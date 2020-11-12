@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.account.address.internal.model.listener;
+package com.liferay.users.admin.internal.address.internal.model.listener;
 
 import com.liferay.portal.kernel.exception.ModelListenerException;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -66,7 +66,7 @@ public class CountryModelListener extends BaseModelListener<Country> {
 
 		try {
 			String path =
-				"com/liferay/account/address/dependencies/regions/" + a2 +
+				"com/liferay/users/admin/internal/address/dependencies/regions/" + a2 +
 					".json";
 
 			if (_classLoader.getResource(path) == null) {

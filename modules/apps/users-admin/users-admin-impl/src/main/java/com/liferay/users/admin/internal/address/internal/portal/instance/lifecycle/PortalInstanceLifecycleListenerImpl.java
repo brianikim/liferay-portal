@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.account.address.internal.portal.instance.lifecycle;
+package com.liferay.users.admin.internal.address.internal.portal.instance.lifecycle;
 
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.instance.lifecycle.BasePortalInstanceLifecycleListener;
@@ -81,7 +81,7 @@ public class PortalInstanceLifecycleListenerImpl
 		}
 
 		JSONArray countriesJSONArray = _getJSONArray(
-			"com/liferay/account/address/dependencies/countries.json");
+			"com/liferay/users/admin/internal/address/dependencies/countries.json");
 
 		for (int i = 0; i < countriesJSONArray.length(); i++) {
 			JSONObject countryJSONObject = countriesJSONArray.getJSONObject(i);
