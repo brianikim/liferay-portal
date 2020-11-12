@@ -21,9 +21,9 @@ import FragmentContent from '../fragment-content/FragmentContent';
 import getAllPortals from './getAllPortals';
 
 const FragmentWithControls = React.forwardRef(({item}, ref) => {
-	const [setRef, itemElement] = useSetRef(ref);
-
 	const getPortals = useCallback((element) => getAllPortals(element), []);
+
+	const [setRef, itemElement] = useSetRef(ref);
 
 	return (
 		<Topper item={item} itemElement={itemElement}>
