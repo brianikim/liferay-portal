@@ -261,6 +261,10 @@ public class BaseContainerTag extends AttributesTagSupport {
 	}
 
 	protected Map<String, Object> prepareProps(Map<String, Object> props) {
+		if (_additionalProps != null) {
+			props.put("additionalProps", _additionalProps);
+		}
+
 		props.put("cssClass", _cssClass);
 
 		if (Validator.isNotNull(_defaultEventHandler)) {
@@ -268,10 +272,6 @@ public class BaseContainerTag extends AttributesTagSupport {
 		}
 
 		props.put("id", _id);
-
-		if (_additionalProps != null) {
-			props.putAll(_additionalProps);
-		}
 
 		props.putAll(getDynamicAttributes());
 
