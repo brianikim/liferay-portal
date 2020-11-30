@@ -64,13 +64,13 @@ public class CountryModelListener extends BaseModelListener<Country> {
 			JSONArray regionsJSONArray = _getJSONArray(path);
 
 			if (_log.isDebugEnabled()) {
-				_log.debug("Regions found for country: " + countryName);
+				_log.debug("Regions found for country " + countryName);
 			}
 
-			for (int j = 0; j < regionsJSONArray.length(); j++) {
+			for (int i = 0; i < regionsJSONArray.length(); i++) {
 				try {
 					JSONObject regionJSONObject =
-						regionsJSONArray.getJSONObject(j);
+						regionsJSONArray.getJSONObject(i);
 
 					ServiceContext serviceContext = new ServiceContext();
 
