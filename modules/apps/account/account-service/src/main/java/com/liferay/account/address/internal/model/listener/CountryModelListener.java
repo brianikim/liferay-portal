@@ -75,7 +75,6 @@ public class CountryModelListener extends BaseModelListener<Country> {
 					ServiceContext serviceContext = new ServiceContext();
 
 					serviceContext.setCompanyId(country.getCompanyId());
-
 					serviceContext.setUserId(
 						_userLocalService.getDefaultUserId(
 							country.getCompanyId()));
