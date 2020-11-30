@@ -14,6 +14,7 @@
 
 package com.liferay.account.address.internal.portal.instance.lifecycle;
 
+import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.instance.lifecycle.BasePortalInstanceLifecycleListener;
 import com.liferay.portal.instance.lifecycle.PortalInstanceLifecycleListener;
 import com.liferay.portal.kernel.json.JSONArray;
@@ -49,8 +50,10 @@ public class PortalInstanceLifecycleListenerImpl
 		if (count > 0) {
 			if (_log.isDebugEnabled()) {
 				_log.debug(
-					"Skipping country initialization. Countries are already " +
-						"initialized for company: " + company.getCompanyId());
+					StringBundler.concat(
+						"Skipping country initialization. Countries are ",
+						"already initialized for company ",
+						company.getCompanyId(), "."));
 			}
 
 			return;
@@ -58,8 +61,7 @@ public class PortalInstanceLifecycleListenerImpl
 
 		if (_log.isDebugEnabled()) {
 			_log.debug(
-				"Initializing countries for company: " +
-					company.getCompanyId());
+				"Initializing countries for company " + company.getCompanyId());
 		}
 
 		JSONArray countriesJSONArray = _getJSONArray(
