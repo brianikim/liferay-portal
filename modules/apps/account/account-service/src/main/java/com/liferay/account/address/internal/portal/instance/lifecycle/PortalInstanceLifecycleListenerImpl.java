@@ -51,7 +51,7 @@ public class PortalInstanceLifecycleListenerImpl
 
 	@Override
 	public void portalInstanceRegistered(Company company) throws Exception {
-		int count = _countryLocalService.getCountriesCountByCompanyId(
+		int count = _countryLocalService.getCompanyCountriesCount(
 			company.getCompanyId());
 
 		if (count > 0) {
