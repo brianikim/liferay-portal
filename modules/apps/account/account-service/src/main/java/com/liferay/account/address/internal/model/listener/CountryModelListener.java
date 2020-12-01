@@ -45,7 +45,7 @@ public class CountryModelListener extends BaseModelListener<Country> {
 
 	@Override
 	public void onBeforeRemove(Country country) throws ModelListenerException {
-		_regionLocalService.deleteRegionsByCountryId(country.getCountryId());
+		_regionLocalService.deleteCountryRegions(country.getCountryId());
 	}
 
 	private JSONArray _getJSONArray(String filePath) throws Exception {

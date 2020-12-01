@@ -46,7 +46,7 @@ public class PortalInstanceLifecycleListenerImpl
 	public void portalInstancePreunregistered(Company company)
 		throws Exception {
 
-		_countryLocalService.deleteCountriesByCompanyId(company.getCompanyId());
+		_countryLocalService.deleteCompanyCountries(company.getCompanyId());
 	}
 
 	@Override
