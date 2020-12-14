@@ -88,6 +88,7 @@ import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.odata.entity.EntityModel;
 import com.liferay.portal.vulcan.dto.converter.DTOConverterRegistry;
@@ -243,6 +244,12 @@ public class ProductResourceImpl
 		}
 
 		_updateProduct(cpDefinition, product);
+
+		if (!Validator.isBlank(product.getExternalReferenceCode())) {
+			_cpDefinitionService.updateExternalReferenceCode(
+				cpDefinition.getCPDefinitionId(),
+				product.getExternalReferenceCode());
+		}
 
 		Response.ResponseBuilder responseBuilder = Response.ok();
 
