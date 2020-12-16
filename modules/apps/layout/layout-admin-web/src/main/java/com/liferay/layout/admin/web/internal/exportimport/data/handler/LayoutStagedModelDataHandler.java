@@ -264,6 +264,9 @@ public class LayoutStagedModelDataHandler
 
 		validateMissingGroupReference(portletDataContext, referenceElement);
 
+		String uuid = GetterUtil.getString(
+			referenceElement.attributeValue("uuid"));
+
 		long groupId = GetterUtil.getLong(
 			referenceElement.attributeValue("group-id"));
 
@@ -277,8 +280,6 @@ public class LayoutStagedModelDataHandler
 			referenceElement.attributeValue("private-layout"));
 		String type = GetterUtil.getString(
 			referenceElement.attributeValue("type"));
-		String uuid = GetterUtil.getString(
-			referenceElement.attributeValue("uuid"));
 
 		Layout existingLayout = null;
 
