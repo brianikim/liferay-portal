@@ -22,6 +22,7 @@ import com.liferay.portal.kernel.security.permission.ResourceActions;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.util.PropsValues;
 
 import java.util.Dictionary;
 
@@ -107,6 +108,14 @@ public class PortletConfigurationExtender
 					StringUtil.split(
 						_portletConfiguration.get(
 							PropsKeys.RESOURCE_ACTIONS_CONFIGS)));
+
+				if (!PropsValues.RESOURCE_ACTIONS_STRICT_MODE_ENABLED) {
+					_resourceActions.populatePortletResources(
+						_classLoader,
+						StringUtil.split(
+							_portletConfiguration.get(
+								PropsKeys.RESOURCE_ACTIONS_CONFIGS)));
+				}
 			}
 			catch (Exception exception) {
 				_log.error(
