@@ -666,7 +666,7 @@ public class ResourceActionsImpl implements ResourceActions {
 		for (String portletResourceName : portletResourceNames) {
 			resourceActionLocalService.checkResourceActions(
 				portletResourceName,
-				getModelResourceActions(portletResourceName));
+				getPortletResourceActions(portletResourceName));
 		}
 	}
 
