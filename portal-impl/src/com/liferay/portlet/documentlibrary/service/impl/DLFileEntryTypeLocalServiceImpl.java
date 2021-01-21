@@ -682,8 +682,8 @@ public class DLFileEntryTypeLocalServiceImpl
 				if (dlFileEntryType == null) {
 					if (_log.isWarnEnabled()) {
 						_log.warn(
-							"Unable to find DLFileEntryType " +
-								fileEntryTypeId);
+							"Document library file entry type " +
+								fileEntryTypeId + " does not exist");
 					}
 
 					continue;
