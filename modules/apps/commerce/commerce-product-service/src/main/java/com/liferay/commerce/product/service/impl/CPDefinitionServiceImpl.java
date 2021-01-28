@@ -570,6 +570,18 @@ public class CPDefinitionServiceImpl extends CPDefinitionServiceBaseImpl {
 	}
 
 	@Override
+	public CPDefinition updateExternalReferenceCode(
+			long cpDefinitionId, String externalReferenceCode)
+		throws PortalException {
+
+		_checkCommerceCatalogByCPDefinitionId(
+			cpDefinitionId, ActionKeys.UPDATE);
+
+		return cpDefinitionLocalService.updateExternalReferenceCode(
+			cpDefinitionId, externalReferenceCode);
+	}
+
+	@Override
 	public CPDefinition updateShippingInfo(
 			long cpDefinitionId, boolean shippable, boolean freeShipping,
 			boolean shipSeparately, double shippingExtraPrice, double width,

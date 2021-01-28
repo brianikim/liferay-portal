@@ -1899,6 +1899,20 @@ public class CPDefinitionLocalServiceImpl
 		}
 	}
 
+	@Override
+	public CPDefinition updateExternalReferenceCode(
+			long cpDefinitionId, String externalReferenceCode)
+		throws PortalException {
+
+		CPDefinition cpDefinition = cpDefinitionLocalService.getCPDefinition(
+			cpDefinitionId);
+
+		cProductLocalService.updateCProductExternalReferenceCode(
+			cpDefinition.getCProductId(), externalReferenceCode);
+
+		return cpDefinitionLocalService.getCPDefinition(cpDefinitionId);
+	}
+
 	@Indexable(type = IndexableType.REINDEX)
 	@Override
 	public CPDefinition updateShippingInfo(
