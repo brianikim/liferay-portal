@@ -539,7 +539,7 @@ renderResponse.setTitle(headerTitle);
 			</c:if>
 
 			<c:if test="<%= dlEditFileEntryDisplayContext.isCheckoutDocumentButtonVisible() %>">
-				<aui:button disabled="<%= dlEditFileEntryDisplayContext.isCheckoutDocumentButtonDisabled() %>" onClick='<%= liferayPortletResponse.getNamespace() + "checkOut();" %>' value="checkout[document]" />
+				<aui:button disabled="<%= dlEditFileEntryDisplayContext.isCheckoutDocumentButtonDisabled() %>" onClick='<%= liferayPortletResponse.getNamespace() + "checkOut();" %>' primary="<%= false %>" type="submit" value="checkout[document]" />
 			</c:if>
 
 			<c:if test="<%= dlEditFileEntryDisplayContext.isCheckinButtonVisible() %>">
@@ -625,10 +625,8 @@ renderResponse.setTitle(headerTitle);
 	}
 
 	function <portlet:namespace />checkOut() {
-		Liferay.Util.postForm(form, {
-			data: {
-				<%= Constants.CMD %>: '<%= Constants.CHECKOUT %>',
-			},
+		Liferay.Util.setFormValues(form, {
+			<%= Constants.CMD %>: '<%= Constants.CHECKOUT %>',
 		});
 	}
 
@@ -639,10 +637,14 @@ renderResponse.setTitle(headerTitle);
 			<%= HtmlUtil.escape(uploadProgressId) %>.startProgress();
 		}
 
-		Liferay.Util.setFormValues(form, {
-			<%= Constants.CMD %>:
-				'<%= (fileEntry == null) ? Constants.ADD : Constants.UPDATE %>',
-		});
+		var cmdElement = Liferay.Util.getFormElement(form, 'cmd');
+
+		if (cmdElement && !cmdElement.value) {
+			Liferay.Util.setFormValues(form, {
+				<%= Constants.CMD %>:
+					'<%= (fileEntry == null) ? Constants.ADD : Constants.UPDATE %>',
+			});
+		}
 
 		if (draft) {
 			Liferay.Util.setFormValues(form, {
