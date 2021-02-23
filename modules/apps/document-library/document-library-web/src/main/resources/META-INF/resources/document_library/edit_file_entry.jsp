@@ -574,11 +574,11 @@ renderResponse.setTitle(headerTitle);
 
 	function <portlet:namespace />changeFileEntryType() {
 		function updateFileEntryType() {
-			var uri = '<%= themeDisplay.getURLCurrent() %>';
+			Liferay.Util.setFormValues(form, {
+				<%= Constants.CMD %>: '<%= Constants.PREVIEW %>',
+			});
 
-			form.<portlet:namespace />cmd.value = '<%= Constants.PREVIEW %>';
-
-			submitForm(form, uri, false, false);
+			form.submit();
 		}
 		var fileElement = Liferay.Util.getFormElement(form, 'file');
 		if (
