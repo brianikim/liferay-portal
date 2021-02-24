@@ -35,10 +35,12 @@ import com.liferay.commerce.product.service.CPInstanceService;
 import com.liferay.commerce.product.service.CPOptionService;
 import com.liferay.commerce.product.service.CPSpecificationOptionService;
 import com.liferay.commerce.product.service.CommerceCatalogLocalService;
+import com.liferay.commerce.product.service.CommerceChannelRelService;
 import com.liferay.commerce.service.CPDefinitionInventoryService;
 import com.liferay.headless.commerce.admin.catalog.dto.v1_0.Attachment;
 import com.liferay.headless.commerce.admin.catalog.dto.v1_0.Category;
 import com.liferay.headless.commerce.admin.catalog.dto.v1_0.Product;
+import com.liferay.headless.commerce.admin.catalog.dto.v1_0.ProductChannel;
 import com.liferay.headless.commerce.admin.catalog.dto.v1_0.ProductConfiguration;
 import com.liferay.headless.commerce.admin.catalog.dto.v1_0.ProductOption;
 import com.liferay.headless.commerce.admin.catalog.dto.v1_0.ProductOptionValue;
@@ -89,11 +91,13 @@ import com.liferay.upload.UniqueFileNameProvider;
 
 import java.io.Serializable;
 
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.ws.rs.core.MultivaluedMap;
@@ -755,6 +759,39 @@ public class ProductResourceImpl
 			}
 		}
 
+		// Channels visibility
+
+		_commerceChannelRelService.deleteCommerceChannelRels(
+			CPDefinition.class.getName(), cpDefinition.getCPDefinitionId());
+
+		ProductChannel[] productChannels = product.getProductChannels();
+
+		if (productChannels == null) {
+			return cpDefinition;
+		}
+
+		Stream<ProductChannel> stream = Arrays.stream(productChannels);
+
+		List<Long> channelIds = stream.map(
+			ProductChannel::getChannelId
+		).collect(
+			Collectors.toList()
+		);
+
+		for (long commerceChannelId : channelIds) {
+			if (commerceChannelId == 0) {
+				continue;
+			}
+
+			_commerceChannelRelService.addCommerceChannelRel(
+				CPDefinition.class.getName(), cpDefinition.getCPDefinitionId(),
+				commerceChannelId, serviceContext);
+		}
+
+		_cpDefinitionService.updateCPDefinitionChannelFilter(
+			cpDefinition.getCPDefinitionId(),
+			GetterUtil.getBoolean(product.getProductChannelFilter()));
+
 		return cpDefinition;
 	}
 
@@ -879,6 +916,9 @@ public class ProductResourceImpl
 
 	@Reference
 	private CommerceCatalogLocalService _commerceCatalogLocalService;
+
+	@Reference
+	private CommerceChannelRelService _commerceChannelRelService;
 
 	@Reference
 	private CPAttachmentFileEntryService _cpAttachmentFileEntryService;

@@ -124,6 +124,7 @@ public class ProductDTOConverter
 				modifiedDate = cpDefinition.getModifiedDate();
 				name = LanguageUtils.getLanguageIdMap(
 					cpDefinition.getNameMap());
+				productChannelFilter = cpDefinition.isChannelFilterEnabled();
 				productId = cProduct.getCProductId();
 				productStatus = cpDefinition.getStatus();
 				productType = cpType.getName();
