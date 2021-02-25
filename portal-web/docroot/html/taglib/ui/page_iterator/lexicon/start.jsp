@@ -105,7 +105,7 @@ NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
 					%>
 
 						<li>
-							<a class="dropdown-icon" href="<%= HtmlUtil.escapeHREF(curDeltaURL) %>" onClick="<%= forcePost ? _getOnClick(namespace, deltaParam, curDelta) : "" %>">
+							<a class="dropdown-item" href="<%= HtmlUtil.escapeHREF(curDeltaURL) %>" onClick="<%= forcePost ? _getOnClick(namespace, deltaParam, curDelta) : "" %>">
 								<%= String.valueOf(curDelta) %><span class="sr-only"><%= StringPool.NBSP %><liferay-ui:message key="entries-per-page" /></span>
 							</a>
 						</li>
@@ -194,7 +194,7 @@ NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
 								%>
 
 									<li>
-										<a class="dropdown-icon" href="<%= _getHREF(formName, namespace + curParam, i, jsCall, url, urlAnchor) %>" onclick="<%= forcePost ? _getOnClick(namespace, curParam, i) : "" %>"><span class="sr-only"><liferay-ui:message key="page" /><%= StringPool.NBSP %></span><%= i %></a>
+										<a class="dropdown-item" href="<%= _getHREF(formName, namespace + curParam, i, jsCall, url, urlAnchor) %>" onclick="<%= forcePost ? _getOnClick(namespace, curParam, i) : "" %>"><span class="sr-only"><liferay-ui:message key="page" /><%= StringPool.NBSP %></span><%= i %></a>
 									</li>
 
 								<%
@@ -227,7 +227,7 @@ NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
 								%>
 
 									<li>
-										<a class="dropdown-icon" href="<%= _getHREF(formName, namespace + curParam, i, jsCall, url, urlAnchor) %>" onclick="<%= forcePost ? _getOnClick(namespace, curParam, i) : "" %>"><span class="sr-only"><liferay-ui:message key="page" /><%= StringPool.NBSP %></span><%= i %></a>
+										<a class="dropdown-item" href="<%= _getHREF(formName, namespace + curParam, i, jsCall, url, urlAnchor) %>" onclick="<%= forcePost ? _getOnClick(namespace, curParam, i) : "" %>"><span class="sr-only"><liferay-ui:message key="page" /><%= StringPool.NBSP %></span><%= i %></a>
 									</li>
 
 								<%
@@ -269,7 +269,7 @@ NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
 					%>
 
 						<li class="<%= ((cur - 3) > 1) ? "" : "page-item" %>">
-							<a class="<%= ((cur - 3) > 1) ? "dropdown-icon" : "dropdown-icon page-link" %>" href="<%= _getHREF(formName, namespace + curParam, i, jsCall, url, urlAnchor) %>" onclick="<%= forcePost ? _getOnClick(namespace, curParam, i) : "" %>"><span class="sr-only"><liferay-ui:message key="page" /><%= StringPool.NBSP %></span><%= i %></a>
+							<a class="<%= ((cur - 3) > 1) ? "dropdown-item" : "dropdown-item page-link" %>" href="<%= _getHREF(formName, namespace + curParam, i, jsCall, url, urlAnchor) %>" onclick="<%= forcePost ? _getOnClick(namespace, curParam, i) : "" %>"><span class="sr-only"><liferay-ui:message key="page" /><%= StringPool.NBSP %></span><%= i %></a>
 						</li>
 
 					<%
@@ -317,7 +317,7 @@ NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
 					%>
 
 						<li class="<%= ((cur + 3) < pages) ? "" : "page-item" %>">
-							<a class="<%= ((cur + 3) < pages) ? "dropdown-icon" : "dropdown-icon page-link" %>" href="<%= _getHREF(formName, namespace + curParam, i, jsCall, url, urlAnchor) %>" onclick="<%= forcePost ? _getOnClick(namespace, curParam, i) : "" %>"><span class="sr-only"><liferay-ui:message key="page" /><%= StringPool.NBSP %></span><%= i %></a>
+							<a class="<%= ((cur + 3) < pages) ? "dropdown-item" : "dropdown-item page-link" %>" href="<%= _getHREF(formName, namespace + curParam, i, jsCall, url, urlAnchor) %>" onclick="<%= forcePost ? _getOnClick(namespace, curParam, i) : "" %>"><span class="sr-only"><liferay-ui:message key="page" /><%= StringPool.NBSP %></span><%= i %></a>
 						</li>
 
 					<%
