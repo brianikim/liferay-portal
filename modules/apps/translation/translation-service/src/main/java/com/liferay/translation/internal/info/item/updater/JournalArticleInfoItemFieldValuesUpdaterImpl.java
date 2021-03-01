@@ -181,24 +181,24 @@ public class JournalArticleInfoItemFieldValuesUpdaterImpl
 			latestArticle.getSmallImageURL(), null, null, null, serviceContext);
 	}
 
-	private void _addNewTranslatedField(
-			DDMStructure ddmStructure, Locale targetLocale, Fields ddmFields,
-			String fieldName, String entryValue)
+	private void _addNewTranslatedDDMField(
+			DDMStructure ddmStructure, Locale targetLocale, String ddmFieldName,
+			Fields ddmFields, String ddmFieldValue)
 		throws Exception {
 
-		Field field = new Field(
-			ddmStructure.getStructureId(), fieldName, Collections.emptyList(),
-			ddmFields.getDefaultLocale());
+		Field ddmField = new Field(
+			ddmStructure.getStructureId(), ddmFieldName,
+			Collections.emptyList(), ddmFields.getDefaultLocale());
 
-		field.setValue(
+		ddmField.setValue(
 			targetLocale,
 			FieldConstants.getSerializable(
 				targetLocale, targetLocale,
-				ddmStructure.getFieldType(fieldName), entryValue));
+				ddmStructure.getFieldType(ddmFieldName), ddmFieldValue));
 
-		ddmFields.put(field);
+		ddmFields.put(ddmField);
 
-		_updateFieldsDisplay(ddmFields, fieldName);
+		_updateFieldsDisplay(ddmFields, ddmFieldName);
 	}
 
 	private AssetEntry _getAssetLinkEntry(
@@ -330,8 +330,8 @@ public class JournalArticleInfoItemFieldValuesUpdaterImpl
 						entry.getValue()));
 			}
 			else if (ddmStructure.hasField(entry.getKey())) {
-				_addNewTranslatedField(
-					ddmStructure, targetLocale, ddmFields, entry.getKey(),
+				_addNewTranslatedDDMField(
+					ddmStructure, targetLocale, entry.getKey(), ddmFields,
 					entry.getValue());
 			}
 		}
