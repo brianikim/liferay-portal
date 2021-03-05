@@ -173,10 +173,42 @@ LayoutsTreeDisplayContext layoutsTreeDisplayContext = new LayoutsTreeDisplayCont
 	module="js/PagesTreeEventHandler.es"
 />
 
-<aui:script require="metal-dom/src/all/dom as dom">
+<aui:script require="frontend-js-web/liferay/delegate/delegate.es as delegateModule">
+	const KEY_ENTER = 13;
+
 	var layoutsTree = document.getElementById('<portlet:namespace />layoutsTree');
 
-	var viewCollectionItemsActionOptionQueryClickHandler = dom.delegate(
+	var delegate = delegateModule.default;
+
+	const dropdownActionKeyupHandler = delegate(
+		layoutsTree,
+		'keyup',
+		'.pages-tree-dropdown button.dropdown-toggle',
+		(event) => {
+			if (event.keyCode === KEY_ENTER) {
+				event.stopImmediatePropagation();
+				const trigger = event.delegateTarget;
+				const menu = trigger.parentNode.querySelector(
+					'.pages-tree-dropdown .dropdown-menu'
+				);
+				Liferay.DropdownProvider.show({menu, trigger});
+			}
+		}
+	);
+
+	const linkActionKeyupHandler = delegate(
+		layoutsTree,
+		'keyup',
+		'a.layout-tree[data-url], .pages-tree-dropdown a.dropdown-item',
+		(event) => {
+			if (event.keyCode === KEY_ENTER) {
+				event.stopImmediatePropagation();
+				window.location.href = event.delegateTarget.href;
+			}
+		}
+	);
+
+	var viewCollectionItemsActionOptionQueryClickHandler = delegate(
 		layoutsTree,
 		'click',
 		'.view-collection-items-action-option.collection',
@@ -197,7 +229,9 @@ LayoutsTreeDisplayContext layoutsTreeDisplayContext = new LayoutsTreeDisplayCont
 			'<%= ProductNavigationProductMenuWebKeys.PAGES_TREE_EVENT_HANDLER %>'
 		);
 
-		viewCollectionItemsActionOptionQueryClickHandler.removeListener();
+		dropdownActionKeyupHandler.dispose();
+		linkActionKeyupHandler.dispose();
+		viewCollectionItemsActionOptionQueryClickHandler.dispose();
 
 		Liferay.detach('destroyPortlet', handleDestroyPortlet);
 	}
