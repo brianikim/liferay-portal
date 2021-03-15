@@ -41,7 +41,7 @@ public class NoSuchSpecificationExceptionMapper
 
 	@Override
 	public String getErrorDescription() {
-		return "Unable to find Specification";
+		return "Unable to find specification";
 	}
 
 	@Override
