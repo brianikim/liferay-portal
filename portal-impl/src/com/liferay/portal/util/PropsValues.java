@@ -3129,7 +3129,7 @@ public class PropsValues {
 
 	/**
 	 * @deprecated As of Athanasius (7.3.x), replaced by {@link
-	 *             com.liferay.view.count.configuration.ViewCountsConfiguration
+	 *             com.liferay.view.count.configuration.ViewCountConfiguration
 	 *             #enabled()}
 	 */
 	@Deprecated
