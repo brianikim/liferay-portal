@@ -19,6 +19,8 @@ import template from './QuantitySelector.soy';
 
 class QuantitySelector extends Component {
 	attached() {
+		this.inputDebounceTimeout = null;
+
 		if (!this.quantity) {
 			this.quantity = this.allowedQuantities
 				? this.allowedQuantities[0]
@@ -128,12 +130,15 @@ class QuantitySelector extends Component {
 	}
 
 	_handleInputKeyUp(e) {
+		clearTimeout(this.inputDebounceTimeout);
+
 		if (!e.target.value) {
 			return null;
 		}
-		const quantity = parseInt(e.target.value, 10);
 
-		return this._submitQuantity(quantity);
+		this.inputDebounceTimeout = setTimeout(() => {
+			this._submitQuantity(parseInt(e.target.value, 10));
+		}, 500);
 	}
 
 	_handleFormSubmit(e) {
@@ -144,27 +149,23 @@ class QuantitySelector extends Component {
 	}
 
 	_submitQuantity(quantity) {
-		if (this.multipleQuantity) {
-			if (quantity % this.multipleQuantity) {
-				this.inputError = 'NotMultipleThan';
+		let computedQuantity = quantity;
 
-				return this.inputError;
+		if (this.multipleQuantity) {
+			if (!computedQuantity || computedQuantity % this.multipleQuantity) {
+				computedQuantity -= computedQuantity % this.multipleQuantity;
 			}
 		}
 
-		if (quantity < this.minQuantity) {
-			this.inputError = 'MinAvailableReached';
-
-			return this.inputError;
+		if (computedQuantity < this.minQuantity) {
+			computedQuantity = this.minQuantity;
 		}
 
-		if (quantity > this.maxQuantity) {
-			this.inputError = 'MaxAvailableReached';
-
-			return this.inputError;
+		if (computedQuantity > this.maxQuantity) {
+			computedQuantity = this.maxQuantity;
 		}
 
-		return this._updateQuantity(quantity);
+		this._updateQuantity(computedQuantity);
 	}
 
 	_updateQuantity(quantity) {
