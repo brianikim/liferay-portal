@@ -1539,6 +1539,9 @@ public class PropsValues {
 		GetterUtil.getBoolean(
 			PropsUtil.get(PropsKeys.LEARN_RESOURCES_CDN_ENABLED));
 
+	public static final boolean LEARN_RESOURCES_ENABLED = GetterUtil.getBoolean(
+		PropsUtil.get(PropsKeys.LEARN_RESOURCES_ENABLED));
+
 	public static final long LEARN_RESOURCES_REFRESH_TIME = GetterUtil.getLong(
 		PropsUtil.get(PropsKeys.LEARN_RESOURCES_REFRESH_TIME));
 

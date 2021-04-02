@@ -1773,6 +1773,9 @@ public interface PropsKeys {
 	public static final String LEARN_RESOURCES_CDN_ENABLED =
 		"learn.resources.cdn.enabled";
 
+	public static final String LEARN_RESOURCES_ENABLED =
+		"learn.resources.enabled";
+
 	public static final String LEARN_RESOURCES_REFRESH_TIME =
 		"learn.resources.refresh.time";
 
