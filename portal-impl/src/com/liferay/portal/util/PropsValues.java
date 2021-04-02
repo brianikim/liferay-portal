@@ -1535,6 +1535,13 @@ public class PropsValues {
 			PropsUtil.get(
 				PropsKeys.LAYOUT_USER_PUBLIC_LAYOUTS_POWER_USER_REQUIRED));
 
+	public static final boolean LEARN_RESOURCES_CDN_ENABLED =
+		GetterUtil.getBoolean(
+			PropsUtil.get(PropsKeys.LEARN_RESOURCES_CDN_ENABLED));
+
+	public static final long LEARN_RESOURCES_REFRESH_TIME = GetterUtil.getLong(
+		PropsUtil.get(PropsKeys.LEARN_RESOURCES_REFRESH_TIME));
+
 	public static final String LIFERAY_HOME = PropsUtil.get(
 		PropsKeys.LIFERAY_HOME);
 
