@@ -94,22 +94,22 @@ public class ShippingAddressUtil {
 			ShippingAddress shippingAddress)
 		throws Exception {
 
-		if (Validator.isNull(shippingAddress.getRegionISOCode()) &&
-			(commerceAddress != null)) {
+		if ((commerceCountry != null) &&
+			Validator.isNotNull(shippingAddress.getRegionISOCode())) {
 
-			return commerceAddress.getCommerceRegionId();
+			CommerceRegion commerceRegion =
+				CommerceRegionLocalServiceUtil.getCommerceRegion(
+					commerceCountry.getCommerceCountryId(),
+					shippingAddress.getRegionISOCode());
+
+			return commerceRegion.getCommerceRegionId();
 		}
 
-		if (commerceCountry == null) {
-			return 0;
+		if (commerceAddress != null) {
+			return commerceAddress.getRegionId();
 		}
 
-		CommerceRegion commerceRegion =
-			CommerceRegionLocalServiceUtil.getCommerceRegion(
-				commerceCountry.getCommerceCountryId(),
-				shippingAddress.getRegionISOCode());
-
-		return commerceRegion.getCommerceRegionId();
+		return 0;
 	}
 
 	private static String _getDescription(CommerceAddress commerceAddress) {
