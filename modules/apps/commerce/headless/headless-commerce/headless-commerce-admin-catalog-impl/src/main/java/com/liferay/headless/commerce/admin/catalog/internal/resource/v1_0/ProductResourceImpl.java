@@ -17,6 +17,7 @@ package com.liferay.headless.commerce.admin.catalog.internal.resource.v1_0;
 import com.liferay.asset.kernel.model.AssetTag;
 import com.liferay.asset.kernel.service.AssetCategoryLocalService;
 import com.liferay.asset.kernel.service.AssetTagService;
+import com.liferay.commerce.account.service.CommerceAccountGroupRelService;
 import com.liferay.commerce.product.constants.CPAttachmentFileEntryConstants;
 import com.liferay.commerce.product.exception.NoSuchCPDefinitionException;
 import com.liferay.commerce.product.exception.NoSuchCatalogException;
@@ -40,6 +41,7 @@ import com.liferay.commerce.service.CPDefinitionInventoryService;
 import com.liferay.headless.commerce.admin.catalog.dto.v1_0.Attachment;
 import com.liferay.headless.commerce.admin.catalog.dto.v1_0.Category;
 import com.liferay.headless.commerce.admin.catalog.dto.v1_0.Product;
+import com.liferay.headless.commerce.admin.catalog.dto.v1_0.ProductAccountGroup;
 import com.liferay.headless.commerce.admin.catalog.dto.v1_0.ProductChannel;
 import com.liferay.headless.commerce.admin.catalog.dto.v1_0.ProductConfiguration;
 import com.liferay.headless.commerce.admin.catalog.dto.v1_0.ProductOption;
@@ -94,6 +96,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -119,6 +122,16 @@ import org.osgi.service.component.annotations.ServiceScope;
 )
 public class ProductResourceImpl
 	extends BaseProductResourceImpl implements EntityModelResource {
+
+	@Override
+	public void delete(
+			Collection<Product> products, Map<String, Serializable> parameters)
+		throws Exception {
+
+		for (Product product : products) {
+			deleteProduct(product.getProductId());
+		}
+	}
 
 	@Override
 	public Response deleteProduct(Long id) throws Exception {
@@ -276,7 +289,7 @@ public class ProductResourceImpl
 		if (catalogExternalReferenceCode != null) {
 			commerceCatalog =
 				_commerceCatalogLocalService.
-					fetchCommerceCatalogByReferenceCode(
+					fetchCommerceCatalogByExternalReferenceCode(
 						contextCompany.getCompanyId(),
 						catalogExternalReferenceCode);
 		}
@@ -312,6 +325,16 @@ public class ProductResourceImpl
 			cpDefinition.getCPDefinitionId(), commerceCatalog.getGroupId());
 
 		return _toProduct(cpDefinition.getCPDefinitionId());
+	}
+
+	@Override
+	public void update(
+			Collection<Product> products, Map<String, Serializable> parameters)
+		throws Exception {
+
+		for (Product product : products) {
+			patchProduct(product.getProductId(), product);
+		}
 	}
 
 	private CPDefinition _addOrUpdateProduct(Product product) throws Exception {
@@ -384,6 +407,12 @@ public class ProductResourceImpl
 			serviceContext.setAssetCategoryIds(assetCategoryIds);
 		}
 
+		Map<String, String> nameMap = product.getName();
+
+		if ((cpDefinition != null) && (nameMap == null)) {
+			nameMap = LanguageUtils.getLanguageIdMap(cpDefinition.getNameMap());
+		}
+
 		Map<String, String> shortDescriptionMap = product.getShortDescription();
 
 		if ((cpDefinition != null) && (shortDescriptionMap == null)) {
@@ -406,7 +435,7 @@ public class ProductResourceImpl
 
 		cpDefinition = _cpDefinitionService.upsertCPDefinition(
 			commerceCatalog.getGroupId(), contextUser.getUserId(),
-			LanguageUtils.getLocalizedMap(product.getName()),
+			LanguageUtils.getLocalizedMap(nameMap),
 			LanguageUtils.getLocalizedMap(shortDescriptionMap),
 			LanguageUtils.getLocalizedMap(descriptionMap), null,
 			LanguageUtils.getLocalizedMap(product.getMetaTitle()),
@@ -433,14 +462,16 @@ public class ProductResourceImpl
 			GetterUtil.getBoolean(product.getNeverExpire(), true),
 			product.getDefaultSku(),
 			GetterUtil.getBoolean(subscriptionConfiguration.getEnable()),
-			GetterUtil.getInteger(subscriptionConfiguration.getLength()),
+			GetterUtil.getInteger(subscriptionConfiguration.getLength(), 1),
 			GetterUtil.getString(
 				subscriptionConfiguration.getSubscriptionTypeAsString()),
 			null,
 			GetterUtil.getLong(subscriptionConfiguration.getNumberOfLength()),
 			product.getExternalReferenceCode(), serviceContext);
 
-		if (!product.getActive()) {
+		// Workflow
+
+		if ((product.getActive() != null) && !product.getActive()) {
 			Map<String, Serializable> workflowContext = new HashMap<>();
 
 			_cpDefinitionService.updateStatus(
@@ -792,6 +823,41 @@ public class ProductResourceImpl
 			cpDefinition.getCPDefinitionId(),
 			GetterUtil.getBoolean(product.getProductChannelFilter()));
 
+		// Account Groups visibility
+
+		_commerceAccountGroupRelService.deleteCommerceAccountGroupRels(
+			CPDefinition.class.getName(), cpDefinition.getCPDefinitionId());
+
+		ProductAccountGroup[] productAccountGroups =
+			product.getProductAccountGroups();
+
+		if (productAccountGroups == null) {
+			return cpDefinition;
+		}
+
+		Stream<ProductAccountGroup> productAccountGroupStream = Arrays.stream(
+			productAccountGroups);
+
+		List<Long> accountGroupIds = productAccountGroupStream.map(
+			ProductAccountGroup::getAccountGroupId
+		).collect(
+			Collectors.toList()
+		);
+
+		for (long accountGroupId : accountGroupIds) {
+			if (accountGroupId == 0) {
+				continue;
+			}
+
+			_commerceAccountGroupRelService.addCommerceAccountGroupRel(
+				CPDefinition.class.getName(), cpDefinition.getCPDefinitionId(),
+				accountGroupId, serviceContext);
+		}
+
+		_cpDefinitionService.updateCPDefinitionAccountGroupFilter(
+			cpDefinition.getCPDefinitionId(),
+			GetterUtil.getBoolean(product.getProductAccountGroupFilter()));
+
 		return cpDefinition;
 	}
 
@@ -851,6 +917,12 @@ public class ProductResourceImpl
 				ArrayUtil.toLongArray(assetCategoryIds));
 		}
 
+		Map<String, String> nameMap = product.getName();
+
+		if ((cpDefinition != null) && (nameMap == null)) {
+			nameMap = LanguageUtils.getLanguageIdMap(cpDefinition.getNameMap());
+		}
+
 		Map<String, String> shortDescriptionMap = product.getShortDescription();
 
 		if ((cpDefinition != null) && (shortDescriptionMap == null)) {
@@ -867,7 +939,7 @@ public class ProductResourceImpl
 
 		cpDefinition = _cpDefinitionService.updateCPDefinition(
 			cpDefinition.getCPDefinitionId(),
-			LanguageUtils.getLocalizedMap(product.getName()),
+			LanguageUtils.getLocalizedMap(nameMap),
 			LanguageUtils.getLocalizedMap(shortDescriptionMap),
 			LanguageUtils.getLocalizedMap(descriptionMap),
 			cpDefinition.getUrlTitleMap(), cpDefinition.getMetaTitleMap(),
@@ -883,7 +955,7 @@ public class ProductResourceImpl
 			GetterUtil.getBoolean(product.getNeverExpire(), true),
 			serviceContext);
 
-		if (!product.getActive()) {
+		if ((product.getActive() != null) && !product.getActive()) {
 			Map<String, Serializable> workflowContext = new HashMap<>();
 
 			_cpDefinitionService.updateStatus(
@@ -913,6 +985,9 @@ public class ProductResourceImpl
 
 	@Reference
 	private ClassNameLocalService _classNameLocalService;
+
+	@Reference
+	private CommerceAccountGroupRelService _commerceAccountGroupRelService;
 
 	@Reference
 	private CommerceCatalogLocalService _commerceCatalogLocalService;
