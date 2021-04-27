@@ -37,6 +37,12 @@ import org.osgi.annotation.versioning.ProviderType;
 public interface ExportImportServiceConfiguration {
 
 	@Meta.AD(
+		deflt = "false", description = "include-all-asset-links-help",
+		name = "include-all-asset-links", required = false
+	)
+	public boolean includeAllAssetLinks();
+
+	@Meta.AD(
 		deflt = "false",
 		description = "replicate-individual-deletions-by-default-help",
 		name = "replicate-individual-deletions-by-default", required = false

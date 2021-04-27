@@ -19,6 +19,7 @@ import com.liferay.asset.kernel.model.adapter.StagedAssetLink;
 import com.liferay.asset.kernel.service.AssetEntryLocalService;
 import com.liferay.asset.kernel.service.AssetLinkLocalService;
 import com.liferay.exportimport.changeset.constants.ChangesetPortletKeys;
+import com.liferay.exportimport.configuration.ExportImportServiceConfiguration;
 import com.liferay.exportimport.constants.ExportImportConstants;
 import com.liferay.exportimport.controller.PortletExportController;
 import com.liferay.exportimport.internal.lar.DeletionSystemEventExporter;
@@ -66,7 +67,9 @@ import com.liferay.portal.kernel.model.PortletItem;
 import com.liferay.portal.kernel.model.PortletPreferences;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.adapter.ModelAdapterUtil;
+import com.liferay.portal.kernel.module.configuration.ConfigurationProvider;
 import com.liferay.portal.kernel.portlet.PortletPreferencesFactoryUtil;
+import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.service.PortletItemLocalService;
@@ -192,12 +195,14 @@ public class PortletExportControllerImpl implements PortletExportController {
 
 			List<AssetLink> assetLinks = new ArrayList<>();
 
-			assetLinks.addAll(
-				_assetLinkLocalService.getLinks(
-					portletDataContext.getGroupId(),
-					portletDataContext.getStartDate(),
-					portletDataContext.getEndDate(), QueryUtil.ALL_POS,
-					QueryUtil.ALL_POS));
+			if (_isIncludeAllAssetLinks()) {
+				assetLinks.addAll(
+					_assetLinkLocalService.getLinks(
+						portletDataContext.getGroupId(),
+						portletDataContext.getStartDate(),
+						portletDataContext.getEndDate(), QueryUtil.ALL_POS,
+						QueryUtil.ALL_POS));
+			}
 
 			Set<Long> assetLinkIds = portletDataContext.getAssetLinkIds();
 
@@ -1364,6 +1369,22 @@ public class PortletExportControllerImpl implements PortletExportController {
 		return false;
 	}
 
+	private boolean _isIncludeAllAssetLinks() {
+		try {
+			ExportImportServiceConfiguration exportImportServiceConfiguration =
+				_configurationProvider.getCompanyConfiguration(
+					ExportImportServiceConfiguration.class,
+					CompanyThreadLocal.getCompanyId());
+
+			return exportImportServiceConfiguration.includeAllAssetLinks();
+		}
+		catch (Exception exception) {
+			_log.error(exception, exception);
+		}
+
+		return false;
+	}
+
 	private Optional<Portlet> _replacePortlet(
 		PortletDataContext portletDataContext, Portlet portlet) {
 
@@ -1394,6 +1415,10 @@ public class PortletExportControllerImpl implements PortletExportController {
 
 	private AssetEntryLocalService _assetEntryLocalService;
 	private AssetLinkLocalService _assetLinkLocalService;
+
+	@Reference
+	private ConfigurationProvider _configurationProvider;
+
 	private final DeletionSystemEventExporter _deletionSystemEventExporter =
 		DeletionSystemEventExporter.getInstance();
 
