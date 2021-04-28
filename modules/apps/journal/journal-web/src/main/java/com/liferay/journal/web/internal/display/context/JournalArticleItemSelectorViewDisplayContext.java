@@ -246,7 +246,7 @@ public class JournalArticleItemSelectorViewDisplayContext {
 			return _articleSearchContainer;
 		}
 
-		if (Validator.isNotNull(getDDMStructureKey())) {
+		if (Validator.isNotNull(getDDMStructureKey()) && !isSearch()) {
 			SearchContainer<JournalArticle> articleSearchContainer =
 				new SearchContainer<>(
 					_portletRequest, getPortletURL(), null, null);
