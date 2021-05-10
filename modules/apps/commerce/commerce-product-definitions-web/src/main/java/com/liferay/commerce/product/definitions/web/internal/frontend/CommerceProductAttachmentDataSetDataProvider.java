@@ -111,8 +111,7 @@ public class CommerceProductAttachmentDataSetDataProvider
 						CommerceMediaResolverUtil.getThumbnailURL(
 							CommerceAccountConstants.ACCOUNT_ID_GUEST,
 							cpAttachmentFileEntryId)),
-					HtmlUtil.escape(title),
-					HtmlUtil.escape(fileEntry.getExtension()),
+					title, HtmlUtil.escape(fileEntry.getExtension()),
 					cpAttachmentFileEntry.getPriority(),
 					LanguageUtil.format(
 						httpServletRequest, "x-ago", modifiedDateDescription,
