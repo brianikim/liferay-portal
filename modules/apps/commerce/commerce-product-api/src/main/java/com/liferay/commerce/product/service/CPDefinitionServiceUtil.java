@@ -489,6 +489,14 @@ public class CPDefinitionServiceUtil {
 			cpDefinitionId, layoutUuid, serviceContext);
 	}
 
+	public static CPDefinition updateExternalReferenceCode(
+			long cpDefinitionId, String externalReferenceCode)
+		throws PortalException {
+
+		return getService().updateExternalReferenceCode(
+			cpDefinitionId, externalReferenceCode);
+	}
+
 	public static CPDefinition updateShippingInfo(
 			long cpDefinitionId, boolean shippable, boolean freeShipping,
 			boolean shipSeparately, double shippingExtraPrice, double width,
