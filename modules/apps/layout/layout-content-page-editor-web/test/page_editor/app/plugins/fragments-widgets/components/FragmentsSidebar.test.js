@@ -82,7 +82,16 @@ const STATE = {
 				{
 					instanceable: true,
 					portletId: 'portlet-1',
-					portletItems: [],
+					portletItems: [
+						{
+							instanceable: true,
+							portletId: 'template-portlet-1',
+							portletItemId: '40063',
+							preview: '',
+							title: 'Template Portlet 1',
+							used: false,
+						},
+					],
 					title: 'Portlet 1',
 					used: false,
 				},
@@ -91,6 +100,24 @@ const STATE = {
 		},
 	],
 };
+
+const NORMALIZED_PORTLET_ITEMS = [
+	{
+		data: {
+			instanceable: true,
+			portletId: 'template-portlet-1',
+			portletItemId: '40063',
+			used: false,
+		},
+		disabled: false,
+		icon: 'cards2',
+		itemId: 'template-portlet-1',
+		label: 'Template Portlet 1',
+		portletItems: null,
+		preview: '',
+		type: 'fragment',
+	},
+];
 
 const NORMALIZED_TABS = [
 	{
@@ -155,7 +182,7 @@ const NORMALIZED_TABS = [
 						icon: 'cards2',
 						itemId: 'portlet-1',
 						label: 'Portlet 1',
-						portletItems: null,
+						portletItems: NORMALIZED_PORTLET_ITEMS,
 						preview: '',
 						type: 'fragment',
 					},
@@ -253,7 +280,7 @@ describe('FragmentsSidebar', () => {
 			icon: 'square-hole',
 			itemId: 'portlet-1',
 			label: 'Portlet 1',
-			portletItems: null,
+			portletItems: NORMALIZED_PORTLET_ITEMS,
 			preview: '',
 			type: 'fragment',
 		};
@@ -279,7 +306,7 @@ describe('FragmentsSidebar', () => {
 			icon: 'square-hole',
 			itemId: 'portlet-1',
 			label: 'Portlet 1',
-			portletItems: null,
+			portletItems: NORMALIZED_PORTLET_ITEMS,
 			preview: '',
 			type: 'fragment',
 		};
