@@ -477,8 +477,8 @@ public class CommerceOrderContentDisplayContext {
 			_cpRequestHelper.getLiferayPortletRequest(), getPortletURL(), null,
 			"no-orders-were-found");
 
-		List<CommerceOrder> commerceOrders;
-		long commerceOrdersTotal;
+		List<CommerceOrder> commerceOrders = null;
+		long commerceOrdersTotal = 0;
 
 		String keywords = ParamUtil.getString(_httpServletRequest, "keywords");
 
