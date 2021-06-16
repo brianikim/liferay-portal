@@ -14,6 +14,7 @@
 
 import React, {useMemo, useState} from 'react';
 
+import {useWidgets} from '../../../app/components/WidgetsContext';
 import {LAYOUT_DATA_ITEM_TYPES} from '../../../app/config/constants/layoutDataItemTypes';
 import {useSelector} from '../../../app/store/index';
 import SearchForm from '../../../common/components/SearchForm';
@@ -121,7 +122,7 @@ const normalizeFragmentEntry = (fragmentEntry, collectionId) => {
 
 export default function FragmentsSidebar() {
 	const fragments = useSelector((state) => state.fragments);
-	const widgets = useSelector((state) => state.widgets);
+	const widgets = useWidgets();
 
 	const [searchValue, setSearchValue] = useState('');
 

@@ -36,6 +36,7 @@ import canBeRemoved from '../utils/canBeRemoved';
 import canBeSaved from '../utils/canBeSaved';
 import {useActiveItemId, useSelectItem} from './Controls';
 import SaveFragmentCompositionModal from './SaveFragmentCompositionModal';
+import {useWidgets} from './WidgetsContext';
 
 const ctrlOrMeta = (event) =>
 	(event.ctrlKey && !event.metaKey) || (!event.ctrlKey && event.metaKey);
@@ -61,20 +62,13 @@ const isWithinIframe = () => {
 export default function ShortcutManager() {
 	const activeItemId = useActiveItemId();
 	const dispatch = useDispatch();
-	const selectItem = useSelectItem();
-
 	const canUpdatePageStructure = useSelector(selectCanUpdatePageStructure);
-
 	const [openSaveModal, setOpenSaveModal] = useState(false);
-
+	const selectItem = useSelectItem();
 	const state = useSelector((state) => state);
+	const widgets = useWidgets();
 
-	const {
-		fragmentEntryLinks,
-		layoutData,
-		segmentsExperienceId,
-		widgets,
-	} = state;
+	const {fragmentEntryLinks, layoutData, segmentsExperienceId} = state;
 
 	const activeItem = layoutData.items[activeItemId];
 
