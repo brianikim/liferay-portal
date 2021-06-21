@@ -202,6 +202,8 @@ public class FragmentEntryLinkUtil {
 			).put(
 				"name", name
 			).put(
+				"portletId", portletId
+			).put(
 				"segmentsExperienceId",
 				String.valueOf(fragmentEntryLink.getSegmentsExperienceId())
 			);
