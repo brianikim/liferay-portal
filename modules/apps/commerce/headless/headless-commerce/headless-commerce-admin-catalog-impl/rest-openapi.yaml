@@ -2960,10 +2960,8 @@ paths:
             responses:
                 204:
                     content:
-                        application/json: { }
-                        application/xml: { }
-                    description:
-                        ""
+                        application/json: {}
+                        application/xml: {}
                 401:
                     content:
                         application/json:
@@ -2975,12 +2973,12 @@ paths:
                     description:
                         Authentication information is missing or invalid
             security:
-                - BasicAuth: [ ]
-                - BearerAuth: [ ]
+                - BasicAuth: []
+                - BearerAuth: []
                 - OAuth2:
                       - HeadlessCommerceAdminCatalog.write
             summary: Deletes a Related Product by ID.
-            tags: [ "ProductAccountGroup" ]
+            tags: ["ProductAccountGroup"]
         get:
             parameters:
                 - in: path
@@ -3040,12 +3038,12 @@ paths:
                     description:
                         Unexpected error
             security:
-                - BasicAuth: [ ]
-                - BearerAuth: [ ]
+                - BasicAuth: []
+                - BearerAuth: []
                 - OAuth2:
                       - HeadlessCommerceAdminCatalog.read
             summary: Gets a Related Product by ID.
-            tags: [ "ProductAccountGroup" ]
+            tags: ["ProductAccountGroup"]
     /product-channels/{id}:
         delete:
             parameters:
@@ -3066,8 +3064,6 @@ paths:
                     content:
                         application/json: {}
                         application/xml: {}
-                    description:
-                        ""
                 401:
                     content:
                         application/json:
@@ -5811,12 +5807,12 @@ paths:
                     description:
                         Unexpected error
             security:
-                - BasicAuth: [ ]
-                - BearerAuth: [ ]
+                - BasicAuth: []
+                - BearerAuth: []
                 - OAuth2:
                       - HeadlessCommerceAdminCatalog.read
             summary: Gets a list of Channel related to a Product.
-            tags: [ "ProductAccountGroup" ]
+            tags: ["ProductAccountGroup"]
     /products/by-externalReferenceCode/{externalReferenceCode}/product-channels:
         get:
             parameters:
@@ -8154,12 +8150,12 @@ paths:
                     description:
                         Unexpected error
             security:
-                - BasicAuth: [ ]
-                - BearerAuth: [ ]
+                - BasicAuth: []
+                - BearerAuth: []
                 - OAuth2:
                       - HeadlessCommerceAdminCatalog.read
             summary: Gets a list of Channel related to a Product.
-            tags: [ "ProductAccountGroup" ]
+            tags: ["ProductAccountGroup"]
     /products/{id}/product-channels:
         get:
             parameters:

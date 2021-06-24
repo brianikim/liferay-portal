@@ -17,8 +17,8 @@ package com.liferay.headless.commerce.admin.catalog.internal.resource.v1_0;
 import com.liferay.asset.kernel.model.AssetTag;
 import com.liferay.asset.kernel.service.AssetCategoryLocalService;
 import com.liferay.asset.kernel.service.AssetTagService;
-import com.liferay.commerce.account.service.CommerceAccountGroupRelService;
 import com.liferay.commerce.account.model.CommerceAccountGroup;
+import com.liferay.commerce.account.service.CommerceAccountGroupRelService;
 import com.liferay.commerce.account.service.CommerceAccountGroupService;
 import com.liferay.commerce.product.constants.CPAttachmentFileEntryConstants;
 import com.liferay.commerce.product.exception.NoSuchCPDefinitionException;
@@ -100,8 +100,8 @@ import com.liferay.upload.UniqueFileNameProvider;
 
 import java.io.Serializable;
 
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
@@ -724,7 +724,7 @@ public class ProductResourceImpl
 			}
 		}
 
-		// Related Products
+		// Related products
 
 		RelatedProduct[] relatedProducts = product.getRelatedProducts();
 
@@ -856,7 +856,7 @@ public class ProductResourceImpl
 			}
 		}
 
-		// Account Groups visibility
+		// Account groups visibility
 
 		_cpDefinitionService.updateCPDefinitionAccountGroupFilter(
 			cpDefinition.getCPDefinitionId(),
@@ -1037,9 +1037,10 @@ public class ProductResourceImpl
 		return _updateNestedResources(product, cpDefinition, serviceContext);
 	}
 
-	private static final EntityModel _entityModel = new ProductEntityModel();
 	private static final Log _log = LogFactoryUtil.getLog(
 		ProductResourceImpl.class);
+
+	private static final EntityModel _entityModel = new ProductEntityModel();
 
 	@Reference
 	private AssetCategoryLocalService _assetCategoryLocalService;

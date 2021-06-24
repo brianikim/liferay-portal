@@ -69,7 +69,7 @@ public class ProductAccountGroupResourceImpl
 		CPDefinition cpDefinition =
 			_cpDefinitionService.
 				fetchCPDefinitionByCProductExternalReferenceCode(
-					externalReferenceCode, contextCompany.getCompanyId());
+					contextCompany.getCompanyId(), externalReferenceCode);
 
 		if (cpDefinition == null) {
 			return Page.of(Collections.emptyList());
