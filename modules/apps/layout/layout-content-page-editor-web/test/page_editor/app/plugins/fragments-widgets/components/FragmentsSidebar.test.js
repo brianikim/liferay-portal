@@ -237,7 +237,12 @@ describe('FragmentsSidebar', () => {
 	it('normalizes fragments and widgets format', () => {
 		renderComponent(STATE);
 
-		expect(TabsPanel).toHaveBeenCalledWith({tabs: NORMALIZED_TABS}, {});
+		expect(TabsPanel).toHaveBeenCalledWith(
+			expect.objectContaining({
+				tabs: NORMALIZED_TABS,
+			}),
+			{}
+		);
 	});
 
 	it('filters fragments and widgets according to a input value', () => {
@@ -307,7 +312,7 @@ describe('FragmentsSidebar', () => {
 		renderComponent(STATE);
 
 		expect(TabsPanel).toHaveBeenCalledWith(
-			{
+			expect.objectContaining({
 				tabs: setIn(
 					NORMALIZED_TABS,
 					[1, 'collections', 0, 'children', 0],
@@ -343,7 +348,7 @@ describe('FragmentsSidebar', () => {
 						type: 'fragment',
 					}
 				),
-			},
+			}),
 			{}
 		);
 	});
@@ -378,7 +383,7 @@ describe('FragmentsSidebar', () => {
 		renderComponent(STATE);
 
 		expect(TabsPanel).toHaveBeenCalledWith(
-			{
+			expect.objectContaining({
 				tabs: setIn(
 					NORMALIZED_TABS,
 					[1, 'collections', 0, 'children', 0],
@@ -414,7 +419,7 @@ describe('FragmentsSidebar', () => {
 						type: 'fragment',
 					}
 				),
-			},
+			}),
 			{}
 		);
 	});
@@ -447,7 +452,7 @@ describe('FragmentsSidebar', () => {
 		renderComponent(STATE);
 
 		expect(TabsPanel).toHaveBeenCalledWith(
-			{
+			expect.objectContaining({
 				tabs: setIn(
 					NORMALIZED_TABS,
 					[1, 'collections', 0, 'children', 0, 'portletItems'],
@@ -469,7 +474,7 @@ describe('FragmentsSidebar', () => {
 						},
 					]
 				),
-			},
+			}),
 			{}
 		);
 	});
@@ -526,7 +531,7 @@ describe('FragmentsSidebar', () => {
 		renderComponent(STATE);
 
 		expect(TabsPanel).toHaveBeenCalledWith(
-			{
+			expect.objectContaining({
 				tabs: setIn(
 					NORMALIZED_TABS,
 					[1, 'collections', 0, 'collections'],
@@ -562,7 +567,7 @@ describe('FragmentsSidebar', () => {
 						},
 					]
 				),
-			},
+			}),
 			{}
 		);
 	});
