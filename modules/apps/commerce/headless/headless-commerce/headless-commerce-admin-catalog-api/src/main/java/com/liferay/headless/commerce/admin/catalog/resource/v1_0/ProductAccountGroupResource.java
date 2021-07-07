@@ -14,7 +14,7 @@
 
 package com.liferay.headless.commerce.admin.catalog.resource.v1_0;
 
-import com.liferay.headless.commerce.admin.catalog.dto.v1_0.ProductChannel;
+import com.liferay.headless.commerce.admin.catalog.dto.v1_0.ProductAccountGroup;
 import com.liferay.portal.kernel.search.filter.Filter;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.ResourceActionLocalService;
@@ -52,26 +52,26 @@ import org.osgi.annotation.versioning.ProviderType;
  */
 @Generated("")
 @ProviderType
-public interface ProductChannelResource {
+public interface ProductAccountGroupResource {
 
 	public static Builder builder() {
 		return FactoryHolder.factory.create();
 	}
 
-	public void deleteProductChannel(Long id) throws Exception;
+	public void deleteProductAccountGroup(Long id) throws Exception;
 
-	public Response deleteProductChannelBatch(
+	public Response deleteProductAccountGroupBatch(
 			Long id, String callbackURL, Object object)
 		throws Exception;
 
-	public ProductChannel getProductChannel(Long id) throws Exception;
+	public ProductAccountGroup getProductAccountGroup(Long id) throws Exception;
 
-	public Page<ProductChannel>
-			getProductByExternalReferenceCodeProductChannelsPage(
+	public Page<ProductAccountGroup>
+			getProductByExternalReferenceCodeProductAccountGroupsPage(
 				String externalReferenceCode, Pagination pagination)
 		throws Exception;
 
-	public Page<ProductChannel> getProductIdProductChannelsPage(
+	public Page<ProductAccountGroup> getProductIdProductAccountGroupsPage(
 			Long id, Pagination pagination)
 		throws Exception;
 
@@ -136,7 +136,7 @@ public interface ProductChannelResource {
 	@ProviderType
 	public interface Builder {
 
-		public ProductChannelResource build();
+		public ProductAccountGroupResource build();
 
 		public Builder checkPermissions(boolean checkPermissions);
 

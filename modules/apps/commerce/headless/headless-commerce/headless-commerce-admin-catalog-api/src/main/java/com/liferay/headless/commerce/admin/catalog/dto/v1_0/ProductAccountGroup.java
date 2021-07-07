@@ -46,36 +46,37 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @generated
  */
 @Generated("")
-@GraphQLName("ProductChannel")
+@GraphQLName("ProductAccountGroup")
 @JsonFilter("Liferay.Vulcan")
 @Schema(requiredProperties = {"id"})
-@XmlRootElement(name = "ProductChannel")
-public class ProductChannel implements Serializable {
+@XmlRootElement(name = "ProductAccountGroup")
+public class ProductAccountGroup implements Serializable {
 
-	public static ProductChannel toDTO(String json) {
-		return ObjectMapperUtil.readValue(ProductChannel.class, json);
+	public static ProductAccountGroup toDTO(String json) {
+		return ObjectMapperUtil.readValue(ProductAccountGroup.class, json);
 	}
 
-	public static ProductChannel unsafeToDTO(String json) {
-		return ObjectMapperUtil.unsafeReadValue(ProductChannel.class, json);
+	public static ProductAccountGroup unsafeToDTO(String json) {
+		return ObjectMapperUtil.unsafeReadValue(
+			ProductAccountGroup.class, json);
 	}
 
 	@DecimalMin("0")
 	@Schema(example = "31130")
-	public Long getChannelId() {
-		return channelId;
+	public Long getAccountGroupId() {
+		return accountGroupId;
 	}
 
-	public void setChannelId(Long channelId) {
-		this.channelId = channelId;
+	public void setAccountGroupId(Long accountGroupId) {
+		this.accountGroupId = accountGroupId;
 	}
 
 	@JsonIgnore
-	public void setChannelId(
-		UnsafeSupplier<Long, Exception> channelIdUnsafeSupplier) {
+	public void setAccountGroupId(
+		UnsafeSupplier<Long, Exception> accountGroupIdUnsafeSupplier) {
 
 		try {
-			channelId = channelIdUnsafeSupplier.get();
+			accountGroupId = accountGroupIdUnsafeSupplier.get();
 		}
 		catch (RuntimeException re) {
 			throw re;
@@ -87,35 +88,7 @@ public class ProductChannel implements Serializable {
 
 	@GraphQLField
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
-	protected Long channelId;
-
-	@Schema(example = "USD")
-	public String getCurrencyCode() {
-		return currencyCode;
-	}
-
-	public void setCurrencyCode(String currencyCode) {
-		this.currencyCode = currencyCode;
-	}
-
-	@JsonIgnore
-	public void setCurrencyCode(
-		UnsafeSupplier<String, Exception> currencyCodeUnsafeSupplier) {
-
-		try {
-			currencyCode = currencyCodeUnsafeSupplier.get();
-		}
-		catch (RuntimeException re) {
-			throw re;
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	@GraphQLField
-	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
-	protected String currencyCode;
+	protected Long accountGroupId;
 
 	@Schema(example = "AB-34098-789-N")
 	public String getExternalReferenceCode() {
@@ -199,45 +172,19 @@ public class ProductChannel implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected String name;
 
-	@Schema
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
-	}
-
-	@JsonIgnore
-	public void setType(UnsafeSupplier<String, Exception> typeUnsafeSupplier) {
-		try {
-			type = typeUnsafeSupplier.get();
-		}
-		catch (RuntimeException re) {
-			throw re;
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	@GraphQLField
-	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
-	protected String type;
-
 	@Override
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
 		}
 
-		if (!(object instanceof ProductChannel)) {
+		if (!(object instanceof ProductAccountGroup)) {
 			return false;
 		}
 
-		ProductChannel productChannel = (ProductChannel)object;
+		ProductAccountGroup productAccountGroup = (ProductAccountGroup)object;
 
-		return Objects.equals(toString(), productChannel.toString());
+		return Objects.equals(toString(), productAccountGroup.toString());
 	}
 
 	@Override
@@ -252,28 +199,14 @@ public class ProductChannel implements Serializable {
 
 		sb.append("{");
 
-		if (channelId != null) {
+		if (accountGroupId != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
 			}
 
-			sb.append("\"channelId\": ");
+			sb.append("\"accountGroupId\": ");
 
-			sb.append(channelId);
-		}
-
-		if (currencyCode != null) {
-			if (sb.length() > 1) {
-				sb.append(", ");
-			}
-
-			sb.append("\"currencyCode\": ");
-
-			sb.append("\"");
-
-			sb.append(_escape(currencyCode));
-
-			sb.append("\"");
+			sb.append(accountGroupId);
 		}
 
 		if (externalReferenceCode != null) {
@@ -314,20 +247,6 @@ public class ProductChannel implements Serializable {
 			sb.append("\"");
 		}
 
-		if (type != null) {
-			if (sb.length() > 1) {
-				sb.append(", ");
-			}
-
-			sb.append("\"type\": ");
-
-			sb.append("\"");
-
-			sb.append(_escape(type));
-
-			sb.append("\"");
-		}
-
 		sb.append("}");
 
 		return sb.toString();
@@ -335,7 +254,7 @@ public class ProductChannel implements Serializable {
 
 	@Schema(
 		accessMode = Schema.AccessMode.READ_ONLY,
-		defaultValue = "com.liferay.headless.commerce.admin.catalog.dto.v1_0.ProductChannel",
+		defaultValue = "com.liferay.headless.commerce.admin.catalog.dto.v1_0.ProductAccountGroup",
 		name = "x-class-name"
 	)
 	public String xClassName;

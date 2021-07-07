@@ -22,12 +22,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 
-import com.liferay.headless.commerce.admin.catalog.client.dto.v1_0.ProductChannel;
+import com.liferay.headless.commerce.admin.catalog.client.dto.v1_0.ProductAccountGroup;
 import com.liferay.headless.commerce.admin.catalog.client.http.HttpInvoker;
 import com.liferay.headless.commerce.admin.catalog.client.pagination.Page;
 import com.liferay.headless.commerce.admin.catalog.client.pagination.Pagination;
-import com.liferay.headless.commerce.admin.catalog.client.resource.v1_0.ProductChannelResource;
-import com.liferay.headless.commerce.admin.catalog.client.serdes.v1_0.ProductChannelSerDes;
+import com.liferay.headless.commerce.admin.catalog.client.resource.v1_0.ProductAccountGroupResource;
+import com.liferay.headless.commerce.admin.catalog.client.serdes.v1_0.ProductAccountGroupSerDes;
 import com.liferay.petra.reflect.ReflectionUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.json.JSONArray;
@@ -83,7 +83,7 @@ import org.junit.Test;
  * @generated
  */
 @Generated("")
-public abstract class BaseProductChannelResourceTestCase {
+public abstract class BaseProductAccountGroupResourceTestCase {
 
 	@ClassRule
 	@Rule
@@ -104,12 +104,12 @@ public abstract class BaseProductChannelResourceTestCase {
 		testCompany = CompanyLocalServiceUtil.getCompany(
 			testGroup.getCompanyId());
 
-		_productChannelResource.setContextCompany(testCompany);
+		_productAccountGroupResource.setContextCompany(testCompany);
 
-		ProductChannelResource.Builder builder =
-			ProductChannelResource.builder();
+		ProductAccountGroupResource.Builder builder =
+			ProductAccountGroupResource.builder();
 
-		productChannelResource = builder.authentication(
+		productAccountGroupResource = builder.authentication(
 			"test@liferay.com", "test"
 		).locale(
 			LocaleUtil.getDefault()
@@ -140,13 +140,14 @@ public abstract class BaseProductChannelResourceTestCase {
 			}
 		};
 
-		ProductChannel productChannel1 = randomProductChannel();
+		ProductAccountGroup productAccountGroup1 = randomProductAccountGroup();
 
-		String json = objectMapper.writeValueAsString(productChannel1);
+		String json = objectMapper.writeValueAsString(productAccountGroup1);
 
-		ProductChannel productChannel2 = ProductChannelSerDes.toDTO(json);
+		ProductAccountGroup productAccountGroup2 =
+			ProductAccountGroupSerDes.toDTO(json);
 
-		Assert.assertTrue(equals(productChannel1, productChannel2));
+		Assert.assertTrue(equals(productAccountGroup1, productAccountGroup2));
 	}
 
 	@Test
@@ -166,10 +167,10 @@ public abstract class BaseProductChannelResourceTestCase {
 			}
 		};
 
-		ProductChannel productChannel = randomProductChannel();
+		ProductAccountGroup productAccountGroup = randomProductAccountGroup();
 
-		String json1 = objectMapper.writeValueAsString(productChannel);
-		String json2 = ProductChannelSerDes.toJSON(productChannel);
+		String json1 = objectMapper.writeValueAsString(productAccountGroup);
+		String json2 = ProductAccountGroupSerDes.toJSON(productAccountGroup);
 
 		Assert.assertEquals(
 			objectMapper.readTree(json1), objectMapper.readTree(json2));
@@ -179,48 +180,46 @@ public abstract class BaseProductChannelResourceTestCase {
 	public void testEscapeRegexInStringFields() throws Exception {
 		String regex = "^[0-9]+(\\.[0-9]{1,2})\"?";
 
-		ProductChannel productChannel = randomProductChannel();
+		ProductAccountGroup productAccountGroup = randomProductAccountGroup();
 
-		productChannel.setCurrencyCode(regex);
-		productChannel.setExternalReferenceCode(regex);
-		productChannel.setName(regex);
-		productChannel.setType(regex);
+		productAccountGroup.setExternalReferenceCode(regex);
+		productAccountGroup.setName(regex);
 
-		String json = ProductChannelSerDes.toJSON(productChannel);
+		String json = ProductAccountGroupSerDes.toJSON(productAccountGroup);
 
 		Assert.assertFalse(json.contains(regex));
 
-		productChannel = ProductChannelSerDes.toDTO(json);
+		productAccountGroup = ProductAccountGroupSerDes.toDTO(json);
 
-		Assert.assertEquals(regex, productChannel.getCurrencyCode());
-		Assert.assertEquals(regex, productChannel.getExternalReferenceCode());
-		Assert.assertEquals(regex, productChannel.getName());
-		Assert.assertEquals(regex, productChannel.getType());
+		Assert.assertEquals(
+			regex, productAccountGroup.getExternalReferenceCode());
+		Assert.assertEquals(regex, productAccountGroup.getName());
 	}
 
 	@Test
-	public void testDeleteProductChannel() throws Exception {
+	public void testDeleteProductAccountGroup() throws Exception {
 		@SuppressWarnings("PMD.UnusedLocalVariable")
-		ProductChannel productChannel =
-			testDeleteProductChannel_addProductChannel();
+		ProductAccountGroup productAccountGroup =
+			testDeleteProductAccountGroup_addProductAccountGroup();
 
 		assertHttpResponseStatusCode(
 			204,
-			productChannelResource.deleteProductChannelHttpResponse(
-				productChannel.getId()));
+			productAccountGroupResource.deleteProductAccountGroupHttpResponse(
+				productAccountGroup.getId()));
 
 		assertHttpResponseStatusCode(
 			404,
-			productChannelResource.getProductChannelHttpResponse(
-				productChannel.getId()));
+			productAccountGroupResource.getProductAccountGroupHttpResponse(
+				productAccountGroup.getId()));
 
 		assertHttpResponseStatusCode(
 			404,
-			productChannelResource.getProductChannelHttpResponse(
-				productChannel.getId()));
+			productAccountGroupResource.getProductAccountGroupHttpResponse(
+				productAccountGroup.getId()));
 	}
 
-	protected ProductChannel testDeleteProductChannel_addProductChannel()
+	protected ProductAccountGroup
+			testDeleteProductAccountGroup_addProductAccountGroup()
 		throws Exception {
 
 		throw new UnsupportedOperationException(
@@ -228,28 +227,28 @@ public abstract class BaseProductChannelResourceTestCase {
 	}
 
 	@Test
-	public void testGraphQLDeleteProductChannel() throws Exception {
-		ProductChannel productChannel =
-			testGraphQLDeleteProductChannel_addProductChannel();
+	public void testGraphQLDeleteProductAccountGroup() throws Exception {
+		ProductAccountGroup productAccountGroup =
+			testGraphQLDeleteProductAccountGroup_addProductAccountGroup();
 
 		Assert.assertTrue(
 			JSONUtil.getValueAsBoolean(
 				invokeGraphQLMutation(
 					new GraphQLField(
-						"deleteProductChannel",
+						"deleteProductAccountGroup",
 						new HashMap<String, Object>() {
 							{
-								put("id", productChannel.getId());
+								put("id", productAccountGroup.getId());
 							}
 						})),
-				"JSONObject/data", "Object/deleteProductChannel"));
+				"JSONObject/data", "Object/deleteProductAccountGroup"));
 		JSONArray errorsJSONArray = JSONUtil.getValueAsJSONArray(
 			invokeGraphQLQuery(
 				new GraphQLField(
-					"productChannel",
+					"productAccountGroup",
 					new HashMap<String, Object>() {
 						{
-							put("id", productChannel.getId());
+							put("id", productAccountGroup.getId());
 						}
 					},
 					new GraphQLField("id"))),
@@ -258,26 +257,28 @@ public abstract class BaseProductChannelResourceTestCase {
 		Assert.assertTrue(errorsJSONArray.length() > 0);
 	}
 
-	protected ProductChannel testGraphQLDeleteProductChannel_addProductChannel()
+	protected ProductAccountGroup
+			testGraphQLDeleteProductAccountGroup_addProductAccountGroup()
 		throws Exception {
 
-		return testGraphQLProductChannel_addProductChannel();
+		return testGraphQLProductAccountGroup_addProductAccountGroup();
 	}
 
 	@Test
-	public void testGetProductChannel() throws Exception {
-		ProductChannel postProductChannel =
-			testGetProductChannel_addProductChannel();
+	public void testGetProductAccountGroup() throws Exception {
+		ProductAccountGroup postProductAccountGroup =
+			testGetProductAccountGroup_addProductAccountGroup();
 
-		ProductChannel getProductChannel =
-			productChannelResource.getProductChannel(
-				postProductChannel.getId());
+		ProductAccountGroup getProductAccountGroup =
+			productAccountGroupResource.getProductAccountGroup(
+				postProductAccountGroup.getId());
 
-		assertEquals(postProductChannel, getProductChannel);
-		assertValid(getProductChannel);
+		assertEquals(postProductAccountGroup, getProductAccountGroup);
+		assertValid(getProductAccountGroup);
 	}
 
-	protected ProductChannel testGetProductChannel_addProductChannel()
+	protected ProductAccountGroup
+			testGetProductAccountGroup_addProductAccountGroup()
 		throws Exception {
 
 		throw new UnsupportedOperationException(
@@ -285,29 +286,29 @@ public abstract class BaseProductChannelResourceTestCase {
 	}
 
 	@Test
-	public void testGraphQLGetProductChannel() throws Exception {
-		ProductChannel productChannel =
-			testGraphQLGetProductChannel_addProductChannel();
+	public void testGraphQLGetProductAccountGroup() throws Exception {
+		ProductAccountGroup productAccountGroup =
+			testGraphQLGetProductAccountGroup_addProductAccountGroup();
 
 		Assert.assertTrue(
 			equals(
-				productChannel,
-				ProductChannelSerDes.toDTO(
+				productAccountGroup,
+				ProductAccountGroupSerDes.toDTO(
 					JSONUtil.getValueAsString(
 						invokeGraphQLQuery(
 							new GraphQLField(
-								"productChannel",
+								"productAccountGroup",
 								new HashMap<String, Object>() {
 									{
-										put("id", productChannel.getId());
+										put("id", productAccountGroup.getId());
 									}
 								},
 								getGraphQLFields())),
-						"JSONObject/data", "Object/productChannel"))));
+						"JSONObject/data", "Object/productAccountGroup"))));
 	}
 
 	@Test
-	public void testGraphQLGetProductChannelNotFound() throws Exception {
+	public void testGraphQLGetProductAccountGroupNotFound() throws Exception {
 		Long irrelevantId = RandomTestUtil.randomLong();
 
 		Assert.assertEquals(
@@ -315,7 +316,7 @@ public abstract class BaseProductChannelResourceTestCase {
 			JSONUtil.getValueAsString(
 				invokeGraphQLQuery(
 					new GraphQLField(
-						"productChannel",
+						"productAccountGroup",
 						new HashMap<String, Object>() {
 							{
 								put("id", irrelevantId);
@@ -326,128 +327,134 @@ public abstract class BaseProductChannelResourceTestCase {
 				"Object/code"));
 	}
 
-	protected ProductChannel testGraphQLGetProductChannel_addProductChannel()
+	protected ProductAccountGroup
+			testGraphQLGetProductAccountGroup_addProductAccountGroup()
 		throws Exception {
 
-		return testGraphQLProductChannel_addProductChannel();
+		return testGraphQLProductAccountGroup_addProductAccountGroup();
 	}
 
 	@Test
-	public void testGetProductByExternalReferenceCodeProductChannelsPage()
+	public void testGetProductByExternalReferenceCodeProductAccountGroupsPage()
 		throws Exception {
 
 		String externalReferenceCode =
-			testGetProductByExternalReferenceCodeProductChannelsPage_getExternalReferenceCode();
+			testGetProductByExternalReferenceCodeProductAccountGroupsPage_getExternalReferenceCode();
 		String irrelevantExternalReferenceCode =
-			testGetProductByExternalReferenceCodeProductChannelsPage_getIrrelevantExternalReferenceCode();
+			testGetProductByExternalReferenceCodeProductAccountGroupsPage_getIrrelevantExternalReferenceCode();
 
-		Page<ProductChannel> page =
-			productChannelResource.
-				getProductByExternalReferenceCodeProductChannelsPage(
+		Page<ProductAccountGroup> page =
+			productAccountGroupResource.
+				getProductByExternalReferenceCodeProductAccountGroupsPage(
 					externalReferenceCode, Pagination.of(1, 10));
 
 		Assert.assertEquals(0, page.getTotalCount());
 
 		if (irrelevantExternalReferenceCode != null) {
-			ProductChannel irrelevantProductChannel =
-				testGetProductByExternalReferenceCodeProductChannelsPage_addProductChannel(
+			ProductAccountGroup irrelevantProductAccountGroup =
+				testGetProductByExternalReferenceCodeProductAccountGroupsPage_addProductAccountGroup(
 					irrelevantExternalReferenceCode,
-					randomIrrelevantProductChannel());
+					randomIrrelevantProductAccountGroup());
 
 			page =
-				productChannelResource.
-					getProductByExternalReferenceCodeProductChannelsPage(
+				productAccountGroupResource.
+					getProductByExternalReferenceCodeProductAccountGroupsPage(
 						irrelevantExternalReferenceCode, Pagination.of(1, 2));
 
 			Assert.assertEquals(1, page.getTotalCount());
 
 			assertEquals(
-				Arrays.asList(irrelevantProductChannel),
-				(List<ProductChannel>)page.getItems());
+				Arrays.asList(irrelevantProductAccountGroup),
+				(List<ProductAccountGroup>)page.getItems());
 			assertValid(page);
 		}
 
-		ProductChannel productChannel1 =
-			testGetProductByExternalReferenceCodeProductChannelsPage_addProductChannel(
-				externalReferenceCode, randomProductChannel());
+		ProductAccountGroup productAccountGroup1 =
+			testGetProductByExternalReferenceCodeProductAccountGroupsPage_addProductAccountGroup(
+				externalReferenceCode, randomProductAccountGroup());
 
-		ProductChannel productChannel2 =
-			testGetProductByExternalReferenceCodeProductChannelsPage_addProductChannel(
-				externalReferenceCode, randomProductChannel());
+		ProductAccountGroup productAccountGroup2 =
+			testGetProductByExternalReferenceCodeProductAccountGroupsPage_addProductAccountGroup(
+				externalReferenceCode, randomProductAccountGroup());
 
 		page =
-			productChannelResource.
-				getProductByExternalReferenceCodeProductChannelsPage(
+			productAccountGroupResource.
+				getProductByExternalReferenceCodeProductAccountGroupsPage(
 					externalReferenceCode, Pagination.of(1, 10));
 
 		Assert.assertEquals(2, page.getTotalCount());
 
 		assertEqualsIgnoringOrder(
-			Arrays.asList(productChannel1, productChannel2),
-			(List<ProductChannel>)page.getItems());
+			Arrays.asList(productAccountGroup1, productAccountGroup2),
+			(List<ProductAccountGroup>)page.getItems());
 		assertValid(page);
 
-		productChannelResource.deleteProductChannel(productChannel1.getId());
+		productAccountGroupResource.deleteProductAccountGroup(
+			productAccountGroup1.getId());
 
-		productChannelResource.deleteProductChannel(productChannel2.getId());
+		productAccountGroupResource.deleteProductAccountGroup(
+			productAccountGroup2.getId());
 	}
 
 	@Test
-	public void testGetProductByExternalReferenceCodeProductChannelsPageWithPagination()
+	public void testGetProductByExternalReferenceCodeProductAccountGroupsPageWithPagination()
 		throws Exception {
 
 		String externalReferenceCode =
-			testGetProductByExternalReferenceCodeProductChannelsPage_getExternalReferenceCode();
+			testGetProductByExternalReferenceCodeProductAccountGroupsPage_getExternalReferenceCode();
 
-		ProductChannel productChannel1 =
-			testGetProductByExternalReferenceCodeProductChannelsPage_addProductChannel(
-				externalReferenceCode, randomProductChannel());
+		ProductAccountGroup productAccountGroup1 =
+			testGetProductByExternalReferenceCodeProductAccountGroupsPage_addProductAccountGroup(
+				externalReferenceCode, randomProductAccountGroup());
 
-		ProductChannel productChannel2 =
-			testGetProductByExternalReferenceCodeProductChannelsPage_addProductChannel(
-				externalReferenceCode, randomProductChannel());
+		ProductAccountGroup productAccountGroup2 =
+			testGetProductByExternalReferenceCodeProductAccountGroupsPage_addProductAccountGroup(
+				externalReferenceCode, randomProductAccountGroup());
 
-		ProductChannel productChannel3 =
-			testGetProductByExternalReferenceCodeProductChannelsPage_addProductChannel(
-				externalReferenceCode, randomProductChannel());
+		ProductAccountGroup productAccountGroup3 =
+			testGetProductByExternalReferenceCodeProductAccountGroupsPage_addProductAccountGroup(
+				externalReferenceCode, randomProductAccountGroup());
 
-		Page<ProductChannel> page1 =
-			productChannelResource.
-				getProductByExternalReferenceCodeProductChannelsPage(
+		Page<ProductAccountGroup> page1 =
+			productAccountGroupResource.
+				getProductByExternalReferenceCodeProductAccountGroupsPage(
 					externalReferenceCode, Pagination.of(1, 2));
 
-		List<ProductChannel> productChannels1 =
-			(List<ProductChannel>)page1.getItems();
+		List<ProductAccountGroup> productAccountGroups1 =
+			(List<ProductAccountGroup>)page1.getItems();
 
 		Assert.assertEquals(
-			productChannels1.toString(), 2, productChannels1.size());
+			productAccountGroups1.toString(), 2, productAccountGroups1.size());
 
-		Page<ProductChannel> page2 =
-			productChannelResource.
-				getProductByExternalReferenceCodeProductChannelsPage(
+		Page<ProductAccountGroup> page2 =
+			productAccountGroupResource.
+				getProductByExternalReferenceCodeProductAccountGroupsPage(
 					externalReferenceCode, Pagination.of(2, 2));
 
 		Assert.assertEquals(3, page2.getTotalCount());
 
-		List<ProductChannel> productChannels2 =
-			(List<ProductChannel>)page2.getItems();
+		List<ProductAccountGroup> productAccountGroups2 =
+			(List<ProductAccountGroup>)page2.getItems();
 
 		Assert.assertEquals(
-			productChannels2.toString(), 1, productChannels2.size());
+			productAccountGroups2.toString(), 1, productAccountGroups2.size());
 
-		Page<ProductChannel> page3 =
-			productChannelResource.
-				getProductByExternalReferenceCodeProductChannelsPage(
+		Page<ProductAccountGroup> page3 =
+			productAccountGroupResource.
+				getProductByExternalReferenceCodeProductAccountGroupsPage(
 					externalReferenceCode, Pagination.of(1, 3));
 
 		assertEqualsIgnoringOrder(
-			Arrays.asList(productChannel1, productChannel2, productChannel3),
-			(List<ProductChannel>)page3.getItems());
+			Arrays.asList(
+				productAccountGroup1, productAccountGroup2,
+				productAccountGroup3),
+			(List<ProductAccountGroup>)page3.getItems());
 	}
 
-	protected ProductChannel
-			testGetProductByExternalReferenceCodeProductChannelsPage_addProductChannel(
-				String externalReferenceCode, ProductChannel productChannel)
+	protected ProductAccountGroup
+			testGetProductByExternalReferenceCodeProductAccountGroupsPage_addProductAccountGroup(
+				String externalReferenceCode,
+				ProductAccountGroup productAccountGroup)
 		throws Exception {
 
 		throw new UnsupportedOperationException(
@@ -455,7 +462,7 @@ public abstract class BaseProductChannelResourceTestCase {
 	}
 
 	protected String
-			testGetProductByExternalReferenceCodeProductChannelsPage_getExternalReferenceCode()
+			testGetProductByExternalReferenceCodeProductAccountGroupsPage_getExternalReferenceCode()
 		throws Exception {
 
 		throw new UnsupportedOperationException(
@@ -463,135 +470,142 @@ public abstract class BaseProductChannelResourceTestCase {
 	}
 
 	protected String
-			testGetProductByExternalReferenceCodeProductChannelsPage_getIrrelevantExternalReferenceCode()
+			testGetProductByExternalReferenceCodeProductAccountGroupsPage_getIrrelevantExternalReferenceCode()
 		throws Exception {
 
 		return null;
 	}
 
 	@Test
-	public void testGetProductIdProductChannelsPage() throws Exception {
-		Long id = testGetProductIdProductChannelsPage_getId();
+	public void testGetProductIdProductAccountGroupsPage() throws Exception {
+		Long id = testGetProductIdProductAccountGroupsPage_getId();
 		Long irrelevantId =
-			testGetProductIdProductChannelsPage_getIrrelevantId();
+			testGetProductIdProductAccountGroupsPage_getIrrelevantId();
 
-		Page<ProductChannel> page =
-			productChannelResource.getProductIdProductChannelsPage(
+		Page<ProductAccountGroup> page =
+			productAccountGroupResource.getProductIdProductAccountGroupsPage(
 				id, Pagination.of(1, 10));
 
 		Assert.assertEquals(0, page.getTotalCount());
 
 		if (irrelevantId != null) {
-			ProductChannel irrelevantProductChannel =
-				testGetProductIdProductChannelsPage_addProductChannel(
-					irrelevantId, randomIrrelevantProductChannel());
+			ProductAccountGroup irrelevantProductAccountGroup =
+				testGetProductIdProductAccountGroupsPage_addProductAccountGroup(
+					irrelevantId, randomIrrelevantProductAccountGroup());
 
-			page = productChannelResource.getProductIdProductChannelsPage(
-				irrelevantId, Pagination.of(1, 2));
+			page =
+				productAccountGroupResource.
+					getProductIdProductAccountGroupsPage(
+						irrelevantId, Pagination.of(1, 2));
 
 			Assert.assertEquals(1, page.getTotalCount());
 
 			assertEquals(
-				Arrays.asList(irrelevantProductChannel),
-				(List<ProductChannel>)page.getItems());
+				Arrays.asList(irrelevantProductAccountGroup),
+				(List<ProductAccountGroup>)page.getItems());
 			assertValid(page);
 		}
 
-		ProductChannel productChannel1 =
-			testGetProductIdProductChannelsPage_addProductChannel(
-				id, randomProductChannel());
+		ProductAccountGroup productAccountGroup1 =
+			testGetProductIdProductAccountGroupsPage_addProductAccountGroup(
+				id, randomProductAccountGroup());
 
-		ProductChannel productChannel2 =
-			testGetProductIdProductChannelsPage_addProductChannel(
-				id, randomProductChannel());
+		ProductAccountGroup productAccountGroup2 =
+			testGetProductIdProductAccountGroupsPage_addProductAccountGroup(
+				id, randomProductAccountGroup());
 
-		page = productChannelResource.getProductIdProductChannelsPage(
+		page = productAccountGroupResource.getProductIdProductAccountGroupsPage(
 			id, Pagination.of(1, 10));
 
 		Assert.assertEquals(2, page.getTotalCount());
 
 		assertEqualsIgnoringOrder(
-			Arrays.asList(productChannel1, productChannel2),
-			(List<ProductChannel>)page.getItems());
+			Arrays.asList(productAccountGroup1, productAccountGroup2),
+			(List<ProductAccountGroup>)page.getItems());
 		assertValid(page);
 
-		productChannelResource.deleteProductChannel(productChannel1.getId());
+		productAccountGroupResource.deleteProductAccountGroup(
+			productAccountGroup1.getId());
 
-		productChannelResource.deleteProductChannel(productChannel2.getId());
+		productAccountGroupResource.deleteProductAccountGroup(
+			productAccountGroup2.getId());
 	}
 
 	@Test
-	public void testGetProductIdProductChannelsPageWithPagination()
+	public void testGetProductIdProductAccountGroupsPageWithPagination()
 		throws Exception {
 
-		Long id = testGetProductIdProductChannelsPage_getId();
+		Long id = testGetProductIdProductAccountGroupsPage_getId();
 
-		ProductChannel productChannel1 =
-			testGetProductIdProductChannelsPage_addProductChannel(
-				id, randomProductChannel());
+		ProductAccountGroup productAccountGroup1 =
+			testGetProductIdProductAccountGroupsPage_addProductAccountGroup(
+				id, randomProductAccountGroup());
 
-		ProductChannel productChannel2 =
-			testGetProductIdProductChannelsPage_addProductChannel(
-				id, randomProductChannel());
+		ProductAccountGroup productAccountGroup2 =
+			testGetProductIdProductAccountGroupsPage_addProductAccountGroup(
+				id, randomProductAccountGroup());
 
-		ProductChannel productChannel3 =
-			testGetProductIdProductChannelsPage_addProductChannel(
-				id, randomProductChannel());
+		ProductAccountGroup productAccountGroup3 =
+			testGetProductIdProductAccountGroupsPage_addProductAccountGroup(
+				id, randomProductAccountGroup());
 
-		Page<ProductChannel> page1 =
-			productChannelResource.getProductIdProductChannelsPage(
+		Page<ProductAccountGroup> page1 =
+			productAccountGroupResource.getProductIdProductAccountGroupsPage(
 				id, Pagination.of(1, 2));
 
-		List<ProductChannel> productChannels1 =
-			(List<ProductChannel>)page1.getItems();
+		List<ProductAccountGroup> productAccountGroups1 =
+			(List<ProductAccountGroup>)page1.getItems();
 
 		Assert.assertEquals(
-			productChannels1.toString(), 2, productChannels1.size());
+			productAccountGroups1.toString(), 2, productAccountGroups1.size());
 
-		Page<ProductChannel> page2 =
-			productChannelResource.getProductIdProductChannelsPage(
+		Page<ProductAccountGroup> page2 =
+			productAccountGroupResource.getProductIdProductAccountGroupsPage(
 				id, Pagination.of(2, 2));
 
 		Assert.assertEquals(3, page2.getTotalCount());
 
-		List<ProductChannel> productChannels2 =
-			(List<ProductChannel>)page2.getItems();
+		List<ProductAccountGroup> productAccountGroups2 =
+			(List<ProductAccountGroup>)page2.getItems();
 
 		Assert.assertEquals(
-			productChannels2.toString(), 1, productChannels2.size());
+			productAccountGroups2.toString(), 1, productAccountGroups2.size());
 
-		Page<ProductChannel> page3 =
-			productChannelResource.getProductIdProductChannelsPage(
+		Page<ProductAccountGroup> page3 =
+			productAccountGroupResource.getProductIdProductAccountGroupsPage(
 				id, Pagination.of(1, 3));
 
 		assertEqualsIgnoringOrder(
-			Arrays.asList(productChannel1, productChannel2, productChannel3),
-			(List<ProductChannel>)page3.getItems());
+			Arrays.asList(
+				productAccountGroup1, productAccountGroup2,
+				productAccountGroup3),
+			(List<ProductAccountGroup>)page3.getItems());
 	}
 
-	protected ProductChannel
-			testGetProductIdProductChannelsPage_addProductChannel(
-				Long id, ProductChannel productChannel)
+	protected ProductAccountGroup
+			testGetProductIdProductAccountGroupsPage_addProductAccountGroup(
+				Long id, ProductAccountGroup productAccountGroup)
 		throws Exception {
 
 		throw new UnsupportedOperationException(
 			"This method needs to be implemented");
 	}
 
-	protected Long testGetProductIdProductChannelsPage_getId()
+	protected Long testGetProductIdProductAccountGroupsPage_getId()
 		throws Exception {
 
 		throw new UnsupportedOperationException(
 			"This method needs to be implemented");
 	}
 
-	protected Long testGetProductIdProductChannelsPage_getIrrelevantId()
+	protected Long testGetProductIdProductAccountGroupsPage_getIrrelevantId()
 		throws Exception {
 
 		return null;
 	}
 
-	protected ProductChannel testGraphQLProductChannel_addProductChannel()
+	protected ProductAccountGroup
+			testGraphQLProductAccountGroup_addProductAccountGroup()
 		throws Exception {
 
 		throw new UnsupportedOperationException(
@@ -599,12 +613,13 @@ public abstract class BaseProductChannelResourceTestCase {
 	}
 
 	protected void assertContains(
-		ProductChannel productChannel, List<ProductChannel> productChannels) {
+		ProductAccountGroup productAccountGroup,
+		List<ProductAccountGroup> productAccountGroups) {
 
 		boolean contains = false;
 
-		for (ProductChannel item : productChannels) {
-			if (equals(productChannel, item)) {
+		for (ProductAccountGroup item : productAccountGroups) {
+			if (equals(productAccountGroup, item)) {
 				contains = true;
 
 				break;
@@ -612,7 +627,8 @@ public abstract class BaseProductChannelResourceTestCase {
 		}
 
 		Assert.assertTrue(
-			productChannels + " does not contain " + productChannel, contains);
+			productAccountGroups + " does not contain " + productAccountGroup,
+			contains);
 	}
 
 	protected void assertHttpResponseStatusCode(
@@ -624,38 +640,45 @@ public abstract class BaseProductChannelResourceTestCase {
 	}
 
 	protected void assertEquals(
-		ProductChannel productChannel1, ProductChannel productChannel2) {
+		ProductAccountGroup productAccountGroup1,
+		ProductAccountGroup productAccountGroup2) {
 
 		Assert.assertTrue(
-			productChannel1 + " does not equal " + productChannel2,
-			equals(productChannel1, productChannel2));
+			productAccountGroup1 + " does not equal " + productAccountGroup2,
+			equals(productAccountGroup1, productAccountGroup2));
 	}
 
 	protected void assertEquals(
-		List<ProductChannel> productChannels1,
-		List<ProductChannel> productChannels2) {
+		List<ProductAccountGroup> productAccountGroups1,
+		List<ProductAccountGroup> productAccountGroups2) {
 
-		Assert.assertEquals(productChannels1.size(), productChannels2.size());
+		Assert.assertEquals(
+			productAccountGroups1.size(), productAccountGroups2.size());
 
-		for (int i = 0; i < productChannels1.size(); i++) {
-			ProductChannel productChannel1 = productChannels1.get(i);
-			ProductChannel productChannel2 = productChannels2.get(i);
+		for (int i = 0; i < productAccountGroups1.size(); i++) {
+			ProductAccountGroup productAccountGroup1 =
+				productAccountGroups1.get(i);
+			ProductAccountGroup productAccountGroup2 =
+				productAccountGroups2.get(i);
 
-			assertEquals(productChannel1, productChannel2);
+			assertEquals(productAccountGroup1, productAccountGroup2);
 		}
 	}
 
 	protected void assertEqualsIgnoringOrder(
-		List<ProductChannel> productChannels1,
-		List<ProductChannel> productChannels2) {
+		List<ProductAccountGroup> productAccountGroups1,
+		List<ProductAccountGroup> productAccountGroups2) {
 
-		Assert.assertEquals(productChannels1.size(), productChannels2.size());
+		Assert.assertEquals(
+			productAccountGroups1.size(), productAccountGroups2.size());
 
-		for (ProductChannel productChannel1 : productChannels1) {
+		for (ProductAccountGroup productAccountGroup1 : productAccountGroups1) {
 			boolean contains = false;
 
-			for (ProductChannel productChannel2 : productChannels2) {
-				if (equals(productChannel1, productChannel2)) {
+			for (ProductAccountGroup productAccountGroup2 :
+					productAccountGroups2) {
+
+				if (equals(productAccountGroup1, productAccountGroup2)) {
 					contains = true;
 
 					break;
@@ -663,31 +686,26 @@ public abstract class BaseProductChannelResourceTestCase {
 			}
 
 			Assert.assertTrue(
-				productChannels2 + " does not contain " + productChannel1,
+				productAccountGroups2 + " does not contain " +
+					productAccountGroup1,
 				contains);
 		}
 	}
 
-	protected void assertValid(ProductChannel productChannel) throws Exception {
+	protected void assertValid(ProductAccountGroup productAccountGroup)
+		throws Exception {
+
 		boolean valid = true;
 
-		if (productChannel.getId() == null) {
+		if (productAccountGroup.getId() == null) {
 			valid = false;
 		}
 
 		for (String additionalAssertFieldName :
 				getAdditionalAssertFieldNames()) {
 
-			if (Objects.equals("channelId", additionalAssertFieldName)) {
-				if (productChannel.getChannelId() == null) {
-					valid = false;
-				}
-
-				continue;
-			}
-
-			if (Objects.equals("currencyCode", additionalAssertFieldName)) {
-				if (productChannel.getCurrencyCode() == null) {
+			if (Objects.equals("accountGroupId", additionalAssertFieldName)) {
+				if (productAccountGroup.getAccountGroupId() == null) {
 					valid = false;
 				}
 
@@ -697,7 +715,7 @@ public abstract class BaseProductChannelResourceTestCase {
 			if (Objects.equals(
 					"externalReferenceCode", additionalAssertFieldName)) {
 
-				if (productChannel.getExternalReferenceCode() == null) {
+				if (productAccountGroup.getExternalReferenceCode() == null) {
 					valid = false;
 				}
 
@@ -705,15 +723,7 @@ public abstract class BaseProductChannelResourceTestCase {
 			}
 
 			if (Objects.equals("name", additionalAssertFieldName)) {
-				if (productChannel.getName() == null) {
-					valid = false;
-				}
-
-				continue;
-			}
-
-			if (Objects.equals("type", additionalAssertFieldName)) {
-				if (productChannel.getType() == null) {
+				if (productAccountGroup.getName() == null) {
 					valid = false;
 				}
 
@@ -728,12 +738,13 @@ public abstract class BaseProductChannelResourceTestCase {
 		Assert.assertTrue(valid);
 	}
 
-	protected void assertValid(Page<ProductChannel> page) {
+	protected void assertValid(Page<ProductAccountGroup> page) {
 		boolean valid = false;
 
-		java.util.Collection<ProductChannel> productChannels = page.getItems();
+		java.util.Collection<ProductAccountGroup> productAccountGroups =
+			page.getItems();
 
-		int size = productChannels.size();
+		int size = productAccountGroups.size();
 
 		if ((page.getLastPage() > 0) && (page.getPage() > 0) &&
 			(page.getPageSize() > 0) && (page.getTotalCount() > 0) &&
@@ -755,7 +766,7 @@ public abstract class BaseProductChannelResourceTestCase {
 		for (java.lang.reflect.Field field :
 				getDeclaredFields(
 					com.liferay.headless.commerce.admin.catalog.dto.v1_0.
-						ProductChannel.class)) {
+						ProductAccountGroup.class)) {
 
 			if (!ArrayUtil.contains(
 					getAdditionalAssertFieldNames(), field.getName())) {
@@ -804,30 +815,20 @@ public abstract class BaseProductChannelResourceTestCase {
 	}
 
 	protected boolean equals(
-		ProductChannel productChannel1, ProductChannel productChannel2) {
+		ProductAccountGroup productAccountGroup1,
+		ProductAccountGroup productAccountGroup2) {
 
-		if (productChannel1 == productChannel2) {
+		if (productAccountGroup1 == productAccountGroup2) {
 			return true;
 		}
 
 		for (String additionalAssertFieldName :
 				getAdditionalAssertFieldNames()) {
 
-			if (Objects.equals("channelId", additionalAssertFieldName)) {
+			if (Objects.equals("accountGroupId", additionalAssertFieldName)) {
 				if (!Objects.deepEquals(
-						productChannel1.getChannelId(),
-						productChannel2.getChannelId())) {
-
-					return false;
-				}
-
-				continue;
-			}
-
-			if (Objects.equals("currencyCode", additionalAssertFieldName)) {
-				if (!Objects.deepEquals(
-						productChannel1.getCurrencyCode(),
-						productChannel2.getCurrencyCode())) {
+						productAccountGroup1.getAccountGroupId(),
+						productAccountGroup2.getAccountGroupId())) {
 
 					return false;
 				}
@@ -839,8 +840,8 @@ public abstract class BaseProductChannelResourceTestCase {
 					"externalReferenceCode", additionalAssertFieldName)) {
 
 				if (!Objects.deepEquals(
-						productChannel1.getExternalReferenceCode(),
-						productChannel2.getExternalReferenceCode())) {
+						productAccountGroup1.getExternalReferenceCode(),
+						productAccountGroup2.getExternalReferenceCode())) {
 
 					return false;
 				}
@@ -850,7 +851,8 @@ public abstract class BaseProductChannelResourceTestCase {
 
 			if (Objects.equals("id", additionalAssertFieldName)) {
 				if (!Objects.deepEquals(
-						productChannel1.getId(), productChannel2.getId())) {
+						productAccountGroup1.getId(),
+						productAccountGroup2.getId())) {
 
 					return false;
 				}
@@ -860,17 +862,8 @@ public abstract class BaseProductChannelResourceTestCase {
 
 			if (Objects.equals("name", additionalAssertFieldName)) {
 				if (!Objects.deepEquals(
-						productChannel1.getName(), productChannel2.getName())) {
-
-					return false;
-				}
-
-				continue;
-			}
-
-			if (Objects.equals("type", additionalAssertFieldName)) {
-				if (!Objects.deepEquals(
-						productChannel1.getType(), productChannel2.getType())) {
+						productAccountGroup1.getName(),
+						productAccountGroup2.getName())) {
 
 					return false;
 				}
@@ -928,13 +921,13 @@ public abstract class BaseProductChannelResourceTestCase {
 	protected java.util.Collection<EntityField> getEntityFields()
 		throws Exception {
 
-		if (!(_productChannelResource instanceof EntityModelResource)) {
+		if (!(_productAccountGroupResource instanceof EntityModelResource)) {
 			throw new UnsupportedOperationException(
 				"Resource is not an instance of EntityModelResource");
 		}
 
 		EntityModelResource entityModelResource =
-			(EntityModelResource)_productChannelResource;
+			(EntityModelResource)_productAccountGroupResource;
 
 		EntityModel entityModel = entityModelResource.getEntityModel(
 			new MultivaluedHashMap());
@@ -964,7 +957,7 @@ public abstract class BaseProductChannelResourceTestCase {
 
 	protected String getFilterString(
 		EntityField entityField, String operator,
-		ProductChannel productChannel) {
+		ProductAccountGroup productAccountGroup) {
 
 		StringBundler sb = new StringBundler();
 
@@ -976,23 +969,15 @@ public abstract class BaseProductChannelResourceTestCase {
 		sb.append(operator);
 		sb.append(" ");
 
-		if (entityFieldName.equals("channelId")) {
+		if (entityFieldName.equals("accountGroupId")) {
 			throw new IllegalArgumentException(
 				"Invalid entity field " + entityFieldName);
-		}
-
-		if (entityFieldName.equals("currencyCode")) {
-			sb.append("'");
-			sb.append(String.valueOf(productChannel.getCurrencyCode()));
-			sb.append("'");
-
-			return sb.toString();
 		}
 
 		if (entityFieldName.equals("externalReferenceCode")) {
 			sb.append("'");
 			sb.append(
-				String.valueOf(productChannel.getExternalReferenceCode()));
+				String.valueOf(productAccountGroup.getExternalReferenceCode()));
 			sb.append("'");
 
 			return sb.toString();
@@ -1005,15 +990,7 @@ public abstract class BaseProductChannelResourceTestCase {
 
 		if (entityFieldName.equals("name")) {
 			sb.append("'");
-			sb.append(String.valueOf(productChannel.getName()));
-			sb.append("'");
-
-			return sb.toString();
-		}
-
-		if (entityFieldName.equals("type")) {
-			sb.append("'");
-			sb.append(String.valueOf(productChannel.getType()));
+			sb.append(String.valueOf(productAccountGroup.getName()));
 			sb.append("'");
 
 			return sb.toString();
@@ -1060,32 +1037,34 @@ public abstract class BaseProductChannelResourceTestCase {
 			invoke(queryGraphQLField.toString()));
 	}
 
-	protected ProductChannel randomProductChannel() throws Exception {
-		return new ProductChannel() {
+	protected ProductAccountGroup randomProductAccountGroup() throws Exception {
+		return new ProductAccountGroup() {
 			{
-				channelId = RandomTestUtil.randomLong();
-				currencyCode = StringUtil.toLowerCase(
-					RandomTestUtil.randomString());
+				accountGroupId = RandomTestUtil.randomLong();
 				externalReferenceCode = StringUtil.toLowerCase(
 					RandomTestUtil.randomString());
 				id = RandomTestUtil.randomLong();
 				name = StringUtil.toLowerCase(RandomTestUtil.randomString());
-				type = StringUtil.toLowerCase(RandomTestUtil.randomString());
 			}
 		};
 	}
 
-	protected ProductChannel randomIrrelevantProductChannel() throws Exception {
-		ProductChannel randomIrrelevantProductChannel = randomProductChannel();
+	protected ProductAccountGroup randomIrrelevantProductAccountGroup()
+		throws Exception {
 
-		return randomIrrelevantProductChannel;
+		ProductAccountGroup randomIrrelevantProductAccountGroup =
+			randomProductAccountGroup();
+
+		return randomIrrelevantProductAccountGroup;
 	}
 
-	protected ProductChannel randomPatchProductChannel() throws Exception {
-		return randomProductChannel();
+	protected ProductAccountGroup randomPatchProductAccountGroup()
+		throws Exception {
+
+		return randomProductAccountGroup();
 	}
 
-	protected ProductChannelResource productChannelResource;
+	protected ProductAccountGroupResource productAccountGroupResource;
 	protected Group irrelevantGroup;
 	protected Company testCompany;
 	protected Group testGroup;
@@ -1271,12 +1250,12 @@ public abstract class BaseProductChannelResourceTestCase {
 	}
 
 	private static final com.liferay.portal.kernel.log.Log _log =
-		LogFactoryUtil.getLog(BaseProductChannelResourceTestCase.class);
+		LogFactoryUtil.getLog(BaseProductAccountGroupResourceTestCase.class);
 
 	private static DateFormat _dateFormat;
 
 	@Inject
 	private com.liferay.headless.commerce.admin.catalog.resource.v1_0.
-		ProductChannelResource _productChannelResource;
+		ProductAccountGroupResource _productAccountGroupResource;
 
 }

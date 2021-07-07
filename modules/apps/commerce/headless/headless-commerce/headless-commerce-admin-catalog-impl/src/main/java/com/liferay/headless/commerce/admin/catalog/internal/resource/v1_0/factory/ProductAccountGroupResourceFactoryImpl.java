@@ -14,7 +14,7 @@
 
 package com.liferay.headless.commerce.admin.catalog.internal.resource.v1_0.factory;
 
-import com.liferay.headless.commerce.admin.catalog.resource.v1_0.ProductChannelResource;
+import com.liferay.headless.commerce.admin.catalog.resource.v1_0.ProductAccountGroupResource;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.search.filter.Filter;
@@ -61,22 +61,24 @@ import org.osgi.service.component.annotations.ReferenceScope;
  * @author Zoltán Takács
  * @generated
  */
-@Component(immediate = true, service = ProductChannelResource.Factory.class)
+@Component(
+	immediate = true, service = ProductAccountGroupResource.Factory.class
+)
 @Generated("")
-public class ProductChannelResourceFactoryImpl
-	implements ProductChannelResource.Factory {
+public class ProductAccountGroupResourceFactoryImpl
+	implements ProductAccountGroupResource.Factory {
 
 	@Override
-	public ProductChannelResource.Builder create() {
-		return new ProductChannelResource.Builder() {
+	public ProductAccountGroupResource.Builder create() {
+		return new ProductAccountGroupResource.Builder() {
 
 			@Override
-			public ProductChannelResource build() {
+			public ProductAccountGroupResource build() {
 				if (_user == null) {
 					throw new IllegalArgumentException("User is not set");
 				}
 
-				return _productChannelResourceProxyProviderFunction.apply(
+				return _productAccountGroupResourceProxyProviderFunction.apply(
 					(proxy, method, arguments) -> _invoke(
 						method, arguments, _checkPermissions,
 						_httpServletRequest, _httpServletResponse,
@@ -84,7 +86,7 @@ public class ProductChannelResourceFactoryImpl
 			}
 
 			@Override
-			public ProductChannelResource.Builder checkPermissions(
+			public ProductAccountGroupResource.Builder checkPermissions(
 				boolean checkPermissions) {
 
 				_checkPermissions = checkPermissions;
@@ -93,7 +95,7 @@ public class ProductChannelResourceFactoryImpl
 			}
 
 			@Override
-			public ProductChannelResource.Builder httpServletRequest(
+			public ProductAccountGroupResource.Builder httpServletRequest(
 				HttpServletRequest httpServletRequest) {
 
 				_httpServletRequest = httpServletRequest;
@@ -102,7 +104,7 @@ public class ProductChannelResourceFactoryImpl
 			}
 
 			@Override
-			public ProductChannelResource.Builder httpServletResponse(
+			public ProductAccountGroupResource.Builder httpServletResponse(
 				HttpServletResponse httpServletResponse) {
 
 				_httpServletResponse = httpServletResponse;
@@ -111,7 +113,7 @@ public class ProductChannelResourceFactoryImpl
 			}
 
 			@Override
-			public ProductChannelResource.Builder preferredLocale(
+			public ProductAccountGroupResource.Builder preferredLocale(
 				Locale preferredLocale) {
 
 				_preferredLocale = preferredLocale;
@@ -120,7 +122,7 @@ public class ProductChannelResourceFactoryImpl
 			}
 
 			@Override
-			public ProductChannelResource.Builder user(User user) {
+			public ProductAccountGroupResource.Builder user(User user) {
 				_user = user;
 
 				return this;
@@ -137,25 +139,25 @@ public class ProductChannelResourceFactoryImpl
 
 	@Activate
 	protected void activate() {
-		ProductChannelResource.FactoryHolder.factory = this;
+		ProductAccountGroupResource.FactoryHolder.factory = this;
 	}
 
 	@Deactivate
 	protected void deactivate() {
-		ProductChannelResource.FactoryHolder.factory = null;
+		ProductAccountGroupResource.FactoryHolder.factory = null;
 	}
 
-	private static Function<InvocationHandler, ProductChannelResource>
+	private static Function<InvocationHandler, ProductAccountGroupResource>
 		_getProxyProviderFunction() {
 
 		Class<?> proxyClass = ProxyUtil.getProxyClass(
-			ProductChannelResource.class.getClassLoader(),
-			ProductChannelResource.class);
+			ProductAccountGroupResource.class.getClassLoader(),
+			ProductAccountGroupResource.class);
 
 		try {
-			Constructor<ProductChannelResource> constructor =
-				(Constructor<ProductChannelResource>)proxyClass.getConstructor(
-					InvocationHandler.class);
+			Constructor<ProductAccountGroupResource> constructor =
+				(Constructor<ProductAccountGroupResource>)
+					proxyClass.getConstructor(InvocationHandler.class);
 
 			return invocationHandler -> {
 				try {
@@ -196,37 +198,39 @@ public class ProductChannelResourceFactoryImpl
 				_liberalPermissionCheckerFactory.create(user));
 		}
 
-		ProductChannelResource productChannelResource =
+		ProductAccountGroupResource productAccountGroupResource =
 			_componentServiceObjects.getService();
 
-		productChannelResource.setContextAcceptLanguage(
+		productAccountGroupResource.setContextAcceptLanguage(
 			new AcceptLanguageImpl(httpServletRequest, preferredLocale, user));
 
 		Company company = _companyLocalService.getCompany(user.getCompanyId());
 
-		productChannelResource.setContextCompany(company);
+		productAccountGroupResource.setContextCompany(company);
 
-		productChannelResource.setContextHttpServletRequest(httpServletRequest);
-		productChannelResource.setContextHttpServletResponse(
+		productAccountGroupResource.setContextHttpServletRequest(
+			httpServletRequest);
+		productAccountGroupResource.setContextHttpServletResponse(
 			httpServletResponse);
-		productChannelResource.setContextUser(user);
-		productChannelResource.setExpressionConvert(_expressionConvert);
-		productChannelResource.setFilterParserProvider(_filterParserProvider);
-		productChannelResource.setGroupLocalService(_groupLocalService);
-		productChannelResource.setResourceActionLocalService(
+		productAccountGroupResource.setContextUser(user);
+		productAccountGroupResource.setExpressionConvert(_expressionConvert);
+		productAccountGroupResource.setFilterParserProvider(
+			_filterParserProvider);
+		productAccountGroupResource.setGroupLocalService(_groupLocalService);
+		productAccountGroupResource.setResourceActionLocalService(
 			_resourceActionLocalService);
-		productChannelResource.setResourcePermissionLocalService(
+		productAccountGroupResource.setResourcePermissionLocalService(
 			_resourcePermissionLocalService);
-		productChannelResource.setRoleLocalService(_roleLocalService);
+		productAccountGroupResource.setRoleLocalService(_roleLocalService);
 
 		try {
-			return method.invoke(productChannelResource, arguments);
+			return method.invoke(productAccountGroupResource, arguments);
 		}
 		catch (InvocationTargetException invocationTargetException) {
 			throw invocationTargetException.getTargetException();
 		}
 		finally {
-			_componentServiceObjects.ungetService(productChannelResource);
+			_componentServiceObjects.ungetService(productAccountGroupResource);
 
 			PrincipalThreadLocal.setName(name);
 
@@ -234,15 +238,16 @@ public class ProductChannelResourceFactoryImpl
 		}
 	}
 
-	private static final Function<InvocationHandler, ProductChannelResource>
-		_productChannelResourceProxyProviderFunction =
-			_getProxyProviderFunction();
+	private static final Function
+		<InvocationHandler, ProductAccountGroupResource>
+			_productAccountGroupResourceProxyProviderFunction =
+				_getProxyProviderFunction();
 
 	@Reference
 	private CompanyLocalService _companyLocalService;
 
 	@Reference(scope = ReferenceScope.PROTOTYPE_REQUIRED)
-	private ComponentServiceObjects<ProductChannelResource>
+	private ComponentServiceObjects<ProductAccountGroupResource>
 		_componentServiceObjects;
 
 	@Reference

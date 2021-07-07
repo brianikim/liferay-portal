@@ -14,8 +14,8 @@
 
 package com.liferay.headless.commerce.admin.catalog.internal.resource.v1_0;
 
-import com.liferay.headless.commerce.admin.catalog.dto.v1_0.ProductChannel;
-import com.liferay.headless.commerce.admin.catalog.resource.v1_0.ProductChannelResource;
+import com.liferay.headless.commerce.admin.catalog.dto.v1_0.ProductAccountGroup;
+import com.liferay.headless.commerce.admin.catalog.resource.v1_0.ProductAccountGroupResource;
 import com.liferay.petra.function.UnsafeBiConsumer;
 import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.function.UnsafeFunction;
@@ -65,14 +65,14 @@ import javax.ws.rs.core.UriInfo;
  */
 @Generated("")
 @javax.ws.rs.Path("/v1.0")
-public abstract class BaseProductChannelResourceImpl
-	implements EntityModelResource, ProductChannelResource,
-			   VulcanBatchEngineTaskItemDelegate<ProductChannel> {
+public abstract class BaseProductAccountGroupResourceImpl
+	implements EntityModelResource, ProductAccountGroupResource,
+			   VulcanBatchEngineTaskItemDelegate<ProductAccountGroup> {
 
 	/**
 	 * Invoke this method with the command line:
 	 *
-	 * curl -X 'DELETE' 'http://localhost:8080/o/headless-commerce-admin-catalog/v1.0/product-channels/{id}'  -u 'test@liferay.com:test'
+	 * curl -X 'DELETE' 'http://localhost:8080/o/headless-commerce-admin-catalog/v1.0/product-account-groups/{id}'  -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Parameters(
 		value = {
@@ -84,14 +84,16 @@ public abstract class BaseProductChannelResourceImpl
 	)
 	@io.swagger.v3.oas.annotations.tags.Tags(
 		value = {
-			@io.swagger.v3.oas.annotations.tags.Tag(name = "ProductChannel")
+			@io.swagger.v3.oas.annotations.tags.Tag(
+				name = "ProductAccountGroup"
+			)
 		}
 	)
 	@javax.ws.rs.DELETE
-	@javax.ws.rs.Path("/product-channels/{id}")
+	@javax.ws.rs.Path("/product-account-groups/{id}")
 	@javax.ws.rs.Produces({"application/json", "application/xml"})
 	@Override
-	public void deleteProductChannel(
+	public void deleteProductAccountGroup(
 			@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 			@javax.validation.constraints.NotNull @javax.ws.rs.PathParam("id")
 			Long id)
@@ -101,7 +103,7 @@ public abstract class BaseProductChannelResourceImpl
 	/**
 	 * Invoke this method with the command line:
 	 *
-	 * curl -X 'DELETE' 'http://localhost:8080/o/headless-commerce-admin-catalog/v1.0/product-channels/batch'  -u 'test@liferay.com:test'
+	 * curl -X 'DELETE' 'http://localhost:8080/o/headless-commerce-admin-catalog/v1.0/product-account-groups/batch'  -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Parameters(
 		value = {
@@ -117,15 +119,17 @@ public abstract class BaseProductChannelResourceImpl
 	)
 	@io.swagger.v3.oas.annotations.tags.Tags(
 		value = {
-			@io.swagger.v3.oas.annotations.tags.Tag(name = "ProductChannel")
+			@io.swagger.v3.oas.annotations.tags.Tag(
+				name = "ProductAccountGroup"
+			)
 		}
 	)
 	@javax.ws.rs.Consumes("application/json")
 	@javax.ws.rs.DELETE
-	@javax.ws.rs.Path("/product-channels/batch")
+	@javax.ws.rs.Path("/product-account-groups/batch")
 	@javax.ws.rs.Produces("application/json")
 	@Override
-	public Response deleteProductChannelBatch(
+	public Response deleteProductAccountGroupBatch(
 			@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 			@javax.validation.constraints.NotNull @javax.ws.rs.PathParam("id")
 			Long id,
@@ -147,14 +151,14 @@ public abstract class BaseProductChannelResourceImpl
 
 		return responseBuilder.entity(
 			vulcanBatchEngineImportTaskResource.deleteImportTask(
-				ProductChannel.class.getName(), callbackURL, object)
+				ProductAccountGroup.class.getName(), callbackURL, object)
 		).build();
 	}
 
 	/**
 	 * Invoke this method with the command line:
 	 *
-	 * curl -X 'GET' 'http://localhost:8080/o/headless-commerce-admin-catalog/v1.0/product-channels/{id}'  -u 'test@liferay.com:test'
+	 * curl -X 'GET' 'http://localhost:8080/o/headless-commerce-admin-catalog/v1.0/product-account-groups/{id}'  -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Parameters(
 		value = {
@@ -166,26 +170,28 @@ public abstract class BaseProductChannelResourceImpl
 	)
 	@io.swagger.v3.oas.annotations.tags.Tags(
 		value = {
-			@io.swagger.v3.oas.annotations.tags.Tag(name = "ProductChannel")
+			@io.swagger.v3.oas.annotations.tags.Tag(
+				name = "ProductAccountGroup"
+			)
 		}
 	)
 	@javax.ws.rs.GET
-	@javax.ws.rs.Path("/product-channels/{id}")
+	@javax.ws.rs.Path("/product-account-groups/{id}")
 	@javax.ws.rs.Produces({"application/json", "application/xml"})
 	@Override
-	public ProductChannel getProductChannel(
+	public ProductAccountGroup getProductAccountGroup(
 			@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 			@javax.validation.constraints.NotNull @javax.ws.rs.PathParam("id")
 			Long id)
 		throws Exception {
 
-		return new ProductChannel();
+		return new ProductAccountGroup();
 	}
 
 	/**
 	 * Invoke this method with the command line:
 	 *
-	 * curl -X 'GET' 'http://localhost:8080/o/headless-commerce-admin-catalog/v1.0/products/by-externalReferenceCode/{externalReferenceCode}/product-channels'  -u 'test@liferay.com:test'
+	 * curl -X 'GET' 'http://localhost:8080/o/headless-commerce-admin-catalog/v1.0/products/by-externalReferenceCode/{externalReferenceCode}/product-account-groups'  -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Parameters(
 		value = {
@@ -205,17 +211,19 @@ public abstract class BaseProductChannelResourceImpl
 	)
 	@io.swagger.v3.oas.annotations.tags.Tags(
 		value = {
-			@io.swagger.v3.oas.annotations.tags.Tag(name = "ProductChannel")
+			@io.swagger.v3.oas.annotations.tags.Tag(
+				name = "ProductAccountGroup"
+			)
 		}
 	)
 	@javax.ws.rs.GET
 	@javax.ws.rs.Path(
-		"/products/by-externalReferenceCode/{externalReferenceCode}/product-channels"
+		"/products/by-externalReferenceCode/{externalReferenceCode}/product-account-groups"
 	)
 	@javax.ws.rs.Produces({"application/json", "application/xml"})
 	@Override
-	public Page<ProductChannel>
-			getProductByExternalReferenceCodeProductChannelsPage(
+	public Page<ProductAccountGroup>
+			getProductByExternalReferenceCodeProductAccountGroupsPage(
 				@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 				@javax.validation.constraints.NotNull
 				@javax.ws.rs.PathParam("externalReferenceCode")
@@ -229,7 +237,7 @@ public abstract class BaseProductChannelResourceImpl
 	/**
 	 * Invoke this method with the command line:
 	 *
-	 * curl -X 'GET' 'http://localhost:8080/o/headless-commerce-admin-catalog/v1.0/products/{id}/product-channels'  -u 'test@liferay.com:test'
+	 * curl -X 'GET' 'http://localhost:8080/o/headless-commerce-admin-catalog/v1.0/products/{id}/product-account-groups'  -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Parameters(
 		value = {
@@ -249,14 +257,16 @@ public abstract class BaseProductChannelResourceImpl
 	)
 	@io.swagger.v3.oas.annotations.tags.Tags(
 		value = {
-			@io.swagger.v3.oas.annotations.tags.Tag(name = "ProductChannel")
+			@io.swagger.v3.oas.annotations.tags.Tag(
+				name = "ProductAccountGroup"
+			)
 		}
 	)
 	@javax.ws.rs.GET
-	@javax.ws.rs.Path("/products/{id}/product-channels")
+	@javax.ws.rs.Path("/products/{id}/product-account-groups")
 	@javax.ws.rs.Produces({"application/json", "application/xml"})
 	@Override
-	public Page<ProductChannel> getProductIdProductChannelsPage(
+	public Page<ProductAccountGroup> getProductIdProductAccountGroupsPage(
 			@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 			@javax.validation.constraints.NotNull @javax.ws.rs.PathParam("id")
 			Long id,
@@ -269,19 +279,19 @@ public abstract class BaseProductChannelResourceImpl
 	@Override
 	@SuppressWarnings("PMD.UnusedLocalVariable")
 	public void create(
-			java.util.Collection<ProductChannel> productChannels,
+			java.util.Collection<ProductAccountGroup> productAccountGroups,
 			Map<String, Serializable> parameters)
 		throws Exception {
 	}
 
 	@Override
 	public void delete(
-			java.util.Collection<ProductChannel> productChannels,
+			java.util.Collection<ProductAccountGroup> productAccountGroups,
 			Map<String, Serializable> parameters)
 		throws Exception {
 
-		for (ProductChannel productChannel : productChannels) {
-			deleteProductChannel(productChannel.getId());
+		for (ProductAccountGroup productAccountGroup : productAccountGroups) {
+			deleteProductAccountGroup(productAccountGroup.getId());
 		}
 	}
 
@@ -305,7 +315,7 @@ public abstract class BaseProductChannelResourceImpl
 	}
 
 	@Override
-	public Page<ProductChannel> read(
+	public Page<ProductAccountGroup> read(
 			Filter filter, Pagination pagination, Sort[] sorts,
 			Map<String, Serializable> parameters, String search)
 		throws Exception {
@@ -337,7 +347,7 @@ public abstract class BaseProductChannelResourceImpl
 
 	@Override
 	public void update(
-			java.util.Collection<ProductChannel> productChannels,
+			java.util.Collection<ProductAccountGroup> productAccountGroups,
 			Map<String, Serializable> parameters)
 		throws Exception {
 	}
@@ -348,8 +358,8 @@ public abstract class BaseProductChannelResourceImpl
 
 	public void setContextBatchUnsafeConsumer(
 		UnsafeBiConsumer
-			<java.util.Collection<ProductChannel>,
-			 UnsafeConsumer<ProductChannel, Exception>, Exception>
+			<java.util.Collection<ProductAccountGroup>,
+			 UnsafeConsumer<ProductAccountGroup, Exception>, Exception>
 				contextBatchUnsafeConsumer) {
 
 		this.contextBatchUnsafeConsumer = contextBatchUnsafeConsumer;
@@ -512,8 +522,8 @@ public abstract class BaseProductChannelResourceImpl
 
 	protected AcceptLanguage contextAcceptLanguage;
 	protected UnsafeBiConsumer
-		<java.util.Collection<ProductChannel>,
-		 UnsafeConsumer<ProductChannel, Exception>, Exception>
+		<java.util.Collection<ProductAccountGroup>,
+		 UnsafeConsumer<ProductAccountGroup, Exception>, Exception>
 			contextBatchUnsafeConsumer;
 	protected com.liferay.portal.kernel.model.Company contextCompany;
 	protected HttpServletRequest contextHttpServletRequest;
@@ -531,6 +541,6 @@ public abstract class BaseProductChannelResourceImpl
 		vulcanBatchEngineImportTaskResource;
 
 	private static final com.liferay.portal.kernel.log.Log _log =
-		LogFactoryUtil.getLog(BaseProductChannelResourceImpl.class);
+		LogFactoryUtil.getLog(BaseProductAccountGroupResourceImpl.class);
 
 }
