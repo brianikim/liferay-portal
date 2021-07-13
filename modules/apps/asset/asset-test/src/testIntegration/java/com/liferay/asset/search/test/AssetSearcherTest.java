@@ -62,7 +62,6 @@ public class AssetSearcherTest {
 
 		_publicAssetCategory1 = AssetTestUtil.addCategory(
 			_group.getGroupId(), publicAssetVocabulary.getVocabularyId());
-
 		_publicAssetCategory2 = AssetTestUtil.addCategory(
 			_group.getGroupId(), publicAssetVocabulary.getVocabularyId());
 
