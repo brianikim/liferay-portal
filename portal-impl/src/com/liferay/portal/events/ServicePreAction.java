@@ -1046,22 +1046,14 @@ public class ServicePreAction extends Action {
 			}
 		}
 
-		// Portal URL
-
-		String portalURL = PortalUtil.getPortalURL(httpServletRequest);
-
+		long doAsGroupId = ParamUtil.getLong(httpServletRequest, "doAsGroupId");
 		String doAsUserId = ParamUtil.getString(
 			httpServletRequest, "doAsUserId");
 		String doAsUserLanguageId = ParamUtil.getString(
 			httpServletRequest, "doAsUserLanguageId");
-		long doAsGroupId = ParamUtil.getLong(httpServletRequest, "doAsGroupId");
-
-		long refererGroupId = ParamUtil.getLong(
-			httpServletRequest, "refererGroupId");
-
+		Group group = null;
 		List<Layout> layouts = null;
-
-		String ppid = ParamUtil.getString(httpServletRequest, "p_p_id");
+		boolean loginRequest = _isLoginRequest(httpServletRequest);
 
 		Boolean redirectToDefaultLayout =
 			(Boolean)httpServletRequest.getAttribute(
@@ -1071,9 +1063,9 @@ public class ServicePreAction extends Action {
 			redirectToDefaultLayout = Boolean.FALSE;
 		}
 
-		Group group = null;
+		long refererGroupId = ParamUtil.getLong(
+			httpServletRequest, "refererGroupId");
 
-		boolean loginRequest = _isLoginRequest(httpServletRequest);
 		boolean stagingGroup = false;
 		boolean viewableGroup = false;
 
@@ -1352,6 +1344,10 @@ public class ServicePreAction extends Action {
 		Locale locale = PortalUtil.getLocale(
 			httpServletRequest, httpServletResponse, true);
 
+		// Portal URL
+
+		String portalURL = PortalUtil.getPortalURL(httpServletRequest);
+
 		// Scope
 
 		long scopeGroupId = PortalUtil.getScopeGroupId(httpServletRequest);
@@ -1516,7 +1512,7 @@ public class ServicePreAction extends Action {
 		themeDisplay.setPathSound(contextPath.concat("/html/sound"));
 		themeDisplay.setPermissionChecker(permissionChecker);
 		themeDisplay.setPlid(plid);
-		themeDisplay.setPpid(ppid);
+		themeDisplay.setPpid(ParamUtil.getString(httpServletRequest, "p_p_id"));
 		themeDisplay.setRealCompanyLogo(companyLogo);
 		themeDisplay.setRealCompanyLogoHeight(companyLogoHeight);
 		themeDisplay.setRealCompanyLogoWidth(companyLogoWidth);
