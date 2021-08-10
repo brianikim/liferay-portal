@@ -66,6 +66,8 @@ public class CPMediaImpl implements CPMedia {
 			cpAttachmentFileEntry.getCPAttachmentFileEntryId());
 		_id = cpAttachmentFileEntry.getCPAttachmentFileEntryId();
 
+		FileEntry fileEntry = cpAttachmentFileEntry.getFileEntry();
+
 		if (fileEntry == null) {
 			_mimeType = StringPool.BLANK;
 		}
