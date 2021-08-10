@@ -842,21 +842,15 @@ public class ServicePreAction extends Action {
 
 		// Company logo
 
-		StringBundler sb = new StringBundler(6);
-
-		sb.append(imagePath);
-		sb.append("/company_logo");
+		String companyLogo = imagePath + "/company_logo";
 
 		long companyLogoId = company.getLogoId();
 
 		if (companyLogoId > 0) {
-			sb.append("?img_id=");
-			sb.append(company.getLogoId());
-			sb.append("&t=");
-			sb.append(WebServerServletTokenUtil.getToken(company.getLogoId()));
+			companyLogo = StringBundler.concat(
+				"?img_id=", company.getLogoId(), "&t=",
+				WebServerServletTokenUtil.getToken(company.getLogoId()));
 		}
-
-		String companyLogo = sb.toString();
 
 		int companyLogoHeight = 0;
 		int companyLogoWidth = 0;
@@ -1023,19 +1017,16 @@ public class ServicePreAction extends Action {
 						!GroupPermissionUtil.contains(
 							permissionChecker, sourceGroup, ActionKeys.VIEW)) {
 
-						sb = new StringBundler(6);
-
-						sb.append("User ");
-						sb.append(user.getUserId());
-						sb.append(" is not allowed to access the private ");
-						sb.append("pages of user ");
-						sb.append(sourceGroup.getClassPK());
+						String message = StringBundler.concat(
+							"User ", user.getUserId(),
+							" is not allowed to access the private pages of ",
+							"user ", sourceGroup.getClassPK());
 
 						if (_log.isWarnEnabled()) {
-							_log.warn(sb.toString());
+							_log.warn(message);
 						}
 
-						throw new NoSuchLayoutException(sb.toString());
+						throw new NoSuchLayoutException(message);
 					}
 
 					layout = new VirtualLayout(layout, sourceGroup);
@@ -1112,20 +1103,16 @@ public class ServicePreAction extends Action {
 						user.getUserId());
 				}
 
-				sb = new StringBundler(6);
-
-				sb.append("User ");
-				sb.append(user.getUserId());
-				sb.append(" is not allowed to access the ");
-				sb.append(layout.isPrivateLayout() ? "private" : "public");
-				sb.append(" pages of group ");
-				sb.append(layout.getGroupId());
+				String message = StringBundler.concat(
+					"User ", user.getUserId(), " is not allowed to access the ",
+					layout.isPrivateLayout() ? "private" : "public",
+					" pages of group ", layout.getGroupId());
 
 				if (_log.isWarnEnabled()) {
-					_log.warn(sb.toString());
+					_log.warn(message);
 				}
 
-				throw new NoSuchLayoutException(sb.toString());
+				throw new NoSuchLayoutException(message);
 			}
 			else if (loginRequest && !viewableGroup) {
 				layout = null;
@@ -1234,15 +1221,9 @@ public class ServicePreAction extends Action {
 				}
 
 				if (logoId > 0) {
-					sb = new StringBundler(5);
-
-					sb.append(imagePath);
-					sb.append("/layout_set_logo?img_id=");
-					sb.append(logoId);
-					sb.append("&t=");
-					sb.append(WebServerServletTokenUtil.getToken(logoId));
-
-					layoutSetLogo = sb.toString();
+					layoutSetLogo = StringBundler.concat(
+						imagePath, "/layout_set_logo?img_id=", logoId, "&t=",
+						WebServerServletTokenUtil.getToken(logoId));
 
 					Image layoutSetLogoImage =
 						ImageLocalServiceUtil.getCompanyLogo(logoId);
