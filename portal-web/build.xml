@@ -37,7 +37,6 @@
 		<pathelement location="${project.dir}/lib/portal/liferay-icu4j.jar" />
 		<pathelement location="${project.dir}/lib/portal/openid4java.jar" />
 		<pathelement location="${project.dir}/lib/portal/reload4j.jar" />
-		<pathelement location="${project.dir}/lib/portal/rome.jar" />
 	</path>
 
 	<target name="build-dtd">
