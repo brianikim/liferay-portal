@@ -30,7 +30,6 @@
 		<pathelement location="${project.dir}/lib/portal/jabsorb.jar" />
 		<pathelement location="${project.dir}/lib/portal/jcifs.jar" />
 		<pathelement location="${project.dir}/lib/portal/jcommon.jar" />
-		<pathelement location="${project.dir}/lib/portal/jdom.jar" />
 		<pathelement location="${project.dir}/lib/portal/jfreechart.jar" />
 		<pathelement location="${project.dir}/lib/portal/jstl-api.jar" />
 		<pathelement location="${project.dir}/lib/portal/jstl-impl.jar" />
