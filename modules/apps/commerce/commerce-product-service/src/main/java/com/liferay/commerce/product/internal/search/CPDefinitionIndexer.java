@@ -769,7 +769,6 @@ public class CPDefinitionIndexer extends BaseIndexer<CPDefinition> {
 			CPInstance cpInstance = cpInstances.get(0);
 
 			BigDecimal price = cpInstance.getPrice();
-
 			BigDecimal promoPrice = cpInstance.getPromoPrice();
 
 			if (!promoPrice.equals(BigDecimal.ZERO) &&
