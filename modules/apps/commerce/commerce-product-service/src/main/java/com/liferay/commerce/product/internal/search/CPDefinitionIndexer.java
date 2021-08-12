@@ -771,7 +771,7 @@ public class CPDefinitionIndexer extends BaseIndexer<CPDefinition> {
 			BigDecimal price = cpInstance.getPrice();
 			BigDecimal promoPrice = cpInstance.getPromoPrice();
 
-			if (!promoPrice.equals(BigDecimal.ZERO) &&
+			if ((promoPrice.compareTo(BigDecimal.ZERO) > 0) &&
 				CommerceBigDecimalUtil.lt(promoPrice, price)) {
 
 				document.addNumber(CPField.BASE_PRICE, promoPrice);
@@ -802,7 +802,7 @@ public class CPDefinitionIndexer extends BaseIndexer<CPDefinition> {
 
 				BigDecimal promoPrice = cpInstance.getPromoPrice();
 
-				if (!promoPrice.equals(BigDecimal.ZERO) &&
+				if ((promoPrice.compareTo(BigDecimal.ZERO) > 0) &&
 					CommerceBigDecimalUtil.lt(promoPrice, price)) {
 
 					price = promoPrice;
