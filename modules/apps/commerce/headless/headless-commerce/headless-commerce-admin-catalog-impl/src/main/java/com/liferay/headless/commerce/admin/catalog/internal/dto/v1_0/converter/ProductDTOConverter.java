@@ -208,18 +208,16 @@ public class ProductDTOConverter
 			assetVocabularyName = assetVocabulary.getName();
 		}
 
-		Category category = new Category() {
+		return new Category() {
 			{
 				externalReferenceCode =
 					assetCategory.getExternalReferenceCode();
 				id = assetCategory.getCategoryId();
 				name = assetCategory.getName();
+
+				setVocabulary(assetVocabularyName);
 			}
 		};
-
-		category.setVocabulary(assetVocabularyName);
-
-		return category;
 	}
 
 	@Reference
