@@ -358,28 +358,26 @@ public class ProductResourceImpl
 					contextCompany.getCompanyId(),
 					product.getExternalReferenceCode());
 
-		// Categories
-
 		Category[] categories = product.getCategories();
 
 		if (categories != null) {
-			List<Long> categoryIds = new ArrayList<>();
+			List<Long> assetCategoryIds = new ArrayList<>();
 
 			for (Category category : categories) {
 				if (category.getId() != null) {
-					categoryIds.add(category.getId());
+					assetCategoryIds.add(category.getId());
 				}
 			}
 
 			serviceContext.setAssetCategoryIds(
-				ArrayUtil.toLongArray(categoryIds));
+				ArrayUtil.toLongArray(assetCategoryIds));
 		}
 		else if (cpDefinition != null) {
-			long[] categoryIds = _assetCategoryLocalService.getCategoryIds(
+			long[] assetCategoryIds = _assetCategoryLocalService.getCategoryIds(
 				cpDefinition.getModelClassName(),
 				cpDefinition.getCPDefinitionId());
 
-			serviceContext.setAssetCategoryIds(categoryIds);
+			serviceContext.setAssetCategoryIds(assetCategoryIds);
 		}
 
 		Map<String, String> shortDescriptionMap = product.getShortDescription();
@@ -438,8 +436,6 @@ public class ProductResourceImpl
 			GetterUtil.getLong(subscriptionConfiguration.getNumberOfLength()),
 			product.getExternalReferenceCode(), serviceContext);
 
-		// Workflow
-
 		if (!product.getActive()) {
 			Map<String, Serializable> workflowContext = new HashMap<>();
 
@@ -449,8 +445,6 @@ public class ProductResourceImpl
 				workflowContext);
 		}
 
-		// Expando
-
 		Map<String, ?> expando = product.getExpando();
 
 		if ((expando != null) && !expando.isEmpty()) {
@@ -458,8 +452,6 @@ public class ProductResourceImpl
 				serviceContext.getCompanyId(), CPDefinition.class,
 				cpDefinition.getPrimaryKey(), expando);
 		}
-
-		// Update nested resources
 
 		_updateNestedResources(product, cpDefinition, serviceContext);
 
@@ -800,28 +792,26 @@ public class ProductResourceImpl
 
 		DateConfig expirationDateConfig = new DateConfig(expirationCalendar);
 
-		// Categories
-
 		Category[] categories = product.getCategories();
 
 		if (categories == null) {
-			long[] categoryIds = _assetCategoryLocalService.getCategoryIds(
+			long[] assetCategoryIds = _assetCategoryLocalService.getCategoryIds(
 				cpDefinition.getModelClassName(),
 				cpDefinition.getCPDefinitionId());
 
-			serviceContext.setAssetCategoryIds(categoryIds);
+			serviceContext.setAssetCategoryIds(assetCategoryIds);
 		}
 		else {
-			List<Long> categoryIds = new ArrayList<>();
+			List<Long> assetCategoryIds = new ArrayList<>();
 
 			for (Category category : categories) {
 				if (category.getId() != null) {
-					categoryIds.add(category.getId());
+					assetCategoryIds.add(category.getId());
 				}
 			}
 
 			serviceContext.setAssetCategoryIds(
-				ArrayUtil.toLongArray(categoryIds));
+				ArrayUtil.toLongArray(assetCategoryIds));
 		}
 
 		Map<String, String> shortDescriptionMap = product.getShortDescription();
@@ -856,8 +846,6 @@ public class ProductResourceImpl
 			GetterUtil.getBoolean(product.getNeverExpire(), true),
 			serviceContext);
 
-		// Workflow
-
 		if (!product.getActive()) {
 			Map<String, Serializable> workflowContext = new HashMap<>();
 
@@ -867,8 +855,6 @@ public class ProductResourceImpl
 				workflowContext);
 		}
 
-		// Expando
-
 		Map<String, ?> expando = product.getExpando();
 
 		if ((expando != null) && !expando.isEmpty()) {
@@ -876,8 +862,6 @@ public class ProductResourceImpl
 				serviceContext.getCompanyId(), CPDefinition.class,
 				cpDefinition.getPrimaryKey(), expando);
 		}
-
-		// Update nested resources
 
 		return _updateNestedResources(product, cpDefinition, serviceContext);
 	}
