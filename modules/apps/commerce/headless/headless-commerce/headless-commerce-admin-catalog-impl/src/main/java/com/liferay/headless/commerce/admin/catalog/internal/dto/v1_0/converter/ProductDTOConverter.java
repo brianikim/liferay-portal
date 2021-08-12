@@ -198,14 +198,14 @@ public class ProductDTOConverter
 	}
 
 	private Category _toCategory(AssetCategory assetCategory) {
-		String vocabularyName = StringPool.BLANK;
+		String assetVocabularyName = StringPool.BLANK;
 
-		AssetVocabulary vocabulary =
+		AssetVocabulary assetVocabulary =
 			_assetVocabularyLocalService.fetchAssetVocabulary(
 				assetCategory.getVocabularyId());
 
-		if (vocabulary != null) {
-			vocabularyName = vocabulary.getName();
+		if (assetVocabulary != null) {
+			assetVocabularyName = assetVocabulary.getName();
 		}
 
 		Category category = new Category() {
@@ -217,7 +217,7 @@ public class ProductDTOConverter
 			}
 		};
 
-		category.setVocabulary(vocabularyName);
+		category.setVocabulary(assetVocabularyName);
 
 		return category;
 	}
