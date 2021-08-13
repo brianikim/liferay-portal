@@ -62,12 +62,12 @@ public class ModuleConfigurationLocalizationTest {
 
 	@Test
 	public void testConfigurationLocalization() {
+		StringBundler sb = new StringBundler();
+
 		Bundle currentBundle = FrameworkUtil.getBundle(
 			ModuleConfigurationLocalizationTest.class);
 
 		BundleContext bundleContext = currentBundle.getBundleContext();
-
-		StringBundler sb = new StringBundler();
 
 		for (Bundle bundle : bundleContext.getBundles()) {
 			String bundleError = _collectBundleError(bundle);
@@ -126,6 +126,8 @@ public class ModuleConfigurationLocalizationTest {
 			return StringPool.BLANK;
 		}
 
+		StringBundler sb = new StringBundler();
+
 		ResourceBundleLoader resourceBundleLoader =
 			ResourceBundleLoaderUtil.
 				getResourceBundleLoaderByBundleSymbolicName(
@@ -143,8 +145,6 @@ public class ModuleConfigurationLocalizationTest {
 
 		ResourceBundle resourceBundle = resourceBundleLoader.loadResourceBundle(
 			LocaleUtil.getDefault());
-
-		StringBundler sb = new StringBundler();
 
 		for (String pid : pids) {
 			String configurationError = _collectConfigurationError(
