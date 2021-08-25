@@ -419,6 +419,15 @@ public class AssetBrowserDisplayContext {
 	}
 
 	public boolean isShowBreadcrumb() {
+		String scopeGroupType = ParamUtil.getString(
+			_httpServletRequest, "scopeGroupType");
+
+		if (Validator.isNotNull(scopeGroupType) &&
+			scopeGroupType.equals("page")) {
+
+			return false;
+		}
+
 		ThemeDisplay themeDisplay =
 			(ThemeDisplay)_httpServletRequest.getAttribute(
 				WebKeys.THEME_DISPLAY);
@@ -594,6 +603,7 @@ public class AssetBrowserDisplayContext {
 
 		portletURL.setParameter("groupType", "site");
 		portletURL.setParameter("showGroupSelector", Boolean.TRUE.toString());
+		portletURL.setParameter("scopeGroupType", ParamUtil.getString(_httpServletRequest, "scopeGroupType", "");
 
 		breadcrumbEntry.setURL(portletURL.toString());
 

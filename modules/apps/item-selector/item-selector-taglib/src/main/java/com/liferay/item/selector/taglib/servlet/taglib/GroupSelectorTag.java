@@ -142,24 +142,34 @@ public class GroupSelectorTag extends IncludeTag {
 	}
 
 	private int _getGroupsCount(HttpServletRequest httpServletRequest) {
-		Optional<GroupItemSelectorProvider> groupSelectorProviderOptional =
-			GroupItemSelectorTrackerUtil.getGroupItemSelectorProviderOptional(
-				_getGroupType(httpServletRequest));
+		String scopeGroupType = ParamUtil.getString(
+			httpServletRequest, "scopeGroupType");
 
-		ThemeDisplay themeDisplay =
-			(ThemeDisplay)httpServletRequest.getAttribute(
-				WebKeys.THEME_DISPLAY);
+		if (Validator.isNotNull(scopeGroupType)) {
+			_groupsCount = 1;
+		}
+		else {
+			Optional<GroupItemSelectorProvider> groupSelectorProviderOptional =
+				GroupItemSelectorTrackerUtil.
+					getGroupItemSelectorProviderOptional(
+						_getGroupType(httpServletRequest));
 
-		Group group = _getGroup(themeDisplay);
+			ThemeDisplay themeDisplay =
+				(ThemeDisplay)httpServletRequest.getAttribute(
+					WebKeys.THEME_DISPLAY);
 
-		String keywords = ParamUtil.getString(httpServletRequest, "keywords");
+			Group group = _getGroup(themeDisplay);
 
-		_groupsCount = groupSelectorProviderOptional.map(
-			groupSelectorProvider -> groupSelectorProvider.getGroupsCount(
-				group.getCompanyId(), group.getGroupId(), keywords)
-		).orElse(
-			0
-		);
+			String keywords = ParamUtil.getString(
+				httpServletRequest, "keywords");
+
+			_groupsCount = groupSelectorProviderOptional.map(
+				groupSelectorProvider -> groupSelectorProvider.getGroupsCount(
+					group.getCompanyId(), group.getGroupId(), keywords)
+			).orElse(
+				0
+			);
+		}
 
 		return _groupsCount;
 	}
