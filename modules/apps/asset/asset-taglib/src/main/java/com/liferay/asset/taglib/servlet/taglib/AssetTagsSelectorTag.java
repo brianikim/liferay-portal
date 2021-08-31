@@ -21,7 +21,6 @@ import com.liferay.petra.string.StringPool;
 import com.liferay.petra.string.StringUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.portlet.PortletProvider;
 import com.liferay.portal.kernel.portlet.PortletProviderUtil;
@@ -177,23 +176,21 @@ public class AssetTagsSelectorTag extends IncludeTag {
 		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		long[] groupIds = null;
+		try {
+			if (ArrayUtil.isEmpty(_groupIds)) {
+				return PortalUtil.getCurrentAndAncestorSiteGroupIds(
+					themeDisplay.getScopeGroupId());
+			}
 
-		Group group = themeDisplay.getScopeGroup();
-
-		if (group.isLayout()) {
-			groupIds = new long[] {group.getParentGroupId()};
+			return PortalUtil.getCurrentAndAncestorSiteGroupIds(_groupIds);
 		}
-		else {
-			groupIds = new long[] {group.getGroupId()};
-		}
-
-		if (group.getParentGroupId() != themeDisplay.getCompanyGroupId()) {
-			groupIds = ArrayUtil.append(
-				groupIds, themeDisplay.getCompanyGroupId());
+		catch (Exception exception) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(exception, exception);
+			}
 		}
 
-		return groupIds;
+		return new long[0];
 	}
 
 	protected String getId() {
@@ -224,7 +221,8 @@ public class AssetTagsSelectorTag extends IncludeTag {
 
 			if (_groupIds != null) {
 				portletURL.setParameter(
-					"groupIds", StringUtil.merge(_groupIds, StringPool.COMMA));
+					"groupIds",
+					StringUtil.merge(getGroupIds(), StringPool.COMMA));
 			}
 
 			portletURL.setParameter("eventName", getEventName());
