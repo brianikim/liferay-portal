@@ -435,34 +435,25 @@ boolean columnOptionsVisible = GetterUtil.getBoolean(SessionClicks.get(request, 
 </aui:script>
 
 <%!
-	protected boolean hasMenuItems(
-		JSONObject calendarJSONObject, boolean enableRSS,
-		boolean otherCalendar) {
-
-		if (enableRSS || otherCalendar) {
-			return true;
-		}
-
-		JSONObject permissionsJSONObject = calendarJSONObject.getJSONObject(
-			"permissions");
-
-		if ((permissionsJSONObject.getBoolean(ActionKeys.DELETE) &&
-			 !calendarJSONObject.getBoolean("defaultCalendar")) ||
-			permissionsJSONObject.getBoolean(
-				CalendarActionKeys.MANAGE_BOOKINGS) ||
-			permissionsJSONObject.getBoolean(ActionKeys.PERMISSIONS) ||
-			permissionsJSONObject.getBoolean(ActionKeys.UPDATE)) {
-
-			return true;
-		}
-
-		return false;
+protected boolean hasMenuItems(JSONObject calendarJSONObject, boolean enableRSS, boolean otherCalendar) {
+	if (enableRSS || otherCalendar) {
+		return true;
 	}
 
-protected void updateCalendarsJSONArray(
-	JSONArray calendarsJSONArray, boolean enableRSS, HttpServletRequest request,
-	boolean otherCalendar) {
+	JSONObject permissionsJSONObject = calendarJSONObject.getJSONObject("permissions");
 
+	if ((permissionsJSONObject.getBoolean(ActionKeys.DELETE) && !calendarJSONObject.getBoolean("defaultCalendar")) ||
+		permissionsJSONObject.getBoolean(CalendarActionKeys.MANAGE_BOOKINGS) ||
+		permissionsJSONObject.getBoolean(ActionKeys.PERMISSIONS) ||
+		permissionsJSONObject.getBoolean(ActionKeys.UPDATE)) {
+
+		return true;
+	}
+
+	return false;
+}
+
+protected void updateCalendarsJSONArray(JSONArray calendarsJSONArray, boolean enableRSS, HttpServletRequest request, boolean otherCalendar) {
 	for (int i = 0; i < calendarsJSONArray.length(); i++) {
 		JSONObject jsonObject = calendarsJSONArray.getJSONObject(i);
 
