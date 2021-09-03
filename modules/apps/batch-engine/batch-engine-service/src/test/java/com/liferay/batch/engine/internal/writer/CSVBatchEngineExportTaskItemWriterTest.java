@@ -96,11 +96,12 @@ public class CSVBatchEngineExportTaskItemWriterTest
 			List<String> fieldNames, List<Item> items)
 		throws Exception {
 
-		String lineSeparator = System.getProperty("line.separator");
-
 		StringBundler sb = new StringBundler();
 
 		sb.append(StringUtil.merge(fieldNames, StringPool.COMMA));
+
+		String lineSeparator = System.getProperty("line.separator");
+
 		sb.append(lineSeparator);
 
 		for (Item item : items) {
