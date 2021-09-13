@@ -26,8 +26,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import java.util.stream.Stream;
-
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -124,18 +122,6 @@ public class ElasticsearchInstaller {
 		}
 	}
 
-	protected static Path getExtractedElasticsearchDirectoryPath(
-			Path extractedRootDirectoryPath)
-		throws IOException {
-
-		try (Stream<Path> stream = Files.list(extractedRootDirectoryPath)) {
-			return stream.filter(
-				Files::isDirectory
-			).findAny(
-			).get();
-		}
-	}
-
 	protected static Path getTemporaryDirectoryPath() {
 		Path path = Paths.get(SystemProperties.get(SystemProperties.TMP_DIR));
 
@@ -179,22 +165,12 @@ public class ElasticsearchInstaller {
 		Path filePath = getFilePath(
 			_distribution.getElasticsearchDistributable());
 
-		UncompressUtil.unarchive(filePath, _temporaryDirectoryPath);
-
-		Path extractedElasticsearchDirectoryPath =
-			getExtractedElasticsearchDirectoryPath(_temporaryDirectoryPath);
+		String rootArchiveName = UncompressUtil.unarchive(
+			filePath, _temporaryDirectoryPath);
 
 		PathUtil.copyDirectory(
-			extractedElasticsearchDirectoryPath.resolve("lib"),
-			_installationDirectoryPath.resolve("lib"));
-
-		Path extractedModulesDirectoryPath =
-			extractedElasticsearchDirectoryPath.resolve("modules");
-
-		PathUtil.copyDirectory(
-			extractedModulesDirectoryPath,
-			_installationDirectoryPath.resolve("modules"),
-			extractedModulesDirectoryPath.resolve("ingest-geoip"));
+			_temporaryDirectoryPath.resolve(rootArchiveName),
+			_installationDirectoryPath);
 	}
 
 	protected void downloadAndInstallPlugin(Distributable distributable)
