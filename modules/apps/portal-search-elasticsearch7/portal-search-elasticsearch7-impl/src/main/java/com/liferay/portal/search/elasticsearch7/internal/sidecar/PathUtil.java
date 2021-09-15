@@ -101,7 +101,7 @@ public class PathUtil {
 						throws IOException {
 
 						if (excludedPathList.contains(file.getParent()) ||
-							file.endsWith(_CONTROLLER_PATH)) {
+							file.endsWith(_FILE_NAME)) {
 
 							return FileVisitResult.CONTINUE;
 						}
@@ -185,7 +185,7 @@ public class PathUtil {
 		}
 	}
 
-	private static final String _CONTROLLER_PATH =
+	private static final String _FILE_NAME =
 		"modules/x-pack-ml/platform/linux-x86_64/bin/controller";
 
 	private static final Log _log = LogFactoryUtil.getLog(PathUtil.class);
