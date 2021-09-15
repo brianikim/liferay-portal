@@ -39,13 +39,13 @@ public class ElasticsearchDistribution implements Distribution {
 	@Override
 	public List<Distributable> getPluginDistributables() {
 		return Arrays.asList(
-			new DistributableImpl(getPluginUrl("analysis-icu")),
-			new DistributableImpl(getPluginUrl("analysis-kuromoji")),
-			new DistributableImpl(getPluginUrl("analysis-smartcn")),
-			new DistributableImpl(getPluginUrl("analysis-stempel")));
+			new DistributableImpl(_getURL("analysis-icu")),
+			new DistributableImpl(_getURL("analysis-kuromoji")),
+			new DistributableImpl(_getURL("analysis-smartcn")),
+			new DistributableImpl(_getURL("analysis-stempel")));
 	}
 
-	protected String getPluginUrl(String plugin) {
+	private String _getURL(String plugin) {
 		return StringBundler.concat(
 			"https://artifacts.elastic.co/downloads/elasticsearch-plugins/",
 			plugin, "/", plugin, "-", _version, ".zip");
