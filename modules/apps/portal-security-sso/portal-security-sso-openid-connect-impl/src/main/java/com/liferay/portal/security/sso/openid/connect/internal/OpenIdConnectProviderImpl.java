@@ -74,7 +74,7 @@ public class OpenIdConnectProviderImpl
 	}
 
 	@Override
-	public int geTokenConnectionTimeout() {
+	public int getTokenConnectionTimeout() {
 		return _tokenConnectionTimeout;
 	}
 
