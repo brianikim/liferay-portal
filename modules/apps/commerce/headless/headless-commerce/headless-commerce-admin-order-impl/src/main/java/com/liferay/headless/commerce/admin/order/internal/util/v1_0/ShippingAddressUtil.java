@@ -106,7 +106,7 @@ public class ShippingAddressUtil {
 		}
 
 		if (commerceAddress != null) {
-			return commerceAddress.getRegionId();
+			return commerceAddress.getCommerceRegionId();
 		}
 
 		return 0;
