@@ -25,6 +25,7 @@ import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.taglib.util.IncludeTag;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -92,9 +93,11 @@ public class GroupSelectorTag extends IncludeTag {
 	}
 
 	private List<Group> _getGroups(HttpServletRequest httpServletRequest) {
+		String groupType = _getGroupType(httpServletRequest);
+
 		Optional<GroupItemSelectorProvider> groupItemSelectorProviderOptional =
 			GroupItemSelectorTrackerUtil.getGroupItemSelectorProviderOptional(
-				_getGroupType(httpServletRequest));
+				groupType);
 
 		ThemeDisplay themeDisplay =
 			(ThemeDisplay)httpServletRequest.getAttribute(
@@ -102,25 +105,37 @@ public class GroupSelectorTag extends IncludeTag {
 
 		Group group = _getGroup(themeDisplay);
 
-		String keywords = ParamUtil.getString(httpServletRequest, "keywords");
+		String scopeGroupType = ParamUtil.getString(
+			httpServletRequest, "scopeGroupType");
 
-		int cur = ParamUtil.getInteger(
-			httpServletRequest, SearchContainer.DEFAULT_CUR_PARAM,
-			SearchContainer.DEFAULT_CUR);
-		int delta = ParamUtil.getInteger(
-			httpServletRequest, SearchContainer.DEFAULT_DELTA_PARAM,
-			SearchContainer.DEFAULT_DELTA);
+		if (Validator.isNotNull(scopeGroupType) && groupType.equals("site")) {
+			_groups = new ArrayList<>();
 
-		int[] startAndEnd = SearchPaginationUtil.calculateStartAndEnd(
-			cur, delta);
+			_groups.add(group);
+		}
+		else {
+			String keywords = ParamUtil.getString(
+				httpServletRequest, "keywords");
 
-		_groups = groupItemSelectorProviderOptional.map(
-			groupItemSelectorProvider -> groupItemSelectorProvider.getGroups(
-				group.getCompanyId(), group.getGroupId(), keywords,
-				startAndEnd[0], startAndEnd[1])
-		).orElse(
-			Collections.emptyList()
-		);
+			int cur = ParamUtil.getInteger(
+				httpServletRequest, SearchContainer.DEFAULT_CUR_PARAM,
+				SearchContainer.DEFAULT_CUR);
+			int delta = ParamUtil.getInteger(
+				httpServletRequest, SearchContainer.DEFAULT_DELTA_PARAM,
+				SearchContainer.DEFAULT_DELTA);
+
+			int[] startAndEnd = SearchPaginationUtil.calculateStartAndEnd(
+				cur, delta);
+
+			_groups = groupItemSelectorProviderOptional.map(
+				groupItemSelectorProvider ->
+					groupItemSelectorProvider.getGroups(
+						group.getCompanyId(), group.getGroupId(), keywords,
+						startAndEnd[0], startAndEnd[1])
+			).orElse(
+				Collections.emptyList()
+			);
+		}
 
 		return _groups;
 	}
