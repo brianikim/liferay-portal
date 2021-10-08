@@ -170,6 +170,10 @@ function FieldBase({
 		fieldDetails += requiredText;
 	}
 
+	const accessibleProps = fieldDetails
+		? {'aria-labelledby': fieldDetailsId}
+		: null;
+
 	return (
 		<ClayTooltipProvider>
 			<div
@@ -241,7 +245,7 @@ function FieldBase({
 						{showLegend ? (
 							<fieldset>
 								<legend
-									aria-labelledby={fieldDetailsId}
+									{...accessibleProps}
 									className="lfr-ddm-legend"
 									tabIndex="0"
 								>
@@ -257,11 +261,12 @@ function FieldBase({
 						) : (
 							<>
 								<label
-									aria-describedby={fieldDetailsId}
+									{...accessibleProps}
 									className={classNames({
 										'ddm-empty': !showLabel && !required,
 										'ddm-label': showLabel || required,
 									})}
+									htmlFor={id ?? name}
 									tabIndex="0"
 								>
 									{label && showLabel && label}
