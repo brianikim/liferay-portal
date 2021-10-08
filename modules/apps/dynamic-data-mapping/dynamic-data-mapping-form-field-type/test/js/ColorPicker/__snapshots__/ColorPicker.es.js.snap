@@ -137,8 +137,9 @@ exports[`Field Color Picker renders field with label 1`] = `
     data-field-name="colorPicker"
   >
     <label
-      aria-describedby="colorPicker_fieldDetails"
+      aria-labelledby="colorPicker_fieldDetails"
       class="ddm-label"
+      for="colorPicker"
       tabindex="0"
     >
       label

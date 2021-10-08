@@ -57,8 +57,8 @@ exports[`Field Numeric has a label 1`] = `
     data-field-name="numericField"
   >
     <label
-      aria-describedby="numericField_fieldDetails"
       class="ddm-label"
+      for="numericField"
       tabindex="0"
     >
       label
@@ -178,8 +178,8 @@ exports[`Field Numeric renders Label if showLabel is true 1`] = `
     data-field-name="numericField"
   >
     <label
-      aria-describedby="numericField_fieldDetails"
       class="ddm-label"
+      for="numericField"
       tabindex="0"
     >
       Numeric Field
