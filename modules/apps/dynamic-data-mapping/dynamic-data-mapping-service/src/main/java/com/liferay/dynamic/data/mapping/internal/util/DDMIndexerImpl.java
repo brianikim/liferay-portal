@@ -483,7 +483,8 @@ public class DDMIndexerImpl implements DDMIndexer {
 
 	protected void addFieldValueRequiredTerm(
 		BooleanQuery booleanQuery, String ddmStructureFieldName,
-		String ddmStructureFieldValue, String indexType, Locale locale) {
+		String ddmStructureFieldValue, String indexType, Locale locale,
+		boolean localizableField) {
 
 		if (isLegacyDDMIndexFieldsEnabled()) {
 			booleanQuery.addRequiredTerm(
@@ -497,6 +498,11 @@ public class DDMIndexerImpl implements DDMIndexer {
 			StringBundler.concat(
 				DDM_FIELD_ARRAY, StringPool.PERIOD, DDM_FIELD_NAME),
 			ddmStructureFieldName);
+
+		if (!localizableField) {
+			locale = null;
+		}
+
 		booleanQuery.addRequiredTerm(
 			StringBundler.concat(
 				DDM_FIELD_ARRAY, StringPool.PERIOD,
@@ -673,9 +679,14 @@ public class DDMIndexerImpl implements DDMIndexer {
 
 		BooleanQuery booleanQuery = new BooleanQueryImpl();
 
+		Boolean localizableField = false;
+
 		if (ddmStructure.hasField(fieldName)) {
 			ddmStructureFieldValue = _ddm.getIndexedFieldValue(
 				ddmStructureFieldValue, ddmStructure.getFieldType(fieldName));
+
+			localizableField = GetterUtil.getBoolean(
+				ddmStructure.getFieldProperty(fieldName, "localizable"));
 		}
 
 		if (ddmStructureFieldValue instanceof String[]) {
@@ -687,13 +698,15 @@ public class DDMIndexerImpl implements DDMIndexer {
 
 				addFieldValueRequiredTerm(
 					booleanQuery, ddmStructureFieldName,
-					ddmStructureFieldValueString, indexType, locale);
+					ddmStructureFieldValueString, indexType, locale,
+					localizableField);
 			}
 		}
 		else {
 			addFieldValueRequiredTerm(
 				booleanQuery, ddmStructureFieldName,
-				String.valueOf(ddmStructureFieldValue), indexType, locale);
+				String.valueOf(ddmStructureFieldValue), indexType, locale,
+				localizableField);
 		}
 
 		if (isLegacyDDMIndexFieldsEnabled()) {
