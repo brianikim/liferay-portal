@@ -123,6 +123,13 @@ public class AntiSamySanitizerImpl implements Sanitizer {
 
 		AntiSamy antiSamy = new AntiSamy();
 
+		Thread currentThread = Thread.currentThread();
+
+		ClassLoader contextClassLoader = currentThread.getContextClassLoader();
+
+		currentThread.setContextClassLoader(
+			AntiSamySanitizerImpl.class.getClassLoader());
+
 		try {
 			if (isConfigured(className, classPK)) {
 				Policy policy = _policies.get(className);
@@ -141,6 +148,9 @@ public class AntiSamySanitizerImpl implements Sanitizer {
 			_log.error("Unable to sanitize input", exception);
 
 			throw new SanitizerException(exception);
+		}
+		finally {
+			currentThread.setContextClassLoader(contextClassLoader);
 		}
 	}
 
