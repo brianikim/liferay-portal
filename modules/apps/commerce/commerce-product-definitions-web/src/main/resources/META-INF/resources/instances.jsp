@@ -18,13 +18,11 @@
 
 <%
 CPInstanceDisplayContext cpInstanceDisplayContext = (CPInstanceDisplayContext)request.getAttribute(WebKeys.PORTLET_DISPLAY_CONTEXT);
-
-PortletURL portletURL = cpInstanceDisplayContext.getPortletURL();
 %>
 
 <c:if test="<%= CommerceCatalogPermission.contains(permissionChecker, cpInstanceDisplayContext.getCPDefinition(), ActionKeys.VIEW) %>">
 	<div class="pt-4" id="<portlet:namespace />productInstancesContainer">
-		<aui:form action="<%= portletURL.toString() %>" method="post" name="fm">
+		<aui:form action="<%= cpInstanceDisplayContext.getPortletURL() %>" method="post" name="fm">
 			<clay:data-set-display
 				contextParams='<%=
 					HashMapBuilder.<String, String>put(

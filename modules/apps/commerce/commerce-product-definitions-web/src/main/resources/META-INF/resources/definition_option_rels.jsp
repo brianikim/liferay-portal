@@ -20,8 +20,6 @@
 CPDefinitionOptionRelDisplayContext cpDefinitionOptionRelDisplayContext = (CPDefinitionOptionRelDisplayContext)request.getAttribute(WebKeys.PORTLET_DISPLAY_CONTEXT);
 
 CPDefinition cpDefinition = cpDefinitionOptionRelDisplayContext.getCPDefinition();
-
-PortletURL portletURL = cpDefinitionOptionRelDisplayContext.getPortletURL();
 %>
 
 <c:if test="<%= CommerceCatalogPermission.contains(permissionChecker, cpDefinitionOptionRelDisplayContext.getCPDefinition(), ActionKeys.VIEW) %>">
@@ -142,7 +140,7 @@ PortletURL portletURL = cpDefinitionOptionRelDisplayContext.getPortletURL();
 			elementClasses="mt-4"
 			title='<%= LanguageUtil.get(request, "options") %>'
 		>
-			<aui:form action="<%= portletURL.toString() %>" method="post" name="fm">
+			<aui:form action="<%= cpDefinitionOptionRelDisplayContext.getPortletURL() %>" method="post" name="fm">
 				<clay:data-set-display
 					contextParams='<%=
 						HashMapBuilder.<String, String>put(
