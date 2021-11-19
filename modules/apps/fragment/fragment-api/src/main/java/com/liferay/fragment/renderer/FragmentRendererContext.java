@@ -46,6 +46,8 @@ public interface FragmentRendererContext {
 
 	public String getPreviewVersion();
 
+	public long[] getSegmentsEntryIds();
+
 	public long[] getSegmentsExperienceIds();
 
 	public boolean isUseCachedContent();
