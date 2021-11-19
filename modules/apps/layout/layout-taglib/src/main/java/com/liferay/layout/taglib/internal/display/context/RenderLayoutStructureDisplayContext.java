@@ -1109,9 +1109,15 @@ public class RenderLayoutStructureDisplayContext {
 			return _segmentsEntryIds;
 		}
 
-		_segmentsEntryIds = _segmentsEntryRetriever.getSegmentsEntryIds(
+		SegmentsEntryRetriever segmentsEntryRetriever =
+			ServletContextUtil.getSegmentsEntryRetriever();
+
+		RequestContextMapper requestContextMapper =
+			ServletContextUtil.getRequestContextMapper();
+
+		_segmentsEntryIds = segmentsEntryRetriever.getSegmentsEntryIds(
 			_themeDisplay.getScopeGroupId(), _themeDisplay.getUserId(),
-			_requestContextMapper.map(_httpServletRequest));
+			requestContextMapper.map(_httpServletRequest));
 
 		return _segmentsEntryIds;
 	}
