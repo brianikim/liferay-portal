@@ -30,6 +30,7 @@ import com.liferay.portal.kernel.util.HashMapDictionary;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.spring.extender.internal.configuration.ConfigurationUtil;
 import com.liferay.portal.spring.extender.internal.upgrade.InitialUpgradeExtender.InitialUpgradeExtension;
+import com.liferay.portal.spring.hibernate.DialectDetector;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -215,7 +216,9 @@ public class InitialUpgradeExtender
 
 			DBManager dbManager = dbContext.getDBManager();
 
-			DB db = dbManager.getDB();
+			DB db = dbManager.getDB(
+				dbManager.getDBType(DialectDetector.getDialect(_dataSource)),
+				_dataSource);
 
 			String tablesSQL = _getSQLTemplateString("tables.sql");
 			String sequencesSQL = _getSQLTemplateString("sequences.sql");
