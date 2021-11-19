@@ -504,6 +504,8 @@ public class RenderLayoutStructureDisplayContext {
 			defaultFragmentRendererContext.setPreviewType(_getPreviewType());
 			defaultFragmentRendererContext.setPreviewVersion(
 				_getPreviewVersion());
+			defaultFragmentRendererContext.setSegmentsEntryIds(
+				_getSegmentsEntryIds());
 			defaultFragmentRendererContext.setSegmentsExperienceIds(
 				_getSegmentsExperienceIds());
 		}
