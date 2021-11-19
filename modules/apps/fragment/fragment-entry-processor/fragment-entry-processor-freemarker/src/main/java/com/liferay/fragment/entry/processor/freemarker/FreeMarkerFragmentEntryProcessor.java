@@ -133,7 +133,8 @@ public class FreeMarkerFragmentEntryProcessor
 			).putAll(
 				_fragmentEntryConfigurationParser.getContextObjects(
 					configurationValuesJSONObject,
-					fragmentEntryLink.getConfiguration())
+					fragmentEntryLink.getConfiguration(),
+					fragmentEntryProcessorContext.getSegmentsEntryIds())
 			).build());
 
 		template.prepareTaglib(
@@ -202,7 +203,8 @@ public class FreeMarkerFragmentEntryProcessor
 						"fragmentEntryLinkNamespace", StringPool.BLANK
 					).putAll(
 						_fragmentEntryConfigurationParser.getContextObjects(
-							configurationDefaultValuesJSONObject, configuration)
+							configurationDefaultValuesJSONObject, configuration,
+							new long[0])
 					).build());
 
 				template.prepareTaglib(httpServletRequest, httpServletResponse);
