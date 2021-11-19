@@ -49,6 +49,10 @@ public interface FragmentEntryConfigurationParser {
 	public Map<String, Object> getContextObjects(
 		JSONObject configurationValuesJSONObject, String configuration);
 
+	public Map<String, Object> getContextObjects(
+		JSONObject configurationValuesJSONObject, String configuration,
+		long[] segmentsEntryIds);
+
 	/**
 	 * @deprecated As of Athanasius (7.3.x), replaced by {@link
 	 *             #getContextObjects(JSONObject, String)}
