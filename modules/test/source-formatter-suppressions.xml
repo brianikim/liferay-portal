@@ -3,6 +3,7 @@
 <suppressions>
 	<source-check>
 		<suppress checks="BNDIncludeResourceCheck" files="external-data-source-test/bnd.bnd" />
+		<suppress checks="BNDSchemaVersionCheck" files="external-data-source-test-service/bnd.bnd" />
 		<suppress checks="StringMethodsCheck" />
 		<suppress checks="XMLServiceFileCheck" files="external-data-source-test-service/service\.xml" />
 	</source-check>
