@@ -40,6 +40,9 @@ import com.liferay.portal.kernel.util.LoggingTimer;
 import com.liferay.portal.kernel.util.ObjectValuePair;
 import com.liferay.portal.kernel.util.PortalClassLoaderUtil;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.registry.Registry;
+import com.liferay.registry.RegistryUtil;
+import com.liferay.registry.ServiceReference;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,11 +71,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.sql.DataSource;
-
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceReference;
 
 /**
  * @author Brian Wing Shun Chan
@@ -449,17 +447,17 @@ public abstract class UpgradeProcess
 	protected abstract void doUpgrade() throws Exception;
 
 	protected Connection getConnection() throws Exception {
-		Bundle bundle = FrameworkUtil.getBundle(getClass());
+		Registry registry = RegistryUtil.getRegistry();
 
-		if (bundle != null) {
-			BundleContext bundleContext = bundle.getBundleContext();
+		String symbolicName = registry.getSymbolicName(
+			getClass().getClassLoader());
 
+		if (symbolicName != null) {
 			Collection<ServiceReference<DataSource>> serviceReferences =
-				bundleContext.getServiceReferences(
+				registry.getServiceReferences(
 					DataSource.class,
 					StringBundler.concat(
-						"(origin.bundle.symbolic.name=",
-						bundle.getSymbolicName(), ")"));
+						"(origin.bundle.symbolic.name=", symbolicName, ")"));
 
 			Iterator<ServiceReference<DataSource>> iterator =
 				serviceReferences.iterator();
@@ -467,8 +465,7 @@ public abstract class UpgradeProcess
 			if (iterator.hasNext()) {
 				ServiceReference<DataSource> serviceReference = iterator.next();
 
-				DataSource dataSource = bundleContext.getService(
-					serviceReference);
+				DataSource dataSource = registry.getService(serviceReference);
 
 				try {
 					if (dataSource != null) {
@@ -476,7 +473,7 @@ public abstract class UpgradeProcess
 					}
 				}
 				finally {
-					bundleContext.ungetService(serviceReference);
+					registry.ungetService(serviceReference);
 				}
 			}
 		}
