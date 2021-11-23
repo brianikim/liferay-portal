@@ -123,7 +123,7 @@ public class LiferayServiceExtender
 				}
 				catch (Exception exception) {
 					_log.error(
-						"Unable to destroy external DataSource " + _dataSource,
+						"Unable to destroy external data source " + _dataSource,
 						exception);
 				}
 			}
