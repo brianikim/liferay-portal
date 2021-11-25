@@ -62,6 +62,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -633,26 +634,27 @@ public class AssetListAssetEntryProviderImpl
 	private long _getFirstSegmentsEntryId(
 		AssetListEntry assetListEntry, long[] segmentsEntryIds) {
 
+		if (segmentsEntryIds.length == 0){
+			return SegmentsEntryConstants.ID_DEFAULT;
+		}
+
 		LongStream longStream = Arrays.stream(segmentsEntryIds);
 
-		return longStream.filter(
-			segmentsEntryId -> {
-				if (segmentsEntryId == SegmentsEntryConstants.ID_DEFAULT) {
-					return false;
-				}
+		Stream<AssetListEntrySegmentsEntryRel>
+			assetListEntrySegmentsEntryRelStream = longStream
+			.mapToObj(segmentsEntryId ->
+				_assetListEntrySegmentsEntryRelLocalService.
+					fetchAssetListEntrySegmentsEntryRel(
+						assetListEntry.getAssetListEntryId(),
+						segmentsEntryId)
+			);
 
-				AssetListEntrySegmentsEntryRel assetListEntrySegmentsEntryRel =
-					_assetListEntrySegmentsEntryRelLocalService.
-						fetchAssetListEntrySegmentsEntryRel(
-							assetListEntry.getAssetListEntryId(),
-							segmentsEntryId);
-
-				return assetListEntrySegmentsEntryRel != null;
-			}
-		).findFirst(
-		).orElse(
-			SegmentsEntryConstants.ID_DEFAULT
-		);
+		return assetListEntrySegmentsEntryRelStream.min(
+				Comparator.comparing(
+					AssetListEntrySegmentsEntryRel::getCreateDate,
+					Comparator.reverseOrder()))
+			.get()
+			.getSegmentsEntryId();
 	}
 
 	private String[] _getKeywords(UnicodeProperties unicodeProperties) {
