@@ -31,7 +31,9 @@ import com.liferay.asset.list.internal.configuration.AssetListConfiguration;
 import com.liferay.asset.list.internal.dynamic.data.mapping.util.DDMIndexerUtil;
 import com.liferay.asset.list.model.AssetListEntry;
 import com.liferay.asset.list.model.AssetListEntryAssetEntryRel;
+import com.liferay.asset.list.model.AssetListEntryAssetEntryRelModel;
 import com.liferay.asset.list.model.AssetListEntrySegmentsEntryRel;
+import com.liferay.asset.list.model.AssetListEntrySegmentsEntryRelModel;
 import com.liferay.asset.list.service.AssetListEntryAssetEntryRelLocalService;
 import com.liferay.asset.list.service.AssetListEntrySegmentsEntryRelLocalService;
 import com.liferay.asset.util.AssetHelper;
@@ -50,6 +52,7 @@ import com.liferay.portal.kernel.search.Hits;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -691,15 +694,24 @@ public class AssetListAssetEntryProviderImpl
 		AssetListEntry assetListEntry, long[] segmentsEntryId, int start,
 		int end) {
 
-		List<AssetListEntryAssetEntryRel> assetListEntryAssetEntryRels;
+		List<AssetListEntryAssetEntryRel> assetListEntryAssetEntryRels =
+			new ArrayList<>();
 
 		if (_assetListConfiguration.combineAssetsFromAllSegmentsManual()) {
-			assetListEntryAssetEntryRels =
-				_assetListEntryAssetEntryRelLocalService.
-					getAssetListEntryAssetEntryRels(
-						assetListEntry.getAssetListEntryId(),
-						_getCombinedSegmentsEntryIds(segmentsEntryId), start,
-						end);
+			long[] segmentsEntryIds = _sortSegmentsByPriority(
+				assetListEntry, _getCombinedSegmentsEntryIds(segmentsEntryId));
+
+			for (long segmentId : segmentsEntryIds) {
+				assetListEntryAssetEntryRels.addAll(
+					ListUtil.sort(
+						_assetListEntryAssetEntryRelLocalService.
+							getAssetListEntryAssetEntryRels(
+								assetListEntry.getAssetListEntryId(),
+								new long[] {segmentId}, QueryUtil.ALL_POS,
+								QueryUtil.ALL_POS),
+						Comparator.comparing(
+							AssetListEntryAssetEntryRelModel::getPosition)));
+			}
 		}
 		else {
 			assetListEntryAssetEntryRels =
@@ -946,6 +958,24 @@ public class AssetListAssetEntryProviderImpl
 			groupIds, notAnyAssetTagNames);
 
 		assetEntryQuery.setNotAnyTagIds(notAnyAssetTagIds);
+	}
+
+	private long[] _sortSegmentsByPriority(AssetListEntry assetListEntry, long[] segmentsEntryIds) {
+		LongStream longStream = Arrays.stream(segmentsEntryIds);
+
+		Stream<AssetListEntrySegmentsEntryRel>
+			assetListEntrySegmentsEntryRelStream = longStream
+			.mapToObj(segmentsEntryId ->
+				_assetListEntrySegmentsEntryRelLocalService.
+					fetchAssetListEntrySegmentsEntryRel(
+						assetListEntry.getAssetListEntryId(),
+						segmentsEntryId)
+			);
+
+		return assetListEntrySegmentsEntryRelStream.sorted(
+				Comparator.comparing(AssetListEntrySegmentsEntryRel::getCreateDate, Comparator.reverseOrder())
+			).mapToLong(AssetListEntrySegmentsEntryRelModel::getSegmentsEntryId)
+			.toArray();
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
