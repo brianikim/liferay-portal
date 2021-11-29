@@ -24,7 +24,7 @@
 	</div>
 </c:if>
 
-<aui:script>
+<aui:script require="metal-dom/src/all/dom as dom">
 	function <portlet:namespace />saveRuleGroupsPriorities(dialog) {
 		dialog.hide();
 
@@ -53,6 +53,10 @@
 
 				if (uniqueRuleGroupInstancesContainer) {
 					uniqueRuleGroupInstancesContainer.innerHTML = response;
+
+					dom.globalEval.runScriptsInElement(
+						uniqueRuleGroupInstancesContainer
+					);
 				}
 			});
 	}
