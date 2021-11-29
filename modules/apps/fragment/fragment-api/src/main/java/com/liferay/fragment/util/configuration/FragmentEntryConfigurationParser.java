@@ -47,7 +47,7 @@ public interface FragmentEntryConfigurationParser {
 		throws JSONException;
 
 	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link
+	 * @deprecated As of Athanasius (7.3.x), replaced by {@link
 	 *             #getContextObjects(JSONObject, String, long[])}
 	 */
 	@Deprecated

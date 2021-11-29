@@ -95,6 +95,10 @@ public class DefaultFragmentEntryProcessorContext
 		return _segmentsEntryIds;
 	}
 
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public long[] getSegmentsExperienceIds() {
 		return _segmentsExperienceIds;
@@ -128,6 +132,10 @@ public class DefaultFragmentEntryProcessorContext
 		_segmentsEntryIds = segmentsEntryIds;
 	}
 
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
 	public void setSegmentsExperienceIds(long[] segmentsExperienceIds) {
 		_segmentsExperienceIds = segmentsExperienceIds;
 	}
