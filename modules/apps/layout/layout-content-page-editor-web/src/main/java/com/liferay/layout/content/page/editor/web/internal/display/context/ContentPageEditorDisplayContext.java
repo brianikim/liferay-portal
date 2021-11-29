@@ -1450,8 +1450,6 @@ public class ContentPageEditorDisplayContext {
 		LiferayPortletResponse liferayPortletResponse =
 			PortalUtil.getLiferayPortletResponse(_renderResponse);
 
-		long[] segmentsExperienceIds = {getSegmentsExperienceId()};
-
 		try {
 			for (FragmentEntryLink fragmentEntryLink : fragmentEntryLinks) {
 				DefaultFragmentRendererContext fragmentRendererContext =
@@ -1460,8 +1458,6 @@ public class ContentPageEditorDisplayContext {
 				fragmentRendererContext.setLocale(themeDisplay.getLocale());
 				fragmentRendererContext.setMode(
 					FragmentEntryLinkConstants.EDIT);
-				fragmentRendererContext.setSegmentsExperienceIds(
-					segmentsExperienceIds);
 
 				String content = _fragmentRendererController.render(
 					fragmentRendererContext, httpServletRequest,

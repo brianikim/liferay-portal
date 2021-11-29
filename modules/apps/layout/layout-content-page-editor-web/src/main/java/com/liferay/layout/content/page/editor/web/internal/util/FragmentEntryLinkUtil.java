@@ -39,7 +39,6 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
-import com.liferay.segments.constants.SegmentsExperienceConstants;
 
 import java.util.List;
 import java.util.Locale;
@@ -122,8 +121,6 @@ public class FragmentEntryLinkUtil {
 			defaultFragmentRendererContext.setLocale(themeDisplay.getLocale());
 			defaultFragmentRendererContext.setMode(
 				FragmentEntryLinkConstants.EDIT);
-			defaultFragmentRendererContext.setSegmentsExperienceIds(
-				new long[] {SegmentsExperienceConstants.ID_DEFAULT});
 
 			String configuration = fragmentRendererController.getConfiguration(
 				defaultFragmentRendererContext);
