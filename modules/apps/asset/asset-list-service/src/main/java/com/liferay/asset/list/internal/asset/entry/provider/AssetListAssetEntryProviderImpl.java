@@ -652,7 +652,9 @@ public class AssetListAssetEntryProviderImpl
 						segmentsEntryId)
 			);
 
-		return assetListEntrySegmentsEntryRelStream.min(
+		return assetListEntrySegmentsEntryRelStream
+				.filter(Objects::nonNull)
+				.min(
 				Comparator.comparing(
 					AssetListEntrySegmentsEntryRel::getCreateDate,
 					Comparator.reverseOrder()))
@@ -972,7 +974,9 @@ public class AssetListAssetEntryProviderImpl
 						segmentsEntryId)
 			);
 
-		return assetListEntrySegmentsEntryRelStream.sorted(
+		return assetListEntrySegmentsEntryRelStream.filter(
+			Objects::nonNull)
+			.sorted(
 				Comparator.comparing(AssetListEntrySegmentsEntryRel::getCreateDate, Comparator.reverseOrder())
 			).mapToLong(AssetListEntrySegmentsEntryRelModel::getSegmentsEntryId)
 			.toArray();
