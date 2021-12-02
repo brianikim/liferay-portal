@@ -289,7 +289,7 @@
 			<finder-column name="groupId" />
 			<finder-column name="plid" />
 		</finder>
-		<finder name="G_O_P" return-type="Collection">
+		<finder name="G_OFELI_P" return-type="Collection">
 			<finder-column name="groupId" />
 			<finder-column name="originalFragmentEntryLinkId" />
 			<finder-column name="plid" />

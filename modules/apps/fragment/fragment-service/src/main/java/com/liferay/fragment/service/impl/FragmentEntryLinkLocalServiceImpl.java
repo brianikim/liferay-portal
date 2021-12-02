@@ -302,7 +302,7 @@ public class FragmentEntryLinkLocalServiceImpl
 	public FragmentEntryLink getFragmentEntryLink(
 		long groupId, long originalFragmentEntryLinkId, long plid) {
 
-		return fragmentEntryLinkPersistence.fetchByG_O_P_First(
+		return fragmentEntryLinkPersistence.fetchByG_OFELI_P_First(
 			groupId, originalFragmentEntryLinkId, plid, null);
 	}
 
