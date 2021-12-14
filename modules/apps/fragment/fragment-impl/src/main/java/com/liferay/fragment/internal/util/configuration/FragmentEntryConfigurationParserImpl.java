@@ -123,20 +123,6 @@ public class FragmentEntryConfigurationParserImpl
 		return configurationDefaultValuesJSONObject;
 	}
 
-	/**
-	 * @deprecated As of Athanasius (7.3.x), replaced by {@link
-	 *             #getConfigurationJSONObject(String, String)}
-	 */
-	@Deprecated
-	@Override
-	public JSONObject getConfigurationJSONObject(
-			String configuration, String editableValues,
-			long[] segmentsExperienceIds)
-		throws JSONException {
-
-		return getConfigurationJSONObject(configuration, editableValues);
-	}
-
     /**
 	 * @deprecated As of Athanasius (7.3.x), replaced by {@link
 	 *             #getContextObjects(JSONObject, String, long[])}

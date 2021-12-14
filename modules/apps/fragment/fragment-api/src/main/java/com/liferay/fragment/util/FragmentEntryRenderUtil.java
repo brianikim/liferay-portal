@@ -161,8 +161,6 @@ public class FragmentEntryRenderUtil {
 		defaultFragmentRendererContext.setFieldValues(parameterMap);
 		defaultFragmentRendererContext.setLocale(locale);
 		defaultFragmentRendererContext.setMode(mode);
-		defaultFragmentRendererContext.setSegmentsExperienceIds(
-			segmentsExperienceIds);
 
 		return fragmentRendererController.render(
 			defaultFragmentRendererContext, httpServletRequest,
