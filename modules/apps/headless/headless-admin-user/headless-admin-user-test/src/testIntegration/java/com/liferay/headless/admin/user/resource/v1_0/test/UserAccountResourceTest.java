@@ -39,6 +39,7 @@ import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.test.rule.DataGuard;
 import com.liferay.portal.kernel.test.util.OrganizationTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
+import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
@@ -247,6 +248,31 @@ public class UserAccountResourceTest extends BaseUserAccountResourceTestCase {
 			Arrays.asList(
 				UserAccountSerDes.toDTOs(
 					userAccountsJSONObject.getString("items"))));
+	}
+
+	@Override
+	@Test
+	public void testPatchUserAccount() throws Exception {
+		super.testPatchUserAccount();
+
+		User user = UserTestUtil.addUser();
+
+		long portraitId = RandomTestUtil.randomLong();
+
+		user.setPortraitId(portraitId);
+
+		user = _userLocalService.updateUser(user);
+
+		UserAccount userAccount = new UserAccount();
+
+		userAccount.setJobTitle(RandomTestUtil.randomString());
+
+		userAccount = userAccountResource.patchUserAccount(
+			user.getUserId(), userAccount);
+
+		user = _userLocalService.getUser(userAccount.getId());
+
+		Assert.assertEquals(portraitId, user.getPortraitId());
 	}
 
 	@Override
