@@ -953,9 +953,8 @@ public class CommerceOrderLocalServiceImpl
 				QueryUtil.ALL_POS);
 
 		for (CommerceOrderItem commerceOrderItem : commerceOrderItems) {
-			commerceOrderItemLocalService.addCommerceOrderItem(
-				newCommerceOrder.getCommerceOrderId(),
-				commerceOrderItem.getCPInstanceId(),
+			_addCommerceOrderItem(
+				newCommerceOrder, commerceOrderItem.getCPInstanceId(),
 				commerceOrderItem.getJson(), commerceOrderItem.getQuantity(), 0,
 				commerceContext, serviceContext);
 		}
@@ -2071,6 +2070,37 @@ public class CommerceOrderLocalServiceImpl
 
 		if (Validator.isNull(purchaseOrderNumber)) {
 			throw new CommerceOrderPurchaseOrderNumberException();
+		}
+	}
+
+	private void _addCommerceOrderItem(
+			CommerceOrder newCommerceOrder, long cpInstanceId, String json,
+			int quantity, int shippedQuantity, CommerceContext commerceContext,
+			ServiceContext serviceContext)
+		throws PortalException {
+
+		List<CommerceOrderItem> commerceOrderItems =
+			newCommerceOrder.getCommerceOrderItems();
+
+		if (!commerceOrderItems.isEmpty()) {
+			boolean found = false;
+
+			for (CommerceOrderItem commerceOrderItem : commerceOrderItems) {
+				if (Objects.equals(commerceOrderItem.getJson(), json)) {
+					found = true;
+				}
+			}
+
+			if (!found) {
+				commerceOrderItemLocalService.addCommerceOrderItem(
+					newCommerceOrder.getCommerceOrderId(), cpInstanceId, json,
+					quantity, shippedQuantity, commerceContext, serviceContext);
+			}
+		}
+		else {
+			commerceOrderItemLocalService.addCommerceOrderItem(
+				newCommerceOrder.getCommerceOrderId(), cpInstanceId, json,
+				quantity, shippedQuantity, commerceContext, serviceContext);
 		}
 	}
 
