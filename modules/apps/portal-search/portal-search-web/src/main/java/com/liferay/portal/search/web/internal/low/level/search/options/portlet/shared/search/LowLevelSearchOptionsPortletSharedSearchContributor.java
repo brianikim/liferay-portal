@@ -90,7 +90,7 @@ public class LowLevelSearchOptionsPortletSharedSearchContributor
 						portletSharedSearchSettings.getRenderRequest());
 
 				searchContext.setAttribute(
-					"search.experiences.ipaddress",
+					"search.experiences.ip.address",
 					httpServletRequest.getRemoteAddr());
 			}
 		);
