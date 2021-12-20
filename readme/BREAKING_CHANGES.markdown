@@ -1082,7 +1082,6 @@ This affects you if you use `FragmentEntryProcessorContext`, `DefaultFragmentEnt
 Use `getSegmentsEntryIds` in `FragmentEntryProcessorContext`, `DefaultFragmentEntryProcessorContext`, `FragmentRendererContext` and `DefaultFragmentRendererContext`.
 Use the method with signature `getContextObjects(JSONObject, String, long[])` from `FragmentEntryConfigurationParser`, where the third parameter represents the `long array` of `segmentsEntryIds`.
 
-
 ### Why was this change made?
 
 This change removes unnecessary methods.
