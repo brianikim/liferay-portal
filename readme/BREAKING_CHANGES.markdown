@@ -1063,3 +1063,28 @@ If you want to maintain the old sort behavior, you will have to customize the El
 If you need to retrieve data from these fields, you can get the same information from the _source field of Elasticsearch https://www.elastic.co/guide/en/elasticsearch/reference/7.17/mapping-source-field.html or you can also remove the `icu_collation_keyword` as it is explained in the previous paragraph.
 
 ---------------------------------------
+
+## Title
+- **Date: 2021-Dic-17**
+- **JIRA Ticket: [LPS-141471](https://issues.liferay.com/browse/LPS-141471)**
+
+### What changed?
+
+The `getSegmentsExperienceIds` method from `FragmentEntryProcessorContext`, `DefaultFragmentEntryProcessorContext`, `FragmentRendererContext` and `DefaultFragmentRendererContext` has been removed.
+The method with signature `getContextObjects(JSONObject, String)` from `FragmentEntryConfigurationParser` has been removed.
+
+### Who is affected?
+
+This affects you if you use `FragmentEntryProcessorContext`, `DefaultFragmentEntryProcessorContext`, `FragmentRendererContext` or `DefaultFragmentRendererContext` to get the `long array` of `segmentsExperienceIds` or if you use the method with signature `getContextObjects(JSONObject, String)` from `FragmentEntryConfigurationParser`.
+
+### How should I update my code?
+
+Use `getSegmentsEntryIds` in `FragmentEntryProcessorContext`, `DefaultFragmentEntryProcessorContext`, `FragmentRendererContext` and `DefaultFragmentRendererContext`.
+Use the method with signature `getContextObjects(JSONObject, String, long[])` from `FragmentEntryConfigurationParser`, where the third parameter represents the `long array` of `segmentsEntryIds`.
+
+
+### Why was this change made?
+
+This change removes unnecessary methods.
+
+---------------------------------------
