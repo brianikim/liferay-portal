@@ -66,7 +66,7 @@ public class ViewSXPElementsDisplayContext {
 				).buildString(),
 				"pencil", "edit",
 				LanguageUtil.get(_sxpRequestHelper.getRequest(), "edit"), "get",
-				null, null),
+				"view", null),
 			new ClayDataSetActionDropdownItem(
 				getAPIURL() + "/{id}/export", "download", "export",
 				LanguageUtil.get(_sxpRequestHelper.getRequest(), "export"),
@@ -74,7 +74,7 @@ public class ViewSXPElementsDisplayContext {
 			new ClayDataSetActionDropdownItem(
 				getAPIURL() + "/{id}", "trash", "delete",
 				LanguageUtil.get(_sxpRequestHelper.getRequest(), "delete"),
-				"delete", null, "async"));
+				"delete", "delete", "async"));
 	}
 
 	public CreationMenu getCreationMenu() throws Exception {
