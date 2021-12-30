@@ -636,9 +636,6 @@ function EditSXPBlueprintForm({
 
 						<ClauseContributorsSidebar
 							frameworkConfig={formik.values.frameworkConfig}
-							onApplyIndexerClausesChange={
-								_handleApplyIndexerClausesChange
-							}
 							onFrameworkConfigChange={
 								_handleFrameworkConfigChange
 							}
