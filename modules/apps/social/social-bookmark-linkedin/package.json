@@ -1,13 +1,12 @@
 {
 	"dependencies": {
-		"react": "16.12.0"
+		"frontend-js-web": "*"
 	},
-	"main": "index.js",
-	"name": "social-bookmarks-taglib",
+	"name": "@liferay/social-bookmark-linkedin",
 	"scripts": {
 		"build": "liferay-npm-scripts build",
 		"checkFormat": "liferay-npm-scripts check",
 		"format": "liferay-npm-scripts fix"
 	},
-	"version": "3.0.19"
+	"version": "3.0.13"
 }

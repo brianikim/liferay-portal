@@ -1,0 +1,9 @@
+{
+	"config": {
+		"imports": {
+			"social-bookmarks-taglib": {
+				"/": ">=3.1.0"
+			}
+		}
+	}
+}
