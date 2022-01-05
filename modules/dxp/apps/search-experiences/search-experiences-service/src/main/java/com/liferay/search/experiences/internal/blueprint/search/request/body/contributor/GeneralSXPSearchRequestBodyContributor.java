@@ -14,6 +14,7 @@
 
 package com.liferay.search.experiences.internal.blueprint.search.request.body.contributor;
 
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.TimeZoneUtil;
 import com.liferay.portal.search.searcher.SearchRequestBuilder;
@@ -77,6 +78,11 @@ public class GeneralSXPSearchRequestBodyContributor
 		if (generalConfiguration.getSearchableAssetTypes() != null) {
 			searchRequestBuilder.modelIndexerClassNames(
 				generalConfiguration.getSearchableAssetTypes());
+		}
+
+		if (generalConfiguration.getLocaleId() != null) {
+			searchRequestBuilder.locale(
+				LocaleUtil.fromLanguageId(generalConfiguration.getLocaleId()));
 		}
 
 		if (generalConfiguration.getTimeZoneId() != null) {
