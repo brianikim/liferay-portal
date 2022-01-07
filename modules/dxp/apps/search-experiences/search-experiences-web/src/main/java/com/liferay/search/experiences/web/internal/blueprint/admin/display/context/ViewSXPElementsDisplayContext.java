@@ -70,7 +70,7 @@ public class ViewSXPElementsDisplayContext {
 			new ClayDataSetActionDropdownItem(
 				getAPIURL() + "/{id}/export", "download", "export",
 				LanguageUtil.get(_sxpRequestHelper.getRequest(), "export"),
-				"get", null, "blank"),
+				"get", null, null),
 			new ClayDataSetActionDropdownItem(
 				getAPIURL() + "/{id}", "trash", "delete",
 				LanguageUtil.get(_sxpRequestHelper.getRequest(), "delete"),
