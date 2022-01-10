@@ -808,6 +808,14 @@ public abstract class BaseSXPBlueprintResourceTestCase {
 		for (String additionalAssertFieldName :
 				getAdditionalAssertFieldNames()) {
 
+			if (Objects.equals("actions", additionalAssertFieldName)) {
+				if (sxpBlueprint.getActions() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
 			if (Objects.equals("configuration", additionalAssertFieldName)) {
 				if (sxpBlueprint.getConfiguration() == null) {
 					valid = false;
@@ -980,6 +988,17 @@ public abstract class BaseSXPBlueprintResourceTestCase {
 
 		for (String additionalAssertFieldName :
 				getAdditionalAssertFieldNames()) {
+
+			if (Objects.equals("actions", additionalAssertFieldName)) {
+				if (!equals(
+						(Map)sxpBlueprint1.getActions(),
+						(Map)sxpBlueprint2.getActions())) {
+
+					return false;
+				}
+
+				continue;
+			}
 
 			if (Objects.equals("configuration", additionalAssertFieldName)) {
 				if (!Objects.deepEquals(
@@ -1196,6 +1215,11 @@ public abstract class BaseSXPBlueprintResourceTestCase {
 		sb.append(" ");
 		sb.append(operator);
 		sb.append(" ");
+
+		if (entityFieldName.equals("actions")) {
+			throw new IllegalArgumentException(
+				"Invalid entity field " + entityFieldName);
+		}
 
 		if (entityFieldName.equals("configuration")) {
 			throw new IllegalArgumentException(
