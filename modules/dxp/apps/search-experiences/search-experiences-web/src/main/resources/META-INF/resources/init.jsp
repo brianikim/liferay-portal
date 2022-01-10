@@ -44,7 +44,6 @@ page import="com.liferay.search.experiences.web.internal.blueprint.admin.constan
 page import="com.liferay.search.experiences.web.internal.blueprint.admin.display.context.ViewSXPBlueprintsDisplayContext" %><%@
 page import="com.liferay.search.experiences.web.internal.blueprint.admin.display.context.ViewSXPElementsDisplayContext" %><%@
 page import="com.liferay.search.experiences.web.internal.blueprint.options.portlet.preferences.SXPBlueprintOptionsPortletPreferences" %><%@
-page import="com.liferay.search.experiences.web.internal.blueprint.options.portlet.preferences.SXPBlueprintOptionsPortletPreferencesImpl" %><%@
 page import="com.liferay.search.experiences.web.internal.compat.petra.portlet.url.builder.PortletURLBuilder" %><%@
 page import="com.liferay.search.experiences.web.internal.constants.SXPWebKeys" %>
 
