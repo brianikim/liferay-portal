@@ -43,7 +43,7 @@ page import="com.liferay.search.experiences.service.SXPBlueprintLocalServiceUtil
 page import="com.liferay.search.experiences.web.internal.blueprint.admin.constants.SXPBlueprintAdminClayDataSetDisplayNames" %><%@
 page import="com.liferay.search.experiences.web.internal.blueprint.admin.display.context.ViewSXPBlueprintsDisplayContext" %><%@
 page import="com.liferay.search.experiences.web.internal.blueprint.admin.display.context.ViewSXPElementsDisplayContext" %><%@
-page import="com.liferay.search.experiences.web.internal.blueprint.options.portlet.preferences.SXPBlueprintOptionsPortletPreferences" %><%@
+page import="com.liferay.search.experiences.web.internal.blueprint.options.portlet.preferences.SXPBlueprintOptionsPortletPreferencesUtil" %><%@
 page import="com.liferay.search.experiences.web.internal.compat.petra.portlet.url.builder.PortletURLBuilder" %><%@
 page import="com.liferay.search.experiences.web.internal.constants.SXPWebKeys" %>
 
