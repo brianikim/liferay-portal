@@ -461,7 +461,7 @@ public class EditAssetListDisplayContext {
 	}
 
 	public String getClassName(AssetRendererFactory<?> assetRendererFactory) {
-		Class<? extends AssetRendererFactory> clazz =
+		Class<? extends AssetRendererFactory<?>> clazz =
 			_assetRendererFactoryClassProvider.getClass(assetRendererFactory);
 
 		String className = clazz.getName();
@@ -799,7 +799,7 @@ public class EditAssetListDisplayContext {
 		}
 
 		SearchContainer<AssetListEntryAssetEntryRel> searchContainer =
-			new SearchContainer(
+			new SearchContainer<>(
 				_portletRequest, getPortletURL(), null,
 				"there-are-no-asset-entries");
 
