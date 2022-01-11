@@ -819,17 +819,6 @@ public class EditAssetListDisplayContext {
 		return _searchContainer;
 	}
 
-	public SegmentsEntry getSegmentsEntry() {
-		if (_segmentsEntry != null) {
-			return _segmentsEntry;
-		}
-
-		_segmentsEntry = SegmentsEntryLocalServiceUtil.fetchSegmentsEntry(
-			getSegmentsEntryId());
-
-		return _segmentsEntry;
-	}
-
 	public long getSegmentsEntryId() {
 		if (_segmentsEntryId != null) {
 			return _segmentsEntryId;
@@ -1257,7 +1246,6 @@ public class EditAssetListDisplayContext {
 	private String _redirect;
 	private long[] _referencedModelsGroupIds;
 	private SearchContainer<AssetListEntryAssetEntryRel> _searchContainer;
-	private SegmentsEntry _segmentsEntry;
 	private Long _segmentsEntryId;
 	private long[] _selectedSegmentsEntryIds;
 	private String _selectSegmentsEntryURL;
