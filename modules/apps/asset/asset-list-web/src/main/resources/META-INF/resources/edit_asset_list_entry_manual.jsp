@@ -104,9 +104,9 @@ AssetListEntry assetListEntry = assetListDisplayContext.getAssetListEntry();
 							containerElement="span"
 							expand="<%= true %>"
 						>
-					<span class="heading-text">
-						<liferay-ui:message key="collection-items" />
-					</span>
+							<span class="heading-text">
+								<liferay-ui:message key="collection-items" />
+							</span>
 						</clay:content-col>
 
 						<c:if test="<%= !editAssetListDisplayContext.isLiveGroup() %>">
@@ -127,13 +127,13 @@ AssetListEntry assetListEntry = assetListDisplayContext.getAssetListEntry();
 									for (Map.Entry<String, Map<String, Object>> entry : manualAddIconDataMap.entrySet()) {
 									%>
 
-									<liferay-ui:icon
-										cssClass="asset-selector"
-										data="<%= entry.getValue() %>"
-										id="<%= themeDisplay.getScopeGroupId() + HtmlUtil.getAUICompatibleId(entry.getKey()) %>"
-										message="<%= HtmlUtil.escape(entry.getKey()) %>"
-										url="javascript:;"
-									/>
+										<liferay-ui:icon
+											cssClass="asset-selector"
+											data="<%= entry.getValue() %>"
+											id="<%= themeDisplay.getScopeGroupId() + HtmlUtil.getAUICompatibleId(entry.getKey()) %>"
+											message="<%= HtmlUtil.escape(entry.getKey()) %>"
+											url="javascript:;"
+										/>
 
 									<%
 									}
