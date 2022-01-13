@@ -866,7 +866,7 @@ function EditSXPBlueprintForm({
 				onFetchResults={_handleFetchPreviewSearch}
 				onFocusSXPElement={_handleFocusSXPElement}
 				responseString={previewInfo.results.responseString}
-				totalHits={previewInfo.results.totalHits}
+				totalHits={previewInfo.results.searchHits?.totalHits}
 				visible={openSidebar === SIDEBARS.PREVIEW}
 				warnings={previewInfo.results.warnings}
 			/>
