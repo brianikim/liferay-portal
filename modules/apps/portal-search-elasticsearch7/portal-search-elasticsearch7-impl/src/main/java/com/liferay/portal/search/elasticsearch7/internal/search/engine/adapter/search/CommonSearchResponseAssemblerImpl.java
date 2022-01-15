@@ -41,7 +41,7 @@ import org.elasticsearch.index.search.MatchQueryParser;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.profile.ProfileShardResult;
+import org.elasticsearch.search.profile.SearchProfileShardResult;
 import org.elasticsearch.search.profile.query.QueryProfileShardResult;
 import org.elasticsearch.xcontent.ToXContent;
 import org.elasticsearch.xcontent.XContentBuilder;
@@ -78,54 +78,25 @@ public class CommonSearchResponseAssemblerImpl
 			baseSearchRequest.getStatsRequests());
 	}
 
-	protected String getProfileShardResultString(
-			ProfileShardResult profileShardResult)
-		throws IOException {
-
-		XContentBuilder xContentBuilder = XContentFactory.contentBuilder(
-			XContentType.JSON);
-
-		List<QueryProfileShardResult> queryProfileShardResults =
-			profileShardResult.getQueryProfileResults();
-
-		queryProfileShardResults.forEach(
-			queryProfileShardResult -> {
-				try {
-					xContentBuilder.startObject();
-
-					queryProfileShardResult.toXContent(
-						xContentBuilder, ToXContent.EMPTY_PARAMS);
-
-					xContentBuilder.endObject();
-				}
-				catch (IOException ioException) {
-					if (_log.isDebugEnabled()) {
-						_log.debug(ioException, ioException);
-					}
-				}
-			});
-
-		return Strings.toString(xContentBuilder);
-	}
-
 	protected void setExecutionProfile(
 		SearchResponse searchResponse, BaseSearchResponse baseSearchResponse) {
 
-		Map<String, ProfileShardResult> profileShardResults =
+		Map<String, SearchProfileShardResult> searchProfileShardResults =
 			searchResponse.getProfileResults();
 
-		if (MapUtil.isEmpty(profileShardResults)) {
+		if (MapUtil.isEmpty(searchProfileShardResults)) {
 			return;
 		}
 
 		Map<String, String> executionProfile = new HashMap<>();
 
-		profileShardResults.forEach(
-			(shardKey, profileShardResult) -> {
+		searchProfileShardResults.forEach(
+			(shardKey, searchProfileShardResult) -> {
 				try {
 					executionProfile.put(
 						shardKey,
-						getProfileShardResultString(profileShardResult));
+						_getSearchProfileShardResultString(
+							searchProfileShardResult));
 				}
 				catch (IOException ioException) {
 					if (_log.isInfoEnabled()) {
@@ -259,6 +230,36 @@ public class CommonSearchResponseAssemblerImpl
 	protected static final String ZERO_TERMS_QUERY_STRING =
 		",\"zero_terms_query\":\"" + MatchQueryParser.DEFAULT_ZERO_TERMS_QUERY +
 			"\"";
+
+	private String _getSearchProfileShardResultString(
+			SearchProfileShardResult searchProfileShardResult)
+		throws IOException {
+
+		XContentBuilder xContentBuilder = XContentFactory.contentBuilder(
+			XContentType.JSON);
+
+		List<QueryProfileShardResult> queryProfileShardResults =
+			searchProfileShardResult.getQueryProfileResults();
+
+		queryProfileShardResults.forEach(
+			queryProfileShardResult -> {
+				try {
+					xContentBuilder.startObject();
+
+					queryProfileShardResult.toXContent(
+						xContentBuilder, ToXContent.EMPTY_PARAMS);
+
+					xContentBuilder.endObject();
+				}
+				catch (IOException ioException) {
+					if (_log.isDebugEnabled()) {
+						_log.debug(ioException, ioException);
+					}
+				}
+			});
+
+		return Strings.toString(xContentBuilder);
+	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		CommonSearchResponseAssemblerImpl.class);
