@@ -288,6 +288,14 @@ public abstract class BaseSearchResponseResourceTestCase {
 		for (String additionalAssertFieldName :
 				getAdditionalAssertFieldNames()) {
 
+			if (Objects.equals("errors", additionalAssertFieldName)) {
+				if (searchResponse.getErrors() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
 			if (Objects.equals("page", additionalAssertFieldName)) {
 				if (searchResponse.getPage() == null) {
 					valid = false;
@@ -444,6 +452,17 @@ public abstract class BaseSearchResponseResourceTestCase {
 
 		for (String additionalAssertFieldName :
 				getAdditionalAssertFieldNames()) {
+
+			if (Objects.equals("errors", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						searchResponse1.getErrors(),
+						searchResponse2.getErrors())) {
+
+					return false;
+				}
+
+				continue;
+			}
 
 			if (Objects.equals("page", additionalAssertFieldName)) {
 				if (!Objects.deepEquals(
@@ -629,6 +648,11 @@ public abstract class BaseSearchResponseResourceTestCase {
 		sb.append(" ");
 		sb.append(operator);
 		sb.append(" ");
+
+		if (entityFieldName.equals("errors")) {
+			throw new IllegalArgumentException(
+				"Invalid entity field " + entityFieldName);
+		}
 
 		if (entityFieldName.equals("page")) {
 			sb.append(String.valueOf(searchResponse.getPage()));
