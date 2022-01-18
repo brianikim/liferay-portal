@@ -40,6 +40,7 @@ import {
 	isDefined,
 	parseCustomSXPElement,
 	transformToSearchContextAttributes,
+	transformToSearchPreviewHits,
 } from '../utils/utils';
 import {
 	validateBoost,
@@ -902,13 +903,13 @@ function EditSXPBlueprintForm({
 
 			<PreviewSidebar
 				errors={previewInfo.results.errors}
+				hits={transformToSearchPreviewHits(previewInfo.results)}
 				loading={previewInfo.loading}
 				onClose={_handleCloseSidebar}
 				onFetchResults={_handleFetchPreviewSearch}
 				onFocusSXPElement={_handleFocusSXPElement}
-				response={previewInfo.results.response}
 				responseString={previewInfo.results.responseString}
-				searchHits={previewInfo.results.searchHits}
+				totalHits={previewInfo.results.searchHits?.totalHits}
 				visible={openSidebar === SIDEBARS.PREVIEW}
 				warnings={previewInfo.results.warnings}
 			/>
