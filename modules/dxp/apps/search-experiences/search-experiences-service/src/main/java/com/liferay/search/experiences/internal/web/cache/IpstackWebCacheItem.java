@@ -116,11 +116,7 @@ public class IpstackWebCacheItem implements WebCacheItem {
 
 			_exceptionListener.exceptionThrown(
 				new PrivateIPAddressException(
-					StringBundler.concat(
-						"IPStack is enabled but geolocation could not be ",
-						"resolved for a non public IP address ", _ipAddress,
-						". Search context attribute 'search.experiences.ip.",
-						"address' can be used to test a public address")));
+					"Unable to resolve private IP address " + _ipAddress));
 
 			return true;
 		}
