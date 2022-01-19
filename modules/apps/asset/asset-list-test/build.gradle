@@ -1,8 +1,13 @@
 dependencies {
 	testIntegrationCompile group: "com.liferay", name: "com.liferay.arquillian.extension.junit.bridge", version: "1.0.19"
 	testIntegrationCompile group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "default"
+	testIntegrationCompile group: "org.osgi", name: "org.osgi.service.cm", version: "1.5.0"
 	testIntegrationCompile project(":apps:asset:asset-list-api")
+	testIntegrationCompile project(":apps:asset:asset-list-service")
 	testIntegrationCompile project(":apps:asset:asset-test-util")
+	testIntegrationCompile project(":apps:journal:journal-api")
+	testIntegrationCompile project(":apps:journal:journal-test-util")
+	testIntegrationCompile project(":apps:portal-configuration:portal-configuration-test-util")
 	testIntegrationCompile project(":apps:segments:segments-api")
 	testIntegrationCompile project(":apps:segments:segments-test-util")
 	testIntegrationCompile project(":core:petra:petra-sql-dsl-api")

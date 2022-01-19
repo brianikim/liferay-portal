@@ -111,4 +111,20 @@ public class AssetListTestUtil {
 				typeSettingsUnicodeProperties.toString(), serviceContext);
 	}
 
+	public static AssetListEntrySegmentsEntryRel
+			addAssetListEntrySegmentsEntryRel(
+				long groupId, AssetListEntry assetListEntry,
+				long segmentsEntryId, String typeSettings)
+		throws PortalException {
+
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(groupId);
+
+		return AssetListEntrySegmentsEntryRelLocalServiceUtil.
+			addAssetListEntrySegmentsEntryRel(
+				TestPropsValues.getUserId(), groupId,
+				assetListEntry.getAssetListEntryId(), segmentsEntryId,
+				typeSettings, serviceContext);
+	}
+
 }
