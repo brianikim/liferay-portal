@@ -24,7 +24,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.webcache.WebCacheItem;
 import com.liferay.portal.kernel.webcache.WebCachePoolUtil;
-import com.liferay.search.experiences.exception.NonPublicIPAddressException;
+import com.liferay.search.experiences.blueprint.exception.PrivateIPAddressException;
 import com.liferay.search.experiences.internal.configuration.IpstackConfiguration;
 
 import java.beans.ExceptionListener;
@@ -115,7 +115,7 @@ public class IpstackWebCacheItem implements WebCacheItem {
 			inet4Address.isMulticastAddress()) {
 
 			_exceptionListener.exceptionThrown(
-				new NonPublicIPAddressException(
+				new PrivateIPAddressException(
 					StringBundler.concat(
 						"IPStack is enabled but geolocation could not be ",
 						"resolved for a non public IP address ", _ipAddress,

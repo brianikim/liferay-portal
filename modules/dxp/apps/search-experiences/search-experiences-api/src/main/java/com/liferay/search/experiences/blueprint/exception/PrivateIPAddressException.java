@@ -12,27 +12,27 @@
  *
  */
 
-package com.liferay.search.experiences.exception;
+package com.liferay.search.experiences.blueprint.exception;
 
 import com.liferay.portal.kernel.exception.PortalException;
 
 /**
  * @author Petteri Karttunen
  */
-public class NonPublicIPAddressException extends PortalException {
+public class PrivateIPAddressException extends PortalException {
 
-	public NonPublicIPAddressException() {
+	public PrivateIPAddressException() {
 	}
 
-	public NonPublicIPAddressException(String msg) {
+	public PrivateIPAddressException(String msg) {
 		super(msg);
 	}
 
-	public NonPublicIPAddressException(String msg, Throwable throwable) {
+	public PrivateIPAddressException(String msg, Throwable throwable) {
 		super(msg, throwable);
 	}
 
-	public NonPublicIPAddressException(Throwable throwable) {
+	public PrivateIPAddressException(Throwable throwable) {
 		super(throwable);
 	}
 
