@@ -108,11 +108,11 @@ public class IpstackWebCacheItem implements WebCacheItem {
 		Inet4Address inet4Address = (Inet4Address)InetAddress.getByName(
 			_ipAddress);
 
-		if (inet4Address.isSiteLocalAddress() ||
-			inet4Address.isAnyLocalAddress() ||
+		if (inet4Address.isAnyLocalAddress() ||
 			inet4Address.isLinkLocalAddress() ||
 			inet4Address.isLoopbackAddress() ||
-			inet4Address.isMulticastAddress()) {
+			inet4Address.isMulticastAddress() ||
+			inet4Address.isSiteLocalAddress()) {
 
 			_exceptionListener.exceptionThrown(
 				new PrivateIPAddressException(
