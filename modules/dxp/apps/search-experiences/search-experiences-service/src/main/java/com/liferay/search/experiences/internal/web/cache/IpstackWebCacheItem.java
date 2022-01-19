@@ -59,7 +59,7 @@ public class IpstackWebCacheItem implements WebCacheItem {
 	@Override
 	public JSONObject convert(String key) {
 		try {
-			if (!_ipstackConfiguration.enabled() || !_isPublicIPAddress()) {
+			if (!_ipstackConfiguration.enabled() || _isPrivateIPAddress()) {
 				return JSONFactoryUtil.createJSONObject();
 			}
 
@@ -104,7 +104,7 @@ public class IpstackWebCacheItem implements WebCacheItem {
 		return 0;
 	}
 
-	private boolean _isPublicIPAddress() throws Exception {
+	private boolean _isPrivateIPAddress() throws Exception {
 		Inet4Address inet4Address = (Inet4Address)InetAddress.getByName(
 			_ipAddress);
 
@@ -122,10 +122,10 @@ public class IpstackWebCacheItem implements WebCacheItem {
 						". Search context attribute 'search.experiences.ip.",
 						"address' can be used to test a public address")));
 
-			return false;
+			return true;
 		}
 
-		return true;
+		return false;
 	}
 
 	private void _validateResponse(JSONObject jsonObject) {
