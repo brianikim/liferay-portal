@@ -31,7 +31,7 @@ public interface RedirectConfiguration {
 
 	@Meta.AD(
 		deflt = "false", description = "redirect-not-found-entry-enabled-help",
-		required = false
+		name = "enabled", required = false
 	)
 	public boolean enabled();
 
