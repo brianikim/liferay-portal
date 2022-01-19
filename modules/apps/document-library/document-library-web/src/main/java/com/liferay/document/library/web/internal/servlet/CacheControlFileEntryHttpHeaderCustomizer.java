@@ -50,24 +50,7 @@ public class CacheControlFileEntryHttpHeaderCustomizer
 	@Override
 	public String getHttpHeaderValue(FileEntry fileEntry, String currentValue) {
 		try {
-			Company company = _companyLocalService.getCompany(
-				fileEntry.getCompanyId());
-
-			if (!_dlFileEntryModelResourcePermission.contains(
-					PermissionCheckerFactoryUtil.create(
-						company.getDefaultUser()),
-					fileEntry.getPrimaryKey(), ActionKeys.VIEW)) {
-
-				return currentValue;
-			}
-
-			if (_cacheControlConfiguration.maxAge() <= 0) {
-				return _cacheControlConfiguration.cacheControl();
-			}
-
-			return String.format(
-				"%s, max-age: %d", _cacheControlConfiguration.cacheControl(),
-				_cacheControlConfiguration.maxAge());
+			return _getHttpHeaderValue(fileEntry, currentValue);
 		}
 		catch (PortalException portalException) {
 			_log.error(portalException, portalException);
@@ -81,6 +64,28 @@ public class CacheControlFileEntryHttpHeaderCustomizer
 	protected void activate(Map<String, Object> properties) {
 		_cacheControlConfiguration = ConfigurableUtil.createConfigurable(
 			CacheControlConfiguration.class, properties);
+	}
+
+	private String _getHttpHeaderValue(FileEntry fileEntry, String currentValue)
+		throws PortalException {
+
+		Company company = _companyLocalService.getCompany(
+			fileEntry.getCompanyId());
+
+		if (!_dlFileEntryModelResourcePermission.contains(
+				PermissionCheckerFactoryUtil.create(company.getDefaultUser()),
+				fileEntry.getPrimaryKey(), ActionKeys.VIEW)) {
+
+			return currentValue;
+		}
+
+		if (_cacheControlConfiguration.maxAge() <= 0) {
+			return _cacheControlConfiguration.cacheControl();
+		}
+
+		return String.format(
+			"%s, max-age: %d", _cacheControlConfiguration.cacheControl(),
+			_cacheControlConfiguration.maxAge());
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
