@@ -547,16 +547,36 @@ public class AssetListAssetEntryProviderImpl
 		return availableClassTypeIds;
 	}
 
-	private long[] _getCombinedSegmentsEntryIds(long[] segmentEntryIds) {
+	private long[] _getCombinedSegmentsEntryIds(
+		AssetListEntry assetListEntry, long[] segmentEntryIds) {
+
+		LongStream longStream = Arrays.stream(segmentEntryIds);
+
 		if ((segmentEntryIds.length > 1) &&
 			ArrayUtil.contains(
 				segmentEntryIds, SegmentsEntryConstants.ID_DEFAULT)) {
 
-			return ArrayUtil.remove(
-				segmentEntryIds, SegmentsEntryConstants.ID_DEFAULT);
+			longStream = Arrays.stream(
+				ArrayUtil.remove(
+					segmentEntryIds, SegmentsEntryConstants.ID_DEFAULT));
 		}
 
-		return segmentEntryIds;
+		return longStream.mapToObj(
+			segmentsEntryId ->
+				_assetListEntrySegmentsEntryRelLocalService.
+					fetchAssetListEntrySegmentsEntryRel(
+						assetListEntry.getAssetListEntryId(), segmentsEntryId)
+		).filter(
+			Objects::nonNull
+		).sorted(
+			Comparator.comparing(
+				AssetListEntrySegmentsEntryRel::getCreateDate,
+				Comparator.reverseOrder())
+		).map(
+			AssetListEntrySegmentsEntryRelModel::getSegmentsEntryId
+		).mapToLong(
+			i -> i
+		).toArray();
 	}
 
 	private List<AssetEntry> _getDynamicAssetEntries(
@@ -568,7 +588,8 @@ public class AssetListAssetEntryProviderImpl
 		if (_assetListConfiguration.combineAssetsFromAllSegmentsDynamic()) {
 			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS)) {
 				for (long segmentsEntryId :
-						_getCombinedSegmentsEntryIds(segmentsEntryIds)) {
+						_getCombinedSegmentsEntryIds(
+							assetListEntry, segmentsEntryIds)) {
 
 					AssetEntryQuery assetEntryQuery = getAssetEntryQuery(
 						assetListEntry, segmentsEntryId, userId);
@@ -585,7 +606,8 @@ public class AssetListAssetEntryProviderImpl
 				int subtotal = 0;
 
 				for (long segmentsEntryId :
-						_getCombinedSegmentsEntryIds(segmentsEntryIds)) {
+						_getCombinedSegmentsEntryIds(
+							assetListEntry, segmentsEntryIds)) {
 
 					AssetEntryQuery assetEntryQuery = getAssetEntryQuery(
 						assetListEntry, segmentsEntryId, userId);
@@ -700,7 +722,8 @@ public class AssetListAssetEntryProviderImpl
 
 		if (_assetListConfiguration.combineAssetsFromAllSegmentsManual()) {
 			long[] segmentsEntryIds = _sortSegmentsByPriority(
-				assetListEntry, _getCombinedSegmentsEntryIds(segmentsEntryId));
+				assetListEntry,
+				_getCombinedSegmentsEntryIds(assetListEntry, segmentsEntryId));
 
 			for (long segmentId : segmentsEntryIds) {
 				assetListEntryAssetEntryRels.addAll(
