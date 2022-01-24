@@ -34,7 +34,6 @@ import java.io.IOException;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 /**
  * @author Brian Wing Shun Chan
@@ -116,7 +115,7 @@ public class IpstackWebCacheItem implements WebCacheItem {
 	}
 
 	private static boolean _isPrivateIPAddress(String ipAddress)
-		throws PrivateIPAddressException, UnknownHostException {
+		throws Exception {
 
 		Inet4Address inet4Address = (Inet4Address)InetAddress.getByName(
 			ipAddress);
