@@ -109,7 +109,7 @@ String referringPortletResource = ParamUtil.getString(request, "referringPortlet
 							%>
 
 							<span class="text-default">
-								<liferay-ui:message arguments="<%= new String[] {modifiedDateDescription, HtmlUtil.escape(curArticle.getUserName())} %>" key="modified-x-ago-by-x" />
+								<liferay-ui:message arguments="<%= new String[] {modifiedDateDescription, HtmlUtil.escape(curArticle.getStatusByUserName())} %>" key="modified-x-ago-by-x" />
 							</span>
 
 							<p class="font-weight-bold h5">
@@ -225,7 +225,7 @@ String referringPortletResource = ParamUtil.getString(request, "referringPortlet
 							String modifiedDateDescription = LanguageUtil.getTimeDescription(request, System.currentTimeMillis() - createDate.getTime(), true);
 							%>
 
-							<liferay-ui:message arguments="<%= new String[] {modifiedDateDescription, HtmlUtil.escape(curArticle.getUserName())} %>" key="modified-x-ago-by-x" />
+							<liferay-ui:message arguments="<%= new String[] {modifiedDateDescription, HtmlUtil.escape(curArticle.getStatusByUserName())} %>" key="modified-x-ago-by-x" />
 						</liferay-ui:search-container-column-text>
 
 						<liferay-ui:search-container-column-date
