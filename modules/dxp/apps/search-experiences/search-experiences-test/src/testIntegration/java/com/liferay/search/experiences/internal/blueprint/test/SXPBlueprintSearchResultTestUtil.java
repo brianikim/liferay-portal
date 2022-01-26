@@ -179,21 +179,21 @@ public class SXPBlueprintSearchResultTestUtil {
 		int boost, String[] fields, String fuzziness, String operator,
 		String query, String type) {
 
-		JSONObject jsonObject = JSONUtil.put(
-			"boost", boost
-		).put(
-			"fields", fields
-		).put(
-			"fuzziness", () -> fuzziness
-		).put(
-			"operator", () -> operator
-		).put(
-			"query", query
-		).put(
-			"type", type
-		);
-
-		return JSONUtil.put("multi_match", jsonObject);
+		return JSONUtil.put(
+			"multi_match",
+			JSONUtil.put(
+				"boost", boost
+			).put(
+				"fields", fields
+			).put(
+				"fuzziness", () -> fuzziness
+			).put(
+				"operator", () -> operator
+			).put(
+				"query", query
+			).put(
+				"type", type
+			));
 	}
 
 }
