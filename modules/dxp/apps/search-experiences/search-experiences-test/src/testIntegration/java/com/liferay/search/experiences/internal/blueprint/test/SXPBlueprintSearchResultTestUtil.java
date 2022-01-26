@@ -14,7 +14,6 @@
 
 package com.liferay.search.experiences.internal.blueprint.test;
 
-import com.liferay.portal.kernel.json.JSONException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
@@ -56,7 +55,7 @@ public class SXPBlueprintSearchResultTestUtil {
 	public static String getElementInstancesJSON(
 			Object[] configurationValuesArray, String[] sxpElementNames,
 			List<SXPElement> sxpElements)
-		throws JSONException {
+		throws Exception {
 
 		ElementInstance[] elementInstances =
 			new ElementInstance[sxpElementNames.length];
