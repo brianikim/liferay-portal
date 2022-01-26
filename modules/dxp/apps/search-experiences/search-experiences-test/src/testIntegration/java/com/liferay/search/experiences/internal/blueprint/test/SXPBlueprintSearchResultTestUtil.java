@@ -127,9 +127,8 @@ public class SXPBlueprintSearchResultTestUtil {
 			UiConfiguration uiConfiguration =
 				elementDefinition.getUiConfiguration();
 
-			if ((uiConfiguration != null) &&
-				(uiConfiguration.getFieldSets() != null) &&
-				(configurationValues != null)) {
+			if ((configurationValues != null) && (uiConfiguration != null) &&
+				(uiConfiguration.getFieldSets() != null)) {
 
 				FieldSet[] fieldSets = uiConfiguration.getFieldSets();
 
