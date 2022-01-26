@@ -118,8 +118,9 @@ public class SXPBlueprintSearchResultTestUtil {
 
 			elementInstance.setSxpElement(
 				SXPElementUtil.toSXPElement(
-					"{\"elementDefinition\":" + elementDefinition.toString() +
-						"}"));
+					JSONUtil.put(
+						"elementDefinition", elementDefinition.toString()
+					).toString()));
 
 			Map<String, Object> uiConfigurationValues = new HashMap<>();
 
