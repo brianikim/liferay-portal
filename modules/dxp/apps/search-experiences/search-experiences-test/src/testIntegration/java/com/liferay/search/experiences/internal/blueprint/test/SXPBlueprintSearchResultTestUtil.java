@@ -184,18 +184,14 @@ public class SXPBlueprintSearchResultTestUtil {
 		).put(
 			"fields", fields
 		).put(
+			"fuzziness", () -> fuzziness
+		).put(
+			"operator", () -> operator
+		).put(
 			"query", query
 		).put(
 			"type", type
 		);
-
-		if (fuzziness != null) {
-			jsonObject.put("fuzziness", fuzziness);
-		}
-
-		if (operator != null) {
-			jsonObject.put("operator", operator);
-		}
 
 		return JSONUtil.put("multi_match", jsonObject);
 	}
