@@ -115,7 +115,6 @@ public class SXPBlueprintSearchResultTestUtil {
 
 			elementInstance.setConfigurationEntry(
 				Configuration.toDTO(configurationJSON));
-
 			elementInstance.setSxpElement(
 				SXPElementUtil.toSXPElement(
 					JSONUtil.put(
