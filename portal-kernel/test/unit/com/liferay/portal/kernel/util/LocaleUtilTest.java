@@ -54,6 +54,18 @@ public class LocaleUtilTest extends PowerMockito {
 			true
 		);
 
+		Mockito.when(
+			LanguageUtil.isAvailableLanguageCode("en")
+		).thenReturn(
+			false
+		);
+
+		Mockito.when(
+			LanguageUtil.isAvailableLanguageCode("fr")
+		).thenReturn(
+			true
+		);
+
 		try (CaptureHandler captureHandler =
 				JDKLoggerTestUtil.configureJDKLogger(
 					LocaleUtil.class.getName(), Level.WARNING)) {
@@ -73,6 +85,11 @@ public class LocaleUtilTest extends PowerMockito {
 
 			Assert.assertEquals(
 				"en is not a valid language id", logRecord.getMessage());
+
+			logRecords.clear();
+
+			Assert.assertEquals(Locale.FRENCH, LocaleUtil.fromLanguageId("fr"));
+			Assert.assertEquals(logRecords.toString(), 0, logRecords.size());
 		}
 	}
 
