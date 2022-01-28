@@ -22,11 +22,17 @@ import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItemListBuilder
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.web.internal.constants.JournalWebConstants;
 import com.liferay.journal.web.internal.servlet.taglib.util.JournalArticleActionDropdownItemsProvider;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.search.RowChecker;
 import com.liferay.portal.kernel.language.LanguageUtil;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.BaseModel;
+import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.taglib.util.LexiconUtil;
 import com.liferay.trash.TrashHelper;
 
 import java.util.Date;
@@ -107,6 +113,56 @@ public class JournalArticleHistoryVerticalCard extends BaseVerticalCard {
 	}
 
 	@Override
+	public String getStickerCssClass() {
+		User user = UserLocalServiceUtil.fetchUser(_article.getUserId());
+
+		if (user == null) {
+			return StringPool.BLANK;
+		}
+
+		return "sticker-user-icon " + LexiconUtil.getUserColorCssClass(user);
+	}
+
+	@Override
+	public String getStickerIcon() {
+		User user = UserLocalServiceUtil.fetchUser(_article.getUserId());
+
+		if (user == null) {
+			return StringPool.BLANK;
+		}
+
+		if (user.getPortraitId() == 0) {
+			return "user";
+		}
+
+		return StringPool.BLANK;
+	}
+
+	@Override
+	public String getStickerImageSrc() {
+		try {
+			User user = UserLocalServiceUtil.fetchUser(_article.getUserId());
+
+			if (user == null) {
+				return StringPool.BLANK;
+			}
+
+			if (user.getPortraitId() <= 0) {
+				return null;
+			}
+
+			return user.getPortraitURL(themeDisplay);
+		}
+		catch (Exception exception) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(exception, exception);
+			}
+
+			return StringPool.BLANK;
+		}
+	}
+
+	@Override
 	public String getSubtitle() {
 		Date createDate = _article.getModifiedDate();
 
@@ -122,6 +178,9 @@ public class JournalArticleHistoryVerticalCard extends BaseVerticalCard {
 	public String getTitle() {
 		return HtmlUtil.escape(_article.getTitle(themeDisplay.getLocale()));
 	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		JournalArticleHistoryVerticalCard.class);
 
 	private final JournalArticle _article;
 	private final AssetDisplayPageFriendlyURLProvider
