@@ -18,6 +18,7 @@ import com.liferay.asset.kernel.AssetRendererFactoryRegistryUtil;
 import com.liferay.asset.kernel.model.AssetCategory;
 import com.liferay.asset.kernel.model.AssetEntry;
 import com.liferay.asset.kernel.model.AssetRendererFactory;
+import com.liferay.asset.util.comparator.AssetRendererFactoryTypeNameComparator;
 import com.liferay.asset.kernel.model.AssetTag;
 import com.liferay.asset.kernel.model.AssetVocabulary;
 import com.liferay.asset.kernel.model.ClassType;
@@ -67,6 +68,8 @@ import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.IndexerRegistryUtil;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
@@ -77,7 +80,6 @@ import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PropertiesParamUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
-import com.liferay.portal.kernel.util.UnicodePropertiesBuilder;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.segments.constants.SegmentsEntryConstants;
@@ -87,6 +89,8 @@ import com.liferay.segments.service.SegmentsEntryServiceUtil;
 import com.liferay.staging.StagingGroupHelper;
 import com.liferay.staging.StagingGroupHelperUtil;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -627,41 +631,33 @@ public class EditAssetListDisplayContext {
 
 		Map<String, Map<String, Object>> manualAddIconDataMap = new HashMap<>();
 
-		AssetListEntry assetListEntry = getAssetListEntry();
+		List<AssetRendererFactory<?>> assetRendererFactories = ListUtil.sort(
+			AssetRendererFactoryRegistryUtil.getAssetRendererFactories(
+				_themeDisplay.getCompanyId(), true),
+			new AssetRendererFactoryTypeNameComparator(
+				_themeDisplay.getLocale()));
 
-		UnicodeProperties unicodeProperties = UnicodePropertiesBuilder.create(
-			true
-		).fastLoad(
-			assetListEntry.getTypeSettings(getSegmentsEntryId())
-		).build();
+		for (AssetRendererFactory<?> curRendererFactory :
+				assetRendererFactories) {
 
-		long[] classNameIds = GetterUtil.getLongValues(
-			StringUtil.split(
-				unicodeProperties.getProperty("classNameIds", null)),
-			AssetRendererFactoryRegistryUtil.getClassNameIds(
-				_themeDisplay.getCompanyId(), true));
-
-		for (long classNameId : classNameIds) {
-			AssetRendererFactory<?> assetRendererFactory =
-				AssetRendererFactoryRegistryUtil.
-					getAssetRendererFactoryByClassNameId(classNameId);
+			AssetListEntry assetListEntry = getAssetListEntry();
 
 			if (!Objects.equals(
 					assetListEntry.getAssetEntryType(),
 					AssetEntry.class.getName()) &&
 				!Objects.equals(
 					assetListEntry.getAssetEntryType(),
-					assetRendererFactory.getClassName())) {
+					curRendererFactory.getClassName())) {
 
 				continue;
 			}
 
-			if (!assetRendererFactory.isSupportsClassTypes()) {
+			if (!curRendererFactory.isSupportsClassTypes()) {
 				manualAddIconDataMap.put(
-					assetRendererFactory.getTypeName(_themeDisplay.getLocale()),
+					curRendererFactory.getTypeName(_themeDisplay.getLocale()),
 					_getDataMap(
-						assetRendererFactory,
-						assetRendererFactory.getTypeName(
+						curRendererFactory,
+						curRendererFactory.getTypeName(
 							_themeDisplay.getLocale()),
 						_DEFAULT_SUBTYPE_SELECTION_ID));
 
@@ -669,7 +665,7 @@ public class EditAssetListDisplayContext {
 			}
 
 			ClassTypeReader classTypeReader =
-				assetRendererFactory.getClassTypeReader();
+				curRendererFactory.getClassTypeReader();
 
 			List<ClassType> assetAvailableClassTypes =
 				classTypeReader.getAvailableClassTypes(
@@ -688,10 +684,57 @@ public class EditAssetListDisplayContext {
 					continue;
 				}
 
+				Stream<AssetListEntrySegmentsEntryRel> stream =
+					_assetListEntrySegmentsEntryRels.stream();
+
+				boolean assetEntrySubtype = stream.anyMatch(
+					assetListEntrySegmentsEntryRel -> {
+						UnicodeProperties typeSettingsUnicodeProperties =
+							new UnicodeProperties(true);
+
+						try {
+							typeSettingsUnicodeProperties.load(
+								assetListEntrySegmentsEntryRel.
+									getTypeSettings());
+						}
+						catch (IOException ioException) {
+							_log.error(ioException, ioException);
+						}
+
+						String anyClassType =
+							"anyClassType" +
+								curRendererFactory.getClassSimpleName();
+
+						if (GetterUtil.getBoolean(
+								typeSettingsUnicodeProperties.getProperty(
+									anyClassType),
+								true)) {
+
+							return true;
+						}
+
+						String classTypeIds =
+							typeSettingsUnicodeProperties.getProperty(
+								"classTypeIds" +
+									curRendererFactory.getClassSimpleName());
+
+						Stream<String> classTypeIdsStream = Arrays.stream(
+							classTypeIds.split(","));
+
+						return classTypeIdsStream.anyMatch(
+							classTypeId -> classTypeId.equals(
+								String.valueOf(
+									assetAvailableClassType.getClassTypeId())));
+					});
+
+				if (!assetEntrySubtype) {
+					continue;
+				}
+
 				manualAddIconDataMap.put(
 					assetAvailableClassType.getName(),
 					_getDataMap(
-						assetRendererFactory, assetAvailableClassType.getName(),
+						curRendererFactory, assetAvailableClassType.getName(),
 						assetAvailableClassType.getClassTypeId()));
 			}
 		}
@@ -1218,6 +1261,9 @@ public class EditAssetListDisplayContext {
 	}
 
 	private static final long _DEFAULT_SUBTYPE_SELECTION_ID = 0;
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		EditAssetListDisplayContext.class);
 
 	private AssetListEntry _assetListEntry;
 	private Long _assetListEntryId;
