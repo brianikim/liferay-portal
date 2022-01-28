@@ -341,7 +341,7 @@ public class JournalArticleInfoItemFieldValuesProvider
 			}
 
 			User lastEditorUser = _userLocalService.fetchUser(
-				journalArticle.getUserId());
+				journalArticle.getStatusByUserId());
 
 			if (lastEditorUser != null) {
 				journalArticleFieldValues.add(
