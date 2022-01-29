@@ -20,43 +20,34 @@
 ViewSXPBlueprintsDisplayContext viewSXPBlueprintsDisplayContext = (ViewSXPBlueprintsDisplayContext)request.getAttribute(SXPWebKeys.VIEW_SXP_BLUEPRINTS_DISPLAY_CONTEXT);
 %>
 
-<aui:form action="<%= viewSXPBlueprintsDisplayContext.getPortletURL() %>" method="post" name="fm">
-	<aui:input name="redirect" type="hidden" value="<%= String.valueOf(viewSXPBlueprintsDisplayContext.getPortletURL()) %>" />
-
-	<clay:headless-data-set-display
-		apiURL="<%= viewSXPBlueprintsDisplayContext.getAPIURL() %>"
-		bulkActionDropdownItems="<%= viewSXPBlueprintsDisplayContext.getBulkActionDropdownItems() %>"
-		clayDataSetActionDropdownItems="<%= viewSXPBlueprintsDisplayContext.getClayDataSetActionDropdownItems() %>"
-		creationMenu="<%= viewSXPBlueprintsDisplayContext.getCreationMenu() %>"
-		id="<%= SXPBlueprintAdminClayDataSetDisplayNames.SXP_BLUEPRINTS %>"
-		itemsPerPage="<%= 20 %>"
-		namespace="<%= liferayPortletResponse.getNamespace() %>"
-		pageNumber="<%= 1 %>"
-		portletURL="<%= liferayPortletResponse.createRenderURL() %>"
-		propsTransformer="sxp_blueprint_admin/js/view_sxp_blueprints/ViewSXPBlueprintsPropsTransformer"
-		selectedItemsKey="id"
-		selectionType="multiple"
-		style="fluid"
-	/>
-</aui:form>
-
-<div id="<portlet:namespace />addSXPBlueprint">
+<div id="<portlet:namespace />viewSXPBlueprints">
 	<react:component
-		module="sxp_blueprint_admin/js/view_sxp_blueprints/AddSXPBlueprintModal"
+		module="sxp_blueprint_admin/js/view_sxp_blueprints/index"
 		props='<%=
 			HashMapBuilder.<String, Object>put(
-				"contextPath", application.getContextPath()
+				"apiURL", viewSXPBlueprintsDisplayContext.getAPIURL()
 			).put(
 				"defaultLocale", LocaleUtil.toLanguageId(LocaleUtil.getDefault())
 			).put(
+				"deleteSXPBlueprintURL",
+				PortletURLBuilder.createActionURL(
+					liferayPortletResponse
+				).setActionName(
+					"/sxp_blueprint_admin/edit_sxp_blueprint"
+				).setCMD(
+					Constants.DELETE
+				).buildString()
+			).put(
 				"editSXPBlueprintURL",
 				PortletURLBuilder.createRenderURL(
-					renderResponse
+					liferayPortletResponse
 				).setMVCRenderCommandName(
 					"/sxp_blueprint_admin/edit_sxp_blueprint"
 				).buildString()
 			).put(
-				"portletNamespace", liferayPortletResponse.getNamespace()
+				"hasAddSXPBlueprintPermission", viewSXPBlueprintsDisplayContext.hasAddSXPBlueprintPermission()
+			).put(
+				"namespace", liferayPortletResponse.getNamespace()
 			).build()
 		%>'
 	/>

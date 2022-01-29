@@ -1,0 +1,15 @@
+.sort-button {
+	margin-left: 6px;
+
+	.lexicon-icon {
+		color: $secondaryL1;
+
+		&.active {
+			color: $main;
+		}
+
+		&.lexicon-icon-order-arrow-down {
+			margin-left: -6px;
+		}
+	}
+}
