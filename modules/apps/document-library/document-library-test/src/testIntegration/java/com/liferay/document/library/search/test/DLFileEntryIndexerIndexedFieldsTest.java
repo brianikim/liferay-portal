@@ -255,8 +255,12 @@ public class DLFileEntryIndexerIndexedFieldsTest extends BaseDLIndexerTestCase {
 		map.put("readCount", String.valueOf(fileEntry.getReadCount()));
 		map.put("size", String.valueOf(fileEntry.getSize()));
 		map.put("size_sortable", String.valueOf(fileEntry.getSize()));
+		map.put("versionCount", String.valueOf(fileEntry.getVersion()));
+		map.put(
+			"versionCount_sortable", String.valueOf(fileEntry.getVersion()));
 		map.put("visible", "true");
 
+		populateContentLength(fileEntry, map);
 		populateDates(fileEntry, map);
 
 		if (_ddmIndexer.isLegacyDDMIndexFieldsEnabled()) {
@@ -266,8 +270,6 @@ public class DLFileEntryIndexerIndexedFieldsTest extends BaseDLIndexerTestCase {
 			populateHttpHeaders(fileEntry, map);
 		}
 
-		populateVersionCount(fileEntry, map);
-		populateContentLength(fileEntry, map);
 		populateLocalizedTitles(fileEntry, map);
 		populateViewCount(fileEntry, map);
 
@@ -333,15 +335,6 @@ public class DLFileEntryIndexerIndexedFieldsTest extends BaseDLIndexerTestCase {
 			map.put(key, title);
 			map.put(key.concat("_sortable"), title);
 		}
-	}
-
-	protected void populateVersionCount(
-		FileEntry fileEntry, Map<String, String> map) {
-
-		String version = fileEntry.getVersion();
-
-		map.put("versionCount", String.valueOf(version));
-		map.put("versionCount_sortable", String.valueOf(version));
 	}
 
 	protected void populateViewCount(
