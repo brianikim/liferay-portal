@@ -562,8 +562,7 @@ public class PortalRequestProcessor {
 
 				String lastPathPath = lastPath.getPath();
 
-				// Ignore lastPath if it is pointing to a .map file (see
-				// LPS-141963)
+				// Ignore files that end with .map. See LPS-141963.
 
 				if (!lastPathPath.endsWith(".map")) {
 					session.setAttribute(WebKeys.LAST_PATH, lastPath);
