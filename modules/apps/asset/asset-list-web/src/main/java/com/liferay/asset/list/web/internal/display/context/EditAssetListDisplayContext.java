@@ -642,8 +642,8 @@ public class EditAssetListDisplayContext {
 
 			AssetListEntry assetListEntry = getAssetListEntry();
 
-			if (!assetRendererFactory.isActive(_themeDisplay.getCompanyId()) ||
-				!assetRendererFactory.isSelectable()) {
+			if (!curRendererFactory.isActive(_themeDisplay.getCompanyId()) ||
+				!curRendererFactory.isSelectable()) {
 
 				continue;
 			}
