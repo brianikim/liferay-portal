@@ -179,8 +179,9 @@ public class CommerceInventoryWarehouseItemFinderImpl
 			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
 
 			queryPos.add(companyId);
-			queryPos.add(commerceChannelGroupId);
 			queryPos.add(sku);
+			queryPos.add(companyId);
+			queryPos.add(commerceChannelGroupId);
 
 			Iterator<Integer> iterator = sqlQuery.iterate();
 
