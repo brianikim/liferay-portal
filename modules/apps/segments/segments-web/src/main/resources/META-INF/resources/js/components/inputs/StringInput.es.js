@@ -16,6 +16,7 @@ import {ClaySelectWithOption} from '@clayui/form';
 import propTypes from 'prop-types';
 import React from 'react';
 
+import {unescapeSingleQuotes} from '../../utils/odata.es';
 class StringInput extends React.Component {
 	static propTypes = {
 		disabled: propTypes.bool,
@@ -28,7 +29,25 @@ class StringInput extends React.Component {
 		options: [],
 	};
 
+	constructor(props) {
+		super(props);
+
+		this.state = {
+			value: props.value,
+		};
+	}
+
+	componentDidMount() {
+		this.setState({
+			value: unescapeSingleQuotes(this.props.value),
+		});
+	}
+
 	_handleChange = (event) => {
+		this.setState({
+			value: event.target.value,
+		});
+
 		this.props.onChange({value: event.target.value});
 	};
 
@@ -42,7 +61,7 @@ class StringInput extends React.Component {
 				disabled={disabled}
 				onChange={this._handleChange}
 				type="text"
-				value={value}
+				value={this.state.value}
 			/>
 		) : (
 			<ClaySelectWithOption
