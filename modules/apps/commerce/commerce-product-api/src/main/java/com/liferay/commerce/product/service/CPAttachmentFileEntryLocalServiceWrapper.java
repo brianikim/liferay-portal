@@ -448,6 +448,18 @@ public class CPAttachmentFileEntryLocalServiceWrapper
 	public java.util.List
 		<com.liferay.commerce.product.model.CPAttachmentFileEntry>
 				getCPAttachmentFileEntries(
+					long classNameId, long classPK, String keywords, int type,
+					int status, int start, int end)
+			throws com.liferay.portal.kernel.exception.PortalException {
+
+		return _cpAttachmentFileEntryLocalService.getCPAttachmentFileEntries(
+			classNameId, classPK, keywords, type, status, start, end);
+	}
+
+	@Override
+	public java.util.List
+		<com.liferay.commerce.product.model.CPAttachmentFileEntry>
+				getCPAttachmentFileEntries(
 					long cpDefinitionId, String serializedDDMFormValues,
 					int type, int start, int end)
 			throws Exception {
@@ -514,6 +526,17 @@ public class CPAttachmentFileEntryLocalServiceWrapper
 
 		return _cpAttachmentFileEntryLocalService.
 			getCPAttachmentFileEntriesCount(classNameId, classPK, type, status);
+	}
+
+	@Override
+	public int getCPAttachmentFileEntriesCount(
+			long classNameId, long classPK, String keywords, int type,
+			int status)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return _cpAttachmentFileEntryLocalService.
+			getCPAttachmentFileEntriesCount(
+				classNameId, classPK, keywords, type, status);
 	}
 
 	/**
