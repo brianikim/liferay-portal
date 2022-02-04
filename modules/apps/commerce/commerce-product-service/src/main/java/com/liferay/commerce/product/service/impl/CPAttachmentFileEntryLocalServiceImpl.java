@@ -877,7 +877,15 @@ public class CPAttachmentFileEntryLocalServiceImpl
 			).and(
 				CPAttachmentFileEntryTable.INSTANCE.type.eq(type)
 			).and(
-				CPAttachmentFileEntryTable.INSTANCE.status.eq(status)
+				() -> {
+					if (status == WorkflowConstants.STATUS_ANY) {
+						return CPAttachmentFileEntryTable.INSTANCE.status.neq(
+							WorkflowConstants.STATUS_IN_TRASH);
+					}
+
+					return CPAttachmentFileEntryTable.INSTANCE.status.eq(
+						status);
+				}
 			).and(
 				() -> {
 					if (Validator.isNotNull(keywords)) {
