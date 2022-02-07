@@ -300,7 +300,7 @@ public class ElasticsearchInstanceSettingsBuilder {
 
 		configureTestMode();
 
-		put("transport.type", "netty4");
+		_disableXpack();
 	}
 
 	protected void loadSettingsContributors() {
@@ -334,6 +334,14 @@ public class ElasticsearchInstanceSettingsBuilder {
 
 	protected void put(String key, String value) {
 		_settingsBuilder.put(key, value);
+	}
+
+	private void _disableXpack() {
+		put("xpack.ml.enabled", false);
+		put("xpack.monitoring.enabled", false);
+		put("xpack.security.enabled", false);
+		put("xpack.sql.enabled", false);
+		put("xpack.watcher.enabled", false);
 	}
 
 	private String _clusterInitialMasterNodes;
