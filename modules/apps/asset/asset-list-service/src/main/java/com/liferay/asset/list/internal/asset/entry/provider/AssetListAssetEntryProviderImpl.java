@@ -78,9 +78,6 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 /**
  * @author Sarai Díaz
@@ -233,6 +230,44 @@ public class AssetListAssetEntryProviderImpl
 		unicodeProperties.fastLoad(
 			assetListEntry.getTypeSettings(segmentsEntryId));
 
+		_createAssetEntryQuery(
+			assetListEntry, userId, assetEntryQuery, unicodeProperties);
+
+		return assetEntryQuery;
+	}
+
+	protected AssetEntryQuery getAssetEntryQuery(
+		AssetListEntry assetListEntry, long[] segmentsEntryIds, String userId,
+		int end, int start) {
+
+		AssetEntryQuery assetEntryQuery = new AssetEntryQuery();
+
+		LongStream longStream = Arrays.stream(segmentsEntryIds);
+
+		List<String> typeSettings = longStream.mapToObj(
+			assetListEntry::getTypeSettings
+		).collect(
+			Collectors.toList()
+		);
+
+		UnicodeProperties unicodeProperties = new UnicodeProperties(true);
+
+		unicodeProperties.setProperty(
+			"anyAssetType", StringUtil.merge(typeSettings, StringPool.COMMA));
+
+		_createAssetEntryQuery(
+			assetListEntry, userId, assetEntryQuery, unicodeProperties);
+
+		assetEntryQuery.setEnd(end);
+		assetEntryQuery.setStart(start);
+
+		return assetEntryQuery;
+	}
+
+	private void _createAssetEntryQuery(
+		AssetListEntry assetListEntry, String userId,
+		AssetEntryQuery assetEntryQuery, UnicodeProperties unicodeProperties) {
+
 		_setCategoriesAndTagsAndKeywords(
 			assetEntryQuery, unicodeProperties,
 			_getAssetCategoryIds(unicodeProperties),
@@ -325,49 +360,28 @@ public class AssetListAssetEntryProviderImpl
 		}
 
 		String orderByColumn1 = GetterUtil.getString(
-			unicodeProperties.getProperty("orderByColumn1", "modifiedDate"));
+			unicodeProperties.getProperty("orderByColumn1", "priority"));
 
 		assetEntryQuery.setOrderByCol1(orderByColumn1);
 
 		String orderByColumn2 = GetterUtil.getString(
-			unicodeProperties.getProperty("orderByColumn2", "title"));
+			unicodeProperties.getProperty("orderByColumn2", "modifiedDate"));
 
 		assetEntryQuery.setOrderByCol2(orderByColumn2);
 
 		String orderByType1 = GetterUtil.getString(
-			unicodeProperties.getProperty("orderByType1", "DESC"));
+			unicodeProperties.getProperty("orderByType1", "ASC"));
 
 		assetEntryQuery.setOrderByType1(orderByType1);
 
 		String orderByType2 = GetterUtil.getString(
-			unicodeProperties.getProperty("orderByType2", "ASC"));
+			unicodeProperties.getProperty("orderByType2", "DESC"));
 
 		assetEntryQuery.setOrderByType2(orderByType2);
 
 		_processAssetEntryQuery(
 			assetListEntry.getCompanyId(), userId, unicodeProperties,
 			assetEntryQuery);
-
-		return assetEntryQuery;
-	}
-
-	@Reference(
-		cardinality = ReferenceCardinality.MULTIPLE,
-		policy = ReferencePolicy.DYNAMIC,
-		policyOption = ReferencePolicyOption.GREEDY
-	)
-	protected void setAssetListAssetEntryQueryProcessor(
-		AssetListAssetEntryQueryProcessor assetListAssetEntryQueryProcessor) {
-
-		_assetListAssetEntryQueryProcessors.add(
-			assetListAssetEntryQueryProcessor);
-	}
-
-	protected void unsetAssetListAssetEntryQueryProcessor(
-		AssetListAssetEntryQueryProcessor assetListAssetEntryQueryProcessor) {
-
-		_assetListAssetEntryQueryProcessors.remove(
-			assetListAssetEntryQueryProcessor);
 	}
 
 	private long[] _filterAssetCategoryIds(long[] assetCategoryIds) {
@@ -583,77 +597,25 @@ public class AssetListAssetEntryProviderImpl
 		AssetListEntry assetListEntry, long[] segmentsEntryIds, String userId,
 		int start, int end) {
 
-		List<AssetEntry> dynamicAssetEntries = new ArrayList<>();
-
 		if (_assetListConfiguration.combineAssetsFromAllSegmentsDynamic()) {
-			if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS)) {
-				for (long segmentsEntryId :
-						_getCombinedSegmentsEntryIds(
-							assetListEntry, segmentsEntryIds)) {
+			AssetEntryQuery assetEntryQuery = getAssetEntryQuery(
+				assetListEntry,
+				_getCombinedSegmentsEntryIds(assetListEntry, segmentsEntryIds),
+				userId, end, start);
 
-					AssetEntryQuery assetEntryQuery = getAssetEntryQuery(
-						assetListEntry, segmentsEntryId, userId);
-
-					List<AssetEntry> assetEntries = _search(
-						assetListEntry.getCompanyId(), assetEntryQuery);
-
-					dynamicAssetEntries.addAll(assetEntries);
-				}
-			}
-			else {
-				int count = 0;
-				int remaining = Math.max(0, end - start);
-				int subtotal = 0;
-
-				for (long segmentsEntryId :
-						_getCombinedSegmentsEntryIds(
-							assetListEntry, segmentsEntryIds)) {
-
-					AssetEntryQuery assetEntryQuery = getAssetEntryQuery(
-						assetListEntry, segmentsEntryId, userId);
-
-					count = (int)_searchCount(
-						assetListEntry.getCompanyId(), assetEntryQuery);
-
-					if ((subtotal + count) < start) {
-						subtotal = +count;
-
-						continue;
-					}
-
-					List<AssetEntry> assetEntries = _search(
-						assetListEntry.getCompanyId(), assetEntryQuery);
-
-					count = assetEntries.size();
-
-					List<AssetEntry> assetEntriesSublist = assetEntries.subList(
-						Math.max(start - subtotal, 0),
-						Math.min(remaining, count));
-
-					dynamicAssetEntries.addAll(assetEntriesSublist);
-
-					remaining -= assetEntriesSublist.size();
-
-					subtotal += count;
-
-					if (remaining <= 0) {
-						break;
-					}
-				}
-			}
+			return _search(assetListEntry.getCompanyId(), assetEntryQuery);
 		}
 		else {
 			AssetEntryQuery assetEntryQuery = getAssetEntryQuery(
-				assetListEntry, segmentsEntryIds, userId);
+				assetListEntry,
+				_getFirstSegmentsEntryId(assetListEntry, segmentsEntryIds),
+				userId);
 
 			assetEntryQuery.setEnd(end);
 			assetEntryQuery.setStart(start);
 
-			dynamicAssetEntries = _search(
-				assetListEntry.getCompanyId(), assetEntryQuery);
+			return _search(assetListEntry.getCompanyId(), assetEntryQuery);
 		}
-
-		return dynamicAssetEntries;
 	}
 
 	private long _getFirstSegmentsEntryId(
