@@ -43,7 +43,7 @@ import java.util.stream.Stream;
  */
 public class SXPBlueprintSearchResultTestUtil {
 
-	public static final String QUERY_CONFIGURATION_JSON = JSONUtil.put(
+	public static final String JSON_QUERY_CONFIGURATION = JSONUtil.put(
 		"generalConfiguration",
 		JSONUtil.put(
 			"searchableAssetTypes",
@@ -52,7 +52,7 @@ public class SXPBlueprintSearchResultTestUtil {
 		"queryConfiguration", JSONUtil.put("applyIndexerClauses", true)
 	).toString();
 
-	public static final String[] TITLE_CONTENT_LOCALE_DEFAULT_BOOST = {
+	public static final String[] FIELDS = {
 		"localized_title_${context.language_id}^2",
 		"content_${context.language_id}^1"
 	};
