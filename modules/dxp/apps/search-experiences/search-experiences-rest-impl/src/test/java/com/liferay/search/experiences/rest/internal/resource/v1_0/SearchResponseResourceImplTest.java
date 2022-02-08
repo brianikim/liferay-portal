@@ -110,7 +110,6 @@ public class SearchResponseResourceImplTest {
 				"severity", "ERROR"
 			).build(),
 			errorMaps[0]);
-
 		_assertEquals(
 			HashMapBuilder.put(
 				"exceptionClass", InvalidQueryEntryException.class.getName()
