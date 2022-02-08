@@ -43,6 +43,11 @@ import java.util.stream.Stream;
  */
 public class SXPBlueprintSearchResultTestUtil {
 
+	public static final String[] FIELDS = {
+		"localized_title_${context.language_id}^2",
+		"content_${context.language_id}^1"
+	};
+
 	public static final String JSON_QUERY_CONFIGURATION = JSONUtil.put(
 		"generalConfiguration",
 		JSONUtil.put(
@@ -51,11 +56,6 @@ public class SXPBlueprintSearchResultTestUtil {
 	).put(
 		"queryConfiguration", JSONUtil.put("applyIndexerClauses", true)
 	).toString();
-
-	public static final String[] FIELDS = {
-		"localized_title_${context.language_id}^2",
-		"content_${context.language_id}^1"
-	};
 
 	public static String getElementInstancesJSON(
 			Object[] configurationValuesArray, String[] sxpElementNames,
