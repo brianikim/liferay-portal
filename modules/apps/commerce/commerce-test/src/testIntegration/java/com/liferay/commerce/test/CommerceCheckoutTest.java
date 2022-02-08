@@ -14,6 +14,7 @@
 
 package com.liferay.commerce.test;
 
+import com.liferay.account.model.AccountEntry;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.commerce.account.constants.CommerceAccountConstants;
 import com.liferay.commerce.account.model.CommerceAccount;
@@ -825,13 +826,12 @@ public class CommerceCheckoutTest {
 		}
 
 		return CommerceAddressLocalServiceUtil.addCommerceAddress(
-			CommerceAccount.class.getName(),
-			commerceOrder.getCommerceAccountId(), RandomTestUtil.randomString(),
+			AccountEntry.class.getName(), commerceOrder.getCommerceAccountId(),
 			RandomTestUtil.randomString(), RandomTestUtil.randomString(),
 			RandomTestUtil.randomString(), RandomTestUtil.randomString(),
-			RandomTestUtil.randomString(), RandomTestUtil.randomString(), 0,
-			country.getCountryId(), RandomTestUtil.randomString(), addressType,
-			_serviceContext);
+			RandomTestUtil.randomString(), RandomTestUtil.randomString(),
+			RandomTestUtil.randomString(), 0, country.getCountryId(),
+			RandomTestUtil.randomString(), addressType, _serviceContext);
 	}
 
 	private static Company _company;

@@ -14,6 +14,7 @@
 
 package com.liferay.commerce.checkout.helper.test;
 
+import com.liferay.account.model.AccountEntry;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.commerce.account.constants.CommerceAccountConstants;
 import com.liferay.commerce.account.model.CommerceAccount;
@@ -176,7 +177,7 @@ public class CommerceCheckoutStepHttpHelperTest {
 		}
 
 		return _commerceAddressLocalService.addCommerceAddress(
-			CommerceAccount.class.getName(), commerceAccountId,
+			AccountEntry.class.getName(), commerceAccountId,
 			RandomTestUtil.randomString(), RandomTestUtil.randomString(),
 			RandomTestUtil.randomString(), RandomTestUtil.randomString(),
 			RandomTestUtil.randomString(), RandomTestUtil.randomString(),
