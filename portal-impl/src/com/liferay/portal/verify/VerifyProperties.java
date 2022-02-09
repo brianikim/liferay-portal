@@ -1635,8 +1635,11 @@ public class VerifyProperties extends VerifyProcess {
 		"com.liferay.portal.servlet.filters.doubleclick.DoubleClickFilter",
 		"com.liferay.portal.servlet.filters.charbufferpool." +
 			"CharBufferPoolFilter",
+		"com.liferay.portal.servlet.filters.jsoncontenttype." +
+			"JSONContentTypeFilter",
 		"com.liferay.portal.servlet.filters.monitoring.MonitoringFilter",
 		"com.liferay.portal.servlet.filters.secure.SecureFilter",
+		"com.liferay.portal.servlet.filters.sso.opensso.OpenSSOFilter",
 		"com.liferay.portal.servlet.filters.validhtml.ValidHtmlFilter",
 		"com.liferay.portal.upload.UploadServletRequestImpl.max.size",
 		"com.liferay.portal.upload.UploadServletRequestImpl.temp.dir",
