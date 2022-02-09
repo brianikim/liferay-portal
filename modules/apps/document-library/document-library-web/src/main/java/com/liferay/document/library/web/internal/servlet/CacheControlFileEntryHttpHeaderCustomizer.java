@@ -71,7 +71,7 @@ public class CacheControlFileEntryHttpHeaderCustomizer
 		throws PortalException {
 
 		if (ArrayUtil.contains(
-				_cacheControlConfiguration.noCacheableMimeTypes(),
+				_cacheControlConfiguration.notCacheableMimeTypes(),
 				fileEntry.getMimeType())) {
 
 			return HttpHeaders.CACHE_CONTROL_NO_CACHE_VALUE;
