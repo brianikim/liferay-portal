@@ -16,10 +16,8 @@ package com.liferay.search.experiences.web.internal.blueprint.admin.display.cont
 
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermission;
-import com.liferay.portal.kernel.util.Constants;
 import com.liferay.search.experiences.constants.SXPActionKeys;
 import com.liferay.search.experiences.model.SXPBlueprint;
-import com.liferay.search.experiences.web.internal.compat.petra.portlet.url.builder.PortletURLBuilder;
 import com.liferay.search.experiences.web.internal.display.context.helper.SXPRequestHelper;
 
 import javax.servlet.http.HttpServletRequest;
