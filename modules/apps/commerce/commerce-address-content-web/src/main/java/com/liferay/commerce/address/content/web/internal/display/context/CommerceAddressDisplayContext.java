@@ -14,6 +14,7 @@
 
 package com.liferay.commerce.address.content.web.internal.display.context;
 
+import com.liferay.account.model.AccountEntry;
 import com.liferay.commerce.account.model.CommerceAccount;
 import com.liferay.commerce.account.util.CommerceAccountHelper;
 import com.liferay.commerce.address.content.web.internal.portlet.action.helper.ActionHelper;
@@ -271,7 +272,7 @@ public class CommerceAddressDisplayContext {
 
 		_searchContainer.setResultsAndTotal(
 			_commerceAddressService.searchCommerceAddresses(
-				commerceAccount.getCompanyId(), CommerceAccount.class.getName(),
+				commerceAccount.getCompanyId(), AccountEntry.class.getName(),
 				commerceAccount.getCommerceAccountId(), null,
 				_searchContainer.getStart(), _searchContainer.getEnd(), null));
 

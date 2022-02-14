@@ -14,6 +14,7 @@
 
 package com.liferay.headless.commerce.admin.account.internal.resource.v1_0;
 
+import com.liferay.account.model.AccountEntry;
 import com.liferay.commerce.account.exception.NoSuchAccountException;
 import com.liferay.commerce.account.model.CommerceAccount;
 import com.liferay.commerce.account.service.CommerceAccountService;
@@ -348,7 +349,7 @@ public class AccountAddressResourceImpl
 			_commerceAddressService.addCommerceAddress(
 				GetterUtil.getString(
 					accountAddress.getExternalReferenceCode(), null),
-				commerceAccount.getModelClassName(),
+				AccountEntry.class.getName(),
 				commerceAccount.getCommerceAccountId(),
 				accountAddress.getName(), accountAddress.getDescription(),
 				accountAddress.getStreet1(), accountAddress.getStreet2(),
@@ -372,13 +373,13 @@ public class AccountAddressResourceImpl
 
 		List<CommerceAddress> commerceAddresses =
 			_commerceAddressService.getCommerceAddresses(
-				commerceAccount.getModelClassName(),
+				AccountEntry.class.getName(),
 				commerceAccount.getCommerceAccountId(),
 				pagination.getStartPosition(), pagination.getEndPosition(),
 				null);
 
 		int totalItems = _commerceAddressService.getCommerceAddressesCount(
-			commerceAccount.getModelClassName(),
+			AccountEntry.class.getName(),
 			commerceAccount.getCommerceAccountId());
 
 		return Page.of(

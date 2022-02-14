@@ -523,7 +523,7 @@ public class AccountResourceImpl
 		if (accountAddresses != null) {
 			List<CommerceAddress> commerceAddresses =
 				_commerceAddressService.getCommerceAddresses(
-					commerceAccount.getModelClassName(),
+					AccountEntry.class.getName(),
 					commerceAccount.getCommerceAccountId(), QueryUtil.ALL_POS,
 					QueryUtil.ALL_POS, null);
 
@@ -554,7 +554,7 @@ public class AccountResourceImpl
 					_commerceAddressService.addCommerceAddress(
 						GetterUtil.getString(
 							accountAddress.getExternalReferenceCode(), null),
-						commerceAccount.getModelClassName(),
+						AccountEntry.class.getName(),
 						commerceAccount.getCommerceAccountId(),
 						accountAddress.getName(),
 						accountAddress.getDescription(),

@@ -62,7 +62,7 @@ public abstract class BaseAddressCheckoutStepDisplayContext {
 
 	public List<CommerceAddress> getCommerceAddresses() throws PortalException {
 		return commerceAddressService.getCommerceAddressesByCompanyId(
-			_commerceOrder.getCompanyId(), CommerceAccount.class.getName(),
+			_commerceOrder.getCompanyId(), AccountEntry.class.getName(),
 			_commerceOrder.getCommerceAccountId(), QueryUtil.ALL_POS,
 			QueryUtil.ALL_POS, new CommerceAddressNameComparator());
 	}

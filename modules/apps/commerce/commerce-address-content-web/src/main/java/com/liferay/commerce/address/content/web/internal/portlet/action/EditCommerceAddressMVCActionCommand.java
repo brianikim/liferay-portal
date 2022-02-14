@@ -14,7 +14,7 @@
 
 package com.liferay.commerce.address.content.web.internal.portlet.action;
 
-import com.liferay.commerce.account.model.CommerceAccount;
+import com.liferay.account.model.AccountEntry;
 import com.liferay.commerce.constants.CommercePortletKeys;
 import com.liferay.commerce.exception.CommerceAddressCityException;
 import com.liferay.commerce.exception.CommerceAddressCountryException;
@@ -136,7 +136,7 @@ public class EditCommerceAddressMVCActionCommand extends BaseMVCActionCommand {
 				actionRequest, "commerceAccountId");
 
 			_commerceAddressService.addCommerceAddress(
-				CommerceAccount.class.getName(), commerceAccountId, name,
+				AccountEntry.class.getName(), commerceAccountId, name,
 				description, street1, street2, street3, city, zip, regionId,
 				countryId, phoneNumber, defaultBilling, defaultShipping,
 				serviceContext);

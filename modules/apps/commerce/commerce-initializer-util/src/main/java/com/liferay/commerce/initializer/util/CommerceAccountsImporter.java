@@ -14,6 +14,7 @@
 
 package com.liferay.commerce.initializer.util;
 
+import com.liferay.account.model.AccountEntry;
 import com.liferay.commerce.account.constants.CommerceAccountConstants;
 import com.liferay.commerce.account.exception.NoSuchAccountGroupException;
 import com.liferay.commerce.account.model.CommerceAccount;
@@ -170,7 +171,7 @@ public class CommerceAccountsImporter {
 		// Add Commerce Address
 
 		_commerceAddressLocalService.addCommerceAddress(
-			commerceAccount.getModelClassName(),
+			AccountEntry.class.getName(),
 			commerceAccount.getCommerceAccountId(), commerceAccount.getName(),
 			StringPool.BLANK, street1, StringPool.BLANK, StringPool.BLANK, city,
 			zip, regionId, country.getCountryId(), StringPool.BLANK, true, true,

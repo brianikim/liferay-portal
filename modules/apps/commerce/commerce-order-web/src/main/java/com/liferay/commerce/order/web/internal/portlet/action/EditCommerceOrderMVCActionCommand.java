@@ -14,7 +14,7 @@
 
 package com.liferay.commerce.order.web.internal.portlet.action;
 
-import com.liferay.commerce.account.model.CommerceAccount;
+import com.liferay.account.model.AccountEntry;
 import com.liferay.commerce.constants.CommerceAddressConstants;
 import com.liferay.commerce.constants.CommerceOrderConstants;
 import com.liferay.commerce.constants.CommercePortletKeys;
@@ -177,7 +177,7 @@ public class EditCommerceOrderMVCActionCommand extends BaseMVCActionCommand {
 
 		CommerceAddress commerceAddress =
 			_commerceAddressService.addCommerceAddress(
-				CommerceAccount.class.getName(),
+				AccountEntry.class.getName(),
 				commerceOrder.getCommerceAccountId(), name, description,
 				street1, street2, street3, city, zip, regionId, countryId,
 				phoneNumber, CommerceAddressConstants.ADDRESS_TYPE_BILLING,
@@ -224,7 +224,7 @@ public class EditCommerceOrderMVCActionCommand extends BaseMVCActionCommand {
 
 		CommerceAddress commerceAddress =
 			_commerceAddressService.addCommerceAddress(
-				CommerceAccount.class.getName(),
+				AccountEntry.class.getName(),
 				commerceOrder.getCommerceAccountId(), name, description,
 				street1, street2, street3, city, zip, regionId, countryId,
 				phoneNumber, CommerceAddressConstants.ADDRESS_TYPE_SHIPPING,
