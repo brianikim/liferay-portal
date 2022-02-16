@@ -69,10 +69,6 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 			new CPSpecificationOptionFacetsDisplayContext(
 				_portal.getHttpServletRequest(_renderRequest));
 
-		cpSpecificationOptionFacetsDisplayContext.
-			setCPSpecificationOptionsSearchFacetDisplayContexts(
-				_buildCPSpecificationOptionsSearchFacetDisplayContexts());
-
 		ThemeDisplay themeDisplay = (ThemeDisplay)_renderRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
@@ -83,6 +79,10 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 				portletDisplay.getPortletInstanceConfiguration(
 					CPSpecificationOptionFacetPortletInstanceConfiguration.
 						class));
+
+		cpSpecificationOptionFacetsDisplayContext.
+			setCPSpecificationOptionsSearchFacetDisplayContexts(
+				_buildCPSpecificationOptionsSearchFacetDisplayContexts());
 
 		return cpSpecificationOptionFacetsDisplayContext;
 	}
