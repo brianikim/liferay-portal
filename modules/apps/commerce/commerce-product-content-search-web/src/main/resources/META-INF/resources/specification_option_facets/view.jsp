@@ -33,7 +33,7 @@ CPSpecificationOptionFacetPortletInstanceConfiguration cpSpecificationOptionFace
 		<%
 		int j = 0;
 
-		for (CPSpecificationOptionsSearchFacetDisplayContext cpSpecificationOptionsSearchFacetDisplayContext : cpSpecificationOptionFacetsDisplayContext.getCpSpecificationOptionsSearchFacetDisplayContext()) {
+		for (CPSpecificationOptionsSearchFacetDisplayContext cpSpecificationOptionsSearchFacetDisplayContext : cpSpecificationOptionFacetsDisplayContext.getCPSpecificationOptionsSearchFacetDisplayContexts()) {
 			j++;
 
 			Facet facet = cpSpecificationOptionsSearchFacetDisplayContext.getFacet();
