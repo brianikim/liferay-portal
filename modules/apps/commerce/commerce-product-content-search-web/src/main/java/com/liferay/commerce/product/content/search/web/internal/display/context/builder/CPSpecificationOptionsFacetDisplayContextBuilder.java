@@ -122,7 +122,7 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 	private CPSpecificationOptionsSearchFacetDisplayContext
 	_buildCPSpecificationOptionsSearchFacetDisplayContext() {
 
-		_tuples = _collectTuples(_facet.getFacetCollector());
+		_tuples = _getTuples(_facet.getFacetCollector());
 
 		CPSpecificationOptionsSearchFacetDisplayContext
 			cpSpecificationOptionsSearchFacetDisplayContext =
@@ -344,7 +344,7 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 		return cpSpecificationOptionsSearchFacetTermDisplayContexts;
 	}
 
-	private List<Tuple> _collectTuples(FacetCollector facetCollector) {
+	private List<Tuple> _getTuples(FacetCollector facetCollector) {
 		List<TermCollector> termCollectors = facetCollector.getTermCollectors();
 
 		List<Tuple> tuples = new ArrayList<>(termCollectors.size());
