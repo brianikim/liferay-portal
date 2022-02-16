@@ -35,7 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 public class CPSpecificationOptionFacetsDisplayContext implements Serializable {
 
 	public CPSpecificationOptionFacetsDisplayContext(
-		HttpServletRequest httpServletRequest)
+			HttpServletRequest httpServletRequest)
 		throws ConfigurationException {
 
 		_httpServletRequest = httpServletRequest;
@@ -52,15 +52,15 @@ public class CPSpecificationOptionFacetsDisplayContext implements Serializable {
 	}
 
 	public CPSpecificationOptionFacetPortletInstanceConfiguration
-	getCPSpecificationOptionFacetPortletInstanceConfiguration() {
+		getCPSpecificationOptionFacetPortletInstanceConfiguration() {
 
 		return _cpSpecificationOptionFacetPortletInstanceConfiguration;
 	}
 
 	public List<CPSpecificationOptionsSearchFacetDisplayContext>
-	getCPSpecificationOptionsSearchFacetDisplayContexts() {
+		getCPSpecificationOptionsSearchFacetDisplayContexts() {
 
-		return _cpSpecificationOptionsSearchFacetDisplayContext;
+		return _cpSpecificationOptionsSearchFacetDisplayContexts;
 	}
 
 	public long getDisplayStyleGroupId() {
@@ -107,16 +107,16 @@ public class CPSpecificationOptionFacetsDisplayContext implements Serializable {
 
 	public void setCPSpecificationOptionsSearchFacetDisplayContexts(
 		List<CPSpecificationOptionsSearchFacetDisplayContext>
-			cpSpecificationOptionsSearchFacetDisplayContext) {
+			cpSpecificationOptionsSearchFacetDisplayContexts) {
 
-		_cpSpecificationOptionsSearchFacetDisplayContext =
-			cpSpecificationOptionsSearchFacetDisplayContext;
+		_cpSpecificationOptionsSearchFacetDisplayContexts =
+			cpSpecificationOptionsSearchFacetDisplayContexts;
 	}
 
 	private CPSpecificationOptionFacetPortletInstanceConfiguration
 		_cpSpecificationOptionFacetPortletInstanceConfiguration;
 	private List<CPSpecificationOptionsSearchFacetDisplayContext>
-		_cpSpecificationOptionsSearchFacetDisplayContext;
+		_cpSpecificationOptionsSearchFacetDisplayContexts;
 	private long _displayStyleGroupId;
 	private final HttpServletRequest _httpServletRequest;
 
