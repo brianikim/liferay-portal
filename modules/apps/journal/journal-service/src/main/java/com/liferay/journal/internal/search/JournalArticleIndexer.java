@@ -475,10 +475,6 @@ public class JournalArticleIndexer extends BaseIndexer<JournalArticle> {
 			Field.TREE_PATH,
 			StringUtil.split(journalArticle.getTreePath(), CharPool.SLASH));
 		document.addKeyword(Field.VERSION, journalArticle.getVersion());
-
-		document.addNumber(
-			"versionCount", GetterUtil.getDouble(journalArticle.getVersion()));
-
 		document.addKeyword(
 			"ddmStructureKey", journalArticle.getDDMStructureKey());
 		document.addKeyword(
@@ -517,6 +513,9 @@ public class JournalArticleIndexer extends BaseIndexer<JournalArticle> {
 				journalArticle.getUrlTitle(
 					LocaleUtil.fromLanguageId(titleAvailableLanguageId)));
 		}
+
+		document.addNumber(
+			"versionCount", GetterUtil.getDouble(journalArticle.getVersion()));
 
 		addDDMStructureAttributes(document, journalArticle);
 
