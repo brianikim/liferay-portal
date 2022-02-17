@@ -22,6 +22,7 @@ import com.liferay.frontend.taglib.clay.servlet.taglib.util.ViewTypeItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.ViewTypeItemList;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
+import com.liferay.portal.kernel.dao.search.SearchPaginationUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.Role;
@@ -210,17 +211,20 @@ public class ViewRolesManagementToolbarDisplayContext {
 					_currentRoleTypeContributor.getClassName()));
 		}
 
-		List<Role> results = RoleServiceUtil.search(
-			themeDisplay.getCompanyId(), roleSearchTerms.getKeywords(),
-			new Integer[] {_currentRoleTypeContributor.getType()}, params,
-			roleSearch.getStart(), roleSearch.getEnd(),
-			roleSearch.getOrderByComparator());
-
 		int total = RoleServiceUtil.searchCount(
 			themeDisplay.getCompanyId(), roleSearchTerms.getKeywords(),
 			new Integer[] {_currentRoleTypeContributor.getType()}, params);
 
+		int[] startAndEnd = SearchPaginationUtil.calculateStartAndEnd(
+			roleSearch.getStart(), roleSearch.getEnd(), total);
+
+		List<Role> results = RoleServiceUtil.search(
+			themeDisplay.getCompanyId(), roleSearchTerms.getKeywords(),
+			new Integer[] {_currentRoleTypeContributor.getType()}, params,
+			startAndEnd[0], startAndEnd[1], roleSearch.getOrderByComparator());
+
 		roleSearch.setResults(results);
+
 		roleSearch.setTotal(total);
 
 		_roleSearch = roleSearch;
