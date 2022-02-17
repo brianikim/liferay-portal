@@ -37,6 +37,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -58,7 +59,7 @@ public class CPOptionsSearchFacetDisplayContextBuilder implements Serializable {
 		CPOptionsSearchFacetDisplayContext cpOptionsSearchFacetDisplayContext =
 			_createCPOptionsSearchFacetDisplayContext();
 
-		cpOptionsSearchFacetDisplayContext.setFacets(_getFacets());
+		cpOptionsSearchFacetDisplayContext.setFacets(getFacets());
 		cpOptionsSearchFacetDisplayContext.setCPOptionLocalService(
 			_cpOptionLocalService);
 		cpOptionsSearchFacetDisplayContext.setPortletSharedSearchRequest(
@@ -73,43 +74,75 @@ public class CPOptionsSearchFacetDisplayContextBuilder implements Serializable {
 		return cpOptionsSearchFacetDisplayContext;
 	}
 
-	public void cpOptionLocalService(
+	public List<Facet> getFacets() {
+		List<Facet> filledFacets = new ArrayList<>();
+
+		FacetCollector facetCollector = _facet.getFacetCollector();
+
+		PortletSharedSearchResponse portletSharedSearchResponse =
+			_portletSharedSearchRequest.search(_renderRequest);
+
+		ThemeDisplay themeDisplay = portletSharedSearchResponse.getThemeDisplay(
+			_renderRequest);
+
+		for (TermCollector termCollector : facetCollector.getTermCollectors()) {
+			CPOption cpOption = _cpOptionLocalService.fetchCPOption(
+				themeDisplay.getCompanyId(), termCollector.getTerm());
+
+			if ((cpOption != null) && cpOption.isFacetable()) {
+				Facet facet = portletSharedSearchResponse.getFacet(
+					CPOptionFacetsUtil.getIndexFieldName(
+						termCollector.getTerm(), themeDisplay.getLanguageId()));
+
+				filledFacets.add(facet);
+				_buckets = _collectBuckets(cpOption, facet.getFacetCollector());
+			}
+		}
+
+		return filledFacets;
+	}
+
+	public void setCPOptionLocalService(
 		CPOptionLocalService cpOptionLocalService) {
 
 		_cpOptionLocalService = cpOptionLocalService;
 	}
 
-	public void displayStyle(String displayStyle) {
+	public void setDisplayStyle(String displayStyle) {
 		_displayStyle = displayStyle;
 	}
 
-	public void facet(Facet facet) {
+	public void setFacet(Facet facet) {
 		_facet = facet;
 	}
 
-	public void frequenciesVisible(boolean frequenciesVisible) {
+	public void setFrequenciesVisible(boolean frequenciesVisible) {
 		_frequenciesVisible = frequenciesVisible;
 	}
 
-	public void frequencyThreshold(int frequencyThreshold) {
+	public void setFrequencyThreshold(int frequencyThreshold) {
 		_frequencyThreshold = frequencyThreshold;
 	}
 
-	public void maxTerms(int maxTerms) {
+	public void setLocale(Locale locale) {
+		_locale = locale;
+	}
+
+	public void setMaxTerms(int maxTerms) {
 		_maxTerms = maxTerms;
 	}
 
-	public void paginationStartParameterName(
+	public void setPaginationStartParameterName(
 		String paginationStartParameterName) {
 
 		_paginationStartParameterName = paginationStartParameterName;
 	}
 
-	public void portal(Portal portal) {
+	public void setPortal(Portal portal) {
 		_portal = portal;
 	}
 
-	public void portletSharedSearchRequest(
+	public void setPortletSharedSearchRequest(
 		PortletSharedSearchRequest portletSharedSearchRequest) {
 
 		_portletSharedSearchRequest = portletSharedSearchRequest;
@@ -135,29 +168,29 @@ public class CPOptionsSearchFacetDisplayContextBuilder implements Serializable {
 	protected List<CPOptionsSearchFacetTermDisplayContext>
 		buildTermDisplayContexts() {
 
-		if (ListUtil.isEmpty(_tuples)) {
+		if (ListUtil.isEmpty(_buckets)) {
 			return getEmptyTermDisplayContexts();
 		}
 
 		List<CPOptionsSearchFacetTermDisplayContext>
 			cpOptionsSearchFacetTermDisplayContexts = new ArrayList<>(
-				_tuples.size());
+				_buckets.size());
 
 		int maxCount = 1;
 		int minCount = 1;
 
 		if (_frequenciesVisible && _displayStyle.equals("cloud")) {
 
-			// The cloud style may not list tags in the order of frequency.
-			// Keep looking through the results until we reach the maximum
+			// The cloud style may not list tags in the order of frequency,
+			// so keep looking through the results until we reach the maximum
 			// number of terms or we run out of terms.
 
-			for (int i = 0, j = 0; i < _tuples.size(); i++, j++) {
+			for (int i = 0, j = 0; i < _buckets.size(); i++, j++) {
 				if (j >= _maxTerms) {
 					break;
 				}
 
-				Tuple tuple = _tuples.get(i);
+				Tuple tuple = _buckets.get(i);
 
 				Integer frequency = (Integer)tuple.getObject(2);
 
@@ -178,12 +211,12 @@ public class CPOptionsSearchFacetDisplayContextBuilder implements Serializable {
 			multiplier = (double)5 / (maxCount - minCount);
 		}
 
-		for (int i = 0, j = 0; i < _tuples.size(); i++, j++) {
+		for (int i = 0, j = 0; i < _buckets.size(); i++, j++) {
 			if ((_maxTerms > 0) && (j >= _maxTerms)) {
 				break;
 			}
 
-			Tuple tuple = _tuples.get(i);
+			Tuple tuple = _buckets.get(i);
 
 			Integer frequency = (Integer)tuple.getObject(2);
 
@@ -249,6 +282,23 @@ public class CPOptionsSearchFacetDisplayContextBuilder implements Serializable {
 		return false;
 	}
 
+	private List<Tuple> _collectBuckets(
+		CPOption cpOption, FacetCollector facetCollector) {
+
+		List<TermCollector> termCollectors = facetCollector.getTermCollectors();
+
+		List<Tuple> buckets = new ArrayList<>(termCollectors.size());
+
+		for (TermCollector termCollector : termCollectors) {
+			buckets.add(
+				new Tuple(
+					cpOption, termCollector.getTerm(),
+					termCollector.getFrequency()));
+		}
+
+		return buckets;
+	}
+
 	private CPOptionsSearchFacetDisplayContext
 		_createCPOptionsSearchFacetDisplayContext() {
 
@@ -271,62 +321,18 @@ public class CPOptionsSearchFacetDisplayContextBuilder implements Serializable {
 		);
 	}
 
-	private List<Facet> _getFacets() {
-		List<Facet> filledFacets = new ArrayList<>();
-
-		FacetCollector facetCollector = _facet.getFacetCollector();
-
-		PortletSharedSearchResponse portletSharedSearchResponse =
-			_portletSharedSearchRequest.search(_renderRequest);
-
-		ThemeDisplay themeDisplay = portletSharedSearchResponse.getThemeDisplay(
-			_renderRequest);
-
-		for (TermCollector termCollector : facetCollector.getTermCollectors()) {
-			CPOption cpOption = _cpOptionLocalService.fetchCPOption(
-				themeDisplay.getCompanyId(), termCollector.getTerm());
-
-			if ((cpOption != null) && cpOption.isFacetable()) {
-				Facet facet = portletSharedSearchResponse.getFacet(
-					CPOptionFacetsUtil.getIndexFieldName(
-						termCollector.getTerm(), themeDisplay.getLanguageId()));
-
-				filledFacets.add(facet);
-				_tuples = _getTuples(cpOption, facet.getFacetCollector());
-			}
-		}
-
-		return filledFacets;
-	}
-
-	private List<Tuple> _getTuples(
-		CPOption cpOption, FacetCollector facetCollector) {
-
-		List<TermCollector> termCollectors = facetCollector.getTermCollectors();
-
-		List<Tuple> tuples = new ArrayList<>(termCollectors.size());
-
-		for (TermCollector termCollector : termCollectors) {
-			tuples.add(
-				new Tuple(
-					cpOption, termCollector.getTerm(),
-					termCollector.getFrequency()));
-		}
-
-		return tuples;
-	}
-
+	private List<Tuple> _buckets;
 	private CPOptionLocalService _cpOptionLocalService;
 	private String _displayStyle;
 	private Facet _facet;
 	private boolean _frequenciesVisible;
 	private int _frequencyThreshold;
+	private Locale _locale;
 	private int _maxTerms;
 	private String _paginationStartParameterName;
 	private Portal _portal;
 	private PortletSharedSearchRequest _portletSharedSearchRequest;
 	private final RenderRequest _renderRequest;
 	private final List<Long> _selectedCategoryIds = Collections.emptyList();
-	private List<Tuple> _tuples;
 
 }
