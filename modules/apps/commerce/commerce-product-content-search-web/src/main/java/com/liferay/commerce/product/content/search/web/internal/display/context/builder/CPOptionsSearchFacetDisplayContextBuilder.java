@@ -92,7 +92,7 @@ public class CPOptionsSearchFacetDisplayContextBuilder implements Serializable {
 						termCollector.getTerm(), themeDisplay.getLanguageId()));
 
 				filledFacets.add(facet);
-				_buckets = _collectBuckets(cpOption, facet.getFacetCollector());
+				_tuples = _getTuples(cpOption, facet.getFacetCollector());
 			}
 		}
 
@@ -161,13 +161,13 @@ public class CPOptionsSearchFacetDisplayContextBuilder implements Serializable {
 	protected List<CPOptionsSearchFacetTermDisplayContext>
 		buildTermDisplayContexts() {
 
-		if (ListUtil.isEmpty(_buckets)) {
+		if (ListUtil.isEmpty(_tuples)) {
 			return getEmptyTermDisplayContexts();
 		}
 
 		List<CPOptionsSearchFacetTermDisplayContext>
 			cpOptionsSearchFacetTermDisplayContexts = new ArrayList<>(
-				_buckets.size());
+				_tuples.size());
 
 		int maxCount = 1;
 		int minCount = 1;
@@ -180,12 +180,12 @@ public class CPOptionsSearchFacetDisplayContextBuilder implements Serializable {
 			// so keep looking through the results until we reach the maximum
 			// number of terms or we run out of terms.
 
-			for (int i = 0, j = 0; i < _buckets.size(); i++, j++) {
+			for (int i = 0, j = 0; i < _tuples.size(); i++, j++) {
 				if (j >= _maxTerms) {
 					break;
 				}
 
-				Tuple tuple = _buckets.get(i);
+				Tuple tuple = _tuples.get(i);
 
 				Integer frequency = (Integer)tuple.getObject(2);
 
@@ -206,12 +206,12 @@ public class CPOptionsSearchFacetDisplayContextBuilder implements Serializable {
 			multiplier = (double)5 / (maxCount - minCount);
 		}
 
-		for (int i = 0, j = 0; i < _buckets.size(); i++, j++) {
+		for (int i = 0, j = 0; i < _tuples.size(); i++, j++) {
 			if ((_maxTerms > 0) && (j >= _maxTerms)) {
 				break;
 			}
 
-			Tuple tuple = _buckets.get(i);
+			Tuple tuple = _tuples.get(i);
 
 			Integer frequency = (Integer)tuple.getObject(2);
 
@@ -277,23 +277,6 @@ public class CPOptionsSearchFacetDisplayContextBuilder implements Serializable {
 		return false;
 	}
 
-	private List<Tuple> _collectBuckets(
-		CPOption cpOption, FacetCollector facetCollector) {
-
-		List<TermCollector> termCollectors = facetCollector.getTermCollectors();
-
-		List<Tuple> buckets = new ArrayList<>(termCollectors.size());
-
-		for (TermCollector termCollector : termCollectors) {
-			buckets.add(
-				new Tuple(
-					cpOption, termCollector.getTerm(),
-					termCollector.getFrequency()));
-		}
-
-		return buckets;
-	}
-
 	private CPOptionsSearchFacetDisplayContext
 		_createCPOptionsSearchFacetDisplayContext() {
 
@@ -316,7 +299,23 @@ public class CPOptionsSearchFacetDisplayContextBuilder implements Serializable {
 		);
 	}
 
-	private List<Tuple> _buckets;
+	private List<Tuple> _getTuples(
+		CPOption cpOption, FacetCollector facetCollector) {
+
+		List<TermCollector> termCollectors = facetCollector.getTermCollectors();
+
+		List<Tuple> tuples = new ArrayList<>(termCollectors.size());
+
+		for (TermCollector termCollector : termCollectors) {
+			tuples.add(
+				new Tuple(
+					cpOption, termCollector.getTerm(),
+					termCollector.getFrequency()));
+		}
+
+		return tuples;
+	}
+
 	private CPOptionLocalService _cpOptionLocalService;
 	private String _displayStyle;
 	private Facet _facet;
@@ -328,5 +327,6 @@ public class CPOptionsSearchFacetDisplayContextBuilder implements Serializable {
 	private PortletSharedSearchRequest _portletSharedSearchRequest;
 	private final RenderRequest _renderRequest;
 	private final List<Long> _selectedCategoryIds = Collections.emptyList();
+	private List<Tuple> _tuples;
 
 }
