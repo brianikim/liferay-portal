@@ -183,8 +183,6 @@ public class CPOptionFacetsPortlet extends MVCPortlet {
 			getPaginationStartParameterName(portletSharedSearchResponse));
 		cpOptionsSearchFacetDisplayBuilder.setPortal(_portal);
 
-		cpOptionsSearchFacetDisplayBuilder.setLocale(themeDisplay.getLocale());
-
 		return cpOptionsSearchFacetDisplayBuilder.build();
 	}
 
