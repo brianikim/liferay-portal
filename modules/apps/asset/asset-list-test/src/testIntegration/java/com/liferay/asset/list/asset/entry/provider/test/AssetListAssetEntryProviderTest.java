@@ -25,9 +25,7 @@ import com.liferay.asset.list.util.AssetListTestUtil;
 import com.liferay.journal.constants.JournalFolderConstants;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.test.util.JournalTestUtil;
-import com.liferay.osgi.service.tracker.collections.internal.map.MultiValueServiceTrackerBucketFactory;
 import com.liferay.petra.string.StringPool;
-import com.liferay.portal.configuration.test.util.ConfigurationTemporarySwapper;
 import com.liferay.portal.configuration.test.util.ConfigurationTestUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
@@ -133,6 +131,60 @@ public class AssetListAssetEntryProviderTest {
 			_group.getGroupId(), assetListEntry,
 			segmentsEntry2.getSegmentsEntryId(),
 			_getTypeSettings(userName));
+
+		List<AssetEntry> assetEntries =
+			_assetListAssetEntryProvider.getAssetEntries(
+				assetListEntry, segmentsEntryIds);
+
+		Assert.assertEquals(
+			assetEntries.toString(), 3, assetEntries.size());
+
+		AssetEntry firstAssetEntry = assetEntries.get(0);
+
+		Assert.assertEquals(
+			firstAssetEntry.getTitle(LocaleUtil.US),
+			journalArticle.getTitle(LocaleUtil.US));
+	}
+
+	@Test
+	public void testCombineSegmentsOfDynamicCollectionWithoutDuplications()
+		throws Exception {
+
+		_setCombinedAssetForDynamicCollections(true);
+
+		AssetListEntry assetListEntry =
+			_assetListEntryLocalService.addAssetListEntry(
+				TestPropsValues.getUserId(), _group.getGroupId(),
+				"Dynamic title", AssetListEntryTypeConstants.TYPE_DYNAMIC,
+				null, _serviceContext);
+
+		User userTest = TestPropsValues.getUser();
+
+		SegmentsEntry segmentsEntry1 = _addSegmentsEntryByFirstName(
+			_group.getGroupId(), userTest);
+		SegmentsEntry segmentsEntry2 = _addSegmentsEntryByFirstName(
+			_group.getGroupId(), userTest);
+
+		JournalArticle journalArticle = _addJournalArticle(
+			new long[0], TestPropsValues.getUserId());
+
+		_addJournalArticle(new long[0], TestPropsValues.getUserId());
+		_addJournalArticle(new long[0], TestPropsValues.getUserId());
+
+		long[] segmentsEntryIds = {
+			segmentsEntry1.getSegmentsEntryId(),
+			segmentsEntry2.getSegmentsEntryId()
+		};
+
+		AssetListTestUtil.addAssetListEntrySegmentsEntryRel(
+			_group.getGroupId(), assetListEntry,
+			segmentsEntry1.getSegmentsEntryId(),
+			_getTypeSettings(userTest.getFirstName()));
+
+		AssetListTestUtil.addAssetListEntrySegmentsEntryRel(
+			_group.getGroupId(), assetListEntry,
+			segmentsEntry2.getSegmentsEntryId(),
+			_getTypeSettings(userTest.getFirstName()));
 
 		List<AssetEntry> assetEntries =
 			_assetListAssetEntryProvider.getAssetEntries(
