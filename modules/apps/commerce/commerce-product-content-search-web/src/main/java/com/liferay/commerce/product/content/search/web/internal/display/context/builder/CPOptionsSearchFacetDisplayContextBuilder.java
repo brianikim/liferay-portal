@@ -176,8 +176,8 @@ public class CPOptionsSearchFacetDisplayContextBuilder implements Serializable {
 			_displayStyle.equals(
 				"ddmTemplate_CP-SPECIFICATION-OPTION-FACET-CLOUD-FTL")) {
 
-			// The cloud style may not list tags in the order of frequency,
-			// so keep looking through the results until we reach the maximum
+			// The cloud style may not list tags in the order of frequency.
+			// Keep looking through the results until we reach the maximum
 			// number of terms or we run out of terms.
 
 			for (int i = 0, j = 0; i < _tuples.size(); i++, j++) {
