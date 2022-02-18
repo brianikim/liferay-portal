@@ -78,6 +78,7 @@ MDRRuleGroup mdrRuleGroup = MDRRuleGroupLocalServiceUtil.getMDRRuleGroup(mdrRule
 
 				Liferay.Util.openWindow({
 					dialog: {
+						destroyOnHide: true,
 						on: {
 							visibleChange: function (event) {
 								<portlet:namespace />updateRuleGroupInstances();
