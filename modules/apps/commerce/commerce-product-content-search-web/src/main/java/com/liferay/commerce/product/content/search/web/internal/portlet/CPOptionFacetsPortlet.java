@@ -136,6 +136,88 @@ public class CPOptionFacetsPortlet extends MVCPortlet {
 		return searchRequest.getPaginationStartParameterName();
 	}
 
+	private CPOptionsSearchFacetDisplayContext
+		_buildCPOptionsSearchFacetDisplayContext(
+			PortletSharedSearchResponse portletSharedSearchResponse,
+			RenderRequest renderRequest) {
+
+		ThemeDisplay themeDisplay = (ThemeDisplay)renderRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
+
+		int maxTerms = 10;
+
+		int frequencyThreshold = 1;
+
+		boolean showFrequencies = true;
+
+		String displayStyle = "cloud";
+
+		try {
+			CPOptionFacetsPortletInstanceConfiguration
+				cpOptionFacetsPortletInstanceConfiguration =
+					portletDisplay.getPortletInstanceConfiguration(
+						CPOptionFacetsPortletInstanceConfiguration.class);
+
+			maxTerms = cpOptionFacetsPortletInstanceConfiguration.getMaxTerms();
+
+			frequencyThreshold =
+				cpOptionFacetsPortletInstanceConfiguration.
+					getFrequencyThreshold();
+
+			showFrequencies =
+				cpOptionFacetsPortletInstanceConfiguration.showFrequencies();
+
+			displayStyle =
+				cpOptionFacetsPortletInstanceConfiguration.displayStyle();
+		}
+		catch (ConfigurationException configurationException) {
+			throw new RuntimeException(configurationException);
+		}
+
+		Optional<PortletPreferences> portletPreferencesOptional =
+			portletSharedSearchResponse.getPortletPreferences(renderRequest);
+
+		if (portletPreferencesOptional.isPresent()) {
+			PortletPreferences portletPreferences =
+				portletPreferencesOptional.get();
+
+			frequencyThreshold = GetterUtil.getInteger(
+				portletPreferences.getValue("frequencyThreshold", null),
+				frequencyThreshold);
+			maxTerms = GetterUtil.getInteger(
+				portletPreferences.getValue("maxTerms", null), maxTerms);
+			showFrequencies = GetterUtil.getBoolean(
+				portletPreferences.getValue(
+					"frequenciesVisible", StringPool.BLANK),
+				true);
+			displayStyle = portletPreferences.getValue(
+				"cpOptionFacetDisplayStyle", displayStyle);
+		}
+
+		CPOptionsSearchFacetDisplayContextBuilder
+			cpOptionsSearchFacetDisplayBuilder =
+				new CPOptionsSearchFacetDisplayContextBuilder(renderRequest);
+
+		cpOptionsSearchFacetDisplayBuilder.cpOptionLocalService(
+			_cpOptionLocalService);
+		cpOptionsSearchFacetDisplayBuilder.displayStyle(displayStyle);
+		cpOptionsSearchFacetDisplayBuilder.facet(
+			portletSharedSearchResponse.getFacet(CPField.OPTION_NAMES));
+		cpOptionsSearchFacetDisplayBuilder.frequenciesVisible(showFrequencies);
+		cpOptionsSearchFacetDisplayBuilder.frequencyThreshold(
+			frequencyThreshold);
+		cpOptionsSearchFacetDisplayBuilder.maxTerms(maxTerms);
+		cpOptionsSearchFacetDisplayBuilder.paginationStartParameterName(
+			getPaginationStartParameterName(portletSharedSearchResponse));
+		cpOptionsSearchFacetDisplayBuilder.portal(_portal);
+		cpOptionsSearchFacetDisplayBuilder.portletSharedSearchRequest(
+			_portletSharedSearchRequest);
+
+		return cpOptionsSearchFacetDisplayBuilder.build();
+	}
+
 	@Reference
 	protected PortletSharedSearchRequest portletSharedSearchRequest;
 
