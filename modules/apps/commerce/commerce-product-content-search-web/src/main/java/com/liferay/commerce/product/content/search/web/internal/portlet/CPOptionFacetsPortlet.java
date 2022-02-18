@@ -112,18 +112,31 @@ public class CPOptionFacetsPortlet extends MVCPortlet {
 		ThemeDisplay themeDisplay = (ThemeDisplay)renderRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		CPOptionFacetsPortletInstanceConfiguration
-			cpOptionFacetsPortletInstanceConfiguration =
-				_getCpOptionFacetsPortletInstanceConfiguration(
-					themeDisplay.getPortletDisplay());
+		PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
 
-		String displayStyle =
-			cpOptionFacetsPortletInstanceConfiguration.displayStyle();
-		int frequencyThreshold =
-			cpOptionFacetsPortletInstanceConfiguration.getFrequencyThreshold();
-		int maxTerms = cpOptionFacetsPortletInstanceConfiguration.getMaxTerms();
-		boolean showFrequencies =
-			cpOptionFacetsPortletInstanceConfiguration.showFrequencies();
+		String displayStyle = null;
+		int frequencyThreshold = -1;
+		int maxTerms = -1;
+		boolean showFrequencies = true;
+
+		try {
+			CPOptionFacetsPortletInstanceConfiguration
+				cpOptionFacetsPortletInstanceConfiguration =
+					portletDisplay.getPortletInstanceConfiguration(
+						CPOptionFacetsPortletInstanceConfiguration.class);
+
+			displayStyle =
+				cpOptionFacetsPortletInstanceConfiguration.displayStyle();
+			frequencyThreshold =
+				cpOptionFacetsPortletInstanceConfiguration.
+					getFrequencyThreshold();
+			maxTerms = cpOptionFacetsPortletInstanceConfiguration.getMaxTerms();
+			showFrequencies =
+				cpOptionFacetsPortletInstanceConfiguration.showFrequencies();
+		}
+		catch (ConfigurationException configurationException) {
+			throw new RuntimeException(configurationException);
+		}
 
 		Optional<PortletPreferences> portletPreferencesOptional =
 			portletSharedSearchResponse.getPortletPreferences(renderRequest);
