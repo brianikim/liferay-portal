@@ -35,6 +35,7 @@ MDRRuleGroup mdrRuleGroup = MDRRuleGroupLocalServiceUtil.getMDRRuleGroup(mdrRule
 		<liferay-ui:icon
 			id='<%= row.getRowId() + "manageActions" %>'
 			message="manage-actions"
+			onClick='<%= liferayPortletResponse.getNamespace() + row.getRowId() + "manageActions();" %>'
 			url="javascript:;"
 		/>
 	</c:if>
@@ -63,7 +64,7 @@ MDRRuleGroup mdrRuleGroup = MDRRuleGroupLocalServiceUtil.getMDRRuleGroup(mdrRule
 </liferay-ui:icon-menu>
 
 <c:if test="<%= MDRRuleGroupInstancePermission.contains(permissionChecker, mdrRuleGroupInstance.getRuleGroupInstanceId(), ActionKeys.UPDATE) %>">
-	<aui:script use="aui-base">
+	<aui:script>
 		<liferay-portlet:renderURL portletName="<%= MDRPortletKeys.MOBILE_DEVICE_RULES %>" varImpl="viewRuleGroupInstanceActionsURL" windowState="<%= LiferayWindowState.POP_UP.toString() %>">
 			<portlet:param name="mvcRenderCommandName" value="/mobile_device_rules/view_actions" />
 			<portlet:param name="showBackURL" value="<%= Boolean.FALSE.toString() %>" />
@@ -71,28 +72,25 @@ MDRRuleGroup mdrRuleGroup = MDRRuleGroupLocalServiceUtil.getMDRRuleGroup(mdrRule
 			<portlet:param name="ruleGroupInstanceId" value="<%= String.valueOf(mdrRuleGroupInstance.getRuleGroupInstanceId()) %>" />
 		</liferay-portlet:renderURL>
 
-		A.one('#<portlet:namespace /><%= row.getRowId() %>manageActions').on(
-			'click',
-			function (event) {
-				var currentTarget = event.currentTarget;
-
-				Liferay.Util.openWindow({
-					dialog: {
-						destroyOnHide: true,
-						on: {
-							visibleChange: function (event) {
-								<portlet:namespace />updateRuleGroupInstances();
-							},
+		window[
+			'<portlet:namespace /><%= row.getRowId() %>manageActions'
+		] = function () {
+			Liferay.Util.openWindow({
+				dialog: {
+					destroyOnHide: true,
+					on: {
+						visibleChange: function (event) {
+							<portlet:namespace />updateRuleGroupInstances();
 						},
 					},
-					dialogIframe: {
-						bodyCssClass: 'dialog-with-footer',
-					},
-					title:
-						'<liferay-ui:message arguments="<%= HtmlUtil.escape(mdrRuleGroup.getName(locale)) %>" key="actions-for-x" translateArguments="<%= false %>" />',
-					uri: '<%= viewRuleGroupInstanceActionsURL.toString() %>',
-				});
-			}
-		);
+				},
+				dialogIframe: {
+					bodyCssClass: 'dialog-with-footer',
+				},
+				title:
+					'<liferay-ui:message arguments="<%= HtmlUtil.escape(mdrRuleGroup.getName(locale)) %>" key="actions-for-x" translateArguments="<%= false %>" />',
+				uri: '<%= viewRuleGroupInstanceActionsURL.toString() %>',
+			});
+		};
 	</aui:script>
 </c:if>
