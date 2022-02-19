@@ -15,11 +15,9 @@
 package com.liferay.commerce.product.content.search.web.internal.display.context.builder;
 
 import com.liferay.commerce.product.constants.CPField;
-import com.liferay.commerce.product.content.search.web.internal.configuration.CPSpecificationOptionFacetPortletInstanceConfiguration;
 import com.liferay.commerce.product.content.search.web.internal.display.context.CPSpecificationOptionFacetsDisplayContext;
 import com.liferay.commerce.product.content.search.web.internal.display.context.CPSpecificationOptionsSearchFacetDisplayContext;
 import com.liferay.commerce.product.content.search.web.internal.display.context.CPSpecificationOptionsSearchFacetTermDisplayContext;
-import com.liferay.commerce.product.content.search.web.internal.facet.config.CPSpecificationOptionsFacetConfiguration;
 import com.liferay.commerce.product.content.search.web.internal.util.CPSpecificationOptionFacetsUtil;
 import com.liferay.commerce.product.model.CPSpecificationOption;
 import com.liferay.commerce.product.service.CPSpecificationOptionLocalService;
@@ -28,7 +26,6 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.search.facet.Facet;
 import com.liferay.portal.kernel.search.facet.collector.FacetCollector;
 import com.liferay.portal.kernel.search.facet.collector.TermCollector;
-import com.liferay.portal.kernel.theme.PortletDisplay;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -66,19 +63,8 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 
 		CPSpecificationOptionFacetsDisplayContext
 			cpSpecificationOptionFacetsDisplayContext =
-				new CPSpecificationOptionFacetsDisplayContext(
-					_portal.getHttpServletRequest(_renderRequest));
-
-		ThemeDisplay themeDisplay = (ThemeDisplay)_renderRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
-		PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
-
-		cpSpecificationOptionFacetsDisplayContext.
-			setCPSpecificationOptionFacetPortletInstanceConfiguration(
-				portletDisplay.getPortletInstanceConfiguration(
-					CPSpecificationOptionFacetPortletInstanceConfiguration.
-						class));
+			new CPSpecificationOptionFacetsDisplayContext(
+				_portal.getHttpServletRequest(_renderRequest));
 
 		cpSpecificationOptionFacetsDisplayContext.
 			setCPSpecificationOptionsSearchFacetDisplayContexts(
@@ -120,23 +106,13 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 	}
 
 	private CPSpecificationOptionsSearchFacetDisplayContext
-		_buildCPSpecificationOptionsSearchFacetDisplayContext() {
-
-		CPSpecificationOptionsFacetConfiguration
-			cpSpecificationOptionsFacetConfiguration =
-				new CPSpecificationOptionsFacetConfiguration(
-					_facet.getFacetConfiguration());
-
-		_frequencyThreshold =
-			cpSpecificationOptionsFacetConfiguration.getFrequencyThreshold();
-
-		_maxTerms = cpSpecificationOptionsFacetConfiguration.getMaxTerms();
+	_buildCPSpecificationOptionsSearchFacetDisplayContext() {
 
 		_tuples = _getTuples(_facet.getFacetCollector());
 
 		CPSpecificationOptionsSearchFacetDisplayContext
 			cpSpecificationOptionsSearchFacetDisplayContext =
-				new CPSpecificationOptionsSearchFacetDisplayContext();
+			new CPSpecificationOptionsSearchFacetDisplayContext();
 
 		cpSpecificationOptionsSearchFacetDisplayContext.setFacet(_facet);
 		cpSpecificationOptionsSearchFacetDisplayContext.setLocale(_locale);
@@ -160,10 +136,10 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 	}
 
 	private CPSpecificationOptionsSearchFacetDisplayContext
-		_buildCPSpecificationOptionsSearchFacetDisplayContext(
-			Facet facet,
-			PortletSharedSearchResponse portletSharedSearchResponse,
-			RenderRequest renderRequest) {
+	_buildCPSpecificationOptionsSearchFacetDisplayContext(
+		Facet facet,
+		PortletSharedSearchResponse portletSharedSearchResponse,
+		RenderRequest renderRequest) {
 
 		_facet = facet;
 
@@ -177,7 +153,7 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 	}
 
 	private List<CPSpecificationOptionsSearchFacetDisplayContext>
-			_buildCPSpecificationOptionsSearchFacetDisplayContexts()
+	_buildCPSpecificationOptionsSearchFacetDisplayContexts()
 		throws PortalException {
 
 		_portletSharedSearchResponse = _portletSharedSearchRequest.search(
@@ -193,14 +169,21 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 		Optional<PortletPreferences> portletPreferencesOptional =
 			_portletSharedSearchResponse.getPortletPreferences(_renderRequest);
 
-		PortletPreferences portletPreferences =
-			portletPreferencesOptional.get();
+		if (portletPreferencesOptional.isPresent()) {
+			PortletPreferences portletPreferences =
+				portletPreferencesOptional.get();
 
-		_displayStyle = portletPreferences.getValue(
-			"cpSpecificationOptionFacetDisplayStyle", "cloud");
-
-		_frequenciesVisible = GetterUtil.getBoolean(
-			portletPreferences.getValue("frequenciesVisible", "true"), true);
+			_displayStyle = portletPreferences.getValue(
+				"displayStyle", _displayStyle);
+			_frequencyThreshold = GetterUtil.getInteger(
+				portletPreferences.getValue("frequencyThreshold", null),
+				_frequencyThreshold);
+			_frequenciesVisible = GetterUtil.getBoolean(
+				portletPreferences.getValue("frequenciesVisible", "true"),
+				_frequenciesVisible);
+			_maxTerms = GetterUtil.getInteger(
+				portletPreferences.getValue("maxTerms", null), _maxTerms);
+		}
 
 		ThemeDisplay themeDisplay = (ThemeDisplay)_renderRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
@@ -221,7 +204,7 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 
 		List<CPSpecificationOptionsSearchFacetDisplayContext>
 			cpSpecificationOptionsSearchFacetDisplayContexts =
-				new ArrayList<>();
+			new ArrayList<>();
 
 		_paginationStartParameterName = _getPaginationStartParameterName(
 			_portletSharedSearchResponse);
@@ -231,9 +214,9 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 		for (Facet filledFacet : filledFacets) {
 			CPSpecificationOptionsSearchFacetDisplayContext
 				cpSpecificationOptionsSearchFacetDisplayContext =
-					_buildCPSpecificationOptionsSearchFacetDisplayContext(
-						filledFacet, _portletSharedSearchResponse,
-						_renderRequest);
+				_buildCPSpecificationOptionsSearchFacetDisplayContext(
+					filledFacet, _portletSharedSearchResponse,
+					_renderRequest);
 
 			cpSpecificationOptionsSearchFacetDisplayContexts.add(
 				cpSpecificationOptionsSearchFacetDisplayContext);
@@ -243,12 +226,12 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 	}
 
 	private CPSpecificationOptionsSearchFacetTermDisplayContext
-		_buildTermDisplayContext(
-			int frequency, boolean selected, int popularity, String term) {
+	_buildTermDisplayContext(
+		int frequency, boolean selected, int popularity, String term) {
 
 		CPSpecificationOptionsSearchFacetTermDisplayContext
 			cpSpecificationOptionsSearchFacetTermDisplayContext =
-				new CPSpecificationOptionsSearchFacetTermDisplayContext();
+			new CPSpecificationOptionsSearchFacetTermDisplayContext();
 
 		cpSpecificationOptionsSearchFacetTermDisplayContext.setDisplayName(
 			term);
@@ -265,7 +248,7 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 	}
 
 	private List<CPSpecificationOptionsSearchFacetTermDisplayContext>
-		_buildTermDisplayContexts() {
+	_buildTermDisplayContexts() {
 
 		if (_tuples.isEmpty()) {
 			return Collections.emptyList();
@@ -273,15 +256,17 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 
 		List<CPSpecificationOptionsSearchFacetTermDisplayContext>
 			cpSpecificationOptionsSearchFacetTermDisplayContexts =
-				new ArrayList<>(_tuples.size());
+			new ArrayList<>(_tuples.size());
 
 		int maxCount = 1;
 		int minCount = 1;
 
-		if (_frequenciesVisible && _displayStyle.equals("cloud")) {
+		if (_frequenciesVisible &&
+			_displayStyle.equals(
+				"ddmTemplate_CP-SPECIFICATION-OPTION-FACET-CLOUD-FTL")) {
 
-			// The cloud style may not list tags in the order of frequency,
-			// so keep looking through the results until we reach the maximum
+			// The cloud style may not list tags in the order of frequency.
+			// Keep looking through the results until we reach the maximum
 			// number of terms or we run out of terms.
 
 			for (int i = 0, j = 0; i < _tuples.size(); i++, j++) {
@@ -413,12 +398,12 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 
 	private CPSpecificationOptionLocalService
 		_cpSpecificationOptionLocalService;
-	private String _displayStyle;
+	private String _displayStyle = StringPool.BLANK;
 	private Facet _facet;
-	private boolean _frequenciesVisible;
-	private int _frequencyThreshold;
+	private boolean _frequenciesVisible = true;
+	private int _frequencyThreshold = 1;
 	private Locale _locale;
-	private int _maxTerms;
+	private int _maxTerms = 10;
 	private String _paginationStartParameterName;
 	private Portal _portal;
 	private PortletSharedSearchRequest _portletSharedSearchRequest;
