@@ -75,7 +75,7 @@ CPOptionFacetsPortletInstanceConfiguration cpOptionFacetsPortletInstanceConfigur
 									).put(
 										"title", HtmlUtil.escape(cpOptionsSearchFacetDisplayContext.getCPOptionName(companyId, facet.getFieldId()))
 									).build()
-				%>'
+								%>'
 								displayStyle="<%= cpOptionFacetsPortletInstanceConfiguration.displayStyle() %>"
 								displayStyleGroupId="<%= cpOptionsSearchFacetDisplayContext.getDisplayStyleGroupId() %>"
 								entries="<%= cpOptionsSearchFacetDisplayContext.getTermDisplayContexts() %>"
