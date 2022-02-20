@@ -41,7 +41,7 @@ public interface CPOptionFacetsPortletInstanceConfiguration {
 	@Meta.AD(deflt = "10", name = "max-terms", required = false)
 	public int getMaxTerms();
 
-	@Meta.AD(deflt = "1", name = "frequency-treshold", required = false)
+	@Meta.AD(deflt = "1", name = "frequency-threshold", required = false)
 	public int getFrequencyThreshold();
 
 	@Meta.AD(
