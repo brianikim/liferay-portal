@@ -105,12 +105,11 @@ public class CPOptionFacetsPortletSharedSearchContributor
 					portletDisplay.getPortletInstanceConfiguration(
 						CPOptionFacetsPortletInstanceConfiguration.class);
 
-			int maxTerms =
-				cpOptionFacetsPortletInstanceConfiguration.getMaxTerms();
-
 			int frequencyThreshold =
 				cpOptionFacetsPortletInstanceConfiguration.
 					getFrequencyThreshold();
+			int maxTerms =
+				cpOptionFacetsPortletInstanceConfiguration.getMaxTerms();
 
 			Optional<PortletPreferences> portletPreferencesOptional =
 				portletSharedSearchSettings.getPortletPreferencesOptional();
