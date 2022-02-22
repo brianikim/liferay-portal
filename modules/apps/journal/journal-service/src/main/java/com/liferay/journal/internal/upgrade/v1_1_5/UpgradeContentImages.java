@@ -18,6 +18,8 @@ import com.liferay.journal.internal.upgrade.util.JournalArticleImageUpgradeHelpe
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.dao.jdbc.AutoBatchPreparedStatementUtil;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.json.JSONFactoryUtil;
+import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -99,9 +101,13 @@ public class UpgradeContentImages extends UpgradeProcess {
 								getFileEntryFromURL(data);
 
 						if (fileEntry == null) {
-							fileEntry =
-								_journalArticleImageUpgradeHelper.
-									getFileEntryFromData(data);
+							JSONObject jsonObject =
+								JSONFactoryUtil.createJSONObject(data);
+
+							fileEntryId = GetterUtil.getLong(
+								jsonObject.get("fileEntryId"));
+
+							fileEntry = _getFileEntryByFileEntryId(fileEntryId);
 						}
 					}
 				}
