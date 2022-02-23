@@ -14,6 +14,7 @@
 
 package com.liferay.portal.upgrade.v7_0_0;
 
+import com.liferay.portal.kernel.dao.jdbc.AutoBatchPreparedStatementUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.settings.LocalizedValuesMap;
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
@@ -88,60 +89,60 @@ public class UpgradeGroup extends UpgradeProcess {
 	}
 
 	protected void updateGroupsNames() throws Exception {
-		try (PreparedStatement preparedStatement = connection.prepareStatement(
+		try (PreparedStatement preparedStatement1 = connection.prepareStatement(
 				"select groupId, name, typeSettings from Group_ where site = " +
-					"1 and friendlyURL != '/global'")) {
+					"1 and friendlyURL != '/global'");
+			ResultSet resultSet = preparedStatement1.executeQuery();
+			PreparedStatement preparedStatement2 =
+				AutoBatchPreparedStatementUtil.autoBatch(
+					connection.prepareStatement(
+						"update Group_ set name = ? where groupId = ?"))) {
 
-			try (ResultSet resultSet = preparedStatement.executeQuery()) {
-				while (resultSet.next()) {
-					String name = resultSet.getString("name");
-					long groupId = resultSet.getLong("groupId");
+			while (resultSet.next()) {
+				String name = resultSet.getString("name");
+				long groupId = resultSet.getLong("groupId");
 
-					String typeSettings = resultSet.getString("typeSettings");
+				String typeSettings = resultSet.getString("typeSettings");
 
-					UnicodeProperties typeSettingsUnicodeProperties =
-						new UnicodeProperties(true);
+				UnicodeProperties typeSettingsUnicodeProperties =
+					new UnicodeProperties(true);
 
-					typeSettingsUnicodeProperties.fastLoad(typeSettings);
+				typeSettingsUnicodeProperties.fastLoad(typeSettings);
 
-					String defaultLanguageId =
-						typeSettingsUnicodeProperties.getProperty("languageId");
+				String defaultLanguageId =
+					typeSettingsUnicodeProperties.getProperty("languageId");
 
-					Locale currentDefaultLocale =
-						LocaleThreadLocal.getSiteDefaultLocale();
+				Locale currentDefaultLocale =
+					LocaleThreadLocal.getSiteDefaultLocale();
 
-					try {
-						LocaleThreadLocal.setSiteDefaultLocale(
-							LocaleUtil.fromLanguageId(defaultLanguageId));
+				try {
+					LocaleThreadLocal.setSiteDefaultLocale(
+						LocaleUtil.fromLanguageId(defaultLanguageId));
 
-						LocalizedValuesMap localizedValuesMap =
-							_getLocalizedValuesMap(
-								StringUtil.split(
-									typeSettingsUnicodeProperties.getProperty(
-										"locales")),
-								name);
+					LocalizedValuesMap localizedValuesMap =
+						_getLocalizedValuesMap(
+							StringUtil.split(
+								typeSettingsUnicodeProperties.getProperty(
+									"locales")),
+							name);
 
-						String nameXML = LocalizationUtil.updateLocalization(
-							localizedValuesMap.getValues(), "", "name",
-							defaultLanguageId);
+					String nameXML = LocalizationUtil.updateLocalization(
+						localizedValuesMap.getValues(), "", "name",
+						defaultLanguageId);
 
-						try (PreparedStatement updatePreparedStatement =
-								connection.prepareStatement(
-									"update Group_ set name = ? where " +
-										"groupId = ?")) {
+					preparedStatement2.setString(1, nameXML);
 
-							updatePreparedStatement.setString(1, nameXML);
-							updatePreparedStatement.setLong(2, groupId);
+					preparedStatement2.setLong(2, groupId);
 
-							updatePreparedStatement.executeUpdate();
-						}
-					}
-					finally {
-						LocaleThreadLocal.setSiteDefaultLocale(
-							currentDefaultLocale);
-					}
+					preparedStatement2.addBatch();
+				}
+				finally {
+					LocaleThreadLocal.setSiteDefaultLocale(
+						currentDefaultLocale);
 				}
 			}
+
+			preparedStatement2.executeBatch();
 		}
 	}
 
