@@ -66,7 +66,7 @@ public class ViewSXPElementsDisplayContext {
 				).buildString(),
 				"view", "view",
 				LanguageUtil.get(_sxpRequestHelper.getRequest(), "view"), "get",
-				"view", null),
+				"get", null),
 			new ClayDataSetActionDropdownItem(
 				getAPIURL() + "/{id}/copy", "copy", "copy",
 				LanguageUtil.get(_sxpRequestHelper.getRequest(), "copy"),
@@ -74,7 +74,7 @@ public class ViewSXPElementsDisplayContext {
 			new ClayDataSetActionDropdownItem(
 				"#", "download", "export",
 				LanguageUtil.get(_sxpRequestHelper.getRequest(), "export"),
-				null, null, null),
+				null, "get", null),
 			new ClayDataSetActionDropdownItem(
 				getAPIURL() + "/{id}", "trash", "delete",
 				LanguageUtil.get(_sxpRequestHelper.getRequest(), "delete"),
