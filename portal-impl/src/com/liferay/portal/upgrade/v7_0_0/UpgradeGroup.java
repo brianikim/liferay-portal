@@ -17,8 +17,12 @@ package com.liferay.portal.upgrade.v7_0_0;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.settings.LocalizedValuesMap;
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
+import com.liferay.portal.kernel.util.LocaleThreadLocal;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.LoggingTimer;
+import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.language.LanguageResources;
 import com.liferay.portal.upgrade.v7_0_0.util.GroupTable;
 
@@ -47,6 +51,7 @@ public class UpgradeGroup extends UpgradeProcess {
 		createIndex();
 
 		updateGlobalGroupName();
+		updateGroupsNames();
 	}
 
 	protected void updateGlobalGroupName() throws Exception {
@@ -87,6 +92,71 @@ public class UpgradeGroup extends UpgradeProcess {
 				ps.setLong(2, companyId);
 
 				ps.executeUpdate();
+			}
+		}
+	}
+
+	protected void updateGroupsNames() throws Exception {
+		try (PreparedStatement preparedStatement = connection.prepareStatement(
+				"select groupId, name, typeSettings from Group_ where site = " +
+					"1 and friendlyURL != '/global'")) {
+
+			try (ResultSet resultSet = preparedStatement.executeQuery()) {
+				while (resultSet.next()) {
+					String name = resultSet.getString("name");
+					long groupId = resultSet.getLong("groupId");
+
+					String typeSettings = resultSet.getString("typeSettings");
+
+					UnicodeProperties typeSettingsUnicodeProperties =
+						new UnicodeProperties(true);
+
+					typeSettingsUnicodeProperties.fastLoad(typeSettings);
+
+					String defaultLanguageId =
+						typeSettingsUnicodeProperties.getProperty("languageId");
+
+					Locale currentDefaultLocale =
+						LocaleThreadLocal.getSiteDefaultLocale();
+
+					try {
+						LocaleThreadLocal.setSiteDefaultLocale(
+							LocaleUtil.fromLanguageId(defaultLanguageId));
+
+						LocalizedValuesMap localizedValuesMap =
+							new LocalizedValuesMap();
+
+						for (String languageId :
+								StringUtil.split(
+									typeSettingsUnicodeProperties.getProperty(
+										"locales"))) {
+
+							Locale locale = LocaleUtil.fromLanguageId(
+								languageId);
+
+							localizedValuesMap.put(locale, name);
+						}
+
+						String nameXML = LocalizationUtil.updateLocalization(
+							localizedValuesMap.getValues(), "", "name",
+							defaultLanguageId);
+
+						try (PreparedStatement updatePreparedStatement =
+								connection.prepareStatement(
+									"update Group_ set name = ? where " +
+										"groupId = ?")) {
+
+							updatePreparedStatement.setString(1, nameXML);
+							updatePreparedStatement.setLong(2, groupId);
+
+							updatePreparedStatement.executeUpdate();
+						}
+					}
+					finally {
+						LocaleThreadLocal.setSiteDefaultLocale(
+							currentDefaultLocale);
+					}
+				}
 			}
 		}
 	}
