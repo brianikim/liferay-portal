@@ -100,8 +100,8 @@ public class UpgradeGroup extends UpgradeProcess {
 						"update Group_ set name = ? where groupId = ?"))) {
 
 			while (resultSet.next()) {
-				String name = resultSet.getString("name");
 				long groupId = resultSet.getLong("groupId");
+				String name = resultSet.getString("name");
 
 				String typeSettings = resultSet.getString("typeSettings");
 
