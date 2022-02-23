@@ -70,6 +70,10 @@ public class ViewSXPBlueprintsDisplayContext {
 				LanguageUtil.get(_sxpRequestHelper.getRequest(), "edit"), "get",
 				"view", null),
 			new ClayDataSetActionDropdownItem(
+				getAPIURL() + "/{id}/copy", "copy", "copy",
+				LanguageUtil.get(_sxpRequestHelper.getRequest(), "copy"),
+				"post", "create", "async"),
+			new ClayDataSetActionDropdownItem(
 				"#", "download", "export",
 				LanguageUtil.get(_sxpRequestHelper.getRequest(), "export"),
 				null, null, null),
