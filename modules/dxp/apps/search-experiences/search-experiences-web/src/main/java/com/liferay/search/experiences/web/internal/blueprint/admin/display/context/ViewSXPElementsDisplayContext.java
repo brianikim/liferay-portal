@@ -72,7 +72,7 @@ public class ViewSXPElementsDisplayContext {
 				LanguageUtil.get(_sxpRequestHelper.getRequest(), "copy"),
 				"post", "create", "async"),
 			new ClayDataSetActionDropdownItem(
-				"#", "download", "export",
+				"#", "export", "export",
 				LanguageUtil.get(_sxpRequestHelper.getRequest(), "export"),
 				null, "get", null),
 			new ClayDataSetActionDropdownItem(
