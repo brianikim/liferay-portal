@@ -31,6 +31,7 @@ import {fetchData, fetchPreviewSearch} from '../utils/fetch';
 import {INPUT_TYPES} from '../utils/inputTypes';
 import {TEST_IDS} from '../utils/testIds';
 import {openErrorToast, openSuccessToast} from '../utils/toasts';
+import useShouldConfirmBeforeNavigate from '../utils/useShouldConfirmBeforeNavigate';
 import {
 	cleanUIConfiguration,
 	filterAndSortClassNames,
@@ -849,6 +850,8 @@ function EditSXPBlueprintForm({
 				);
 		}
 	};
+
+	useShouldConfirmBeforeNavigate(formik.dirty && !formik.isSubmitting);
 
 	if (
 		!indexFields ||
