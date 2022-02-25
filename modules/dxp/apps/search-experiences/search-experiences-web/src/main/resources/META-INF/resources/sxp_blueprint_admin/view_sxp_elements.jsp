@@ -52,3 +52,7 @@ ViewSXPElementsDisplayContext viewSXPElementsDisplayContext = (ViewSXPElementsDi
 		%>'
 	/>
 </div>
+
+<liferay-frontend:component
+	module="sxp_blueprint_admin/js/utils/openInitialSuccessToastHandler"
+/>

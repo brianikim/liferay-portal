@@ -54,3 +54,7 @@ ViewSXPBlueprintsDisplayContext viewSXPBlueprintsDisplayContext = (ViewSXPBluepr
 		%>'
 	/>
 </div>
+
+<liferay-frontend:component
+	module="sxp_blueprint_admin/js/utils/openInitialSuccessToastHandler"
+/>
