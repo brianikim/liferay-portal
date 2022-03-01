@@ -1083,6 +1083,28 @@ public class CalendarBookingLocalServiceImpl
 	@Override
 	public List<CalendarBooking> search(
 		long companyId, long[] groupIds, long[] calendarIds,
+		long[] calendarResourceIds, long parentCalendarBookingId,
+		String keywords, long startTime, long endTime, TimeZone displayTimeZone,
+		boolean recurring, int[] statuses, int start, int end,
+		OrderByComparator<CalendarBooking> orderByComparator) {
+
+		List<CalendarBooking> calendarBookings =
+			calendarBookingFinder.findByKeywords(
+				companyId, groupIds, calendarIds, calendarResourceIds,
+				parentCalendarBookingId, keywords, startTime, endTime,
+				recurring, statuses, start, end, orderByComparator);
+
+		if (recurring) {
+			calendarBookings = RecurrenceUtil.expandCalendarBookings(
+				calendarBookings, startTime, endTime, displayTimeZone);
+		}
+
+		return calendarBookings;
+	}
+
+	@Override
+	public List<CalendarBooking> search(
+		long companyId, long[] groupIds, long[] calendarIds,
 		long[] calendarResourceIds, long parentCalendarBookingId, String title,
 		String description, String location, long startTime, long endTime,
 		boolean recurring, int[] statuses, boolean andOperator, int start,
