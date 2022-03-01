@@ -300,6 +300,8 @@ public class ElasticsearchInstanceSettingsBuilder {
 
 		configureTestMode();
 
+		_disableGeoipDownloader();
+
 		_disableXpack();
 	}
 
@@ -334,6 +336,10 @@ public class ElasticsearchInstanceSettingsBuilder {
 
 	protected void put(String key, String value) {
 		_settingsBuilder.put(key, value);
+	}
+
+	private void _disableGeoipDownloader() {
+		put("ingest.geoip.downloader.enabled", false);
 	}
 
 	private void _disableXpack() {
