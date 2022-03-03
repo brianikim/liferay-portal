@@ -88,24 +88,26 @@ const Form = React.forwardRef(
 				validate()
 					.then((validForm) => {
 						if (validForm) {
-							const liferayForm =
-								event.target.id &&
-								Liferay.Form.get(event.target.id);
+							AUI().use('liferay-form', () => {
+								const liferayForm =
+									event.target.id &&
+									Liferay.Form.get(event.target.id);
 
-							const validLiferayForm = !Object.keys(
-								liferayForm?.formValidator?.errors ?? {}
-							).length;
+								const validLiferayForm = !Object.keys(
+									liferayForm?.formValidator?.errors ?? {}
+								).length;
 
-							if (!validLiferayForm) {
-								return;
-							}
+								if (!validLiferayForm) {
+									return;
+								}
 
-							Liferay.Util.submitForm(event.target);
+								Liferay.Util.submitForm(event.target);
 
-							Liferay.fire('ddmFormSubmit', {
-								formId: getFormId(
-									getFormNode(containerRef.current)
-								),
+								Liferay.fire('ddmFormSubmit', {
+									formId: getFormId(
+										getFormNode(containerRef.current)
+									),
+								});
 							});
 						}
 					})
