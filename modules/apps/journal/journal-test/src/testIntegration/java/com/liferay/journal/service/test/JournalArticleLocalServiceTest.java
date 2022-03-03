@@ -489,18 +489,24 @@ public class JournalArticleLocalServiceTest {
 			"Valeur Prédéfinie",
 			actualDDMFormFieldPredefinedValue.getString(LocaleUtil.FRENCH));
 		Assert.assertEquals(
-			"Valore Predefinito",
-			actualDDMFormFieldPredefinedValue.getString(LocaleUtil.ITALY));
+			"Valor Predefinido",
+			actualDDMFormFieldPredefinedValue.getString(LocaleUtil.SPAIN));
 		Assert.assertEquals(
 			"Predefined Value",
 			actualDDMFormFieldPredefinedValue.getString(LocaleUtil.US));
+
+		Locale unavailableLocale = LocaleUtil.ITALY;
+
+		Assert.assertEquals(
+			"Predefined Value",
+			actualDDMFormFieldPredefinedValue.getString(unavailableLocale));
 	}
 
 	private Tuple _createJournalArticleWithPredefinedValues(String title)
 		throws Exception {
 
 		Set<Locale> availableLocales = DDMFormTestUtil.createAvailableLocales(
-			LocaleUtil.BRAZIL, LocaleUtil.FRENCH, LocaleUtil.ITALY,
+			LocaleUtil.BRAZIL, LocaleUtil.FRENCH, LocaleUtil.SPAIN,
 			LocaleUtil.US);
 
 		DDMForm ddmForm = DDMFormTestUtil.createDDMForm(
@@ -513,7 +519,7 @@ public class JournalArticleLocalServiceTest {
 
 		label.addString(LocaleUtil.BRAZIL, "rótulo");
 		label.addString(LocaleUtil.FRENCH, "étiquette");
-		label.addString(LocaleUtil.ITALY, "etichetta");
+		label.addString(LocaleUtil.SPAIN, "etiqueta");
 		label.addString(LocaleUtil.US, "label");
 
 		ddmFormField.setLabel(label);
@@ -535,7 +541,7 @@ public class JournalArticleLocalServiceTest {
 			).put(
 				LocaleUtil.FRENCH, "Valeur Prédéfinie"
 			).put(
-				LocaleUtil.ITALY, "Valore Predefinito"
+				LocaleUtil.SPAIN, "Valor Predefinido"
 			).put(
 				LocaleUtil.US, "Predefined Value"
 			).build(),
