@@ -22,11 +22,17 @@
 String redirect = ParamUtil.getString(request, "redirect");
 
 if (Validator.isNull(redirect)) {
-	PortletURL portletURL = renderResponse.createRenderURL();
+	String mvcRenderCommandName = "/blogs/view";
 
-	portletURL.setParameter("mvcRenderCommandName", "/blogs/view");
+	if (Objects.equals(portletName, BlogsPortletKeys.BLOGS_AGGREGATOR)) {
+		mvcRenderCommandName = "/blogs_aggregator/view";
+	}
 
-	redirect = portletURL.toString();
+	redirect = PortletURLBuilder.createRenderURL(
+		renderResponse
+	).setMVCRenderCommandName(
+		mvcRenderCommandName
+	).buildString();
 }
 
 BlogsEntry entry = (BlogsEntry)request.getAttribute(WebKeys.BLOGS_ENTRY);
