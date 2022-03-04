@@ -219,11 +219,15 @@ public class SpecificationResourceImpl
 
 		return _cpSpecificationOptionService.updateCPSpecificationOption(
 			cpSpecificationOption.getCPSpecificationOptionId(),
-			_getCPOptionCategoryId(specification),
+			GetterUtil.getLong(
+				cpSpecificationOption.getCPOptionCategoryId(),
+				_getCPOptionCategoryId(specification)),
 			LanguageUtils.getLocalizedMap(specification.getTitle()),
 			LanguageUtils.getLocalizedMap(specification.getDescription()),
-			_isFacetable(specification), specification.getKey(),
-			_serviceContextHelper.getServiceContext());
+			GetterUtil.getBoolean(
+				cpSpecificationOption.isFacetable(),
+				_isFacetable(specification)),
+			specification.getKey(), _serviceContextHelper.getServiceContext());
 	}
 
 	private CPSpecificationOption _updateSpecification(
