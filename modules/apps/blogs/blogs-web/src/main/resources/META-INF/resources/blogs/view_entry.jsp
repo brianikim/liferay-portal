@@ -24,15 +24,15 @@ String redirect = ParamUtil.getString(request, "redirect");
 if (Validator.isNull(redirect)) {
 	String mvcRenderCommandName = "/blogs/view";
 
+	PortletURL portletURL = renderResponse.createRenderURL();
+
 	if (Objects.equals(portletName, BlogsPortletKeys.BLOGS_AGGREGATOR)) {
 		mvcRenderCommandName = "/blogs_aggregator/view";
 	}
 
-	redirect = PortletURLBuilder.createRenderURL(
-		renderResponse
-	).setMVCRenderCommandName(
-		mvcRenderCommandName
-	).buildString();
+	portletURL.setParameter("mvcRenderCommandName", mvcRenderCommandName);
+
+	redirect = portletURL.toString();
 }
 
 BlogsEntry entry = (BlogsEntry)request.getAttribute(WebKeys.BLOGS_ENTRY);
