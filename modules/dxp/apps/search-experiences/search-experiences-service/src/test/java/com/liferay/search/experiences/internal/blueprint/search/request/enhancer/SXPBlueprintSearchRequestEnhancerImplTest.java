@@ -234,9 +234,7 @@ public class SXPBlueprintSearchRequestEnhancerImplTest {
 		Assert.assertTrue(MapUtil.isEmpty(searchRequest.getAggregationsMap()));
 		Assert.assertTrue(
 			ListUtil.isEmpty(searchRequest.getComplexQueryParts()));
-
 		Assert.assertNull(searchRequest.getHighlight());
-
 		Assert.assertTrue(ListUtil.isEmpty(searchRequest.getSorts()));
 
 		_assert(sxpBlueprint);
