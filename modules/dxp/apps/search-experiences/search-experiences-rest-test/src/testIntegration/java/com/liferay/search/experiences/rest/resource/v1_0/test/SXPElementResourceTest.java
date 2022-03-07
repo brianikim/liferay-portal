@@ -137,13 +137,11 @@ public class SXPElementResourceTest extends BaseSXPElementResourceTestCase {
 	protected SXPElement randomSXPElement() throws Exception {
 		SXPElement sxpElement = super.randomSXPElement();
 
-		sxpElement.setTitle(_TITLE_PREFIX + sxpElement.getTitle());
-
-		sxpElement.setTitle_i18n(
-			Collections.singletonMap("en_US", sxpElement.getTitle()));
-
 		sxpElement.setDescription_i18n(
 			Collections.singletonMap("en_US", sxpElement.getDescription()));
+		sxpElement.setTitle(_TITLE_PREFIX + sxpElement.getTitle());
+		sxpElement.setTitle_i18n(
+			Collections.singletonMap("en_US", sxpElement.getTitle()));
 
 		return sxpElement;
 	}

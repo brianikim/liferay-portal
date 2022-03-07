@@ -125,13 +125,11 @@ public class SXPBlueprintResourceTest extends BaseSXPBlueprintResourceTestCase {
 	protected SXPBlueprint randomSXPBlueprint() throws Exception {
 		SXPBlueprint sxpBlueprint = super.randomSXPBlueprint();
 
-		sxpBlueprint.setTitle(_TITLE_PREFIX + sxpBlueprint.getTitle());
-
-		sxpBlueprint.setTitle_i18n(
-			Collections.singletonMap("en_US", sxpBlueprint.getTitle()));
-
 		sxpBlueprint.setDescription_i18n(
 			Collections.singletonMap("en_US", sxpBlueprint.getDescription()));
+		sxpBlueprint.setTitle(_TITLE_PREFIX + sxpBlueprint.getTitle());
+		sxpBlueprint.setTitle_i18n(
+			Collections.singletonMap("en_US", sxpBlueprint.getTitle()));
 
 		return sxpBlueprint;
 	}
