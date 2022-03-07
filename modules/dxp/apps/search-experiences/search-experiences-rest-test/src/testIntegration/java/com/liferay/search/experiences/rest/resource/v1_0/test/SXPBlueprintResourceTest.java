@@ -40,9 +40,6 @@ public class SXPBlueprintResourceTest extends BaseSXPBlueprintResourceTestCase {
 	public void testGetSXPBlueprintExport() throws Exception {
 		SXPBlueprint sxpBlueprint = randomSXPBlueprint();
 
-		String title = sxpBlueprint.getTitle();
-		String description = sxpBlueprint.getDescription();
-
 		SXPBlueprint postSXPBlueprint = testPostSXPBlueprint_addSXPBlueprint(
 			sxpBlueprint);
 
@@ -56,13 +53,14 @@ public class SXPBlueprintResourceTest extends BaseSXPBlueprintResourceTestCase {
 				JSONUtil.put(
 					"configuration", JSONFactoryUtil.createJSONObject()
 				).put(
-					"description_i18n", JSONUtil.put("en_US", description)
+					"description_i18n",
+					JSONUtil.put("en_US", sxpBlueprint.getDescription())
 				).put(
 					"elementInstances", JSONFactoryUtil.createJSONArray()
 				).put(
 					"schemaVersion", postSXPBlueprint.getSchemaVersion()
 				).put(
-					"title_i18n", JSONUtil.put("en_US", title)
+					"title_i18n", JSONUtil.put("en_US", sxpBlueprint.getTitle())
 				)));
 	}
 

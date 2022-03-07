@@ -41,9 +41,6 @@ public class SXPElementResourceTest extends BaseSXPElementResourceTestCase {
 	public void testGetSXPElementExport() throws Exception {
 		SXPElement sxpElement = randomSXPElement();
 
-		String title = sxpElement.getTitle();
-		String description = sxpElement.getDescription();
-
 		SXPElement postSXPElement = testPostSXPElement_addSXPElement(
 			sxpElement);
 
@@ -55,13 +52,14 @@ public class SXPElementResourceTest extends BaseSXPElementResourceTestCase {
 			JSONUtil.equals(
 				JSONFactoryUtil.createJSONObject(httpResponse.getContent()),
 				JSONUtil.put(
-					"description_i18n", JSONUtil.put("en_US", description)
+					"description_i18n",
+					JSONUtil.put("en_US", sxpElement.getDescription())
 				).put(
 					"elementDefinition", JSONFactoryUtil.createJSONObject()
 				).put(
 					"schemaVersion", postSXPElement.getSchemaVersion()
 				).put(
-					"title_i18n", JSONUtil.put("en_US", title)
+					"title_i18n", JSONUtil.put("en_US", sxpElement.getTitle())
 				).put(
 					"type", postSXPElement.getType()
 				)));
