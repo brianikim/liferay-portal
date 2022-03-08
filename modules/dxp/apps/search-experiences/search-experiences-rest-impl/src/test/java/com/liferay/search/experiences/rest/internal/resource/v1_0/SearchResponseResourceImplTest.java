@@ -239,7 +239,6 @@ public class SearchResponseResourceImplTest {
 		runtimeException.addSuppressed(throwable3);
 
 		runtimeException.addSuppressed(new InvalidWebCacheItemException());
-
 		runtimeException.addSuppressed(new PrivateIPAddressException());
 
 		Mockito.doThrow(
