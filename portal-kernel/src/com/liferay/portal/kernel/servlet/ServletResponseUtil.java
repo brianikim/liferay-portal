@@ -488,6 +488,11 @@ public class ServletResponseUtil {
 			String extension = GetterUtil.getString(
 				FileUtil.getExtension(fileName));
 
+			if (extension.isEmpty()) {
+				extension = MimeTypesUtil.getExtensions(contentType)
+					.iterator().next().substring(1);
+			}
+
 			extension = StringUtil.toLowerCase(extension);
 
 			String[] mimeTypesContentDispositionInline = null;
