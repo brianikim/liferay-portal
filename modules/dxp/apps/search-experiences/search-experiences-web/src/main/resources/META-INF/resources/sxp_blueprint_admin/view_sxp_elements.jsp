@@ -20,18 +20,25 @@
 ViewSXPElementsDisplayContext viewSXPElementsDisplayContext = (ViewSXPElementsDisplayContext)request.getAttribute(SXPWebKeys.VIEW_SXP_ELEMENTS_DISPLAY_CONTEXT);
 %>
 
-<clay:headless-data-set-display
-	apiURL="<%= viewSXPElementsDisplayContext.getAPIURL() %>"
-	clayDataSetActionDropdownItems="<%= viewSXPElementsDisplayContext.getClayDataSetActionDropdownItems() %>"
-	creationMenu="<%= viewSXPElementsDisplayContext.getCreationMenu() %>"
-	id="<%= SXPBlueprintAdminClayDataSetDisplayNames.SXP_ELEMENTS %>"
-	itemsPerPage="<%= 20 %>"
-	namespace="<%= liferayPortletResponse.getNamespace() %>"
-	pageNumber="<%= 1 %>"
-	portletURL="<%= liferayPortletResponse.createRenderURL() %>"
-	propsTransformer="sxp_blueprint_admin/js/view_sxp_elements/ViewSXPElementsPropsTransformer"
-	style="fluid"
-/>
+<aui:form action="<%= viewSXPElementsDisplayContext.getPortletURL() %>" method="post" name="fm">
+	<aui:input name="redirect" type="hidden" value="<%= String.valueOf(viewSXPElementsDisplayContext.getPortletURL()) %>" />
+
+	<clay:headless-data-set-display
+		apiURL="<%= viewSXPElementsDisplayContext.getAPIURL() %>"
+		bulkActionDropdownItems="<%= viewSXPElementsDisplayContext.getBulkActionDropdownItems() %>"
+		clayDataSetActionDropdownItems="<%= viewSXPElementsDisplayContext.getClayDataSetActionDropdownItems() %>"
+		creationMenu="<%= viewSXPElementsDisplayContext.getCreationMenu() %>"
+		id="<%= SXPBlueprintAdminClayDataSetDisplayNames.SXP_ELEMENTS %>"
+		itemsPerPage="<%= 20 %>"
+		namespace="<%= liferayPortletResponse.getNamespace() %>"
+		pageNumber="<%= 1 %>"
+		portletURL="<%= liferayPortletResponse.createRenderURL() %>"
+		propsTransformer="sxp_blueprint_admin/js/view_sxp_elements/ViewSXPElementsPropsTransformer"
+		selectedItemsKey="id"
+		selectionType="multiple"
+		style="fluid"
+	/>
+</aui:form>
 
 <div id="<portlet:namespace />addSXPElement">
 	<react:component
