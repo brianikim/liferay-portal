@@ -277,15 +277,13 @@ function AddSXPElementSidebar({
 
 	const [querySXPElements, setQuerySXPElements] = useState(null);
 
-	// TODO check pagesize
-
 	useEffect(() => {
 		fetchData(
 			addParams('/o/search-experiences-rest/v1.0/sxp-elements', {
-				pageSize: 200,
-			}),
-			{method: 'GET'},
-			(responseContent) => {
+				pageSize: 200, // TODO check pagesize
+			})
+		)
+			.then((responseContent) => {
 				if (isMounted()) {
 					setQuerySXPElements(
 						responseContent.items.map(
@@ -307,13 +305,12 @@ function AddSXPElementSidebar({
 						)
 					);
 				}
-			},
-			() => {
+			})
+			.catch(() => {
 				if (isMounted()) {
 					setQuerySXPElements([]);
 				}
-			}
-		);
+			});
 	}, []); //eslint-disable-line
 
 	if (!querySXPElements) {
