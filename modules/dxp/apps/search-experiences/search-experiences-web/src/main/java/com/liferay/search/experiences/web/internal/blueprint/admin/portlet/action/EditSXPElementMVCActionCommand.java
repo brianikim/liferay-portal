@@ -76,15 +76,6 @@ public class EditSXPElementMVCActionCommand extends BaseMVCActionCommand {
 			ParamUtil.getString(actionRequest, "id"), 0L);
 
 		for (long deleteSXPElementId : deleteSXPElementIds) {
-			SXPElement sxpElement = _sxpElementService.getSXPElement(
-				deleteSXPElementId);
-
-			if (sxpElement.isReadOnly()) {
-				throw new SXPElementReadOnlyException();
-			}
-		}
-
-		for (long deleteSXPElementId : deleteSXPElementIds) {
 			_sxpElementService.deleteSXPElement(deleteSXPElementId);
 		}
 	}
