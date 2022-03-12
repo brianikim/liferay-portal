@@ -59,13 +59,6 @@ public class EditSXPBlueprintMVCActionCommand extends BaseMVCActionCommand {
 		}
 	}
 
-	@Reference(unbind = "-")
-	protected void setSXPBlueprintService(
-		SXPBlueprintService sxpBlueprintService) {
-
-		_sxpBlueprintService = sxpBlueprintService;
-	}
-
 	private void _deleteSXPBlueprints(ActionRequest actionRequest)
 		throws Exception {
 
@@ -77,6 +70,7 @@ public class EditSXPBlueprintMVCActionCommand extends BaseMVCActionCommand {
 		}
 	}
 
+	@Reference
 	private SXPBlueprintService _sxpBlueprintService;
 
 }

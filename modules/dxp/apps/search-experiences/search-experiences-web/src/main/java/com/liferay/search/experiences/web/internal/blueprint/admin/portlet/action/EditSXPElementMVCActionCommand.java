@@ -69,11 +69,6 @@ public class EditSXPElementMVCActionCommand extends BaseMVCActionCommand {
 		}
 	}
 
-	@Reference(unbind = "-")
-	protected void setSXPElementService(SXPElementService sxpElementService) {
-		_sxpElementService = sxpElementService;
-	}
-
 	private void _deleteSXPElements(ActionRequest actionRequest)
 		throws Exception {
 
@@ -94,6 +89,7 @@ public class EditSXPElementMVCActionCommand extends BaseMVCActionCommand {
 		}
 	}
 
+	@Reference
 	private SXPElementService _sxpElementService;
 
 }
