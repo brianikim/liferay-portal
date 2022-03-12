@@ -22,7 +22,6 @@ import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.search.experiences.constants.SXPPortletKeys;
 import com.liferay.search.experiences.exception.SXPElementReadOnlyException;
-import com.liferay.search.experiences.model.SXPElement;
 import com.liferay.search.experiences.service.SXPElementService;
 
 import javax.portlet.ActionRequest;
