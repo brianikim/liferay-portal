@@ -233,15 +233,15 @@ public class LabelTag extends BaseContainerTag {
 
 			jspWriter.write("<span class=\"label-item label-item-expand\">");
 
-			String labelValue = _label;
+			String translatedLabel = _label;
 
 			if (_translated) {
-				labelValue = LanguageUtil.get(
+				translatedLabel = LanguageUtil.get(
 					TagResourceBundleUtil.getResourceBundle(pageContext),
 					_label);
 			}
 
-			jspWriter.write(HtmlUtil.escape(labelValue));
+			jspWriter.write(HtmlUtil.escape(translatedLabel));
 			jspWriter.write("</span>");
 
 			if (_dismissible) {
