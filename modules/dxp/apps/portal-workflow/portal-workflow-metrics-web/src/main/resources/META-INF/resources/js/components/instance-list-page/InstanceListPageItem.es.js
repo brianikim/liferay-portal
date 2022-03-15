@@ -44,7 +44,7 @@ const getSLAStatusIcon = (slaStatus) => {
 	return items[slaStatus] || items.Untracked;
 };
 
-const Item = ({totalCount, ...instance}) => {
+const Item = ({isAdmin, totalCount, ...instance}) => {
 	const {userId} = useContext(AppContext);
 	const {
 		selectedItems = [],
@@ -72,7 +72,12 @@ const Item = ({totalCount, ...instance}) => {
 	const assigneeNames = assignees.map((user) => user.name).join(', ');
 	const {reviewer} = assignees.find(({id}) => id === -1) || {};
 
-	const disableCheckbox = (!assignedToUser && !reviewer) || completed;
+	let disableCheckbox = completed;
+
+	if (!isAdmin) {
+		disableCheckbox = !assignedToUser && !reviewer;
+	}
+
 	const slaStatusIcon = getSLAStatusIcon(slaStatus);
 
 	const formattedAssignees = !completed
