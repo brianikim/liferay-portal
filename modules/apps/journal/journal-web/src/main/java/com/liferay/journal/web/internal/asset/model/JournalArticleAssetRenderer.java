@@ -416,7 +416,7 @@ public class JournalArticleAssetRenderer
 		Layout layout = _article.getLayout();
 
 		if (layout == null) {
-			layout = themeDisplay.getLayout();
+			return noSuchEntryRedirect;
 		}
 
 		String groupFriendlyURL = PortalUtil.getGroupFriendlyURL(
