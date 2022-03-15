@@ -393,12 +393,6 @@ public class JournalArticleAssetRenderer
 			(ThemeDisplay)liferayPortletRequest.getAttribute(
 				WebKeys.THEME_DISPLAY);
 
-		Layout layout = _article.getLayout();
-
-		if (layout == null) {
-			layout = themeDisplay.getLayout();
-		}
-
 		if (!_isShowDisplayPage(_article.getGroupId(), _article)) {
 			return getHitLayoutURL(noSuchEntryRedirect, themeDisplay);
 		}
@@ -417,6 +411,12 @@ public class JournalArticleAssetRenderer
 
 				return friendlyURL;
 			}
+		}
+
+		Layout layout = _article.getLayout();
+
+		if (layout == null) {
+			layout = themeDisplay.getLayout();
 		}
 
 		String groupFriendlyURL = PortalUtil.getGroupFriendlyURL(
