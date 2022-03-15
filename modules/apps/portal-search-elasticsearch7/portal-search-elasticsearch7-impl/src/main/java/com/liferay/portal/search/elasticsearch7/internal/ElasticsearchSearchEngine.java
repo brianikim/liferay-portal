@@ -14,6 +14,7 @@
 
 package com.liferay.portal.search.elasticsearch7.internal;
 
+import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
@@ -31,6 +32,9 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.search.ccr.CrossClusterReplicationHelper;
 import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionManager;
 import com.liferay.portal.search.elasticsearch7.internal.index.IndexFactory;
+import com.liferay.portal.search.engine.ConnectionInformation;
+import com.liferay.portal.search.engine.NodeInformation;
+import com.liferay.portal.search.engine.SearchEngineInformation;
 import com.liferay.portal.search.engine.adapter.SearchEngineAdapter;
 import com.liferay.portal.search.engine.adapter.cluster.ClusterHealthStatus;
 import com.liferay.portal.search.engine.adapter.cluster.HealthClusterRequest;
@@ -223,6 +227,8 @@ public class ElasticsearchSearchEngine extends BaseSearchEngine {
 
 	@Activate
 	protected void activate(Map<String, Object> properties) {
+		_checkNodeVersions();
+
 		setVendor(MapUtil.getString(properties, "search.engine.impl"));
 	}
 
@@ -289,6 +295,13 @@ public class ElasticsearchSearchEngine extends BaseSearchEngine {
 		_searchEngineAdapter = searchEngineAdapter;
 	}
 
+	@Reference(unbind = "-")
+	protected void setSearchEngineInformation(
+		SearchEngineInformation searchEngineInformation) {
+
+		_searchEngineInformation = searchEngineInformation;
+	}
+
 	protected void validateBackupName(String backupName)
 		throws SearchException {
 
@@ -352,6 +365,41 @@ public class ElasticsearchSearchEngine extends BaseSearchEngine {
 		}
 	}
 
+	private void _checkNodeVersions() {
+		String clientVersion =
+			_searchEngineInformation.getClientVersionString();
+
+		String minimumVersion = clientVersion.substring(
+			0, clientVersion.lastIndexOf("."));
+
+		MinimumVersionRequirementChecker minimumVersionRequirementChecker =
+			new MinimumVersionRequirementChecker(minimumVersion);
+
+		List<ConnectionInformation> connectionInformationList =
+			_searchEngineInformation.getConnectionInformationList();
+
+		for (ConnectionInformation connectionInformation :
+				connectionInformationList) {
+
+			List<NodeInformation> nodeInformationList =
+				connectionInformation.getNodeInformationList();
+
+			for (NodeInformation nodeInformation : nodeInformationList) {
+				if (!minimumVersionRequirementChecker.meetsRequirement(
+						nodeInformation.getVersion())) {
+
+					_log.error(
+						StringBundler.concat(
+							"Elasticsearch node ", nodeInformation.getName(),
+							" does not meet the minimum version requirement ",
+							"of ", minimumVersion));
+
+					System.exit(1);
+				}
+			}
+		}
+	}
+
 	private static final String _BACKUP_REPOSITORY_NAME = "liferay_backup";
 
 	private static final Log _log = LogFactoryUtil.getLog(
@@ -362,5 +410,6 @@ public class ElasticsearchSearchEngine extends BaseSearchEngine {
 	private IndexFactory _indexFactory;
 	private IndexNameBuilder _indexNameBuilder;
 	private SearchEngineAdapter _searchEngineAdapter;
+	private SearchEngineInformation _searchEngineInformation;
 
 }
