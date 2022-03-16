@@ -33,6 +33,7 @@ import com.liferay.journal.service.JournalFolderServiceUtil;
 import com.liferay.journal.test.util.JournalTestUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.test.util.ConfigurationTemporarySwapper;
+import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.GroupConstants;
@@ -134,9 +135,7 @@ public class SXPBlueprintSearchResultTest {
 		_user = TestPropsValues.getUser();
 
 		_sxpBlueprint = _sxpBlueprintLocalService.addSXPBlueprint(
-			_user.getUserId(),
-			SXPBlueprintSearchResultTestUtil.
-				JSON_QUERY_CONFIGURATION_JSON_OBJECT.toString(),
+			_user.getUserId(), _configurationJSONObject.toString(),
 			Collections.singletonMap(LocaleUtil.US, ""), null, "",
 			Collections.singletonMap(
 				LocaleUtil.US, RandomTestUtil.randomString()),
@@ -456,13 +455,12 @@ public class SXPBlueprintSearchResultTest {
 		throws Exception {
 
 		_sxpBlueprint.setConfigurationJSON(
-			SXPBlueprintSearchResultTestUtil.
-				JSON_QUERY_CONFIGURATION_JSON_OBJECT.put(
-					"parameterConfiguration",
-					JSONUtil.put(
-						"parameters",
-						JSONUtil.put("myparam", JSONUtil.put("type", "String")))
-				).toString());
+			_configurationJSONObject.put(
+				"parameterConfiguration",
+				JSONUtil.put(
+					"parameters",
+					JSONUtil.put("myparam", JSONUtil.put("type", "String")))
+			).toString());
 
 		_updateSXPBlueprint();
 
@@ -1486,6 +1484,14 @@ public class SXPBlueprintSearchResultTest {
 	private AssetCategory _assetCategory;
 	private AssetTag _assetTag;
 	private AssetVocabulary _assetVocabulary;
+	private final JSONObject _configurationJSONObject = JSONUtil.put(
+		"generalConfiguration",
+		JSONUtil.put(
+			"searchableAssetTypes",
+			JSONUtil.put("com.liferay.journal.model.JournalArticle"))
+	).put(
+		"queryConfiguration", JSONUtil.put("applyIndexerClauses", true)
+	);
 
 	@DeleteAfterTestRun
 	private final List<ExpandoColumn> _expandoColumns = new ArrayList<>();
