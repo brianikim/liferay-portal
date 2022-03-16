@@ -276,8 +276,8 @@ elasticsearch.username: "elastic"</echo>
 
 	<macrodef name="configure-portal-remote-elasticsearch-osgi-properties">
 		<sequential>
-			<echo append="true" file="${liferay.home}/osgi/configs/com.liferay.portal.search.elasticsearch7.configuration.ElasticsearchConfiguration.config">${line.separator}productionModeEnabled="true"
-minimumRequiredNodeVersion="${elasticsearch.version}"</echo>
+			<echo append="true" file="${liferay.home}/osgi/configs/com.liferay.portal.search.elasticsearch7.configuration.ElasticsearchConfiguration.config">${line.separator}minimumRequiredNodeVersion="${elasticsearch.version}"
+productionModeEnabled="true"</echo>
 		</sequential>
 	</macrodef>
 
