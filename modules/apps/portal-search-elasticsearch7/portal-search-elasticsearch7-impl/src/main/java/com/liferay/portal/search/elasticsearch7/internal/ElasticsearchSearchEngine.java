@@ -30,6 +30,7 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.search.ccr.CrossClusterReplicationHelper;
+import com.liferay.portal.search.elasticsearch7.internal.configuration.ElasticsearchConfigurationWrapper;
 import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchConnectionManager;
 import com.liferay.portal.search.elasticsearch7.internal.index.IndexFactory;
 import com.liferay.portal.search.engine.ConnectionInformation;
@@ -271,6 +272,13 @@ public class ElasticsearchSearchEngine extends BaseSearchEngine {
 		_crossClusterReplicationHelper = crossClusterReplicationHelper;
 	}
 
+	@Reference(unbind = "-")
+	protected void setElasticsearchConfigurationWrapper(
+		ElasticsearchConfigurationWrapper elasticsearchConfigurationWrapper) {
+
+		_elasticsearchConfigurationWrapper = elasticsearchConfigurationWrapper;
+	}
+
 	@Reference
 	protected void setElasticsearchConnectionManager(
 		ElasticsearchConnectionManager elasticsearchConnectionManager) {
@@ -366,11 +374,16 @@ public class ElasticsearchSearchEngine extends BaseSearchEngine {
 	}
 
 	private void _checkNodeVersions() {
-		String clientVersion =
-			_searchEngineInformation.getClientVersionString();
+		String minimumVersion =
+			_elasticsearchConfigurationWrapper.minimumRequiredNodeVersion();
 
-		String minimumVersion = clientVersion.substring(
-			0, clientVersion.lastIndexOf("."));
+		if (minimumVersion.equals("0.0.0")) {
+			String clientVersion =
+				_searchEngineInformation.getClientVersionString();
+
+			minimumVersion = clientVersion.substring(
+				0, clientVersion.lastIndexOf("."));
+		}
 
 		MinimumVersionRequirementChecker minimumVersionRequirementChecker =
 			new MinimumVersionRequirementChecker(minimumVersion);
@@ -406,6 +419,8 @@ public class ElasticsearchSearchEngine extends BaseSearchEngine {
 		ElasticsearchSearchEngine.class);
 
 	private CrossClusterReplicationHelper _crossClusterReplicationHelper;
+	private volatile ElasticsearchConfigurationWrapper
+		_elasticsearchConfigurationWrapper;
 	private ElasticsearchConnectionManager _elasticsearchConnectionManager;
 	private IndexFactory _indexFactory;
 	private IndexNameBuilder _indexNameBuilder;
