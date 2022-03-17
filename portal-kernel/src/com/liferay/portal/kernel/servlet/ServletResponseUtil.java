@@ -500,9 +500,9 @@ public class ServletResponseUtil {
 				if (iterator.hasNext()) {
 					extension = iterator.next();
 
-					int pos = extension.lastIndexOf(CharPool.PERIOD);
+					int index = extension.lastIndexOf(CharPool.PERIOD);
 
-					extension = extension.substring(pos + 1);
+					extension = extension.substring(index + 1);
 				}
 			}
 
