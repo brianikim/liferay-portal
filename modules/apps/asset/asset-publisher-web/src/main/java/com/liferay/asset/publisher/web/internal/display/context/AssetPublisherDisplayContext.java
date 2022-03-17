@@ -1565,17 +1565,11 @@ public class AssetPublisherDisplayContext {
 		return false;
 	}
 
-	public boolean isSelectionStyleManual() throws PortalException {
-		AssetListEntry assetListEntry = fetchAssetListEntry();
+	public boolean isSelectionStyleManual() {
+		if (Objects.equals(
+				getSelectionStyle(),
+				AssetListEntryTypeConstants.TYPE_MANUAL_LABEL)) {
 
-		if (isSelectionStyleAssetList() && (assetListEntry != null) &&
-			(assetListEntry.getType() ==
-				AssetListEntryTypeConstants.TYPE_MANUAL)) {
-
-			return true;
-		}
-
-		if (Objects.equals(getSelectionStyle(), "manual")) {
 			return true;
 		}
 
