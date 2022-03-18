@@ -15,6 +15,7 @@ import React from 'react';
 import InstanceListPage from '../../../src/main/resources/META-INF/resources/js/components/instance-list-page/InstanceListPage.es';
 import ToasterProvider from '../../../src/main/resources/META-INF/resources/js/shared/components/toaster/ToasterProvider.es';
 import {MockRouter} from '../../mock/MockRouter.es';
+import FetchMock, {fetchMockResponse} from '../../mock/fetch.es';
 
 import '@testing-library/jest-dom/extend-expect';
 
@@ -46,6 +47,12 @@ const routeParams = {
 	query: '',
 	sort: 'overdueInstanceCount%3Adesc',
 };
+
+const fetchMock = new FetchMock({
+	GET: {
+		default: fetchMockResponse({}),
+	},
+});
 
 describe('The instance list card should', () => {
 	const clientMock = {
@@ -80,6 +87,8 @@ describe('The instance list card should', () => {
 	});
 
 	test('Select all page by clicking on check all button', () => {
+		fetchMock.mock();
+
 		const checkAllButton = container.querySelectorAll(
 			'input.custom-control-input'
 		)[0];

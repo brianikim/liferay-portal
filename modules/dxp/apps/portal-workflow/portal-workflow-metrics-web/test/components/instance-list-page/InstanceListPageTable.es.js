@@ -16,6 +16,7 @@ import {InstanceListContext} from '../../../src/main/resources/META-INF/resource
 import {Table} from '../../../src/main/resources/META-INF/resources/js/components/instance-list-page/InstanceListPageTable.es';
 import {ModalContext} from '../../../src/main/resources/META-INF/resources/js/components/instance-list-page/modal/ModalProvider.es';
 import {MockRouter} from '../../mock/MockRouter.es';
+import FetchMock, {fetchMockResponse} from '../../mock/fetch.es';
 
 const instances = [
 	{
@@ -37,11 +38,25 @@ const instances = [
 	},
 ];
 
-describe('The instance list table should', () => {
-	afterEach(cleanup);
+const fetchMock = new FetchMock({
+	GET: {
+		default: fetchMockResponse({}),
+	},
+});
 
-	test('Be rendered with two items', () => {
-		const {getAllByRole} = render(
+describe('The instance list table should', () => {
+	let getAllByRole;
+
+	afterEach(() => {
+		fetchMock.reset();
+
+		cleanup();
+	});
+
+	beforeEach(() => {
+		fetchMock.mock();
+
+		const renderResult = render(
 			<MockRouter>
 				<InstanceListContext.Provider
 					value={{setInstanceId: jest.fn()}}
@@ -55,6 +70,10 @@ describe('The instance list table should', () => {
 			</MockRouter>
 		);
 
+		getAllByRole = renderResult.getAllByRole;
+	});
+
+	test('Be rendered with two items', () => {
 		const instanceRows = getAllByRole('row');
 
 		expect(instanceRows.length).toBe(3);
