@@ -127,21 +127,24 @@ for (String childrenItemId : childrenItemIds) {
 			String containerLinkHref = renderLayoutStructureDisplayContext.getContainerLinkHref(containerStyledLayoutStructureItem, request.getAttribute(InfoDisplayWebKeys.INFO_LIST_DISPLAY_OBJECT));
 			%>
 
-			<c:if test="<%= Validator.isNotNull(containerLinkHref) %>">
-				<a href="<%= containerLinkHref %>" style="color: inherit; text-decoration: none;" target="<%= renderLayoutStructureDisplayContext.getContainerLinkTarget(containerStyledLayoutStructureItem) %>">
-			</c:if>
+			<c:if test="<%= !Objects.equals(ParamUtil.getString( request, "p_l_mode", Constants.VIEW), Constants.SEARCH) || !containerStyledLayoutStructureItem.isNonindexed() %>">
 
-			<div class="<%= renderLayoutStructureDisplayContext.getCssClass(containerStyledLayoutStructureItem) %>" style="<%= renderLayoutStructureDisplayContext.getStyle(containerStyledLayoutStructureItem) %>">
+				<c:if test="<%= Validator.isNotNull(containerLinkHref) %>">
+					<a href="<%= containerLinkHref %>" style="color: inherit; text-decoration: none;" target="<%= renderLayoutStructureDisplayContext.getContainerLinkTarget(containerStyledLayoutStructureItem) %>">
+				</c:if>
 
-				<%
-				request.setAttribute("render_layout_structure.jsp-childrenItemIds", layoutStructureItem.getChildrenItemIds());
-				%>
+				<div class="<%= renderLayoutStructureDisplayContext.getCssClass(containerStyledLayoutStructureItem) %>" style="<%= renderLayoutStructureDisplayContext.getStyle(containerStyledLayoutStructureItem) %>">
 
-				<liferay-util:include page="/render_layout_structure/render_layout_structure.jsp" servletContext="<%= application %>" />
-			</div>
+					<%
+					request.setAttribute("render_layout_structure.jsp-childrenItemIds", layoutStructureItem.getChildrenItemIds());
+					%>
 
-			<c:if test="<%= Validator.isNotNull(containerLinkHref) %>">
-				</a>
+					<liferay-util:include page="/render_layout_structure/render_layout_structure.jsp" servletContext="<%= application %>" />
+				</div>
+
+				<c:if test="<%= Validator.isNotNull(containerLinkHref) %>">
+					</a>
+				</c:if>
 			</c:if>
 		</c:when>
 		<c:when test="<%= layoutStructureItem instanceof DropZoneLayoutStructureItem %>">
@@ -192,23 +195,26 @@ for (String childrenItemId : childrenItemIds) {
 				FragmentStyledLayoutStructureItem fragmentStyledLayoutStructureItem = (FragmentStyledLayoutStructureItem)layoutStructureItem;
 				%>
 
-				<c:if test="<%= fragmentStyledLayoutStructureItem.getFragmentEntryLinkId() > 0 %>">
+				<c:if test="<%= !Objects.equals(ParamUtil.getString( request, "p_l_mode", Constants.VIEW), Constants.SEARCH) || !fragmentStyledLayoutStructureItem.isNonindexed() %>">
 
-					<%
-					FragmentEntryLink fragmentEntryLink = FragmentEntryLinkLocalServiceUtil.fetchFragmentEntryLink(fragmentStyledLayoutStructureItem.getFragmentEntryLinkId());
-					%>
-
-					<c:if test="<%= fragmentEntryLink != null %>">
+					<c:if test="<%= fragmentStyledLayoutStructureItem.getFragmentEntryLinkId() > 0 %>">
 
 						<%
-						FragmentRendererController fragmentRendererController = (FragmentRendererController)request.getAttribute(FragmentActionKeys.FRAGMENT_RENDERER_CONTROLLER);
-
-						DefaultFragmentRendererContext defaultFragmentRendererContext = renderLayoutStructureDisplayContext.getDefaultFragmentRendererContext(fragmentEntryLink, fragmentStyledLayoutStructureItem.getItemId());
+						FragmentEntryLink fragmentEntryLink = FragmentEntryLinkLocalServiceUtil.fetchFragmentEntryLink(fragmentStyledLayoutStructureItem.getFragmentEntryLinkId());
 						%>
 
-						<div class="<%= renderLayoutStructureDisplayContext.getCssClass(fragmentStyledLayoutStructureItem) %>" style="<%= renderLayoutStructureDisplayContext.getStyle(fragmentStyledLayoutStructureItem) %>">
-							<%= fragmentRendererController.render(defaultFragmentRendererContext, request, response) %>
-						</div>
+						<c:if test="<%= fragmentEntryLink != null %>">
+
+							<%
+							FragmentRendererController fragmentRendererController = (FragmentRendererController)request.getAttribute(FragmentActionKeys.FRAGMENT_RENDERER_CONTROLLER);
+
+							DefaultFragmentRendererContext defaultFragmentRendererContext = renderLayoutStructureDisplayContext.getDefaultFragmentRendererContext(fragmentEntryLink, fragmentStyledLayoutStructureItem.getItemId());
+							%>
+
+							<div class="<%= renderLayoutStructureDisplayContext.getCssClass(fragmentStyledLayoutStructureItem) %>" style="<%= renderLayoutStructureDisplayContext.getStyle(fragmentStyledLayoutStructureItem) %>">
+								<%= fragmentRendererController.render(defaultFragmentRendererContext, request, response) %>
+							</div>
+						</c:if>
 					</c:if>
 				</c:if>
 			</div>
@@ -243,13 +249,28 @@ for (String childrenItemId : childrenItemIds) {
 			}
 			%>
 
-			<div class="<%= renderLayoutStructureDisplayContext.getCssClass(rowStyledLayoutStructureItem) %>" style="<%= renderLayoutStructureDisplayContext.getStyle(rowStyledLayoutStructureItem) %>">
-				<c:choose>
-					<c:when test="<%= includeContainer %>">
-						<clay:container
-							cssClass="p-0"
-							fluid="<%= true %>"
-						>
+			<c:if test="<%= !Objects.equals(ParamUtil.getString( request, "p_l_mode", Constants.VIEW), Constants.SEARCH) || !rowStyledLayoutStructureItem.isNonindexed() %>">
+
+				<div class="<%= renderLayoutStructureDisplayContext.getCssClass(rowStyledLayoutStructureItem) %>" style="<%= renderLayoutStructureDisplayContext.getStyle(rowStyledLayoutStructureItem) %>">
+					<c:choose>
+						<c:when test="<%= includeContainer %>">
+							<clay:container
+								cssClass="p-0"
+								fluid="<%= true %>"
+							>
+								<clay:row
+									cssClass="<%= ResponsiveLayoutStructureUtil.getRowCssClass(rowStyledLayoutStructureItem) %>"
+								>
+
+									<%
+									request.setAttribute("render_layout_structure.jsp-childrenItemIds", layoutStructureItem.getChildrenItemIds());
+									%>
+
+									<liferay-util:include page="/render_layout_structure/render_layout_structure.jsp" servletContext="<%= application %>" />
+								</clay:row>
+							</clay:container>
+						</c:when>
+						<c:otherwise>
 							<clay:row
 								cssClass="<%= ResponsiveLayoutStructureUtil.getRowCssClass(rowStyledLayoutStructureItem) %>"
 							>
@@ -260,22 +281,10 @@ for (String childrenItemId : childrenItemIds) {
 
 								<liferay-util:include page="/render_layout_structure/render_layout_structure.jsp" servletContext="<%= application %>" />
 							</clay:row>
-						</clay:container>
-					</c:when>
-					<c:otherwise>
-						<clay:row
-							cssClass="<%= ResponsiveLayoutStructureUtil.getRowCssClass(rowStyledLayoutStructureItem) %>"
-						>
-
-							<%
-							request.setAttribute("render_layout_structure.jsp-childrenItemIds", layoutStructureItem.getChildrenItemIds());
-							%>
-
-							<liferay-util:include page="/render_layout_structure/render_layout_structure.jsp" servletContext="<%= application %>" />
-						</clay:row>
-					</c:otherwise>
-				</c:choose>
-			</div>
+						</c:otherwise>
+					</c:choose>
+				</div>
+			</c:if>
 		</c:when>
 		<c:otherwise>
 
