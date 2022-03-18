@@ -20,6 +20,7 @@ import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.CookieKeys;
 import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.util.LocaleUtil;
@@ -87,7 +88,9 @@ public class LayoutCrawlerImpl implements LayoutCrawler {
 		themeDisplay.setSiteGroupId(layout.getGroupId());
 
 		HttpGet httpGet = new HttpGet(
-			_portal.getLayoutFullURL(layout, themeDisplay));
+			_http.addParameter(
+				_portal.getLayoutFullURL(layout, themeDisplay), "p_l_mode",
+				Constants.SEARCH));
 
 		httpGet.setHeader("Host", company.getVirtualHostname());
 
@@ -133,6 +136,9 @@ public class LayoutCrawlerImpl implements LayoutCrawler {
 
 	@Reference
 	private CompanyLocalService _companyLocalService;
+
+	@Reference
+	private Http _http;
 
 	@Reference
 	private Portal _portal;
