@@ -50,15 +50,16 @@ public class ElasticsearchSearchEngineMeetsMinimumVersionRequirementTest {
 	}
 
 	private void _testMeetsRequirement(
-		String minimumVersion, String version, boolean meetsRequirement) {
+		String minimumVersionString, String versionString,
+		boolean meetsRequirement) {
 
 		ElasticsearchSearchEngine elasticsearchSearchEngine =
 			new ElasticsearchSearchEngine();
 
 		Assert.assertEquals(
-			minimumVersion + " -> " + version, meetsRequirement,
+			minimumVersionString + " -> " + versionString, meetsRequirement,
 			elasticsearchSearchEngine.meetsMinimumVersionRequirement(
-				Version.parseVersion(minimumVersion), version));
+				Version.parseVersion(minimumVersionString), versionString));
 	}
 
 }

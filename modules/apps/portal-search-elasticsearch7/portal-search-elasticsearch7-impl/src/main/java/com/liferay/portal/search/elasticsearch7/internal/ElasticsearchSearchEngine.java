@@ -264,9 +264,11 @@ public class ElasticsearchSearchEngine extends BaseSearchEngine {
 	}
 
 	protected boolean meetsMinimumVersionRequirement(
-		Version minimumVersion, String version) {
+		Version minimumVersion, String versionString) {
 
-		if (minimumVersion.compareTo(Version.parseVersion(version)) <= 0) {
+		if (minimumVersion.compareTo(Version.parseVersion(versionString)) <=
+				0) {
+
 			return true;
 		}
 
