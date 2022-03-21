@@ -18,7 +18,9 @@ import com.liferay.dynamic.data.mapping.model.DDMStructure;
 import com.liferay.dynamic.data.mapping.model.DDMTemplate;
 import com.liferay.dynamic.data.mapping.service.DDMStructureLocalServiceUtil;
 import com.liferay.dynamic.data.mapping.service.DDMTemplateServiceUtil;
-import com.liferay.dynamic.data.mapping.util.DDMUtil;
+import com.liferay.dynamic.data.mapping.util.comparator.TemplateIdComparator;
+import com.liferay.dynamic.data.mapping.util.comparator.TemplateModifiedDateComparator;
+import com.liferay.dynamic.data.mapping.util.comparator.TemplateNameComparator;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.journal.constants.JournalPortletKeys;
 import com.liferay.journal.model.JournalArticle;
@@ -39,6 +41,8 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.portlet.PortletURL;
@@ -63,6 +67,9 @@ public class JournalDDMTemplateDisplayContext {
 		_journalWebConfiguration =
 			(JournalWebConfiguration)_httpServletRequest.getAttribute(
 				JournalWebConfiguration.class.getName());
+
+		_themeDisplay = (ThemeDisplay)_httpServletRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
 	}
 
 	public long getClassPK() {
@@ -109,10 +116,6 @@ public class JournalDDMTemplateDisplayContext {
 			return _ddmTemplateSearch;
 		}
 
-		ThemeDisplay themeDisplay =
-			(ThemeDisplay)_httpServletRequest.getAttribute(
-				WebKeys.THEME_DISPLAY);
-
 		SearchContainer<DDMTemplate> ddmTemplateSearch = new SearchContainer(
 			_renderRequest, _getPortletURL(), null, "there-are-no-templates");
 
@@ -123,23 +126,19 @@ public class JournalDDMTemplateDisplayContext {
 		String orderByCol = getOrderByCol();
 		String orderByType = getOrderByType();
 
-		OrderByComparator<DDMTemplate> orderByComparator =
-			DDMUtil.getTemplateOrderByComparator(
-				getOrderByCol(), getOrderByType());
-
 		ddmTemplateSearch.setOrderByCol(orderByCol);
-		ddmTemplateSearch.setOrderByComparator(orderByComparator);
+		ddmTemplateSearch.setOrderByComparator(_getOrderByComparator());
 		ddmTemplateSearch.setOrderByType(orderByType);
 		ddmTemplateSearch.setRowChecker(
 			new EmptyOnClickRowChecker(_renderResponse));
 
-		long[] groupIds = {themeDisplay.getScopeGroupId()};
+		long[] groupIds = {_themeDisplay.getScopeGroupId()};
 
 		if (_journalWebConfiguration.showAncestorScopesByDefault()) {
 			groupIds =
 				SiteConnectedGroupUtil.
 					getCurrentAndAncestorSiteAndDepotGroupIds(
-						themeDisplay.getScopeGroupId(), true);
+						_themeDisplay.getScopeGroupId(), true);
 		}
 
 		List<DDMTemplate> results = null;
@@ -147,7 +146,7 @@ public class JournalDDMTemplateDisplayContext {
 
 		if (Validator.isNotNull(_getKeywords())) {
 			results = DDMTemplateServiceUtil.search(
-				themeDisplay.getCompanyId(), groupIds,
+				_themeDisplay.getCompanyId(), groupIds,
 				new long[] {PortalUtil.getClassNameId(DDMStructure.class)},
 				_getDDMTemplateClassPKs(),
 				PortalUtil.getClassNameId(JournalArticle.class), _getKeywords(),
@@ -157,7 +156,7 @@ public class JournalDDMTemplateDisplayContext {
 				ddmTemplateSearch.getOrderByComparator());
 
 			total = DDMTemplateServiceUtil.searchCount(
-				themeDisplay.getCompanyId(), groupIds,
+				_themeDisplay.getCompanyId(), groupIds,
 				new long[] {PortalUtil.getClassNameId(DDMStructure.class)},
 				_getDDMTemplateClassPKs(),
 				PortalUtil.getClassNameId(JournalArticle.class), _getKeywords(),
@@ -166,20 +165,25 @@ public class JournalDDMTemplateDisplayContext {
 		}
 		else {
 			results = DDMTemplateServiceUtil.getTemplates(
-				themeDisplay.getCompanyId(), groupIds,
+				_themeDisplay.getCompanyId(), groupIds,
 				new long[] {PortalUtil.getClassNameId(DDMStructure.class)},
 				_getDDMTemplateClassPKs(),
 				PortalUtil.getClassNameId(JournalArticle.class),
 				ddmTemplateSearch.getStart(), ddmTemplateSearch.getEnd(),
 				ddmTemplateSearch.getOrderByComparator());
 			total = DDMTemplateServiceUtil.getTemplatesCount(
-				themeDisplay.getCompanyId(), groupIds,
+				_themeDisplay.getCompanyId(), groupIds,
 				new long[] {PortalUtil.getClassNameId(DDMStructure.class)},
 				_getDDMTemplateClassPKs(),
 				PortalUtil.getClassNameId(JournalArticle.class));
 		}
 
-		ddmTemplateSearch.setResults(results);
+		List<DDMTemplate> sortedResults = new ArrayList<>(results);
+
+		Collections.sort(
+			sortedResults, ddmTemplateSearch.getOrderByComparator());
+
+		ddmTemplateSearch.setResults(sortedResults);
 
 		ddmTemplateSearch.setTotal(total);
 
@@ -269,6 +273,31 @@ public class JournalDDMTemplateDisplayContext {
 		return _keywords;
 	}
 
+	private OrderByComparator<DDMTemplate> _getOrderByComparator() {
+		boolean orderByAsc = false;
+
+		String orderByType = getOrderByType();
+
+		if (orderByType.equals("asc")) {
+			orderByAsc = true;
+		}
+
+		OrderByComparator<DDMTemplate> orderByComparator = null;
+
+		if (_orderByCol.equals("id")) {
+			orderByComparator = new TemplateIdComparator(orderByAsc);
+		}
+		else if (_orderByCol.equals("modified-date")) {
+			orderByComparator = new TemplateModifiedDateComparator(orderByAsc);
+		}
+		else if (_orderByCol.equals("name")) {
+			orderByComparator = new TemplateNameComparator(
+				orderByAsc, _themeDisplay.getLocale());
+		}
+
+		return orderByComparator;
+	}
+
 	private PortletURL _getPortletURL() {
 		PortletURL portletURL = _renderResponse.createRenderURL();
 
@@ -308,5 +337,6 @@ public class JournalDDMTemplateDisplayContext {
 	private String _orderByType;
 	private final RenderRequest _renderRequest;
 	private final RenderResponse _renderResponse;
+	private final ThemeDisplay _themeDisplay;
 
 }

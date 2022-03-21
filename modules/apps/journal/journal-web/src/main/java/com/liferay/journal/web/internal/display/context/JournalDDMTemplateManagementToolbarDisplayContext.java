@@ -250,7 +250,7 @@ public class JournalDDMTemplateManagementToolbarDisplayContext
 
 	@Override
 	protected String[] getOrderByKeys() {
-		return new String[] {"modified-date", "id"};
+		return new String[] {"modified-date", "name", "id"};
 	}
 
 	private String[] _getTemplateLanguageTypes() {
