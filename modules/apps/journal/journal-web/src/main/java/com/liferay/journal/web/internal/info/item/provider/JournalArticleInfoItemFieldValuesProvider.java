@@ -161,6 +161,8 @@ public class JournalArticleInfoItemFieldValuesProvider
 				InfoField infoField = InfoField.builder(
 				).infoFieldType(
 					TextInfoFieldType.INSTANCE
+				).uniqueId(
+					fieldName
 				).name(
 					fieldName
 				).labelInfoLocalizedValue(

@@ -1366,6 +1366,8 @@ public class OpenGraphTopHeadDynamicIncludeTest {
 					InfoField.builder(
 					).infoFieldType(
 						TextInfoFieldType.INSTANCE
+					).uniqueId(
+						"description"
 					).name(
 						"description"
 					).build(),
@@ -1375,6 +1377,8 @@ public class OpenGraphTopHeadDynamicIncludeTest {
 					InfoField.builder(
 					).infoFieldType(
 						TextInfoFieldType.INSTANCE
+					).uniqueId(
+						"title"
 					).name(
 						"title"
 					).build(),
@@ -1384,6 +1388,8 @@ public class OpenGraphTopHeadDynamicIncludeTest {
 					InfoField.builder(
 					).infoFieldType(
 						TextInfoFieldType.INSTANCE
+					).uniqueId(
+						"mappedDescriptionFieldName"
 					).name(
 						"mappedDescriptionFieldName"
 					).build(),
@@ -1393,6 +1399,8 @@ public class OpenGraphTopHeadDynamicIncludeTest {
 					InfoField.builder(
 					).infoFieldType(
 						TextInfoFieldType.INSTANCE
+					).uniqueId(
+						"mappedTitleFieldName"
 					).name(
 						"mappedTitleFieldName"
 					).build(),
@@ -1402,6 +1410,8 @@ public class OpenGraphTopHeadDynamicIncludeTest {
 					InfoField.builder(
 					).infoFieldType(
 						TextInfoFieldType.INSTANCE
+					).uniqueId(
+						"mappedTitleFieldName"
 					).name(
 						"mappedTitleFieldName"
 					).build(),
@@ -1411,6 +1421,8 @@ public class OpenGraphTopHeadDynamicIncludeTest {
 					InfoField.builder(
 					).infoFieldType(
 						ImageInfoFieldType.INSTANCE
+					).uniqueId(
+						"mappedImageFieldName"
 					).name(
 						"mappedImageFieldName"
 					).build(),
@@ -1420,6 +1432,8 @@ public class OpenGraphTopHeadDynamicIncludeTest {
 					InfoField.builder(
 					).infoFieldType(
 						TextInfoFieldType.INSTANCE
+					).uniqueId(
+						"mappedImageAltFieldName"
 					).name(
 						"mappedImageAltFieldName"
 					).build(),

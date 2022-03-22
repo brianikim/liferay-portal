@@ -14,6 +14,7 @@
 
 package com.liferay.asset.info.internal.item;
 
+import com.liferay.asset.kernel.model.AssetEntry;
 import com.liferay.info.field.InfoField;
 import com.liferay.info.field.type.ImageInfoFieldType;
 import com.liferay.info.field.type.TextInfoFieldType;
@@ -28,6 +29,8 @@ public interface AssetEntryInfoItemFields {
 		InfoField.builder(
 		).infoFieldType(
 			TextInfoFieldType.INSTANCE
+		).uniqueId(
+			AssetEntry.class.getSimpleName() + "_createDate"
 		).name(
 			"createDate"
 		).labelInfoLocalizedValue(
@@ -38,6 +41,8 @@ public interface AssetEntryInfoItemFields {
 		InfoField.builder(
 		).infoFieldType(
 			TextInfoFieldType.INSTANCE
+		).uniqueId(
+			AssetEntry.class.getSimpleName() + "_description"
 		).name(
 			"description"
 		).labelInfoLocalizedValue(
@@ -48,6 +53,8 @@ public interface AssetEntryInfoItemFields {
 		InfoField.builder(
 		).infoFieldType(
 			TextInfoFieldType.INSTANCE
+		).uniqueId(
+			AssetEntry.class.getSimpleName() + "_expirationDate"
 		).name(
 			"expirationDate"
 		).labelInfoLocalizedValue(
@@ -58,6 +65,8 @@ public interface AssetEntryInfoItemFields {
 		InfoField.builder(
 		).infoFieldType(
 			TextInfoFieldType.INSTANCE
+		).uniqueId(
+			AssetEntry.class.getSimpleName() + "_modifiedDate"
 		).name(
 			"modifiedDate"
 		).labelInfoLocalizedValue(
@@ -68,6 +77,8 @@ public interface AssetEntryInfoItemFields {
 		InfoField.builder(
 		).infoFieldType(
 			TextInfoFieldType.INSTANCE
+		).uniqueId(
+			AssetEntry.class.getSimpleName() + "_summary"
 		).name(
 			"summary"
 		).labelInfoLocalizedValue(
@@ -78,6 +89,8 @@ public interface AssetEntryInfoItemFields {
 		InfoField.builder(
 		).infoFieldType(
 			TextInfoFieldType.INSTANCE
+		).uniqueId(
+			AssetEntry.class.getSimpleName() + "_title"
 		).name(
 			"title"
 		).labelInfoLocalizedValue(
@@ -87,6 +100,8 @@ public interface AssetEntryInfoItemFields {
 		InfoField.builder(
 		).infoFieldType(
 			TextInfoFieldType.INSTANCE
+		).uniqueId(
+			AssetEntry.class.getSimpleName() + "_url"
 		).name(
 			"url"
 		).labelInfoLocalizedValue(
@@ -96,6 +111,8 @@ public interface AssetEntryInfoItemFields {
 		InfoField.builder(
 		).infoFieldType(
 			TextInfoFieldType.INSTANCE
+		).uniqueId(
+			AssetEntry.class.getSimpleName() + "_userName"
 		).name(
 			"userName"
 		).labelInfoLocalizedValue(
@@ -105,6 +122,8 @@ public interface AssetEntryInfoItemFields {
 	public static final InfoField userProfileImage = InfoField.builder(
 	).infoFieldType(
 		ImageInfoFieldType.INSTANCE
+	).uniqueId(
+		AssetEntry.class.getSimpleName() + "_userProfileImage"
 	).name(
 		"userProfileImage"
 	).labelInfoLocalizedValue(
@@ -115,6 +134,8 @@ public interface AssetEntryInfoItemFields {
 		InfoField.builder(
 		).infoFieldType(
 			TextInfoFieldType.INSTANCE
+		).uniqueId(
+			AssetEntry.class.getSimpleName() + "_viewName"
 		).name(
 			"viewName"
 		).labelInfoLocalizedValue(
