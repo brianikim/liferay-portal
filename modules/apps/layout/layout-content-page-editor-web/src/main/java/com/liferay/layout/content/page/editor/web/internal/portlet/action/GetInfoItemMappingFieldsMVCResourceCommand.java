@@ -144,10 +144,12 @@ public class GetInfoItemMappingFieldsMVCResourceCommand
 				if (_isFieldMappable(infoField, fieldType)) {
 					defaultFieldSetFieldsJSONArray.put(
 						JSONUtil.put(
-							"key", infoField.getName()
+							"key", infoField.getUniqueId()
 						).put(
 							"label",
 							infoField.getLabel(themeDisplay.getLocale())
+						).put(
+							"name", infoField.getName()
 						).put(
 							"type", infoFieldType.getName()
 						));
@@ -168,10 +170,12 @@ public class GetInfoItemMappingFieldsMVCResourceCommand
 
 					fieldSetFieldsJSONArray.put(
 						JSONUtil.put(
-							"key", infoField.getName()
+							"key", infoField.getUniqueId()
 						).put(
 							"label",
 							infoField.getLabel(themeDisplay.getLocale())
+						).put(
+							"name", infoField.getName()
 						).put(
 							"type", infoFieldType.getName()
 						));
