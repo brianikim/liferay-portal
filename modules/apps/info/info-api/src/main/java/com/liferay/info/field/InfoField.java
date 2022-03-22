@@ -47,6 +47,8 @@ public class InfoField<T extends InfoFieldType> implements InfoFieldSetEntry {
 			builder(
 			).infoFieldType(
 				infoFieldType
+			).uniqueId(
+				name
 			).name(
 				name
 			).labelInfoLocalizedValue(
@@ -68,6 +70,8 @@ public class InfoField<T extends InfoFieldType> implements InfoFieldSetEntry {
 			builder(
 			).infoFieldType(
 				infoFieldType
+			).uniqueId(
+				name
 			).name(
 				name
 			).labelInfoLocalizedValue(
@@ -127,6 +131,11 @@ public class InfoField<T extends InfoFieldType> implements InfoFieldSetEntry {
 	}
 
 	@Override
+	public String getUniqueId() {
+		return _builder._uniqueId;
+	}
+
+	@Override
 	public int hashCode() {
 		int hash = HashUtil.hash(0, _builder._infoFieldType);
 
@@ -158,12 +167,12 @@ public class InfoField<T extends InfoFieldType> implements InfoFieldSetEntry {
 
 	public static class Builder {
 
-		public <T extends InfoFieldType> NameStep<T> infoFieldType(
+		public <T extends InfoFieldType> UniqueIdStep<T> infoFieldType(
 			T infoFieldType) {
 
 			_infoFieldType = infoFieldType;
 
-			return new NameStep<>(this);
+			return new UniqueIdStep<>(this);
 		}
 
 		private Builder() {
@@ -177,6 +186,7 @@ public class InfoField<T extends InfoFieldType> implements InfoFieldSetEntry {
 		private boolean _localizable;
 		private boolean _multivalued;
 		private String _name;
+		private String _uniqueId;
 
 	}
 
@@ -236,6 +246,22 @@ public class InfoField<T extends InfoFieldType> implements InfoFieldSetEntry {
 		}
 
 		private NameStep(Builder builder) {
+			_builder = builder;
+		}
+
+		private final Builder _builder;
+
+	}
+
+	public static class UniqueIdStep<T extends InfoFieldType> {
+
+		public NameStep<T> uniqueId(String uniqueId) {
+			_builder._uniqueId = uniqueId;
+
+			return new NameStep<>(_builder);
+		}
+
+		private UniqueIdStep(Builder builder) {
 			_builder = builder;
 		}
 
