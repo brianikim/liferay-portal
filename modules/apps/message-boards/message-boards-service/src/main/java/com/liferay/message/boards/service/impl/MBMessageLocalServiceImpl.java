@@ -2528,6 +2528,22 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 			MBMessage message, String portletId, ServiceContext serviceContext)
 		throws PortalException {
 
+		List<Layout> layouts = _layoutLocalService.getLayouts(
+			message.getGroupId(), false);
+
+		for (Layout curLayout : layouts) {
+			PortletPreferences portletPreferences =
+				_portletPreferencesLocalService.fetchPortletPreferences(
+					PortletKeys.PREFS_OWNER_ID_DEFAULT,
+					PortletKeys.PREFS_OWNER_TYPE_LAYOUT, curLayout.getPlid(),
+					portletId);
+
+			if (portletPreferences != null) {
+				return _portal.getLayoutFullURL(
+					curLayout, serviceContext.getThemeDisplay(), false);
+			}
+		}
+
 		String layoutFullURL = StringPool.BLANK;
 
 		Layout layout = _layoutLocalService.fetchLayout(
@@ -2545,22 +2561,6 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 
 		if (Validator.isNotNull(layoutFullURL)) {
 			return layoutFullURL;
-		}
-
-		List<Layout> layouts = _layoutLocalService.getLayouts(
-			message.getGroupId(), false);
-
-		for (Layout curLayout : layouts) {
-			PortletPreferences portletPreferences =
-				_portletPreferencesLocalService.fetchPortletPreferences(
-					PortletKeys.PREFS_OWNER_ID_DEFAULT,
-					PortletKeys.PREFS_OWNER_TYPE_LAYOUT, curLayout.getPlid(),
-					portletId);
-
-			if (portletPreferences != null) {
-				return _portal.getLayoutFullURL(
-					curLayout, serviceContext.getThemeDisplay(), false);
-			}
 		}
 
 		return null;
