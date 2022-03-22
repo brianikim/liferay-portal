@@ -602,8 +602,6 @@ public class LayoutPermissionImpl
 				if (count >= 0) {
 					return true;
 				}
-
-				return false;
 			}
 			catch (PortalException | RuntimeException exception) {
 				throw exception;
