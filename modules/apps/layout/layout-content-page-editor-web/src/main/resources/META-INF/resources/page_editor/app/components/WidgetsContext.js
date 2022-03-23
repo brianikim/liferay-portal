@@ -64,9 +64,6 @@ export function WidgetsContextProvider({children}) {
 	const [widgets, setWidgets] = useState([]);
 
 	const fragmentEntryLinksRef = useRef();
-	const segmentsExperienceIdRef = useRef();
-
-	const segmentsExperienceId = useSelector(selectSegmentsExperienceId);
 
 	const fragmentEntryLinksIds = useSelector((state) => {
 		const nextSegmentsExperienceId = selectSegmentsExperienceId(state);
@@ -96,15 +93,11 @@ export function WidgetsContextProvider({children}) {
 					nextSegmentsExperienceId
 		);
 
-		segmentsExperienceIdRef.current = nextSegmentsExperienceId;
-
 		return null;
 	});
 
 	useEffect(() => {
-		WidgetService.getWidgets(
-			segmentsExperienceIdRef.current
-		).then((categories) =>
+		WidgetService.getWidgets().then((categories) =>
 			setWidgets(
 				normalizeCategories(categories, fragmentEntryLinksRef.current)
 			)
@@ -115,7 +108,7 @@ export function WidgetsContextProvider({children}) {
 		setWidgets((currentWidgets) =>
 			normalizeCategories(currentWidgets, fragmentEntryLinksRef.current)
 		);
-	}, [fragmentEntryLinksIds, segmentsExperienceId]);
+	}, [fragmentEntryLinksIds]);
 
 	return (
 		<WidgetsContext.Provider value={widgets}>
