@@ -34,6 +34,7 @@ import com.liferay.headless.delivery.dto.v1_0.ContextReference;
 import com.liferay.headless.delivery.dto.v1_0.PageElement;
 import com.liferay.layout.page.template.admin.web.internal.headless.delivery.dto.v1_0.structure.importer.util.PortletConfigurationImporterHelper;
 import com.liferay.layout.page.template.admin.web.internal.headless.delivery.dto.v1_0.structure.importer.util.PortletPermissionsImporterHelper;
+import com.liferay.layout.util.structure.FragmentStyledLayoutStructureItem;
 import com.liferay.layout.util.structure.LayoutStructure;
 import com.liferay.layout.util.structure.LayoutStructureItem;
 import com.liferay.petra.string.StringPool;
@@ -53,6 +54,7 @@ import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.Portal;
@@ -96,16 +98,17 @@ public class FragmentLayoutStructureItemImporter
 			return null;
 		}
 
-		LayoutStructureItem layoutStructureItem =
-			layoutStructure.addFragmentStyledLayoutStructureItem(
-				fragmentEntryLink.getFragmentEntryLinkId(), parentItemId,
-				position);
+		FragmentStyledLayoutStructureItem fragmentStyledLayoutStructureItem =
+			(FragmentStyledLayoutStructureItem)
+				layoutStructure.addFragmentStyledLayoutStructureItem(
+					fragmentEntryLink.getFragmentEntryLinkId(), parentItemId,
+					position);
 
 		Map<String, Object> definitionMap = getDefinitionMap(
 			pageElement.getDefinition());
 
 		if (definitionMap == null) {
-			return layoutStructureItem;
+			return fragmentStyledLayoutStructureItem;
 		}
 
 		Map<String, Object> fragmentStyleMap =
@@ -115,7 +118,7 @@ public class FragmentLayoutStructureItemImporter
 			JSONObject jsonObject = JSONUtil.put(
 				"styles", toStylesJSONObject(fragmentStyleMap));
 
-			layoutStructureItem.updateItemConfig(jsonObject);
+			fragmentStyledLayoutStructureItem.updateItemConfig(jsonObject);
 		}
 
 		if (definitionMap.containsKey("fragmentViewports")) {
@@ -128,11 +131,16 @@ public class FragmentLayoutStructureItemImporter
 					(String)fragmentViewport.get("id"),
 					toFragmentViewportStylesJSONObject(fragmentViewport));
 
-				layoutStructureItem.updateItemConfig(jsonObject);
+				fragmentStyledLayoutStructureItem.updateItemConfig(jsonObject);
 			}
 		}
 
-		return layoutStructureItem;
+		if (definitionMap.containsKey("indexed")) {
+			fragmentStyledLayoutStructureItem.setIndexed(
+				GetterUtil.getBoolean(definitionMap.get("indexed")));
+		}
+
+		return fragmentStyledLayoutStructureItem;
 	}
 
 	@Override

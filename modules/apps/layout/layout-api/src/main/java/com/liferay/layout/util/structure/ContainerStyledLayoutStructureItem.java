@@ -75,9 +75,9 @@ public class ContainerStyledLayoutStructureItem
 		JSONObject jsonObject = super.getItemConfigJSONObject();
 
 		return jsonObject.put(
-			"link", _linkJSONObject
+			"indexed", _indexed
 		).put(
-			"nonindexed", _nonindexed
+			"link", _linkJSONObject
 		).put(
 			"widthType", _widthType
 		);
@@ -110,8 +110,8 @@ public class ContainerStyledLayoutStructureItem
 		return HashUtil.hash(0, getItemId());
 	}
 
-	public boolean isNonindexed() {
-		return _nonindexed;
+	public boolean isIndexed() {
+		return _indexed;
 	}
 
 	/**
@@ -173,6 +173,10 @@ public class ContainerStyledLayoutStructureItem
 	public void setContentDisplay(String contentDisplay) {
 	}
 
+	public void setIndexed(boolean indexed) {
+		_indexed = indexed;
+	}
+
 	/**
 	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
 	 */
@@ -210,10 +214,6 @@ public class ContainerStyledLayoutStructureItem
 	 */
 	@Deprecated
 	public void setMarginTop(int marginTop) {
-	}
-
-	public void setNonindexed(boolean nonindexed) {
-		_nonindexed = nonindexed;
 	}
 
 	/**
@@ -276,12 +276,12 @@ public class ContainerStyledLayoutStructureItem
 
 		super.updateItemConfig(itemConfigJSONObject);
 
-		if (itemConfigJSONObject.has("link")) {
-			setLinkJSONObject(itemConfigJSONObject.getJSONObject("link"));
+		if (itemConfigJSONObject.has("indexed")) {
+			setIndexed(itemConfigJSONObject.getBoolean("indexed"));
 		}
 
-		if (itemConfigJSONObject.has("nonindexed")) {
-			setNonindexed(itemConfigJSONObject.getBoolean("nonindexed"));
+		if (itemConfigJSONObject.has("link")) {
+			setLinkJSONObject(itemConfigJSONObject.getJSONObject("link"));
 		}
 
 		if (itemConfigJSONObject.has("containerType") ||
@@ -378,8 +378,8 @@ public class ContainerStyledLayoutStructureItem
 		"shadow-sm", "0 .125rem .25rem rgba(0, 0, 0, 0.075)"
 	).build();
 
+	private boolean _indexed = true;
 	private JSONObject _linkJSONObject;
-	private boolean _nonindexed;
 	private String _widthType = "fluid";
 
 }

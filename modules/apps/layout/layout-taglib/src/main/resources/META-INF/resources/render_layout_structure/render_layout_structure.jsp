@@ -127,8 +127,7 @@ for (String childrenItemId : childrenItemIds) {
 			String containerLinkHref = renderLayoutStructureDisplayContext.getContainerLinkHref(containerStyledLayoutStructureItem, request.getAttribute(InfoDisplayWebKeys.INFO_LIST_DISPLAY_OBJECT));
 			%>
 
-			<c:if test="<%= !Objects.equals(ParamUtil.getString( request, "p_l_mode", Constants.VIEW), Constants.SEARCH) || !containerStyledLayoutStructureItem.isNonindexed() %>">
-
+			<c:if test='<%= !Objects.equals(ParamUtil.getString(request, "p_l_mode", Constants.VIEW), Constants.SEARCH) || containerStyledLayoutStructureItem.isIndexed() %>'>
 				<c:if test="<%= Validator.isNotNull(containerLinkHref) %>">
 					<a href="<%= containerLinkHref %>" style="color: inherit; text-decoration: none;" target="<%= renderLayoutStructureDisplayContext.getContainerLinkTarget(containerStyledLayoutStructureItem) %>">
 				</c:if>
@@ -195,8 +194,7 @@ for (String childrenItemId : childrenItemIds) {
 				FragmentStyledLayoutStructureItem fragmentStyledLayoutStructureItem = (FragmentStyledLayoutStructureItem)layoutStructureItem;
 				%>
 
-				<c:if test="<%= !Objects.equals(ParamUtil.getString( request, "p_l_mode", Constants.VIEW), Constants.SEARCH) || !fragmentStyledLayoutStructureItem.isNonindexed() %>">
-
+				<c:if test='<%= !Objects.equals(ParamUtil.getString(request, "p_l_mode", Constants.VIEW), Constants.SEARCH) || fragmentStyledLayoutStructureItem.isIndexed() %>'>
 					<c:if test="<%= fragmentStyledLayoutStructureItem.getFragmentEntryLinkId() > 0 %>">
 
 						<%
@@ -249,8 +247,7 @@ for (String childrenItemId : childrenItemIds) {
 			}
 			%>
 
-			<c:if test="<%= !Objects.equals(ParamUtil.getString( request, "p_l_mode", Constants.VIEW), Constants.SEARCH) || !rowStyledLayoutStructureItem.isNonindexed() %>">
-
+			<c:if test='<%= !Objects.equals(ParamUtil.getString(request, "p_l_mode", Constants.VIEW), Constants.SEARCH) || rowStyledLayoutStructureItem.isIndexed() %>'>
 				<div class="<%= renderLayoutStructureDisplayContext.getCssClass(rowStyledLayoutStructureItem) %>" style="<%= renderLayoutStructureDisplayContext.getStyle(rowStyledLayoutStructureItem) %>">
 					<c:choose>
 						<c:when test="<%= includeContainer %>">

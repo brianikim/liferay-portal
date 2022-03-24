@@ -70,6 +70,8 @@ public class ContainerLayoutStructureItemExporter
 							containerStyledLayoutStructureItem.
 								getLinkJSONObject(),
 							saveMappingConfiguration);
+						indexed =
+							containerStyledLayoutStructureItem.isIndexed();
 						layout = _toLayout(containerStyledLayoutStructureItem);
 
 						setFragmentStyle(

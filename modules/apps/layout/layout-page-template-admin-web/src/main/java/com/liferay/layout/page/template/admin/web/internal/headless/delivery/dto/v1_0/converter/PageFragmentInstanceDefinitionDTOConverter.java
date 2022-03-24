@@ -128,6 +128,7 @@ public class PageFragmentInstanceDefinitionDTOConverter {
 				fragmentStyle = pageFragmentInstanceDefinitionFragmentStyle;
 				fragmentViewports =
 					pageFragmentInstanceDefinitionFragmentViewports;
+				indexed = fragmentStyledLayoutStructureItem.isIndexed();
 				widgetInstances = _getWidgetInstances(fragmentEntryLink);
 			}
 		};

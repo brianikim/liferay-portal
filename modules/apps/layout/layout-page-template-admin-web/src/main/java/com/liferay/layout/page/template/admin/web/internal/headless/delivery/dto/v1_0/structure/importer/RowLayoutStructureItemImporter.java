@@ -70,6 +70,11 @@ public class RowLayoutStructureItemImporter
 		rowStyledLayoutStructureItem.setNumberOfColumns(
 			(Integer)definitionMap.get("numberOfColumns"));
 
+		if (definitionMap.containsKey("indexed")) {
+			rowStyledLayoutStructureItem.setIndexed(
+				GetterUtil.getBoolean(definitionMap.get("indexed")));
+		}
+
 		if (definitionMap.containsKey("reverseOrder")) {
 			rowStyledLayoutStructureItem.setReverseOrder(
 				(Boolean)definitionMap.get("reverseOrder"));

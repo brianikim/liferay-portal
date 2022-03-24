@@ -27,6 +27,7 @@ import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 
@@ -258,6 +259,11 @@ public class ContainerLayoutStructureItemImporter
 
 				containerStyledLayoutStructureItem.updateItemConfig(jsonObject);
 			}
+		}
+
+		if (definitionMap.containsKey("indexed")) {
+			containerStyledLayoutStructureItem.setIndexed(
+				GetterUtil.getBoolean(definitionMap.get("indexed")));
 		}
 
 		return containerStyledLayoutStructureItem;

@@ -2330,10 +2330,10 @@ components:
                     items:
                         $ref: "#/components/schemas/FragmentViewport"
                     type: array
-                nonindexable:
+                indexed:
                     # @review
                     description:
-                        A flag that indicates whether the page fragment instance is indexable or not.
+                        A flag that indicates whether the page fragment instance is indexed or not.
                     type: boolean
                 widgetInstances:
                     items:
@@ -2352,13 +2352,13 @@ components:
                     type: array
                 gutters:
                     type: boolean
-                modulesPerRow:
-                    type: integer
-                nonindexable:
+                indexed:
                     # @review
                     description:
-                        A flag that indicates whether the page row is indexable or not.
+                        A flag that indicates whether the page row is indexed or not.
                     type: boolean
+                modulesPerRow:
+                    type: integer
                 numberOfColumns:
                     type: integer
                 reverseOrder:
@@ -2434,6 +2434,11 @@ components:
                     items:
                         $ref: "#/components/schemas/FragmentViewport"
                     type: array
+                indexed:
+                    # @review
+                    description:
+                        A flag that indicates whether the page section is indexed or not.
+                    type: boolean
                 layout:
                     properties:
                         align:
@@ -2499,11 +2504,6 @@ components:
                             enum: [Fixed, Fluid]
                             type: string
                     type: object
-                nonindexable:
-                    # @review
-                    description:
-                        A flag that indicates whether the page section is indexable or not.
-                    type: boolean
             type: object
         PageTemplate:
             properties:
