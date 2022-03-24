@@ -186,8 +186,10 @@ public class StartupHelperUtil {
 			_log.debug("Check the portal's required schema version");
 		}
 
-		if (!PortalUpgradeProcess.isInRequiredSchemaVersion(
-				DataAccess.getConnection())) {
+		try (Connection connection = DataAccess.getConnection()) {
+			if (PortalUpgradeProcess.isInRequiredSchemaVersion(connection)) {
+				return;
+			}
 
 			Version currentSchemaVersion =
 				PortalUpgradeProcess.getCurrentSchemaVersion(
