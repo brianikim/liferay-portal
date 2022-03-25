@@ -145,6 +145,38 @@ public class PageRowDefinition implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected Boolean gutters;
 
+	@Schema(
+		description = "A flag that indicates whether the page row is indexed or not."
+	)
+	public Boolean getIndexed() {
+		return indexed;
+	}
+
+	public void setIndexed(Boolean indexed) {
+		this.indexed = indexed;
+	}
+
+	@JsonIgnore
+	public void setIndexed(
+		UnsafeSupplier<Boolean, Exception> indexedUnsafeSupplier) {
+
+		try {
+			indexed = indexedUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField(
+		description = "A flag that indicates whether the page row is indexed or not."
+	)
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected Boolean indexed;
+
 	@Schema
 	public Integer getModulesPerRow() {
 		return modulesPerRow;
@@ -387,6 +419,16 @@ public class PageRowDefinition implements Serializable {
 			sb.append("\"gutters\": ");
 
 			sb.append(gutters);
+		}
+
+		if (indexed != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"indexed\": ");
+
+			sb.append(indexed);
 		}
 
 		if (modulesPerRow != null) {
