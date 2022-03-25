@@ -67,7 +67,9 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.ModelHintsUtil;
+import com.liferay.portal.kernel.model.PortletPreferences;
 import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.SystemEventConstants;
 import com.liferay.portal.kernel.model.User;
@@ -89,6 +91,8 @@ import com.liferay.portal.kernel.search.IndexerRegistry;
 import com.liferay.portal.kernel.search.IndexerRegistryUtil;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.service.LayoutLocalService;
+import com.liferay.portal.kernel.service.PortletPreferencesLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.permission.ModelPermissions;
 import com.liferay.portal.kernel.settings.GroupServiceSettingsLocator;
@@ -110,6 +114,7 @@ import com.liferay.portal.kernel.util.ObjectValuePair;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.SubscriptionSender;
 import com.liferay.portal.kernel.util.TempFileEntryUtil;
@@ -1861,8 +1866,8 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 		String portletId = PortletProviderUtil.getPortletId(
 			MBMessage.class.getName(), PortletProvider.Action.VIEW);
 
-		String layoutURL = _portal.getLayoutFullURL(
-			message.getGroupId(), portletId);
+		String layoutURL = _getLayoutFullURL(
+			message, portletId, serviceContext);
 
 		if (Validator.isNotNull(layoutURL)) {
 			return StringBundler.concat(
@@ -2519,6 +2524,36 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 		return StringPool.BLANK;
 	}
 
+	private String _getLayoutFullURL(
+			MBMessage message, String portletId, ServiceContext serviceContext)
+		throws PortalException {
+
+		String layoutFullURL = _portal.getLayoutFullURL(
+			message.getGroupId(), portletId);
+
+		if (Validator.isNotNull(layoutFullURL)) {
+			return layoutFullURL;
+		}
+
+		List<Layout> layouts = _layoutLocalService.getLayouts(
+			message.getGroupId(), false);
+
+		for (Layout layout : layouts) {
+			PortletPreferences portletPreferences =
+				_portletPreferencesLocalService.fetchPortletPreferences(
+					PortletKeys.PREFS_OWNER_ID_DEFAULT,
+					PortletKeys.PREFS_OWNER_TYPE_LAYOUT, layout.getPlid(),
+					portletId);
+
+			if (portletPreferences != null) {
+				return _portal.getLayoutFullURL(
+					layout, serviceContext.getThemeDisplay(), false);
+			}
+		}
+
+		return null;
+	}
+
 	private String _getLocalizedRootCategoryName(Group group, Locale locale) {
 		try {
 			return LanguageUtil.get(locale, "home") + " - " +
@@ -2767,6 +2802,9 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 	private IndexerRegistry _indexerRegistry;
 
 	@Reference
+	private LayoutLocalService _layoutLocalService;
+
+	@Reference
 	private MBCategoryPersistence _mbCategoryPersistence;
 
 	@Reference
@@ -2783,6 +2821,9 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 
 	@Reference
 	private PortletFileRepository _portletFileRepository;
+
+	@Reference
+	private PortletPreferencesLocalService _portletPreferencesLocalService;
 
 	@Reference
 	private SubscriptionLocalService _subscriptionLocalService;
