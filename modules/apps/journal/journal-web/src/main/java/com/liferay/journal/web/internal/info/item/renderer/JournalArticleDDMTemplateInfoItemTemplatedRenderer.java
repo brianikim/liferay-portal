@@ -161,6 +161,12 @@ public class JournalArticleDDMTemplateInfoItemTemplatedRenderer
 		HttpServletRequest httpServletRequest,
 		HttpServletResponse httpServletResponse) {
 
+		if (!JournalArticleRendererUtil.isShowArticle(
+				httpServletRequest, article)) {
+
+			return;
+		}
+
 		if (Validator.isNull(templateKey)) {
 			render(article, httpServletRequest, httpServletResponse);
 

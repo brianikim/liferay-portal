@@ -58,6 +58,12 @@ public class JournalArticleAbstractInfoItemRenderer
 		JournalArticle article, HttpServletRequest httpServletRequest,
 		HttpServletResponse httpServletResponse) {
 
+		if (!JournalArticleRendererUtil.isShowArticle(
+				httpServletRequest, article)) {
+
+			return;
+		}
+
 		try {
 			AssetRendererFactory<?> assetRendererFactory =
 				AssetRendererFactoryRegistryUtil.getAssetRendererFactoryByClass(
