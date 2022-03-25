@@ -30,6 +30,7 @@
 			"textAlign": "",
 			"width": ""
 		},
+		"indexed": true,
 		"layout": {
 			"borderWidth": 0,
 			"marginBottom": 0,
@@ -116,7 +117,8 @@
 					"shadow": "",
 					"textAlign": "",
 					"width": ""
-				}
+				},
+				"indexed": true
 			},
 			"type": "Fragment"
 		}
