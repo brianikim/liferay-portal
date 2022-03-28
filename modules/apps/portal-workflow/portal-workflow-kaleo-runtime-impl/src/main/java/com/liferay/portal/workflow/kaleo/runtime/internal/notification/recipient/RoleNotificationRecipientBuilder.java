@@ -213,6 +213,12 @@ public class RoleNotificationRecipientBuilder
 					_userLocalService.getUserGroupUsers(
 						userGroupGroupRole.getUserGroupId()));
 			}
+
+			if (RoleConstants.SITE_MEMBER.equals(role.getName())) {
+				users.addAll(
+					_userLocalService.getGroupUsers(
+						groupId, WorkflowConstants.STATUS_APPROVED, null));
+			}
 		}
 
 		return users;
