@@ -35,6 +35,7 @@ import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermi
 import com.liferay.portal.kernel.util.ClassUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.Props;
+import com.liferay.portal.search.batch.BatchIndexingHelper;
 import com.liferay.portal.search.index.IndexStatusManager;
 import com.liferay.portal.search.index.UpdateDocumentIndexWriter;
 import com.liferay.portal.search.indexer.BaseModelDocumentFactory;
@@ -279,7 +280,7 @@ public class ModelSearchConfiguratorServiceTrackerCustomizer
 
 		IndexerWriter<?> indexerWriter = new IndexerWriterImpl<>(
 			modelSearchConfigurator.getModelSearchSettings(),
-			baseModelRetriever,
+			baseModelRetriever, batchIndexingHelper,
 			modelSearchConfigurator.getModelIndexerWriterContributor(),
 			indexerDocumentBuilder, searchPermissionIndexWriter,
 			updateDocumentIndexWriter, indexStatusManager, indexWriterHelper,
@@ -337,6 +338,9 @@ public class ModelSearchConfiguratorServiceTrackerCustomizer
 
 	@Reference
 	protected BaseModelRetriever baseModelRetriever;
+
+	@Reference
+	protected BatchIndexingHelper batchIndexingHelper;
 
 	@Reference
 	protected ExpandoQueryContributorHelper expandoQueryContributorHelper;
