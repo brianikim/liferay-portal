@@ -1781,10 +1781,15 @@ public class ContentPageEditorDisplayContext {
 				layoutDisplayPageObjectProvider :
 					layoutDisplayPageObjectProviders) {
 
+			long classNameId = layoutDisplayPageObjectProvider.getClassNameId();
+
+			String className = PortalUtil.getClassName(classNameId);
+
 			mappedInfoItems.add(
 				HashMapBuilder.<String, Object>put(
-					"classNameId",
-					layoutDisplayPageObjectProvider.getClassNameId()
+					"className", className
+				).put(
+					"classNameId", classNameId
 				).put(
 					"classPK", layoutDisplayPageObjectProvider.getClassPK()
 				).put(
