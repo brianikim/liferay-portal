@@ -619,6 +619,9 @@ public class DDMImpl implements DDM {
 			jsonObject, "predefinedValue", ddmFormField.getPredefinedValue(),
 			locale, defaultLocale, ddmFormField.getType());
 		addDDMFormFieldLocalizedProperty(
+			jsonObject, "style", ddmFormField.getStyle(), locale, defaultLocale,
+			ddmFormField.getType());
+		addDDMFormFieldLocalizedProperty(
 			jsonObject, "tip", ddmFormField.getTip(), locale, defaultLocale,
 			ddmFormField.getType());
 	}
