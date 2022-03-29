@@ -72,9 +72,10 @@ class ManagementToolbarDefaultEventHandler extends DefaultEventHandler {
 			onSelect: (selectedItem) => {
 				navigate(
 					addParams(
-						this.namespace +
-							'ddmStructureKey=' +
-							selectedItem.ddmStructureKey,
+						{
+							[this.namespace +
+							'ddmStructureKey']: selectedItem.ddmStructureKey,
+						},
 						this.addArticleURL
 					)
 				);
@@ -113,9 +114,10 @@ class ManagementToolbarDefaultEventHandler extends DefaultEventHandler {
 			onSelect: (selectedItem) => {
 				Liferay.Util.navigate(
 					addParams(
-						this.namespace +
-							'ddmStructureKey=' +
-							selectedItem.ddmstructurekey,
+						{
+							[this.namespace +
+							'ddmStructureKey']: selectedItem.ddmStructureKey,
+						},
 						this.viewDDMStructureArticlesURL
 					)
 				);
