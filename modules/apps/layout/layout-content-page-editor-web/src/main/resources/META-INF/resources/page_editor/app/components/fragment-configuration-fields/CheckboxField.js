@@ -18,21 +18,33 @@ import React, {useState} from 'react';
 
 import {ConfigurationFieldPropTypes} from '../../../prop-types/index';
 
-export const CheckboxField = ({disabled, field, onValueSelect, value}) => {
+export const CheckboxField = ({
+	disabled,
+	field,
+	onValueSelect,
+	title,
+	value,
+}) => {
 	const [nextValue, setNextValue] = useState(!!value);
 
 	return (
 		<ClayForm.Group>
-			<ClayCheckbox
-				aria-label={field.label}
-				checked={nextValue}
-				disabled={disabled}
-				label={field.label}
-				onChange={(event) => {
-					setNextValue(event.target.checked);
-					onValueSelect(field.name, event.target.checked);
-				}}
-			/>
+			<div
+				className="align-items-center d-flex justify-content-between"
+				data-tooltip-align="bottom"
+				title={title}
+			>
+				<ClayCheckbox
+					aria-label={field.label}
+					checked={nextValue}
+					disabled={disabled}
+					label={field.label}
+					onChange={(event) => {
+						setNextValue(event.target.checked);
+						onValueSelect(field.name, event.target.checked);
+					}}
+				/>
+			</div>
 		</ClayForm.Group>
 	);
 };
