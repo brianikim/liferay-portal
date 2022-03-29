@@ -17,7 +17,7 @@ import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React, {useEffect, useState} from 'react';
 
-import {addMappedInfoItem} from '../../app/actions/index';
+import {addMappedInfoItems} from '../../app/actions/index';
 import {useCollectionConfig} from '../../app/components/CollectionItemContext';
 import {EDITABLE_TYPES} from '../../app/config/constants/editableTypes';
 import {LAYOUT_TYPES} from '../../app/config/constants/layoutTypes';
@@ -221,7 +221,7 @@ function MappingSelector({fieldType, mappedItem, onMappingSelect}) {
 
 			if (!mappedInfoItem) {
 				dispatch(
-					addMappedInfoItem({title: selectedItem.title, ...data})
+					addMappedInfoItems([{title: selectedItem.title, ...data}])
 				);
 			}
 

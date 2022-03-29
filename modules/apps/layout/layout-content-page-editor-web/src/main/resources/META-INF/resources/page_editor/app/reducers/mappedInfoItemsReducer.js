@@ -22,15 +22,7 @@ export default function mappedInfoItemsReducer(
 ) {
 	switch (action.type) {
 		case ADD_MAPPED_INFO_ITEM:
-			return [
-				...mappedInfoItems,
-				{
-					className: action.className,
-					classNameId: action.classNameId,
-					classPK: action.classPK,
-					title: action.title,
-				},
-			];
+			return action.infoItems;
 
 		default:
 			return mappedInfoItems;

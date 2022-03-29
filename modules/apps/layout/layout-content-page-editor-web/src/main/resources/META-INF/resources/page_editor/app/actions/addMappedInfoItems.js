@@ -22,17 +22,9 @@ import {ADD_MAPPED_INFO_ITEM} from './types';
  * @param {string} options.title
  * @return {object}
  */
-export default function addMappedInfoItem({
-	className,
-	classNameId,
-	classPK,
-	title,
-}) {
+export default function addMappedInfoItems(infoItems) {
 	return {
-		className,
-		classNameId,
-		classPK,
-		title,
+		infoItems,
 		type: ADD_MAPPED_INFO_ITEM,
 	};
 }

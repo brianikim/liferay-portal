@@ -12,6 +12,7 @@
  * details.
  */
 
+import {addMappedInfoItems} from '../actions/index';
 import updateFragmentEntryLinkConfiguration from '../actions/updateFragmentEntryLinkConfiguration';
 import updatePageContents from '../actions/updatePageContents';
 import {FREEMARKER_FRAGMENT_ENTRY_PROCESSOR} from '../config/constants/freemarkerFragmentEntryProcessor';
@@ -35,26 +36,37 @@ export default function updateFragmentConfiguration({
 			configurationValues: nextEditableValues,
 			fragmentEntryLinkId,
 			onNetworkStatus: dispatch,
-		}).then(({fragmentEntryLink, layoutData}) => {
-			dispatch(
-				updateFragmentEntryLinkConfiguration({
-					fragmentEntryLink,
-					fragmentEntryLinkId,
-					layoutData,
-				})
-			);
-		}).then(() => {
-			InfoItemService.getPageContents({
-				onNetworkStatus: dispatch,
-			}).then((pageContents) => {
+		})
+			.then(({fragmentEntryLink, layoutData}) => {
 				dispatch(
-					updatePageContents({
-						pageContents,
-						segmentsExperienceId:
-						config.defaultSegmentsExperienceId,
+					updateFragmentEntryLinkConfiguration({
+						fragmentEntryLink,
+						fragmentEntryLinkId,
+						layoutData,
 					})
 				);
+			})
+			.then(() => {
+				InfoItemService.getPageContents({
+					onNetworkStatus: dispatch,
+				}).then((pageContents) => {
+					dispatch(
+						updatePageContents({
+							pageContents,
+							segmentsExperienceId:
+								config.defaultSegmentsExperienceId,
+						})
+					);
+
+					dispatch(
+						addMappedInfoItems(
+							pageContents.filter(
+								(element) =>
+									element.classNameId && element.classPK
+							)
+						)
+					);
+				});
 			});
-		});
 	};
 }
