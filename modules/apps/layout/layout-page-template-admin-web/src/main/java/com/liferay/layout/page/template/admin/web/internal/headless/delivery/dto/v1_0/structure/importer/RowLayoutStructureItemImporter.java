@@ -62,17 +62,17 @@ public class RowLayoutStructureItemImporter
 		rowStyledLayoutStructureItem.setGutters(
 			(Boolean)definitionMap.get("gutters"));
 
-		if (definitionMap.containsKey("reverseOrder")) {
-			rowStyledLayoutStructureItem.setModulesPerRow(
-				(Integer)definitionMap.get("modulesPerRow"));
+		if (definitionMap.containsKey("indexed")) {
+			rowStyledLayoutStructureItem.setIndexed(
+				GetterUtil.getBoolean(definitionMap.get("indexed")));
 		}
 
 		rowStyledLayoutStructureItem.setNumberOfColumns(
 			(Integer)definitionMap.get("numberOfColumns"));
 
-		if (definitionMap.containsKey("indexed")) {
-			rowStyledLayoutStructureItem.setIndexed(
-				GetterUtil.getBoolean(definitionMap.get("indexed")));
+		if (definitionMap.containsKey("reverseOrder")) {
+			rowStyledLayoutStructureItem.setModulesPerRow(
+				(Integer)definitionMap.get("modulesPerRow"));
 		}
 
 		if (definitionMap.containsKey("reverseOrder")) {
