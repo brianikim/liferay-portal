@@ -72,8 +72,7 @@ public class UncompressUtilTest {
 		Assert.assertTrue(
 			_canExecuteReadWrite(_tempDir.resolve("tar/test/directory")));
 		Assert.assertTrue(
-			_canExecuteReadWrite(
-				_tempDir.resolve("tar/test/entry/entry.txt")));
+			_canExecuteReadWrite(_tempDir.resolve("tar/test/entry/entry.txt")));
 	}
 
 	@Test
@@ -86,8 +85,7 @@ public class UncompressUtilTest {
 		Assert.assertTrue(
 			_canExecuteReadWrite(_tempDir.resolve("zip/test/directory")));
 		Assert.assertTrue(
-			_canExecuteReadWrite(
-				_tempDir.resolve("zip/test/entry/entry.txt")));
+			_canExecuteReadWrite(_tempDir.resolve("zip/test/entry/entry.txt")));
 	}
 
 	@Test
