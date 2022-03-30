@@ -70,9 +70,9 @@ public class UncompressUtilTest {
 		_assertExists("tar/test/directory");
 
 		Assert.assertTrue(
-			_canFileExecuteReadWrite(_tempDir.resolve("tar/test/directory")));
+			_canExecuteReadWrite(_tempDir.resolve("tar/test/directory")));
 		Assert.assertTrue(
-			_canFileExecuteReadWrite(
+			_canExecuteReadWrite(
 				_tempDir.resolve("tar/test/entry/entry.txt")));
 	}
 
@@ -84,9 +84,9 @@ public class UncompressUtilTest {
 		_assertExists("zip/test/entry/entry.txt");
 
 		Assert.assertTrue(
-			_canFileExecuteReadWrite(_tempDir.resolve("zip/test/directory")));
+			_canExecuteReadWrite(_tempDir.resolve("zip/test/directory")));
 		Assert.assertTrue(
-			_canFileExecuteReadWrite(
+			_canExecuteReadWrite(
 				_tempDir.resolve("zip/test/entry/entry.txt")));
 	}
 
@@ -105,7 +105,7 @@ public class UncompressUtilTest {
 		Assert.assertTrue(Files.exists(fullPath));
 	}
 
-	private boolean _canFileExecuteReadWrite(Path path) {
+	private boolean _canExecuteReadWrite(Path path) {
 		if (OSDetector.isWindows()) {
 			File file = path.toFile();
 
