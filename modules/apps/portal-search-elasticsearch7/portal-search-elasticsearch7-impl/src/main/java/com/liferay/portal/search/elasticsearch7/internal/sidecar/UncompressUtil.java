@@ -132,7 +132,7 @@ public class UncompressUtil {
 	}
 
 	private static boolean _isZipSlipVulnerable(
-			Path destinationPath, String entryName)
+			Path destinationPath, String tarArchiveEntryName)
 		throws IOException {
 
 		File canonicalDirectoryFile = destinationPath.toFile();
@@ -140,7 +140,8 @@ public class UncompressUtil {
 		String canonicalDirectoryPath =
 			canonicalDirectoryFile.getCanonicalPath();
 
-		File destinationFile = new File(destinationPath.toFile(), entryName);
+		File destinationFile = new File(
+			destinationPath.toFile(), tarArchiveEntryName);
 
 		String canonicalDestinationFile = destinationFile.getCanonicalPath();
 
@@ -150,7 +151,7 @@ public class UncompressUtil {
 			if (_log.isWarnEnabled()) {
 				_log.warn(
 					StringBundler.concat(
-						"Entry ", entryName,
+						"Entry ", tarArchiveEntryName,
 						" is outside of the target directory ",
 						canonicalDirectoryPath));
 			}
