@@ -16,7 +16,6 @@ package com.liferay.adaptive.media.image.internal.processor.util;
 
 import com.liferay.adaptive.media.image.internal.util.RenderedImageUtil;
 import com.liferay.portal.image.ImageToolImpl;
-import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.image.ImageTool;
 import com.liferay.portal.kernel.image.ImageToolUtil;
 import com.liferay.portal.kernel.module.util.SystemBundleUtil;
@@ -26,7 +25,6 @@ import com.liferay.portal.test.rule.LiferayUnitTestRule;
 
 import java.awt.image.RenderedImage;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 import org.junit.After;
@@ -71,9 +69,7 @@ public class TiffOrientationTransformerTest {
 	}
 
 	@Test
-	public void testTransformJPGReturnSameImage()
-		throws IOException, PortalException {
-
+	public void testTransformJPG() throws Exception {
 		Mockito.when(
 			_mimeTypes.getContentType(
 				(InputStream)Mockito.anyObject(), Mockito.anyString())
@@ -95,9 +91,7 @@ public class TiffOrientationTransformerTest {
 	}
 
 	@Test
-	public void testTransformPNGReturnTransformedImage()
-		throws IOException, PortalException {
-
+	public void testTransformPNG() throws Exception {
 		Mockito.when(
 			_mimeTypes.getContentType(
 				(InputStream)Mockito.anyObject(), Mockito.anyString())
