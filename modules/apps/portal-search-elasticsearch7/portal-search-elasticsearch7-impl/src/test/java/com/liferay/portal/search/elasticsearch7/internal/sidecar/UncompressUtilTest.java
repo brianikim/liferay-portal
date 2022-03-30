@@ -46,7 +46,7 @@ public class UncompressUtilTest {
 
 	@Before
 	public void setUp() throws IOException {
-		_tempDir = Files.createTempDirectory("temp_dir");
+		_tempDir = Files.createTempDirectory(null);
 
 		_evilFileTargetDir = _tempDir.resolve(
 			"../../../../../../../../../../../../../../../../../../../../.." +
