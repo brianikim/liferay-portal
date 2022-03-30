@@ -34,7 +34,8 @@ import org.junit.Rule;
 import org.junit.Test;
 
 /**
- * @author Wade Cao, Joshua Cords
+ * @author Wade Cao
+ * @author Joshua Cords
  */
 public class UncompressUtilTest {
 
