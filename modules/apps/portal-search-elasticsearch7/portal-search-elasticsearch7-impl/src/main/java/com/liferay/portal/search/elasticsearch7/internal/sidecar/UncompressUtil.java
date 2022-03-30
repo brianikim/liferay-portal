@@ -14,6 +14,7 @@
 
 package com.liferay.portal.search.elasticsearch7.internal.sidecar;
 
+import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -147,7 +148,11 @@ public class UncompressUtil {
 				canonicalDirectoryPath + File.separator)) {
 
 			if (_log.isWarnEnabled()) {
-				_log.warn("Entry is outside of the target dir: " + entryName);
+				_log.warn(
+					StringBundler.concat(
+						"Entry ", entryName,
+						" is outside of the target directory ",
+						canonicalDirectoryPath));
 			}
 
 			return true;
