@@ -95,13 +95,8 @@ public class UncompressUtilTest {
 		UncompressUtil.unzip(_getResourcePath("test_slip.zip"), _tempDir);
 
 		_assertExists("good.txt");
-		_assertDoesNotExist();
-	}
 
-	private void _assertDoesNotExist() {
-		Assert.assertFalse(
-			"File should not unzip outside of " + _tempDir,
-			Files.exists(_evilFileTargetDir));
+		Assert.assertFalse(Files.exists(_evilFileTargetDir));
 	}
 
 	private void _assertExists(String name) {
