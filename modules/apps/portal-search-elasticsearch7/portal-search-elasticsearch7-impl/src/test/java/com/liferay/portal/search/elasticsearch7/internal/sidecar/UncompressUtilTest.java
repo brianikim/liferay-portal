@@ -100,9 +100,9 @@ public class UncompressUtilTest {
 	}
 
 	private void _assertExists(String name) {
-		Path fullPath = _tempDir.resolve(name);
+		Path path = _tempDir.resolve(name);
 
-		Assert.assertTrue(Files.exists(fullPath));
+		Assert.assertTrue(Files.exists(path));
 	}
 
 	private boolean _canExecuteReadWrite(Path path) {
