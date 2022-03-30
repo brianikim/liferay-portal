@@ -140,9 +140,9 @@ public class UncompressUtil {
 		String canonicalDirectoryPath =
 			canonicalDirectoryFile.getCanonicalPath();
 
-		File destinationfile = new File(destinationPath.toFile(), entryName);
+		File destinationFile = new File(destinationPath.toFile(), entryName);
 
-		String canonicalDestinationFile = destinationfile.getCanonicalPath();
+		String canonicalDestinationFile = destinationFile.getCanonicalPath();
 
 		if (!canonicalDestinationFile.startsWith(
 				canonicalDirectoryPath + File.separator)) {
