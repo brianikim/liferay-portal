@@ -1880,6 +1880,59 @@ definition {
 		CKEditor.assertSourceContent();
 	}
 
+	@description = "This is a test for LPS-89616."
+	@priority = "4"
+	test ImportNavigationMenuItemWithMissingReferenceError {
+		property test.name.skip.portal.instance = "ExportImport#ImportNavigationMenuItemWithMissingReferenceError";
+
+		task ("Add two new sites") {
+			JSONGroup.addGroup(groupName = "site1");
+
+			JSONGroup.addGroup(groupName = "site2");
+		}
+
+		task ("Add a public page to site1") {
+			JSONLayout.addPublicLayout(
+				groupName = "site1",
+				layoutName = "page1");
+		}
+
+		task ("Add a menu with navigation entry linked to page1") {
+			NavigationMenusAdmin.openNavigationMenusAdmin(siteURLKey = "site1");
+
+			NavigationMenusAdmin.addMenu(menuName = "menu1");
+
+			NavigationMenusAdmin.addItem(
+				item = "Page",
+				pageNames = "page1",
+				privacy = "Public Pages");
+		}
+
+		task ("Export a LAR file with all site navigation menus") {
+			NavigationMenusAdmin.openNavigationMenusAdmin(siteURLKey = "site1");
+
+			LAR.exportPortlet(larFileName = "site1-menu1.lar");
+		}
+
+		task ("Import the exported LAR file to site2") {
+			NavigationMenusAdmin.openNavigationMenusAdmin(siteURLKey = "site2");
+
+			LAR._gotoExportImport(initializeLiferayEvent = "${initializeLiferayEvent}");
+
+			LAR._selectImportFile(
+				failureExpected = "true",
+				larFileName = "site1-menu1.lar");
+		}
+
+		task ("Assert missing reference error message") {
+			SelectFrame(locator1 = "IFrame#CONFIGURATION_DIALOG");
+
+			Click(locator1 = "Message#SEE_MORE_DETAILS_LINK");
+
+			AssertElementPresent(locator1 = "Message#ERROR");
+		}
+	}
+
 	@description = "This is a use case for LPS-88571."
 	@priority = "3"
 	test ImportSiteWithMissingReferenceOfPreloadedEntry {
