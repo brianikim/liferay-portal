@@ -273,6 +273,12 @@ public class CalendarBookingServiceUtil {
 		return getService().restoreCalendarBookingFromTrash(calendarBookingId);
 	}
 
+	/**
+	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link
+	 #search(long, long[], long[], long[], long, String, long,
+	 long, TimeZone, boolean, int[], int, int, OrderByComparator)}
+	 */
+	@Deprecated
 	public static List<CalendarBooking> search(
 			long companyId, long[] groupIds, long[] calendarIds,
 			long[] calendarResourceIds, long parentCalendarBookingId,
@@ -285,6 +291,22 @@ public class CalendarBookingServiceUtil {
 			companyId, groupIds, calendarIds, calendarResourceIds,
 			parentCalendarBookingId, keywords, startTime, endTime, recurring,
 			statuses, start, end, orderByComparator);
+	}
+
+	public static List<CalendarBooking> search(
+			long companyId, long[] groupIds, long[] calendarIds,
+			long[] calendarResourceIds, long parentCalendarBookingId,
+			String keywords, long startTime, long endTime,
+			java.util.TimeZone displayTimeZone, boolean recurring,
+			int[] statuses, int start, int end,
+			OrderByComparator<CalendarBooking> orderByComparator)
+		throws PortalException {
+
+		return getService().search(
+			companyId, groupIds, calendarIds, calendarResourceIds,
+			parentCalendarBookingId, keywords, startTime, endTime,
+			displayTimeZone, recurring, statuses, start, end,
+			orderByComparator);
 	}
 
 	public static List<CalendarBooking> search(

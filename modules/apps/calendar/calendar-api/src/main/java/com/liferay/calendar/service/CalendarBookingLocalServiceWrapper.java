@@ -724,6 +724,12 @@ public class CalendarBookingLocalServiceWrapper
 			userId, calendarBookingId);
 	}
 
+	/**
+	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link
+	 #search(long, long[], long[], long[], long, String, long,
+	 long, TimeZone, boolean, int[], int, int, OrderByComparator)}
+	 */
+	@Deprecated
 	@Override
 	public java.util.List<com.liferay.calendar.model.CalendarBooking> search(
 		long companyId, long[] groupIds, long[] calendarIds,
@@ -737,6 +743,23 @@ public class CalendarBookingLocalServiceWrapper
 			companyId, groupIds, calendarIds, calendarResourceIds,
 			parentCalendarBookingId, keywords, startTime, endTime, recurring,
 			statuses, start, end, orderByComparator);
+	}
+
+	@Override
+	public java.util.List<com.liferay.calendar.model.CalendarBooking> search(
+		long companyId, long[] groupIds, long[] calendarIds,
+		long[] calendarResourceIds, long parentCalendarBookingId,
+		String keywords, long startTime, long endTime,
+		java.util.TimeZone displayTimeZone, boolean recurring, int[] statuses,
+		int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator
+			<com.liferay.calendar.model.CalendarBooking> orderByComparator) {
+
+		return _calendarBookingLocalService.search(
+			companyId, groupIds, calendarIds, calendarResourceIds,
+			parentCalendarBookingId, keywords, startTime, endTime,
+			displayTimeZone, recurring, statuses, start, end,
+			orderByComparator);
 	}
 
 	@Override
