@@ -620,6 +620,12 @@ public abstract class UpgradeProcess
 		String normalizedTableName = dbInspector.normalizeName(
 			tableName, connection.getMetaData());
 
+		if (!dbInspector.hasTable(normalizedTableName)) {
+			throw new SQLException(
+				StringBundler.concat(
+					"Table ", normalizedTableName, " does not exist"));
+		}
+
 		if ((db.getDBType() == DBType.SQLSERVER) ||
 			(db.getDBType() == DBType.SYBASE)) {
 
@@ -631,27 +637,39 @@ public abstract class UpgradeProcess
 							StringBundler.concat(
 								"select name from sys.key_constraints where ",
 								"type = 'PK' and ",
-								"OBJECT_NAME(parent_object_id) = '",
-								normalizedTableName, "'"));
-					ResultSet resultSet = preparedStatement.executeQuery()) {
+								"OBJECT_NAME(parent_object_id) = ?"))) {
 
-					if (resultSet.next()) {
-						primaryKeyConstraintName = resultSet.getString("name");
+					preparedStatement.setString(1, normalizedTableName);
+
+					try (ResultSet resultSet =
+							preparedStatement.executeQuery()) {
+
+						if (resultSet.next()) {
+							primaryKeyConstraintName = resultSet.getString(
+								"name");
+						}
 					}
 				}
 			}
 			else {
-				try (PreparedStatement ps = connection.prepareStatement(
-						"sp_helpconstraint " + normalizedTableName);
-					ResultSet rs = ps.executeQuery()) {
+				try (PreparedStatement preparedStatement =
+						connection.prepareStatement("sp_helpconstraint ?")) {
 
-					while (rs.next()) {
-						String definition = rs.getString("definition");
+					preparedStatement.setString(1, normalizedTableName);
 
-						if (definition.startsWith("PRIMARY KEY INDEX")) {
-							primaryKeyConstraintName = rs.getString("name");
+					try (ResultSet resultSet =
+							preparedStatement.executeQuery()) {
 
-							break;
+						while (resultSet.next()) {
+							String definition = resultSet.getString(
+								"definition");
+
+							if (definition.startsWith("PRIMARY KEY INDEX")) {
+								primaryKeyConstraintName = resultSet.getString(
+									"name");
+
+								break;
+							}
 						}
 					}
 				}
@@ -663,10 +681,20 @@ public abstract class UpgradeProcess
 						normalizedTableName);
 			}
 
-			runSQL(
-				StringBundler.concat(
-					"alter table ", normalizedTableName, " drop constraint ",
-					primaryKeyConstraintName));
+			if (dbInspector.hasIndex(
+					normalizedTableName, primaryKeyConstraintName)) {
+
+				runSQL(
+					StringBundler.concat(
+						"alter table ", normalizedTableName,
+						" drop constraint ", primaryKeyConstraintName));
+			}
+			else {
+				throw new SQLException(
+					StringBundler.concat(
+						"Primary key with name ", primaryKeyConstraintName,
+						" does not exist"));
+			}
 		}
 		else {
 			runSQL(
