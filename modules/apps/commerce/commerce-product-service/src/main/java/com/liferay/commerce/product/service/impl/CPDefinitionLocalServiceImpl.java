@@ -77,6 +77,7 @@ import com.liferay.portal.kernel.search.facet.MultiValueFacet;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
+import com.liferay.portal.kernel.service.WorkflowDefinitionLinkLocalService;
 import com.liferay.portal.kernel.settings.SystemSettingsLocator;
 import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.transaction.TransactionCommitCallbackUtil;
@@ -299,6 +300,14 @@ public class CPDefinitionLocalServiceImpl
 
 		// Workflow
 
+		if (_isWorkflowEnabled(
+				serviceContext.getCompanyId(), serviceContext.getScopeGroupId(),
+				CPDefinition.class.getName())) {
+
+			serviceContext.setWorkflowAction(
+				WorkflowConstants.ACTION_SAVE_DRAFT);
+		}
+
 		return startWorkflowInstance(
 			user.getUserId(), cpDefinition, serviceContext);
 	}
@@ -381,6 +390,13 @@ public class CPDefinitionLocalServiceImpl
 		long newCPDefinitionId = counterLocalService.increment();
 
 		newCPDefinition.setCPDefinitionId(newCPDefinitionId);
+
+		if (_isWorkflowEnabled(
+				serviceContext.getCompanyId(), serviceContext.getScopeGroupId(),
+				CPDefinition.class.getName())) {
+
+			newCPDefinition.setStatus(WorkflowConstants.STATUS_INACTIVE);
+		}
 
 		if (originalCPDefinition.isPublished() &&
 			cpDefinitionLocalService.isVersionable(originalCPDefinition)) {
@@ -2453,6 +2469,18 @@ public class CPDefinitionLocalServiceImpl
 		return false;
 	}
 
+	private boolean _isWorkflowEnabled(
+		long companyId, long groupId, String className) {
+
+		if (_workflowDefinitionLinkLocalService.hasWorkflowDefinitionLink(
+				companyId, groupId, className, 0)) {
+
+			return true;
+		}
+
+		return false;
+	}
+
 	private List<CPDefinitionLocalization> _updateCPDefinitionLocalizedFields(
 			long companyId, long cpDefinitionId, Map<Locale, String> nameMap,
 			Map<Locale, String> shortDescriptionMap,
@@ -2504,4 +2532,7 @@ public class CPDefinitionLocalServiceImpl
 	@ServiceReference(type = GroupLocalService.class)
 	private GroupLocalService _groupLocalService;
 
+	@ServiceReference(type = WorkflowDefinitionLinkLocalService.class)
+	private WorkflowDefinitionLinkLocalService
+		_workflowDefinitionLinkLocalService;
 }
