@@ -1058,6 +1058,12 @@ public class CalendarBookingLocalServiceImpl
 		return calendarBooking;
 	}
 
+	/**
+	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link
+	 *             #search(long, long[], long[], long[], long, String, long,
+	 *             long, TimeZone, boolean, int[], int, int, OrderByComparator)}
+	 */
+	@Deprecated
 	@Override
 	public List<CalendarBooking> search(
 		long companyId, long[] groupIds, long[] calendarIds,

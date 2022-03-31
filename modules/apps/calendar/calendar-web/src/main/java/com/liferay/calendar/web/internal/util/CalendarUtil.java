@@ -68,8 +68,8 @@ public class CalendarUtil {
 
 		List<CalendarBooking> calendarBookings = _calendarBookingService.search(
 			themeDisplay.getCompanyId(), null, calendarIds, new long[0], -1,
-			null, startTime, endTime, true, statuses, QueryUtil.ALL_POS,
-			QueryUtil.ALL_POS, null);
+			null, startTime, endTime, timeZone, true, statuses,
+			QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
 
 		Map<Integer, Map<Integer, List<Integer>>> rulesMap = new HashMap<>();
 
