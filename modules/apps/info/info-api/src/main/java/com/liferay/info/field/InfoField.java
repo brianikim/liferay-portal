@@ -162,6 +162,8 @@ public class InfoField<T extends InfoFieldType> implements InfoFieldSetEntry {
 		sb.append(_builder._name);
 		sb.append(", type: ");
 		sb.append(_builder._infoFieldType.getName());
+		sb.append(", uniqueId: ");
+		sb.append(_builder._uniqueId);
 		sb.append("}");
 
 		return sb.toString();
