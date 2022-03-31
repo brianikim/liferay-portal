@@ -76,6 +76,7 @@ import com.liferay.portal.kernel.search.facet.Facet;
 import com.liferay.portal.kernel.search.facet.MultiValueFacet;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.settings.SystemSettingsLocator;
 import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.transaction.TransactionCommitCallbackUtil;
@@ -364,6 +365,11 @@ public class CPDefinitionLocalServiceImpl
 	public CPDefinition copyCPDefinition(long cpDefinitionId, long groupId)
 		throws PortalException {
 
+		ServiceContext serviceContext =
+			ServiceContextThreadLocal.getServiceContext();
+
+		User user = userLocalService.getUser(serviceContext.getUserId());
+
 		// CPDefinition
 
 		CPDefinition originalCPDefinition =
@@ -395,6 +401,8 @@ public class CPDefinitionLocalServiceImpl
 
 			newCProduct.setCProductId(counterLocalService.increment());
 			newCProduct.setUuid(PortalUUIDUtil.generate());
+			newCProduct.setUserId(user.getUserId());
+			newCProduct.setUserName(user.getFullName());
 			newCProduct.setPublishedCPDefinitionId(newCPDefinitionId);
 
 			newCPDefinition.setCProductId(newCProduct.getCProductId());
@@ -403,6 +411,8 @@ public class CPDefinitionLocalServiceImpl
 		}
 
 		newCPDefinition.setGroupId(groupId);
+		newCPDefinition.setUserId(user.getUserId());
+		newCPDefinition.setUserName(user.getFullName());
 		newCPDefinition.setUuid(PortalUUIDUtil.generate());
 
 		newCPDefinition = cpDefinitionPersistence.update(newCPDefinition);
