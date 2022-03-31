@@ -53,9 +53,8 @@ public class DDMFormFieldInfoFieldConverterImpl
 			InfoField.builder(
 			).infoFieldType(
 				_getInfoFieldType(ddmFormField)
-			).uniqueId(
-				DDMStructure.class.getSimpleName() + StringPool.UNDERLINE +
-					ddmFormField.getName()
+			).namespace(
+				DDMStructure.class.getSimpleName()
 			).name(
 				ddmFormField.getName()
 			)

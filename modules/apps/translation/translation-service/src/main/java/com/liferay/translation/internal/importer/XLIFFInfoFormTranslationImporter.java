@@ -113,8 +113,8 @@ public class XLIFFInfoFormTranslationImporter
 		return InfoField.builder(
 		).infoFieldType(
 			TextInfoFieldType.INSTANCE
-		).uniqueId(
-			value
+		).namespace(
+			StringPool.BLANK
 		).name(
 			value
 		).labelInfoLocalizedValue(

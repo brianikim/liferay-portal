@@ -32,8 +32,8 @@ public class FileEntryInfoItemFields {
 		InfoField.builder(
 		).infoFieldType(
 			TextInfoFieldType.INSTANCE
-		).uniqueId(
-			FileEntry.class.getSimpleName() + "_authorName"
+		).namespace(
+			FileEntry.class.getSimpleName()
 		).name(
 			"authorName"
 		).labelInfoLocalizedValue(
@@ -44,8 +44,8 @@ public class FileEntryInfoItemFields {
 		authorProfileImageInfoField = InfoField.builder(
 		).infoFieldType(
 			ImageInfoFieldType.INSTANCE
-		).uniqueId(
-			FileEntry.class.getSimpleName() + "_authorProfileImage"
+		).namespace(
+			FileEntry.class.getSimpleName()
 		).name(
 			"authorProfileImage"
 		).labelInfoLocalizedValue(
@@ -56,8 +56,8 @@ public class FileEntryInfoItemFields {
 		InfoField.builder(
 		).infoFieldType(
 			TextInfoFieldType.INSTANCE
-		).uniqueId(
-			FileEntry.class.getSimpleName() + "_description"
+		).namespace(
+			FileEntry.class.getSimpleName()
 		).name(
 			"description"
 		).labelInfoLocalizedValue(
@@ -68,8 +68,8 @@ public class FileEntryInfoItemFields {
 		InfoField.builder(
 		).infoFieldType(
 			URLInfoFieldType.INSTANCE
-		).uniqueId(
-			FileEntry.class.getSimpleName() + "_displayPageURL"
+		).namespace(
+			FileEntry.class.getSimpleName()
 		).name(
 			"displayPageURL"
 		).labelInfoLocalizedValue(
@@ -80,8 +80,8 @@ public class FileEntryInfoItemFields {
 		InfoField.builder(
 		).infoFieldType(
 			URLInfoFieldType.INSTANCE
-		).uniqueId(
-			FileEntry.class.getSimpleName() + "_downloadURL"
+		).namespace(
+			FileEntry.class.getSimpleName()
 		).name(
 			"downloadURL"
 		).labelInfoLocalizedValue(
@@ -92,8 +92,8 @@ public class FileEntryInfoItemFields {
 		InfoField.builder(
 		).infoFieldType(
 			TextInfoFieldType.INSTANCE
-		).uniqueId(
-			FileEntry.class.getSimpleName() + "_fileName"
+		).namespace(
+			FileEntry.class.getSimpleName()
 		).name(
 			"fileName"
 		).labelInfoLocalizedValue(
@@ -104,8 +104,8 @@ public class FileEntryInfoItemFields {
 		InfoField.builder(
 		).infoFieldType(
 			ImageInfoFieldType.INSTANCE
-		).uniqueId(
-			FileEntry.class.getSimpleName() + "_fileURL"
+		).namespace(
+			FileEntry.class.getSimpleName()
 		).name(
 			"fileURL"
 		).labelInfoLocalizedValue(
@@ -116,8 +116,8 @@ public class FileEntryInfoItemFields {
 		InfoField.builder(
 		).infoFieldType(
 			TextInfoFieldType.INSTANCE
-		).uniqueId(
-			FileEntry.class.getSimpleName() + "_mimeType"
+		).namespace(
+			FileEntry.class.getSimpleName()
 		).name(
 			"mimeType"
 		).labelInfoLocalizedValue(
@@ -128,8 +128,8 @@ public class FileEntryInfoItemFields {
 		InfoField.builder(
 		).infoFieldType(
 			ImageInfoFieldType.INSTANCE
-		).uniqueId(
-			FileEntry.class.getSimpleName() + "_previewImage"
+		).namespace(
+			FileEntry.class.getSimpleName()
 		).name(
 			"previewImage"
 		).labelInfoLocalizedValue(
@@ -140,8 +140,8 @@ public class FileEntryInfoItemFields {
 		InfoField.builder(
 		).infoFieldType(
 			DateInfoFieldType.INSTANCE
-		).uniqueId(
-			FileEntry.class.getSimpleName() + "_publishDate"
+		).namespace(
+			FileEntry.class.getSimpleName()
 		).name(
 			"publishDate"
 		).labelInfoLocalizedValue(
@@ -151,8 +151,8 @@ public class FileEntryInfoItemFields {
 	public static final InfoField<TextInfoFieldType> size = InfoField.builder(
 	).infoFieldType(
 		TextInfoFieldType.INSTANCE
-	).uniqueId(
-		FileEntry.class.getSimpleName() + "_size"
+	).namespace(
+		FileEntry.class.getSimpleName()
 	).name(
 		"size"
 	).labelInfoLocalizedValue(
@@ -162,8 +162,8 @@ public class FileEntryInfoItemFields {
 		InfoField.builder(
 		).infoFieldType(
 			TextInfoFieldType.INSTANCE
-		).uniqueId(
-			FileEntry.class.getSimpleName() + "_title"
+		).namespace(
+			FileEntry.class.getSimpleName()
 		).name(
 			"title"
 		).labelInfoLocalizedValue(
@@ -173,8 +173,8 @@ public class FileEntryInfoItemFields {
 		InfoField.builder(
 		).infoFieldType(
 			TextInfoFieldType.INSTANCE
-		).uniqueId(
-			FileEntry.class.getSimpleName() + "_version"
+		).namespace(
+			FileEntry.class.getSimpleName()
 		).name(
 			"version"
 		).labelInfoLocalizedValue(

@@ -31,8 +31,8 @@ public interface JournalArticleInfoItemFields {
 		InfoField.builder(
 		).infoFieldType(
 			TextInfoFieldType.INSTANCE
-		).uniqueId(
-			JournalArticle.class.getSimpleName() + "_authorName"
+		).namespace(
+			JournalArticle.class.getSimpleName()
 		).name(
 			"authorName"
 		).labelInfoLocalizedValue(
@@ -43,8 +43,8 @@ public interface JournalArticleInfoItemFields {
 		authorProfileImageInfoField = InfoField.builder(
 		).infoFieldType(
 			ImageInfoFieldType.INSTANCE
-		).uniqueId(
-			JournalArticle.class.getSimpleName() + "_authorProfileImage"
+		).namespace(
+			JournalArticle.class.getSimpleName()
 		).name(
 			"authorProfileImage"
 		).labelInfoLocalizedValue(
@@ -55,8 +55,8 @@ public interface JournalArticleInfoItemFields {
 		InfoField.builder(
 		).infoFieldType(
 			TextInfoFieldType.INSTANCE
-		).uniqueId(
-			JournalArticle.class.getSimpleName() + "_description"
+		).namespace(
+			JournalArticle.class.getSimpleName()
 		).name(
 			"description"
 		).attribute(
@@ -71,8 +71,8 @@ public interface JournalArticleInfoItemFields {
 		InfoField.builder(
 		).infoFieldType(
 			DateInfoFieldType.INSTANCE
-		).uniqueId(
-			JournalArticle.class.getSimpleName() + "_displayDate"
+		).namespace(
+			JournalArticle.class.getSimpleName()
 		).name(
 			"displayDate"
 		).labelInfoLocalizedValue(
@@ -83,8 +83,8 @@ public interface JournalArticleInfoItemFields {
 		InfoField.builder(
 		).infoFieldType(
 			URLInfoFieldType.INSTANCE
-		).uniqueId(
-			JournalArticle.class.getSimpleName() + "_displayPageURL"
+		).namespace(
+			JournalArticle.class.getSimpleName()
 		).name(
 			"displayPageURL"
 		).labelInfoLocalizedValue(
@@ -95,8 +95,8 @@ public interface JournalArticleInfoItemFields {
 		InfoField.builder(
 		).infoFieldType(
 			DateInfoFieldType.INSTANCE
-		).uniqueId(
-			JournalArticle.class.getSimpleName() + "_expirationDate"
+		).namespace(
+			JournalArticle.class.getSimpleName()
 		).name(
 			"expirationDate"
 		).labelInfoLocalizedValue(
@@ -107,8 +107,8 @@ public interface JournalArticleInfoItemFields {
 		InfoField.builder(
 		).infoFieldType(
 			TextInfoFieldType.INSTANCE
-		).uniqueId(
-			JournalArticle.class.getSimpleName() + "_lastEditorName"
+		).namespace(
+			JournalArticle.class.getSimpleName()
 		).name(
 			"lastEditorName"
 		).labelInfoLocalizedValue(
@@ -119,8 +119,8 @@ public interface JournalArticleInfoItemFields {
 		lastEditorProfileImageInfoField = InfoField.builder(
 		).infoFieldType(
 			ImageInfoFieldType.INSTANCE
-		).uniqueId(
-			JournalArticle.class.getSimpleName() + "_lastEditorProfileImage"
+		).namespace(
+			JournalArticle.class.getSimpleName()
 		).name(
 			"lastEditorProfileImage"
 		).labelInfoLocalizedValue(
@@ -131,8 +131,8 @@ public interface JournalArticleInfoItemFields {
 		InfoField.builder(
 		).infoFieldType(
 			DateInfoFieldType.INSTANCE
-		).uniqueId(
-			JournalArticle.class.getSimpleName() + "_publishDate"
+		).namespace(
+			JournalArticle.class.getSimpleName()
 		).name(
 			"publishDate"
 		).labelInfoLocalizedValue(
@@ -143,8 +143,8 @@ public interface JournalArticleInfoItemFields {
 		InfoField.builder(
 		).infoFieldType(
 			ImageInfoFieldType.INSTANCE
-		).uniqueId(
-			JournalArticle.class.getSimpleName() + "_smallImage"
+		).namespace(
+			JournalArticle.class.getSimpleName()
 		).name(
 			"smallImage"
 		).labelInfoLocalizedValue(
@@ -155,8 +155,8 @@ public interface JournalArticleInfoItemFields {
 		InfoField.builder(
 		).infoFieldType(
 			TextInfoFieldType.INSTANCE
-		).uniqueId(
-			JournalArticle.class.getSimpleName() + "_title"
+		).namespace(
+			JournalArticle.class.getSimpleName()
 		).name(
 			"title"
 		).labelInfoLocalizedValue(
