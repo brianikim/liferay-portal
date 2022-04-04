@@ -111,13 +111,15 @@ public class XLIFFInfoFormTranslationImporter
 	}
 
 	private InfoField _createInfoField(Locale locale, String value) {
+		String[] namespaceNameArray = _getNamespaceNameArray(value);
+
 		return InfoField.builder(
 		).infoFieldType(
 			TextInfoFieldType.INSTANCE
 		).namespace(
-			StringPool.BLANK
+			namespaceNameArray[0]
 		).name(
-			value
+			namespaceNameArray[1]
 		).labelInfoLocalizedValue(
 			InfoLocalizedValue.<String>builder(
 			).value(
@@ -177,6 +179,16 @@ public class XLIFFInfoFormTranslationImporter
 		).infoItemReference(
 			infoItemReference
 		).build();
+	}
+
+	private String[] _getNamespaceNameArray(String value) {
+		String[] parts = value.split(StringPool.UNDERLINE, 2);
+
+		if (parts.length != 2) {
+			return new String[] {StringPool.BLANK, value};
+		}
+
+		return parts;
 	}
 
 	private Locale _getSourceLocale(StartSubDocument startSubDocument) {
