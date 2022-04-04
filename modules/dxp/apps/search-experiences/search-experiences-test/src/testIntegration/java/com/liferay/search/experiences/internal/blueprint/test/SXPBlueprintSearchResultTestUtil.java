@@ -185,9 +185,9 @@ public class SXPBlueprintSearchResultTestUtil {
 			).put(
 				"fields", fields
 			).put(
-				"fuzziness", () -> fuzziness
+				"fuzziness", fuzziness
 			).put(
-				"operator", () -> operator
+				"operator", operator
 			).put(
 				"query", query
 			).put(
