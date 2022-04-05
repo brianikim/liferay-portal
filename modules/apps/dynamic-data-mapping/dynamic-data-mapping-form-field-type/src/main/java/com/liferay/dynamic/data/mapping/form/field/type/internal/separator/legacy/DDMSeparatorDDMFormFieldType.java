@@ -17,7 +17,6 @@ package com.liferay.dynamic.data.mapping.form.field.type.internal.separator.lega
 import com.liferay.dynamic.data.mapping.form.field.type.BaseDDMFormFieldType;
 import com.liferay.dynamic.data.mapping.form.field.type.DDMFormFieldType;
 import com.liferay.dynamic.data.mapping.form.field.type.DDMFormFieldTypeSettings;
-import com.liferay.dynamic.data.mapping.form.field.type.internal.separator.SeparatorDDMFormFieldTypeSettings;
 
 import org.osgi.service.component.annotations.Component;
 
