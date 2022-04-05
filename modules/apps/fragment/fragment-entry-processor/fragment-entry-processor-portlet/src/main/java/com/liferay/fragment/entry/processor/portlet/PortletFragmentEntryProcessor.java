@@ -34,7 +34,6 @@ import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.ModelHintsConstants;
 import com.liferay.portal.kernel.model.Portlet;
-import com.liferay.portal.kernel.model.PortletPreferencesIds;
 import com.liferay.portal.kernel.portlet.PortletIdCodec;
 import com.liferay.portal.kernel.portlet.PortletPreferencesFactory;
 import com.liferay.portal.kernel.portlet.PortletPreferencesFactoryUtil;
@@ -92,8 +91,16 @@ public class PortletFragmentEntryProcessor implements FragmentEntryProcessor {
 				_portletPreferencesLocalService.deletePortletPreferences(
 					PortletKeys.PREFS_OWNER_ID_DEFAULT,
 					PortletKeys.PREFS_OWNER_TYPE_LAYOUT,
-					fragmentEntryLink.getPlid(),
-					portletId);
+					fragmentEntryLink.getPlid(), portletId);
+
+				PortletLocalServiceUtil.deletePortlet(
+					fragmentEntryLink.getCompanyId(), portletId,
+					fragmentEntryLink.getPlid());
+
+				LayoutClassedModelUsageLocalServiceUtil.
+					deleteLayoutClassedModelUsages(
+						portletId, PortalUtil.getClassNameId(Portlet.class),
+						fragmentEntryLink.getPlid());
 			}
 			catch (Exception exception) {
 			}
