@@ -784,21 +784,6 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 		try {
 			GroupServiceHttp.disableStaging(httpPrincipal, remoteGroupId);
 		}
-		catch (PrincipalException principalException) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(principalException, principalException);
-			}
-
-			RemoteExportException remoteExportException =
-				new RemoteExportException(RemoteExportException.NO_PERMISSIONS);
-
-			remoteExportException.setGroupId(remoteGroupId);
-
-			throw remoteExportException;
-		}
 		catch (RemoteAuthException remoteAuthException) {
 
 			// LPS-52675
@@ -833,18 +818,39 @@ public class StagingLocalServiceImpl extends StagingLocalServiceBaseImpl {
 				_log.warn("Forcibly disable remote staging");
 			}
 		}
-		catch (Exception exception) {
+		catch (PortalException portalException) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(exception);
+				_log.debug(portalException);
 			}
 
-			if (!forceDisable) {
+			String message = portalException.getMessage();
+
+			if (message.contains(
+					NoSuchGroupException.class.getCanonicalName())) {
+
+				if (!forceDisable) {
+					RemoteExportException remoteExportException =
+						new RemoteExportException(
+							RemoteExportException.NO_GROUP);
+
+					remoteExportException.setGroupId(remoteGroupId);
+
+					throw remoteExportException;
+				}
+			}
+			else if (message.contains(
+						PrincipalException.class.getCanonicalName())) {
+
 				RemoteExportException remoteExportException =
-					new RemoteExportException(RemoteExportException.NO_GROUP);
+					new RemoteExportException(
+						RemoteExportException.NO_PERMISSIONS);
 
 				remoteExportException.setGroupId(remoteGroupId);
 
 				throw remoteExportException;
+			}
+			else {
+				throw portalException;
 			}
 
 			if (_log.isWarnEnabled()) {
