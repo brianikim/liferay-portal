@@ -23,6 +23,7 @@ import com.liferay.fragment.processor.PortletRegistry;
 import com.liferay.fragment.renderer.FragmentPortletRenderer;
 import com.liferay.fragment.service.FragmentEntryLinkLocalService;
 import com.liferay.layout.page.template.service.LayoutPageTemplateEntryLocalService;
+import com.liferay.layout.service.LayoutClassedModelUsageLocalService;
 import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
@@ -42,7 +43,7 @@ import com.liferay.portal.kernel.service.PortletPreferencesLocalService;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -88,13 +89,13 @@ public class PortletFragmentEntryProcessor implements FragmentEntryProcessor {
 
 		for (String portletId : portletIds) {
 			try {
-				PortletLocalServiceUtil.deletePortlet(
+				_portletLocalService.deletePortlet(
 					fragmentEntryLink.getCompanyId(), portletId,
 					fragmentEntryLink.getPlid());
 
-				LayoutClassedModelUsageLocalServiceUtil.
+				_layoutClassedModelUsageLocalService.
 					deleteLayoutClassedModelUsages(
-						portletId, PortalUtil.getClassNameId(Portlet.class),
+						portletId, _portal.getClassNameId(Portlet.class),
 						fragmentEntryLink.getPlid());
 			}
 			catch (Exception exception) {
@@ -529,8 +530,15 @@ public class PortletFragmentEntryProcessor implements FragmentEntryProcessor {
 	private FragmentPortletRenderer _fragmentPortletRenderer;
 
 	@Reference
+	private LayoutClassedModelUsageLocalService
+		_layoutClassedModelUsageLocalService;
+
+	@Reference
 	private LayoutPageTemplateEntryLocalService
 		_layoutPageTemplateEntryLocalService;
+
+	@Reference
+	private Portal _portal;
 
 	@Reference
 	private PortletLocalService _portletLocalService;
