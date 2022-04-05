@@ -38,7 +38,7 @@ public class DDMSeparatorDDMFormFieldType extends BaseDDMFormFieldType {
 	public Class<? extends DDMFormFieldTypeSettings>
 		getDDMFormFieldTypeSettings() {
 
-		return SeparatorDDMFormFieldTypeSettings.class;
+		return DDMSeparatorDDMFormFieldTypeSettings.class;
 	}
 
 	@Override
