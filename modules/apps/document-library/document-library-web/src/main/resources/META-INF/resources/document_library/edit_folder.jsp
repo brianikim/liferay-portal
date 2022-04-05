@@ -384,14 +384,6 @@ renderResponse.setTitle(headerTitle);
 
 		<c:choose>
 			<c:when test="<%= workflowEnabled %>">
-				var restrictionTypeWorkflow = document.getElementById(
-					'<portlet:namespace />restrictionTypeWorkflow'
-				);
-
-				restrictionTypeWorkflow.classList.add('hide');
-				restrictionTypeWorkflow.setAttribute('hidden', 'hidden');
-				restrictionTypeWorkflow.style.display = 'none';
-
 				var workflowDefinitions =
 					'<%= UnicodeFormatter.toString(workflowDefinitionsBuffer) %>';
 
