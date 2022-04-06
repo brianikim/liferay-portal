@@ -53,22 +53,22 @@ public class ReindexConfigurationUpgradeProcess extends UpgradeProcess {
 		Configuration[] configurations = _configurationAdmin.listConfigurations(
 			filterString);
 
-		int indexingInterval = _prefsProps.getInteger(
+		int interval = _prefsProps.getInteger(
 			"dl.file.indexing.interval", _DL_FILE_INDEXING_INTERVAL);
 
 		if (ArrayUtil.isEmpty(configurations) &&
-			(indexingInterval != _DL_FILE_INDEXING_INTERVAL)) {
+			(interval != _DL_FILE_INDEXING_INTERVAL)) {
 
-			_addNewConfiguration(indexingInterval);
+			_addNewConfiguration(interval);
 		}
 		else if (ArrayUtil.isNotEmpty(configurations)) {
 			for (Configuration configuration : configurations) {
-				_upgradeExistingConfiguration(configuration, indexingInterval);
+				_upgradeExistingConfiguration(configuration, interval);
 			}
 		}
 	}
 
-	private void _addNewConfiguration(int indexingInterval) throws Exception {
+	private void _addNewConfiguration(int interval) throws Exception {
 		Configuration configuration = _configurationAdmin.getConfiguration(
 			ReindexConfiguration.class.getName(), StringPool.QUESTION);
 
@@ -77,16 +77,16 @@ public class ReindexConfigurationUpgradeProcess extends UpgradeProcess {
 				"indexingBatchSizes",
 				new String[] {
 					StringBundler.concat(
-						DLFileEntry.class.getName(), "=", indexingInterval)
+						DLFileEntry.class.getName(), "=", interval)
 				}
 			).build());
 	}
 
-	private boolean _isDLFileEntryConfigurationEntry(String entry) {
-		String[] pair = StringUtil.split(entry, StringPool.EQUAL);
+	private boolean _isDLFileEntryConfigurationEntry(String value) {
+		String[] valueParts = StringUtil.split(value, StringPool.EQUAL);
 
-		if ((pair.length == 2) &&
-			Objects.equals(pair[0], DLFileEntry.class.getName())) {
+		if ((valueParts.length == 2) &&
+			Objects.equals(valueParts[0], DLFileEntry.class.getName())) {
 
 			return true;
 		}
@@ -95,16 +95,16 @@ public class ReindexConfigurationUpgradeProcess extends UpgradeProcess {
 	}
 
 	private void _upgradeExistingConfiguration(
-			Configuration configuration, int indexingInterval)
+			Configuration configuration, int interval)
 		throws Exception {
 
 		Dictionary<String, Object> properties = configuration.getProperties();
 
-		String[] existingEntries = GetterUtil.getStringValues(
+		String[] values = GetterUtil.getStringValues(
 			properties.get("indexingBatchSizes"));
 
-		for (String existingEntry : existingEntries) {
-			if (_isDLFileEntryConfigurationEntry(existingEntry)) {
+		for (String value : values) {
+			if (_isDLFileEntryConfigurationEntry(value)) {
 				return;
 			}
 		}
@@ -112,9 +112,7 @@ public class ReindexConfigurationUpgradeProcess extends UpgradeProcess {
 		properties.put(
 			"indexingBatchSizes",
 			ArrayUtil.append(
-				existingEntries,
-				StringBundler.concat(
-					DLFileEntry.class.getName(), "=", indexingInterval)));
+				values, DLFileEntry.class.getName() + "=" + interval));
 
 		configuration.update(properties);
 	}
