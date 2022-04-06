@@ -54,10 +54,10 @@ public class ReindexConfigurationUpgradeProcess extends UpgradeProcess {
 			filterString);
 
 		int indexingInterval = _prefsProps.getInteger(
-			_DL_FILE_INDEXING_INTERVAL, _DEFAULT_INDEXING_INTERVAL);
+			"dl.file.indexing.interval", _DL_FILE_INDEXING_INTERVAL);
 
 		if (ArrayUtil.isEmpty(configurations) &&
-			(indexingInterval != _DEFAULT_INDEXING_INTERVAL)) {
+			(indexingInterval != _DL_FILE_INDEXING_INTERVAL)) {
 
 			_addNewConfiguration(indexingInterval);
 		}
@@ -74,7 +74,7 @@ public class ReindexConfigurationUpgradeProcess extends UpgradeProcess {
 
 		configuration.update(
 			HashMapDictionaryBuilder.<String, Object>put(
-				_INDEXING_BATCH_SIZES_PROPERTY_NAME,
+				"indexingBatchSizes",
 				new String[] {
 					StringBundler.concat(
 						DLFileEntry.class.getName(), "=", indexingInterval)
@@ -101,7 +101,7 @@ public class ReindexConfigurationUpgradeProcess extends UpgradeProcess {
 		Dictionary<String, Object> properties = configuration.getProperties();
 
 		String[] existingEntries = GetterUtil.getStringValues(
-			properties.get(_INDEXING_BATCH_SIZES_PROPERTY_NAME));
+			properties.get("indexingBatchSizes"));
 
 		for (String existingEntry : existingEntries) {
 			if (_isDLFileEntryConfigurationEntry(existingEntry)) {
@@ -110,7 +110,7 @@ public class ReindexConfigurationUpgradeProcess extends UpgradeProcess {
 		}
 
 		properties.put(
-			_INDEXING_BATCH_SIZES_PROPERTY_NAME,
+			"indexingBatchSizes",
 			ArrayUtil.append(
 				existingEntries,
 				StringBundler.concat(
@@ -119,13 +119,7 @@ public class ReindexConfigurationUpgradeProcess extends UpgradeProcess {
 		configuration.update(properties);
 	}
 
-	private static final int _DEFAULT_INDEXING_INTERVAL = 500;
-
-	private static final String _DL_FILE_INDEXING_INTERVAL =
-		"dl.file.indexing.interval";
-
-	private static final String _INDEXING_BATCH_SIZES_PROPERTY_NAME =
-		"indexingBatchSizes";
+	private static final int _DL_FILE_INDEXING_INTERVAL = 500;
 
 	private final ConfigurationAdmin _configurationAdmin;
 	private final PrefsProps _prefsProps;
