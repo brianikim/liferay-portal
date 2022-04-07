@@ -14,10 +14,18 @@
 
 package com.liferay.users.admin.web.internal.portlet;
 
+import com.liferay.petra.lang.SafeCloseable;
+import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.model.Release;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
 import com.liferay.users.admin.constants.UsersAdminPortletKeys;
 
+import java.io.IOException;
+
+import java.util.Objects;
+
+import javax.portlet.ActionRequest;
+import javax.portlet.ActionResponse;
 import javax.portlet.Portlet;
 
 import org.osgi.service.component.annotations.Component;
@@ -51,6 +59,36 @@ import org.osgi.service.component.annotations.Reference;
 	service = Portlet.class
 )
 public class MyAccountPortlet extends MVCPortlet {
+
+	@Override
+	public void render(
+			RenderRequest renderRequest, RenderResponse renderResponse)
+		throws IOException, PortletException {
+
+		if (Objects.equals(
+				getPath(renderRequest, renderResponse), "/view.jsp")) {
+
+			SessionErrors.add(renderRequest, PrincipalException.class);
+
+			include("/error.jsp", renderRequest, renderResponse);
+
+			return;
+		}
+
+		super.render(renderRequest, renderResponse);
+	}
+
+	@Override
+	protected boolean callActionMethod(
+			ActionRequest actionRequest, ActionResponse actionResponse)
+		throws PortletException {
+
+		try (SafeCloseable safeCloseable =
+				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(0)) {
+
+			return super.callActionMethod(actionRequest, actionResponse);
+		}
+	}
 
 	@Reference(
 		target = "(&(release.bundle.symbolic.name=com.liferay.users.admin.web)(&(release.schema.version>=1.0.0)(!(release.schema.version>=2.0.0))))",
