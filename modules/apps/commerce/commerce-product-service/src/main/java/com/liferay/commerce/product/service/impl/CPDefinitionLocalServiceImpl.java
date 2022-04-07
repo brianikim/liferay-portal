@@ -387,16 +387,15 @@ public class CPDefinitionLocalServiceImpl
 		CPDefinition newCPDefinition =
 			(CPDefinition)originalCPDefinition.clone();
 
+		newCPDefinition.setUuid(PortalUUIDUtil.generate());
+
 		long newCPDefinitionId = counterLocalService.increment();
 
 		newCPDefinition.setCPDefinitionId(newCPDefinitionId);
 
-		if (_isWorkflowEnabled(
-				serviceContext.getCompanyId(), serviceContext.getScopeGroupId(),
-				CPDefinition.class.getName())) {
-
-			newCPDefinition.setStatus(WorkflowConstants.STATUS_INACTIVE);
-		}
+		newCPDefinition.setGroupId(groupId);
+		newCPDefinition.setUserId(user.getUserId());
+		newCPDefinition.setUserName(user.getFullName());
 
 		if (originalCPDefinition.isPublished() &&
 			cpDefinitionLocalService.isVersionable(originalCPDefinition)) {
@@ -415,8 +414,8 @@ public class CPDefinitionLocalServiceImpl
 
 			CProduct newCProduct = (CProduct)originalCProduct.clone();
 
-			newCProduct.setCProductId(counterLocalService.increment());
 			newCProduct.setUuid(PortalUUIDUtil.generate());
+			newCProduct.setCProductId(counterLocalService.increment());
 			newCProduct.setUserId(user.getUserId());
 			newCProduct.setUserName(user.getFullName());
 			newCProduct.setPublishedCPDefinitionId(newCPDefinitionId);
@@ -426,10 +425,12 @@ public class CPDefinitionLocalServiceImpl
 			cProductPersistence.update(newCProduct);
 		}
 
-		newCPDefinition.setGroupId(groupId);
-		newCPDefinition.setUserId(user.getUserId());
-		newCPDefinition.setUserName(user.getFullName());
-		newCPDefinition.setUuid(PortalUUIDUtil.generate());
+		if (_isWorkflowEnabled(
+				serviceContext.getCompanyId(), serviceContext.getScopeGroupId(),
+				CPDefinition.class.getName())) {
+
+			newCPDefinition.setStatus(WorkflowConstants.STATUS_INACTIVE);
+		}
 
 		newCPDefinition = cpDefinitionPersistence.update(newCPDefinition);
 
