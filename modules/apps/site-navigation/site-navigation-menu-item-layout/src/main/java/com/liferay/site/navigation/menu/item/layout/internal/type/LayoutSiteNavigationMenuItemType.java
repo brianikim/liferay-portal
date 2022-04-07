@@ -108,13 +108,13 @@ public class LayoutSiteNavigationMenuItemType
 			if (_log.isWarnEnabled()) {
 				_log.warn(
 					StringBundler.concat(
-						"SiteNavigationMenuItem ",
+						"Site navigation menu item ",
 						siteNavigationMenuItem.getSiteNavigationMenuItemId(),
-						" won't be exported because it points to a ",
+						" will not be exported because it points to a ",
 						privateLayout ? "private" : "public",
 						" layout. It will be exported when a ",
 						privateLayout ? "private" : "public",
-						" process is performed."));
+						" layout is exported."));
 			}
 
 			return false;
