@@ -92,7 +92,7 @@ public class AssetEntryInfoItemFieldSetProviderImpl
 					InfoField.builder(
 					).infoFieldType(
 						CategoriesInfoFieldType.INSTANCE
-					).namespace(
+					).uniqueId(
 						AssetVocabulary.class.getSimpleName() +
 							StringPool.UNDERLINE +
 								assetVocabulary.getVocabularyId()
@@ -205,7 +205,7 @@ public class AssetEntryInfoItemFieldSetProviderImpl
 					InfoField.builder(
 					).infoFieldType(
 						CategoriesInfoFieldType.INSTANCE
-					).namespace(
+					).uniqueId(
 						AssetVocabulary.class.getSimpleName() +
 							StringPool.UNDERLINE +
 								assetVocabulary.getVocabularyId()
