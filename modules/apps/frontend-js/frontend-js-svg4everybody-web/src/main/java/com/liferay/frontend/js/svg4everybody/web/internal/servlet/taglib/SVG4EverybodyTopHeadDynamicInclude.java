@@ -65,41 +65,25 @@ public class SVG4EverybodyTopHeadDynamicInclude extends BaseDynamicInclude {
 			}
 		}
 
-		boolean cdnHostEnabled = false;
+		PrintWriter printWriter = httpServletResponse.getWriter();
 
-		try {
-			String cdnHost = _portal.getCDNHost(httpServletRequest);
+		AbsolutePortalURLBuilder absolutePortalURLBuilder =
+			_absolutePortalURLBuilderFactory.getAbsolutePortalURLBuilder(
+				httpServletRequest);
 
-			cdnHostEnabled = !cdnHost.isEmpty();
-		}
-		catch (PortalException portalException) {
-			if (_log.isWarnEnabled()) {
-				_log.warn("Unable to get CDN host", portalException);
-			}
+		if (!cdnDynamicResourcesEnabled) {
+			absolutePortalURLBuilder.ignoreCDNHost();
 		}
 
-		if (cdnHostEnabled || _browserSniffer.isIe(httpServletRequest)) {
-			PrintWriter printWriter = httpServletResponse.getWriter();
+		for (String jsFileName : _JS_FILE_NAMES) {
+			printWriter.print("<script data-senna-track=\"permanent\" src=\"");
 
-			AbsolutePortalURLBuilder absolutePortalURLBuilder =
-				_absolutePortalURLBuilderFactory.getAbsolutePortalURLBuilder(
-					httpServletRequest);
+			printWriter.print(
+				absolutePortalURLBuilder.forModule(
+					_bundleContext.getBundle(), jsFileName
+				).build());
 
-			if (!cdnDynamicResourcesEnabled) {
-				absolutePortalURLBuilder.ignoreCDNHost();
-			}
-
-			for (String jsFileName : _JS_FILE_NAMES) {
-				printWriter.print(
-					"<script data-senna-track=\"permanent\" src=\"");
-
-				printWriter.print(
-					absolutePortalURLBuilder.forModule(
-						_bundleContext.getBundle(), jsFileName
-					).build());
-
-				printWriter.println("\" type=\"text/javascript\"></script>");
-			}
+			printWriter.println("\" type=\"text/javascript\"></script>");
 		}
 	}
 
