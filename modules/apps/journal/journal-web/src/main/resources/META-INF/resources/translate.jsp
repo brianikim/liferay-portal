@@ -165,7 +165,7 @@ renderResponse.setTitle(journalTranslateDisplayContext.getTitle());
 											</div>
 										</c:when>
 										<c:otherwise>
-											<aui:input dir="<%= sourceContentDir %>" label="<%= label %>" name="<%= label %>" readonly="true" tabIndex="-1" type='<%= multiline ? "textarea" : "text" %>' value="<%= sourceContent %>" />
+											<aui:input dir="<%= sourceContentDir %>" label="<%= label %>" name="<%= infoField.getUniqueId() %>" readonly="true" tabIndex="-1" type='<%= multiline ? "textarea" : "text" %>' value="<%= sourceContent %>" />
 										</c:otherwise>
 									</c:choose>
 								</clay:col>
@@ -175,7 +175,7 @@ renderResponse.setTitle(journalTranslateDisplayContext.getTitle());
 								>
 
 									<%
-									String id = "infoField--" + infoField.getName() + "--";
+									String id = "infoField--" + infoField.getUniqueId() + "--";
 									String targetContent = journalTranslateDisplayContext.getTargetStringValue(infoField, journalTranslateDisplayContext.getTargetLocale());
 									%>
 

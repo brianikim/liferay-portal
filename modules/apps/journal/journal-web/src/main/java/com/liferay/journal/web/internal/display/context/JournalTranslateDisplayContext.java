@@ -198,7 +198,8 @@ public class JournalTranslateDisplayContext {
 
 	public String getSourceStringValue(InfoField infoField, Locale locale) {
 		InfoFieldValue<Object> infoFieldValue =
-			_sourceInfoItemFieldValues.getInfoFieldValue(infoField.getName());
+			_sourceInfoItemFieldValues.getInfoFieldValue(
+				infoField.getUniqueId());
 
 		if (infoFieldValue != null) {
 			return GetterUtil.getString(infoFieldValue.getValue(locale));
@@ -217,7 +218,8 @@ public class JournalTranslateDisplayContext {
 
 	public String getTargetStringValue(InfoField infoField, Locale locale) {
 		InfoFieldValue<Object> infoFieldValue =
-			_targetInfoItemFieldValues.getInfoFieldValue(infoField.getName());
+			_targetInfoItemFieldValues.getInfoFieldValue(
+				infoField.getUniqueId());
 
 		if (infoFieldValue != null) {
 			return GetterUtil.getString(infoFieldValue.getValue(locale));
