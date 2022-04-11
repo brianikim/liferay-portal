@@ -155,8 +155,6 @@ public class SXPBlueprintSearchResultTest {
 			Collections.singletonMap(
 				LocaleUtil.US, RandomTestUtil.randomString()),
 			_serviceContext);
-
-		_testName = new TestName();
 	}
 
 	@Test
@@ -2203,7 +2201,9 @@ public class SXPBlueprintSearchResultTest {
 	private SXPBlueprintSearchRequestEnhancer
 		_sxpBlueprintSearchRequestEnhancer;
 
-	private TestName _testName;
+	@Rule
+	private TestName _testName = new TestName();
+
 	private User _user;
 
 	@Inject(
