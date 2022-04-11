@@ -20,6 +20,7 @@ import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.editor.configuration.BaseEditorConfigContributor;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
+import com.liferay.portal.kernel.portlet.LiferayPortletURL;
 import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactory;
 import com.liferay.portal.kernel.theme.PortletDisplay;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
@@ -55,8 +56,10 @@ public class BaseMentionsEditorConfigContributor
 			"resultTextLocator", "screenName"
 		);
 
-		PortletURL portletURL = getPortletURL(
+		LiferayPortletURL portletURL = (LiferayPortletURL)getPortletURL(
 			themeDisplay, requestBackedPortletURLFactory);
+
+		portletURL.setAnchor(false);
 
 		String source =
 			portletURL.toString() + "&" +
