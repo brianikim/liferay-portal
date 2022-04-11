@@ -15,35 +15,61 @@
 package com.liferay.layout.search.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.fragment.contributor.FragmentCollectionContributorTracker;
+import com.liferay.fragment.model.FragmentEntry;
+import com.liferay.fragment.model.FragmentEntryLink;
+import com.liferay.fragment.service.FragmentEntryLinkLocalService;
+import com.liferay.fragment.service.FragmentEntryLinkService;
+import com.liferay.layout.page.template.model.LayoutPageTemplateStructure;
+import com.liferay.layout.page.template.model.LayoutPageTemplateStructureRel;
+import com.liferay.layout.page.template.service.LayoutPageTemplateStructureLocalService;
+import com.liferay.layout.page.template.service.LayoutPageTemplateStructureRelLocalService;
+import com.liferay.layout.util.structure.LayoutStructure;
+import com.liferay.layout.util.structure.LayoutStructureItem;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.json.JSONFactoryUtil;
+import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutConstants;
+import com.liferay.portal.kernel.model.LayoutSet;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
+import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.settings.LocalizedValuesMap;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
+import com.liferay.portal.kernel.test.portlet.MockLiferayPortletRenderResponse;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil;
+import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.search.test.util.IndexerFixture;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
+import com.liferay.segments.constants.SegmentsExperienceConstants;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 
 /**
  * @author Ricardo Couso
@@ -93,15 +119,74 @@ public class LayoutPublishedSearchTest {
 
 		_layoutIndexerFixture.searchNoOne(name);
 
-		_publishLayout(layout);
+		_publishLayout(new MockHttpServletRequest(), layout);
 
 		_layoutIndexerFixture.searchOnlyOne(name);
 	}
 
-	private void _publishLayout(Layout layout) throws PortalException {
+	@Test
+	public void testPublishedPrivatePageSearch() throws Exception {
+		Layout layout = LayoutLocalServiceUtil.addLayout(
+			TestPropsValues.getUserId(), _group.getGroupId(), true,
+			LayoutConstants.DEFAULT_PARENT_LAYOUT_ID,
+			RandomTestUtil.randomString(), StringPool.BLANK, StringPool.BLANK,
+			LayoutConstants.TYPE_CONTENT, false, false, StringPool.BLANK,
+			ServiceContextTestUtil.getServiceContext(
+				TestPropsValues.getGroupId(), TestPropsValues.getUserId()));
+
+		String content = RandomTestUtil.randomString();
+
+		_updateDraftLayout(layout, content);
+
+		_layoutIndexerFixture.searchNoOne(content);
+
+		_publishLayout(_getHttpServletRequest(layout), layout);
+
+		_layoutIndexerFixture.searchOnlyOne(content);
+	}
+
+	private HttpServletRequest _getHttpServletRequest(Layout layout)
+		throws Exception {
+
+		MockHttpServletRequest httpServletRequest =
+			new MockHttpServletRequest();
+
+		httpServletRequest.setAttribute(
+			JavaConstants.JAVAX_PORTLET_RESPONSE,
+			new MockLiferayPortletRenderResponse());
+
+		ThemeDisplay themeDisplay = new ThemeDisplay();
+
+		themeDisplay.setCompany(
+			_companyLocalService.getCompany(layout.getCompanyId()));
+		themeDisplay.setLayout(layout);
+
+		LayoutSet layoutSet = _group.getPublicLayoutSet();
+
+		themeDisplay.setLayoutSet(layoutSet);
+		themeDisplay.setLookAndFeel(
+			layoutSet.getTheme(), layoutSet.getColorScheme());
+
+		themeDisplay.setRealUser(TestPropsValues.getUser());
+		themeDisplay.setRequest(httpServletRequest);
+		themeDisplay.setResponse(new MockHttpServletResponse());
+		themeDisplay.setScopeGroupId(_group.getGroupId());
+		themeDisplay.setUser(TestPropsValues.getUser());
+
+		httpServletRequest.setAttribute(WebKeys.THEME_DISPLAY, themeDisplay);
+
+		return httpServletRequest;
+	}
+
+	private void _publishLayout(
+			HttpServletRequest httpServletRequest, Layout layout)
+		throws PortalException {
+
 		ServiceContext serviceContext =
 			ServiceContextTestUtil.getServiceContext(
 				layout.getGroup(), TestPropsValues.getUserId());
+
+		serviceContext.setRequest(httpServletRequest);
 
 		ServiceContextThreadLocal.pushServiceContext(serviceContext);
 
@@ -118,10 +203,122 @@ public class LayoutPublishedSearchTest {
 		_layoutIndexerFixture = new IndexerFixture<>(Layout.class);
 	}
 
+	private void _updateDraftLayout(Layout layout, String value)
+		throws Exception {
+
+		FragmentEntry contributedFragmentEntry =
+			_fragmentCollectionContributorTracker.getFragmentEntry(
+				"BASIC_COMPONENT-heading");
+
+		Layout draftLayout = layout.fetchDraftLayout();
+
+		JSONObject inlineValueJSONObject = JSONUtil.put(
+			"com.liferay.fragment.entry.processor.editable." +
+				"EditableFragmentEntryProcessor",
+			JSONUtil.put(
+				"element-text",
+				JSONUtil.put(
+					"config", JSONFactoryUtil.createJSONObject()
+				).put(
+					"defaultValue", "default value"
+				).put(
+					layout.getDefaultLanguageId(), value
+				)));
+
+		FragmentEntryLink inlineFragmentEntryLink =
+			_fragmentEntryLinkService.addFragmentEntryLink(
+				_group.getGroupId(), 0,
+				contributedFragmentEntry.getFragmentEntryId(),
+				SegmentsExperienceConstants.ID_DEFAULT, draftLayout.getPlid(),
+				contributedFragmentEntry.getCss(),
+				contributedFragmentEntry.getHtml(),
+				contributedFragmentEntry.getJs(),
+				contributedFragmentEntry.getConfiguration(),
+				inlineValueJSONObject.toString(), StringPool.BLANK, 0,
+				contributedFragmentEntry.getFragmentEntryKey(),
+				ServiceContextTestUtil.getServiceContext(_group.getGroupId()));
+
+		LayoutPageTemplateStructure draftLayoutPageTemplateStructure =
+			_layoutPageTemplateStructureLocalService.
+				fetchLayoutPageTemplateStructure(
+					draftLayout.getGroupId(), draftLayout.getPlid());
+
+		if (draftLayoutPageTemplateStructure == null) {
+			LayoutPageTemplateStructure layoutPageTemplateStructure =
+				_layoutPageTemplateStructureLocalService.
+					fetchLayoutPageTemplateStructure(
+						layout.getGroupId(), layout.getPlid());
+
+			if (layoutPageTemplateStructure != null) {
+				_layoutPageTemplateStructureLocalService.
+					deleteLayoutPageTemplateStructure(
+						layoutPageTemplateStructure);
+			}
+
+			_fragmentEntryLinkLocalService.
+				deleteLayoutPageTemplateEntryFragmentEntryLinks(
+					layout.getGroupId(), layout.getPlid());
+
+			draftLayoutPageTemplateStructure =
+				_layoutPageTemplateStructureLocalService.
+					rebuildLayoutPageTemplateStructure(
+						draftLayout.getGroupId(), draftLayout.getPlid());
+		}
+
+		LayoutPageTemplateStructureRel layoutPageTemplateStructureRel =
+			_layoutPageTemplateStructureRelLocalService.
+				fetchLayoutPageTemplateStructureRel(
+					draftLayoutPageTemplateStructure.
+						getLayoutPageTemplateStructureId(),
+					SegmentsExperienceConstants.ID_DEFAULT);
+
+		LayoutStructure layoutStructure = LayoutStructure.of(
+			layoutPageTemplateStructureRel.getData());
+
+		LayoutStructureItem rowStyledLayoutStructureItem =
+			layoutStructure.addRowStyledLayoutStructureItem(
+				layoutStructure.getMainItemId(), 0, 1);
+
+		LayoutStructureItem columnLayoutStructureItem =
+			layoutStructure.addColumnLayoutStructureItem(
+				rowStyledLayoutStructureItem.getItemId(), 0);
+
+		layoutStructure.addFragmentStyledLayoutStructureItem(
+			inlineFragmentEntryLink.getFragmentEntryLinkId(),
+			columnLayoutStructureItem.getItemId(), 0);
+
+		_layoutPageTemplateStructureLocalService.
+			updateLayoutPageTemplateStructureData(
+				_group.getGroupId(), draftLayout.getPlid(),
+				SegmentsExperienceConstants.ID_DEFAULT,
+				layoutStructure.toString());
+	}
+
+	@Inject
+	private CompanyLocalService _companyLocalService;
+
+	@Inject
+	private FragmentCollectionContributorTracker
+		_fragmentCollectionContributorTracker;
+
+	@Inject
+	private FragmentEntryLinkLocalService _fragmentEntryLinkLocalService;
+
+	@Inject
+	private FragmentEntryLinkService _fragmentEntryLinkService;
+
 	@DeleteAfterTestRun
 	private Group _group;
 
 	private IndexerFixture<Layout> _layoutIndexerFixture;
+
+	@Inject
+	private LayoutPageTemplateStructureLocalService
+		_layoutPageTemplateStructureLocalService;
+
+	@Inject
+	private LayoutPageTemplateStructureRelLocalService
+		_layoutPageTemplateStructureRelLocalService;
 
 	@Inject(filter = "mvc.command.name=/content_layout/publish_layout")
 	private MVCActionCommand _mvcActionCommand;
