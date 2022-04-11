@@ -637,7 +637,8 @@ public class ProductResourceImpl
 						updateCPDefinitionSpecificationOptionValue(
 							_cpDefinitionSpecificationOptionValueService,
 							cpDefinitionSpecificationOptionValue,
-							productSpecification, serviceContext);
+							_cpSpecificationOptionService, productSpecification,
+							serviceContext);
 				}
 			}
 		}
