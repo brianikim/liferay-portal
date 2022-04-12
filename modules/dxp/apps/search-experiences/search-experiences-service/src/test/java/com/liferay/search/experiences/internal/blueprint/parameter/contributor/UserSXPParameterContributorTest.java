@@ -81,10 +81,14 @@ public class UserSXPParameterContributorTest {
 	public void setUp() throws Exception {
 		MockitoAnnotations.initMocks(this);
 
-		_setUpLanguage();
-		_setUpUser();
+		_mockLanguage();
+		_mockUser();
 
-		_setUpSearchContext();
+		_searchContext.setAttribute(
+			"search.experiences.scope.group.id", RandomTestUtil.randomLong());
+		_searchContext.setKeywords(StringPool.BLANK);
+		_searchContext.setLocale(_locale);
+		_searchContext.setUserId(_user.getUserId());
 	}
 
 	@Test
@@ -822,7 +826,7 @@ public class UserSXPParameterContributorTest {
 		return array;
 	}
 
-	private void _setUpLanguage() {
+	private void _mockLanguage() {
 		Mockito.doReturn(
 			_locale.toString()
 		).when(
@@ -832,17 +836,7 @@ public class UserSXPParameterContributorTest {
 		);
 	}
 
-	private void _setUpSearchContext() {
-		_searchContext = new SearchContext();
-
-		_searchContext.setAttribute(
-			"search.experiences.scope.group.id", RandomTestUtil.randomLong());
-		_searchContext.setKeywords(StringPool.BLANK);
-		_searchContext.setLocale(_locale);
-		_searchContext.setUserId(_user.getUserId());
-	}
-
-	private void _setUpUser() throws Exception {
+	private void _mockUser() throws Exception {
 		Date date = new Date();
 		long userId = RandomTestUtil.randomLong();
 
@@ -1046,7 +1040,7 @@ public class UserSXPParameterContributorTest {
 	private Language _language;
 
 	private final Locale _locale = LocaleUtil.US;
-	private SearchContext _searchContext;
+	private SearchContext _searchContext = new SearchContext();
 	private final Set<SXPParameter> _sxpParameters = new HashSet<>();
 
 	@Mock
