@@ -52,7 +52,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -658,27 +657,17 @@ public class UserSXPParameterContributorTest {
 	}
 
 	private boolean _exists(
-		String name, UnsafePredicate<Object, Exception> unsafePredicate) {
+			String name, UnsafePredicate<Object, Exception> unsafePredicate)
+		throws Exception {
 
-		Stream<SXPParameter> stream = _sxpParameters.stream();
+		for (SXPParameter sxpParameter : _sxpParameters) {
+			if (name.equals(sxpParameter.getName()) &&
+				unsafePredicate.test(sxpParameter.getValue())) {
 
-		if (stream.anyMatch(
-				sxpParameter -> {
-					try {
-						if (name.equals(sxpParameter.getName()) &&
-							unsafePredicate.test(sxpParameter.getValue())) {
+				return true;
+			}
 
-							return true;
-						}
-
-						return false;
-					}
-					catch (Exception exception) {
-						throw new RuntimeException(exception);
-					}
-				})) {
-
-			return true;
+			return false;
 		}
 
 		return false;
