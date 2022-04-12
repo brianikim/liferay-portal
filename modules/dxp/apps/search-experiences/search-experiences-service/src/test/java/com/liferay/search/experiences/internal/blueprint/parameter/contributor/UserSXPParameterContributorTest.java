@@ -112,6 +112,11 @@ public class UserSXPParameterContributorTest {
 	}
 
 	@Test
+	public void testAge() throws Exception {
+		_testSXPParameter(value -> (int)value == 0, "user.age");
+	}
+
+	@Test
 	public void testBirthday() throws Exception {
 		_testSXPParameter(
 			value -> value.equals(_user.getBirthday()), "user.birthday");
@@ -495,11 +500,6 @@ public class UserSXPParameterContributorTest {
 	}
 
 	@Test
-	public void testAge() throws Exception {
-		_testSXPParameter(value -> (int)value == 0, "user.age");
-	}
-
-	@Test
 	public void testShortArrayExpandoAttribute() throws Exception {
 		ExpandoValue expandoValue = Mockito.mock(ExpandoValue.class);
 
@@ -746,9 +746,8 @@ public class UserSXPParameterContributorTest {
 		return segmentsEntryRetriever;
 	}
 
-	private UserGroupGroupRoleLocalService
-		_mockUserGroupGroupRoleLocalService(
-			List<UserGroupGroupRole> userGroupGroupRoles) {
+	private UserGroupGroupRoleLocalService _mockUserGroupGroupRoleLocalService(
+		List<UserGroupGroupRole> userGroupGroupRoles) {
 
 		UserGroupGroupRoleLocalService userGroupGroupRoleLocalService =
 			Mockito.mock(UserGroupGroupRoleLocalService.class);
@@ -1045,7 +1044,7 @@ public class UserSXPParameterContributorTest {
 	@Mock
 	private Language _language;
 
-	private Locale _locale = LocaleUtil.US;
+	private final Locale _locale = LocaleUtil.US;
 	private SearchContext _searchContext;
 	private final Set<SXPParameter> _sxpParameters = new HashSet<>();
 
