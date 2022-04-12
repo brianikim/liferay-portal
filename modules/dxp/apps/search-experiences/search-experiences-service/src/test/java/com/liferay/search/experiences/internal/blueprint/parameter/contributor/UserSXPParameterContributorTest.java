@@ -495,7 +495,7 @@ public class UserSXPParameterContributorTest {
 	}
 
 	@Test
-	public void testsAge() throws Exception {
+	public void testAge() throws Exception {
 		_testSXPParameter(value -> (int)value == 0, "user.age");
 	}
 
