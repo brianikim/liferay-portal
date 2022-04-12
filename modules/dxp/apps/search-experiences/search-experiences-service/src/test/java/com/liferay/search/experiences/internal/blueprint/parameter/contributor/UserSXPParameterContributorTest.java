@@ -839,7 +839,7 @@ public class UserSXPParameterContributorTest {
 		_searchContext.setAttribute(
 			"search.experiences.scope.group.id", RandomTestUtil.randomLong());
 		_searchContext.setKeywords(StringPool.BLANK);
-		_searchContext.setLocale(LocaleUtil.US);
+		_searchContext.setLocale(_locale);
 		_searchContext.setUserId(_user.getUserId());
 	}
 
