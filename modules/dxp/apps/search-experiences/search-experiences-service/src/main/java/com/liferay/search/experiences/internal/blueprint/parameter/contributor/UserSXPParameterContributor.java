@@ -74,7 +74,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -136,61 +135,53 @@ public class UserSXPParameterContributor implements SXPParameterContributor {
 		getSXPParameterContributorDefinitions(long companyId, Locale locale) {
 
 		List<SXPParameterContributorDefinition> sxpParameterDefinitions =
-			new ArrayList<>(
-				Arrays.asList(
-					new SXPParameterContributorDefinition(
-						LongArraySXPParameter.class, "active-segment-entry-ids",
-						"user.active_segment_entry_ids"),
-					new SXPParameterContributorDefinition(
-						IntegerSXPParameter.class, "age", "user.age"),
-					new SXPParameterContributorDefinition(
-						DateSXPParameter.class, "birthday", "user.birthday"),
-					new SXPParameterContributorDefinition(
-						DateSXPParameter.class, "create-date",
-						"user.create_date"),
-					new SXPParameterContributorDefinition(
-						LongArraySXPParameter.class, "current-site-role-ids",
-						"user.current_site_role_ids"),
-					new SXPParameterContributorDefinition(
-						StringSXPParameter.class, "email-domain",
-						"user.email_domain"),
-					new SXPParameterContributorDefinition(
-						StringSXPParameter.class, "first-name",
-						"user.first_name"),
-					new SXPParameterContributorDefinition(
-						StringSXPParameter.class, "full-name",
-						"user.full_name"),
-					new SXPParameterContributorDefinition(
-						LongArraySXPParameter.class, "group-ids",
-						"user.group_ids"),
-					new SXPParameterContributorDefinition(
-						LongSXPParameter.class, "user-id", "user.id"),
-					new SXPParameterContributorDefinition(
-						BooleanSXPParameter.class, "is-female",
-						"user.is_female"),
-					new SXPParameterContributorDefinition(
-						BooleanSXPParameter.class, "is-gender-x",
-						"user.is_gender_x"),
-					new SXPParameterContributorDefinition(
-						BooleanSXPParameter.class, "is-male", "user.is_male"),
-					new SXPParameterContributorDefinition(
-						BooleanSXPParameter.class, "is-signed-in",
-						"user.is_signed_in"),
-					new SXPParameterContributorDefinition(
-						StringSXPParameter.class, "job-title",
-						"user.job_title"),
-					new SXPParameterContributorDefinition(
-						StringSXPParameter.class, "language-id",
-						"user.language_id"),
-					new SXPParameterContributorDefinition(
-						StringSXPParameter.class, "last-name",
-						"user.last_name"),
-					new SXPParameterContributorDefinition(
-						LongArraySXPParameter.class, "regular-role-ids",
-						"user.regular_role_ids"),
-					new SXPParameterContributorDefinition(
-						LongArraySXPParameter.class, "user-group-ids",
-						"user.user_group_ids")));
+			ListUtil.fromArray(
+				new SXPParameterContributorDefinition(
+					LongArraySXPParameter.class, "active-segment-entry-ids",
+					"user.active_segment_entry_ids"),
+				new SXPParameterContributorDefinition(
+					IntegerSXPParameter.class, "age", "user.age"),
+				new SXPParameterContributorDefinition(
+					DateSXPParameter.class, "birthday", "user.birthday"),
+				new SXPParameterContributorDefinition(
+					DateSXPParameter.class, "create-date", "user.create_date"),
+				new SXPParameterContributorDefinition(
+					LongArraySXPParameter.class, "current-site-role-ids",
+					"user.current_site_role_ids"),
+				new SXPParameterContributorDefinition(
+					StringSXPParameter.class, "email-domain",
+					"user.email_domain"),
+				new SXPParameterContributorDefinition(
+					StringSXPParameter.class, "first-name", "user.first_name"),
+				new SXPParameterContributorDefinition(
+					StringSXPParameter.class, "full-name", "user.full_name"),
+				new SXPParameterContributorDefinition(
+					LongArraySXPParameter.class, "group-ids", "user.group_ids"),
+				new SXPParameterContributorDefinition(
+					LongSXPParameter.class, "user-id", "user.id"),
+				new SXPParameterContributorDefinition(
+					BooleanSXPParameter.class, "is-female", "user.is_female"),
+				new SXPParameterContributorDefinition(
+					BooleanSXPParameter.class, "is-gender-x",
+					"user.is_gender_x"),
+				new SXPParameterContributorDefinition(
+					BooleanSXPParameter.class, "is-male", "user.is_male"),
+				new SXPParameterContributorDefinition(
+					BooleanSXPParameter.class, "is-signed-in",
+					"user.is_signed_in"),
+				new SXPParameterContributorDefinition(
+					StringSXPParameter.class, "job-title", "user.job_title"),
+				new SXPParameterContributorDefinition(
+					StringSXPParameter.class, "language-id",
+					"user.language_id"),
+				new SXPParameterContributorDefinition(
+					StringSXPParameter.class, "last-name", "user.last_name"),
+				new SXPParameterContributorDefinition(
+					LongArraySXPParameter.class, "regular-role-ids",
+					"user.regular_role_ids"),
+				new SXPParameterContributorDefinition(
+					LongArraySXPParameter.class, "user-group-ids",
+					"user.user_group_ids"));
 
 		return _addExpandoSXPParameterDefinitions(
 			companyId, locale, sxpParameterDefinitions);

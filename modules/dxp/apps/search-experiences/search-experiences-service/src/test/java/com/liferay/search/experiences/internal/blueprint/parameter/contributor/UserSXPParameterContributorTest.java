@@ -1049,7 +1049,7 @@ public class UserSXPParameterContributorTest {
 
 	private Locale _locale;
 	private SearchContext _searchContext;
-	private Set<SXPParameter> _sxpParameters = new HashSet<>();
+	private final Set<SXPParameter> _sxpParameters = new HashSet<>();
 
 	@Mock
 	private User _user;
