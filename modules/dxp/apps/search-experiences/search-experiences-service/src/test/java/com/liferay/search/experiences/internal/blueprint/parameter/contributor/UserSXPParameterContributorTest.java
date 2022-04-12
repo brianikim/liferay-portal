@@ -92,14 +92,14 @@ public class UserSXPParameterContributorTest {
 		long[] segmentsEntryIds = _randomLongArray(2);
 
 		_userSXPParameterContributor = new UserSXPParameterContributor(
-			_createExpandoColumnLocalService(Collections.emptyList()),
-			_createExpandoValueLocalService(Collections.emptyList()), _language,
-			_createRoleLocalService(Collections.emptyList()),
-			_createSegmentsEntryRetriever(segmentsEntryIds),
-			_createUserGroupGroupRoleLocalService(Collections.emptyList()),
-			_createUserGroupLocalService(Collections.emptyList()),
-			_createUserGroupRoleLocalService(Collections.emptyList()),
-			_createUserLocalService());
+			_mockExpandoColumnLocalService(Collections.emptyList()),
+			_mockExpandoValueLocalService(Collections.emptyList()), _language,
+			_mockRoleLocalService(Collections.emptyList()),
+			_mockSegmentsEntryRetriever(segmentsEntryIds),
+			_mockUserGroupGroupRoleLocalService(Collections.emptyList()),
+			_mockUserGroupLocalService(Collections.emptyList()),
+			_mockUserGroupRoleLocalService(Collections.emptyList()),
+			_mockUserLocalService());
 
 		_userSXPParameterContributor.contribute(
 			_exceptionListener, _searchContext, null, _sxpParameters);
@@ -177,15 +177,15 @@ public class UserSXPParameterContributorTest {
 		).getRoleId();
 
 		_userSXPParameterContributor = new UserSXPParameterContributor(
-			_createExpandoColumnLocalService(Collections.emptyList()),
-			_createExpandoValueLocalService(Collections.emptyList()), _language,
-			_createRoleLocalService(Collections.emptyList()),
-			_createSegmentsEntryRetriever(new long[0]),
-			_createUserGroupGroupRoleLocalService(Collections.emptyList()),
-			_createUserGroupLocalService(Collections.emptyList()),
-			_createUserGroupRoleLocalService(
+			_mockExpandoColumnLocalService(Collections.emptyList()),
+			_mockExpandoValueLocalService(Collections.emptyList()), _language,
+			_mockRoleLocalService(Collections.emptyList()),
+			_mockSegmentsEntryRetriever(new long[0]),
+			_mockUserGroupGroupRoleLocalService(Collections.emptyList()),
+			_mockUserGroupLocalService(Collections.emptyList()),
+			_mockUserGroupRoleLocalService(
 				Arrays.asList(userGroupRole1, userGroupRole2)),
-			_createUserLocalService());
+			_mockUserLocalService());
 
 		_userSXPParameterContributor.contribute(
 			_exceptionListener, _searchContext, null, _sxpParameters);
@@ -634,14 +634,14 @@ public class UserSXPParameterContributorTest {
 		).getUserGroupId();
 
 		_userSXPParameterContributor = new UserSXPParameterContributor(
-			_createExpandoColumnLocalService(Collections.emptyList()),
-			_createExpandoValueLocalService(Collections.emptyList()), _language,
-			_createRoleLocalService(Collections.emptyList()),
-			_createSegmentsEntryRetriever(new long[0]),
-			_createUserGroupGroupRoleLocalService(Collections.emptyList()),
-			_createUserGroupLocalService(Arrays.asList(userGroup1, userGroup2)),
-			_createUserGroupRoleLocalService(Collections.emptyList()),
-			_createUserLocalService());
+			_mockExpandoColumnLocalService(Collections.emptyList()),
+			_mockExpandoValueLocalService(Collections.emptyList()), _language,
+			_mockRoleLocalService(Collections.emptyList()),
+			_mockSegmentsEntryRetriever(new long[0]),
+			_mockUserGroupGroupRoleLocalService(Collections.emptyList()),
+			_mockUserGroupLocalService(Arrays.asList(userGroup1, userGroup2)),
+			_mockUserGroupRoleLocalService(Collections.emptyList()),
+			_mockUserLocalService());
 
 		_userSXPParameterContributor.contribute(
 			_exceptionListener, _searchContext, null, _sxpParameters);
@@ -653,7 +653,7 @@ public class UserSXPParameterContributorTest {
 					ArrayUtils.toPrimitive((Long[])value), groupIds)));
 	}
 
-	private ExpandoColumn _createExpandoColumn(
+	private ExpandoColumn _mockExpandoColumn(
 		long columnId, String name, int type) {
 
 		ExpandoColumn expandoColumn = Mockito.mock(ExpandoColumn.class);
@@ -679,7 +679,7 @@ public class UserSXPParameterContributorTest {
 		return expandoColumn;
 	}
 
-	private ExpandoColumnLocalService _createExpandoColumnLocalService(
+	private ExpandoColumnLocalService _mockExpandoColumnLocalService(
 		List<ExpandoColumn> expandoColumns) {
 
 		ExpandoColumnLocalService expandoColumnLocalService = Mockito.mock(
@@ -696,7 +696,7 @@ public class UserSXPParameterContributorTest {
 		return expandoColumnLocalService;
 	}
 
-	private ExpandoValueLocalService _createExpandoValueLocalService(
+	private ExpandoValueLocalService _mockExpandoValueLocalService(
 		List<ExpandoValue> expandoValues) {
 
 		ExpandoValueLocalService expandoValueLocalService = Mockito.mock(
@@ -714,7 +714,7 @@ public class UserSXPParameterContributorTest {
 		return expandoValueLocalService;
 	}
 
-	private RoleLocalService _createRoleLocalService(List<Role> roles) {
+	private RoleLocalService _mockRoleLocalService(List<Role> roles) {
 		RoleLocalService roleLocalService = Mockito.mock(
 			RoleLocalService.class);
 
@@ -729,7 +729,7 @@ public class UserSXPParameterContributorTest {
 		return roleLocalService;
 	}
 
-	private SegmentsEntryRetriever _createSegmentsEntryRetriever(
+	private SegmentsEntryRetriever _mockSegmentsEntryRetriever(
 		long[] segmentsEntryIds) {
 
 		SegmentsEntryRetriever segmentsEntryRetriever = Mockito.mock(
@@ -747,7 +747,7 @@ public class UserSXPParameterContributorTest {
 	}
 
 	private UserGroupGroupRoleLocalService
-		_createUserGroupGroupRoleLocalService(
+		_mockUserGroupGroupRoleLocalService(
 			List<UserGroupGroupRole> userGroupGroupRoles) {
 
 		UserGroupGroupRoleLocalService userGroupGroupRoleLocalService =
@@ -764,7 +764,7 @@ public class UserSXPParameterContributorTest {
 		return userGroupGroupRoleLocalService;
 	}
 
-	private UserGroupLocalService _createUserGroupLocalService(
+	private UserGroupLocalService _mockUserGroupLocalService(
 		List<UserGroup> userGroups) {
 
 		UserGroupLocalService userGroupLocalService = Mockito.mock(
@@ -781,7 +781,7 @@ public class UserSXPParameterContributorTest {
 		return userGroupLocalService;
 	}
 
-	private UserGroupRoleLocalService _createUserGroupRoleLocalService(
+	private UserGroupRoleLocalService _mockUserGroupRoleLocalService(
 		List<UserGroupRole> userGroupRoles) {
 
 		UserGroupRoleLocalService userGroupRoleLocalService = Mockito.mock(
@@ -798,7 +798,7 @@ public class UserSXPParameterContributorTest {
 		return userGroupRoleLocalService;
 	}
 
-	private UserLocalService _createUserLocalService() {
+	private UserLocalService _mockUserLocalService() {
 		UserLocalService userLocalService = Mockito.mock(
 			UserLocalService.class);
 
@@ -979,26 +979,26 @@ public class UserSXPParameterContributorTest {
 		).getColumnId();
 
 		_userSXPParameterContributor = new UserSXPParameterContributor(
-			_createExpandoColumnLocalService(
+			_mockExpandoColumnLocalService(
 				new ArrayList<ExpandoColumn>() {
 					{
 						add(
-							_createExpandoColumn(
+							_mockExpandoColumn(
 								columnId, expandoAttributeName, type));
 					}
 				}),
-			_createExpandoValueLocalService(
+			_mockExpandoValueLocalService(
 				new ArrayList<ExpandoValue>() {
 					{
 						add(expandoValue);
 					}
 				}),
-			_language, _createRoleLocalService(Collections.emptyList()),
-			_createSegmentsEntryRetriever(new long[0]),
-			_createUserGroupGroupRoleLocalService(Collections.emptyList()),
-			_createUserGroupLocalService(Collections.emptyList()),
-			_createUserGroupRoleLocalService(Collections.emptyList()),
-			_createUserLocalService());
+			_language, _mockRoleLocalService(Collections.emptyList()),
+			_mockSegmentsEntryRetriever(new long[0]),
+			_mockUserGroupGroupRoleLocalService(Collections.emptyList()),
+			_mockUserGroupLocalService(Collections.emptyList()),
+			_mockUserGroupRoleLocalService(Collections.emptyList()),
+			_mockUserLocalService());
 
 		_userSXPParameterContributor.contribute(
 			_exceptionListener, _searchContext, null, _sxpParameters);
@@ -1023,14 +1023,14 @@ public class UserSXPParameterContributorTest {
 		throws Exception {
 
 		_userSXPParameterContributor = new UserSXPParameterContributor(
-			_createExpandoColumnLocalService(Collections.emptyList()),
-			_createExpandoValueLocalService(Collections.emptyList()), _language,
-			_createRoleLocalService(Collections.emptyList()),
-			_createSegmentsEntryRetriever(new long[0]),
-			_createUserGroupGroupRoleLocalService(Collections.emptyList()),
-			_createUserGroupLocalService(Collections.emptyList()),
-			_createUserGroupRoleLocalService(Collections.emptyList()),
-			_createUserLocalService());
+			_mockExpandoColumnLocalService(Collections.emptyList()),
+			_mockExpandoValueLocalService(Collections.emptyList()), _language,
+			_mockRoleLocalService(Collections.emptyList()),
+			_mockSegmentsEntryRetriever(new long[0]),
+			_mockUserGroupGroupRoleLocalService(Collections.emptyList()),
+			_mockUserGroupLocalService(Collections.emptyList()),
+			_mockUserGroupRoleLocalService(Collections.emptyList()),
+			_mockUserLocalService());
 
 		_userSXPParameterContributor.contribute(
 			_exceptionListener, _searchContext, null, _sxpParameters);
