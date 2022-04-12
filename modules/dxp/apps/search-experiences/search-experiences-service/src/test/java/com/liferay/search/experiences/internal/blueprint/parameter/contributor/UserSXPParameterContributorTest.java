@@ -657,6 +657,33 @@ public class UserSXPParameterContributorTest {
 					ArrayUtils.toPrimitive((Long[])value), groupIds)));
 	}
 
+	private boolean _exists(
+		String name, UnsafePredicate<Object, Exception> unsafePredicate) {
+
+		Stream<SXPParameter> stream = _sxpParameters.stream();
+
+		if (stream.anyMatch(
+				sxpParameter -> {
+					try {
+						if (name.equals(sxpParameter.getName()) &&
+							unsafePredicate.test(sxpParameter.getValue())) {
+
+							return true;
+						}
+
+						return false;
+					}
+					catch (Exception exception) {
+						throw new RuntimeException(exception);
+					}
+				})) {
+
+			return true;
+		}
+
+		return false;
+	}
+
 	private ExpandoColumn _mockExpandoColumn(
 		long columnId, String name, int type) {
 
@@ -718,6 +745,16 @@ public class UserSXPParameterContributorTest {
 		return expandoValueLocalService;
 	}
 
+	private void _mockLanguage() {
+		Mockito.doReturn(
+			_locale.toString()
+		).when(
+			_language
+		).getLanguageId(
+			Matchers.any(Locale.class)
+		);
+	}
+
 	private RoleLocalService _mockRoleLocalService(List<Role> roles) {
 		RoleLocalService roleLocalService = Mockito.mock(
 			RoleLocalService.class);
@@ -748,92 +785,6 @@ public class UserSXPParameterContributorTest {
 		);
 
 		return segmentsEntryRetriever;
-	}
-
-	private UserGroupGroupRoleLocalService _mockUserGroupGroupRoleLocalService(
-		List<UserGroupGroupRole> userGroupGroupRoles) {
-
-		UserGroupGroupRoleLocalService userGroupGroupRoleLocalService =
-			Mockito.mock(UserGroupGroupRoleLocalService.class);
-
-		Mockito.doReturn(
-			userGroupGroupRoles
-		).when(
-			userGroupGroupRoleLocalService
-		).getUserGroupGroupRolesByUser(
-			Matchers.anyLong(), Matchers.anyLong()
-		);
-
-		return userGroupGroupRoleLocalService;
-	}
-
-	private UserGroupLocalService _mockUserGroupLocalService(
-		List<UserGroup> userGroups) {
-
-		UserGroupLocalService userGroupLocalService = Mockito.mock(
-			UserGroupLocalService.class);
-
-		Mockito.doReturn(
-			userGroups
-		).when(
-			userGroupLocalService
-		).getUserUserGroups(
-			Matchers.anyLong()
-		);
-
-		return userGroupLocalService;
-	}
-
-	private UserGroupRoleLocalService _mockUserGroupRoleLocalService(
-		List<UserGroupRole> userGroupRoles) {
-
-		UserGroupRoleLocalService userGroupRoleLocalService = Mockito.mock(
-			UserGroupRoleLocalService.class);
-
-		Mockito.doReturn(
-			userGroupRoles
-		).when(
-			userGroupRoleLocalService
-		).getUserGroupRoles(
-			Matchers.anyLong()
-		);
-
-		return userGroupRoleLocalService;
-	}
-
-	private UserLocalService _mockUserLocalService() {
-		UserLocalService userLocalService = Mockito.mock(
-			UserLocalService.class);
-
-		Mockito.doReturn(
-			_user
-		).when(
-			userLocalService
-		).fetchUserById(
-			Matchers.anyLong()
-		);
-
-		return userLocalService;
-	}
-
-	private long[] _randomLongArray(int length) {
-		long[] array = new long[length];
-
-		for (int i = 0; i < length; i++) {
-			array[i] = RandomTestUtil.randomLong();
-		}
-
-		return array;
-	}
-
-	private void _mockLanguage() {
-		Mockito.doReturn(
-			_locale.toString()
-		).when(
-			_language
-		).getLanguageId(
-			Matchers.any(Locale.class)
-		);
 	}
 
 	private void _mockUser() throws Exception {
@@ -931,31 +882,80 @@ public class UserSXPParameterContributorTest {
 		).getUserId();
 	}
 
-	private boolean _exists(
-		String name, UnsafePredicate<Object, Exception> unsafePredicate) {
+	private UserGroupGroupRoleLocalService _mockUserGroupGroupRoleLocalService(
+		List<UserGroupGroupRole> userGroupGroupRoles) {
 
-		Stream<SXPParameter> stream = _sxpParameters.stream();
+		UserGroupGroupRoleLocalService userGroupGroupRoleLocalService =
+			Mockito.mock(UserGroupGroupRoleLocalService.class);
 
-		if (stream.anyMatch(
-				sxpParameter -> {
-					try {
-						if (name.equals(sxpParameter.getName()) &&
-							unsafePredicate.test(sxpParameter.getValue())) {
+		Mockito.doReturn(
+			userGroupGroupRoles
+		).when(
+			userGroupGroupRoleLocalService
+		).getUserGroupGroupRolesByUser(
+			Matchers.anyLong(), Matchers.anyLong()
+		);
 
-							return true;
-						}
+		return userGroupGroupRoleLocalService;
+	}
 
-						return false;
-					}
-					catch (Exception exception) {
-						throw new RuntimeException(exception);
-					}
-				})) {
+	private UserGroupLocalService _mockUserGroupLocalService(
+		List<UserGroup> userGroups) {
 
-			return true;
+		UserGroupLocalService userGroupLocalService = Mockito.mock(
+			UserGroupLocalService.class);
+
+		Mockito.doReturn(
+			userGroups
+		).when(
+			userGroupLocalService
+		).getUserUserGroups(
+			Matchers.anyLong()
+		);
+
+		return userGroupLocalService;
+	}
+
+	private UserGroupRoleLocalService _mockUserGroupRoleLocalService(
+		List<UserGroupRole> userGroupRoles) {
+
+		UserGroupRoleLocalService userGroupRoleLocalService = Mockito.mock(
+			UserGroupRoleLocalService.class);
+
+		Mockito.doReturn(
+			userGroupRoles
+		).when(
+			userGroupRoleLocalService
+		).getUserGroupRoles(
+			Matchers.anyLong()
+		);
+
+		return userGroupRoleLocalService;
+	}
+
+	private UserLocalService _mockUserLocalService() {
+		UserLocalService userLocalService = Mockito.mock(
+			UserLocalService.class);
+
+		Mockito.doReturn(
+			_user
+		).when(
+			userLocalService
+		).fetchUserById(
+			Matchers.anyLong()
+		);
+
+		return userLocalService;
+	}
+
+	private long[] _randomLongArray(int length) {
+		long[] array = new long[length];
+
+		for (int i = 0; i < length; i++) {
+			array[i] = RandomTestUtil.randomLong();
 		}
 
-		return false;
+		return array;
 	}
 
 	private void _testExpandoSXPParameter(
@@ -997,8 +997,7 @@ public class UserSXPParameterContributorTest {
 		_userSXPParameterContributor.contribute(
 			_exceptionListener, _searchContext, null, _sxpParameters);
 
-		Assert.assertTrue(
-			_exists(sxpParameterName, unsafePredicate));
+		Assert.assertTrue(_exists(sxpParameterName, unsafePredicate));
 	}
 
 	private void _testExpandoSXPParameter(
@@ -1029,8 +1028,7 @@ public class UserSXPParameterContributorTest {
 		_userSXPParameterContributor.contribute(
 			_exceptionListener, _searchContext, null, _sxpParameters);
 
-		Assert.assertTrue(
-			_exists(sxpParameterName, unsafePredicate));
+		Assert.assertTrue(_exists(sxpParameterName, unsafePredicate));
 	}
 
 	@Mock
@@ -1040,7 +1038,7 @@ public class UserSXPParameterContributorTest {
 	private Language _language;
 
 	private final Locale _locale = LocaleUtil.US;
-	private SearchContext _searchContext = new SearchContext();
+	private final SearchContext _searchContext = new SearchContext();
 	private final Set<SXPParameter> _sxpParameters = new HashSet<>();
 
 	@Mock
