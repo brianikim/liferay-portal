@@ -222,46 +222,50 @@ public class UserSXPParameterContributor implements SXPParameterContributor {
 				expandoValue.setData(expandoColumn.getDefaultData());
 			}
 
-			String parameterName = _getExpandoSXPParameterName(expandoColumn);
+			String expandoSXPParameterName = _getExpandoSXPParameterName(
+				expandoColumn);
 
 			int type = expandoColumn.getType();
 
 			if (type == ExpandoColumnConstants.BOOLEAN) {
 				sxpParameters.add(
 					new BooleanSXPParameter(
-						parameterName, true, expandoValue.getBoolean()));
+						expandoSXPParameterName, true,
+						expandoValue.getBoolean()));
 			}
 			else if (type == ExpandoColumnConstants.BOOLEAN_ARRAY) {
 				sxpParameters.add(
 					new BooleanArraySXPParameter(
-						parameterName, true,
+						expandoSXPParameterName, true,
 						ArrayUtils.toObject(expandoValue.getBooleanArray())));
 			}
 			else if (type == ExpandoColumnConstants.DATE) {
 				sxpParameters.add(
 					new DateSXPParameter(
-						parameterName, true, expandoValue.getDate()));
+						expandoSXPParameterName, true, expandoValue.getDate()));
 			}
 			else if (type == ExpandoColumnConstants.DOUBLE) {
 				sxpParameters.add(
 					new DoubleSXPParameter(
-						parameterName, true, expandoValue.getDouble()));
+						expandoSXPParameterName, true,
+						expandoValue.getDouble()));
 			}
 			else if (type == ExpandoColumnConstants.DOUBLE_ARRAY) {
 				sxpParameters.add(
 					new DoubleArraySXPParameter(
-						parameterName, true,
+						expandoSXPParameterName, true,
 						ArrayUtils.toObject(expandoValue.getDoubleArray())));
 			}
 			else if (type == ExpandoColumnConstants.FLOAT) {
 				sxpParameters.add(
 					new FloatSXPParameter(
-						parameterName, true, expandoValue.getFloat()));
+						expandoSXPParameterName, true,
+						expandoValue.getFloat()));
 			}
 			else if (type == ExpandoColumnConstants.FLOAT_ARRAY) {
 				sxpParameters.add(
 					new FloatArraySXPParameter(
-						parameterName, true,
+						expandoSXPParameterName, true,
 						ArrayUtils.toObject(expandoValue.getFloatArray())));
 			}
 			else if (type == ExpandoColumnConstants.GEOLOCATION) {
@@ -269,22 +273,23 @@ public class UserSXPParameterContributor implements SXPParameterContributor {
 
 				sxpParameters.add(
 					new DoubleSXPParameter(
-						parameterName + ".latitude", true,
+						expandoSXPParameterName + ".latitude", true,
 						jsonObject.getDouble("latitude")));
 				sxpParameters.add(
 					new DoubleSXPParameter(
-						parameterName + ".longitude", true,
+						expandoSXPParameterName + ".longitude", true,
 						jsonObject.getDouble("longitude")));
 			}
 			else if (type == ExpandoColumnConstants.INTEGER) {
 				sxpParameters.add(
 					new IntegerSXPParameter(
-						parameterName, true, expandoValue.getInteger()));
+						expandoSXPParameterName, true,
+						expandoValue.getInteger()));
 			}
 			else if (type == ExpandoColumnConstants.INTEGER_ARRAY) {
 				sxpParameters.add(
 					new IntegerArraySXPParameter(
-						parameterName, true,
+						expandoSXPParameterName, true,
 						IntStream.of(
 							expandoValue.getIntegerArray()
 						).boxed(
@@ -295,12 +300,12 @@ public class UserSXPParameterContributor implements SXPParameterContributor {
 			else if (type == ExpandoColumnConstants.LONG) {
 				sxpParameters.add(
 					new LongSXPParameter(
-						parameterName, true, expandoValue.getLong()));
+						expandoSXPParameterName, true, expandoValue.getLong()));
 			}
 			else if (type == ExpandoColumnConstants.LONG_ARRAY) {
 				sxpParameters.add(
 					new LongArraySXPParameter(
-						parameterName, true,
+						expandoSXPParameterName, true,
 						LongStream.of(
 							expandoValue.getLongArray()
 						).boxed(
@@ -311,18 +316,18 @@ public class UserSXPParameterContributor implements SXPParameterContributor {
 			else if (type == ExpandoColumnConstants.NUMBER) {
 				sxpParameters.add(
 					new StringSXPParameter(
-						parameterName, true, expandoValue.getData()));
+						expandoSXPParameterName, true, expandoValue.getData()));
 			}
 			else if (type == ExpandoColumnConstants.NUMBER_ARRAY) {
 				sxpParameters.add(
 					new StringArraySXPParameter(
-						parameterName, true,
+						expandoSXPParameterName, true,
 						StringUtil.split(expandoValue.getData())));
 			}
 			else if (type == ExpandoColumnConstants.SHORT) {
 				sxpParameters.add(
 					new IntegerSXPParameter(
-						parameterName, true,
+						expandoSXPParameterName, true,
 						GetterUtil.getInteger(expandoValue.getShort())));
 			}
 			else if (type == ExpandoColumnConstants.SHORT_ARRAY) {
@@ -336,23 +341,25 @@ public class UserSXPParameterContributor implements SXPParameterContributor {
 
 				sxpParameters.add(
 					new IntegerArraySXPParameter(
-						parameterName, true, integerArray));
+						expandoSXPParameterName, true, integerArray));
 			}
 			else if (type == ExpandoColumnConstants.STRING) {
 				sxpParameters.add(
 					new StringSXPParameter(
-						parameterName, true, expandoValue.getString()));
+						expandoSXPParameterName, true,
+						expandoValue.getString()));
 			}
 			else if (type == ExpandoColumnConstants.STRING_ARRAY) {
 				sxpParameters.add(
 					new StringArraySXPParameter(
-						parameterName, true, expandoValue.getStringArray()));
+						expandoSXPParameterName, true,
+						expandoValue.getStringArray()));
 			}
 			else if (type == ExpandoColumnConstants.STRING_ARRAY_LOCALIZED) {
 				sxpParameters.add(
 					new StringArraySXPParameter(
 						StringBundler.concat(
-							parameterName, StringPool.UNDERLINE,
+							expandoSXPParameterName, StringPool.UNDERLINE,
 							_language.getLanguageId(searchContext.getLocale())),
 						true,
 						expandoValue.getStringArray(
@@ -362,7 +369,7 @@ public class UserSXPParameterContributor implements SXPParameterContributor {
 				sxpParameters.add(
 					new StringSXPParameter(
 						StringBundler.concat(
-							parameterName, StringPool.UNDERLINE,
+							expandoSXPParameterName, StringPool.UNDERLINE,
 							_language.getLanguageId(searchContext.getLocale())),
 						true,
 						expandoValue.getString(searchContext.getLocale())));
@@ -582,6 +589,9 @@ public class UserSXPParameterContributor implements SXPParameterContributor {
 				continue;
 			}
 
+			String expandoSXPParameterName = _getExpandoSXPParameterName(
+				expandoColumn);
+
 			int type = expandoColumn.getType();
 
 			if (type == ExpandoColumnConstants.BOOLEAN) {
@@ -589,130 +599,128 @@ public class UserSXPParameterContributor implements SXPParameterContributor {
 					new SXPParameterContributorDefinition(
 						BooleanSXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn)));
+						expandoSXPParameterName));
 			}
 			else if (type == ExpandoColumnConstants.DATE) {
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						DateSXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn)));
+						expandoSXPParameterName));
 			}
 			else if (type == ExpandoColumnConstants.DOUBLE) {
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						DoubleSXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn)));
+						expandoSXPParameterName));
 			}
 			else if (type == ExpandoColumnConstants.DOUBLE_ARRAY) {
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						DoubleArraySXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn)));
+						expandoSXPParameterName));
 			}
 			else if (type == ExpandoColumnConstants.FLOAT) {
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						FloatSXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn)));
+						expandoSXPParameterName));
 			}
 			else if (type == ExpandoColumnConstants.FLOAT_ARRAY) {
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						FloatArraySXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn)));
+						expandoSXPParameterName));
 			}
 			else if (type == ExpandoColumnConstants.GEOLOCATION) {
-				String name = _getExpandoSXPParameterName(expandoColumn);
-
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						FloatSXPParameter.class,
 						StringBundler.concat(
 							expandoColumn.getDisplayName(locale), " (",
 							_language.get(locale, "latitude"), ")"),
-						name + ".latitude"));
+						expandoSXPParameterName + ".latitude"));
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						FloatSXPParameter.class,
 						StringBundler.concat(
 							expandoColumn.getDisplayName(locale), " (",
 							_language.get(locale, "longitude"), ")"),
-						name + ".longitude"));
+						expandoSXPParameterName + ".longitude"));
 			}
 			else if (type == ExpandoColumnConstants.INTEGER) {
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						IntegerSXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn)));
+						expandoSXPParameterName));
 			}
 			else if (type == ExpandoColumnConstants.INTEGER_ARRAY) {
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						IntegerArraySXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn)));
+						expandoSXPParameterName));
 			}
 			else if (type == ExpandoColumnConstants.LONG) {
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						LongSXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn)));
+						expandoSXPParameterName));
 			}
 			else if (type == ExpandoColumnConstants.LONG_ARRAY) {
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						LongArraySXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn)));
+						expandoSXPParameterName));
 			}
 			else if (type == ExpandoColumnConstants.NUMBER) {
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						StringSXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn)));
+						expandoSXPParameterName));
 			}
 			else if (type == ExpandoColumnConstants.NUMBER_ARRAY) {
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						StringArraySXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn)));
+						expandoSXPParameterName));
 			}
 			else if (type == ExpandoColumnConstants.SHORT) {
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						IntegerSXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn)));
+						expandoSXPParameterName));
 			}
 			else if (type == ExpandoColumnConstants.SHORT_ARRAY) {
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						IntegerArraySXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn)));
+						expandoSXPParameterName));
 			}
 			else if (type == ExpandoColumnConstants.STRING) {
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						StringSXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn)));
+						expandoSXPParameterName));
 			}
 			else if (type == ExpandoColumnConstants.STRING_ARRAY) {
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						StringArraySXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn)));
+						expandoSXPParameterName));
 			}
 			else if (type == ExpandoColumnConstants.STRING_ARRAY_LOCALIZED) {
 				sxpParameterContributorDefinitions.add(
