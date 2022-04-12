@@ -105,7 +105,7 @@ public class UserSXPParameterContributorTest {
 			_exceptionListener, _searchContext, null, _sxpParameters);
 
 		Assert.assertTrue(
-			_sxpParameterExists(
+			_exists(
 				"user.active_segment_entry_ids",
 				value -> Arrays.equals(
 					ArrayUtils.toPrimitive((Long[])value), segmentsEntryIds)));
@@ -196,7 +196,7 @@ public class UserSXPParameterContributorTest {
 			_exceptionListener, _searchContext, null, _sxpParameters);
 
 		Assert.assertTrue(
-			_sxpParameterExists(
+			_exists(
 				"user.current_site_role_ids",
 				value -> Arrays.equals(
 					ArrayUtils.toPrimitive((Long[])value), roleIds)));
@@ -647,7 +647,7 @@ public class UserSXPParameterContributorTest {
 			_exceptionListener, _searchContext, null, _sxpParameters);
 
 		Assert.assertTrue(
-			_sxpParameterExists(
+			_exists(
 				"user.user_group_ids",
 				value -> Arrays.equals(
 					ArrayUtils.toPrimitive((Long[])value), groupIds)));
@@ -936,7 +936,7 @@ public class UserSXPParameterContributorTest {
 		).getUserId();
 	}
 
-	private boolean _sxpParameterExists(
+	private boolean _exists(
 		String name, UnsafePredicate<Object, Exception> unsafePredicate) {
 
 		Stream<SXPParameter> stream = _sxpParameters.stream();
@@ -1003,7 +1003,7 @@ public class UserSXPParameterContributorTest {
 			_exceptionListener, _searchContext, null, _sxpParameters);
 
 		Assert.assertTrue(
-			_sxpParameterExists(sxpParameterName, unsafePredicate));
+			_exists(sxpParameterName, unsafePredicate));
 	}
 
 	private void _testExpandoSXPParameter(
@@ -1035,7 +1035,7 @@ public class UserSXPParameterContributorTest {
 			_exceptionListener, _searchContext, null, _sxpParameters);
 
 		Assert.assertTrue(
-			_sxpParameterExists(sxpParameterName, unsafePredicate));
+			_exists(sxpParameterName, unsafePredicate));
 	}
 
 	@Mock
