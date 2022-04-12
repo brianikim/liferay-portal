@@ -222,8 +222,7 @@ public class UserSXPParameterContributor implements SXPParameterContributor {
 				expandoValue.setData(expandoColumn.getDefaultData());
 			}
 
-			String parameterName = _getExpandoSXPParameterName(
-				expandoColumn.getName());
+			String parameterName = _getExpandoSXPParameterName(expandoColumn);
 
 			int type = expandoColumn.getType();
 
@@ -517,22 +516,23 @@ public class UserSXPParameterContributor implements SXPParameterContributor {
 		return emailAddress.substring(emailAddress.indexOf("@") + 1);
 	}
 
-	private String _getExpandoSXPParameterName(String columnName) {
+	private String _getExpandoSXPParameterName(ExpandoColumn expandoColumn) {
 		StringBundler sb = new StringBundler(2);
 
 		sb.append("user.custom.field.");
 		sb.append(
 			StringUtil.toLowerCase(
-				StringUtil.replace(columnName, StringPool.BLANK, "_")));
+				StringUtil.replace(
+					expandoColumn.getName(), StringPool.BLANK, "_")));
 
 		return sb.toString();
 	}
 
 	private String _getExpandoSXPParameterName(
-		String columnName, Locale locale) {
+		ExpandoColumn expandoColumn, Locale locale) {
 
 		return StringBundler.concat(
-			_getExpandoSXPParameterName(columnName), StringPool.UNDERLINE,
+			_getExpandoSXPParameterName(expandoColumn), StringPool.UNDERLINE,
 			_language.getLanguageId(locale));
 	}
 
@@ -589,46 +589,45 @@ public class UserSXPParameterContributor implements SXPParameterContributor {
 					new SXPParameterContributorDefinition(
 						BooleanSXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn.getName())));
+						_getExpandoSXPParameterName(expandoColumn)));
 			}
 			else if (type == ExpandoColumnConstants.DATE) {
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						DateSXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn.getName())));
+						_getExpandoSXPParameterName(expandoColumn)));
 			}
 			else if (type == ExpandoColumnConstants.DOUBLE) {
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						DoubleSXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn.getName())));
+						_getExpandoSXPParameterName(expandoColumn)));
 			}
 			else if (type == ExpandoColumnConstants.DOUBLE_ARRAY) {
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						DoubleArraySXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn.getName())));
+						_getExpandoSXPParameterName(expandoColumn)));
 			}
 			else if (type == ExpandoColumnConstants.FLOAT) {
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						FloatSXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn.getName())));
+						_getExpandoSXPParameterName(expandoColumn)));
 			}
 			else if (type == ExpandoColumnConstants.FLOAT_ARRAY) {
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						FloatArraySXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn.getName())));
+						_getExpandoSXPParameterName(expandoColumn)));
 			}
 			else if (type == ExpandoColumnConstants.GEOLOCATION) {
-				String name = _getExpandoSXPParameterName(
-					expandoColumn.getName());
+				String name = _getExpandoSXPParameterName(expandoColumn);
 
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
@@ -637,7 +636,6 @@ public class UserSXPParameterContributor implements SXPParameterContributor {
 							expandoColumn.getDisplayName(locale), " (",
 							_language.get(locale, "latitude"), ")"),
 						name + ".latitude"));
-
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						FloatSXPParameter.class,
@@ -651,70 +649,70 @@ public class UserSXPParameterContributor implements SXPParameterContributor {
 					new SXPParameterContributorDefinition(
 						IntegerSXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn.getName())));
+						_getExpandoSXPParameterName(expandoColumn)));
 			}
 			else if (type == ExpandoColumnConstants.INTEGER_ARRAY) {
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						IntegerArraySXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn.getName())));
+						_getExpandoSXPParameterName(expandoColumn)));
 			}
 			else if (type == ExpandoColumnConstants.LONG) {
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						LongSXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn.getName())));
+						_getExpandoSXPParameterName(expandoColumn)));
 			}
 			else if (type == ExpandoColumnConstants.LONG_ARRAY) {
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						LongArraySXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn.getName())));
+						_getExpandoSXPParameterName(expandoColumn)));
 			}
 			else if (type == ExpandoColumnConstants.NUMBER) {
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						StringSXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn.getName())));
+						_getExpandoSXPParameterName(expandoColumn)));
 			}
 			else if (type == ExpandoColumnConstants.NUMBER_ARRAY) {
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						StringArraySXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn.getName())));
+						_getExpandoSXPParameterName(expandoColumn)));
 			}
 			else if (type == ExpandoColumnConstants.SHORT) {
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						IntegerSXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn.getName())));
+						_getExpandoSXPParameterName(expandoColumn)));
 			}
 			else if (type == ExpandoColumnConstants.SHORT_ARRAY) {
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						IntegerArraySXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn.getName())));
+						_getExpandoSXPParameterName(expandoColumn)));
 			}
 			else if (type == ExpandoColumnConstants.STRING) {
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						StringSXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn.getName())));
+						_getExpandoSXPParameterName(expandoColumn)));
 			}
 			else if (type == ExpandoColumnConstants.STRING_ARRAY) {
 				sxpParameterContributorDefinitions.add(
 					new SXPParameterContributorDefinition(
 						StringArraySXPParameter.class,
 						expandoColumn.getDisplayName(locale),
-						_getExpandoSXPParameterName(expandoColumn.getName())));
+						_getExpandoSXPParameterName(expandoColumn)));
 			}
 			else if (type == ExpandoColumnConstants.STRING_ARRAY_LOCALIZED) {
 				sxpParameterContributorDefinitions.add(
@@ -723,8 +721,7 @@ public class UserSXPParameterContributor implements SXPParameterContributor {
 						StringBundler.concat(
 							expandoColumn.getDisplayName(locale), " (",
 							_language.get(locale, "localized"), ")"),
-						_getExpandoSXPParameterName(
-							expandoColumn.getName(), locale)));
+						_getExpandoSXPParameterName(expandoColumn, locale)));
 			}
 			else if (type == ExpandoColumnConstants.STRING_LOCALIZED) {
 				sxpParameterContributorDefinitions.add(
@@ -733,8 +730,7 @@ public class UserSXPParameterContributor implements SXPParameterContributor {
 						StringBundler.concat(
 							expandoColumn.getDisplayName(locale), " (",
 							_language.get(locale, "localized"), ")"),
-						_getExpandoSXPParameterName(
-							expandoColumn.getName(), locale)));
+						_getExpandoSXPParameterName(expandoColumn, locale)));
 			}
 		}
 
