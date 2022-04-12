@@ -82,7 +82,7 @@ public class UserSXPParameterContributorTest {
 		MockitoAnnotations.initMocks(this);
 
 		_setUpLanguage();
-		_setUpUser(RandomTestUtil.randomLong());
+		_setUpUser();
 
 		_setUpSearchContext();
 	}
@@ -842,8 +842,9 @@ public class UserSXPParameterContributorTest {
 		_searchContext.setUserId(_user.getUserId());
 	}
 
-	private void _setUpUser(long userId) throws Exception {
+	private void _setUpUser() throws Exception {
 		Date date = new Date();
+		long userId = RandomTestUtil.randomLong();
 
 		Mockito.doReturn(
 			date
