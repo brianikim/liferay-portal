@@ -201,11 +201,10 @@ public class UserSXPParameterContributor implements SXPParameterContributor {
 
 		PermissionChecker permissionChecker =
 			PermissionThreadLocal.getPermissionChecker();
-		boolean secure =
-			PropsValues.PERMISSIONS_CUSTOM_ATTRIBUTE_READ_CHECK_BY_DEFAULT;
 
 		for (ExpandoColumn expandoColumn : expandoColumns) {
-			if (secure &&
+			if (PropsValues.
+					PERMISSIONS_CUSTOM_ATTRIBUTE_READ_CHECK_BY_DEFAULT &&
 				!ExpandoColumnPermissionUtil.contains(
 					permissionChecker, companyId, User.class.getName(),
 					ExpandoTableConstants.DEFAULT_TABLE_NAME,
@@ -408,8 +407,6 @@ public class UserSXPParameterContributor implements SXPParameterContributor {
 				expandoValue.setData(expandoColumn.getDefaultData());
 			}
 
-			Locale locale = searchContext.getLocale();
-
 			String parameterName = _getExpandoSXPParameterName(
 				expandoColumn.getName());
 
@@ -542,16 +539,16 @@ public class UserSXPParameterContributor implements SXPParameterContributor {
 					new StringArraySXPParameter(
 						StringBundler.concat(
 							parameterName, StringPool.UNDERLINE,
-							_language.getLanguageId(locale)),
-						true, expandoValue.getStringArray(locale)));
+							_language.getLanguageId(searchContext.getLocale())),
+						true, expandoValue.getStringArray(searchContext.getLocale())));
 			}
 			else if (type == ExpandoColumnConstants.STRING_LOCALIZED) {
 				sxpParameters.add(
 					new StringSXPParameter(
 						StringBundler.concat(
 							parameterName, StringPool.UNDERLINE,
-							_language.getLanguageId(locale)),
-						true, expandoValue.getString(locale)));
+							_language.getLanguageId(searchContext.getLocale())),
+						true, expandoValue.getString(searchContext.getLocale())));
 			}
 		}
 	}
