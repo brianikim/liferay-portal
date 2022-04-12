@@ -75,10 +75,10 @@ import java.text.SimpleDateFormat;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -185,6 +185,373 @@ public class UserSXPParameterContributor implements SXPParameterContributor {
 				new SXPParameterContributorDefinition(
 					LongArraySXPParameter.class, "user-group-ids",
 					"user.user_group_ids")));
+	}
+
+	private void _addExpandoSXPParameters(
+			SearchContext searchContext, Set<SXPParameter> sxpParameters,
+			User user)
+		throws PortalException {
+
+		List<ExpandoColumn> expandoColumns =
+			_expandoColumnLocalService.getDefaultTableColumns(
+				searchContext.getCompanyId(), User.class.getName());
+
+		if (ListUtil.isEmpty(expandoColumns)) {
+			return;
+		}
+
+		Map<Long, ExpandoValue> expandoValues = new HashMap<>();
+
+		for (ExpandoValue expandoValue :
+				_expandoValueLocalService.getRowValues(
+					searchContext.getCompanyId(), User.class.getName(),
+					ExpandoTableConstants.DEFAULT_TABLE_NAME,
+					user.getPrimaryKey(), QueryUtil.ALL_POS,
+					QueryUtil.ALL_POS)) {
+
+			expandoValues.put(expandoValue.getColumnId(), expandoValue);
+		}
+
+		for (ExpandoColumn expandoColumn : expandoColumns) {
+			ExpandoValue expandoValue = expandoValues.get(
+				expandoColumn.getColumnId());
+
+			if (expandoValue == null) {
+				expandoValue = new ExpandoValueImpl();
+
+				expandoValue.setData(expandoColumn.getDefaultData());
+			}
+
+			String parameterName = _getExpandoSXPParameterName(
+				expandoColumn.getName());
+
+			int type = expandoColumn.getType();
+
+			if (type == ExpandoColumnConstants.BOOLEAN) {
+				sxpParameters.add(
+					new BooleanSXPParameter(
+						parameterName, true, expandoValue.getBoolean()));
+			}
+			else if (type == ExpandoColumnConstants.BOOLEAN_ARRAY) {
+				sxpParameters.add(
+					new BooleanArraySXPParameter(
+						parameterName, true,
+						ArrayUtils.toObject(expandoValue.getBooleanArray())));
+			}
+			else if (type == ExpandoColumnConstants.DATE) {
+				sxpParameters.add(
+					new DateSXPParameter(
+						parameterName, true, expandoValue.getDate()));
+			}
+			else if (type == ExpandoColumnConstants.DOUBLE) {
+				sxpParameters.add(
+					new DoubleSXPParameter(
+						parameterName, true, expandoValue.getDouble()));
+			}
+			else if (type == ExpandoColumnConstants.DOUBLE_ARRAY) {
+				sxpParameters.add(
+					new DoubleArraySXPParameter(
+						parameterName, true,
+						ArrayUtils.toObject(expandoValue.getDoubleArray())));
+			}
+			else if (type == ExpandoColumnConstants.FLOAT) {
+				sxpParameters.add(
+					new FloatSXPParameter(
+						parameterName, true, expandoValue.getFloat()));
+			}
+			else if (type == ExpandoColumnConstants.FLOAT_ARRAY) {
+				sxpParameters.add(
+					new FloatArraySXPParameter(
+						parameterName, true,
+						ArrayUtils.toObject(expandoValue.getFloatArray())));
+			}
+			else if (type == ExpandoColumnConstants.GEOLOCATION) {
+				JSONObject jsonObject = expandoValue.getGeolocationJSONObject();
+
+				sxpParameters.add(
+					new DoubleSXPParameter(
+						parameterName + ".latitude", true,
+						jsonObject.getDouble("latitude")));
+				sxpParameters.add(
+					new DoubleSXPParameter(
+						parameterName + ".longitude", true,
+						jsonObject.getDouble("longitude")));
+			}
+			else if (type == ExpandoColumnConstants.INTEGER) {
+				sxpParameters.add(
+					new IntegerSXPParameter(
+						parameterName, true, expandoValue.getInteger()));
+			}
+			else if (type == ExpandoColumnConstants.INTEGER_ARRAY) {
+				sxpParameters.add(
+					new IntegerArraySXPParameter(
+						parameterName, true,
+						IntStream.of(
+							expandoValue.getIntegerArray()
+						).boxed(
+						).toArray(
+							Integer[]::new
+						)));
+			}
+			else if (type == ExpandoColumnConstants.LONG) {
+				sxpParameters.add(
+					new LongSXPParameter(
+						parameterName, true, expandoValue.getLong()));
+			}
+			else if (type == ExpandoColumnConstants.LONG_ARRAY) {
+				sxpParameters.add(
+					new LongArraySXPParameter(
+						parameterName, true,
+						LongStream.of(
+							expandoValue.getLongArray()
+						).boxed(
+						).toArray(
+							Long[]::new
+						)));
+			}
+			else if (type == ExpandoColumnConstants.NUMBER) {
+				sxpParameters.add(
+					new StringSXPParameter(
+						parameterName, true, expandoValue.getData()));
+			}
+			else if (type == ExpandoColumnConstants.NUMBER_ARRAY) {
+				sxpParameters.add(
+					new StringArraySXPParameter(
+						parameterName, true,
+						StringUtil.split(expandoValue.getData())));
+			}
+			else if (type == ExpandoColumnConstants.SHORT) {
+				sxpParameters.add(
+					new IntegerSXPParameter(
+						parameterName, true,
+						GetterUtil.getInteger(expandoValue.getShort())));
+			}
+			else if (type == ExpandoColumnConstants.SHORT_ARRAY) {
+				short[] shortArray = expandoValue.getShortArray();
+
+				Integer[] integerArray = new Integer[shortArray.length];
+
+				for (int i = 0; i < shortArray.length; i++) {
+					integerArray[i] = (int)shortArray[i];
+				}
+
+				sxpParameters.add(
+					new IntegerArraySXPParameter(
+						parameterName, true, integerArray));
+			}
+			else if (type == ExpandoColumnConstants.STRING) {
+				sxpParameters.add(
+					new StringSXPParameter(
+						parameterName, true, expandoValue.getString()));
+			}
+			else if (type == ExpandoColumnConstants.STRING_ARRAY) {
+				sxpParameters.add(
+					new StringArraySXPParameter(
+						parameterName, true, expandoValue.getStringArray()));
+			}
+			else if (type == ExpandoColumnConstants.STRING_ARRAY_LOCALIZED) {
+				sxpParameters.add(
+					new StringArraySXPParameter(
+						StringBundler.concat(
+							parameterName, StringPool.UNDERLINE,
+							_language.getLanguageId(searchContext.getLocale())),
+						true,
+						expandoValue.getStringArray(
+							searchContext.getLocale())));
+			}
+			else if (type == ExpandoColumnConstants.STRING_LOCALIZED) {
+				sxpParameters.add(
+					new StringSXPParameter(
+						StringBundler.concat(
+							parameterName, StringPool.UNDERLINE,
+							_language.getLanguageId(searchContext.getLocale())),
+						true,
+						expandoValue.getString(searchContext.getLocale())));
+			}
+		}
+	}
+
+	private void _contribute(
+			SearchContext searchContext, Set<SXPParameter> sxpParameters)
+		throws PortalException {
+
+		long userId = searchContext.getUserId();
+
+		if (userId == 0) {
+			return;
+		}
+
+		User user = _userLocalService.fetchUserById(userId);
+
+		if (user == null) {
+			return;
+		}
+
+		long[] segmentsEntryIds = new long[0];
+
+		long scopeGroupId = GetterUtil.getLong(
+			searchContext.getAttribute("search.experiences.scope.group.id"));
+
+		if (scopeGroupId != 0) {
+			segmentsEntryIds = _segmentsEntryRetriever.getSegmentsEntryIds(
+				scopeGroupId, user.getUserId(),
+				new Context() {
+					{
+						put(
+							Context.LANGUAGE_ID,
+							_language.getLanguageId(searchContext.getLocale()));
+						put(Context.SIGNED_IN, !user.isDefaultUser());
+					}
+				});
+
+			segmentsEntryIds = ArrayUtil.filter(
+				segmentsEntryIds, segmentsEntryId -> segmentsEntryId > 0);
+		}
+
+		sxpParameters.add(
+			new LongArraySXPParameter(
+				"user.active_segment_entry_ids", true,
+				ArrayUtil.toLongArray(segmentsEntryIds)));
+
+		sxpParameters.add(
+			new IntegerSXPParameter(
+				"user.age", true, _getAge(user.getBirthday())));
+		sxpParameters.add(
+			new DateSXPParameter("user.birthday", true, user.getBirthday()));
+		sxpParameters.add(
+			new DateSXPParameter(
+				"user.create_date", true, user.getCreateDate()));
+		sxpParameters.add(
+			new LongArraySXPParameter(
+				"user.current_site_role_ids", true,
+				_getCurrentSiteRoleIds(scopeGroupId, user)));
+		sxpParameters.add(
+			new StringSXPParameter(
+				"user.email_domain", true, _getEmailAddressDomain(user)));
+		sxpParameters.add(
+			new StringSXPParameter(
+				"user.first_name", true, user.getFirstName()));
+		sxpParameters.add(
+			new StringSXPParameter("user.full_name", true, user.getFullName()));
+		sxpParameters.add(
+			new LongArraySXPParameter(
+				"user.group_ids", true,
+				ArrayUtil.toLongArray(user.getGroupIds())));
+		sxpParameters.add(
+			new LongSXPParameter("user.id", true, user.getUserId()));
+		sxpParameters.add(
+			new BooleanSXPParameter("user.is_female", true, user.isFemale()));
+		sxpParameters.add(
+			new BooleanSXPParameter(
+				"user.is_gender_x", true, !user.isFemale() && !user.isMale()));
+		sxpParameters.add(
+			new BooleanSXPParameter("user.is_male", true, user.isMale()));
+		sxpParameters.add(
+			new BooleanSXPParameter(
+				"user.is_signed_in", true, !user.isDefaultUser()));
+		sxpParameters.add(
+			new StringSXPParameter("user.job_title", true, user.getJobTitle()));
+		sxpParameters.add(
+			new StringSXPParameter(
+				"user.language_id", true, user.getLanguageId()));
+		sxpParameters.add(
+			new StringSXPParameter("user.last_name", true, user.getLastName()));
+		sxpParameters.add(
+			new LongArraySXPParameter(
+				"user.regular_role_ids", true, _getRegularRoleIds(user)));
+
+		List<UserGroup> userGroups = _userGroupLocalService.getUserUserGroups(
+			userId);
+
+		if (!userGroups.isEmpty()) {
+			Stream<UserGroup> stream = userGroups.stream();
+
+			sxpParameters.add(
+				new LongArraySXPParameter(
+					"user.user_group_ids", true,
+					stream.map(
+						UserGroup::getUserGroupId
+					).toArray(
+						Long[]::new
+					)));
+		}
+
+		_addExpandoSXPParameters(searchContext, sxpParameters, user);
+	}
+
+	private int _getAge(Date date) {
+		DateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+
+		int x = GetterUtil.getInteger(formatter.format(date));
+		int y = GetterUtil.getInteger(formatter.format(new Date()));
+
+		return (y - x) / 10000;
+	}
+
+	private Long[] _getCurrentSiteRoleIds(Long scopeGroupId, User user) {
+		List<Long> roleIds = new ArrayList<>();
+
+		List<UserGroupRole> userGroupRoles =
+			_userGroupRoleLocalService.getUserGroupRoles(user.getUserId());
+
+		for (UserGroupRole userGroupRole : userGroupRoles) {
+			roleIds.add(userGroupRole.getRoleId());
+		}
+
+		if (scopeGroupId != null) {
+			List<UserGroupGroupRole> userGroupGroupRoles =
+				_userGroupGroupRoleLocalService.getUserGroupGroupRolesByUser(
+					user.getUserId(), scopeGroupId);
+
+			for (UserGroupGroupRole userGroupGroupRole : userGroupGroupRoles) {
+				roleIds.add(userGroupGroupRole.getRoleId());
+			}
+		}
+
+		return roleIds.toArray(new Long[0]);
+	}
+
+	private String _getEmailAddressDomain(User user) {
+		String emailAddress = user.getEmailAddress();
+
+		return emailAddress.substring(emailAddress.indexOf("@") + 1);
+	}
+
+	private String _getExpandoSXPParameterName(String columnName) {
+		StringBundler sb = new StringBundler(2);
+
+		sb.append("user.custom.field.");
+		sb.append(
+			StringUtil.toLowerCase(
+				StringUtil.replace(columnName, StringPool.BLANK, "_")));
+
+		return sb.toString();
+	}
+
+	private String _getExpandoSXPParameterName(
+		String columnName, Locale locale) {
+
+		return StringBundler.concat(
+			_getExpandoSXPParameterName(columnName), StringPool.UNDERLINE,
+			_language.getLanguageId(locale));
+	}
+
+	private Long[] _getRegularRoleIds(User user) throws PortalException {
+		List<Long> roleIds = ListUtil.fromArray(user.getRoleIds());
+
+		List<UserGroup> userGroups = _userGroupLocalService.getUserUserGroups(
+			user.getUserId());
+
+		for (UserGroup userGroup : userGroups) {
+			List<Role> roles = _roleLocalService.getGroupRoles(
+				userGroup.getGroupId());
+
+			for (Role role : roles) {
+				roleIds.add(role.getRoleId());
+			}
+		}
+
+		return roleIds.toArray(new Long[0]);
 	}
 
 	private List<SXPParameterContributorDefinition>
@@ -372,368 +739,6 @@ public class UserSXPParameterContributor implements SXPParameterContributor {
 		}
 
 		return sxpParameterContributorDefinitions;
-	}
-
-	private void _addExpandoSXPParameters(
-			SearchContext searchContext, Set<SXPParameter> sxpParameters,
-			User user)
-		throws PortalException {
-
-		List<ExpandoColumn> expandoColumns =
-			_expandoColumnLocalService.getDefaultTableColumns(
-				searchContext.getCompanyId(), User.class.getName());
-
-		if (ListUtil.isEmpty(expandoColumns)) {
-			return;
-		}
-
-		Map<Long, ExpandoValue> expandoValues = new HashMap<>();
-
-		for (ExpandoValue expandoValue : _expandoValueLocalService.getRowValues(
-				searchContext.getCompanyId(), User.class.getName(),
-				ExpandoTableConstants.DEFAULT_TABLE_NAME, user.getPrimaryKey(),
-				QueryUtil.ALL_POS, QueryUtil.ALL_POS)) {
-
-			expandoValues.put(expandoValue.getColumnId(), expandoValue);
-		}
-
-		for (ExpandoColumn expandoColumn : expandoColumns) {
-			ExpandoValue expandoValue = expandoValues.get(
-				expandoColumn.getColumnId());
-
-			if (expandoValue == null) {
-				expandoValue = new ExpandoValueImpl();
-
-				expandoValue.setData(expandoColumn.getDefaultData());
-			}
-
-			String parameterName = _getExpandoSXPParameterName(
-				expandoColumn.getName());
-
-			int type = expandoColumn.getType();
-
-			if (type == ExpandoColumnConstants.BOOLEAN) {
-				sxpParameters.add(
-					new BooleanSXPParameter(
-						parameterName, true, expandoValue.getBoolean()));
-			}
-			else if (type == ExpandoColumnConstants.BOOLEAN_ARRAY) {
-				sxpParameters.add(
-					new BooleanArraySXPParameter(
-						parameterName, true,
-						ArrayUtils.toObject(expandoValue.getBooleanArray())));
-			}
-			else if (type == ExpandoColumnConstants.DATE) {
-				sxpParameters.add(
-					new DateSXPParameter(
-						parameterName, true, expandoValue.getDate()));
-			}
-			else if (type == ExpandoColumnConstants.DOUBLE) {
-				sxpParameters.add(
-					new DoubleSXPParameter(
-						parameterName, true, expandoValue.getDouble()));
-			}
-			else if (type == ExpandoColumnConstants.DOUBLE_ARRAY) {
-				sxpParameters.add(
-					new DoubleArraySXPParameter(
-						parameterName, true,
-						ArrayUtils.toObject(expandoValue.getDoubleArray())));
-			}
-			else if (type == ExpandoColumnConstants.FLOAT) {
-				sxpParameters.add(
-					new FloatSXPParameter(
-						parameterName, true, expandoValue.getFloat()));
-			}
-			else if (type == ExpandoColumnConstants.FLOAT_ARRAY) {
-				sxpParameters.add(
-					new FloatArraySXPParameter(
-						parameterName, true,
-						ArrayUtils.toObject(expandoValue.getFloatArray())));
-			}
-			else if (type == ExpandoColumnConstants.GEOLOCATION) {
-				JSONObject jsonObject = expandoValue.getGeolocationJSONObject();
-
-				sxpParameters.add(
-					new DoubleSXPParameter(
-						parameterName + ".latitude", true,
-						jsonObject.getDouble("latitude")));
-				sxpParameters.add(
-					new DoubleSXPParameter(
-						parameterName + ".longitude", true,
-						jsonObject.getDouble("longitude")));
-			}
-			else if (type == ExpandoColumnConstants.INTEGER) {
-				sxpParameters.add(
-					new IntegerSXPParameter(
-						parameterName, true, expandoValue.getInteger()));
-			}
-			else if (type == ExpandoColumnConstants.INTEGER_ARRAY) {
-				sxpParameters.add(
-					new IntegerArraySXPParameter(
-						parameterName, true,
-						IntStream.of(
-							expandoValue.getIntegerArray()
-						).boxed(
-						).toArray(
-							Integer[]::new
-						)));
-			}
-			else if (type == ExpandoColumnConstants.LONG) {
-				sxpParameters.add(
-					new LongSXPParameter(
-						parameterName, true, expandoValue.getLong()));
-			}
-			else if (type == ExpandoColumnConstants.LONG_ARRAY) {
-				sxpParameters.add(
-					new LongArraySXPParameter(
-						parameterName, true,
-						LongStream.of(
-							expandoValue.getLongArray()
-						).boxed(
-						).toArray(
-							Long[]::new
-						)));
-			}
-			else if (type == ExpandoColumnConstants.NUMBER) {
-				sxpParameters.add(
-					new StringSXPParameter(
-						parameterName, true, expandoValue.getData()));
-			}
-			else if (type == ExpandoColumnConstants.NUMBER_ARRAY) {
-				sxpParameters.add(
-					new StringArraySXPParameter(
-						parameterName, true,
-						StringUtil.split(expandoValue.getData())));
-			}
-			else if (type == ExpandoColumnConstants.SHORT) {
-				sxpParameters.add(
-					new IntegerSXPParameter(
-						parameterName, true,
-						GetterUtil.getInteger(expandoValue.getShort())));
-			}
-			else if (type == ExpandoColumnConstants.SHORT_ARRAY) {
-				short[] shortArray = expandoValue.getShortArray();
-
-				Integer[] integerArray = new Integer[shortArray.length];
-
-				for (int i = 0; i < shortArray.length; i++) {
-					integerArray[i] = (int)shortArray[i];
-				}
-
-				sxpParameters.add(
-					new IntegerArraySXPParameter(
-						parameterName, true, integerArray));
-			}
-			else if (type == ExpandoColumnConstants.STRING) {
-				sxpParameters.add(
-					new StringSXPParameter(
-						parameterName, true, expandoValue.getString()));
-			}
-			else if (type == ExpandoColumnConstants.STRING_ARRAY) {
-				sxpParameters.add(
-					new StringArraySXPParameter(
-						parameterName, true, expandoValue.getStringArray()));
-			}
-			else if (type == ExpandoColumnConstants.STRING_ARRAY_LOCALIZED) {
-				sxpParameters.add(
-					new StringArraySXPParameter(
-						StringBundler.concat(
-							parameterName, StringPool.UNDERLINE,
-							_language.getLanguageId(searchContext.getLocale())),
-						true, expandoValue.getStringArray(searchContext.getLocale())));
-			}
-			else if (type == ExpandoColumnConstants.STRING_LOCALIZED) {
-				sxpParameters.add(
-					new StringSXPParameter(
-						StringBundler.concat(
-							parameterName, StringPool.UNDERLINE,
-							_language.getLanguageId(searchContext.getLocale())),
-						true, expandoValue.getString(searchContext.getLocale())));
-			}
-		}
-	}
-
-	private void _contribute(
-			SearchContext searchContext, Set<SXPParameter> sxpParameters)
-		throws PortalException {
-
-		long userId = searchContext.getUserId();
-
-		if (userId == 0) {
-			return;
-		}
-
-		User user = _userLocalService.fetchUserById(userId);
-
-		if (user == null) {
-			return;
-		}
-
-		long[] segmentsEntryIds = new long[0];
-
-		long scopeGroupId = GetterUtil.getLong(
-			searchContext.getAttribute("search.experiences.scope.group.id"));
-
-		if (scopeGroupId != 0) {
-			segmentsEntryIds = _segmentsEntryRetriever.getSegmentsEntryIds(
-				scopeGroupId, user.getUserId(),
-				new Context() {
-					{
-						put(
-							Context.LANGUAGE_ID,
-							_language.getLanguageId(searchContext.getLocale()));
-						put(Context.SIGNED_IN, !user.isDefaultUser());
-					}
-				});
-
-			segmentsEntryIds = ArrayUtil.filter(
-				segmentsEntryIds, segmentsEntryId -> segmentsEntryId > 0);
-		}
-
-		sxpParameters.add(
-			new LongArraySXPParameter(
-				"user.active_segment_entry_ids", true,
-				ArrayUtil.toLongArray(segmentsEntryIds)));
-
-		sxpParameters.add(
-			new IntegerSXPParameter(
-				"user.age", true, _getAge(user.getBirthday())));
-		sxpParameters.add(
-			new DateSXPParameter("user.birthday", true, user.getBirthday()));
-		sxpParameters.add(
-			new DateSXPParameter(
-				"user.create_date", true, user.getCreateDate()));
-		sxpParameters.add(
-			new LongArraySXPParameter(
-				"user.current_site_role_ids", true,
-				_getCurrentSiteRoleIds(scopeGroupId, user)));
-		sxpParameters.add(
-			new StringSXPParameter(
-				"user.email_domain", true, _getEmailAddressDomain(user)));
-		sxpParameters.add(
-			new StringSXPParameter(
-				"user.first_name", true, user.getFirstName()));
-		sxpParameters.add(
-			new StringSXPParameter("user.full_name", true, user.getFullName()));
-		sxpParameters.add(
-			new LongArraySXPParameter(
-				"user.group_ids", true,
-				ArrayUtil.toLongArray(user.getGroupIds())));
-		sxpParameters.add(
-			new LongSXPParameter("user.id", true, user.getUserId()));
-		sxpParameters.add(
-			new BooleanSXPParameter("user.is_female", true, user.isFemale()));
-		sxpParameters.add(
-			new BooleanSXPParameter(
-				"user.is_gender_x", true, !user.isFemale() && !user.isMale()));
-		sxpParameters.add(
-			new BooleanSXPParameter("user.is_male", true, user.isMale()));
-		sxpParameters.add(
-			new BooleanSXPParameter(
-				"user.is_signed_in", true, !user.isDefaultUser()));
-		sxpParameters.add(
-			new StringSXPParameter("user.job_title", true, user.getJobTitle()));
-		sxpParameters.add(
-			new StringSXPParameter(
-				"user.language_id", true, user.getLanguageId()));
-		sxpParameters.add(
-			new StringSXPParameter("user.last_name", true, user.getLastName()));
-		sxpParameters.add(
-			new LongArraySXPParameter(
-				"user.regular_role_ids", true, _getRegularRoleIds(user)));
-
-		List<UserGroup> userGroups = _userGroupLocalService.getUserUserGroups(
-			userId);
-
-		if (!userGroups.isEmpty()) {
-			Stream<UserGroup> stream = userGroups.stream();
-
-			sxpParameters.add(
-				new LongArraySXPParameter(
-					"user.user_group_ids", true,
-					stream.map(
-						UserGroup::getUserGroupId
-					).toArray(
-						Long[]::new
-					)));
-		}
-
-		_addExpandoSXPParameters(searchContext, sxpParameters, user);
-	}
-
-	private int _getAge(Date date) {
-		DateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-
-		int x = GetterUtil.getInteger(formatter.format(date));
-		int y = GetterUtil.getInteger(formatter.format(new Date()));
-
-		return (y - x) / 10000;
-	}
-
-	private Long[] _getCurrentSiteRoleIds(Long scopeGroupId, User user) {
-		List<Long> roleIds = new ArrayList<>();
-
-		List<UserGroupRole> userGroupRoles =
-			_userGroupRoleLocalService.getUserGroupRoles(user.getUserId());
-
-		for (UserGroupRole userGroupRole : userGroupRoles) {
-			roleIds.add(userGroupRole.getRoleId());
-		}
-
-		if (scopeGroupId != null) {
-			List<UserGroupGroupRole> userGroupGroupRoles =
-				_userGroupGroupRoleLocalService.getUserGroupGroupRolesByUser(
-					user.getUserId(), scopeGroupId);
-
-			for (UserGroupGroupRole userGroupGroupRole : userGroupGroupRoles) {
-				roleIds.add(userGroupGroupRole.getRoleId());
-			}
-		}
-
-		return roleIds.toArray(new Long[0]);
-	}
-
-	private String _getEmailAddressDomain(User user) {
-		String emailAddress = user.getEmailAddress();
-
-		return emailAddress.substring(emailAddress.indexOf("@") + 1);
-	}
-
-	private String _getExpandoSXPParameterName(String columnName) {
-		StringBundler sb = new StringBundler(2);
-
-		sb.append("user.custom.field.");
-		sb.append(
-			StringUtil.toLowerCase(
-				StringUtil.replace(columnName, StringPool.BLANK, "_")));
-
-		return sb.toString();
-	}
-
-	private String _getExpandoSXPParameterName(
-		String columnName, Locale locale) {
-
-		return StringBundler.concat(
-			_getExpandoSXPParameterName(columnName), StringPool.UNDERLINE,
-			_language.getLanguageId(locale));
-	}
-
-	private Long[] _getRegularRoleIds(User user) throws PortalException {
-		List<Long> roleIds = ListUtil.fromArray(user.getRoleIds());
-
-		List<UserGroup> userGroups = _userGroupLocalService.getUserUserGroups(
-			user.getUserId());
-
-		for (UserGroup userGroup : userGroups) {
-			List<Role> roles = _roleLocalService.getGroupRoles(
-				userGroup.getGroupId());
-
-			for (Role role : roles) {
-				roleIds.add(role.getRoleId());
-			}
-		}
-
-		return roleIds.toArray(new Long[0]);
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
