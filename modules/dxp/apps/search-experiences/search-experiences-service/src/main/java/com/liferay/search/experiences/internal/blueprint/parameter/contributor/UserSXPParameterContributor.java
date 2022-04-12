@@ -134,7 +134,7 @@ public class UserSXPParameterContributor implements SXPParameterContributor {
 	public List<SXPParameterContributorDefinition>
 		getSXPParameterContributorDefinitions(long companyId, Locale locale) {
 
-		return _addExpandoSXPParameterDefinitions(
+		return _getSXPParameterContributorDefinitions(
 			companyId, locale,
 			ListUtil.fromArray(
 				new SXPParameterContributorDefinition(
@@ -186,7 +186,7 @@ public class UserSXPParameterContributor implements SXPParameterContributor {
 	}
 
 	private List<SXPParameterContributorDefinition>
-		_addExpandoSXPParameterDefinitions(
+		_getSXPParameterContributorDefinitions(
 			long companyId, Locale locale,
 			List<SXPParameterContributorDefinition>
 				sxpParameterContributorDefinitions) {
