@@ -219,6 +219,17 @@ public class RoleNotificationRecipientBuilder
 					_userLocalService.getGroupUsers(
 						groupId, WorkflowConstants.STATUS_APPROVED, null));
 			}
+
+			if (RoleConstants.ORGANIZATION_USER.equals(role.getName())) {
+				Group group = _groupLocalService.getGroup(groupId);
+
+				if (group.isOrganization()) {
+					long organizationId = group.getClassPK();
+
+					users.addAll(
+						_userLocalService.getOrganizationUsers(organizationId));
+				}
+			}
 		}
 
 		return users;
