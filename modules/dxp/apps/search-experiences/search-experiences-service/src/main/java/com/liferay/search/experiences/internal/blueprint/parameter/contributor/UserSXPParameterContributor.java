@@ -201,7 +201,6 @@ public class UserSXPParameterContributor implements SXPParameterContributor {
 
 		PermissionChecker permissionChecker =
 			PermissionThreadLocal.getPermissionChecker();
-
 		boolean secure =
 			PropsValues.PERMISSIONS_CUSTOM_ATTRIBUTE_READ_CHECK_BY_DEFAULT;
 
