@@ -76,6 +76,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Set;
 import java.util.stream.IntStream;
@@ -385,21 +387,19 @@ public class UserSXPParameterContributor implements SXPParameterContributor {
 			return;
 		}
 
-		List<ExpandoValue> expandoValues =
-			_expandoValueLocalService.getRowValues(
+		Map<Long, ExpandoValue> expandoValues = new HashMap<>();
+
+		for (ExpandoValue expandoValue : _expandoValueLocalService.getRowValues(
 				searchContext.getCompanyId(), User.class.getName(),
 				ExpandoTableConstants.DEFAULT_TABLE_NAME, user.getPrimaryKey(),
-				QueryUtil.ALL_POS, QueryUtil.ALL_POS);
+				QueryUtil.ALL_POS, QueryUtil.ALL_POS)) {
+
+			expandoValues.put(expandoValue.getColumnId(), expandoValue);
+		}
 
 		for (ExpandoColumn expandoColumn : expandoColumns) {
-			Stream<ExpandoValue> stream = expandoValues.stream();
-
-			ExpandoValue expandoValue = stream.filter(
-				value -> value.getColumnId() == expandoColumn.getColumnId()
-			).findFirst(
-			).orElse(
-				null
-			);
+			ExpandoValue expandoValue = expandoValues.get(
+				expandoColumn.getColumnId());
 
 			if (expandoValue == null) {
 				expandoValue = new ExpandoValueImpl();
