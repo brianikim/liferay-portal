@@ -81,8 +81,6 @@ public class UserSXPParameterContributorTest {
 	public void setUp() throws Exception {
 		MockitoAnnotations.initMocks(this);
 
-		_locale = LocaleUtil.US;
-
 		_setUpLanguage();
 		_setUpUser(RandomTestUtil.randomLong());
 
@@ -1047,7 +1045,7 @@ public class UserSXPParameterContributorTest {
 	@Mock
 	private Language _language;
 
-	private Locale _locale;
+	private Locale _locale = LocaleUtil.US;
 	private SearchContext _searchContext;
 	private final Set<SXPParameter> _sxpParameters = new HashSet<>();
 
