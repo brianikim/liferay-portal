@@ -42,6 +42,7 @@ import com.liferay.portal.workflow.kaleo.runtime.util.validator.GroupAwareRoleVa
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.osgi.service.component.annotations.Component;
@@ -215,16 +216,18 @@ public class RoleNotificationRecipientBuilder
 						userGroupGroupRole.getUserGroupId()));
 			}
 
-			if (RoleConstants.SITE_MEMBER.equals(role.getName()) ||
-				DepotRolesConstants.ASSET_LIBRARY_MEMBER.equals(
-					role.getName())) {
+			if (Objects.equals(
+					role.getName(), DepotRolesConstants.ASSET_LIBRARY_MEMBER) ||
+				Objects.equals(role.getName(), RoleConstants.SITE_MEMBER)) {
 
 				users.addAll(
 					_userLocalService.getGroupUsers(
 						groupId, WorkflowConstants.STATUS_APPROVED, null));
 			}
 
-			if (RoleConstants.ORGANIZATION_USER.equals(role.getName())) {
+			if (Objects.equals(
+					role.getName(), RoleConstants.ORGANIZATION_USER)) {
+
 				Group group = _groupLocalService.getGroup(groupId);
 
 				if (group.isOrganization()) {
