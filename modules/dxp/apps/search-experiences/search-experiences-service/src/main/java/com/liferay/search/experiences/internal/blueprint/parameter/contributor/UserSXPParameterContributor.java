@@ -134,7 +134,8 @@ public class UserSXPParameterContributor implements SXPParameterContributor {
 	public List<SXPParameterContributorDefinition>
 		getSXPParameterContributorDefinitions(long companyId, Locale locale) {
 
-		List<SXPParameterContributorDefinition> sxpParameterDefinitions =
+		return _addExpandoSXPParameterDefinitions(
+			companyId, locale,
 			ListUtil.fromArray(
 				new SXPParameterContributorDefinition(
 					LongArraySXPParameter.class, "active-segment-entry-ids",
@@ -181,10 +182,7 @@ public class UserSXPParameterContributor implements SXPParameterContributor {
 					"user.regular_role_ids"),
 				new SXPParameterContributorDefinition(
 					LongArraySXPParameter.class, "user-group-ids",
-					"user.user_group_ids"));
-
-		return _addExpandoSXPParameterDefinitions(
-			companyId, locale, sxpParameterDefinitions);
+					"user.user_group_ids")));
 	}
 
 	private List<SXPParameterContributorDefinition>
