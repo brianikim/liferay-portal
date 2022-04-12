@@ -24,10 +24,12 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.BaseModelListener;
 import com.liferay.portal.kernel.model.Country;
 import com.liferay.portal.kernel.model.ModelListener;
-import com.liferay.portal.kernel.service.RegionLocalService;
-import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
+import com.liferay.portal.kernel.service.RegionService;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.security.permission.SimplePermissionChecker;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -40,12 +42,17 @@ public class CountryModelListener extends BaseModelListener<Country> {
 
 	@Override
 	public void onAfterCreate(Country country) throws ModelListenerException {
-		_processCountryRegions(country);
-	}
+		PermissionChecker permissionChecker =
+			PermissionThreadLocal.getPermissionChecker();
 
-	@Override
-	public void onBeforeRemove(Country country) throws ModelListenerException {
-		_regionLocalService.deleteCountryRegions(country.getCountryId());
+		try {
+			PermissionThreadLocal.setPermissionChecker(_permissionChecker);
+
+			_processCountryRegions(country);
+		}
+		finally {
+			PermissionThreadLocal.setPermissionChecker(permissionChecker);
+		}
 	}
 
 	private JSONArray _getJSONArray(String filePath) throws Exception {
@@ -59,7 +66,8 @@ public class CountryModelListener extends BaseModelListener<Country> {
 
 		try {
 			String path =
-				"com/liferay/account/address/dependencies/regions/" + a2 + ".json";
+				"com/liferay/account/address/dependencies/regions/" + a2 +
+					".json";
 
 			if (_classLoader.getResource(path) == null) {
 				return;
@@ -76,19 +84,11 @@ public class CountryModelListener extends BaseModelListener<Country> {
 					JSONObject regionJSONObject =
 						regionsJSONArray.getJSONObject(i);
 
-					ServiceContext serviceContext = new ServiceContext();
-
-					serviceContext.setCompanyId(country.getCompanyId());
-					serviceContext.setUserId(
-						_userLocalService.getDefaultUserId(
-							country.getCompanyId()));
-
-					_regionLocalService.addRegion(
+					_regionService.addRegion(
 						country.getCountryId(),
-						regionJSONObject.getBoolean("active"),
-						regionJSONObject.getString("name"), 0,
 						regionJSONObject.getString("regionCode"),
-						serviceContext);
+						regionJSONObject.getString("name"),
+						regionJSONObject.getBoolean("active"));
 				}
 				catch (PortalException portalException) {
 					if (_log.isWarnEnabled()) {
@@ -107,6 +107,16 @@ public class CountryModelListener extends BaseModelListener<Country> {
 	private static final Log _log = LogFactoryUtil.getLog(
 		CountryModelListener.class);
 
+	private static final PermissionChecker _permissionChecker =
+		new SimplePermissionChecker() {
+
+			@Override
+			public boolean isOmniadmin() {
+				return true;
+			}
+
+		};
+
 	private final ClassLoader _classLoader =
 		CountryModelListener.class.getClassLoader();
 
@@ -114,7 +124,7 @@ public class CountryModelListener extends BaseModelListener<Country> {
 	private JSONFactory _jsonFactory;
 
 	@Reference
-	private RegionLocalService _regionLocalService;
+	private RegionService _regionService;
 
 	@Reference
 	private UserLocalService _userLocalService;
