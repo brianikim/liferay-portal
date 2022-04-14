@@ -166,8 +166,7 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 
 				_log.info(
 					StringBundler.concat(
-						"Searching ", query.toString(), " took ",
-						stopWatch.getTime(), " ms"));
+						"Searching took ", stopWatch.getTime(), " ms"));
 			}
 		}
 	}
@@ -218,8 +217,7 @@ public class SolrIndexSearcher extends BaseIndexSearcher {
 
 				_log.info(
 					StringBundler.concat(
-						"Searching ", query.toString(), " took ",
-						stopWatch.getTime(), " ms"));
+						"Searching took ", stopWatch.getTime(), " ms"));
 			}
 		}
 	}
