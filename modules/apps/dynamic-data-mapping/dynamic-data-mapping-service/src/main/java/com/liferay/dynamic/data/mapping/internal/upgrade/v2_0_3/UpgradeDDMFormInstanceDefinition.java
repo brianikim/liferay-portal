@@ -91,7 +91,7 @@ public class UpgradeDDMFormInstanceDefinition extends UpgradeProcess {
 
 		updateFieldsToLocalizable(fieldsJSONArray);
 
-		return ddmFormJSONObject.toJSONString();
+		return ddmFormJSONObject.toString();
 	}
 
 	private final JSONFactory _jsonFactory;

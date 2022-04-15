@@ -638,7 +638,7 @@ public class AppResourceImpl
 			jsonObject.put(entry.getKey(), entry.getValue());
 		}
 
-		return jsonObject.toJSONString();
+		return jsonObject.toString();
 	}
 
 	private OrderByComparator<AppBuilderApp> _toOrderByComparator(Sort sort) {

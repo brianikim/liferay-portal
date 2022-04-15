@@ -215,7 +215,7 @@ public class DDMFormInstanceReportLocalServiceImpl
 				ddmFormFieldTypeReportProcessor.process(
 					ddmFormFieldValue,
 					JSONFactoryUtil.createJSONObject(
-						fieldJSONObject.toJSONString()),
+						fieldJSONObject.toString()),
 					ddmFormInstanceRecordVersion.getFormInstanceRecordId(),
 					ddmFormInstanceReportEvent);
 

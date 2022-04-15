@@ -154,7 +154,7 @@ public class UpgradeDDMFormFieldValidation extends UpgradeProcess {
 			}
 		}
 
-		return definitionJSONObject.toJSONString();
+		return definitionJSONObject.toString();
 	}
 
 	private void _addParameterValue(

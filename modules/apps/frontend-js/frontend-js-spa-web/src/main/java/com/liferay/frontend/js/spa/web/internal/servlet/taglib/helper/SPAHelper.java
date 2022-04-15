@@ -319,7 +319,7 @@ public class SPAHelper {
 			}
 		}
 
-		_VALID_STATUS_CODES = jsonArray.toJSONString();
+		_VALID_STATUS_CODES = jsonArray.toString();
 
 		String portletNamespace = PortalUtil.getPortletNamespace(
 			PropsUtil.get(PropsKeys.AUTH_LOGIN_PORTLET_NAME));

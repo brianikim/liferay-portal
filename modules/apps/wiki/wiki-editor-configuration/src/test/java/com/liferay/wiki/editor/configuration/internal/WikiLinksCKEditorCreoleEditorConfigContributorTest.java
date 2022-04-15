@@ -108,7 +108,7 @@ public class WikiLinksCKEditorCreoleEditorConfigContributorTest
 			getJSONObjectWithDefaultItemSelectorURL();
 
 		JSONObject jsonObject = JSONFactoryUtil.createJSONObject(
-			originalJSONObject.toJSONString());
+			originalJSONObject.toString());
 
 		_wikiLinksCKEditorCreoleEditorConfigContributor.
 			populateConfigJSONObject(
@@ -121,7 +121,7 @@ public class WikiLinksCKEditorCreoleEditorConfigContributorTest
 		);
 
 		JSONAssert.assertEquals(
-			expectedJSONObject.toJSONString(), jsonObject.toJSONString(), true);
+			expectedJSONObject.toString(), jsonObject.toString(), true);
 	}
 
 	@Test
@@ -132,7 +132,7 @@ public class WikiLinksCKEditorCreoleEditorConfigContributorTest
 			getJSONObjectWithDefaultItemSelectorURL();
 
 		JSONObject jsonObject = JSONFactoryUtil.createJSONObject(
-			originalJSONObject.toJSONString());
+			originalJSONObject.toString());
 
 		_wikiLinksCKEditorCreoleEditorConfigContributor.
 			populateConfigJSONObject(
@@ -145,7 +145,7 @@ public class WikiLinksCKEditorCreoleEditorConfigContributorTest
 		);
 
 		JSONAssert.assertEquals(
-			expectedJSONObject.toJSONString(), jsonObject.toJSONString(), true);
+			expectedJSONObject.toString(), jsonObject.toString(), true);
 	}
 
 	@Test
@@ -158,7 +158,7 @@ public class WikiLinksCKEditorCreoleEditorConfigContributorTest
 			getJSONObjectWithDefaultItemSelectorURL();
 
 		JSONObject jsonObject = JSONFactoryUtil.createJSONObject(
-			originalJSONObject.toJSONString());
+			originalJSONObject.toString());
 
 		_wikiLinksCKEditorCreoleEditorConfigContributor.
 			populateConfigJSONObject(
@@ -171,7 +171,7 @@ public class WikiLinksCKEditorCreoleEditorConfigContributorTest
 		);
 
 		JSONAssert.assertEquals(
-			expectedJSONObject.toJSONString(), jsonObject.toJSONString(), true);
+			expectedJSONObject.toString(), jsonObject.toString(), true);
 	}
 
 	protected JSONObject getJSONObjectWithDefaultItemSelectorURL()

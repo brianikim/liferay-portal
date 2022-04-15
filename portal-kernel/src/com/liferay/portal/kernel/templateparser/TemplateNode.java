@@ -455,7 +455,7 @@ public class TemplateNode extends LinkedHashMap<String, Object> {
 				"uuid", assetRenderer.getUuid()
 			);
 
-			return jsonObject.toJSONString();
+			return jsonObject.toString();
 		}
 		catch (JSONException jsonException) {
 			if (_log.isDebugEnabled()) {

@@ -143,7 +143,7 @@ public class DDMStructureContentDashboardItemTypeTest {
 			).put(
 				"title",
 				ddmStructureContentDashboardItemType.getFullLabel(LocaleUtil.US)
-			).toJSONString(),
+			).toString(),
 			ddmStructureContentDashboardItemType.toJSONString(LocaleUtil.US));
 	}
 

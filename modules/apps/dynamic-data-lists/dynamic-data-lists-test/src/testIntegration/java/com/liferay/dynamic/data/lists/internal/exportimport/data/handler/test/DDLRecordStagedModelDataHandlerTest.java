@@ -309,7 +309,7 @@ public class DDLRecordStagedModelDataHandlerTest
 
 		Value value = ddmFormFieldValue.getValue();
 
-		value.addString(locale, fieldValueJSONObject.toJSONString());
+		value.addString(locale, fieldValueJSONObject.toString());
 
 		return ddmFormFieldValue;
 	}
@@ -322,7 +322,7 @@ public class DDLRecordStagedModelDataHandlerTest
 
 		JSONObject fieldValueJSONObject = JSONFactoryUtil.createJSONObject();
 
-		localizedValue.addString(locale, fieldValueJSONObject.toJSONString());
+		localizedValue.addString(locale, fieldValueJSONObject.toString());
 
 		return DDMFormValuesTestUtil.createDDMFormFieldValue(
 			fieldName, localizedValue);

@@ -85,7 +85,7 @@ public class SetOptionsFunctionTest extends PowerMockito {
 
 		jsonObject.put("pt_BR", jsonArray);
 
-		String json = jsonObject.toJSONString();
+		String json = jsonObject.toString();
 
 		DefaultDDMExpressionObserver defaultDDMExpressionObserver =
 			new DefaultDDMExpressionObserver();

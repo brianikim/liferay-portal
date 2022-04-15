@@ -700,7 +700,7 @@ public class CPFileImporterImpl implements CPFileImporter {
 					"uuid", fileEntry.getUuid()
 				);
 
-				return jsonObject.toJSONString();
+				return jsonObject.toString();
 			},
 			classLoader, dependenciesFilePath, serviceContext);
 

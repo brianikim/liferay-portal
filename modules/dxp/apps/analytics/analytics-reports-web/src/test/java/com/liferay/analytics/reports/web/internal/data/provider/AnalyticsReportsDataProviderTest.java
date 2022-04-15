@@ -183,7 +183,7 @@ public class AnalyticsReportsDataProviderTest {
 								))
 						).put(
 							"value", 5
-						).toJSONString())));
+						).toString())));
 
 		HistoricalMetric historicalMetric =
 			analyticsReportsDataProvider.getHistoricalReadsHistoricalMetric(
@@ -308,7 +308,7 @@ public class AnalyticsReportsDataProviderTest {
 								))
 						).put(
 							"value", 5
-						).toJSONString()
+						).toString()
 					).build()));
 
 		Long totalReads = analyticsReportsDataProvider.getTotalReads(
@@ -349,7 +349,7 @@ public class AnalyticsReportsDataProviderTest {
 								))
 						).put(
 							"value", 5
-						).toJSONString()
+						).toString()
 					).build()));
 
 		Long totalViews = analyticsReportsDataProvider.getTotalViews(

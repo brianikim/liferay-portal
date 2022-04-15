@@ -81,7 +81,7 @@ public class UpgradeDDMContent extends UpgradeProcess {
 							dataJSONObject.getJSONArray("fieldValues"),
 							definitionJSONObject.getJSONArray("fields"))) {
 
-						ps2.setString(1, dataJSONObject.toJSONString());
+						ps2.setString(1, dataJSONObject.toString());
 
 						long contentId = rs.getLong("contentId");
 

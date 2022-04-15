@@ -448,8 +448,8 @@ public class GetTrafficSourcesMVCResourceCommandTest {
 							).put(
 								"value", 0
 							)
-						).toJSONString(),
-						jsonArray.toJSONString());
+						).toString(),
+						jsonArray.toString());
 				});
 		}
 		finally {

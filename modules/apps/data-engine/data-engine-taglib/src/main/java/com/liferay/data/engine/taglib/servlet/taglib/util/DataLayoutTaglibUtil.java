@@ -850,7 +850,7 @@ public class DataLayoutTaglibUtil {
 				"defaultLanguageId", ddmStructure.getDefaultLanguageId()
 			);
 
-			ddmStructure.setDefinition(jsonObject.toJSONString());
+			ddmStructure.setDefinition(jsonObject.toString());
 
 			return ddmStructure.getDDMForm();
 		}
@@ -869,7 +869,7 @@ public class DataLayoutTaglibUtil {
 					},
 					new String[] {"size", "columns", "pages", "rows"}));
 
-			return _deserializeDDMFormLayout(jsonObject.toJSONString());
+			return _deserializeDDMFormLayout(jsonObject.toString());
 		}
 
 		private List<Map<String, Object>> _getNestedFields(

@@ -106,7 +106,7 @@ public class WikiAttachmentImageCreoleEditorConfigContributorTest
 			getJSONObjectWithDefaultItemSelectorURL();
 
 		JSONObject jsonObject = JSONFactoryUtil.createJSONObject(
-			originalJSONObject.toJSONString());
+			originalJSONObject.toString());
 
 		WikiAttachmentImageCreoleEditorConfigContributor
 			wikiAttachmentImageCreoleEditorConfigContributor =
@@ -130,7 +130,7 @@ public class WikiAttachmentImageCreoleEditorConfigContributorTest
 		);
 
 		JSONAssert.assertEquals(
-			expectedJSONObject.toJSONString(), jsonObject.toJSONString(), true);
+			expectedJSONObject.toString(), jsonObject.toString(), true);
 	}
 
 	@Test
@@ -207,7 +207,7 @@ public class WikiAttachmentImageCreoleEditorConfigContributorTest
 		);
 
 		JSONAssert.assertEquals(
-			expectedJSONObject.toJSONString(), jsonObject.toJSONString(), true);
+			expectedJSONObject.toString(), jsonObject.toString(), true);
 	}
 
 	@Test
@@ -221,7 +221,7 @@ public class WikiAttachmentImageCreoleEditorConfigContributorTest
 			getJSONObjectWithDefaultItemSelectorURL();
 
 		JSONObject jsonObject = JSONFactoryUtil.createJSONObject(
-			originalJSONObject.toJSONString());
+			originalJSONObject.toString());
 
 		WikiAttachmentImageCreoleEditorConfigContributor
 			wikiAttachmentImageCreoleEditorConfigContributor =
@@ -235,12 +235,12 @@ public class WikiAttachmentImageCreoleEditorConfigContributorTest
 				jsonObject, _inputEditorTaglibAttributes, null, null);
 
 		JSONObject expectedJSONObject = JSONFactoryUtil.createJSONObject(
-			originalJSONObject.toJSONString());
+			originalJSONObject.toString());
 
 		expectedJSONObject.put("removePlugins", "plugin1");
 
 		JSONAssert.assertEquals(
-			expectedJSONObject.toJSONString(), jsonObject.toJSONString(), true);
+			expectedJSONObject.toString(), jsonObject.toString(), true);
 	}
 
 	@Test
@@ -254,7 +254,7 @@ public class WikiAttachmentImageCreoleEditorConfigContributorTest
 			getJSONObjectWithDefaultItemSelectorURL();
 
 		JSONObject jsonObject = JSONFactoryUtil.createJSONObject(
-			originalJSONObject.toJSONString());
+			originalJSONObject.toString());
 
 		WikiAttachmentImageCreoleEditorConfigContributor
 			wikiAttachmentImageCreoleEditorConfigContributor =
@@ -268,12 +268,12 @@ public class WikiAttachmentImageCreoleEditorConfigContributorTest
 				jsonObject, _inputEditorTaglibAttributes, null, null);
 
 		JSONObject expectedJSONObject = JSONFactoryUtil.createJSONObject(
-			originalJSONObject.toJSONString());
+			originalJSONObject.toString());
 
 		expectedJSONObject.put("removePlugins", "plugin1");
 
 		JSONAssert.assertEquals(
-			expectedJSONObject.toJSONString(), jsonObject.toJSONString(), true);
+			expectedJSONObject.toString(), jsonObject.toString(), true);
 	}
 
 	protected JSONObject getJSONObjectWithDefaultItemSelectorURL()

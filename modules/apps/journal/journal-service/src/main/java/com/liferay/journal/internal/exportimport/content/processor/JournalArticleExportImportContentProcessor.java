@@ -542,7 +542,7 @@ public class JournalArticleExportImportContentProcessor
 			_log.debug(
 				StringBundler.concat(
 					"Replacing ", json, " with ",
-					newArticleJSONObject.toJSONString()));
+					newArticleJSONObject.toString()));
 		}
 
 		if (exportReferencedContent) {
@@ -585,7 +585,7 @@ public class JournalArticleExportImportContentProcessor
 				PortletDataContext.REFERENCE_TYPE_DEPENDENCY, true);
 		}
 
-		return newArticleJSONObject.toJSONString();
+		return newArticleJSONObject.toString();
 	}
 
 	private String _extractJournalArticleForImport(
@@ -641,7 +641,7 @@ public class JournalArticleExportImportContentProcessor
 			"titleMap", journalArticle.getTitleMap()
 		);
 
-		return newArticleJSONObject.toJSONString();
+		return newArticleJSONObject.toString();
 	}
 
 	private List<String> _fetchContentsFromDDMFormValues(

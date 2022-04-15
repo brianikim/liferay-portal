@@ -408,7 +408,7 @@ public class DataDefinitionResourceTest
 					"fieldName", "select1"
 				).put(
 					"property", "options"
-				).toJSONString(),
+				).toString(),
 				problem.getDetail());
 			Assert.assertEquals("BAD_REQUEST", problem.getStatus());
 			Assert.assertEquals(

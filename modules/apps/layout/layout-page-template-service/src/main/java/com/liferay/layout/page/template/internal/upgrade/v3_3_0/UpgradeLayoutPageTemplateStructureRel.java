@@ -215,7 +215,7 @@ public class UpgradeLayoutPageTemplateStructureRel extends UpgradeProcess {
 
 		JSONObject layoutDataJSONObject = layoutStructure.toJSONObject();
 
-		return layoutDataJSONObject.toJSONString();
+		return layoutDataJSONObject.toString();
 	}
 
 	private void _upgradeLayoutPageTemplateStructureRel() throws Exception {

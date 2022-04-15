@@ -159,7 +159,7 @@ public class WorkflowTaskUserNotificationHandlerTest extends PowerMockito {
 
 			@Override
 			public String getPayload() {
-				return jsonObject.toJSONString();
+				return jsonObject.toString();
 			}
 
 			@Override

@@ -149,7 +149,7 @@ public class UpgradeDDMFormParagraphFields extends UpgradeProcess {
 
 		makeFieldsLocalizable(fieldsJSONArray, availableLanguageIdsJSONArray);
 
-		return jsonObject.toJSONString();
+		return jsonObject.toString();
 	}
 
 	private boolean _isValueLocalizable(

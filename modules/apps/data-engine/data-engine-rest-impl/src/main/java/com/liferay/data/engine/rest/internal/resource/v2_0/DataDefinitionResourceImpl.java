@@ -278,7 +278,7 @@ public class DataDefinitionResourceImpl
 			jsonArray::put
 		);
 
-		return jsonArray.toJSONString();
+		return jsonArray.toString();
 	}
 
 	@Override
@@ -1461,7 +1461,7 @@ public class DataDefinitionResourceImpl
 									"label", "Option"
 								).put(
 									"value", "option"
-								).toJSONString()
+								).toString()
 							}
 						).build());
 				}

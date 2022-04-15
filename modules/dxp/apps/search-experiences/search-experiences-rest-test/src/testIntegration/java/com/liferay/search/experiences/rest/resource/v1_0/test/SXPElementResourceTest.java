@@ -56,7 +56,7 @@ public class SXPElementResourceTest extends BaseSXPElementResourceTestCase {
 				"description", RandomTestUtil.randomString()
 			).put(
 				"title", RandomTestUtil.randomString()
-			).toJSONString());
+			).toString());
 
 		SXPElement postSXPElement = testPostSXPElement_addSXPElement(
 			sxpElement);

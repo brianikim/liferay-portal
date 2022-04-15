@@ -106,7 +106,7 @@ public class GetTotalReadsMVCResourceCommandTest {
 							))
 					).put(
 						"value", 5
-					).toJSONString()
+					).toString()
 				).build()));
 
 		try {

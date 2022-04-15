@@ -125,7 +125,7 @@ public class DDMStructureContentDashboardItemType
 			"classPK", _infoItemReference.getClassPK()
 		).put(
 			"title", getFullLabel(locale)
-		).toJSONString();
+		).toString();
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
