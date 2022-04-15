@@ -45,7 +45,7 @@ ContentDashboardItemTypeItemSelectorViewDisplayContext contentDashboardItemTypeI
 						"className", infoItemReference.getClassName()
 					).put(
 						"classPK", infoItemReference.getClassPK()
-					).toJSONString()));
+					).toString()));
 			%>
 
 			<liferay-ui:search-container-column-text
