@@ -51,6 +51,8 @@ public class RenderLayoutStructureTag extends IncludeTag {
 				ServletContextUtil.getSegmentsEntryRetriever(),
 				isShowPreview()));
 
+		request.setAttribute(LAYOUT_STRUCTURE, _layoutStructure);
+
 		return super.doStartTag();
 	}
 
@@ -116,6 +118,8 @@ public class RenderLayoutStructureTag extends IncludeTag {
 	protected String getPage() {
 		return _PAGE;
 	}
+
+	protected static final String LAYOUT_STRUCTURE = "LAYOUT_STRUCTURE";
 
 	private static final String _PAGE = "/render_layout_structure/page.jsp";
 
