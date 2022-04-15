@@ -53,7 +53,7 @@ public class JournalContentPortletConfigurationListener
 		if (_log.isDebugEnabled()) {
 			_log.debug(
 				StringBundler.concat(
-					"UpdateScope ", portletId, " from portletPreferences ",
+					"Portlet ", portletId, " with portlet preferences ",
 					MapUtil.toString(portletPreferences.getMap())));
 		}
 
