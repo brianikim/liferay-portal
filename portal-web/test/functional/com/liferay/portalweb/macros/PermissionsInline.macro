@@ -153,6 +153,14 @@ definition {
 		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 	}
 
+	macro gotoDepotEntry {
+		WaitForLiferayEvent.initializeLiferayEventLog();
+
+		LexiconEntry.gotoEntryMenuItem(
+			menuItem = "Permissions",
+			rowEntry = "${depotName}");
+	}
+
 	macro gotoDocumentsAndMediaDocumentPG {
 		LexiconEntry.gotoEntryMenuItem(
 			menuItem = "Permissions",
