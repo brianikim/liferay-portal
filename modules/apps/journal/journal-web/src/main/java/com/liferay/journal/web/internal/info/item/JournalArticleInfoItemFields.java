@@ -37,8 +37,7 @@ public class JournalArticleInfoItemFields {
 				JournalArticleInfoItemFields.class, "author-name")
 		).build();
 	public static final InfoField<ImageInfoFieldType>
-		authorProfileImageInfoField =
-		BuilderHolder._builder.infoFieldType(
+		authorProfileImageInfoField = BuilderHolder._builder.infoFieldType(
 				ImageInfoFieldType.INSTANCE
 			).name(
 			"authorProfileImage"
@@ -96,8 +95,7 @@ public class JournalArticleInfoItemFields {
 				"com.liferay.journal.lang", "last-editor-name")
 		).build();
 	public static final InfoField<ImageInfoFieldType>
-		lastEditorProfileImageInfoField =
-		BuilderHolder._builder.infoFieldType(
+		lastEditorProfileImageInfoField = BuilderHolder._builder.infoFieldType(
 			ImageInfoFieldType.INSTANCE
 		).name(
 			"lastEditorProfileImage"

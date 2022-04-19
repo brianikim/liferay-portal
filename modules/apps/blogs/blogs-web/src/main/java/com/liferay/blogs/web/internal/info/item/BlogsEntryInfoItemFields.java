@@ -37,15 +37,14 @@ public class BlogsEntryInfoItemFields {
 				BlogsEntryInfoItemFields.class, "author-name")
 		).build();
 	public static final InfoField<ImageInfoFieldType>
-		authorProfileImageInfoField =
-			BuilderHolder._builder.infoFieldType(
-				ImageInfoFieldType.INSTANCE
-			).name(
-				"authorProfileImage"
-			).labelInfoLocalizedValue(
-				InfoLocalizedValue.localize(
-					BlogsEntryInfoItemFields.class, "author-profile-image")
-			).build();
+		authorProfileImageInfoField = BuilderHolder._builder.infoFieldType(
+			ImageInfoFieldType.INSTANCE
+		).name(
+			"authorProfileImage"
+		).labelInfoLocalizedValue(
+			InfoLocalizedValue.localize(
+				BlogsEntryInfoItemFields.class, "author-profile-image")
+		).build();
 	public static final InfoField<TextInfoFieldType> contentInfoField =
 		BuilderHolder._builder.infoFieldType(
 			TextInfoFieldType.INSTANCE

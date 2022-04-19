@@ -38,8 +38,7 @@ public class FileEntryInfoItemFields {
 				FileEntryInfoItemFields.class, "author-name")
 		).build();
 	public static final InfoField<ImageInfoFieldType>
-		authorProfileImageInfoField =
-		BuilderHolder._builder.infoFieldType(
+		authorProfileImageInfoField = BuilderHolder._builder.infoFieldType(
 			ImageInfoFieldType.INSTANCE
 		).name(
 			"authorProfileImage"
