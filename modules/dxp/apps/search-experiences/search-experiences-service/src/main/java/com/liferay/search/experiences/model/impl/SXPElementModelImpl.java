@@ -88,9 +88,10 @@ public class SXPElementModelImpl
 		{"userId", Types.BIGINT}, {"userName", Types.VARCHAR},
 		{"createDate", Types.TIMESTAMP}, {"modifiedDate", Types.TIMESTAMP},
 		{"description", Types.VARCHAR}, {"elementDefinitionJSON", Types.CLOB},
-		{"hidden_", Types.BOOLEAN}, {"readOnly", Types.BOOLEAN},
-		{"schemaVersion", Types.VARCHAR}, {"title", Types.VARCHAR},
-		{"type_", Types.INTEGER}, {"status", Types.INTEGER}
+		{"hidden_", Types.BOOLEAN}, {"key_", Types.VARCHAR},
+		{"readOnly", Types.BOOLEAN}, {"schemaVersion", Types.VARCHAR},
+		{"title", Types.VARCHAR}, {"type_", Types.INTEGER},
+		{"version", Types.VARCHAR}, {"status", Types.INTEGER}
 	};
 
 	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
@@ -108,15 +109,17 @@ public class SXPElementModelImpl
 		TABLE_COLUMNS_MAP.put("description", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("elementDefinitionJSON", Types.CLOB);
 		TABLE_COLUMNS_MAP.put("hidden_", Types.BOOLEAN);
+		TABLE_COLUMNS_MAP.put("key_", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("readOnly", Types.BOOLEAN);
 		TABLE_COLUMNS_MAP.put("schemaVersion", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("title", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("type_", Types.INTEGER);
+		TABLE_COLUMNS_MAP.put("version", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("status", Types.INTEGER);
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table SXPElement (mvccVersion LONG default 0 not null,uuid_ VARCHAR(75) null,sxpElementId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,description STRING null,elementDefinitionJSON TEXT null,hidden_ BOOLEAN,readOnly BOOLEAN,schemaVersion VARCHAR(75) null,title STRING null,type_ INTEGER,status INTEGER)";
+		"create table SXPElement (mvccVersion LONG default 0 not null,uuid_ VARCHAR(75) null,sxpElementId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,description STRING null,elementDefinitionJSON TEXT null,hidden_ BOOLEAN,key_ VARCHAR(75) null,readOnly BOOLEAN,schemaVersion VARCHAR(75) null,title STRING null,type_ INTEGER,version VARCHAR(75) null,status INTEGER)";
 
 	public static final String TABLE_SQL_DROP = "drop table SXPElement";
 
@@ -380,6 +383,9 @@ public class SXPElementModelImpl
 		attributeGetterFunctions.put("hidden", SXPElement::getHidden);
 		attributeSetterBiConsumers.put(
 			"hidden", (BiConsumer<SXPElement, Boolean>)SXPElement::setHidden);
+		attributeGetterFunctions.put("key", SXPElement::getKey);
+		attributeSetterBiConsumers.put(
+			"key", (BiConsumer<SXPElement, String>)SXPElement::setKey);
 		attributeGetterFunctions.put("readOnly", SXPElement::getReadOnly);
 		attributeSetterBiConsumers.put(
 			"readOnly",
@@ -395,6 +401,9 @@ public class SXPElementModelImpl
 		attributeGetterFunctions.put("type", SXPElement::getType);
 		attributeSetterBiConsumers.put(
 			"type", (BiConsumer<SXPElement, Integer>)SXPElement::setType);
+		attributeGetterFunctions.put("version", SXPElement::getVersion);
+		attributeSetterBiConsumers.put(
+			"version", (BiConsumer<SXPElement, String>)SXPElement::setVersion);
 		attributeGetterFunctions.put("status", SXPElement::getStatus);
 		attributeSetterBiConsumers.put(
 			"status", (BiConsumer<SXPElement, Integer>)SXPElement::setStatus);
@@ -731,6 +740,26 @@ public class SXPElementModelImpl
 
 	@JSON
 	@Override
+	public String getKey() {
+		if (_key == null) {
+			return "";
+		}
+		else {
+			return _key;
+		}
+	}
+
+	@Override
+	public void setKey(String key) {
+		if (_columnOriginalValues == Collections.EMPTY_MAP) {
+			_setColumnOriginalValues();
+		}
+
+		_key = key;
+	}
+
+	@JSON
+	@Override
 	public boolean getReadOnly() {
 		return _readOnly;
 	}
@@ -912,6 +941,26 @@ public class SXPElementModelImpl
 	public int getOriginalType() {
 		return GetterUtil.getInteger(
 			this.<Integer>getColumnOriginalValue("type_"));
+	}
+
+	@JSON
+	@Override
+	public String getVersion() {
+		if (_version == null) {
+			return "";
+		}
+		else {
+			return _version;
+		}
+	}
+
+	@Override
+	public void setVersion(String version) {
+		if (_columnOriginalValues == Collections.EMPTY_MAP) {
+			_setColumnOriginalValues();
+		}
+
+		_version = version;
 	}
 
 	@JSON
@@ -1100,13 +1149,54 @@ public class SXPElementModelImpl
 		sxpElementImpl.setDescription(getDescription());
 		sxpElementImpl.setElementDefinitionJSON(getElementDefinitionJSON());
 		sxpElementImpl.setHidden(isHidden());
+		sxpElementImpl.setKey(getKey());
 		sxpElementImpl.setReadOnly(isReadOnly());
 		sxpElementImpl.setSchemaVersion(getSchemaVersion());
 		sxpElementImpl.setTitle(getTitle());
 		sxpElementImpl.setType(getType());
+		sxpElementImpl.setVersion(getVersion());
 		sxpElementImpl.setStatus(getStatus());
 
 		sxpElementImpl.resetOriginalValues();
+
+		return sxpElementImpl;
+	}
+
+	@Override
+	public SXPElement cloneWithOriginalValues() {
+		SXPElementImpl sxpElementImpl = new SXPElementImpl();
+
+		sxpElementImpl.setMvccVersion(
+			this.<Long>getColumnOriginalValue("mvccVersion"));
+		sxpElementImpl.setUuid(this.<String>getColumnOriginalValue("uuid_"));
+		sxpElementImpl.setSXPElementId(
+			this.<Long>getColumnOriginalValue("sxpElementId"));
+		sxpElementImpl.setCompanyId(
+			this.<Long>getColumnOriginalValue("companyId"));
+		sxpElementImpl.setUserId(this.<Long>getColumnOriginalValue("userId"));
+		sxpElementImpl.setUserName(
+			this.<String>getColumnOriginalValue("userName"));
+		sxpElementImpl.setCreateDate(
+			this.<Date>getColumnOriginalValue("createDate"));
+		sxpElementImpl.setModifiedDate(
+			this.<Date>getColumnOriginalValue("modifiedDate"));
+		sxpElementImpl.setDescription(
+			this.<String>getColumnOriginalValue("description"));
+		sxpElementImpl.setElementDefinitionJSON(
+			this.<String>getColumnOriginalValue("elementDefinitionJSON"));
+		sxpElementImpl.setHidden(
+			this.<Boolean>getColumnOriginalValue("hidden_"));
+		sxpElementImpl.setKey(this.<String>getColumnOriginalValue("key_"));
+		sxpElementImpl.setReadOnly(
+			this.<Boolean>getColumnOriginalValue("readOnly"));
+		sxpElementImpl.setSchemaVersion(
+			this.<String>getColumnOriginalValue("schemaVersion"));
+		sxpElementImpl.setTitle(this.<String>getColumnOriginalValue("title"));
+		sxpElementImpl.setType(this.<Integer>getColumnOriginalValue("type_"));
+		sxpElementImpl.setVersion(
+			this.<String>getColumnOriginalValue("version"));
+		sxpElementImpl.setStatus(
+			this.<Integer>getColumnOriginalValue("status"));
 
 		return sxpElementImpl;
 	}
@@ -1247,6 +1337,14 @@ public class SXPElementModelImpl
 
 		sxpElementCacheModel.hidden = isHidden();
 
+		sxpElementCacheModel.key = getKey();
+
+		String key = sxpElementCacheModel.key;
+
+		if ((key != null) && (key.length() == 0)) {
+			sxpElementCacheModel.key = null;
+		}
+
 		sxpElementCacheModel.readOnly = isReadOnly();
 
 		sxpElementCacheModel.schemaVersion = getSchemaVersion();
@@ -1266,6 +1364,14 @@ public class SXPElementModelImpl
 		}
 
 		sxpElementCacheModel.type = getType();
+
+		sxpElementCacheModel.version = getVersion();
+
+		String version = sxpElementCacheModel.version;
+
+		if ((version != null) && (version.length() == 0)) {
+			sxpElementCacheModel.version = null;
+		}
 
 		sxpElementCacheModel.status = getStatus();
 
@@ -1374,11 +1480,13 @@ public class SXPElementModelImpl
 	private String _descriptionCurrentLanguageId;
 	private String _elementDefinitionJSON;
 	private boolean _hidden;
+	private String _key;
 	private boolean _readOnly;
 	private String _schemaVersion;
 	private String _title;
 	private String _titleCurrentLanguageId;
 	private int _type;
+	private String _version;
 	private int _status;
 
 	public <T> T getColumnValue(String columnName) {
@@ -1422,10 +1530,12 @@ public class SXPElementModelImpl
 		_columnOriginalValues.put(
 			"elementDefinitionJSON", _elementDefinitionJSON);
 		_columnOriginalValues.put("hidden_", _hidden);
+		_columnOriginalValues.put("key_", _key);
 		_columnOriginalValues.put("readOnly", _readOnly);
 		_columnOriginalValues.put("schemaVersion", _schemaVersion);
 		_columnOriginalValues.put("title", _title);
 		_columnOriginalValues.put("type_", _type);
+		_columnOriginalValues.put("version", _version);
 		_columnOriginalValues.put("status", _status);
 	}
 
@@ -1436,6 +1546,7 @@ public class SXPElementModelImpl
 
 		attributeNames.put("uuid_", "uuid");
 		attributeNames.put("hidden_", "hidden");
+		attributeNames.put("key_", "key");
 		attributeNames.put("type_", "type");
 
 		_attributeNames = Collections.unmodifiableMap(attributeNames);
@@ -1474,15 +1585,19 @@ public class SXPElementModelImpl
 
 		columnBitmasks.put("hidden_", 1024L);
 
-		columnBitmasks.put("readOnly", 2048L);
+		columnBitmasks.put("key_", 2048L);
 
-		columnBitmasks.put("schemaVersion", 4096L);
+		columnBitmasks.put("readOnly", 4096L);
 
-		columnBitmasks.put("title", 8192L);
+		columnBitmasks.put("schemaVersion", 8192L);
 
-		columnBitmasks.put("type_", 16384L);
+		columnBitmasks.put("title", 16384L);
 
-		columnBitmasks.put("status", 32768L);
+		columnBitmasks.put("type_", 32768L);
+
+		columnBitmasks.put("version", 65536L);
+
+		columnBitmasks.put("status", 131072L);
 
 		_columnBitmasks = Collections.unmodifiableMap(columnBitmasks);
 	}

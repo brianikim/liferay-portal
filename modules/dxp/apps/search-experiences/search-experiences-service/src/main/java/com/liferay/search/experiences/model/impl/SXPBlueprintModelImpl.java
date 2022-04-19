@@ -89,8 +89,9 @@ public class SXPBlueprintModelImpl
 		{"userId", Types.BIGINT}, {"userName", Types.VARCHAR},
 		{"createDate", Types.TIMESTAMP}, {"modifiedDate", Types.TIMESTAMP},
 		{"configurationJSON", Types.CLOB}, {"description", Types.VARCHAR},
-		{"elementInstancesJSON", Types.CLOB}, {"schemaVersion", Types.VARCHAR},
-		{"title", Types.VARCHAR}, {"status", Types.INTEGER},
+		{"elementInstancesJSON", Types.CLOB}, {"key_", Types.VARCHAR},
+		{"schemaVersion", Types.VARCHAR}, {"title", Types.VARCHAR},
+		{"version", Types.VARCHAR}, {"status", Types.INTEGER},
 		{"statusByUserId", Types.BIGINT}, {"statusByUserName", Types.VARCHAR},
 		{"statusDate", Types.TIMESTAMP}
 	};
@@ -110,8 +111,10 @@ public class SXPBlueprintModelImpl
 		TABLE_COLUMNS_MAP.put("configurationJSON", Types.CLOB);
 		TABLE_COLUMNS_MAP.put("description", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("elementInstancesJSON", Types.CLOB);
+		TABLE_COLUMNS_MAP.put("key_", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("schemaVersion", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("title", Types.VARCHAR);
+		TABLE_COLUMNS_MAP.put("version", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("status", Types.INTEGER);
 		TABLE_COLUMNS_MAP.put("statusByUserId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("statusByUserName", Types.VARCHAR);
@@ -119,7 +122,7 @@ public class SXPBlueprintModelImpl
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table SXPBlueprint (mvccVersion LONG default 0 not null,uuid_ VARCHAR(75) null,sxpBlueprintId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,configurationJSON TEXT null,description STRING null,elementInstancesJSON TEXT null,schemaVersion VARCHAR(75) null,title STRING null,status INTEGER,statusByUserId LONG,statusByUserName VARCHAR(75) null,statusDate DATE null)";
+		"create table SXPBlueprint (mvccVersion LONG default 0 not null,uuid_ VARCHAR(75) null,sxpBlueprintId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,configurationJSON TEXT null,description STRING null,elementInstancesJSON TEXT null,key_ VARCHAR(75) null,schemaVersion VARCHAR(75) null,title STRING null,version VARCHAR(75) null,status INTEGER,statusByUserId LONG,statusByUserName VARCHAR(75) null,statusDate DATE null)";
 
 	public static final String TABLE_SQL_DROP = "drop table SXPBlueprint";
 
@@ -373,6 +376,9 @@ public class SXPBlueprintModelImpl
 			"elementInstancesJSON",
 			(BiConsumer<SXPBlueprint, String>)
 				SXPBlueprint::setElementInstancesJSON);
+		attributeGetterFunctions.put("key", SXPBlueprint::getKey);
+		attributeSetterBiConsumers.put(
+			"key", (BiConsumer<SXPBlueprint, String>)SXPBlueprint::setKey);
 		attributeGetterFunctions.put(
 			"schemaVersion", SXPBlueprint::getSchemaVersion);
 		attributeSetterBiConsumers.put(
@@ -381,6 +387,10 @@ public class SXPBlueprintModelImpl
 		attributeGetterFunctions.put("title", SXPBlueprint::getTitle);
 		attributeSetterBiConsumers.put(
 			"title", (BiConsumer<SXPBlueprint, String>)SXPBlueprint::setTitle);
+		attributeGetterFunctions.put("version", SXPBlueprint::getVersion);
+		attributeSetterBiConsumers.put(
+			"version",
+			(BiConsumer<SXPBlueprint, String>)SXPBlueprint::setVersion);
 		attributeGetterFunctions.put("status", SXPBlueprint::getStatus);
 		attributeSetterBiConsumers.put(
 			"status",
@@ -732,6 +742,26 @@ public class SXPBlueprintModelImpl
 
 	@JSON
 	@Override
+	public String getKey() {
+		if (_key == null) {
+			return "";
+		}
+		else {
+			return _key;
+		}
+	}
+
+	@Override
+	public void setKey(String key) {
+		if (_columnOriginalValues == Collections.EMPTY_MAP) {
+			_setColumnOriginalValues();
+		}
+
+		_key = key;
+	}
+
+	@JSON
+	@Override
 	public String getSchemaVersion() {
 		if (_schemaVersion == null) {
 			return "";
@@ -857,6 +887,26 @@ public class SXPBlueprintModelImpl
 			LocalizationUtil.updateLocalization(
 				titleMap, getTitle(), "Title",
 				LocaleUtil.toLanguageId(defaultLocale)));
+	}
+
+	@JSON
+	@Override
+	public String getVersion() {
+		if (_version == null) {
+			return "";
+		}
+		else {
+			return _version;
+		}
+	}
+
+	@Override
+	public void setVersion(String version) {
+		if (_columnOriginalValues == Collections.EMPTY_MAP) {
+			_setColumnOriginalValues();
+		}
+
+		_version = version;
 	}
 
 	@JSON
@@ -1181,14 +1231,58 @@ public class SXPBlueprintModelImpl
 		sxpBlueprintImpl.setConfigurationJSON(getConfigurationJSON());
 		sxpBlueprintImpl.setDescription(getDescription());
 		sxpBlueprintImpl.setElementInstancesJSON(getElementInstancesJSON());
+		sxpBlueprintImpl.setKey(getKey());
 		sxpBlueprintImpl.setSchemaVersion(getSchemaVersion());
 		sxpBlueprintImpl.setTitle(getTitle());
+		sxpBlueprintImpl.setVersion(getVersion());
 		sxpBlueprintImpl.setStatus(getStatus());
 		sxpBlueprintImpl.setStatusByUserId(getStatusByUserId());
 		sxpBlueprintImpl.setStatusByUserName(getStatusByUserName());
 		sxpBlueprintImpl.setStatusDate(getStatusDate());
 
 		sxpBlueprintImpl.resetOriginalValues();
+
+		return sxpBlueprintImpl;
+	}
+
+	@Override
+	public SXPBlueprint cloneWithOriginalValues() {
+		SXPBlueprintImpl sxpBlueprintImpl = new SXPBlueprintImpl();
+
+		sxpBlueprintImpl.setMvccVersion(
+			this.<Long>getColumnOriginalValue("mvccVersion"));
+		sxpBlueprintImpl.setUuid(this.<String>getColumnOriginalValue("uuid_"));
+		sxpBlueprintImpl.setSXPBlueprintId(
+			this.<Long>getColumnOriginalValue("sxpBlueprintId"));
+		sxpBlueprintImpl.setCompanyId(
+			this.<Long>getColumnOriginalValue("companyId"));
+		sxpBlueprintImpl.setUserId(this.<Long>getColumnOriginalValue("userId"));
+		sxpBlueprintImpl.setUserName(
+			this.<String>getColumnOriginalValue("userName"));
+		sxpBlueprintImpl.setCreateDate(
+			this.<Date>getColumnOriginalValue("createDate"));
+		sxpBlueprintImpl.setModifiedDate(
+			this.<Date>getColumnOriginalValue("modifiedDate"));
+		sxpBlueprintImpl.setConfigurationJSON(
+			this.<String>getColumnOriginalValue("configurationJSON"));
+		sxpBlueprintImpl.setDescription(
+			this.<String>getColumnOriginalValue("description"));
+		sxpBlueprintImpl.setElementInstancesJSON(
+			this.<String>getColumnOriginalValue("elementInstancesJSON"));
+		sxpBlueprintImpl.setKey(this.<String>getColumnOriginalValue("key_"));
+		sxpBlueprintImpl.setSchemaVersion(
+			this.<String>getColumnOriginalValue("schemaVersion"));
+		sxpBlueprintImpl.setTitle(this.<String>getColumnOriginalValue("title"));
+		sxpBlueprintImpl.setVersion(
+			this.<String>getColumnOriginalValue("version"));
+		sxpBlueprintImpl.setStatus(
+			this.<Integer>getColumnOriginalValue("status"));
+		sxpBlueprintImpl.setStatusByUserId(
+			this.<Long>getColumnOriginalValue("statusByUserId"));
+		sxpBlueprintImpl.setStatusByUserName(
+			this.<String>getColumnOriginalValue("statusByUserName"));
+		sxpBlueprintImpl.setStatusDate(
+			this.<Date>getColumnOriginalValue("statusDate"));
 
 		return sxpBlueprintImpl;
 	}
@@ -1336,6 +1430,14 @@ public class SXPBlueprintModelImpl
 			sxpBlueprintCacheModel.elementInstancesJSON = null;
 		}
 
+		sxpBlueprintCacheModel.key = getKey();
+
+		String key = sxpBlueprintCacheModel.key;
+
+		if ((key != null) && (key.length() == 0)) {
+			sxpBlueprintCacheModel.key = null;
+		}
+
 		sxpBlueprintCacheModel.schemaVersion = getSchemaVersion();
 
 		String schemaVersion = sxpBlueprintCacheModel.schemaVersion;
@@ -1350,6 +1452,14 @@ public class SXPBlueprintModelImpl
 
 		if ((title != null) && (title.length() == 0)) {
 			sxpBlueprintCacheModel.title = null;
+		}
+
+		sxpBlueprintCacheModel.version = getVersion();
+
+		String version = sxpBlueprintCacheModel.version;
+
+		if ((version != null) && (version.length() == 0)) {
+			sxpBlueprintCacheModel.version = null;
 		}
 
 		sxpBlueprintCacheModel.status = getStatus();
@@ -1478,9 +1588,11 @@ public class SXPBlueprintModelImpl
 	private String _description;
 	private String _descriptionCurrentLanguageId;
 	private String _elementInstancesJSON;
+	private String _key;
 	private String _schemaVersion;
 	private String _title;
 	private String _titleCurrentLanguageId;
+	private String _version;
 	private int _status;
 	private long _statusByUserId;
 	private String _statusByUserName;
@@ -1527,8 +1639,10 @@ public class SXPBlueprintModelImpl
 		_columnOriginalValues.put("description", _description);
 		_columnOriginalValues.put(
 			"elementInstancesJSON", _elementInstancesJSON);
+		_columnOriginalValues.put("key_", _key);
 		_columnOriginalValues.put("schemaVersion", _schemaVersion);
 		_columnOriginalValues.put("title", _title);
+		_columnOriginalValues.put("version", _version);
 		_columnOriginalValues.put("status", _status);
 		_columnOriginalValues.put("statusByUserId", _statusByUserId);
 		_columnOriginalValues.put("statusByUserName", _statusByUserName);
@@ -1541,6 +1655,7 @@ public class SXPBlueprintModelImpl
 		Map<String, String> attributeNames = new HashMap<>();
 
 		attributeNames.put("uuid_", "uuid");
+		attributeNames.put("key_", "key");
 
 		_attributeNames = Collections.unmodifiableMap(attributeNames);
 	}
@@ -1578,17 +1693,21 @@ public class SXPBlueprintModelImpl
 
 		columnBitmasks.put("elementInstancesJSON", 1024L);
 
-		columnBitmasks.put("schemaVersion", 2048L);
+		columnBitmasks.put("key_", 2048L);
 
-		columnBitmasks.put("title", 4096L);
+		columnBitmasks.put("schemaVersion", 4096L);
 
-		columnBitmasks.put("status", 8192L);
+		columnBitmasks.put("title", 8192L);
 
-		columnBitmasks.put("statusByUserId", 16384L);
+		columnBitmasks.put("version", 16384L);
 
-		columnBitmasks.put("statusByUserName", 32768L);
+		columnBitmasks.put("status", 32768L);
 
-		columnBitmasks.put("statusDate", 65536L);
+		columnBitmasks.put("statusByUserId", 65536L);
+
+		columnBitmasks.put("statusByUserName", 131072L);
+
+		columnBitmasks.put("statusDate", 262144L);
 
 		_columnBitmasks = Collections.unmodifiableMap(columnBitmasks);
 	}
