@@ -8817,7 +8817,7 @@
 			</library>
 			<library>
 				<file-name>lib/portal/xstream.jar</file-name>
-				<version>1.4.17</version>
+				<version>1.4.19</version>
 				<project-name>XStream</project-name>
 				<project-url>http://xstream.codehaus.org</project-url>
 				<licenses>
