@@ -35,6 +35,8 @@ import com.liferay.portal.security.sso.openid.connect.internal.session.manager.O
 import com.liferay.portal.security.sso.openid.connect.internal.util.OpenIdConnectTokenRequestUtil;
 
 import com.nimbusds.jwt.JWT;
+import com.nimbusds.langtag.LangTag;
+import com.nimbusds.langtag.LangTagException;
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.ResponseType;
@@ -64,6 +66,10 @@ import java.io.IOException;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -187,11 +193,28 @@ public class OpenIdConnectAuthenticationHandlerImpl
 				OpenIdConnectWebKeys.OPEN_ID_CONNECT_SESSION_ID);
 		}
 
+		List<LangTag> langTags = null;
+
+		Locale locale = _portal.getLocale(httpServletRequest);
+
+		try {
+			if (locale != null) {
+				langTags = Arrays.asList(new LangTag(locale.getLanguage()));
+			}
+		}
+		catch (LangTagException langTagException) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(
+					"Unable to create the LangTag with the current locale: " +
+						locale.getLanguage());
+			}
+		}
+
 		Nonce nonce = new Nonce();
 		State state = new State();
 
 		URI authenticationRequestURI = _getAuthenticationRequestURI(
-			_getLoginRedirectURI(httpServletRequest), nonce,
+			langTags, _getLoginRedirectURI(httpServletRequest), nonce,
 			openIdConnectProvider,
 			Scope.parse(openIdConnectProvider.getScopes()), state);
 
@@ -215,7 +238,7 @@ public class OpenIdConnectAuthenticationHandlerImpl
 	}
 
 	private URI _getAuthenticationRequestURI(
-			URI loginRedirectURI, Nonce nonce,
+			List<LangTag> langTags, URI loginRedirectURI, Nonce nonce,
 			OpenIdConnectProvider<OIDCClientMetadata, OIDCProviderMetadata>
 				openIdConnectProvider,
 			Scope scope, State state)
@@ -228,8 +251,10 @@ public class OpenIdConnectAuthenticationHandlerImpl
 
 		AuthenticationRequest authenticationRequest = new AuthenticationRequest(
 			oidcProviderMetadata.getAuthorizationEndpointURI(), responseType,
-			scope, new ClientID(openIdConnectProvider.getClientId()),
-			loginRedirectURI, state, nonce);
+			null, scope, new ClientID(openIdConnectProvider.getClientId()),
+			loginRedirectURI, state, nonce, null, null, -1, langTags, null,
+			null, null, null, null, null, null, null, null, null, null, null,
+			false, null);
 
 		return authenticationRequest.toURI();
 	}
