@@ -114,7 +114,7 @@ Export-Package:\
 	com.sun.syndication.io;version='1.0',\
 	com.sun.syndication.io.impl;version='1.0',\
 	\
-	com.thoughtworks.xstream.*;version='1.4.17',\
+	com.thoughtworks.xstream.*;version='1.4.19',\
 	\
 	io.netty.*;version='4.1',\
 	\
