@@ -149,6 +149,11 @@ public class LayoutDataConverter {
 						"columnSpacing", true);
 
 					rowStyledLayoutStructureItem.setGutters(columnSpacing);
+
+					boolean nonindexable = inputRowConfigJSONObject.getBoolean(
+						"nonIndexable", false);
+
+					rowStyledLayoutStructureItem.setIndexed(!nonindexable);
 				}
 
 				for (int j = 0; j < columnsJSONArray.length(); j++) {
