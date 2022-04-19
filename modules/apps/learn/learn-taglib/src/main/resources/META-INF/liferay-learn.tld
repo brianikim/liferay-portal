@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+
+<taglib
+	version="2.1"
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-jsptaglibrary_2_1.xsd"
+>
+	<description></description>
+	<tlib-version>1.0</tlib-version>
+	<short-name>liferay-learn</short-name>
+	<uri>http://liferay.com/tld/learn</uri>
+	<tag>
+		<name>json</name>
+		<tag-class>com.liferay.learn.taglib.servlet.taglib.JSONTag</tag-class>
+		<tei-class>com.liferay.learn.taglib.servlet.taglib.JSONTei</tei-class>
+		<body-content>JSP</body-content>
+		<attribute>
+			<name>resource</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>var</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+	</tag>
+	<tag>
+		<name>message</name>
+		<tag-class>com.liferay.learn.taglib.servlet.taglib.MessageTag</tag-class>
+		<tei-class>com.liferay.learn.taglib.servlet.taglib.MessageTei</tei-class>
+		<body-content>JSP</body-content>
+		<attribute>
+			<name>key</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>resource</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>var</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+	</tag>
+</taglib>
