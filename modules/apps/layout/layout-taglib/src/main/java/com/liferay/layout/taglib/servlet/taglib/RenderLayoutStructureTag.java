@@ -120,7 +120,7 @@ public class RenderLayoutStructureTag extends IncludeTag {
 	}
 
 	protected static final String LAYOUT_STRUCTURE =
-		RenderLayoutStructureTag.class.getName() "#LAYOUT_STRUCTURE";
+		RenderLayoutStructureTag.class.getName() + "#LAYOUT_STRUCTURE";
 
 	private static final String _PAGE = "/render_layout_structure/page.jsp";
 
