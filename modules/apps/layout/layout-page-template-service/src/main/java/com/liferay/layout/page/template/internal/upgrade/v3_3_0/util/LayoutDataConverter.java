@@ -58,14 +58,14 @@ public class LayoutDataConverter {
 			return data;
 		}
 
-		JSONArray nonindexableFragmentEntryLinkIdsJSONArray =
-			inputDataJSONObject.getJSONArray(
-				"nonIndexableFragmentEntryLinkIds");
-
 		LayoutStructure layoutStructure = new LayoutStructure();
 
 		LayoutStructureItem rootLayoutStructureItem =
 			layoutStructure.addRootLayoutStructureItem();
+
+		JSONArray nonindexableFragmentEntryLinkIdsJSONArray =
+			inputDataJSONObject.getJSONArray(
+				"nonIndexableFragmentEntryLinkIds");
 
 		for (int i = 0; i < structureJSONArray.length(); i++) {
 			JSONObject inputRowJSONObject = structureJSONArray.getJSONObject(i);
