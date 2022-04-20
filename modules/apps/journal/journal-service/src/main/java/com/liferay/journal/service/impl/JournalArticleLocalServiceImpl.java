@@ -9111,16 +9111,6 @@ public class JournalArticleLocalServiceImpl
 	}
 
 	private int _getNotificationType(String emailType) {
-		if (emailType.equals("move_to")) {
-			return JournalArticleConstants.
-				NOTIFICATION_TYPE_MOVE_ENTRY_TO_FOLDER;
-		}
-
-		if (emailType.equals("move_to_trash")) {
-			return JournalArticleConstants.
-				NOTIFICATION_TYPE_MOVE_ENTRY_TO_TRASH;
-		}
-
 		if (emailType.equals("move_from")) {
 			return JournalArticleConstants.
 				NOTIFICATION_TYPE_MOVE_ENTRY_FROM_FOLDER;
@@ -9129,6 +9119,16 @@ public class JournalArticleLocalServiceImpl
 		if (emailType.equals("move_from_trash")) {
 			return JournalArticleConstants.
 				NOTIFICATION_TYPE_MOVE_ENTRY_FROM_TRASH;
+		}
+
+		if (emailType.equals("move_to")) {
+			return JournalArticleConstants.
+				NOTIFICATION_TYPE_MOVE_ENTRY_TO_FOLDER;
+		}
+
+		if (emailType.equals("move_to_trash")) {
+			return JournalArticleConstants.
+				NOTIFICATION_TYPE_MOVE_ENTRY_TO_TRASH;
 		}
 
 		if (emailType.equals("update")) {
