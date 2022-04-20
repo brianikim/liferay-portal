@@ -83,14 +83,11 @@ public class LowLevelSearchOptionsPortletSharedSearchContributor
 				lowLevelSearchOptionsPortletPreferences.getIndexesOptional())
 		).withSearchContext(
 			searchContext -> {
-				applyAttributes(
-					lowLevelSearchOptionsPortletPreferences, searchContext);
-
 				ThemeDisplay themeDisplay =
 					portletSharedSearchSettings.getThemeDisplay();
 
 				searchContext.setAttribute(
-					"search.experiences.current.group.id",
+					"search.experiences.scope.group.id",
 					themeDisplay.getScopeGroupId());
 
 				HttpServletRequest httpServletRequest =
@@ -100,6 +97,9 @@ public class LowLevelSearchOptionsPortletSharedSearchContributor
 				searchContext.setAttribute(
 					"search.experiences.ip.address",
 					httpServletRequest.getRemoteAddr());
+
+				applyAttributes(
+					lowLevelSearchOptionsPortletPreferences, searchContext);
 			}
 		);
 	}
