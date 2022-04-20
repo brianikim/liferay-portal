@@ -8166,17 +8166,15 @@ public class JournalArticleLocalServiceImpl
 			return;
 		}
 
-		String articleTitle = article.getTitle(serviceContext.getLanguageId());
-
-		String articleURL = JournalUtil.getJournalControlPanelLink(
-			article.getFolderId(), article.getGroupId(),
-			serviceContext.getLiferayPortletResponse());
-
 		String fromAddress =
 			journalGroupServiceConfiguration.emailFromAddress();
 
 		_populateSubscriptionSender(
-			article, articleURL, action, fromAddress,
+			article,
+			JournalUtil.getJournalControlPanelLink(
+				article.getFolderId(), article.getGroupId(),
+				serviceContext.getLiferayPortletResponse()),
+			action, fromAddress,
 			journalGroupServiceConfiguration.emailFromName(),
 			journalGroupServiceConfiguration, serviceContext,
 			subscriptionSender);
@@ -8216,15 +8214,14 @@ public class JournalArticleLocalServiceImpl
 			folderName = LanguageUtil.get(LocaleUtil.getSiteDefault(), "home");
 		}
 
-		String articleStatus = LanguageUtil.get(
-			LocaleUtil.getSiteDefault(),
-			WorkflowConstants.getStatusLabel(article.getStatus()));
-
 		subscriptionSender.setContextAttributes(
-			"[$FOLDER_NAME$]", folderName, "[$ARTICLE_STATUS$]", articleStatus);
-
+			"[$FOLDER_NAME$]", folderName, "[$ARTICLE_STATUS$]",
+			LanguageUtil.get(
+				LocaleUtil.getSiteDefault(),
+				WorkflowConstants.getStatusLabel(article.getStatus())));
 		subscriptionSender.setCurrentUserId(userId);
-		subscriptionSender.setEntryTitle(articleTitle);
+		subscriptionSender.setEntryTitle(
+			article.getTitle(serviceContext.getLanguageId()));
 		subscriptionSender.setNotificationType(_getNotificationType(action));
 		subscriptionSender.setReplyToAddress(fromAddress);
 
