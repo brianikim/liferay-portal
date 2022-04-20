@@ -420,7 +420,7 @@ public class LanguageResources {
 			Locale locale = null;
 
 			if (Validator.isNotNull(languageId)) {
-				locale = LocaleUtil.fromLanguageId(languageId, true);
+				locale = LocaleUtil.fromLanguageId(languageId, false);
 			}
 			else {
 				locale = new Locale(StringPool.BLANK);
