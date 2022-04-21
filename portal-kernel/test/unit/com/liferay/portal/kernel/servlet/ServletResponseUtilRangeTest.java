@@ -19,6 +19,8 @@ import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.util.PropsTestUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.FileUtil;
+import com.liferay.portal.kernel.util.MimeTypes;
+import com.liferay.portal.kernel.util.MimeTypesUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -32,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -43,6 +46,7 @@ import org.junit.runner.RunWith;
 
 import org.mockito.Matchers;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -63,6 +67,7 @@ public class ServletResponseUtilRangeTest extends PowerMockito {
 		MockitoAnnotations.initMocks(this);
 
 		setUpFileUtil();
+		setUpMimeTypes();
 		setUpPropsUtil();
 	}
 
@@ -242,6 +247,18 @@ public class ServletResponseUtilRangeTest extends PowerMockito {
 		);
 	}
 
+	protected void setUpMimeTypes() {
+		MimeTypesUtil mimeTypesUtil = new MimeTypesUtil();
+
+		mimeTypesUtil.setMimeTypes(_mimeTypes);
+
+		when(
+			_mimeTypes.getExtensions(Mockito.anyString())
+		).thenReturn(
+			Collections.emptySet()
+		);
+	}
+
 	protected void setUpPropsUtil() {
 		PropsTestUtil.setProps(
 			PropsKeys.WEB_SERVER_SERVLET_MAX_RANGE_FIELDS, "10");
@@ -332,5 +349,8 @@ public class ServletResponseUtilRangeTest extends PowerMockito {
 
 	@Mock
 	private HttpServletRequest _httpServletRequest;
+
+	@Mock
+	private MimeTypes _mimeTypes;
 
 }
