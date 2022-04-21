@@ -103,7 +103,7 @@ SearchContainer<?> searchContainer = new SearchContainer(renderRequest, itemSele
 		/>
 	</c:if>
 
-	<c:if test="<%= showDragAndDropZone && !showSearchInfo && DLFolderPermission.contains(permissionChecker, scopeGroupId, folderId, ActionKeys.ADD_DOCUMENT) %>">
+	<c:if test="<%= showDragAndDropZone && !showSearchInfo %>">
 		<liferay-util:buffer
 			var="selectFileHTML"
 		>
