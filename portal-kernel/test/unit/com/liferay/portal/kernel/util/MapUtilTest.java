@@ -28,66 +28,46 @@ import org.junit.Test;
 public class MapUtilTest {
 
 	@Test
-	public void testGetWithFallbackKeyEmptyTranslation() {
+	public void testGetWithFallback() {
 		MapUtil mapUtil = new MapUtil();
 
 		Assert.assertEquals(
-			"US translated",
+			"pencil",
 			mapUtil.getWithFallbackKey(
 				HashMapBuilder.put(
-					LocaleUtil.getDefault(), "US translated"
+					LocaleUtil.BRAZIL, StringPool.BLANK
 				).put(
-					LocaleUtil.CHINA, "CN translated"
+					LocaleUtil.CHINA, "鉛筆"
 				).put(
-					LocaleUtil.FRANCE, StringPool.BLANK
+					LocaleUtil.getDefault(), "pencil"
 				).getMap(),
-				LocaleUtil.FRANCE, LocaleUtil.getDefault()));
-	}
-
-	@Test
-	public void testGetWithFallbackKeyExistingTranslation() {
-		MapUtil mapUtil = new MapUtil();
+				LocaleUtil.BRAZIL, LocaleUtil.getDefault()));
 
 		Map<Locale, String> localizedValueMap = HashMapBuilder.put(
-			LocaleUtil.getDefault(), "US translated"
+			LocaleUtil.BRAZIL, "lápis"
 		).put(
-			LocaleUtil.CHINA, "CN translated"
+			LocaleUtil.CHINA, "鉛筆"
 		).put(
-			LocaleUtil.FRANCE, "FR translated"
+			LocaleUtil.getDefault(), "pencil"
 		).getMap();
 
 		Assert.assertEquals(
-			"US translated",
+			"lápis",
+			mapUtil.getWithFallbackKey(
+				localizedValueMap, LocaleUtil.BRAZIL, LocaleUtil.getDefault()));
+		Assert.assertEquals(
+			"鉛筆",
+			mapUtil.getWithFallbackKey(
+				localizedValueMap, LocaleUtil.CHINA, LocaleUtil.getDefault()));
+		Assert.assertEquals(
+			"pencil",
 			mapUtil.getWithFallbackKey(
 				localizedValueMap, LocaleUtil.getDefault(),
 				LocaleUtil.getDefault()));
-
 		Assert.assertEquals(
-			"FR translated",
+			"pencil",
 			mapUtil.getWithFallbackKey(
-				localizedValueMap, LocaleUtil.FRANCE, LocaleUtil.getDefault()));
-
-		Assert.assertEquals(
-			"CN translated",
-			mapUtil.getWithFallbackKey(
-				localizedValueMap, LocaleUtil.CHINA, LocaleUtil.getDefault()));
-	}
-
-	@Test
-	public void testGetWithFallbackKeyNull() {
-		MapUtil mapUtil = new MapUtil();
-
-		Assert.assertEquals(
-			"US translated",
-			mapUtil.getWithFallbackKey(
-				HashMapBuilder.put(
-					LocaleUtil.getDefault(), "US translated"
-				).put(
-					LocaleUtil.CHINA, "CN translated"
-				).put(
-					LocaleUtil.FRANCE, "FR translated"
-				).getMap(),
-				null, LocaleUtil.getDefault()));
+				localizedValueMap, null, LocaleUtil.getDefault()));
 	}
 
 }
