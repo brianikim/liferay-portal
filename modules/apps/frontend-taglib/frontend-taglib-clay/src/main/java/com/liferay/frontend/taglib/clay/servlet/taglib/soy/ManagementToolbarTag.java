@@ -27,6 +27,7 @@ import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -54,6 +55,33 @@ public class ManagementToolbarTag extends BaseClayTag {
 		}
 
 		Map<String, Object> context = getContext();
+
+		List<DropdownItem> filterDropdownItems =
+			(List<DropdownItem>)context.get("filterItems");
+
+		if (filterDropdownItems != null) {
+			filterDropdownItems.forEach(
+				filterDropdownItem -> {
+					List<DropdownItem> items =
+						(List<DropdownItem>)filterDropdownItem.get("items");
+
+					if (items != null) {
+						items.forEach(
+							item -> item.setLabel(
+								HtmlUtil.escapeAttribute(
+									(String)item.get("label"))));
+					}
+				});
+		}
+
+		List<LabelItem> filterLabelItems = (List<LabelItem>)context.get(
+			"filterLabels");
+
+		if (filterLabelItems != null) {
+			filterLabelItems.forEach(
+				labelItem -> labelItem.setLabel(
+					HtmlUtil.escapeAttribute((String)labelItem.get("label"))));
+		}
 
 		String searchContainerId = (String)context.get("searchContainerId");
 
