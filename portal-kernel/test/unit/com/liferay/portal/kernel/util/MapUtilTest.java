@@ -31,22 +31,12 @@ public class MapUtilTest {
 	public void testGetWithFallback() {
 		MapUtil mapUtil = new MapUtil();
 
-		Assert.assertEquals(
-			"pencil",
-			mapUtil.getWithFallbackKey(
-				HashMapBuilder.put(
-					LocaleUtil.BRAZIL, StringPool.BLANK
-				).put(
-					LocaleUtil.CHINA, "鉛筆"
-				).put(
-					LocaleUtil.getDefault(), "pencil"
-				).getMap(),
-				LocaleUtil.BRAZIL, LocaleUtil.getDefault()));
-
 		Map<Locale, String> localizedValueMap = HashMapBuilder.put(
 			LocaleUtil.BRAZIL, "lápis"
 		).put(
 			LocaleUtil.CHINA, "鉛筆"
+		).put(
+			LocaleUtil.SPAIN, StringPool.BLANK
 		).put(
 			LocaleUtil.getDefault(), "pencil"
 		).getMap();
@@ -59,6 +49,10 @@ public class MapUtilTest {
 			"鉛筆",
 			mapUtil.getWithFallbackKey(
 				localizedValueMap, LocaleUtil.CHINA, LocaleUtil.getDefault()));
+		Assert.assertEquals(
+			"pencil",
+			mapUtil.getWithFallbackKey(
+				localizedValueMap, LocaleUtil.SPAIN, LocaleUtil.getDefault()));
 		Assert.assertEquals(
 			"pencil",
 			mapUtil.getWithFallbackKey(
