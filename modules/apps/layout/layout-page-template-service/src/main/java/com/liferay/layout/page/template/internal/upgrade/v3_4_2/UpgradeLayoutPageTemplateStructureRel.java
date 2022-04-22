@@ -256,6 +256,10 @@ public class UpgradeLayoutPageTemplateStructureRel extends UpgradeProcess {
 							fragmentEntryLink.getConfiguration()),
 					fragmentConfigValuesJSONObject, stylesJSONObject);
 
+				if (_isEmpty(fragmentConfigValuesJSONObject)) {
+					continue;
+				}
+
 				_replaceAlign(fragmentConfigValuesJSONObject, stylesJSONObject);
 				_replaceBorderRadius(
 					fragmentConfigValuesJSONObject, stylesJSONObject);
