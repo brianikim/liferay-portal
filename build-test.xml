@@ -2767,6 +2767,986 @@ tell application "Safari" to quit
 		</sequential>
 	</macrodef>
 
+	<macrodef name="prepare-selenium-analytics-cloud-properties">
+		<sequential>
+			<get-testcase-property property.name="analytics.cloud.enabled" />
+
+			<if>
+				<isset property="test.analytics.cloud.url" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					analytics.cloud.url=${test.analytics.cloud.url}
+					</echo>
+				</then>
+				<elseif>
+					<equals arg1="${analytics.cloud.enabled}" arg2="true" />
+					<then>
+						<echo append="true" file="${test.ext.properties.file}">
+						analytics.cloud.url=${analytics.cloud.faro.frontend.url}
+						</echo>
+					</then>
+				</elseif>
+			</if>
+
+			<if>
+				<isset property="test.analytics.cloud.publisher.url" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					analytics.cloud.publisher.url=${test.analytics.cloud.publisher.url}
+					</echo>
+				</then>
+				<elseif>
+					<equals arg1="${analytics.cloud.enabled}" arg2="true" />
+					<then>
+						<echo append="true" file="${test.ext.properties.file}">
+						analytics.cloud.publisher.url=${analytics.cloud.asah.publisher.url}
+						</echo>
+					</then>
+				</elseif>
+			</if>
+
+			<echo append="true" file="${test.ext.properties.file}">
+			analytics.cloud.asah.backend.url=${analytics.cloud.asah.backend.url}
+			analytics.cloud.asah.curator.batch.url=${analytics.cloud.asah.curator.batch.url}
+			analytics.cloud.asah.curator.stream.url=${analytics.cloud.asah.curator.stream.url}
+			analytics.cloud.asah.publisher.url=${analytics.cloud.asah.publisher.url}
+			analytics.cloud.faro.frontend.url=${analytics.cloud.faro.frontend.url}
+			</echo>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="prepare-selenium-app-server-properties">
+		<sequential>
+			<if>
+				<isset property="app.server.type" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					app.server.type=${app.server.type}
+					</echo>
+				</then>
+			</if>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="prepare-selenium-browser">
+		<sequential>
+			<get-testcase-property property.name="browser.type" />
+			<get-testcase-property property.name="browser.${browser.type}.version" />
+
+			<propertycopy from="browser.${browser.type}.version" name="browser.version" override="true" />
+
+			<echo append="true" file="${test.ext.properties.file}">
+			browser.type=${browser.type}
+			browser.version=${browser.version}
+			</echo>
+
+			<if>
+				<equals arg1="${browser.type}" arg2="chrome" />
+				<then>
+					<get-testcase-property append="true" delimiter=" " property.name="browser.chrome.bin.args" />
+
+					<if>
+						<isset property="browser.chrome.bin.args" />
+						<then>
+							<echo append="true" file="${test.ext.properties.file}">
+							browser.chrome.bin.args=${browser.chrome.bin.args}
+							</echo>
+						</then>
+					</if>
+
+					<propertycopy from="browser.chrome.bin.file[${browser.chrome.version}]" name="browser.chrome.bin.file" silent="true" />
+
+					<if>
+						<isset property="browser.chrome.bin.file" />
+						<then>
+							<echo append="true" file="${test.ext.properties.file}">
+							browser.chrome.bin.file=${browser.chrome.bin.file}
+							</echo>
+						</then>
+					</if>
+				</then>
+			</if>
+
+			<if>
+				<equals arg1="${browser.type}" arg2="edge" />
+				<then>
+					<prepare-edge-driver />
+
+					<echo append="true" file="${test.ext.properties.file}">
+					selenium.edge.driver.executable=${selenium.edge.driver.executable}
+					selenium.executable.dir.name=${selenium.executable.dir.name}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<and>
+					<equals arg1="${browser.firefox.version}" arg2="52.0" />
+					<equals arg1="${browser.type}" arg2="firefox" />
+				</and>
+				<then>
+					<propertycopy from="browser.firefox.bin.file[${browser.firefox.version}]" name="browser.firefox.bin.file" silent="true" />
+
+					<if>
+						<isset property="browser.firefox.bin.file" />
+						<then>
+							<echo append="true" file="${test.ext.properties.file}">
+							browser.firefox.bin.file=${browser.firefox.bin.file}
+							</echo>
+						</then>
+					</if>
+
+					<prepare-gecko-driver />
+
+					<echo append="true" file="${test.ext.properties.file}">
+					selenium.executable.dir.name=${selenium.executable.dir.name}
+					selenium.gecko.driver.executable=${selenium.gecko.driver.executable}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<equals arg1="${browser.type}" arg2="internetexplorer" />
+				<then>
+					<prepare-ie-driver />
+
+					<echo append="true" file="${test.ext.properties.file}">
+					selenium.executable.dir.name=${selenium.executable.dir.name}
+					selenium.ie.driver.executable=${selenium.ie.driver.executable}
+					selenium.ie.driver.version=${selenium.ie.driver.version}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<equals arg1="${browser.type}" arg2="safari" />
+				<then>
+					<prepare-safari-driver />
+				</then>
+			</if>
+
+			<get-browser-property property.name="browser.docker.image" />
+
+			<if>
+				<isset property="browser.docker.image" />
+				<then>
+					<get-browser-property property.name="browser.host" />
+
+					<echo append="true" file="${test.ext.properties.file}">
+					selenium.remote.driver.url=http://${browser.host}:4444
+					</echo>
+				</then>
+				<elseif>
+					<isset property="selenium.remote.driver.url" />
+					<then>
+						<echo append="true" file="${test.ext.properties.file}">
+						selenium.desired.capabilities.platform=${selenium.desired.capabilities.platform}
+						selenium.remote.driver.url=${selenium.remote.driver.url}
+						</echo>
+					</then>
+				</elseif>
+			</if>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="prepare-selenium-database-properties">
+		<sequential>
+			<for list="${database.types}" param="database.type">
+				<sequential>
+					<if>
+						<isset property="database.@{database.type}.driver" />
+						<then>
+							<local name="database.driver" />
+
+							<propertycopy from="database.@{database.type}.driver" name="database.driver" />
+
+							<echo append="true" file="${test.ext.properties.file}">
+							database.@{database.type}.driver=${database.driver}
+							</echo>
+						</then>
+					</if>
+
+					<if>
+						<isset property="database.@{database.type}.password" />
+						<then>
+							<local name="database.password" />
+
+							<propertycopy from="database.@{database.type}.password" name="database.password" />
+
+							<echo append="true" file="${test.ext.properties.file}">
+							database.@{database.type}.password=${database.password}
+							</echo>
+						</then>
+					</if>
+
+					<if>
+						<isset property="database.@{database.type}.schema" />
+						<then>
+							<local name="database.schema" />
+
+							<propertycopy from="database.@{database.type}.schema" name="database.schema" />
+
+							<echo append="true" file="${test.ext.properties.file}">
+							database.@{database.type}.schema=${database.schema}
+							</echo>
+						</then>
+					</if>
+
+					<if>
+						<isset property="database.@{database.type}.url" />
+						<then>
+							<local name="database.url" />
+
+							<propertycopy from="database.@{database.type}.url" name="database.url" />
+
+							<echo append="true" file="${test.ext.properties.file}">
+							database.@{database.type}.url=${database.url}
+							</echo>
+						</then>
+					</if>
+
+					<if>
+						<isset property="database.@{database.type}.username" />
+						<then>
+							<local name="database.username" />
+
+							<propertycopy from="database.@{database.type}.username" name="database.username" />
+
+							<echo append="true" file="${test.ext.properties.file}">
+							database.@{database.type}.username=${database.username}
+							</echo>
+						</then>
+					</if>
+				</sequential>
+			</for>
+
+			<if>
+				<isset property="database.type" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					database.type=${database.type}
+					</echo>
+				</then>
+			</if>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="prepare-selenium-email-properties">
+		<sequential>
+			<if>
+				<isset property="email.address.1" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					email.address.1=${email.address.1}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="email.address.2" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					email.address.2=${email.address.2}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="email.address.3" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					email.address.3=${email.address.3}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="email.address.4" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					email.address.4=${email.address.4}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="email.address.5" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					email.address.5=${email.address.5}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="email.password.1" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					email.password.1=${email.password.1}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="email.password.2" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					email.password.2=${email.password.2}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="email.password.3" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					email.password.3=${email.password.3}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="email.password.4" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					email.password.4=${email.password.4}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="email.password.5" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					email.password.5=${email.password.5}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="lcs.email.address.1" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					lcs.email.address.1=${lcs.email.address.1}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="lcs.email.address.2" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					lcs.email.address.2=${lcs.email.address.2}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="lcs.email.address.3" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					lcs.email.address.3=${lcs.email.address.3}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="lcs.site.password.1" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					lcs.site.password.1=${lcs.site.password.1}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="lcs.site.password.2" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					lcs.site.password.2=${lcs.site.password.2}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="lcs.site.password.3" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					lcs.site.password.3=${lcs.site.password.3}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="marketplace.email.address.1" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					marketplace.email.address.1=${marketplace.email.address.1}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="marketplace.email.address.2" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					marketplace.email.address.2=${marketplace.email.address.2}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="marketplace.email.address.3" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					marketplace.email.address.3=${marketplace.email.address.3}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="marketplace.email.address.4" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					marketplace.email.address.4=${marketplace.email.address.4}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="marketplace.email.address.5" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					marketplace.email.address.5=${marketplace.email.address.5}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="marketplace.email.password.1" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					marketplace.email.password.1=${marketplace.email.password.1}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="marketplace.email.password.2" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					marketplace.email.password.2=${marketplace.email.password.2}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="marketplace.email.password.3" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					marketplace.email.password.3=${marketplace.email.password.3}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="marketplace.email.password.4" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					marketplace.email.password.4=${marketplace.email.password.4}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="marketplace.email.password.5" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					marketplace.email.password.5=${marketplace.email.password.5}
+					</echo>
+				</then>
+			</if>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="prepare-selenium-facebook-properties">
+		<sequential>
+			<if>
+				<isset property="facebook.application.id" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					facebook.application.id=${facebook.application.id}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="facebook.application.secret" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					facebook.application.secret=${facebook.application.secret}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="facebook.email" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					facebook.email=${facebook.email}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="facebook.password" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					facebook.password=${facebook.password}
+					</echo>
+				</then>
+			</if>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="prepare-selenium-google-properties">
+		<sequential>
+			<if>
+				<isset property="google.api.key.1" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					google.api.key.1=${google.api.key.1}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="google.api.key.2" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					google.api.key.2=${google.api.key.2}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="google.api.key.3" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					google.api.key.3=${google.api.key.3}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="google.api.key.4" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					google.api.key.4=${google.api.key.4}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="google.client.id.1" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					google.client.id.1=${google.client.id.1}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="google.client.id.2" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					google.client.id.2=${google.client.id.2}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="google.client.id.3" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					google.client.id.3=${google.client.id.3}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="google.client.id.4" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					google.client.id.4=${google.client.id.4}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="google.client.secret.1" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					google.client.secret.1=${google.client.secret.1}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="google.client.secret.2" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					google.client.secret.2=${google.client.secret.2}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="google.client.secret.3" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					google.client.secret.3=${google.client.secret.3}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="google.client.secret.4" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					google.client.secret.4=${google.client.secret.4}
+					</echo>
+				</then>
+			</if>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="prepare-selenium-onedrive-properties">
+		<sequential>
+			<if>
+				<isset property="onedrive.client.id" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					onedrive.client.id=${onedrive.client.id}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="onedrive.client.secret" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					onedrive.client.secret=${onedrive.client.secret}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="onedrive.tenant" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					onedrive.tenant=${onedrive.tenant}
+					</echo>
+				</then>
+			</if>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="prepare-selenium-openid-properties">
+		<sequential>
+			<if>
+				<isset property="openid.password" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					openid.password=${openid.password}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="openid.username" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					openid.username=${openid.username}
+					</echo>
+				</then>
+			</if>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="prepare-selenium-recaptcha-properties">
+		<sequential>
+			<if>
+				<isset property="recaptcha.private.key" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					recaptcha.private.key=${recaptcha.private.key}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="recaptcha.public.key" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					recaptcha.public.key=${recaptcha.public.key}
+					</echo>
+				</then>
+			</if>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="prepare-selenium-required-properties">
+		<sequential>
+			<get-test-url />
+
+			<echo append="true" file="${test.ext.properties.file}">
+			portal.url=${test.url}
+			selenium.executable.dir=${basedir.unix}/tools/selenium/
+			test.class.command.name=${test.class}
+			</echo>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="prepare-selenium-sharepoint-properties">
+		<sequential>
+			<if>
+				<isset property="sharepoint.oauth.authorization.grant.endpoint" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					sharepoint.oauth.authorization.grant.endpoint=${sharepoint.oauth.authorization.grant.endpoint}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="sharepoint.oauth.authorization.token.endpoint" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					sharepoint.oauth.authorization.token.endpoint=${sharepoint.oauth.authorization.token.endpoint}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="sharepoint.oauth.client.id" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					sharepoint.oauth.client.id=${sharepoint.oauth.client.id}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="sharepoint.oauth.client.secret" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					sharepoint.oauth.client.secret=${sharepoint.oauth.client.secret}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="sharepoint.oauth.configuration.name" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					sharepoint.oauth.configuration.name=${sharepoint.oauth.configuration.name}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="sharepoint.oauth.configuration.resource" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					sharepoint.oauth.configuration.resource=${sharepoint.oauth.configuration.resource}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="sharepoint.oauth.configuration.scope" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					sharepoint.oauth.configuration.scope=${sharepoint.oauth.configuration.scope}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="sharepoint.oauth.site.domain" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					sharepoint.oauth.site.domain=${sharepoint.oauth.site.domain}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="sharepoint.oauth.tenant.id" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					sharepoint.oauth.tenant.id=${sharepoint.oauth.tenant.id}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="sharepoint.oauth.user.name" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					sharepoint.oauth.user.name=${sharepoint.oauth.user.name}
+					</echo>
+				</then>
+			</if>
+
+			<if>
+				<isset property="sharepoint.oauth.user.password" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					sharepoint.oauth.user.password=${sharepoint.oauth.user.password}
+					</echo>
+				</then>
+			</if>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="prepare-selenium-testcase-properties">
+		<sequential>
+			<get-testcase-property property.name="cmis.repository.type" />
+
+			<if>
+				<or>
+					<equals arg1="${cmis.repository.type}" arg2="documentum6" />
+					<equals arg1="${cmis.repository.type}" arg2="sharepoint2010" />
+					<equals arg1="${cmis.repository.type}" arg2="sharepoint2013" />
+				</or>
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					cmis.repository.vm.host.name=${cmis.repository.vm.host.name}
+					</echo>
+				</then>
+			</if>
+
+			<get-testcase-property property.name="ignore.errors" />
+
+			<if>
+				<isset property="ignore.errors" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					ignore.errors=${ignore.errors}
+					</echo>
+				</then>
+			</if>
+
+			<get-testcase-property property.name="ignore.errors.delimiter" />
+
+			<if>
+				<isset property="ignore.errors.delimiter" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					ignore.errors.delimiter=${ignore.errors.delimiter}
+					</echo>
+				</then>
+			</if>
+
+			<get-testcase-property property.name="proxy.server.enabled" />
+
+			<if>
+				<equals arg1="${proxy.server.enabled}" arg2="true" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					proxy.server.enabled=true
+					</echo>
+				</then>
+			</if>
+
+			<get-testcase-property property.name="test.assert.javascript.errors" />
+
+			<if>
+				<equals arg1="${test.assert.javascript.errors}" arg2="false" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					test.assert.javascript.errors=false
+					</echo>
+				</then>
+			</if>
+
+			<get-testcase-property property.name="test.assert.warning.exceptions" />
+
+			<if>
+				<isset property="test.assert.warning.exceptions" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					test.assert.warning.exceptions=${test.assert.warning.exceptions}
+					</echo>
+				</then>
+			</if>
+
+			<get-testcase-property property.name="test.name.skip.portal.instance" />
+
+			<if>
+				<isset property="test.name.skip.portal.instance" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					test.name.skip.portal.instance=${test.name.skip.portal.instance}
+					</echo>
+				</then>
+			</if>
+
+			<get-testcase-property property.name="theme.file.name" />
+
+			<if>
+				<isset property="theme.file.name" />
+				<then>
+					<propertyregex
+						input="${theme.file.name}"
+						override="true"
+						property="zipfileset.includes"
+						regexp="([^\.]+)(\.[^\s]+)"
+						replace="\1*\2"
+					/>
+
+					<if>
+						<resourcecount count="0" when="greater">
+							<zipfileset
+								dir="${liferay.home}/osgi/war"
+								includes="${zipfileset.includes}"
+							>
+								<patternset>
+									<include name="**/private.lar" />
+								</patternset>
+							</zipfileset>
+						</resourcecount>
+						<then>
+							<echo append="true" file="${test.ext.properties.file}">
+							theme.contains.resources=true
+							</echo>
+						</then>
+					</if>
+				</then>
+			</if>
+
+			<property name="default.timeout.explicit.wait" value="${timeout.explicit.wait}" />
+
+			<get-testcase-property property.name="timeout.explicit.wait" />
+
+			<if>
+				<isset property="timeout.explicit.wait" />
+				<then>
+					<echo append="true" file="${test.ext.properties.file}">
+					timeout.explicit.wait=${timeout.explicit.wait}
+					</echo>
+				</then>
+				<else>
+					<echo append="true" file="${test.ext.properties.file}">
+					timeout.explicit.wait=${default.timeout.explicit.wait}
+					</echo>
+				</else>
+			</if>
+		</sequential>
+	</macrodef>
+
 	<macrodef name="prepare-test-app-server-custom">
 		<sequential>
 			<ant antfile="build-dist.xml" inheritAll="false" target="unzip-${app.server.type}-custom" />
@@ -10079,19 +11059,19 @@ auto.deploy.dest.dir=C:/WINDOWS/system32/config/systemprofile/liferay/websphere-
 			<param name="test.class" value="${test.class}" />
 		</antcall>
 
-		<antcall target="prepare-selenium-analytics-cloud-properties" />
-		<antcall target="prepare-selenium-app-server-properties" />
-		<antcall target="prepare-selenium-browser" />
-		<antcall target="prepare-selenium-database-properties" />
-		<antcall target="prepare-selenium-email-properties" />
-		<antcall target="prepare-selenium-facebook-properties" />
-		<antcall target="prepare-selenium-google-properties" />
-		<antcall target="prepare-selenium-onedrive-properties" />
-		<antcall target="prepare-selenium-openid-properties" />
-		<antcall target="prepare-selenium-recaptcha-properties" />
-		<antcall target="prepare-selenium-required-properties" />
-		<antcall target="prepare-selenium-sharepoint-properties" />
-		<antcall target="prepare-selenium-testcase-properties" />
+		<prepare-selenium-analytics-cloud-properties />
+		<prepare-selenium-app-server-properties />
+		<prepare-selenium-browser />
+		<prepare-selenium-database-properties />
+		<prepare-selenium-email-properties />
+		<prepare-selenium-facebook-properties />
+		<prepare-selenium-google-properties />
+		<prepare-selenium-onedrive-properties />
+		<prepare-selenium-openid-properties />
+		<prepare-selenium-recaptcha-properties />
+		<prepare-selenium-required-properties />
+		<prepare-selenium-sharepoint-properties />
+		<prepare-selenium-testcase-properties />
 
 		<get-browser-property property.name="browser.docker.image" />
 		<get-operating-system-property property.name="operating.system.docker.image" />
@@ -10281,960 +11261,6 @@ auto.deploy.dest.dir=C:/WINDOWS/system32/config/systemprofile/liferay/websphere-
 					test.testcase.max.retries=${test.testcase.max.retries}
 				</echo>
 			</then>
-		</if>
-	</target>
-
-	<target name="prepare-selenium-analytics-cloud-properties">
-		<get-testcase-property property.name="analytics.cloud.enabled" />
-
-		<if>
-			<isset property="test.analytics.cloud.url" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					analytics.cloud.url=${test.analytics.cloud.url}
-				</echo>
-			</then>
-			<elseif>
-				<equals arg1="${analytics.cloud.enabled}" arg2="true" />
-				<then>
-					<echo append="true" file="${test.ext.properties.file}">
-						analytics.cloud.url=${analytics.cloud.faro.frontend.url}
-					</echo>
-				</then>
-			</elseif>
-		</if>
-
-		<if>
-			<isset property="test.analytics.cloud.publisher.url" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					analytics.cloud.publisher.url=${test.analytics.cloud.publisher.url}
-				</echo>
-			</then>
-			<elseif>
-				<equals arg1="${analytics.cloud.enabled}" arg2="true" />
-				<then>
-					<echo append="true" file="${test.ext.properties.file}">
-						analytics.cloud.publisher.url=${analytics.cloud.asah.publisher.url}
-					</echo>
-				</then>
-			</elseif>
-		</if>
-
-		<echo append="true" file="${test.ext.properties.file}">
-			analytics.cloud.asah.backend.url=${analytics.cloud.asah.backend.url}
-			analytics.cloud.asah.curator.batch.url=${analytics.cloud.asah.curator.batch.url}
-			analytics.cloud.asah.curator.stream.url=${analytics.cloud.asah.curator.stream.url}
-			analytics.cloud.asah.publisher.url=${analytics.cloud.asah.publisher.url}
-			analytics.cloud.faro.frontend.url=${analytics.cloud.faro.frontend.url}
-		</echo>
-	</target>
-
-	<target name="prepare-selenium-app-server-properties">
-		<if>
-			<isset property="app.server.type" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					app.server.type=${app.server.type}
-				</echo>
-			</then>
-		</if>
-	</target>
-
-	<target name="prepare-selenium-browser">
-		<get-testcase-property property.name="browser.type" />
-		<get-testcase-property property.name="browser.${browser.type}.version" />
-
-		<propertycopy from="browser.${browser.type}.version" name="browser.version" override="true" />
-
-		<echo append="true" file="${test.ext.properties.file}">
-			browser.type=${browser.type}
-			browser.version=${browser.version}
-		</echo>
-
-		<if>
-			<equals arg1="${browser.type}" arg2="chrome" />
-			<then>
-				<get-testcase-property append="true" delimiter=" " property.name="browser.chrome.bin.args" />
-
-				<if>
-					<isset property="browser.chrome.bin.args" />
-					<then>
-						<echo append="true" file="${test.ext.properties.file}">
-							browser.chrome.bin.args=${browser.chrome.bin.args}
-						</echo>
-					</then>
-				</if>
-
-				<propertycopy from="browser.chrome.bin.file[${browser.chrome.version}]" name="browser.chrome.bin.file" silent="true" />
-
-				<if>
-					<isset property="browser.chrome.bin.file" />
-					<then>
-						<echo append="true" file="${test.ext.properties.file}">
-							browser.chrome.bin.file=${browser.chrome.bin.file}
-						</echo>
-					</then>
-				</if>
-			</then>
-		</if>
-
-		<if>
-			<equals arg1="${browser.type}" arg2="edge" />
-			<then>
-				<prepare-edge-driver />
-
-				<echo append="true" file="${test.ext.properties.file}">
-					selenium.edge.driver.executable=${selenium.edge.driver.executable}
-					selenium.executable.dir.name=${selenium.executable.dir.name}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<and>
-				<equals arg1="${browser.firefox.version}" arg2="52.0" />
-				<equals arg1="${browser.type}" arg2="firefox" />
-			</and>
-			<then>
-				<propertycopy from="browser.firefox.bin.file[${browser.firefox.version}]" name="browser.firefox.bin.file" silent="true" />
-
-				<if>
-					<isset property="browser.firefox.bin.file" />
-					<then>
-						<echo append="true" file="${test.ext.properties.file}">
-							browser.firefox.bin.file=${browser.firefox.bin.file}
-						</echo>
-					</then>
-				</if>
-
-				<prepare-gecko-driver />
-
-				<echo append="true" file="${test.ext.properties.file}">
-					selenium.executable.dir.name=${selenium.executable.dir.name}
-					selenium.gecko.driver.executable=${selenium.gecko.driver.executable}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<equals arg1="${browser.type}" arg2="internetexplorer" />
-			<then>
-				<prepare-ie-driver />
-
-				<echo append="true" file="${test.ext.properties.file}">
-					selenium.executable.dir.name=${selenium.executable.dir.name}
-					selenium.ie.driver.executable=${selenium.ie.driver.executable}
-					selenium.ie.driver.version=${selenium.ie.driver.version}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<equals arg1="${browser.type}" arg2="safari" />
-			<then>
-				<prepare-safari-driver />
-			</then>
-		</if>
-
-		<get-browser-property property.name="browser.docker.image" />
-
-		<if>
-			<isset property="browser.docker.image" />
-			<then>
-				<get-browser-property property.name="browser.host" />
-
-				<echo append="true" file="${test.ext.properties.file}">
-					selenium.remote.driver.url=http://${browser.host}:4444
-				</echo>
-			</then>
-			<elseif>
-				<isset property="selenium.remote.driver.url" />
-				<then>
-					<echo append="true" file="${test.ext.properties.file}">
-						selenium.desired.capabilities.platform=${selenium.desired.capabilities.platform}
-						selenium.remote.driver.url=${selenium.remote.driver.url}
-					</echo>
-				</then>
-			</elseif>
-		</if>
-	</target>
-
-	<target name="prepare-selenium-database-properties">
-		<for list="${database.types}" param="database.type">
-			<sequential>
-				<if>
-					<isset property="database.@{database.type}.driver" />
-					<then>
-						<local name="database.driver" />
-
-						<propertycopy from="database.@{database.type}.driver" name="database.driver" />
-
-						<echo append="true" file="${test.ext.properties.file}">
-							database.@{database.type}.driver=${database.driver}
-						</echo>
-					</then>
-				</if>
-
-				<if>
-					<isset property="database.@{database.type}.password" />
-					<then>
-						<local name="database.password" />
-
-						<propertycopy from="database.@{database.type}.password" name="database.password" />
-
-						<echo append="true" file="${test.ext.properties.file}">
-							database.@{database.type}.password=${database.password}
-						</echo>
-					</then>
-				</if>
-
-				<if>
-					<isset property="database.@{database.type}.schema" />
-					<then>
-						<local name="database.schema" />
-
-						<propertycopy from="database.@{database.type}.schema" name="database.schema" />
-
-						<echo append="true" file="${test.ext.properties.file}">
-							database.@{database.type}.schema=${database.schema}
-						</echo>
-					</then>
-				</if>
-
-				<if>
-					<isset property="database.@{database.type}.url" />
-					<then>
-						<local name="database.url" />
-
-						<propertycopy from="database.@{database.type}.url" name="database.url" />
-
-						<echo append="true" file="${test.ext.properties.file}">
-							database.@{database.type}.url=${database.url}
-						</echo>
-					</then>
-				</if>
-
-				<if>
-					<isset property="database.@{database.type}.username" />
-					<then>
-						<local name="database.username" />
-
-						<propertycopy from="database.@{database.type}.username" name="database.username" />
-
-						<echo append="true" file="${test.ext.properties.file}">
-							database.@{database.type}.username=${database.username}
-						</echo>
-					</then>
-				</if>
-			</sequential>
-		</for>
-
-		<if>
-			<isset property="database.type" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					database.type=${database.type}
-				</echo>
-			</then>
-		</if>
-	</target>
-
-	<target name="prepare-selenium-email-properties">
-		<if>
-			<isset property="email.address.1" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					email.address.1=${email.address.1}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="email.address.2" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					email.address.2=${email.address.2}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="email.address.3" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					email.address.3=${email.address.3}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="email.address.4" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					email.address.4=${email.address.4}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="email.address.5" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					email.address.5=${email.address.5}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="email.password.1" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					email.password.1=${email.password.1}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="email.password.2" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					email.password.2=${email.password.2}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="email.password.3" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					email.password.3=${email.password.3}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="email.password.4" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					email.password.4=${email.password.4}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="email.password.5" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					email.password.5=${email.password.5}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="lcs.email.address.1" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					lcs.email.address.1=${lcs.email.address.1}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="lcs.email.address.2" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					lcs.email.address.2=${lcs.email.address.2}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="lcs.email.address.3" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					lcs.email.address.3=${lcs.email.address.3}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="lcs.site.password.1" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					lcs.site.password.1=${lcs.site.password.1}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="lcs.site.password.2" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					lcs.site.password.2=${lcs.site.password.2}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="lcs.site.password.3" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					lcs.site.password.3=${lcs.site.password.3}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="marketplace.email.address.1" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					marketplace.email.address.1=${marketplace.email.address.1}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="marketplace.email.address.2" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					marketplace.email.address.2=${marketplace.email.address.2}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="marketplace.email.address.3" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					marketplace.email.address.3=${marketplace.email.address.3}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="marketplace.email.address.4" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					marketplace.email.address.4=${marketplace.email.address.4}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="marketplace.email.address.5" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					marketplace.email.address.5=${marketplace.email.address.5}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="marketplace.email.password.1" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					marketplace.email.password.1=${marketplace.email.password.1}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="marketplace.email.password.2" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					marketplace.email.password.2=${marketplace.email.password.2}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="marketplace.email.password.3" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					marketplace.email.password.3=${marketplace.email.password.3}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="marketplace.email.password.4" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					marketplace.email.password.4=${marketplace.email.password.4}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="marketplace.email.password.5" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					marketplace.email.password.5=${marketplace.email.password.5}
-				</echo>
-			</then>
-		</if>
-	</target>
-
-	<target name="prepare-selenium-facebook-properties">
-		<if>
-			<isset property="facebook.application.id" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					facebook.application.id=${facebook.application.id}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="facebook.application.secret" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					facebook.application.secret=${facebook.application.secret}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="facebook.email" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					facebook.email=${facebook.email}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="facebook.password" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					facebook.password=${facebook.password}
-				</echo>
-			</then>
-		</if>
-	</target>
-
-	<target name="prepare-selenium-google-properties">
-		<if>
-			<isset property="google.api.key.1" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					google.api.key.1=${google.api.key.1}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="google.api.key.2" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					google.api.key.2=${google.api.key.2}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="google.api.key.3" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					google.api.key.3=${google.api.key.3}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="google.api.key.4" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					google.api.key.4=${google.api.key.4}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="google.client.id.1" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					google.client.id.1=${google.client.id.1}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="google.client.id.2" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					google.client.id.2=${google.client.id.2}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="google.client.id.3" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					google.client.id.3=${google.client.id.3}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="google.client.id.4" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					google.client.id.4=${google.client.id.4}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="google.client.secret.1" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					google.client.secret.1=${google.client.secret.1}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="google.client.secret.2" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					google.client.secret.2=${google.client.secret.2}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="google.client.secret.3" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					google.client.secret.3=${google.client.secret.3}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="google.client.secret.4" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					google.client.secret.4=${google.client.secret.4}
-				</echo>
-			</then>
-		</if>
-	</target>
-
-	<target name="prepare-selenium-onedrive-properties">
-		<if>
-			<isset property="onedrive.client.id" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					onedrive.client.id=${onedrive.client.id}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="onedrive.client.secret" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					onedrive.client.secret=${onedrive.client.secret}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="onedrive.tenant" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					onedrive.tenant=${onedrive.tenant}
-				</echo>
-			</then>
-		</if>
-	</target>
-
-	<target name="prepare-selenium-openid-properties">
-		<if>
-			<isset property="openid.password" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					openid.password=${openid.password}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="openid.username" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					openid.username=${openid.username}
-				</echo>
-			</then>
-		</if>
-	</target>
-
-	<target name="prepare-selenium-recaptcha-properties">
-		<if>
-			<isset property="recaptcha.private.key" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					recaptcha.private.key=${recaptcha.private.key}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="recaptcha.public.key" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					recaptcha.public.key=${recaptcha.public.key}
-				</echo>
-			</then>
-		</if>
-	</target>
-
-	<target name="prepare-selenium-required-properties">
-		<get-test-url />
-
-		<echo append="true" file="${test.ext.properties.file}">
-			portal.url=${test.url}
-			selenium.executable.dir=${basedir.unix}/tools/selenium/
-			test.class.command.name=${test.class}
-		</echo>
-	</target>
-
-	<target name="prepare-selenium-sharepoint-properties">
-		<if>
-			<isset property="sharepoint.oauth.authorization.grant.endpoint" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					sharepoint.oauth.authorization.grant.endpoint=${sharepoint.oauth.authorization.grant.endpoint}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="sharepoint.oauth.authorization.token.endpoint" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					sharepoint.oauth.authorization.token.endpoint=${sharepoint.oauth.authorization.token.endpoint}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="sharepoint.oauth.client.id" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					sharepoint.oauth.client.id=${sharepoint.oauth.client.id}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="sharepoint.oauth.client.secret" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					sharepoint.oauth.client.secret=${sharepoint.oauth.client.secret}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="sharepoint.oauth.configuration.name" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					sharepoint.oauth.configuration.name=${sharepoint.oauth.configuration.name}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="sharepoint.oauth.configuration.resource" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					sharepoint.oauth.configuration.resource=${sharepoint.oauth.configuration.resource}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="sharepoint.oauth.configuration.scope" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					sharepoint.oauth.configuration.scope=${sharepoint.oauth.configuration.scope}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="sharepoint.oauth.site.domain" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					sharepoint.oauth.site.domain=${sharepoint.oauth.site.domain}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="sharepoint.oauth.tenant.id" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					sharepoint.oauth.tenant.id=${sharepoint.oauth.tenant.id}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="sharepoint.oauth.user.name" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					sharepoint.oauth.user.name=${sharepoint.oauth.user.name}
-				</echo>
-			</then>
-		</if>
-
-		<if>
-			<isset property="sharepoint.oauth.user.password" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					sharepoint.oauth.user.password=${sharepoint.oauth.user.password}
-				</echo>
-			</then>
-		</if>
-	</target>
-
-	<target name="prepare-selenium-testcase-properties">
-		<get-testcase-property property.name="cmis.repository.type" />
-
-		<if>
-			<or>
-				<equals arg1="${cmis.repository.type}" arg2="documentum6" />
-				<equals arg1="${cmis.repository.type}" arg2="sharepoint2010" />
-				<equals arg1="${cmis.repository.type}" arg2="sharepoint2013" />
-			</or>
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					cmis.repository.vm.host.name=${cmis.repository.vm.host.name}
-				</echo>
-			</then>
-		</if>
-
-		<get-testcase-property property.name="ignore.errors" />
-
-		<if>
-			<isset property="ignore.errors" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					ignore.errors=${ignore.errors}
-				</echo>
-			</then>
-		</if>
-
-		<get-testcase-property property.name="ignore.errors.delimiter" />
-
-		<if>
-			<isset property="ignore.errors.delimiter" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					ignore.errors.delimiter=${ignore.errors.delimiter}
-				</echo>
-			</then>
-		</if>
-
-		<get-testcase-property property.name="proxy.server.enabled" />
-
-		<if>
-			<equals arg1="${proxy.server.enabled}" arg2="true" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					proxy.server.enabled=true
-				</echo>
-			</then>
-		</if>
-
-		<get-testcase-property property.name="test.assert.javascript.errors" />
-
-		<if>
-			<equals arg1="${test.assert.javascript.errors}" arg2="false" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					test.assert.javascript.errors=false
-				</echo>
-			</then>
-		</if>
-
-		<get-testcase-property property.name="test.assert.warning.exceptions" />
-
-		<if>
-			<isset property="test.assert.warning.exceptions" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					test.assert.warning.exceptions=${test.assert.warning.exceptions}
-				</echo>
-			</then>
-		</if>
-
-		<get-testcase-property property.name="test.name.skip.portal.instance" />
-
-		<if>
-			<isset property="test.name.skip.portal.instance" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					test.name.skip.portal.instance=${test.name.skip.portal.instance}
-				</echo>
-			</then>
-		</if>
-
-		<get-testcase-property property.name="theme.file.name" />
-
-		<if>
-			<isset property="theme.file.name" />
-			<then>
-				<propertyregex
-					input="${theme.file.name}"
-					override="true"
-					property="zipfileset.includes"
-					regexp="([^\.]+)(\.[^\s]+)"
-					replace="\1*\2"
-				/>
-
-				<if>
-					<resourcecount count="0" when="greater">
-						<zipfileset
-							dir="${liferay.home}/osgi/war"
-							includes="${zipfileset.includes}"
-						>
-							<patternset>
-								<include name="**/private.lar" />
-							</patternset>
-						</zipfileset>
-					</resourcecount>
-					<then>
-						<echo append="true" file="${test.ext.properties.file}">
-							theme.contains.resources=true
-						</echo>
-					</then>
-				</if>
-			</then>
-		</if>
-
-		<property name="default.timeout.explicit.wait" value="${timeout.explicit.wait}" />
-
-		<get-testcase-property property.name="timeout.explicit.wait" />
-
-		<if>
-			<isset property="timeout.explicit.wait" />
-			<then>
-				<echo append="true" file="${test.ext.properties.file}">
-					timeout.explicit.wait=${timeout.explicit.wait}
-				</echo>
-			</then>
-			<else>
-				<echo append="true" file="${test.ext.properties.file}">
-					timeout.explicit.wait=${default.timeout.explicit.wait}
-				</echo>
-			</else>
 		</if>
 	</target>
 
