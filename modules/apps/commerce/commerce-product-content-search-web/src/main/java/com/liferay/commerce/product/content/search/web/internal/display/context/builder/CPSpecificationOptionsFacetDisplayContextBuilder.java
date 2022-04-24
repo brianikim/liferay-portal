@@ -15,6 +15,7 @@
 package com.liferay.commerce.product.content.search.web.internal.display.context.builder;
 
 import com.liferay.commerce.product.constants.CPField;
+import com.liferay.commerce.product.content.search.web.internal.configuration.CPSpecificationOptionFacetPortletInstanceConfiguration;
 import com.liferay.commerce.product.content.search.web.internal.display.context.CPSpecificationOptionFacetsDisplayContext;
 import com.liferay.commerce.product.content.search.web.internal.display.context.CPSpecificationOptionsSearchFacetDisplayContext;
 import com.liferay.commerce.product.content.search.web.internal.display.context.CPSpecificationOptionsSearchFacetTermDisplayContext;
@@ -27,6 +28,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.search.facet.Facet;
 import com.liferay.portal.kernel.search.facet.collector.FacetCollector;
 import com.liferay.portal.kernel.search.facet.collector.TermCollector;
+import com.liferay.portal.kernel.theme.PortletDisplay;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -47,6 +49,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -68,48 +72,112 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 				_portal.getHttpServletRequest(_renderRequest));
 
 		cpSpecificationOptionFacetsDisplayContext.
-			setCPSpecificationOptionsSearchFacetDisplayContexts(
+			setCpSpecificationOptionsSearchFacetDisplayContext(
 				_buildCPSpecificationOptionsSearchFacetDisplayContexts());
+
+		ThemeDisplay themeDisplay = (ThemeDisplay)_renderRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
+
+		cpSpecificationOptionFacetsDisplayContext.
+			setCpSpecificationOptionFacetPortletInstanceConfiguration(
+				portletDisplay.getPortletInstanceConfiguration(
+					CPSpecificationOptionFacetPortletInstanceConfiguration.
+						class));
 
 		return cpSpecificationOptionFacetsDisplayContext;
 	}
 
-	public void cpSpecificationOptionLocalService(
+	public void setCpSpecificationOptionLocalService(
 		CPSpecificationOptionLocalService cpSpecificationOptionLocalService) {
 
 		_cpSpecificationOptionLocalService = cpSpecificationOptionLocalService;
 	}
 
-	public void parameterValues(String... parameterValues) {
+	public void setParameterValues(String... parameterValues) {
 		_selectedCPSpecificationOptionIds = Stream.of(
 			Objects.requireNonNull(parameterValues)
 		).map(
 			GetterUtil::getLong
 		).filter(
-			cpSpecificationOptionId -> cpSpecificationOptionId > 0
+			categoryId -> categoryId > 0
 		).collect(
 			Collectors.toList()
 		);
 	}
 
-	public void portal(Portal portal) {
+	public void setPortal(Portal portal) {
 		_portal = portal;
 	}
 
-	public void portletSharedSearchRequest(
+	public void setPortletSharedSearchRequest(
 		PortletSharedSearchRequest portletSharedSearchRequest) {
 
 		_portletSharedSearchRequest = portletSharedSearchRequest;
 	}
 
-	public void renderRequest(RenderRequest renderRequest) {
+	public void setRenderRequest(RenderRequest renderRequest) {
 		_renderRequest = renderRequest;
+	}
+
+	protected CPSpecificationOption getCPSpecificationOption(String fieldName) {
+		return _cpSpecificationOptionLocalService.fetchCPSpecificationOption(
+			PortalUtil.getCompanyId(_renderRequest),
+			CPSpecificationOptionFacetsUtil.
+				getCPSpecificationOptionKeyFromIndexFieldName(fieldName));
+	}
+
+	protected String getFirstParameterValueString() {
+		if (_selectedCPSpecificationOptionIds.isEmpty()) {
+			return StringPool.BLANK;
+		}
+
+		return String.valueOf(_selectedCPSpecificationOptionIds.get(0));
+	}
+
+	protected String getPaginationStartParameterName(
+		PortletSharedSearchResponse portletSharedSearchResponse) {
+
+		SearchResponse searchResponse =
+			portletSharedSearchResponse.getSearchResponse();
+
+		SearchRequest searchRequest = searchResponse.getRequest();
+
+		return searchRequest.getPaginationStartParameterName();
+	}
+
+	protected double getPopularity(
+		int frequency, int maxCount, int minCount, double multiplier) {
+
+		double popularity = maxCount - (maxCount - (frequency - minCount));
+
+		return 1 + (popularity * multiplier);
+	}
+
+	protected boolean isCPDefinitionSpecificationOptionValueSelected(
+		String fieldName, String fieldValue) {
+
+		CPSpecificationOption cpSpecificationOption = getCPSpecificationOption(
+			fieldName);
+
+		Optional<String[]> parameterValuesOptional =
+			_portletSharedSearchResponse.getParameterValues(
+				cpSpecificationOption.getKey(), _renderRequest);
+
+		if (parameterValuesOptional.isPresent()) {
+			String[] parameterValues = parameterValuesOptional.get();
+
+			return ArrayUtil.contains(parameterValues, fieldValue);
+		}
+
+		return false;
 	}
 
 	private CPSpecificationOptionsSearchFacetDisplayContext
 	_buildCPSpecificationOptionsSearchFacetDisplayContext() {
 
-		_tuples = _getTuples(_facet.getFacetCollector());
+		_buckets = _collectBuckets(_facet.getFacetCollector());
 
 		CPSpecificationOptionsSearchFacetDisplayContext
 			cpSpecificationOptionsSearchFacetDisplayContext =
@@ -124,7 +192,7 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 		cpSpecificationOptionsSearchFacetDisplayContext.
 			setPaginationStartParameterName(_paginationStartParameterName);
 		cpSpecificationOptionsSearchFacetDisplayContext.setParameterValue(
-			_getFirstParameterValueString());
+			getFirstParameterValueString());
 		cpSpecificationOptionsSearchFacetDisplayContext.setRenderRequest(
 			_renderRequest);
 		cpSpecificationOptionsSearchFacetDisplayContext.setTermDisplayContexts(
@@ -144,11 +212,10 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 
 		_facet = facet;
 
-		Optional<String[]> parameterValuesOptional =
-			portletSharedSearchResponse.getParameterValues(
-				facet.getFieldName(), renderRequest);
-
-		parameterValuesOptional.ifPresent(this::parameterValues);
+		_copy(
+			() -> portletSharedSearchResponse.getParameterValues(
+				facet.getFieldName(), renderRequest),
+			this::setParameterValues);
 
 		return _buildCPSpecificationOptionsSearchFacetDisplayContext();
 	}
@@ -211,7 +278,7 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 			cpSpecificationOptionsSearchFacetDisplayContexts =
 			new ArrayList<>();
 
-		_paginationStartParameterName = _getPaginationStartParameterName(
+		_paginationStartParameterName = getPaginationStartParameterName(
 			_portletSharedSearchResponse);
 
 		_locale = themeDisplay.getLocale();
@@ -255,29 +322,29 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 	private List<CPSpecificationOptionsSearchFacetTermDisplayContext>
 	_buildTermDisplayContexts() {
 
-		if (_tuples.isEmpty()) {
+		if (_buckets.isEmpty()) {
 			return Collections.emptyList();
 		}
 
 		List<CPSpecificationOptionsSearchFacetTermDisplayContext>
 			cpSpecificationOptionsSearchFacetTermDisplayContexts =
-			new ArrayList<>(_tuples.size());
+			new ArrayList<>(_buckets.size());
 
 		int maxCount = 1;
 		int minCount = 1;
 
 		if (_frequenciesVisible && _displayStyle.equals("cloud")) {
 
-			// The cloud style may not list tags in the order of frequency.
-			// Keep looking through the results until we reach the maximum
+			// The cloud style may not list tags in the order of frequency,
+			// so keep looking through the results until we reach the maximum
 			// number of terms or we run out of terms.
 
-			for (int i = 0, j = 0; i < _tuples.size(); i++, j++) {
+			for (int i = 0, j = 0; i < _buckets.size(); i++, j++) {
 				if (j >= _maxTerms) {
 					break;
 				}
 
-				Tuple tuple = _tuples.get(i);
+				Tuple tuple = _buckets.get(i);
 
 				Integer frequency = (Integer)tuple.getObject(1);
 
@@ -298,12 +365,12 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 			multiplier = (double)5 / (maxCount - minCount);
 		}
 
-		for (int i = 0, j = 0; i < _tuples.size(); i++, j++) {
+		for (int i = 0, j = 0; i < _buckets.size(); i++, j++) {
 			if ((_maxTerms > 0) && (j >= _maxTerms)) {
 				break;
 			}
 
-			Tuple tuple = _tuples.get(i);
+			Tuple tuple = _buckets.get(i);
 
 			Integer frequency = (Integer)tuple.getObject(1);
 
@@ -313,7 +380,7 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 				continue;
 			}
 
-			int popularity = (int)_getPopularity(
+			int popularity = (int)getPopularity(
 				frequency, maxCount, minCount, multiplier);
 
 			String fieldName = (String)tuple.getObject(0);
@@ -323,7 +390,7 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 			cpSpecificationOptionsSearchFacetTermDisplayContexts.add(
 				_buildTermDisplayContext(
 					frequency,
-					_isCPDefinitionSpecificationOptionValueSelected(
+					isCPDefinitionSpecificationOptionValueSelected(
 						fieldName, fieldValue),
 					popularity, fieldValue));
 		}
@@ -331,74 +398,28 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 		return cpSpecificationOptionsSearchFacetTermDisplayContexts;
 	}
 
-	private CPSpecificationOption _getCPSpecificationOption(String fieldName) {
-		return _cpSpecificationOptionLocalService.fetchCPSpecificationOption(
-			PortalUtil.getCompanyId(_renderRequest),
-			CPSpecificationOptionFacetsUtil.
-				getCPSpecificationOptionKeyFromIndexFieldName(fieldName));
-	}
-
-	private String _getFirstParameterValueString() {
-		if (_selectedCPSpecificationOptionIds.isEmpty()) {
-			return StringPool.BLANK;
-		}
-
-		return String.valueOf(_selectedCPSpecificationOptionIds.get(0));
-	}
-
-	private String _getPaginationStartParameterName(
-		PortletSharedSearchResponse portletSharedSearchResponse) {
-
-		SearchResponse searchResponse =
-			portletSharedSearchResponse.getSearchResponse();
-
-		SearchRequest searchRequest = searchResponse.getRequest();
-
-		return searchRequest.getPaginationStartParameterName();
-	}
-
-	private double _getPopularity(
-		int frequency, int maxCount, int minCount, double multiplier) {
-
-		double popularity = maxCount - (maxCount - (frequency - minCount));
-
-		return 1 + (popularity * multiplier);
-	}
-
-	private List<Tuple> _getTuples(FacetCollector facetCollector) {
+	private List<Tuple> _collectBuckets(FacetCollector facetCollector) {
 		List<TermCollector> termCollectors = facetCollector.getTermCollectors();
 
-		List<Tuple> tuples = new ArrayList<>(termCollectors.size());
+		List<Tuple> buckets = new ArrayList<>(termCollectors.size());
 
 		for (TermCollector termCollector : termCollectors) {
-			tuples.add(
+			buckets.add(
 				new Tuple(
 					facetCollector.getFieldName(), termCollector.getFrequency(),
 					termCollector.getTerm()));
 		}
 
-		return tuples;
+		return buckets;
 	}
 
-	private boolean _isCPDefinitionSpecificationOptionValueSelected(
-		String fieldName, String fieldValue) {
+	private <T> void _copy(Supplier<Optional<T>> from, Consumer<T> to) {
+		Optional<T> optional = from.get();
 
-		CPSpecificationOption cpSpecificationOption = _getCPSpecificationOption(
-			fieldName);
-
-		Optional<String[]> parameterValuesOptional =
-			_portletSharedSearchResponse.getParameterValues(
-				cpSpecificationOption.getKey(), _renderRequest);
-
-		if (parameterValuesOptional.isPresent()) {
-			String[] parameterValues = parameterValuesOptional.get();
-
-			return ArrayUtil.contains(parameterValues, fieldValue);
-		}
-
-		return false;
+		optional.ifPresent(to);
 	}
 
+	private List<Tuple> _buckets;
 	private CPSpecificationOptionLocalService
 		_cpSpecificationOptionLocalService;
 	private String _displayStyle;
@@ -414,6 +435,5 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 	private RenderRequest _renderRequest;
 	private List<Long> _selectedCPSpecificationOptionIds =
 		Collections.emptyList();
-	private List<Tuple> _tuples;
 
 }

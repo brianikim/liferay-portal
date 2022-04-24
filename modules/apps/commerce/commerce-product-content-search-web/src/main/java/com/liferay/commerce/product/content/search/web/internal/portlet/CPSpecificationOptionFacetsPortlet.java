@@ -22,7 +22,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
-import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.search.web.portlet.shared.search.PortletSharedSearchRequest;
 
@@ -66,13 +66,13 @@ public class CPSpecificationOptionFacetsPortlet extends MVCPortlet {
 
 	@Override
 	public void render(
-			RenderRequest renderRequest, RenderResponse renderResponse)
+		RenderRequest renderRequest, RenderResponse renderResponse)
 		throws IOException, PortletException {
 
 		try {
 			CPSpecificationOptionFacetsDisplayContext
 				cpSpecificationOptionSearchFacetDisplayContext =
-					_buildDisplayContext(renderRequest);
+				_buildDisplayContext(renderRequest);
 
 			renderRequest.setAttribute(
 				WebKeys.PORTLET_DISPLAY_CONTEXT,
@@ -86,25 +86,27 @@ public class CPSpecificationOptionFacetsPortlet extends MVCPortlet {
 	}
 
 	@Reference
+	protected Portal portal;
+
+	@Reference
 	protected PortletSharedSearchRequest portletSharedSearchRequest;
 
 	private CPSpecificationOptionFacetsDisplayContext _buildDisplayContext(
-			RenderRequest renderRequest)
+		RenderRequest renderRequest)
 		throws PortalException {
 
 		CPSpecificationOptionsFacetDisplayContextBuilder
 			cpSpecificationOptionsFacetDisplayBuilder =
-				new CPSpecificationOptionsFacetDisplayContextBuilder();
+			new CPSpecificationOptionsFacetDisplayContextBuilder();
 
 		cpSpecificationOptionsFacetDisplayBuilder.
 			setCpSpecificationOptionLocalService(
 				_cpSpecificationOptionLocalService);
 		cpSpecificationOptionsFacetDisplayBuilder.setPortletSharedSearchRequest(
 			portletSharedSearchRequest);
+		cpSpecificationOptionsFacetDisplayBuilder.setPortal(portal);
 		cpSpecificationOptionsFacetDisplayBuilder.setRenderRequest(
 			renderRequest);
-		cpSpecificationOptionsFacetDisplayBuilder.setThemeDisplay(
-			(ThemeDisplay)renderRequest.getAttribute(WebKeys.THEME_DISPLAY));
 
 		return cpSpecificationOptionsFacetDisplayBuilder.build();
 	}

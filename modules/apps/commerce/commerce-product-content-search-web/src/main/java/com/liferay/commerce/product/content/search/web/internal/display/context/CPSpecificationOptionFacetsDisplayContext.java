@@ -58,9 +58,9 @@ public class CPSpecificationOptionFacetsDisplayContext implements Serializable {
 	}
 
 	public List<CPSpecificationOptionsSearchFacetDisplayContext>
-	getCPSpecificationOptionsSearchFacetDisplayContexts() {
+	getCpSpecificationOptionsSearchFacetDisplayContext() {
 
-		return _cpSpecificationOptionsSearchFacetDisplayContexts;
+		return _cpSpecificationOptionsSearchFacetDisplayContext;
 	}
 
 	public long getDisplayStyleGroupId() {
@@ -68,19 +68,17 @@ public class CPSpecificationOptionFacetsDisplayContext implements Serializable {
 			return _displayStyleGroupId;
 		}
 
-		long displayStyleGroupId =
+		_displayStyleGroupId =
 			_cpSpecificationOptionFacetPortletInstanceConfiguration.
 				displayStyleGroupId();
 
-		if (displayStyleGroupId <= 0) {
+		if (_displayStyleGroupId <= 0) {
 			ThemeDisplay themeDisplay =
 				(ThemeDisplay)_httpServletRequest.getAttribute(
 					WebKeys.THEME_DISPLAY);
 
-			displayStyleGroupId = themeDisplay.getScopeGroupId();
+			_displayStyleGroupId = themeDisplay.getScopeGroupId();
 		}
-
-		_displayStyleGroupId = displayStyleGroupId;
 
 		return _displayStyleGroupId;
 	}
@@ -99,18 +97,26 @@ public class CPSpecificationOptionFacetsDisplayContext implements Serializable {
 		return false;
 	}
 
-	public void setCPSpecificationOptionsSearchFacetDisplayContexts(
-		List<CPSpecificationOptionsSearchFacetDisplayContext>
-			cpSpecificationOptionsSearchFacetDisplayContexts) {
+	public void setCpSpecificationOptionFacetPortletInstanceConfiguration(
+		CPSpecificationOptionFacetPortletInstanceConfiguration
+			cpSpecificationOptionFacetPortletInstanceConfiguration) {
 
-		_cpSpecificationOptionsSearchFacetDisplayContexts =
-			cpSpecificationOptionsSearchFacetDisplayContexts;
+		_cpSpecificationOptionFacetPortletInstanceConfiguration =
+			cpSpecificationOptionFacetPortletInstanceConfiguration;
 	}
 
-	private final CPSpecificationOptionFacetPortletInstanceConfiguration
+	public void setCpSpecificationOptionsSearchFacetDisplayContext(
+		List<CPSpecificationOptionsSearchFacetDisplayContext>
+			cpSpecificationOptionsSearchFacetDisplayContext) {
+
+		_cpSpecificationOptionsSearchFacetDisplayContext =
+			cpSpecificationOptionsSearchFacetDisplayContext;
+	}
+
+	private CPSpecificationOptionFacetPortletInstanceConfiguration
 		_cpSpecificationOptionFacetPortletInstanceConfiguration;
 	private List<CPSpecificationOptionsSearchFacetDisplayContext>
-		_cpSpecificationOptionsSearchFacetDisplayContexts;
+		_cpSpecificationOptionsSearchFacetDisplayContext;
 	private long _displayStyleGroupId;
 	private final HttpServletRequest _httpServletRequest;
 
