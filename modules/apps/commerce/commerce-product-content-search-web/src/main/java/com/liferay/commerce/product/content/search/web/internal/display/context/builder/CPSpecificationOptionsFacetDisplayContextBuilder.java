@@ -99,7 +99,7 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 		).map(
 			GetterUtil::getLong
 		).filter(
-			categoryId -> categoryId > 0
+			cpSpecificationOptionId -> cpSpecificationOptionId > 0
 		).collect(
 			Collectors.toList()
 		);
