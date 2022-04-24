@@ -18,47 +18,38 @@ import com.liferay.commerce.constants.CommerceWebKeys;
 import com.liferay.commerce.context.CommerceContext;
 import com.liferay.commerce.product.content.search.web.internal.configuration.CPSpecificationOptionFacetPortletInstanceConfiguration;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.module.configuration.ConfigurationException;
-import com.liferay.portal.kernel.theme.PortletDisplay;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
-import com.liferay.portal.kernel.util.WebKeys;
 
 import java.io.Serializable;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.portlet.RenderRequest;
 
 /**
  * @author Alessio Antonio Rendina
  */
 public class CPSpecificationOptionFacetsDisplayContext implements Serializable {
 
+	public CPSpecificationOptionFacetsDisplayContext() {
+	}
+
 	public CPSpecificationOptionFacetsDisplayContext(
-			HttpServletRequest httpServletRequest)
-		throws ConfigurationException {
-
-		_httpServletRequest = httpServletRequest;
-
-		ThemeDisplay themeDisplay =
-			(ThemeDisplay)httpServletRequest.getAttribute(
-				WebKeys.THEME_DISPLAY);
-
-		PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
+		CPSpecificationOptionFacetPortletInstanceConfiguration
+			cpSpecificationOptionFacetPortletInstanceConfiguration) {
 
 		_cpSpecificationOptionFacetPortletInstanceConfiguration =
-			portletDisplay.getPortletInstanceConfiguration(
-				CPSpecificationOptionFacetPortletInstanceConfiguration.class);
+			cpSpecificationOptionFacetPortletInstanceConfiguration;
 	}
 
 	public CPSpecificationOptionFacetPortletInstanceConfiguration
-		getCPSpecificationOptionFacetPortletInstanceConfiguration() {
+	getCPSpecificationOptionFacetPortletInstanceConfiguration() {
 
 		return _cpSpecificationOptionFacetPortletInstanceConfiguration;
 	}
 
 	public List<CPSpecificationOptionsSearchFacetDisplayContext>
-		getCpSpecificationOptionsSearchFacetDisplayContext() {
+	getCpSpecificationOptionsSearchFacetDisplayContext() {
 
 		return _cpSpecificationOptionsSearchFacetDisplayContext;
 	}
@@ -68,26 +59,20 @@ public class CPSpecificationOptionFacetsDisplayContext implements Serializable {
 			return _displayStyleGroupId;
 		}
 
-		long displayStyleGroupId =
+		_displayStyleGroupId =
 			_cpSpecificationOptionFacetPortletInstanceConfiguration.
 				displayStyleGroupId();
 
-		if (displayStyleGroupId <= 0) {
-			ThemeDisplay themeDisplay =
-				(ThemeDisplay)_httpServletRequest.getAttribute(
-					WebKeys.THEME_DISPLAY);
-
-			displayStyleGroupId = themeDisplay.getScopeGroupId();
+		if (_displayStyleGroupId <= 0) {
+			_displayStyleGroupId = _themeDisplay.getScopeGroupId();
 		}
-
-		_displayStyleGroupId = displayStyleGroupId;
 
 		return _displayStyleGroupId;
 	}
 
 	public boolean hasCommerceChannel() throws PortalException {
 		CommerceContext commerceContext =
-			(CommerceContext)_httpServletRequest.getAttribute(
+			(CommerceContext)_renderRequest.getAttribute(
 				CommerceWebKeys.COMMERCE_CONTEXT);
 
 		long commerceChannelId = commerceContext.getCommerceChannelId();
@@ -115,11 +100,20 @@ public class CPSpecificationOptionFacetsDisplayContext implements Serializable {
 			cpSpecificationOptionsSearchFacetDisplayContext;
 	}
 
+	public void setRenderRequest(RenderRequest renderRequest) {
+		_renderRequest = renderRequest;
+	}
+
+	public void setThemeDisplay(ThemeDisplay themeDisplay) {
+		_themeDisplay = themeDisplay;
+	}
+
 	private CPSpecificationOptionFacetPortletInstanceConfiguration
 		_cpSpecificationOptionFacetPortletInstanceConfiguration;
 	private List<CPSpecificationOptionsSearchFacetDisplayContext>
 		_cpSpecificationOptionsSearchFacetDisplayContext;
 	private long _displayStyleGroupId;
-	private final HttpServletRequest _httpServletRequest;
+	private RenderRequest _renderRequest;
+	private ThemeDisplay _themeDisplay;
 
 }
