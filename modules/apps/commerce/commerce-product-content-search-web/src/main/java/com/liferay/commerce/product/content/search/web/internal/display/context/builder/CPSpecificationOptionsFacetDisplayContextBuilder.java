@@ -49,8 +49,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -159,10 +157,11 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 
 		_facet = facet;
 
-		_copy(
-			() -> portletSharedSearchResponse.getParameterValues(
-				facet.getFieldName(), renderRequest),
-			this::parameterValues);
+		Optional<String[]> parameterValuesOptional =
+			portletSharedSearchResponse.getParameterValues(
+				facet.getFieldName(), renderRequest);
+
+		parameterValuesOptional.ifPresent(this::parameterValues);
 
 		return _buildCPSpecificationOptionsSearchFacetDisplayContext();
 	}
@@ -358,12 +357,6 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 		}
 
 		return buckets;
-	}
-
-	private <T> void _copy(Supplier<Optional<T>> from, Consumer<T> to) {
-		Optional<T> optional = from.get();
-
-		optional.ifPresent(to);
 	}
 
 	private CPSpecificationOption _getCPSpecificationOption(String fieldName) {
