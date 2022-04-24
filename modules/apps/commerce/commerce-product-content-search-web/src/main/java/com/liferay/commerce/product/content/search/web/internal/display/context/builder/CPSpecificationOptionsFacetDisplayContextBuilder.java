@@ -89,13 +89,13 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 		return cpSpecificationOptionFacetsDisplayContext;
 	}
 
-	public void setCpSpecificationOptionLocalService(
+	public void cpSpecificationOptionLocalService(
 		CPSpecificationOptionLocalService cpSpecificationOptionLocalService) {
 
 		_cpSpecificationOptionLocalService = cpSpecificationOptionLocalService;
 	}
 
-	public void setParameterValues(String... parameterValues) {
+	public void parameterValues(String... parameterValues) {
 		_selectedCPSpecificationOptionIds = Stream.of(
 			Objects.requireNonNull(parameterValues)
 		).map(
@@ -107,77 +107,24 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 		);
 	}
 
-	public void setPortal(Portal portal) {
+	public void portal(Portal portal) {
 		_portal = portal;
 	}
 
-	public void setPortletSharedSearchRequest(
+	public void portletSharedSearchRequest(
 		PortletSharedSearchRequest portletSharedSearchRequest) {
 
 		_portletSharedSearchRequest = portletSharedSearchRequest;
 	}
 
-	public void setRenderRequest(RenderRequest renderRequest) {
+	public void renderRequest(RenderRequest renderRequest) {
 		_renderRequest = renderRequest;
-	}
-
-	protected CPSpecificationOption getCPSpecificationOption(String fieldName) {
-		return _cpSpecificationOptionLocalService.fetchCPSpecificationOption(
-			PortalUtil.getCompanyId(_renderRequest),
-			CPSpecificationOptionFacetsUtil.
-				getCPSpecificationOptionKeyFromIndexFieldName(fieldName));
-	}
-
-	protected String getFirstParameterValueString() {
-		if (_selectedCPSpecificationOptionIds.isEmpty()) {
-			return StringPool.BLANK;
-		}
-
-		return String.valueOf(_selectedCPSpecificationOptionIds.get(0));
-	}
-
-	protected String getPaginationStartParameterName(
-		PortletSharedSearchResponse portletSharedSearchResponse) {
-
-		SearchResponse searchResponse =
-			portletSharedSearchResponse.getSearchResponse();
-
-		SearchRequest searchRequest = searchResponse.getRequest();
-
-		return searchRequest.getPaginationStartParameterName();
-	}
-
-	protected double getPopularity(
-		int frequency, int maxCount, int minCount, double multiplier) {
-
-		double popularity = maxCount - (maxCount - (frequency - minCount));
-
-		return 1 + (popularity * multiplier);
-	}
-
-	protected boolean isCPDefinitionSpecificationOptionValueSelected(
-		String fieldName, String fieldValue) {
-
-		CPSpecificationOption cpSpecificationOption = getCPSpecificationOption(
-			fieldName);
-
-		Optional<String[]> parameterValuesOptional =
-			_portletSharedSearchResponse.getParameterValues(
-				cpSpecificationOption.getKey(), _renderRequest);
-
-		if (parameterValuesOptional.isPresent()) {
-			String[] parameterValues = parameterValuesOptional.get();
-
-			return ArrayUtil.contains(parameterValues, fieldValue);
-		}
-
-		return false;
 	}
 
 	private CPSpecificationOptionsSearchFacetDisplayContext
 	_buildCPSpecificationOptionsSearchFacetDisplayContext() {
 
-		_buckets = _collectBuckets(_facet.getFacetCollector());
+		_tuples = _collectBuckets(_facet.getFacetCollector());
 
 		CPSpecificationOptionsSearchFacetDisplayContext
 			cpSpecificationOptionsSearchFacetDisplayContext =
@@ -192,7 +139,7 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 		cpSpecificationOptionsSearchFacetDisplayContext.
 			setPaginationStartParameterName(_paginationStartParameterName);
 		cpSpecificationOptionsSearchFacetDisplayContext.setParameterValue(
-			getFirstParameterValueString());
+			_getFirstParameterValueString());
 		cpSpecificationOptionsSearchFacetDisplayContext.setRenderRequest(
 			_renderRequest);
 		cpSpecificationOptionsSearchFacetDisplayContext.setTermDisplayContexts(
@@ -215,7 +162,7 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 		_copy(
 			() -> portletSharedSearchResponse.getParameterValues(
 				facet.getFieldName(), renderRequest),
-			this::setParameterValues);
+			this::parameterValues);
 
 		return _buildCPSpecificationOptionsSearchFacetDisplayContext();
 	}
@@ -278,7 +225,7 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 			cpSpecificationOptionsSearchFacetDisplayContexts =
 			new ArrayList<>();
 
-		_paginationStartParameterName = getPaginationStartParameterName(
+		_paginationStartParameterName = _getPaginationStartParameterName(
 			_portletSharedSearchResponse);
 
 		_locale = themeDisplay.getLocale();
@@ -322,13 +269,13 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 	private List<CPSpecificationOptionsSearchFacetTermDisplayContext>
 	_buildTermDisplayContexts() {
 
-		if (_buckets.isEmpty()) {
+		if (_tuples.isEmpty()) {
 			return Collections.emptyList();
 		}
 
 		List<CPSpecificationOptionsSearchFacetTermDisplayContext>
 			cpSpecificationOptionsSearchFacetTermDisplayContexts =
-			new ArrayList<>(_buckets.size());
+			new ArrayList<>(_tuples.size());
 
 		int maxCount = 1;
 		int minCount = 1;
@@ -339,12 +286,12 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 			// so keep looking through the results until we reach the maximum
 			// number of terms or we run out of terms.
 
-			for (int i = 0, j = 0; i < _buckets.size(); i++, j++) {
+			for (int i = 0, j = 0; i < _tuples.size(); i++, j++) {
 				if (j >= _maxTerms) {
 					break;
 				}
 
-				Tuple tuple = _buckets.get(i);
+				Tuple tuple = _tuples.get(i);
 
 				Integer frequency = (Integer)tuple.getObject(1);
 
@@ -365,12 +312,12 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 			multiplier = (double)5 / (maxCount - minCount);
 		}
 
-		for (int i = 0, j = 0; i < _buckets.size(); i++, j++) {
+		for (int i = 0, j = 0; i < _tuples.size(); i++, j++) {
 			if ((_maxTerms > 0) && (j >= _maxTerms)) {
 				break;
 			}
 
-			Tuple tuple = _buckets.get(i);
+			Tuple tuple = _tuples.get(i);
 
 			Integer frequency = (Integer)tuple.getObject(1);
 
@@ -380,7 +327,7 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 				continue;
 			}
 
-			int popularity = (int)getPopularity(
+			int popularity = (int)_getPopularity(
 				frequency, maxCount, minCount, multiplier);
 
 			String fieldName = (String)tuple.getObject(0);
@@ -390,7 +337,7 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 			cpSpecificationOptionsSearchFacetTermDisplayContexts.add(
 				_buildTermDisplayContext(
 					frequency,
-					isCPDefinitionSpecificationOptionValueSelected(
+					_isCPDefinitionSpecificationOptionValueSelected(
 						fieldName, fieldValue),
 					popularity, fieldValue));
 		}
@@ -419,7 +366,59 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 		optional.ifPresent(to);
 	}
 
-	private List<Tuple> _buckets;
+	private CPSpecificationOption _getCPSpecificationOption(String fieldName) {
+		return _cpSpecificationOptionLocalService.fetchCPSpecificationOption(
+			PortalUtil.getCompanyId(_renderRequest),
+			CPSpecificationOptionFacetsUtil.
+				getCPSpecificationOptionKeyFromIndexFieldName(fieldName));
+	}
+
+	private String _getFirstParameterValueString() {
+		if (_selectedCPSpecificationOptionIds.isEmpty()) {
+			return StringPool.BLANK;
+		}
+
+		return String.valueOf(_selectedCPSpecificationOptionIds.get(0));
+	}
+
+	private String _getPaginationStartParameterName(
+		PortletSharedSearchResponse portletSharedSearchResponse) {
+
+		SearchResponse searchResponse =
+			portletSharedSearchResponse.getSearchResponse();
+
+		SearchRequest searchRequest = searchResponse.getRequest();
+
+		return searchRequest.getPaginationStartParameterName();
+	}
+
+	private double _getPopularity(
+		int frequency, int maxCount, int minCount, double multiplier) {
+
+		double popularity = maxCount - (maxCount - (frequency - minCount));
+
+		return 1 + (popularity * multiplier);
+	}
+
+	private boolean _isCPDefinitionSpecificationOptionValueSelected(
+		String fieldName, String fieldValue) {
+
+		CPSpecificationOption cpSpecificationOption = _getCPSpecificationOption(
+			fieldName);
+
+		Optional<String[]> parameterValuesOptional =
+			_portletSharedSearchResponse.getParameterValues(
+				cpSpecificationOption.getKey(), _renderRequest);
+
+		if (parameterValuesOptional.isPresent()) {
+			String[] parameterValues = parameterValuesOptional.get();
+
+			return ArrayUtil.contains(parameterValues, fieldValue);
+		}
+
+		return false;
+	}
+
 	private CPSpecificationOptionLocalService
 		_cpSpecificationOptionLocalService;
 	private String _displayStyle;
@@ -435,5 +434,6 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 	private RenderRequest _renderRequest;
 	private List<Long> _selectedCPSpecificationOptionIds =
 		Collections.emptyList();
+	private List<Tuple> _tuples;
 
 }
