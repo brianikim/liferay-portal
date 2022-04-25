@@ -66,13 +66,14 @@ public class CPSpecificationOptionFacetsPortlet extends MVCPortlet {
 
 	@Override
 	public void render(
-		RenderRequest renderRequest, RenderResponse renderResponse)
+			RenderRequest renderRequest, RenderResponse renderResponse)
 		throws IOException, PortletException {
 
 		try {
 			CPSpecificationOptionFacetsDisplayContext
 				cpSpecificationOptionSearchFacetDisplayContext =
-				_buildDisplayContext(renderRequest);
+					_buildCPSpecificationOptionFacetsDisplayContext(
+						renderRequest);
 
 			renderRequest.setAttribute(
 				WebKeys.PORTLET_DISPLAY_CONTEXT,
@@ -91,22 +92,22 @@ public class CPSpecificationOptionFacetsPortlet extends MVCPortlet {
 	@Reference
 	protected PortletSharedSearchRequest portletSharedSearchRequest;
 
-	private CPSpecificationOptionFacetsDisplayContext _buildDisplayContext(
-		RenderRequest renderRequest)
+	private CPSpecificationOptionFacetsDisplayContext
+			_buildCPSpecificationOptionFacetsDisplayContext(
+				RenderRequest renderRequest)
 		throws PortalException {
 
 		CPSpecificationOptionsFacetDisplayContextBuilder
 			cpSpecificationOptionsFacetDisplayBuilder =
-			new CPSpecificationOptionsFacetDisplayContextBuilder();
+				new CPSpecificationOptionsFacetDisplayContextBuilder();
 
 		cpSpecificationOptionsFacetDisplayBuilder.
-			setCpSpecificationOptionLocalService(
+			cpSpecificationOptionLocalService(
 				_cpSpecificationOptionLocalService);
-		cpSpecificationOptionsFacetDisplayBuilder.setPortletSharedSearchRequest(
+		cpSpecificationOptionsFacetDisplayBuilder.portletSharedSearchRequest(
 			portletSharedSearchRequest);
-		cpSpecificationOptionsFacetDisplayBuilder.setPortal(portal);
-		cpSpecificationOptionsFacetDisplayBuilder.setRenderRequest(
-			renderRequest);
+		cpSpecificationOptionsFacetDisplayBuilder.portal(portal);
+		cpSpecificationOptionsFacetDisplayBuilder.renderRequest(renderRequest);
 
 		return cpSpecificationOptionsFacetDisplayBuilder.build();
 	}
