@@ -7914,7 +7914,7 @@ go</echo>
 					<sequential>
 						<mirrors-get
 							dest="${todir}"
-							src="${test.jdbc.drivers.url}/db2/${database.version}/@{jdbc.driver}"
+							src="${test.jdbc.drivers.url}/db2/11.1.3/@{jdbc.driver}"
 						/>
 
 						<tstamp>
