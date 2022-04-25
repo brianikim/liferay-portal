@@ -278,7 +278,7 @@ public class JournalManagementToolbarDisplayContext
 		).addGroup(
 			dropdownGroupItem -> {
 				dropdownGroupItem.setDropdownItems(
-					_getFilterStatusDropdownItems());
+					getFilterStatusDropdownItems());
 				dropdownGroupItem.setLabel(
 					LanguageUtil.get(httpServletRequest, "filter-by-status"));
 			}
@@ -483,6 +483,25 @@ public class JournalManagementToolbarDisplayContext
 		return filterNavigationDropdownItems;
 	}
 
+	protected List<DropdownItem> getFilterStatusDropdownItems() {
+		return new DropdownItemList() {
+			{
+				for (int status : _getStatuses()) {
+					add(
+						dropdownItem -> {
+							dropdownItem.setActive(
+								_journalDisplayContext.getStatus() == status);
+							dropdownItem.setHref(
+								getPortletURL(), "status",
+								String.valueOf(status));
+
+							dropdownItem.setLabel(_getStatusLabel(status));
+						});
+				}
+			}
+		};
+	}
+
 	@Override
 	protected String[] getNavigationKeys() {
 		return new String[] {"all", "mine", "recent"};
@@ -580,25 +599,6 @@ public class JournalManagementToolbarDisplayContext
 						httpServletRequest,
 						"you-can-customize-this-menu-or-see-all-you-have-by-" +
 							"clicking-more"));
-			}
-		};
-	}
-
-	private List<DropdownItem> _getFilterStatusDropdownItems() {
-		return new DropdownItemList() {
-			{
-				for (int status : _getStatuses()) {
-					add(
-						dropdownItem -> {
-							dropdownItem.setActive(
-								_journalDisplayContext.getStatus() == status);
-							dropdownItem.setHref(
-								getPortletURL(), "status",
-								String.valueOf(status));
-
-							dropdownItem.setLabel(_getStatusLabel(status));
-						});
-				}
 			}
 		};
 	}
