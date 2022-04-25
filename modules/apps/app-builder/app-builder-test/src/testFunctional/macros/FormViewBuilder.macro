@@ -252,8 +252,6 @@ definition {
 	macro editRules {
 		Click(locator1 = "FormViewBuilder#EDIT_RULE_COLLAPSE");
 
-		AssertElementPresent(locator1 = "FormViewBuilder#EDIT_RULE_EXPANDED");
-
 		Click(locator1 = "FormViewBuilder#EDIT_RULE");
 	}
 
