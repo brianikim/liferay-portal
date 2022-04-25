@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.commerce.product.content.search.web.internal.portlet.shared.search;
+package com.liferay.commerce.product.content.search.web.internal.portlet;
 
 import com.liferay.asset.kernel.model.AssetCategory;
 import com.liferay.commerce.account.model.CommerceAccount;
@@ -177,12 +177,10 @@ public class CPSpecificationOptionFacetsPortletSharedSearchContributor
 					_portal.getHttpServletRequest(renderRequest));
 
 			if (commerceAccount != null) {
-				long[] commerceAccountGroupIds =
-					_commerceAccountHelper.getCommerceAccountGroupIds(
-						commerceAccount.getCommerceAccountId());
-
 				searchContext.setAttribute(
-					"commerceAccountGroupIds", commerceAccountGroupIds);
+					"commerceAccountGroupIds",
+					_commerceAccountHelper.getCommerceAccountGroupIds(
+						commerceAccount.getCommerceAccountId()));
 			}
 		}
 
