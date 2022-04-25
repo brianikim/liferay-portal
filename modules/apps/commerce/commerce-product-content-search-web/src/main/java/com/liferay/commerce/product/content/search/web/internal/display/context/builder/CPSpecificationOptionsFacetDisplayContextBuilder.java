@@ -70,7 +70,7 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 				_portal.getHttpServletRequest(_renderRequest));
 
 		cpSpecificationOptionFacetsDisplayContext.
-			setCpSpecificationOptionsSearchFacetDisplayContext(
+			setCPSpecificationOptionsSearchFacetDisplayContexts(
 				_buildCPSpecificationOptionsSearchFacetDisplayContexts());
 
 		ThemeDisplay themeDisplay = (ThemeDisplay)_renderRequest.getAttribute(
@@ -79,7 +79,7 @@ public class CPSpecificationOptionsFacetDisplayContextBuilder
 		PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
 
 		cpSpecificationOptionFacetsDisplayContext.
-			setCpSpecificationOptionFacetPortletInstanceConfiguration(
+			setCPSpecificationOptionFacetPortletInstanceConfiguration(
 				portletDisplay.getPortletInstanceConfiguration(
 					CPSpecificationOptionFacetPortletInstanceConfiguration.
 						class));
