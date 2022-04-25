@@ -105,6 +105,7 @@ import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Image;
 import com.liferay.portal.kernel.model.ResourceConstants;
@@ -8887,7 +8888,6 @@ public class JournalArticleLocalServiceImpl
 		}
 	}
 
-	}
 
 	private String _getArticleDiffs(
 		JournalArticle article, ServiceContext serviceContext) {
@@ -8910,7 +8910,7 @@ public class JournalArticleLocalServiceImpl
 				LocaleUtil.toLanguageId(LocaleUtil.getSiteDefault()),
 				portletRequestModel, serviceContext.getThemeDisplay());
 
-			return _diffHtml.replaceStyles(articleDiffs);
+			return DiffHtmlUtil.replaceStyles(articleDiffs);
 		}
 		catch (Exception exception) {
 			if (_log.isDebugEnabled()) {
@@ -8919,6 +8919,8 @@ public class JournalArticleLocalServiceImpl
 		}
 
 		return StringPool.BLANK;
+	}
+
 	private Map<String, String> _getFriendlyURLMap(
 			JournalArticle article, ThemeDisplay themeDisplay)
 		throws PortalException {
