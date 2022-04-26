@@ -194,7 +194,7 @@ public class OpenIdConnectTokenRequestUtil {
 			throw new OpenIdConnectServiceException.TokenException(
 				StringBundler.concat(
 					"Signing algorithm ", name,
-					" rejected by OpenId Connect client: ",
+					" rejected by OpenID Connect client: ",
 					clientID.getValue()));
 		}
 		catch (BadJOSEException | JOSEException exception) {
