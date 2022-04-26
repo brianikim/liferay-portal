@@ -16,6 +16,8 @@ import CKEditor from 'ckeditor4-react';
 import React, {useEffect} from 'react';
 
 const BASEPATH = '/o/frontend-editor-ckeditor-web/ckeditor/';
+const CONTEXT_URL = Liferay.ThemeDisplay.getPathContext();
+const CURRENT_PATH = CONTEXT_URL ? CONTEXT_URL + BASEPATH : BASEPATH;
 
 const Editor = React.forwardRef((props, ref) => {
 	useEffect(() => {
@@ -32,7 +34,7 @@ const Editor = React.forwardRef((props, ref) => {
 	return <CKEditor ref={ref} {...props} />;
 });
 
-CKEditor.editorUrl = `${BASEPATH}ckeditor.js`;
-window.CKEDITOR_BASEPATH = BASEPATH;
+CKEditor.editorUrl = `${CURRENT_PATH}ckeditor.js`;
+window.CKEDITOR_BASEPATH = CURRENT_PATH;
 
 export {Editor};
