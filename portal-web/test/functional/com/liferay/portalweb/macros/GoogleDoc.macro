@@ -25,10 +25,6 @@ definition {
 				value1 = "${linkText}");
 
 			Click(locator1 = "GoogleDoc#INSERT_LINK_APPLY_BUTTON");
-
-			var key_googleDocContent = "${googleDocContent}";
-
-			AssertElementPresent(locator1 = "GoogleDoc#INSERT_LINK_DOCUMENT_CONTENT");
 		}
 
 		SelectFrameTop();
