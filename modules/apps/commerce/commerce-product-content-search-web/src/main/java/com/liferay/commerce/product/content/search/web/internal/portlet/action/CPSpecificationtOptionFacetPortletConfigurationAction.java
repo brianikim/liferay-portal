@@ -15,15 +15,12 @@
 package com.liferay.commerce.product.content.search.web.internal.portlet.action;
 
 import com.liferay.commerce.product.constants.CPPortletKeys;
-import com.liferay.commerce.product.content.search.web.internal.configuration.CPSpecificationOptionFacetPortletInstanceConfiguration;
 import com.liferay.commerce.product.content.search.web.internal.display.context.CPSpecificationOptionFacetsDisplayContext;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.ConfigurationAction;
 import com.liferay.portal.kernel.portlet.DefaultConfigurationAction;
 import com.liferay.portal.kernel.servlet.SessionErrors;
-import com.liferay.portal.kernel.theme.PortletDisplay;
-import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.PropertiesParamUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
@@ -58,7 +55,7 @@ public class CPSpecificationtOptionFacetPortletConfigurationAction
 					httpServletRequest));
 		}
 		catch (Exception exception) {
-			_log.error(exception, exception);
+			_log.error(exception);
 		}
 
 		return "/specification_option_facets/configuration.jsp";
@@ -71,28 +68,14 @@ public class CPSpecificationtOptionFacetPortletConfigurationAction
 		throws Exception {
 
 		UnicodeProperties unicodeProperties = PropertiesParamUtil.getProperties(
-			actionRequest, _PARAMETER_NAME_PREFIX);
+			actionRequest, "preferences--");
 
 		String maxTerms = unicodeProperties.getProperty("maxTerms");
 
-		if (Validator.isNumber(maxTerms)) {
-			ThemeDisplay themeDisplay =
-				(ThemeDisplay)actionRequest.getAttribute(WebKeys.THEME_DISPLAY);
+		if (Validator.isNumber(maxTerms) &&
+			(GetterUtil.getInteger(maxTerms) > _MAX_TERMS_LIMIT)) {
 
-			PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
-
-			CPSpecificationOptionFacetPortletInstanceConfiguration
-				cpSpecificationOptionFacetPortletInstanceConfiguration =
-				portletDisplay.getPortletInstanceConfiguration(
-					CPSpecificationOptionFacetPortletInstanceConfiguration.
-						class);
-
-			if (GetterUtil.getInteger(maxTerms) >
-				cpSpecificationOptionFacetPortletInstanceConfiguration.
-					limitMaxTerms()) {
-
-				SessionErrors.add(actionRequest, "exceededMaxTermsLimit");
-			}
+			SessionErrors.add(actionRequest, "exceededMaxTermsLimit");
 		}
 
 		if (SessionErrors.isEmpty(actionRequest)) {
@@ -100,7 +83,7 @@ public class CPSpecificationtOptionFacetPortletConfigurationAction
 		}
 	}
 
-	private static final String _PARAMETER_NAME_PREFIX = "preferences--";
+	private static final int _MAX_TERMS_LIMIT = 100;
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		CPSpecificationtOptionFacetPortletConfigurationAction.class);

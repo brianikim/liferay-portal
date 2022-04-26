@@ -16,10 +16,8 @@ package com.liferay.commerce.product.content.search.web.internal.display.context
 
 import com.liferay.commerce.constants.CommerceWebKeys;
 import com.liferay.commerce.context.CommerceContext;
-import com.liferay.commerce.product.content.search.web.internal.configuration.CPSpecificationOptionFacetPortletInstanceConfiguration;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.module.configuration.ConfigurationException;
-import com.liferay.portal.kernel.theme.PortletDisplay;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.WebKeys;
 
@@ -35,30 +33,14 @@ import javax.servlet.http.HttpServletRequest;
 public class CPSpecificationOptionFacetsDisplayContext implements Serializable {
 
 	public CPSpecificationOptionFacetsDisplayContext(
-			HttpServletRequest httpServletRequest)
+		HttpServletRequest httpServletRequest)
 		throws ConfigurationException {
 
 		_httpServletRequest = httpServletRequest;
-
-		ThemeDisplay themeDisplay =
-			(ThemeDisplay)httpServletRequest.getAttribute(
-				WebKeys.THEME_DISPLAY);
-
-		PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
-
-		_cpSpecificationOptionFacetPortletInstanceConfiguration =
-			portletDisplay.getPortletInstanceConfiguration(
-				CPSpecificationOptionFacetPortletInstanceConfiguration.class);
-	}
-
-	public CPSpecificationOptionFacetPortletInstanceConfiguration
-		getCPSpecificationOptionFacetPortletInstanceConfiguration() {
-
-		return _cpSpecificationOptionFacetPortletInstanceConfiguration;
 	}
 
 	public List<CPSpecificationOptionsSearchFacetDisplayContext>
-		getCPSpecificationOptionsSearchFacetDisplayContexts() {
+	getCPSpecificationOptionsSearchFacetDisplayContexts() {
 
 		return _cpSpecificationOptionsSearchFacetDisplayContexts;
 	}
@@ -68,17 +50,17 @@ public class CPSpecificationOptionFacetsDisplayContext implements Serializable {
 			return _displayStyleGroupId;
 		}
 
-		_displayStyleGroupId =
-			_cpSpecificationOptionFacetPortletInstanceConfiguration.
-				displayStyleGroupId();
+		long displayStyleGroupId = _DISPLAY_STYLE_GROUP_ID;
 
-		if (_displayStyleGroupId <= 0) {
+		if (displayStyleGroupId <= 0) {
 			ThemeDisplay themeDisplay =
 				(ThemeDisplay)_httpServletRequest.getAttribute(
 					WebKeys.THEME_DISPLAY);
 
-			_displayStyleGroupId = themeDisplay.getScopeGroupId();
+			displayStyleGroupId = themeDisplay.getScopeGroupId();
 		}
+
+		_displayStyleGroupId = displayStyleGroupId;
 
 		return _displayStyleGroupId;
 	}
@@ -97,14 +79,6 @@ public class CPSpecificationOptionFacetsDisplayContext implements Serializable {
 		return false;
 	}
 
-	public void setCPSpecificationOptionFacetPortletInstanceConfiguration(
-		CPSpecificationOptionFacetPortletInstanceConfiguration
-			cpSpecificationOptionFacetPortletInstanceConfiguration) {
-
-		_cpSpecificationOptionFacetPortletInstanceConfiguration =
-			cpSpecificationOptionFacetPortletInstanceConfiguration;
-	}
-
 	public void setCPSpecificationOptionsSearchFacetDisplayContexts(
 		List<CPSpecificationOptionsSearchFacetDisplayContext>
 			cpSpecificationOptionsSearchFacetDisplayContexts) {
@@ -113,8 +87,8 @@ public class CPSpecificationOptionFacetsDisplayContext implements Serializable {
 			cpSpecificationOptionsSearchFacetDisplayContexts;
 	}
 
-	private CPSpecificationOptionFacetPortletInstanceConfiguration
-		_cpSpecificationOptionFacetPortletInstanceConfiguration;
+	private static final long _DISPLAY_STYLE_GROUP_ID = 0;
+
 	private List<CPSpecificationOptionsSearchFacetDisplayContext>
 		_cpSpecificationOptionsSearchFacetDisplayContexts;
 	private long _displayStyleGroupId;
