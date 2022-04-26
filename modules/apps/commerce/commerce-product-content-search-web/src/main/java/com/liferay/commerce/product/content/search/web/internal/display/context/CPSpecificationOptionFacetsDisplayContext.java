@@ -33,14 +33,14 @@ import javax.servlet.http.HttpServletRequest;
 public class CPSpecificationOptionFacetsDisplayContext implements Serializable {
 
 	public CPSpecificationOptionFacetsDisplayContext(
-		HttpServletRequest httpServletRequest)
+			HttpServletRequest httpServletRequest)
 		throws ConfigurationException {
 
 		_httpServletRequest = httpServletRequest;
 	}
 
 	public List<CPSpecificationOptionsSearchFacetDisplayContext>
-	getCPSpecificationOptionsSearchFacetDisplayContexts() {
+		getCPSpecificationOptionsSearchFacetDisplayContexts() {
 
 		return _cpSpecificationOptionsSearchFacetDisplayContexts;
 	}

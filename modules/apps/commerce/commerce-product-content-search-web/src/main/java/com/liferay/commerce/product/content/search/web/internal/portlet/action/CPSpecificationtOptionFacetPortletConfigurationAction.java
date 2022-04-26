@@ -63,8 +63,8 @@ public class CPSpecificationtOptionFacetPortletConfigurationAction
 
 	@Override
 	public void processAction(
-		PortletConfig portletConfig, ActionRequest actionRequest,
-		ActionResponse actionResponse)
+			PortletConfig portletConfig, ActionRequest actionRequest,
+			ActionResponse actionResponse)
 		throws Exception {
 
 		UnicodeProperties unicodeProperties = PropertiesParamUtil.getProperties(
