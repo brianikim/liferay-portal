@@ -34,7 +34,7 @@ export const AutoFocus = ({children}) => {
 				setTimeout(() => setIncrement((value) => value + 1), 5);
 			}
 			else {
-				if (!document.activeElement.id) {
+				if (!document.activeElement) {
 					const firstInput = childRef.current.querySelector('input');
 
 					if (
