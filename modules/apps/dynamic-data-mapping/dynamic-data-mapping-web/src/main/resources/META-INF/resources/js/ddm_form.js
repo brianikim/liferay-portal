@@ -1302,7 +1302,7 @@ AUI.add(
 							locale === defaultLocale ||
 							(localizationMap[defaultLocale] !== undefined &&
 								value !== localizationMap[defaultLocale]) ||
-							localizationMap[locale]
+							localizationMap[locale] !== undefined
 						) {
 							localizationMap[locale] = value;
 						}
@@ -4441,7 +4441,7 @@ AUI.add(
 							var localizationMap = field.get('localizationMap');
 
 							availableLanguageIds.forEach((locale) => {
-								if (localizationMap[locale] == null) {
+								if (localizationMap[locale] === undefined) {
 									localizationMap[locale] = EMPTY_VALUE;
 								}
 							});
