@@ -1609,8 +1609,8 @@ public class LayoutStagedModelDataHandler
 
 			fragmentEntryLink.setClassNameId(
 				_portal.getClassNameId(Layout.class));
-			fragmentEntryLink.setClassPK(importedLayout.getPlid());
-			fragmentEntryLink.setPlid(importedLayout.getPlid());
+			fragmentEntryLink.setClassPK(layout.getPlid());
+			fragmentEntryLink.setPlid(layout.getPlid());
 
 			StagedModelDataHandlerUtil.importStagedModel(
 				portletDataContext, fragmentEntryLink);
