@@ -53,8 +53,6 @@ public class InfoField<T extends InfoFieldType> implements InfoFieldSetEntry {
 			builder(
 			).infoFieldType(
 				infoFieldType
-			).namespace(
-				StringPool.BLANK
 			).name(
 				name
 			).labelInfoLocalizedValue(
@@ -76,8 +74,6 @@ public class InfoField<T extends InfoFieldType> implements InfoFieldSetEntry {
 			builder(
 			).infoFieldType(
 				infoFieldType
-			).namespace(
-				StringPool.BLANK
 			).name(
 				name
 			).labelInfoLocalizedValue(
@@ -175,12 +171,12 @@ public class InfoField<T extends InfoFieldType> implements InfoFieldSetEntry {
 
 	public static class Builder {
 
-		public <T extends InfoFieldType> NamespaceStep<T> infoFieldType(
+		public <T extends InfoFieldType> NameStep<T> infoFieldType(
 			T infoFieldType) {
 
 			_infoFieldType = infoFieldType;
 
-			return new NamespaceStep<>(this);
+			return new NameStep<>(this);
 		}
 
 		private Builder() {
@@ -268,7 +264,25 @@ public class InfoField<T extends InfoFieldType> implements InfoFieldSetEntry {
 
 	}
 
-	public static class NamespaceStep<T extends InfoFieldType> {
+	public static class NameStep<T extends InfoFieldType> {
+
+		public FinalStep<T> name(String name) {
+			_builder._name = name;
+
+			if (Validator.isBlank(_builder._namespace)) {
+				if (Validator.isNull(_builder._uniqueId)) {
+					_builder._uniqueId = name;
+				}
+			}
+			else {
+				if (Validator.isNull(_builder._uniqueId)) {
+					_builder._uniqueId =
+						_builder._namespace + StringPool.UNDERLINE + name;
+				}
+			}
+
+			return new FinalStep<>(_builder);
+		}
 
 		public NameStep<T> namespace(String namespace) {
 			_builder._namespace = namespace;
@@ -280,27 +294,6 @@ public class InfoField<T extends InfoFieldType> implements InfoFieldSetEntry {
 			_builder._uniqueId = uniqueId;
 
 			return new NameStep<>(_builder);
-		}
-
-		private NamespaceStep(Builder builder) {
-			_builder = builder;
-		}
-
-		private final Builder _builder;
-
-	}
-
-	public static class NameStep<T extends InfoFieldType> {
-
-		public FinalStep<T> name(String name) {
-			_builder._name = name;
-
-			if (Validator.isNull(_builder._uniqueId)) {
-				_builder._uniqueId =
-					_builder._namespace + StringPool.UNDERLINE + name;
-			}
-
-			return new FinalStep<>(_builder);
 		}
 
 		private NameStep(Builder builder) {
