@@ -21,7 +21,7 @@ definition {
 		}
 	}
 
-	test AssertSimilarResultsDisplayTemplate {
+	test AssertDisplayTemplate {
 		for (var count : list "1,2,3") {
 			JSONWebcontent.addWebContent(
 				content = "WC Content",
@@ -68,7 +68,7 @@ definition {
 			locator1 = "Search#SIMILAR_RESULTS_CARD_TITLE");
 	}
 
-	test AssertSimilarResultsMatchesAssetType {
+	test AssertMatchesAssetType {
 		for (var count : list "1,2,3") {
 			JSONBlog.addEntry(
 				entryContent = "Blogs Content",
@@ -247,7 +247,7 @@ definition {
 			locator1 = "Search#SIMILAR_RESULTS_LINK_TITLE");
 	}
 
-	test ConfigureSimilarResultsDocumentFrequency {
+	test ConfigureDocumentFrequency {
 		property test.name.skip.portal.instance = "SimilarResults#ConfigureSimilarResultsDocumentFrequency";
 
 		JSONWebcontent.addWebContent(
@@ -318,7 +318,7 @@ definition {
 			locator1 = "Search#SIMILAR_RESULTS_LINK_TITLE");
 	}
 
-	test ConfigureSimilarResultsFields {
+	test ConfigureFields {
 		JSONBlog.addEntry(
 			entryContent = "Content",
 			entryTitle = "No Match Content");
@@ -366,7 +366,7 @@ definition {
 			locator1 = "Search#SIMILAR_RESULTS_LINK_TITLE");
 	}
 
-	test ConfigureSimilarResultsMaximumItemDisplay {
+	test ConfigureMaximumItemDisplay {
 		for (var titleName : list "Alpha,Bravo,Charlie,Delta,Echo,Foxtrot") {
 			JSONWebcontent.addWebContent(
 				content = "${titleName}",
@@ -406,7 +406,7 @@ definition {
 			locator1 = "Search#SIMILAR_RESULTS_SPECIFIC_POSITION");
 	}
 
-	test ConfigureSimilarResultsMaximumQueryTerms {
+	test ConfigureMaximumQueryTerms {
 		for (var count : list "One, Two, Three") {
 			JSONWebcontent.addWebContent(
 				content = "WC Content",
@@ -439,7 +439,7 @@ definition {
 			locator1 = "Search#SIMILAR_RESULTS_SPECIFIC_POSITION");
 	}
 
-	test ConfigureSimilarResultsMinimumShouldMatch {
+	test ConfigureMinimumShouldMatch {
 		JSONWebcontent.addWebContent(
 			content = "WC Content",
 			groupName = "Guest",
@@ -498,7 +498,7 @@ definition {
 			locator1 = "Search#SIMILAR_RESULTS_LINK_TITLE");
 	}
 
-	test ConfigureSimilarResultsStopWords {
+	test ConfigureStopWords {
 		JSONWebcontent.addWebContent(
 			content = "No Match",
 			groupName = "Guest",
@@ -557,7 +557,7 @@ definition {
 			locator1 = "Search#SIMILAR_RESULTS_LINK_TITLE");
 	}
 
-	test ConfigureSimilarResultsTermFrequency {
+	test ConfigureTermFrequency {
 		for (var count : list "One, Two, Three") {
 			JSONWebcontent.addWebContent(
 				content = "WC Content",
@@ -615,7 +615,7 @@ definition {
 			locator1 = "Search#SIMILAR_RESULTS_LINK_TITLE");
 	}
 
-	test ConfigureSimilarResultsWordLength {
+	test ConfigureWordLength {
 		JSONWebcontent.addWebContent(
 			content = "WC Content",
 			groupName = "Guest",
@@ -673,7 +673,7 @@ definition {
 			locator1 = "Search#SIMILAR_RESULTS_LINK_TITLE");
 	}
 
-	test ViewSimilarResultsOnContentPages {
+	test ViewOnContentPages {
 		JSONWebcontent.addWebContent(
 			content = "WC Content",
 			groupName = "Guest",
