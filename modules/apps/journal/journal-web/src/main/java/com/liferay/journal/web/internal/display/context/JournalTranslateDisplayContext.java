@@ -44,7 +44,9 @@ import com.liferay.translation.info.field.TranslationInfoFieldChecker;
 import com.liferay.translation.model.TranslationEntry;
 import com.liferay.translation.service.TranslationEntryLocalServiceUtil;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -196,16 +198,22 @@ public class JournalTranslateDisplayContext {
 		return _sourceLocale;
 	}
 
-	public String getSourceStringValue(InfoField infoField, Locale locale) {
-		InfoFieldValue<Object> infoFieldValue =
-			_sourceInfoItemFieldValues.getInfoFieldValue(
-				infoField.getUniqueId());
+	public List<String> getSourceStringValues(
+		InfoField infoField, Locale locale) {
 
-		if (infoFieldValue != null) {
-			return GetterUtil.getString(infoFieldValue.getValue(locale));
+		String fieldName = infoField.getUniqueId();
+
+		Collection<InfoFieldValue<Object>> infoFieldValues =
+			_sourceInfoItemFieldValues.getInfoFieldValues(fieldName);
+
+		List<String> sourceStringValues = new ArrayList<>();
+
+		for (InfoFieldValue<Object> infoFieldValue : infoFieldValues) {
+			sourceStringValues.add(
+				GetterUtil.getString(infoFieldValue.getValue(locale)));
 		}
 
-		return null;
+		return sourceStringValues;
 	}
 
 	public String getTargetLanguageId() {
@@ -216,16 +224,22 @@ public class JournalTranslateDisplayContext {
 		return _targetLocale;
 	}
 
-	public String getTargetStringValue(InfoField infoField, Locale locale) {
-		InfoFieldValue<Object> infoFieldValue =
-			_targetInfoItemFieldValues.getInfoFieldValue(
-				infoField.getUniqueId());
+	public List<String> getTargetStringValues(
+		InfoField infoField, Locale locale) {
 
-		if (infoFieldValue != null) {
-			return GetterUtil.getString(infoFieldValue.getValue(locale));
+		String fieldName = infoField.getUniqueId();
+
+		Collection<InfoFieldValue<Object>> infoFieldValues =
+			_targetInfoItemFieldValues.getInfoFieldValues(fieldName);
+
+		List<String> targetStringValues = new ArrayList<>();
+
+		for (InfoFieldValue<Object> infoFieldValue : infoFieldValues) {
+			targetStringValues.add(
+				GetterUtil.getString(infoFieldValue.getValue(locale)));
 		}
 
-		return null;
+		return targetStringValues;
 	}
 
 	public String getTitle() {

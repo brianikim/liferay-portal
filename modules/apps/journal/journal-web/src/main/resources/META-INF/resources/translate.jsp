@@ -150,8 +150,10 @@ renderResponse.setTitle(journalTranslateDisplayContext.getTitle());
 								>
 
 									<%
-									String sourceContent = journalTranslateDisplayContext.getSourceStringValue(infoField, journalTranslateDisplayContext.getSourceLocale());
+									List<String> sourceContents = journalTranslateDisplayContext.getSourceStringValues(infoField, journalTranslateDisplayContext.getSourceLocale());
 									String sourceContentDir = LanguageUtil.get(journalTranslateDisplayContext.getSourceLocale(), "lang.dir");
+
+									for (String sourceContent : sourceContents) {
 									%>
 
 									<c:choose>
@@ -170,13 +172,28 @@ renderResponse.setTitle(journalTranslateDisplayContext.getTitle());
 									</c:choose>
 								</clay:col>
 
+								<%
+								}
+								%>
+
 								<clay:col
 									md="6"
 								>
 
 									<%
-									String id = "infoField--" + infoField.getUniqueId() + "--";
-									String targetContent = journalTranslateDisplayContext.getTargetStringValue(infoField, journalTranslateDisplayContext.getTargetLocale());
+									List<String> targetContents = journalTranslateDisplayContext.getTargetStringValues(infoField, journalTranslateDisplayContext.getTargetLocale());
+									int iterator = 0;
+
+									for (String targetContent : targetContents) {
+										String id = StringPool.BLANK;
+
+										if (targetContents.size() > 1) {
+											id = "infoField--" + infoField.getUniqueId() + "_repeatable_" + iterator + "--";
+											iterator++;
+										}
+										else {
+											id = "infoField--" + infoField.getUniqueId() + "--";
+										}
 									%>
 
 									<c:choose>
@@ -199,6 +216,7 @@ renderResponse.setTitle(journalTranslateDisplayContext.getTitle());
 							</clay:row>
 
 					<%
+							}
 						}
 					}
 					%>
