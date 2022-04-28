@@ -467,4 +467,72 @@ definition {
 			value1 = "WC WebContent Title");
 	}
 
+	@priority = "3"
+	test ReviewChangesCanProcessWebContentsWithThemeDisplayInTemplate {
+		JSONPublications.addPublication(publicationName = "Publication Name");
+
+		JSONPublications.selectPublication(publicationName = "Publication Name");
+
+		JSONGroup.addGroup(groupName = "Site Name");
+
+		WebContentStructures.openWebContentStructuresAdmin(siteURLKey = "site-name");
+
+		WebContentStructures.addCP(
+			structureDescription = "WC Structure Description",
+			structureName = "WC Structure Name");
+
+		DynamicDataMapping.addField(
+			field = "Text",
+			fieldFieldLabel = "Text",
+			fieldName = "Text");
+
+		DynamicDataMapping.editFieldLocalizable(fieldFieldLabel = "Text");
+
+		WebContentStructures.saveCP(structureName = "WC Structure Name");
+
+		Navigator.gotoNavItem(navItem = "Templates");
+
+		LexiconEntry.gotoAdd();
+
+		WebContentTemplates.inputTemplateAddScreenFields(
+			structureName = "WC Structure Name",
+			templateDescription = "WC Template Description",
+			templateName = "WC Template Name",
+			templateScript = "themeDisplay.getScopeGroupId()");
+
+		Uncheck(
+			checkboxName = "Cacheable",
+			locator1 = "Checkbox#ANY_CHECKBOX");
+
+		DDLDataDefinition.save();
+
+		WebContentNavigator.openWebContentAdmin(siteURLKey = "site-name");
+
+		WebContentNavigator.gotoAddWithStructureCP(structureName = "WC Structure Name");
+
+		WebContent.addWithStructureCP(
+			structureName = "WC Structure Name",
+			templateName = "WC Template Name",
+			webContentText = "WC Web Content Text",
+			webContentTitle = "WC Web Content Title");
+
+		PortletEntry.publish();
+
+		WebContentNavigator.gotoEditCP(webContentTitle = "WC Web Content Title");
+
+		WebContent.addCP(webContentTitle = "WC Web Content Title Edited");
+
+		PortletEntry.publish();
+
+		Publications.gotoReviewChanges();
+
+		Click(
+			changeOrder = "2",
+			key_changeCategory = "Web Content Article",
+			key_changeTitle = "WC Web Content Title Edited",
+			locator1 = "PublicationsChanges#PUBLICATIONS_CHANGE_TITLE");
+
+		AssertConsoleTextNotPresent(value1 = "Error executing FreeMarker template");
+	}
+
 }
