@@ -35,6 +35,7 @@ import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.translation.service.TranslationEntryService;
 
 import java.util.ArrayList;
@@ -107,10 +108,42 @@ public class UpdateTranslationMVCActionCommand extends BaseMVCActionCommand {
 
 		for (String parameter : parameterMap.keySet()) {
 			if (parameter.startsWith(_INFO_FIELD_PREFIX)) {
-				values.put(
-					parameter.substring(
-						_INFO_FIELD_PREFIX.length(), parameter.length() - 2),
-					portletRequest.getParameterValues(parameter));
+				if (parameter.contains(_REPEATABLE_FIELD_SEPARATOR)) {
+					String repeatableFieldUniqueId =
+						StringUtil.split(parameter, _REPEATABLE_FIELD_SEPARATOR)
+							[0];
+
+					if (!values.containsKey(
+							repeatableFieldUniqueId.substring(
+								_INFO_FIELD_PREFIX.length()))) {
+
+						int i = 0;
+						List<String> repeatableValues = new ArrayList<>();
+
+						while (parameterMap.containsKey(
+									_getRepeatableFieldUniqueId(
+										repeatableFieldUniqueId, i))) {
+
+							repeatableValues.add(
+								parameterMap.get(
+									_getRepeatableFieldUniqueId(
+										repeatableFieldUniqueId, i))[0]);
+							i++;
+						}
+
+						values.put(
+							repeatableFieldUniqueId.substring(
+								_INFO_FIELD_PREFIX.length()),
+							repeatableValues.toArray(new String[0]));
+					}
+				}
+				else {
+					values.put(
+						parameter.substring(
+							_INFO_FIELD_PREFIX.length(),
+							parameter.length() - 2),
+						portletRequest.getParameterValues(parameter));
+				}
 			}
 		}
 
@@ -183,6 +216,19 @@ public class UpdateTranslationMVCActionCommand extends BaseMVCActionCommand {
 		return infoItemFieldValuesProvider.getInfoItemFieldValues(article);
 	}
 
+	private String _getRepeatableFieldUniqueId(
+		String fieldUniqueId, int iterator) {
+
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(fieldUniqueId);
+		sb.append(_REPEATABLE_FIELD_SEPARATOR);
+		sb.append(iterator);
+		sb.append("--");
+
+		return sb.toString();
+	}
+
 	private String _getSourceLanguageId(ActionRequest actionRequest) {
 		return ParamUtil.getString(actionRequest, "sourceLanguageId");
 	}
@@ -200,6 +246,8 @@ public class UpdateTranslationMVCActionCommand extends BaseMVCActionCommand {
 	}
 
 	private static final String _INFO_FIELD_PREFIX = "infoField--";
+
+	private static final String _REPEATABLE_FIELD_SEPARATOR = "_repeatable_";
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		UpdateTranslationMVCActionCommand.class);
