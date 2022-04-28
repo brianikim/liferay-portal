@@ -839,8 +839,8 @@ public class EditFileEntryMVCActionCommand extends BaseMVCActionCommand {
 			String cmd, Exception exception)
 		throws Exception {
 
-		if (_log.isInfoEnabled()) {
-			_log.info("The following exception occured: " + exception);
+		if (_log.isWarnEnabled()) {
+			_log.warn(exception);
 		}
 
 		if (exception instanceof AssetCategoryException ||
