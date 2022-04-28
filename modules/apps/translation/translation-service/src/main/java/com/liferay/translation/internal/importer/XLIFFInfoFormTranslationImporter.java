@@ -344,7 +344,7 @@ public class XLIFFInfoFormTranslationImporter
 						continue;
 					}
 
-									consumer.accept(
+					consumer.accept(
 						new InfoFieldValue<>(
 							_createInfoField(targetLocale, iTextUnit.getId()),
 							InfoLocalizedValue.builder(

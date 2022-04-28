@@ -16,7 +16,6 @@ package com.liferay.asset.info.internal.item;
 
 import com.liferay.asset.kernel.model.AssetEntry;
 import com.liferay.info.field.InfoField;
-import com.liferay.info.field.type.ImageInfoFieldType;
 import com.liferay.info.field.type.TextInfoFieldType;
 import com.liferay.info.localized.InfoLocalizedValue;
 

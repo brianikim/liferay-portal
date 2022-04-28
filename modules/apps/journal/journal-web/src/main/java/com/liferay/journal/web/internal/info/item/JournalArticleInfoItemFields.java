@@ -38,8 +38,8 @@ public class JournalArticleInfoItemFields {
 		).build();
 	public static final InfoField<ImageInfoFieldType>
 		authorProfileImageInfoField = BuilderHolder._builder.infoFieldType(
-				ImageInfoFieldType.INSTANCE
-			).name(
+			ImageInfoFieldType.INSTANCE
+		).name(
 			"authorProfileImage"
 		).labelInfoLocalizedValue(
 			InfoLocalizedValue.localize(

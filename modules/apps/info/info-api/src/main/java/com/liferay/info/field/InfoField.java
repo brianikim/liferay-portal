@@ -160,7 +160,7 @@ public class InfoField<T extends InfoFieldType> implements InfoFieldSetEntry {
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(5);
+		StringBundler sb = new StringBundler(7);
 
 		sb.append("{name: ");
 		sb.append(_builder._name);
