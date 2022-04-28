@@ -574,12 +574,6 @@ AUI.add(
 					var currentLocale = instance.get('displayLocale');
 					var displayLocale = event.item.getAttribute('data-value');
 
-					if (instance.get('localizable')) {
-						var form = instance.getForm();
-
-						form.addAvailableLanguageIds([displayLocale]);
-					}
-
 					instance.updateLocalizationMap(currentLocale);
 
 					instance.set('displayLocale', displayLocale);
