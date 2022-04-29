@@ -1,6 +1,6 @@
 Bundle-Name: Liferay Subscription API
 Bundle-SymbolicName: com.liferay.subscription.api
-Bundle-Version: 4.1.3
+Bundle-Version: 4.1.4
 Export-Package:\
 	com.liferay.subscription.constants,\
 	com.liferay.subscription.exception,\
