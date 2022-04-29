@@ -30,15 +30,15 @@ const AddSXPElementModal = ({children}) => {
 
 	const isMounted = useIsMounted();
 
-	const {observer, onClose} = useModal({
-		onClose: () => setVisibleModal(false),
-	});
-
 	const [descriptionInputValue, setDescriptionInputValue] = useState('');
 	const [errorMessage, setErrorMessage] = useState();
 	const [loadingResponse, setLoadingResponse] = useState(false);
 	const [titleInputValue, setTitleInputValue] = useState('');
 	const [visibleModal, setVisibleModal] = useState(false);
+
+	const {observer, onClose} = useModal({
+		onClose: () => setVisibleModal(false),
+	});
 
 	const _handleFormError = (responseContent) => {
 		setErrorMessage(responseContent.error || DEFAULT_ERROR);

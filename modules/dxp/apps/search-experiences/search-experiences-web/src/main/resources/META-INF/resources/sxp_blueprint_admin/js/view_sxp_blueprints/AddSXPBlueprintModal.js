@@ -36,10 +36,6 @@ const AddSXPBlueprintModal = ({children}) => {
 
 	const isMounted = useIsMounted();
 
-	const {observer, onClose} = useModal({
-		onClose: () => setVisibleModal(false),
-	});
-
 	const [descriptionInputValue, setDescriptionInputValue] = useState('');
 	const [errorMessage, setErrorMessage] = useState();
 	const [loadingResponse, setLoadingResponse] = useState(false);
@@ -57,6 +53,10 @@ const AddSXPBlueprintModal = ({children}) => {
 		queryPrefilterContributors,
 		setQueryPrefilterContributors,
 	] = useState(null);
+
+	const {observer, onClose} = useModal({
+		onClose: () => setVisibleModal(false),
+	});
 
 	useEffect(() => {
 		[

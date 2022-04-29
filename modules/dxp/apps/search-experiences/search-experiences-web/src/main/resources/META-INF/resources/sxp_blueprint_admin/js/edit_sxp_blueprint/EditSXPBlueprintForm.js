@@ -73,6 +73,7 @@ const TABS = {
 };
 /* eslint-enable sort-keys */
 
+/* eslint-disable no-use-before-define */
 function EditSXPBlueprintForm({
 	entityJSON,
 	initialConfiguration = {},
@@ -964,6 +965,7 @@ function EditSXPBlueprintForm({
 		</form>
 	);
 }
+/* eslint-enable no-use-before-define */
 
 EditSXPBlueprintForm.propTypes = {
 	entityJSON: PropTypes.object,

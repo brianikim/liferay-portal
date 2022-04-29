@@ -94,6 +94,14 @@ const ViewSXPElements = ({
 		},
 	});
 
+	const _setLoading = (loading) => {
+		setNetworkState({
+			error: false,
+			loading,
+			networkStatus: 4,
+		});
+	};
+
 	const _handleActionDelete = (id, title) => async () => {
 		if (
 			confirm(
@@ -516,14 +524,6 @@ const ViewSXPElements = ({
 				</div>
 			</div>
 		);
-	};
-
-	const _setLoading = (loading) => {
-		setNetworkState({
-			error: false,
-			loading,
-			networkStatus: 4,
-		});
 	};
 
 	return (
