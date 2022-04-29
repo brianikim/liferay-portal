@@ -1,6 +1,6 @@
 Bundle-Name: Liferay Portal OData Implementation
 Bundle-SymbolicName: com.liferay.portal.odata.impl
-Bundle-Version: 3.0.19
+Bundle-Version: 3.0.20
 Import-Package:\
 	!com.aayushatharva.brotli4j.*,\
 	\
