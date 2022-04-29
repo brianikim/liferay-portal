@@ -511,7 +511,7 @@ definition {
 			configurationName = "Time Zone",
 			configurationScope = "Virtual Instance Scope");
 
-		PortalSettings.configureTimeZone(timeZone = "(UTC +02:00) Israel Standard Time");
+		PortalSettings.configureTimeZone(timeZone = "(UTC +05:00) Pakistan Time");
 
 		JSONUser.addUser(
 			userEmailAddress = "userea@liferay.com",
@@ -549,7 +549,7 @@ definition {
 
 			AssertTextEquals.assertPartialText(
 				locator1 = "Message#ERROR_DISMISSIBLE",
-				value1 = "IST.");
+				value1 = "PKT.");
 		}
 	}
 
