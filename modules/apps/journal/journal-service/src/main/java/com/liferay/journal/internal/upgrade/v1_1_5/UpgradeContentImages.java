@@ -112,9 +112,10 @@ public class UpgradeContentImages extends UpgradeProcess {
 									fileEntryId);
 							}
 							catch (Exception exception) {
-								if (_log.isDebugEnabled()) {
-									_log.debug(
-										"Error getting the fileEntry",
+								if (_log.isWarnEnabled()) {
+									_log.warn(
+										"Unable to get file entry " +
+											fileEntryId,
 										exception);
 								}
 							}
