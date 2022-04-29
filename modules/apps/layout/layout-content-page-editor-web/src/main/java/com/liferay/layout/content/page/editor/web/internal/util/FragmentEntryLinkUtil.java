@@ -150,9 +150,11 @@ public class FragmentEntryLinkUtil {
 				FragmentRenderer fragmentRenderer =
 					fragmentRendererTracker.getFragmentRenderer(rendererKey);
 
-				fragmentEntryKey = fragmentRenderer.getKey();
+				if (fragmentRenderer != null) {
+					fragmentEntryKey = fragmentRenderer.getKey();
 
-				name = fragmentRenderer.getLabel(themeDisplay.getLocale());
+					name = fragmentRenderer.getLabel(themeDisplay.getLocale());
+				}
 
 				if (Validator.isNotNull(portletId)) {
 					name = PortalUtil.getPortletTitle(
