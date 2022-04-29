@@ -161,19 +161,11 @@ public class LayoutPageTemplatesImporterImpl
 
 		Set<String> warningMessages = new HashSet<>();
 
-		_processPageElement(
-			layout, layoutStructure, pageElement, parentItemId, position,
-			warningMessages);
-
 		List<FragmentEntryLink> fragmentEntryLinks = new ArrayList<>();
 
-		LayoutStructureItem parentLayoutStructureItem =
-			layoutStructure.getLayoutStructureItem(parentItemId);
-
-		fragmentEntryLinks.addAll(
-			_getFragmentEntryLinks(
-				layoutStructure,
-				parentLayoutStructureItem.getChildrenItemIds()));
+		_processPageElement(
+			fragmentEntryLinks, layout, layoutStructure, pageElement,
+			parentItemId, position, warningMessages);
 
 		_updateLayoutPageTemplateStructure(layout, layoutStructure);
 
@@ -319,40 +311,6 @@ public class LayoutPageTemplatesImporterImpl
 			locale, getClass());
 
 		return _language.format(resourceBundle, languageKey, arguments);
-	}
-
-	private List<FragmentEntryLink> _getFragmentEntryLinks(
-			LayoutStructure layoutStructure, List<String> childrenItemIds)
-		throws Exception {
-
-		List<FragmentEntryLink> fragmentEntryLinks = new ArrayList<>();
-
-		for (String childItemId : childrenItemIds) {
-			LayoutStructureItem layoutStructureItem =
-				layoutStructure.getLayoutStructureItem(childItemId);
-
-			if (layoutStructureItem instanceof
-					FragmentStyledLayoutStructureItem) {
-
-				FragmentStyledLayoutStructureItem
-					fragmentStyledLayoutStructureItem =
-						(FragmentStyledLayoutStructureItem)layoutStructureItem;
-
-				fragmentEntryLinks.add(
-					_fragmentEntryLinkLocalService.getFragmentEntryLink(
-						fragmentStyledLayoutStructureItem.
-							getFragmentEntryLinkId()));
-			}
-
-			List<String> currentChildrenItemIds =
-				layoutStructureItem.getChildrenItemIds();
-
-			fragmentEntryLinks.addAll(
-				_getFragmentEntryLinks(
-					layoutStructure, currentChildrenItemIds));
-		}
-
-		return fragmentEntryLinks;
 	}
 
 	private String _getKey(String defaultKey, String name, ZipEntry zipEntry) {
@@ -1043,9 +1001,9 @@ public class LayoutPageTemplatesImporterImpl
 						pageElement.getPageElements()) {
 
 					_processPageElement(
-						layout, layoutStructure, childPageElement,
-						rootLayoutStructureItem.getItemId(), position,
-						warningMessages);
+						new ArrayList<>(), layout, layoutStructure,
+						childPageElement, rootLayoutStructureItem.getItemId(),
+						position, warningMessages);
 
 					position++;
 				}
@@ -1064,9 +1022,9 @@ public class LayoutPageTemplatesImporterImpl
 	}
 
 	private void _processPageElement(
-			Layout layout, LayoutStructure layoutStructure,
-			PageElement pageElement, String parentItemId, int position,
-			Set<String> warningMessages)
+			List<FragmentEntryLink> fragmentEntryLinks, Layout layout,
+			LayoutStructure layoutStructure, PageElement pageElement,
+			String parentItemId, int position, Set<String> warningMessages)
 		throws Exception {
 
 		LayoutStructureItemImporter layoutStructureItemImporter =
@@ -1088,9 +1046,22 @@ public class LayoutPageTemplatesImporterImpl
 			return;
 		}
 
-		if ((layoutStructureItem == null) ||
-			(pageElement.getPageElements() == null)) {
+		if (layoutStructureItem == null) {
+			return;
+		}
 
+		if (layoutStructureItem instanceof FragmentStyledLayoutStructureItem) {
+			FragmentStyledLayoutStructureItem
+				fragmentStyledLayoutStructureItem =
+					(FragmentStyledLayoutStructureItem)layoutStructureItem;
+
+			fragmentEntryLinks.add(
+				_fragmentEntryLinkLocalService.getFragmentEntryLink(
+					fragmentStyledLayoutStructureItem.
+						getFragmentEntryLinkId()));
+		}
+
+		if (pageElement.getPageElements() == null) {
 			return;
 		}
 
@@ -1098,7 +1069,7 @@ public class LayoutPageTemplatesImporterImpl
 
 		for (PageElement childPageElement : pageElement.getPageElements()) {
 			_processPageElement(
-				layout, layoutStructure, childPageElement,
+				fragmentEntryLinks, layout, layoutStructure, childPageElement,
 				layoutStructureItem.getItemId(), childPosition,
 				warningMessages);
 
