@@ -1,6 +1,6 @@
 Bundle-Name: Liferay Bulk REST API
 Bundle-SymbolicName: com.liferay.bulk.rest.api
-Bundle-Version: 2.8.3
+Bundle-Version: 2.8.4
 Export-Package:\
 	com.liferay.bulk.rest.dto.v1_0,\
 	com.liferay.bulk.rest.resource.v1_0
