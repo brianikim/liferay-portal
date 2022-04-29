@@ -159,13 +159,11 @@ public class LayoutPageTemplatesImporterImpl
 		PageElement pageElement = _objectMapper.readValue(
 			pageElementJSON, PageElement.class);
 
-		Set<String> warningMessages = new HashSet<>();
-
 		List<FragmentEntryLink> fragmentEntryLinks = new ArrayList<>();
 
 		_processPageElement(
 			fragmentEntryLinks, layout, layoutStructure, pageElement,
-			parentItemId, position, warningMessages);
+			parentItemId, position, new HashSet<>());
 
 		_updateLayoutPageTemplateStructure(layout, layoutStructure);
 
