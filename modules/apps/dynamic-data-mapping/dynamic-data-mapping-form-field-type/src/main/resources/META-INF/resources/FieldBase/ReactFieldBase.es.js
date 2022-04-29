@@ -153,6 +153,10 @@ function FieldBase({
 		parentDivAriaLabelledby = fieldDetailsId;
 	}
 
+	if (label) {
+		fieldDetails += Liferay.Util.escape(label) + '<br>';
+	}
+
 	if (tip) {
 		fieldDetails += Liferay.Util.escape(tip) + '<br>';
 	}
