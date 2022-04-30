@@ -47,7 +47,7 @@
 		]
 	},
 	"main": "js/index.es.js",
-	"name": "@liferay/search-experiences-web",
+	"name": "search-experiences-web",
 	"private": true,
 	"scripts": {
 		"build": "liferay-npm-scripts build",
