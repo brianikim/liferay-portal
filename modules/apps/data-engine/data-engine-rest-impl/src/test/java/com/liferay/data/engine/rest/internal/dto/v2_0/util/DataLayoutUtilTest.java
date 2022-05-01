@@ -30,6 +30,8 @@ import com.liferay.dynamic.data.mapping.model.DDMFormRule;
 import com.liferay.dynamic.data.mapping.test.util.DDMFormTestUtil;
 import com.liferay.portal.json.JSONFactoryImpl;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
+import com.liferay.portal.kernel.language.Language;
+import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.SetUtil;
@@ -42,6 +44,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import org.powermock.api.mockito.PowerMockito;
@@ -58,7 +61,7 @@ public class DataLayoutUtilTest extends PowerMockito {
 	@Before
 	public void setUp() {
 		_setUpJSONFactoryUtil();
-		_setUpLocaleUtil();
+		_setUpLanguageUtil();
 	}
 
 	@Test
@@ -204,20 +207,31 @@ public class DataLayoutUtilTest extends PowerMockito {
 		jsonFactoryUtil.setJSONFactory(new JSONFactoryImpl());
 	}
 
-	private void _setUpLocaleUtil() {
-		mockStatic(LocaleUtil.class);
-
+	private void _setUpLanguageUtil() {
 		when(
-			LocaleUtil.fromLanguageId("en_US")
+			_language.getAvailableLocales()
 		).thenReturn(
-			LocaleUtil.US
+			SetUtil.fromArray(LocaleUtil.US)
 		);
 
 		when(
-			LocaleUtil.toLanguageId(LocaleUtil.US)
+			_language.isAvailableLocale(Matchers.eq(LocaleUtil.US))
 		).thenReturn(
-			"en_US"
+			true
 		);
+
+		when(
+			_language.isAvailableLocale(
+				Matchers.eq(LocaleUtil.toLanguageId(LocaleUtil.US)))
+		).thenReturn(
+			true
+		);
+
+		LanguageUtil languageUtil = new LanguageUtil();
+
+		languageUtil.setLanguage(_language);
 	}
+
+	private final Language _language = Mockito.mock(Language.class);
 
 }

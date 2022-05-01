@@ -1072,6 +1072,11 @@ public class DDMFormValuesFactoryTest extends PowerMockito {
 			"pt_BR"
 		);
 
+		_whenLanguageIsAvailableLocale("en_US");
+		_whenLanguageIsAvailableLocale("pt_BR");
+		_whenLanguageIsAvailableLocale(LocaleUtil.US);
+		_whenLanguageIsAvailableLocale(LocaleUtil.BRAZIL);
+
 		LanguageUtil languageUtil = new LanguageUtil();
 
 		languageUtil.setLanguage(_language);
@@ -1121,15 +1126,25 @@ public class DDMFormValuesFactoryTest extends PowerMockito {
 		);
 
 		when(
-			LocaleUtil.getSiteDefault()
-		).thenReturn(
-			LocaleUtil.US
-		);
-
-		when(
 			LocaleUtil.toLanguageIds(Matchers.anyCollection())
 		).thenReturn(
 			new String[] {"en_US", "pt_BR"}
+		);
+	}
+
+	private void _whenLanguageIsAvailableLocale(Locale locale) {
+		when(
+			_language.isAvailableLocale(Matchers.eq(locale))
+		).thenReturn(
+			true
+		);
+	}
+
+	private void _whenLanguageIsAvailableLocale(String languageId) {
+		when(
+			_language.isAvailableLocale(Matchers.eq(languageId))
+		).thenReturn(
+			true
 		);
 	}
 

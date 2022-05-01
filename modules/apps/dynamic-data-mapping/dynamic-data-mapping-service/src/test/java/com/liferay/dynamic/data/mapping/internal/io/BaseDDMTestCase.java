@@ -41,8 +41,6 @@ import org.junit.runner.RunWith;
 
 import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -123,83 +121,12 @@ public abstract class BaseDDMTestCase extends PowerMockito {
 
 		whenLanguageGetAvailableLocalesThen(availableLocales);
 
-		whenLanguageIsAvailableLocale("en_US");
-		whenLanguageIsAvailableLocale("pt_BR");
+		whenLanguageIsAvailableLocale(LocaleUtil.BRAZIL);
+		whenLanguageIsAvailableLocale(LocaleUtil.US);
 
 		LanguageUtil languageUtil = new LanguageUtil();
 
 		languageUtil.setLanguage(language);
-	}
-
-	protected void setUpLocaleUtil() {
-		mockStatic(LocaleUtil.class);
-
-		when(
-			LocaleUtil.fromLanguageId("en_US")
-		).thenReturn(
-			LocaleUtil.US
-		);
-
-		when(
-			LocaleUtil.fromLanguageId("pt_BR")
-		).thenReturn(
-			LocaleUtil.BRAZIL
-		);
-
-		when(
-			LocaleUtil.fromLanguageId("en_US", true, false)
-		).thenReturn(
-			LocaleUtil.US
-		);
-
-		when(
-			LocaleUtil.fromLanguageId("pt_BR", true, false)
-		).thenReturn(
-			LocaleUtil.BRAZIL
-		);
-
-		when(
-			LocaleUtil.getDefault()
-		).thenReturn(
-			LocaleUtil.US
-		);
-
-		when(
-			LocaleUtil.toLanguageId(LocaleUtil.US)
-		).thenReturn(
-			"en_US"
-		);
-
-		when(
-			LocaleUtil.toLanguageId(LocaleUtil.BRAZIL)
-		).thenReturn(
-			"pt_BR"
-		);
-
-		when(
-			LocaleUtil.toLanguageIds((Locale[])Matchers.any())
-		).then(
-			new Answer<String[]>() {
-
-				@Override
-				public String[] answer(InvocationOnMock invocationOnMock)
-					throws Throwable {
-
-					Object[] args = invocationOnMock.getArguments();
-
-					Locale[] locales = (Locale[])args[0];
-
-					String[] languageIds = new String[locales.length];
-
-					for (int i = 0; i < locales.length; i++) {
-						languageIds[i] = LocaleUtil.toLanguageId(locales[i]);
-					}
-
-					return languageIds;
-				}
-
-			}
-		);
 	}
 
 	protected void setUpPortalClassLoaderUtil() {
@@ -240,9 +167,16 @@ public abstract class BaseDDMTestCase extends PowerMockito {
 		);
 	}
 
-	protected void whenLanguageIsAvailableLocale(String languageId) {
+	protected void whenLanguageIsAvailableLocale(Locale locale) {
 		when(
-			language.isAvailableLocale(Matchers.eq(languageId))
+			language.isAvailableLocale(
+				Matchers.eq(LocaleUtil.toLanguageId(locale)))
+		).thenReturn(
+			true
+		);
+
+		when(
+			language.isAvailableLocale(Matchers.eq(locale))
 		).thenReturn(
 			true
 		);
