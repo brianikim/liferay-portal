@@ -17,8 +17,8 @@ dependencies {
 	compileInclude group: "org.noggit", name: "noggit", version: "0.6"
 
 	compileOnly group: "biz.aQute.bnd", name: "biz.aQute.bnd.annotation", version: "4.2.0"
-	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.impl", version: "5.29.0"
-	compileOnly group: "com.liferay.portal", name: "release.dxp.api", version: "7.3.10.fp2"
+	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.impl", version: "default"
+	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "default"
 	compileOnly group: "commons-lang", name: "commons-lang", version: "2.6"
 	compileOnly group: "org.apache.lucene", name: "lucene-misc", version: luceneVersion
 	compileOnly group: "org.apache.lucene", name: "lucene-sandbox", version: luceneVersion
@@ -26,6 +26,13 @@ dependencies {
 	compileOnly group: "org.osgi", name: "org.osgi.service.component.annotations", version: "1.3.0"
 	compileOnly group: "org.osgi", name: "osgi.core", version: "6.0.0"
 	compileOnly group: "org.slf4j", name: "slf4j-api", version: "1.7.26"
+	compileOnly project(":apps:portal-search-solr8:portal-search-solr8-api")
+	compileOnly project(":apps:portal-search:portal-search-api")
+	compileOnly project(":apps:portal-search:portal-search-engine-adapter-api")
+	compileOnly project(":apps:portal-search:portal-search-spi")
+	compileOnly project(":apps:static:portal-configuration:portal-configuration-metatype-api")
+	compileOnly project(":core:petra:petra-io")
+	compileOnly project(":core:petra:petra-string")
 
 	testCompile group: "com.liferay.portal", name: "com.liferay.util.java", version: "default"
 	testCompile group: "commons-collections", name: "commons-collections", version: "3.2.2"
@@ -34,6 +41,17 @@ dependencies {
 	testCompile group: "org.jabsorb", name: "jabsorb", version: "1.3.1"
 	testCompile group: "org.jodd", name: "jodd-bean", version: "3.6.4"
 	testCompile group: "org.jodd", name: "jodd-json", version: "3.6.4"
+	testCompile project(":apps:portal-search:portal-search")
+	testCompile project(":apps:portal-search:portal-search-test-util")
+	testCompile project(":apps:static:portal-configuration:portal-configuration-persistence-api")
+	testCompile project(":core:petra:petra-concurrent")
+	testCompile project(":core:petra:petra-function")
+	testCompile project(":core:petra:petra-lang")
+	testCompile project(":core:petra:petra-memory")
+	testCompile project(":core:petra:petra-nio")
+	testCompile project(":core:petra:petra-reflect")
+	testCompile project(":core:petra:petra-sql-dsl-api")
+	testCompile project(":core:registry-api")
 }
 
 test {
