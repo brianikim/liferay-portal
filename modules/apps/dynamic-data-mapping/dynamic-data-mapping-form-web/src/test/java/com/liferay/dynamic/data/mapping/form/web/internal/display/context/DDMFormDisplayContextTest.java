@@ -636,8 +636,6 @@ public class DDMFormDisplayContextTest extends PowerMockito {
 			"es_ES"
 		);
 
-		_whenLanguageIsAvailableLocale(_DEFAULT_LANGUAGE_ID);
-		_whenLanguageIsAvailableLocale("pt_BR");
 		_whenLanguageIsAvailableLocale(LocaleUtil.BRAZIL);
 		_whenLanguageIsAvailableLocale(LocaleUtil.SPAIN);
 
@@ -744,11 +742,10 @@ public class DDMFormDisplayContextTest extends PowerMockito {
 		).thenReturn(
 			true
 		);
-	}
 
-	private void _whenLanguageIsAvailableLocale(String languageId) {
 		when(
-			_language.isAvailableLocale(Matchers.eq(languageId))
+			_language.isAvailableLocale(
+				Matchers.eq(LocaleUtil.toLanguageId(locale)))
 		).thenReturn(
 			true
 		);
