@@ -205,7 +205,7 @@ public class OpenIdConnectAuthenticationHandlerImpl
 		catch (LangTagException langTagException) {
 			if (_log.isDebugEnabled()) {
 				_log.debug(
-					"Unable to create the LangTag with the current locale: " +
+					"Unable to create a lang tag with locale " +
 						locale.getLanguage());
 			}
 		}
