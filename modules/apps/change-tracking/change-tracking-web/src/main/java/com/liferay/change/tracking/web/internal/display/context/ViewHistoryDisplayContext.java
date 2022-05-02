@@ -93,7 +93,7 @@ public class ViewHistoryDisplayContext {
 
 		SearchContainer<CTProcess> searchContainer = new SearchContainer<>(
 			_renderRequest, new DisplayTerms(_renderRequest), null,
-			SearchContainer.DEFAULT_CUR_PARAM, 5,
+			SearchContainer.DEFAULT_CUR_PARAM, SearchContainer.DEFAULT_DELTA,
 			PortletURLUtil.getCurrent(_renderRequest, _renderResponse), null,
 			_language.get(
 				_httpServletRequest, "no-publication-has-been-published-yet"));
@@ -107,11 +107,17 @@ public class ViewHistoryDisplayContext {
 
 		List<CTProcess> results = _ctProcessService.getCTProcesses(
 			_themeDisplay.getCompanyId(), CTWebConstants.USER_FILTER_ALL,
-			displayTerms.getKeywords(), _getStatus(_getFilterByStatus()), 0, 5,
+			displayTerms.getKeywords(), _getStatus(_getFilterByStatus()),
+			searchContainer.getStart(), searchContainer.getEnd(),
 			_getOrderByComparator(_getOrderByCol(), _getOrderByType()));
 
+		int processesCount = _ctProcessService.getCTProcessesCount(
+			_themeDisplay.getCompanyId(), CTWebConstants.USER_FILTER_ALL,
+			displayTerms.getKeywords(), _getStatus(_getFilterByStatus()));
+
+		searchContainer.setTotal(processesCount);
+
 		searchContainer.setResults(results);
-		searchContainer.setTotal(results.size());
 
 		_searchContainer = searchContainer;
 
