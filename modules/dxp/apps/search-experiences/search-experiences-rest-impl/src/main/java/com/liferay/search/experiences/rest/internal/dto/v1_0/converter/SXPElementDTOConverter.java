@@ -69,6 +69,7 @@ public class SXPElementDTOConverter
 					true, sxpElement.getDescriptionMap());
 				elementDefinition = _toElementDefinition(
 					sxpElement.getElementDefinitionJSON());
+				externalReferenceCode = sxpElement.getExternalReferenceCode();
 				id = sxpElement.getSXPElementId();
 				modifiedDate = sxpElement.getModifiedDate();
 				readOnly = sxpElement.getReadOnly();
@@ -78,6 +79,7 @@ public class SXPElementDTOConverter
 					true, sxpElement.getTitleMap());
 				type = sxpElement.getType();
 				userName = sxpElement.getUserName();
+				version = sxpElement.getVersion();
 			}
 		};
 	}
