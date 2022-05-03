@@ -440,8 +440,15 @@ public class ProductResourceImpl
 			ignoreSKUCombinations = cpDefinition.isIgnoreSKUCombinations();
 		}
 
-		cpDefinition = _cpDefinitionService.upsertCPDefinition(
-			commerceCatalog.getGroupId(), contextUser.getUserId(),
+		int productStatus = GetterUtil.getInteger(product.getProductStatus());
+
+		if (productStatus != WorkflowConstants.STATUS_APPROVED) {
+			serviceContext.setWorkflowAction(
+				WorkflowConstants.ACTION_SAVE_DRAFT);
+		}
+
+		cpDefinition = _cpDefinitionService.addOrUpdateCPDefinition(
+			product.getExternalReferenceCode(), commerceCatalog.getGroupId(),
 			LanguageUtils.getLocalizedMap(nameMap),
 			LanguageUtils.getLocalizedMap(shortDescriptionMap),
 			LanguageUtils.getLocalizedMap(descriptionMap), null,
@@ -474,9 +481,7 @@ public class ProductResourceImpl
 				subscriptionConfiguration.getSubscriptionTypeAsString()),
 			null,
 			GetterUtil.getLong(subscriptionConfiguration.getNumberOfLength()),
-			product.getExternalReferenceCode(), serviceContext);
-
-		// Workflow
+			productStatus, serviceContext);
 
 		if ((product.getActive() != null) && !product.getActive()) {
 			Map<String, Serializable> workflowContext = new HashMap<>();
