@@ -583,6 +583,10 @@ AUI.add(
 					});
 
 					menuInstance._focusManager = focusManager;
+
+					Liferay.once('beforeScreenFlip', () => {
+						menuInstance._focusManager = null;
+					});
 				}
 
 				focusManager.refresh();
