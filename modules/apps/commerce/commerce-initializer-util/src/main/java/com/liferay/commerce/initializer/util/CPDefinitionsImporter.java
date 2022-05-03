@@ -244,17 +244,17 @@ public class CPDefinitionsImporter {
 			locale, description);
 
 		return _cpDefinitionLocalService.addCPDefinition(
-			catalogGroupId, user.getUserId(), nameMap, shortDescriptionMap,
-			descriptionMap, nameMap, null, null, null, "simple", true,
-			shippable, false, false, 0D, width, height, depth, weight,
-			_getCPTaxCategoryId(taxCategory, serviceContext), false, false,
-			null, true, displayDateMonth, displayDateDay, displayDateYear,
-			displayDateHour, displayDateMinute, expirationDateMonth,
-			expirationDateDay, expirationDateYear, expirationDateHour,
-			expirationDateMinute, true, sku, subscriptionEnabled,
-			subscriptionLength, subscriptionType,
+			externalReferenceCode, catalogGroupId, user.getUserId(), nameMap,
+			shortDescriptionMap, descriptionMap, nameMap, null, null, null,
+			"simple", true, shippable, false, false, 0D, width, height, depth,
+			weight, _getCPTaxCategoryId(taxCategory, serviceContext), false,
+			false, null, true, displayDateMonth, displayDateDay,
+			displayDateYear, displayDateHour, displayDateMinute,
+			expirationDateMonth, expirationDateDay, expirationDateYear,
+			expirationDateHour, expirationDateMinute, true, sku,
+			subscriptionEnabled, subscriptionLength, subscriptionType,
 			subscriptionTypeSettingsUnicodeProperties, maxSubscriptionCycles,
-			externalReferenceCode, serviceContext);
+			WorkflowConstants.STATUS_DRAFT, serviceContext);
 	}
 
 	private void _addWarehouseQuantities(

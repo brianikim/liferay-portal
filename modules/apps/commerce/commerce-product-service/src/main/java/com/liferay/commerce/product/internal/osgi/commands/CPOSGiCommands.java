@@ -26,6 +26,7 @@ import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -94,13 +95,13 @@ public class CPOSGiCommands {
 			titleMap.put(LocaleUtil.US, title);
 
 			_cpDefinitionLocalService.addCPDefinition(
-				commerceCatalog.getGroupId(), user.getUserId(), titleMap, null,
-				null, null, null, null, null, "simple", true, false, false,
-				false, 0, 0, 0, 0, 0, 0, false, false, null, true,
+				null, commerceCatalog.getGroupId(), user.getUserId(), titleMap,
+				null, null, null, null, null, null, "simple", true, false,
+				false, false, 0, 0, 0, 0, 0, 0, false, false, null, true,
 				displayDateMonth, displayDateDay, displayDateYear,
 				displayDateHour, displayDateMinute, 0, 0, 0, 0, 0, true,
-				CPInstanceConstants.DEFAULT_SKU, false, 0, null, null, 0, null,
-				serviceContext);
+				CPInstanceConstants.DEFAULT_SKU, false, 0, null, null, 0,
+				WorkflowConstants.STATUS_DRAFT, serviceContext);
 		}
 	}
 
