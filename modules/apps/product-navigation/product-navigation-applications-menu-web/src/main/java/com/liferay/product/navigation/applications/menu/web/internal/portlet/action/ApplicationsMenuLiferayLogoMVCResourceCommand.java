@@ -15,14 +15,14 @@
 package com.liferay.product.navigation.applications.menu.web.internal.portlet.action;
 
 import com.liferay.petra.string.CharPool;
-import com.liferay.portal.image.ImageToolImpl;
+import com.liferay.portal.kernel.image.ImageTool;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.PortletResponseUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCResourceCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
-import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.MimeTypesUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.module.framework.ModuleFrameworkUtilAdapter;
 import com.liferay.portal.util.PropsUtil;
@@ -57,19 +57,19 @@ public class ApplicationsMenuLiferayLogoMVCResourceCommand
 		throws Exception {
 
 		InputStream inputStream =
-			_getApplicationsMenuDefaultLiferayLogoInputStream();
+			_getApplicationsMenuDefaultLiferayLogoInputStream(resourceResponse);
 
 		if (inputStream == null) {
 			return;
 		}
 
-		resourceResponse.setContentType(ContentTypes.IMAGE_PNG);
-
 		PortletResponseUtil.write(resourceResponse, inputStream);
 	}
 
-	private InputStream _getApplicationsMenuDefaultLiferayLogoInputStream() {
-		ClassLoader classLoader = ImageToolImpl.class.getClassLoader();
+	private InputStream _getApplicationsMenuDefaultLiferayLogoInputStream(
+		ResourceResponse resourceResponse) {
+
+		ClassLoader classLoader = ImageTool.class.getClassLoader();
 
 		try {
 			InputStream inputStream = null;
@@ -112,7 +112,12 @@ public class ApplicationsMenuLiferayLogoMVCResourceCommand
 				if (_log.isDebugEnabled()) {
 					_log.debug("Default Liferay logo is not available");
 				}
+
+				return inputStream;
 			}
+
+			resourceResponse.setContentType(
+				MimeTypesUtil.getExtensionContentType(imageDefaultLiferayLogo));
 
 			return inputStream;
 		}
