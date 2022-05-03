@@ -18,26 +18,18 @@ import com.liferay.adaptive.media.image.internal.util.RenderedImageUtil;
 import com.liferay.portal.image.ImageToolImpl;
 import com.liferay.portal.kernel.image.ImageTool;
 import com.liferay.portal.kernel.image.ImageToolUtil;
-import com.liferay.portal.kernel.module.util.SystemBundleUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
-import com.liferay.portal.kernel.util.MimeTypes;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
 
 import java.awt.image.RenderedImage;
 
 import java.io.InputStream;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
-
-import org.mockito.Mockito;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 
 /**
  * @author Alicia García
@@ -51,32 +43,13 @@ public class TiffOrientationTransformerTest {
 
 	@Before
 	public void setUp() {
-		BundleContext bundleContext = SystemBundleUtil.getBundleContext();
-
-		_mimeTypes = Mockito.mock(MimeTypes.class);
-
-		_serviceRegistration = bundleContext.registerService(
-			MimeTypes.class, _mimeTypes, null);
-
 		ImageToolUtil imageToolUtil = new ImageToolUtil();
 
 		imageToolUtil.setImageTool(_imageTool);
 	}
 
-	@After
-	public void tearDown() {
-		_serviceRegistration.unregister();
-	}
-
 	@Test
 	public void testTransformJPG() throws Exception {
-		Mockito.when(
-			_mimeTypes.getContentType(
-				(InputStream)Mockito.anyObject(), Mockito.anyString())
-		).thenReturn(
-			ContentTypes.IMAGE_JPEG
-		);
-
 		String fileName =
 			"com/liferay/adaptive/media/image/internal/dependencies/test.jpg";
 
@@ -92,13 +65,6 @@ public class TiffOrientationTransformerTest {
 
 	@Test
 	public void testTransformPNG() throws Exception {
-		Mockito.when(
-			_mimeTypes.getContentType(
-				(InputStream)Mockito.anyObject(), Mockito.anyString())
-		).thenReturn(
-			ContentTypes.IMAGE_PNG
-		);
-
 		String fileName =
 			"com/liferay/adaptive/media/image/internal/dependencies/sample.png";
 
@@ -121,7 +87,5 @@ public class TiffOrientationTransformerTest {
 	}
 
 	private final ImageTool _imageTool = ImageToolImpl.getInstance();
-	private MimeTypes _mimeTypes;
-	private ServiceRegistration<?> _serviceRegistration;
 
 }
