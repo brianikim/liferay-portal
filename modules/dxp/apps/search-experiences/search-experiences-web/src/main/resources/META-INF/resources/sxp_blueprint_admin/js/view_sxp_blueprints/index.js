@@ -78,7 +78,9 @@ const ViewSXPBlueprints = ({
 		fetchRetry: {
 			attempts: 0,
 		},
-		link: `${window.location.origin}${apiURL}`,
+		link: `${
+			window.location.origin
+		}${themeDisplay.getPathContext()}${apiURL}`,
 		onNetworkStatusChange: (status) => {
 			setNetworkState({
 				error: status === 5,
