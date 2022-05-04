@@ -23,25 +23,31 @@ import selectCanUpdateItemConfiguration from '../../../app/selectors/selectCanUp
 import selectEditableValue from '../../../app/selectors/selectEditableValue';
 import isMapped from '../../../app/utils/isMapped';
 import {CollectionGeneralPanel} from '../components/item-configuration-panels/CollectionGeneralPanel';
+import ContainerAdvancedPanel from '../components/item-configuration-panels/ContainerAdvancedPanel';
 import ContainerLinkPanel from '../components/item-configuration-panels/ContainerLinkPanel';
 import {ContainerStylesPanel} from '../components/item-configuration-panels/ContainerStylesPanel';
 import EditableLinkPanel from '../components/item-configuration-panels/EditableLinkPanel';
+import FragmentAdvancedPanel from '../components/item-configuration-panels/FragmentAdvancedPanel';
 import {FragmentGeneralPanel} from '../components/item-configuration-panels/FragmentGeneralPanel';
 import {FragmentStylesPanel} from '../components/item-configuration-panels/FragmentStylesPanel';
 import {ImagePropertiesPanel} from '../components/item-configuration-panels/ImagePropertiesPanel';
 import {MappingPanel} from '../components/item-configuration-panels/MappingPanel';
+import RowAdvancedPanel from '../components/item-configuration-panels/RowAdvancedPanel';
 import {RowGeneralPanel} from '../components/item-configuration-panels/RowGeneralPanel';
 import {RowStylesPanel} from '../components/item-configuration-panels/RowStylesPanel';
 
 export const PANEL_IDS = {
 	collectionGeneral: 'collectionGeneral',
+	containerAdvanced: 'containerAdvanced',
 	containerLink: 'containerLink',
 	containerStyles: 'containerStyles',
 	editableLink: 'editableLink',
 	editableMapping: 'editableMapping',
+	fragmentAdvanced: 'fragmentAdvanced',
 	fragmentGeneral: 'fragmentGeneral',
 	fragmentStyles: 'fragmentStyles',
 	imageProperties: 'imageProperties',
+	rowAdvanced: 'rowAdvanced',
 	rowGeneral: 'rowGeneral',
 	rowStyles: 'rowStyles',
 };
@@ -55,12 +61,17 @@ export const PANELS = {
 	[PANEL_IDS.containerLink]: {
 		component: ContainerLinkPanel,
 		label: Liferay.Language.get('link'),
+		priority: 1,
+	},
+	[PANEL_IDS.containerAdvanced]: {
+		component: ContainerAdvancedPanel,
+		label: Liferay.Language.get('advanced'),
 		priority: 0,
 	},
 	[PANEL_IDS.containerStyles]: {
 		component: ContainerStylesPanel,
 		label: Liferay.Language.get('styles'),
-		priority: 0,
+		priority: 2,
 	},
 	[PANEL_IDS.editableLink]: {
 		component: EditableLinkPanel,
@@ -72,30 +83,40 @@ export const PANELS = {
 		label: Liferay.Language.get('mapping'),
 		priority: 1,
 	},
+	[PANEL_IDS.fragmentAdvanced]: {
+		component: FragmentAdvancedPanel,
+		label: Liferay.Language.get('advanced'),
+		priority: 0,
+	},
 	[PANEL_IDS.fragmentGeneral]: {
 		component: FragmentGeneralPanel,
 		label: Liferay.Language.get('general'),
-		priority: 1,
+		priority: 2,
 	},
 	[PANEL_IDS.fragmentStyles]: {
 		component: FragmentStylesPanel,
 		label: Liferay.Language.get('styles'),
-		priority: 0,
+		priority: 1,
 	},
 	[PANEL_IDS.imageProperties]: {
 		component: ImagePropertiesPanel,
 		label: Liferay.Language.get('image'),
 		priority: 3,
 	},
+	[PANEL_IDS.rowAdvanced]: {
+		component: RowAdvancedPanel,
+		label: Liferay.Language.get('advanced'),
+		priority: 0,
+	},
 	[PANEL_IDS.rowGeneral]: {
 		component: RowGeneralPanel,
 		label: Liferay.Language.get('general'),
-		priority: 1,
+		priority: 2,
 	},
 	[PANEL_IDS.rowStyles]: {
 		component: RowStylesPanel,
 		label: Liferay.Language.get('styles'),
-		priority: 0,
+		priority: 1,
 	},
 };
 
@@ -165,6 +186,7 @@ export const selectPanels = (activeItemId, activeItemType, state) => {
 	}
 	else if (activeItem.type === LAYOUT_DATA_ITEM_TYPES.container) {
 		panelsIds = {
+			[PANEL_IDS.containerAdvanced]: canUpdateItemConfiguration,
 			[PANEL_IDS.containerStyles]: canUpdateItemConfiguration,
 			[PANEL_IDS.containerLink]:
 				state.selectedViewportSize === VIEWPORT_SIZES.desktop &&
@@ -177,6 +199,7 @@ export const selectPanels = (activeItemId, activeItemType, state) => {
 				?.configuration?.fieldSets ?? [];
 
 		panelsIds = {
+			[PANEL_IDS.fragmentAdvanced]: canUpdateItemConfiguration,
 			[PANEL_IDS.fragmentStyles]: canUpdateItemConfiguration,
 			[PANEL_IDS.fragmentGeneral]:
 				state.selectedViewportSize === VIEWPORT_SIZES.desktop &&
@@ -190,6 +213,7 @@ export const selectPanels = (activeItemId, activeItemType, state) => {
 	}
 	else if (activeItem.type === LAYOUT_DATA_ITEM_TYPES.row) {
 		panelsIds = {
+			[PANEL_IDS.rowAdvanced]: canUpdateItemConfiguration,
 			[PANEL_IDS.rowStyles]: canUpdateItemConfiguration,
 			[PANEL_IDS.rowGeneral]:
 				canUpdateItemConfiguration &&
