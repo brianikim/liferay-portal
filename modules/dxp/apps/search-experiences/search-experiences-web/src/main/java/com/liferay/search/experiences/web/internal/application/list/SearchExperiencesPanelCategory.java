@@ -30,7 +30,7 @@ import org.osgi.service.component.annotations.Component;
  * @author Kevin Tan
  */
 @Component(
-	enabled = false, immediate = true,
+	immediate = true,
 	property = {
 		"panel.category.key=" + PanelCategoryKeys.APPLICATIONS_MENU_APPLICATIONS,
 		"panel.category.order:Integer=500"

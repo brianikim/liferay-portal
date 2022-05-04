@@ -21,7 +21,7 @@ import org.osgi.service.component.annotations.Component;
 /**
  * @author Petteri Karttunen
  */
-@Component(enabled = false, service = ConfigurationCategory.class)
+@Component(service = ConfigurationCategory.class)
 public class SXPConfigurationCategory implements ConfigurationCategory {
 
 	@Override
