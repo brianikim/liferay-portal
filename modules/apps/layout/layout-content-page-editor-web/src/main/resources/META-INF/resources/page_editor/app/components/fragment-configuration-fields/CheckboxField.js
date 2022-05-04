@@ -18,7 +18,7 @@ import React, {useState} from 'react';
 
 import {ConfigurationFieldPropTypes} from '../../../prop-types/index';
 
-export const CheckboxField = ({field, onValueSelect, value}) => {
+export const CheckboxField = ({disabled, field, onValueSelect, value}) => {
 	const [nextValue, setNextValue] = useState(!!value);
 
 	return (
@@ -26,6 +26,7 @@ export const CheckboxField = ({field, onValueSelect, value}) => {
 			<ClayCheckbox
 				aria-label={field.label}
 				checked={nextValue}
+				disabled={disabled}
 				label={field.label}
 				onChange={(event) => {
 					setNextValue(event.target.checked);
@@ -37,6 +38,7 @@ export const CheckboxField = ({field, onValueSelect, value}) => {
 };
 
 CheckboxField.propTypes = {
+	disabled: PropTypes.bool,
 	field: PropTypes.shape(ConfigurationFieldPropTypes).isRequired,
 	onValueSelect: PropTypes.func.isRequired,
 	value: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
