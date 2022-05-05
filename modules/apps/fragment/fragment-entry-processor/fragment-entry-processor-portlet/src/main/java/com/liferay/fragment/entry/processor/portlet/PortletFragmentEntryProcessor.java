@@ -46,6 +46,7 @@ import com.liferay.portal.kernel.util.ResourceBundleUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portlet.PortletPreferencesImpl;
+import com.liferay.portlet.exportimport.staging.StagingAdvicesThreadLocal;
 
 import java.util.HashSet;
 import java.util.List;
@@ -212,13 +213,26 @@ public class PortletFragmentEntryProcessor implements FragmentEntryProcessor {
 
 			String defaultPreferences = StringPool.BLANK;
 
-			if (originalFragmentEntryLink != null) {
-				defaultPreferences = _getPreferences(
-					plid, portletName, originalFragmentEntryLink, id,
-					StringPool.BLANK);
+			boolean stagingAdvicesThreadLocalEnabled =
+				StagingAdvicesThreadLocal.isEnabled();
+
+			try {
+				StagingAdvicesThreadLocal.setEnabled(false);
+
+				if (originalFragmentEntryLink != null) {
+					defaultPreferences = _getPreferences(
+						plid, portletName, originalFragmentEntryLink, id,
+						StringPool.BLANK);
+				}
+				else {
+					defaultPreferences = _getPreferences(
+						plid, portletName, fragmentEntryLink, id,
+						portlet.getDefaultPreferences());
+				}
 			}
-			else {
-				defaultPreferences = portlet.getDefaultPreferences();
+			finally {
+				StagingAdvicesThreadLocal.setEnabled(
+					stagingAdvicesThreadLocalEnabled);
 			}
 
 			String portletHTML = _fragmentPortletRenderer.renderPortlet(
