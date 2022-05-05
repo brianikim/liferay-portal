@@ -223,20 +223,21 @@ public class UpgradeFriendlyURLEntryLocalization extends UpgradeProcess {
 
 		int count = 0;
 
-		StringBundler sb = new StringBundler(9);
+		StringBundler sb = new StringBundler(3);
 
 		sb.append("select count(*) from FriendlyURLEntryLocalization where ");
-		sb.append("ctCollectionId = ");
-		sb.append(ctCollectionId);
-		sb.append(" and urlTitle = '");
-		sb.append(urlTitle);
-		sb.append("' and groupId = ");
-		sb.append(groupId);
-		sb.append(" and classNameId = ");
-		sb.append(_CLASS_NAME_ID);
+		sb.append("ctCollectionId = ? and urlTitle = ? and groupId = ? and ");
+		sb.append(" classNameId = ? ");
 
-		try (PreparedStatement ps = connection.prepareStatement(sb.toString());
-			ResultSet rs = ps.executeQuery()) {
+		try (PreparedStatement ps = connection.prepareStatement(
+				sb.toString())) {
+
+			ps.setLong(1, ctCollectionId);
+			ps.setString(2, urlTitle);
+			ps.setLong(3, groupId);
+			ps.setLong(4, _CLASS_NAME_ID);
+
+			ResultSet rs = ps.executeQuery();
 
 			if (rs.next()) {
 				count = rs.getInt(1);
