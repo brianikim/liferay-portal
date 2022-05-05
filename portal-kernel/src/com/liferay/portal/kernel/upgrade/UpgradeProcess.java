@@ -326,6 +326,8 @@ public abstract class UpgradeProcess
 	protected void alter(Class<?> tableClass, Alterable... alterables)
 		throws Exception {
 
+		int alterableIndex = 0;
+
 		try (LoggingTimer loggingTimer = new LoggingTimer()) {
 			DB db = DBManagerUtil.getDB();
 
@@ -386,6 +388,8 @@ public abstract class UpgradeProcess
 
 					runSQL(alterable.getSQL(tableName));
 
+					alterableIndex++;
+
 					List<String> indexSQLs = getIndexSQLs(
 						tableClass, tableName);
 
@@ -421,7 +425,9 @@ public abstract class UpgradeProcess
 					tableName, (Object[][])tableColumnsField.get(null),
 					(String)tableSQLCreateField.get(null),
 					(String[])tableSQLAddIndexesField.get(null),
-					getUpgradeColumns(alterables));
+					getUpgradeColumns(
+						ArrayUtil.subset(
+							alterables, alterableIndex, alterables.length)));
 
 				if (_log.isWarnEnabled()) {
 					_log.warn(
