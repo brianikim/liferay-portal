@@ -42,6 +42,7 @@ import com.liferay.portal.kernel.servlet.taglib.DynamicInclude;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.Html;
+import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
 import com.liferay.portal.kernel.util.WebKeys;
@@ -275,7 +276,16 @@ public class ChangeTrackingIndicatorDynamicInclude extends BaseDynamicInclude {
 
 				jsonArray.put(
 					JSONUtil.put(
-						"href", checkoutURL.toString()
+						"href",
+						StringBundler.concat(
+							"javascript: confirm('",
+							_language.get(
+								resourceBundle,
+								"any-changes-made-in-production-will-" +
+									"immediately-be-live.-continue-to-" +
+										"production"),
+							"') && submitForm(document.hrefFm, '",
+							HtmlUtil.escapeJS(checkoutURL.toString()), "');")
 					).put(
 						"label",
 						_language.get(resourceBundle, "work-on-production")
