@@ -8352,7 +8352,6 @@ public class JournalArticleLocalServiceImpl
 
 		subscriptionSender.setPortletId(portletId);
 
-
 		subscriptionSender.addRuntimeSubscribers(toAddress, toName);
 
 		subscriptionSender.flushNotificationsAsync();
@@ -8887,7 +8886,6 @@ public class JournalArticleLocalServiceImpl
 			serviceContext.setIndexingEnabled(indexingEnabled);
 		}
 	}
-
 
 	private String _getArticleDiffs(
 		JournalArticle article, ServiceContext serviceContext) {
