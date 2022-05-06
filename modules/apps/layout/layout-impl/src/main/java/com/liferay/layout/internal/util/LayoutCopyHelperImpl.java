@@ -32,8 +32,6 @@ import com.liferay.layout.util.structure.LayoutStructure;
 import com.liferay.layout.util.structure.LayoutStructureItem;
 import com.liferay.portal.kernel.comment.CommentManager;
 import com.liferay.portal.kernel.json.JSONObject;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Image;
 import com.liferay.portal.kernel.model.Layout;
@@ -348,20 +346,6 @@ public class LayoutCopyHelperImpl implements LayoutCopyHelper {
 				PortletKeys.PREFS_OWNER_ID_DEFAULT,
 				PortletKeys.PREFS_OWNER_TYPE_LAYOUT, sourceLayout.getPlid());
 
-		List<PortletPreferences> targetPortletPreferencesList =
-			_portletPreferencesLocalService.getPortletPreferences(
-				PortletKeys.PREFS_OWNER_ID_DEFAULT,
-				PortletKeys.PREFS_OWNER_TYPE_LAYOUT, targetLayout.getPlid());
-
-		Stream<PortletPreferences> targetPortletPreferencesStream =
-			targetPortletPreferencesList.stream();
-
-		List<String> targetPortletIds = targetPortletPreferencesStream.map(
-			PortletPreferences::getPortletId
-		).collect(
-			Collectors.toList()
-		);
-
 		for (PortletPreferences portletPreferences : portletPreferencesList) {
 			Portlet portlet = _portletLocalService.getPortletById(
 				portletPreferences.getPortletId());
@@ -369,8 +353,6 @@ public class LayoutCopyHelperImpl implements LayoutCopyHelper {
 			if ((portlet == null) || portlet.isUndeployedPortlet()) {
 				continue;
 			}
-
-			targetPortletIds.remove(portletPreferences.getPortletId());
 
 			PortletPreferences targetPortletPreferences =
 				_portletPreferencesLocalService.fetchPortletPreferences(
@@ -394,23 +376,6 @@ public class LayoutCopyHelperImpl implements LayoutCopyHelper {
 					_portletLocalService.getPortletById(
 						portletPreferences.getPortletId()),
 					portletPreferences.getPreferences());
-			}
-		}
-
-		for (String portletId : targetPortletIds) {
-			try {
-				_portletPreferencesLocalService.deletePortletPreferences(
-					PortletKeys.PREFS_OWNER_ID_DEFAULT,
-					PortletKeys.PREFS_OWNER_TYPE_LAYOUT, targetLayout.getPlid(),
-					portletId);
-			}
-			catch (Exception exception) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(
-						"Unable to delete portlet preferences for portlet " +
-							portletId,
-						exception);
-				}
 			}
 		}
 	}
@@ -640,9 +605,6 @@ public class LayoutCopyHelperImpl implements LayoutCopyHelper {
 
 		return layoutStructure.toJSONObject();
 	}
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		LayoutCopyHelperImpl.class);
 
 	private static final TransactionConfig _transactionConfig =
 		TransactionConfig.Factory.create(
