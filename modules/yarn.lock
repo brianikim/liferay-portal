@@ -1257,6 +1257,13 @@
   dependencies:
     classnames "^2.2.6"
 
+"@clayui/link@^3.45.0":
+  version "3.45.0"
+  resolved "https://registry.yarnpkg.com/@clayui/link/-/link-3.45.0.tgz#d3456c29e6e42c5cfa50a55b01042f6c69475668"
+  integrity sha512-awKFYpdyELRs1Z87Z38v1VliZPp7/NsOfNiTVZ08xMxd4D7Cx70Z6ImLe88TcZ67pYUa6BE4RqVI45WUHFaBcg==
+  dependencies:
+    classnames "^2.2.6"
+
 "@clayui/list@3.4.0":
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/@clayui/list/-/list-3.4.0.tgz#0df79ce740074f8c10459d76eb4cf95b08807c0a"
@@ -1328,14 +1335,16 @@
     "@clayui/icon" "^3.1.0"
     classnames "^2.2.6"
 
-"@clayui/nav@3.4.0":
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/@clayui/nav/-/nav-3.4.0.tgz#42410882537ba00a146b0117a21881246ee81ada"
+"@clayui/nav@3.4.3":
+  version "3.4.3"
+  resolved "https://registry.yarnpkg.com/@clayui/nav/-/nav-3.4.3.tgz#f54afd66b899b4d0bdd95b4f093fc700205de972"
+  integrity sha512-yM59Je9H0lwTN53iNowelQ+vv8dXZeYJA9KFdM7UFrmjM280yCi5QWKI+b15Zexrxlvo/M8uKoU+qittsimDwA==
   dependencies:
     "@clayui/button" "^3.5.0"
     "@clayui/icon" "^3.1.0"
-    "@clayui/shared" "^3.3.0"
+    "@clayui/shared" "^3.4.0"
     classnames "^2.2.6"
+    react-transition-group "^4.4.1"
     warning "^4.0.3"
 
 "@clayui/navigation-bar@3.3.5":
@@ -1422,6 +1431,18 @@
   dependencies:
     "@clayui/button" "^3.6.0"
     "@clayui/link" "^3.2.0"
+
+"@clayui/shared@^3.4.0":
+  version "3.55.0"
+  resolved "https://registry.yarnpkg.com/@clayui/shared/-/shared-3.55.0.tgz#fb3d33ba443bfde69528a358e06db2fd5ba80846"
+  integrity sha512-GzzrvfQq6cUzxcBl1d1k4X37F4l1vgS3N78LMvE6/SLEA18XxVPgmIJfFoB7/NdE+R6723eZ1Qk2vz4knyktog==
+  dependencies:
+    "@clayui/button" "^3.40.0"
+    "@clayui/link" "^3.45.0"
+    "@clayui/provider" "^3.40.0"
+    classnames "^2.2.6"
+    dom-align "^1.12.2"
+    warning "^4.0.3"
 
 "@clayui/shared@^3.40.0":
   version "3.40.0"
@@ -6944,6 +6965,11 @@ doctrine@^3.0.0:
 dom-align@1.10.4, dom-align@^1.10.2:
   version "1.10.4"
   resolved "https://registry.yarnpkg.com/dom-align/-/dom-align-1.10.4.tgz#862ae4de0d11d6495c1c8ee1b195427e7caa727d"
+
+dom-align@^1.12.2:
+  version "1.12.3"
+  resolved "https://registry.yarnpkg.com/dom-align/-/dom-align-1.12.3.tgz#a36d02531dae0eefa2abb0c4db6595250526f103"
+  integrity sha512-Gj9hZN3a07cbR6zviMUBOMPdWxYhbMI+x+WS0NAIu2zFZmbK8ys9R79g+iG9qLnlCwpFoaB+fKy8Pdv470GsPA==
 
 dom-converter@^0.2:
   version "0.2.0"
