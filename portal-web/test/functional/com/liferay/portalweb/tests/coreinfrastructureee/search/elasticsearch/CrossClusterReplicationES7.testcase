@@ -479,10 +479,7 @@ definition {
 			groupName = "Guest",
 			title = "WC Title 3");
 
-		ApplicationsMenu.gotoPortlet(
-			category = "Search Tuning",
-			panel = "Applications",
-			portlet = "Result Rankings");
+		SearchTuning.openResultRankingsAdmin();
 
 		SearchTuning.addResultRanking(searchQuery = "WC Title");
 
@@ -516,10 +513,7 @@ definition {
 				title = "${title}");
 		}
 
-		ApplicationsMenu.gotoPortlet(
-			category = "Search Tuning",
-			panel = "Applications",
-			portlet = "Synonyms");
+		SearchTuning.openSynonymsAdmin();
 
 		SearchTuning.addSynonymSet(synonyms = "banana,red apple,fruit");
 
