@@ -105,11 +105,11 @@ exports[`Sidebar closes the sidebar in edition mode 1`] = `
       </div>
     </div>
   </div>
-  <div class="fade modal" role="dialog" tabindex="-1">
+  <div aria-labelledby="clayv2-modal-label-10" aria-modal="true" class="fade modal" role="dialog" tabindex="-1">
     <div class="modal-dialog modal-sm">
       <div class="modal-content">
         <div class="modal-header">
-          <div class="modal-title">cancel-field-changes-question</div><button class="btn close btn-unstyled" aria-label="close" type="button"><svg class="lexicon-icon lexicon-icon-times" focusable="false" role="presentation">
+          <div class="modal-title" id="clayv2-modal-label-10">cancel-field-changes-question</div><button class="btn close btn-unstyled" aria-label="close" type="button"><svg class="lexicon-icon lexicon-icon-times" focusable="false" role="presentation">
               <use xlink:href="icons.svg#times"></use>
             </svg></button>
         </div>
@@ -132,11 +132,11 @@ exports[`Sidebar closes the sidebar in edition mode 1`] = `
 `;
 
 exports[`Sidebar fieldChangesCanceled(state, event) shows modal when cancel field chages option is clicked on the sidebar settings 1`] = `
-<div class="fade modal" role="dialog" tabindex="-1">
+<div aria-labelledby="clayv2-modal-label-8" aria-modal="true" class="fade modal" role="dialog" tabindex="-1">
   <div class="modal-dialog modal-sm">
     <div class="modal-content">
       <div class="modal-header">
-        <div class="modal-title">cancel-field-changes-question</div><button class="btn close btn-unstyled" aria-label="close" type="button"><svg class="lexicon-icon lexicon-icon-times" focusable="false" role="presentation">
+        <div class="modal-title" id="clayv2-modal-label-8">cancel-field-changes-question</div><button class="btn close btn-unstyled" aria-label="close" type="button"><svg class="lexicon-icon lexicon-icon-times" focusable="false" role="presentation">
             <use xlink:href="icons.svg#times"></use>
           </svg></button>
       </div>
@@ -262,11 +262,11 @@ exports[`Sidebar renders a Sidebar with fieldTypes 1`] = `
       </div>
     </div>
   </div>
-  <div class="fade modal" role="dialog" tabindex="-1">
+  <div aria-labelledby="clayv2-modal-label-3" aria-modal="true" class="fade modal" role="dialog" tabindex="-1">
     <div class="modal-dialog modal-sm">
       <div class="modal-content">
         <div class="modal-header">
-          <div class="modal-title">cancel-field-changes-question</div><button class="btn close btn-unstyled" aria-label="close" type="button"><svg class="lexicon-icon lexicon-icon-times" focusable="false" role="presentation">
+          <div class="modal-title" id="clayv2-modal-label-3">cancel-field-changes-question</div><button class="btn close btn-unstyled" aria-label="close" type="button"><svg class="lexicon-icon lexicon-icon-times" focusable="false" role="presentation">
               <use xlink:href="icons.svg#times"></use>
             </svg></button>
         </div>
