@@ -1,0 +1,10 @@
+#
+# Liferay App Version 4.0.18
+#
+
+app.artifacts-4.0.18=\
+	
+
+app.change.log-4.0.18=LPS-152394
+
+app.git.id-4.0.18=039b5837e639afd1fd9d520dbe223c55033b75af
