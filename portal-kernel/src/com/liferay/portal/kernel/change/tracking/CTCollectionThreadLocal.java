@@ -55,6 +55,10 @@ public class CTCollectionThreadLocal {
 		return _ctCollectionId.setWithSafeCloseable(ctCollectionId);
 	}
 
+	public static SafeCloseable setToProductionWithSafeCloseable() {
+		return setCTCollectionIdWithSafeCloseable(_CT_COLLECTION_ID_PRODUCTION);
+	}
+
 	private static long _getCTCollectionId() {
 		CTCollectionIdSupplier ctCollectionIdSupplier = _ctCollectionIdSupplier;
 
@@ -67,6 +71,8 @@ public class CTCollectionThreadLocal {
 
 	private CTCollectionThreadLocal() {
 	}
+
+	private static final int _CT_COLLECTION_ID_PRODUCTION = 0;
 
 	private static final CentralizedThreadLocal<Long> _ctCollectionId =
 		new CentralizedThreadLocal<>(
