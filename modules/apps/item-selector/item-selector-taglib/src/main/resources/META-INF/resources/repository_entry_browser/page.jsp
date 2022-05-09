@@ -635,7 +635,7 @@ SearchContainer<?> searchContainer = new SearchContainer(renderRequest, itemSele
 
 	itemSelector.on('selectedItem', function (event) {
 		Liferay.Util.getOpener().Liferay.fire(
-			'<%= itemSelectedEventName %>',
+			decodeURIComponent('<%= itemSelectedEventName %>'),
 			event
 		);
 	});
