@@ -199,7 +199,7 @@ public class UpgradePortletPreferences extends UpgradeProcess {
 		sb.append("PortletPreferences.plid from PortletPreferences inner ");
 		sb.append("join Layout on PortletPreferences.plid = Layout.plid ");
 		sb.append("where PortletPreferences.portletId like ");
-		sb.append("CONCAT('%_INSTANCE_', '?') and (Layout.groupId = ? or ");
+		sb.append("CONCAT('%_INSTANCE_', ?) and (Layout.groupId = ? or ");
 		sb.append("PortletPreferences.plid = ?)");
 
 		try (PreparedStatement ps = connection.prepareStatement(
