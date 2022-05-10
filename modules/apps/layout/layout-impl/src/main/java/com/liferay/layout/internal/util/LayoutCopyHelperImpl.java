@@ -361,11 +361,12 @@ public class LayoutCopyHelperImpl implements LayoutCopyHelper {
 					portletPreferences.getPortletId());
 
 			if (targetPortletPreferences != null) {
-				targetPortletPreferences.setPreferences(
+				_portletPreferencesLocalService.updatePreferences(
+					targetPortletPreferences.getOwnerId(),
+					targetPortletPreferences.getOwnerType(),
+					targetPortletPreferences.getPlid(),
+					targetPortletPreferences.getPortletId(),
 					portletPreferences.getPreferences());
-
-				_portletPreferencesLocalService.updatePortletPreferences(
-					targetPortletPreferences);
 			}
 			else {
 				_portletPreferencesLocalService.addPortletPreferences(
