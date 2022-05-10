@@ -130,17 +130,17 @@ public class LocaleUtilTest extends PowerMockito {
 			"English (United States)",
 			LocaleUtil.getLocaleDisplayName(Locale.US, Locale.US));
 
-		Locale catalan = new Locale("ca", "ES");
+		Locale catalanLocale = new Locale("ca", "ES");
 
 		Assert.assertEquals(
 			"Catalan (Spain)",
-			LocaleUtil.getLocaleDisplayName(catalan, Locale.US));
+			LocaleUtil.getLocaleDisplayName(catalanLocale, Locale.US));
 
-		Locale catalan_valencia = new Locale("ca", "ES", "VALENCIA");
+		Locale catalanValenciaLocale = new Locale("ca", "ES", "VALENCIA");
 
 		Assert.assertEquals(
 			"Catalan (Spain, VALENCIA)",
-			LocaleUtil.getLocaleDisplayName(catalan_valencia, Locale.US));
+			LocaleUtil.getLocaleDisplayName(catalanValenciaLocale, Locale.US));
 	}
 
 	@Test
@@ -163,18 +163,18 @@ public class LocaleUtilTest extends PowerMockito {
 			"English",
 			LocaleUtil.getLongDisplayName(Locale.US, duplicateLanguages));
 
-		Locale catalan = new Locale("ca", "ES");
+		Locale catalanLocale = new Locale("ca", "ES");
 
 		Assert.assertEquals(
 			"catal\u00e0 (Espanya)",
-			LocaleUtil.getLongDisplayName(catalan, duplicateLanguages));
+			LocaleUtil.getLongDisplayName(catalanLocale, duplicateLanguages));
 
-		Locale catalan_valencia = new Locale("ca", "ES", "VALENCIA");
+		Locale catalanValenciaLocale = new Locale("ca", "ES", "VALENCIA");
 
 		Assert.assertEquals(
 			"catal\u00e0 (Espanya, VALENCIA)",
 			LocaleUtil.getLongDisplayName(
-				catalan_valencia, duplicateLanguages));
+				catalanValenciaLocale, duplicateLanguages));
 	}
 
 }
