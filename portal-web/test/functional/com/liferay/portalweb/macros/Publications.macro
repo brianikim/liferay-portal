@@ -112,6 +112,10 @@ definition {
 	}
 
 	macro discardChanges {
+		if (IsElementNotPresent(locator1 = "Publications#NEEDS_MANUAL_RESOLUTION_HEADER_EXPANDED")) {
+			Click(locator1 = "Publications#NEEDS_MANUAL_RESOLUTION_HEADER_COLLAPSED");
+		}
+
 		if (isSet(changeOrder)) {
 			var changeOrder = "${changeOrder}";
 		}
@@ -231,6 +235,10 @@ definition {
 	}
 
 	macro gotoViewDiffInConflictingPublications {
+		if (IsElementNotPresent(locator1 = "Publications#NEEDS_MANUAL_RESOLUTION_HEADER_EXPANDED")) {
+			Click(locator1 = "Publications#NEEDS_MANUAL_RESOLUTION_HEADER_COLLAPSED");
+		}
+
 		Click(
 			key_entryTitle = "${entryTitle}",
 			locator1 = "Publications#CONFLICTING_CHANGES_CONTENT_LINK");
