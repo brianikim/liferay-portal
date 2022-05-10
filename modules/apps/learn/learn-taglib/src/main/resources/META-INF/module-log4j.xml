@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
 
-<Configuration strict="true">
-	<Loggers>
-		<Logger level="ERROR" name="com.liferay.learn.taglib.internal.web.cache.JSONObjectWebCacheItem" />
-	</Loggers>
-</Configuration>
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+	<category name="com.liferay.learn.taglib.internal.web.cache.JSONObjectWebCacheItem">
+		<priority value="ERROR" />
+	</category>
+</log4j:configuration>
