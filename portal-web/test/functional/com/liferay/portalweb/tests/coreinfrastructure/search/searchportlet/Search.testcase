@@ -254,10 +254,10 @@ definition {
 
 	@description = "This is a use case for LPS-135288."
 	@priority = "4"
-	test AssertNoXSSViaSearchTagURL {
+	test AssertSearchTagURLNoXSS {
 		var portalURL = PropsUtil.get("portal.url");
 
-		Navigator.openSpecificURL(url = "${portalURL}/web/guest/search?tag=asdasd%22%3E%3Csvg/onload=alert(document.domain)%3E");
+		Navigator.openSpecificURL(url = "${portalURL}/web/guest/search?tag=test%22%3E%3Csvg/onload=alert(document.domain)%3E");
 
 		AssertAlertNotPresent();
 	}
