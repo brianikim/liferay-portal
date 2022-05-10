@@ -1462,6 +1462,14 @@ AUI.add(
 
 					DDMDateField.superclass.renderUI.apply(instance, arguments);
 
+					var keysPressed = {};
+
+					var template = A.CalendarBase.HEADER_TEMPLATE;
+
+					template = template.replace('aria-role="heading"', '');
+
+					A.CalendarBase.HEADER_TEMPLATE = template;
+
 					var trigger = instance.get('templateNode').one('input');
 
 					if (trigger) {
@@ -1470,6 +1478,26 @@ AUI.add(
 								locale: Liferay.ThemeDisplay.getLanguageId(),
 							},
 							on: {
+								enterKey() {
+									var countInterval = 0;
+
+									var intervalId = setInterval(() => {
+										var trigger = A.one(
+											'.datepicker-popover:not(.popover-hidden) .yui3-calendarnav-prevmonth'
+										);
+
+										if (trigger) {
+											Liferay.Util.focusFormField(
+												trigger
+											);
+											clearInterval(intervalId);
+										}
+										else if (countInterval > 10) {
+											clearInterval(intervalId);
+										}
+										countInterval++;
+									}, 100);
+								},
 								selectionChange(event) {
 									var date = event.newSelection;
 
@@ -1483,18 +1511,37 @@ AUI.add(
 
 										var domEvent = event.domEvent;
 
+										keysPressed[domEvent.keyCode] = true;
+
 										if (
-											domEvent.keyCode == 9 &&
-											domEvent.target.hasClass(
-												'yui3-calendar-grid'
-											)
+											(domEvent.keyCode === 9 &&
+												!keysPressed[16] &&
+												(domEvent.target.hasClass(
+													'yui3-calendar-grid'
+												) ||
+													domEvent.target.hasClass(
+														'yui3-calendar-day'
+													))) ||
+											(domEvent.keyCode === 9 &&
+												keysPressed[16] &&
+												domEvent.target.hasClass(
+													'yui3-calendar-focused'
+												)) ||
+											domEvent.keyCode === 27
 										) {
 											instance.hide();
+
+											keysPressed = {};
 
 											Liferay.Util.focusFormField(
 												trigger
 											);
 										}
+									},
+									keyup(event) {
+										var domEvent = event.domEvent;
+
+										delete keysPressed[domEvent.keyCode];
 									},
 								},
 							},
@@ -2079,6 +2126,7 @@ AUI.add(
 			'aui-base',
 			'aui-color-picker-popover',
 			'aui-url',
+			'calendar',
 			'liferay-item-selector-dialog',
 			'liferay-portlet-dynamic-data-mapping',
 		],
