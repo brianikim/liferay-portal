@@ -79,7 +79,7 @@ definition {
 		''';
 		var output = JSONCurlUtil.post("${curl}");
 
-		if (contains("${output}", ""agreedToTermsOfUse":true") && contains("${output}", ""companyId":"${companyId}"")) {
+		if (contains("${output}", "\"agreedToTermsOfUse\":true") && contains("${output}", "\"companyId\":\"${companyId}\"")) {
 			echo("Get current user successful.");
 		}
 		else {
