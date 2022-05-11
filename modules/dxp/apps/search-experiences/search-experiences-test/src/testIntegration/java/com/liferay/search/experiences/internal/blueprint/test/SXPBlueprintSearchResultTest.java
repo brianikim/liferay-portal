@@ -1517,7 +1517,7 @@ public class SXPBlueprintSearchResultTest {
 				null, LocaleUtil.getSiteDefault(), displayDate, null, false,
 				true, _serviceContext));
 
-		HashMap<String, Object> textMatchOverMultipleFields =
+		Map<String, Object> textMatchOverMultipleFields =
 			_getDefaultValuesForTextMatchOverMultipleFields();
 
 		textMatchOverMultipleFields.replace(
@@ -1624,7 +1624,7 @@ public class SXPBlueprintSearchResultTest {
 				stagingGroup.getGroupId(), 0, "Staged Article",
 				StringPool.BLANK, false, true));
 
-		HashMap<String, Object> textMatchOverMultipleFields =
+		Map<String, Object> textMatchOverMultipleFields =
 			_getDefaultValuesForTextMatchOverMultipleFields();
 
 		textMatchOverMultipleFields.replace(
@@ -1693,7 +1693,7 @@ public class SXPBlueprintSearchResultTest {
 				"lorem ipsum sit", "lorem ipsum dolor", "amet", "nunquis"
 			});
 
-		HashMap<String, Object> textMatchOverMultipleFields =
+		Map<String, Object> textMatchOverMultipleFields =
 			_getDefaultValuesForTextMatchOverMultipleFields();
 
 		textMatchOverMultipleFields.replace("operator", "and");
@@ -1775,7 +1775,7 @@ public class SXPBlueprintSearchResultTest {
 				"amet", "lorem ipsum dolor", "lorem ipsum sit", "nunquis"
 			});
 
-		HashMap<String, Object> textMatchOverMultipleFields =
+		Map<String, Object> textMatchOverMultipleFields =
 			_getDefaultValuesForTextMatchOverMultipleFields();
 
 		textMatchOverMultipleFields.replace("operator", "and");
@@ -2041,7 +2041,7 @@ public class SXPBlueprintSearchResultTest {
 			).build());
 	}
 
-	private HashMap<String, Object>
+	private Map<String, Object>
 		_getDefaultValuesForTextMatchOverMultipleFields() {
 
 		return HashMapBuilder.<String, Object>put(
