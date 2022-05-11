@@ -108,14 +108,10 @@ public class LocaleUtilTest extends PowerMockito {
 
 	@Test
 	public void testGetLongDisplayName() {
-		LanguageUtil languageUtil = new LanguageUtil();
+		mockStatic(LanguageUtil.class);
 
-		Language language = Mockito.mock(Language.class);
-
-		languageUtil.setLanguage(language);
-
-		Mockito.when(
-			language.isBetaLocale(Matchers.anyObject())
+		when(
+			LanguageUtil.isBetaLocale(Matchers.anyObject())
 		).thenReturn(
 			false
 		);
