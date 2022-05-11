@@ -54,6 +54,7 @@ import javax.annotation.Generated;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import javax.ws.rs.NotSupportedException;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -527,7 +528,21 @@ public abstract class BaseOrganizationResourceImpl
 		throws Exception {
 
 		UnsafeConsumer<Organization, Exception> organizationUnsafeConsumer =
-			organization -> postOrganization(organization);
+			null;
+
+		String createStrategy = (String)parameters.getOrDefault(
+			"createStrategy", "INSERT");
+
+		if ("INSERT".equalsIgnoreCase(createStrategy)) {
+			organizationUnsafeConsumer = organization -> postOrganization(
+				organization);
+		}
+
+		if (organizationUnsafeConsumer == null) {
+			throw new NotSupportedException(
+				"Create strategy \"" + createStrategy +
+					"\" is not supported for Organization");
+		}
 
 		if (contextBatchUnsafeConsumer != null) {
 			contextBatchUnsafeConsumer.accept(
@@ -609,11 +624,40 @@ public abstract class BaseOrganizationResourceImpl
 			Map<String, Serializable> parameters)
 		throws Exception {
 
-		for (Organization organization : organizations) {
-			putOrganization(
+		UnsafeConsumer<Organization, Exception> organizationUnsafeConsumer =
+			null;
+
+		String updateStrategy = (String)parameters.getOrDefault(
+			"updateStrategy", "UPDATE");
+
+		if ("PARTIAL_UPDATE".equalsIgnoreCase(updateStrategy)) {
+			organizationUnsafeConsumer = organization -> patchOrganization(
 				organization.getId() != null ? organization.getId() :
 					(String)parameters.get("organizationId"),
 				organization);
+		}
+
+		if ("UPDATE".equalsIgnoreCase(updateStrategy)) {
+			organizationUnsafeConsumer = organization -> putOrganization(
+				organization.getId() != null ? organization.getId() :
+					(String)parameters.get("organizationId"),
+				organization);
+		}
+
+		if (organizationUnsafeConsumer == null) {
+			throw new NotSupportedException(
+				"Update strategy \"" + updateStrategy +
+					"\" is not supported for Organization");
+		}
+
+		if (contextBatchUnsafeConsumer != null) {
+			contextBatchUnsafeConsumer.accept(
+				organizations, organizationUnsafeConsumer);
+		}
+		else {
+			for (Organization organization : organizations) {
+				organizationUnsafeConsumer.accept(organization);
+			}
 		}
 	}
 

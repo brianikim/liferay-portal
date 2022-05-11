@@ -54,6 +54,7 @@ import javax.annotation.Generated;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import javax.ws.rs.NotSupportedException;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -426,8 +427,20 @@ public abstract class BaseChannelResourceImpl
 			Map<String, Serializable> parameters)
 		throws Exception {
 
-		UnsafeConsumer<Channel, Exception> channelUnsafeConsumer =
-			channel -> postChannel(channel);
+		UnsafeConsumer<Channel, Exception> channelUnsafeConsumer = null;
+
+		String createStrategy = (String)parameters.getOrDefault(
+			"createStrategy", "INSERT");
+
+		if ("INSERT".equalsIgnoreCase(createStrategy)) {
+			channelUnsafeConsumer = channel -> postChannel(channel);
+		}
+
+		if (channelUnsafeConsumer == null) {
+			throw new NotSupportedException(
+				"Create strategy \"" + createStrategy +
+					"\" is not supported for Channel");
+		}
 
 		if (contextBatchUnsafeConsumer != null) {
 			contextBatchUnsafeConsumer.accept(channels, channelUnsafeConsumer);
@@ -506,11 +519,38 @@ public abstract class BaseChannelResourceImpl
 			Map<String, Serializable> parameters)
 		throws Exception {
 
-		for (Channel channel : channels) {
-			putChannel(
+		UnsafeConsumer<Channel, Exception> channelUnsafeConsumer = null;
+
+		String updateStrategy = (String)parameters.getOrDefault(
+			"updateStrategy", "UPDATE");
+
+		if ("PARTIAL_UPDATE".equalsIgnoreCase(updateStrategy)) {
+			channelUnsafeConsumer = channel -> patchChannel(
 				channel.getId() != null ? channel.getId() :
 					Long.parseLong((String)parameters.get("channelId")),
 				channel);
+		}
+
+		if ("UPDATE".equalsIgnoreCase(updateStrategy)) {
+			channelUnsafeConsumer = channel -> putChannel(
+				channel.getId() != null ? channel.getId() :
+					Long.parseLong((String)parameters.get("channelId")),
+				channel);
+		}
+
+		if (channelUnsafeConsumer == null) {
+			throw new NotSupportedException(
+				"Update strategy \"" + updateStrategy +
+					"\" is not supported for Channel");
+		}
+
+		if (contextBatchUnsafeConsumer != null) {
+			contextBatchUnsafeConsumer.accept(channels, channelUnsafeConsumer);
+		}
+		else {
+			for (Channel channel : channels) {
+				channelUnsafeConsumer.accept(channel);
+			}
 		}
 	}
 

@@ -54,6 +54,7 @@ import javax.annotation.Generated;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import javax.ws.rs.NotSupportedException;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -535,9 +536,21 @@ public abstract class BaseWikiPageResourceImpl
 			Map<String, Serializable> parameters)
 		throws Exception {
 
-		UnsafeConsumer<WikiPage, Exception> wikiPageUnsafeConsumer =
-			wikiPage -> postWikiNodeWikiPage(
+		UnsafeConsumer<WikiPage, Exception> wikiPageUnsafeConsumer = null;
+
+		String createStrategy = (String)parameters.getOrDefault(
+			"createStrategy", "INSERT");
+
+		if ("INSERT".equalsIgnoreCase(createStrategy)) {
+			wikiPageUnsafeConsumer = wikiPage -> postWikiNodeWikiPage(
 				Long.parseLong((String)parameters.get("wikiNodeId")), wikiPage);
+		}
+
+		if (wikiPageUnsafeConsumer == null) {
+			throw new NotSupportedException(
+				"Create strategy \"" + createStrategy +
+					"\" is not supported for WikiPage");
+		}
 
 		if (contextBatchUnsafeConsumer != null) {
 			contextBatchUnsafeConsumer.accept(
@@ -619,11 +632,32 @@ public abstract class BaseWikiPageResourceImpl
 			Map<String, Serializable> parameters)
 		throws Exception {
 
-		for (WikiPage wikiPage : wikiPages) {
-			putWikiPage(
+		UnsafeConsumer<WikiPage, Exception> wikiPageUnsafeConsumer = null;
+
+		String updateStrategy = (String)parameters.getOrDefault(
+			"updateStrategy", "UPDATE");
+
+		if ("UPDATE".equalsIgnoreCase(updateStrategy)) {
+			wikiPageUnsafeConsumer = wikiPage -> putWikiPage(
 				wikiPage.getId() != null ? wikiPage.getId() :
 					Long.parseLong((String)parameters.get("wikiPageId")),
 				wikiPage);
+		}
+
+		if (wikiPageUnsafeConsumer == null) {
+			throw new NotSupportedException(
+				"Update strategy \"" + updateStrategy +
+					"\" is not supported for WikiPage");
+		}
+
+		if (contextBatchUnsafeConsumer != null) {
+			contextBatchUnsafeConsumer.accept(
+				wikiPages, wikiPageUnsafeConsumer);
+		}
+		else {
+			for (WikiPage wikiPage : wikiPages) {
+				wikiPageUnsafeConsumer.accept(wikiPage);
+			}
 		}
 	}
 

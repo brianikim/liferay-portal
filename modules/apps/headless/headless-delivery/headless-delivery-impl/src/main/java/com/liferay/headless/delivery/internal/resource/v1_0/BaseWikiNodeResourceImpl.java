@@ -54,6 +54,7 @@ import javax.annotation.Generated;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import javax.ws.rs.NotSupportedException;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -467,13 +468,25 @@ public abstract class BaseWikiNodeResourceImpl
 			Map<String, Serializable> parameters)
 		throws Exception {
 
-		UnsafeConsumer<WikiNode, Exception> wikiNodeUnsafeConsumer =
-			wikiNode -> {
+		UnsafeConsumer<WikiNode, Exception> wikiNodeUnsafeConsumer = null;
+
+		String createStrategy = (String)parameters.getOrDefault(
+			"createStrategy", "INSERT");
+
+		if ("INSERT".equalsIgnoreCase(createStrategy)) {
+			wikiNodeUnsafeConsumer = wikiNode -> {
 			};
 
-		if (parameters.containsKey("siteId")) {
-			wikiNodeUnsafeConsumer = wikiNode -> postSiteWikiNode(
-				(Long)parameters.get("siteId"), wikiNode);
+			if (parameters.containsKey("siteId")) {
+				wikiNodeUnsafeConsumer = wikiNode -> postSiteWikiNode(
+					(Long)parameters.get("siteId"), wikiNode);
+			}
+		}
+
+		if (wikiNodeUnsafeConsumer == null) {
+			throw new NotSupportedException(
+				"Create strategy \"" + createStrategy +
+					"\" is not supported for WikiNode");
 		}
 
 		if (contextBatchUnsafeConsumer != null) {
@@ -561,11 +574,32 @@ public abstract class BaseWikiNodeResourceImpl
 			Map<String, Serializable> parameters)
 		throws Exception {
 
-		for (WikiNode wikiNode : wikiNodes) {
-			putWikiNode(
+		UnsafeConsumer<WikiNode, Exception> wikiNodeUnsafeConsumer = null;
+
+		String updateStrategy = (String)parameters.getOrDefault(
+			"updateStrategy", "UPDATE");
+
+		if ("UPDATE".equalsIgnoreCase(updateStrategy)) {
+			wikiNodeUnsafeConsumer = wikiNode -> putWikiNode(
 				wikiNode.getId() != null ? wikiNode.getId() :
 					Long.parseLong((String)parameters.get("wikiNodeId")),
 				wikiNode);
+		}
+
+		if (wikiNodeUnsafeConsumer == null) {
+			throw new NotSupportedException(
+				"Update strategy \"" + updateStrategy +
+					"\" is not supported for WikiNode");
+		}
+
+		if (contextBatchUnsafeConsumer != null) {
+			contextBatchUnsafeConsumer.accept(
+				wikiNodes, wikiNodeUnsafeConsumer);
+		}
+		else {
+			for (WikiNode wikiNode : wikiNodes) {
+				wikiNodeUnsafeConsumer.accept(wikiNode);
+			}
 		}
 	}
 

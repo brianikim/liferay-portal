@@ -1667,9 +1667,6 @@ public class Mutation {
 		productConfigurationResource.setContextUser(_user);
 		productConfigurationResource.setGroupLocalService(_groupLocalService);
 		productConfigurationResource.setRoleLocalService(_roleLocalService);
-
-		productConfigurationResource.setVulcanBatchEngineImportTaskResource(
-			_vulcanBatchEngineImportTaskResource);
 	}
 
 	private void _populateResourceContext(
@@ -1764,10 +1761,6 @@ public class Mutation {
 			_groupLocalService);
 		productShippingConfigurationResource.setRoleLocalService(
 			_roleLocalService);
-
-		productShippingConfigurationResource.
-			setVulcanBatchEngineImportTaskResource(
-				_vulcanBatchEngineImportTaskResource);
 	}
 
 	private void _populateResourceContext(
@@ -1807,10 +1800,6 @@ public class Mutation {
 			_groupLocalService);
 		productSubscriptionConfigurationResource.setRoleLocalService(
 			_roleLocalService);
-
-		productSubscriptionConfigurationResource.
-			setVulcanBatchEngineImportTaskResource(
-				_vulcanBatchEngineImportTaskResource);
 	}
 
 	private void _populateResourceContext(
@@ -1829,9 +1818,6 @@ public class Mutation {
 		productTaxConfigurationResource.setGroupLocalService(
 			_groupLocalService);
 		productTaxConfigurationResource.setRoleLocalService(_roleLocalService);
-
-		productTaxConfigurationResource.setVulcanBatchEngineImportTaskResource(
-			_vulcanBatchEngineImportTaskResource);
 	}
 
 	private void _populateResourceContext(

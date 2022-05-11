@@ -54,6 +54,7 @@ import javax.annotation.Generated;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import javax.ws.rs.NotSupportedException;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -616,11 +617,31 @@ public abstract class BaseAppResourceImpl
 			Map<String, Serializable> parameters)
 		throws Exception {
 
-		for (App app : apps) {
-			putApp(
+		UnsafeConsumer<App, Exception> appUnsafeConsumer = null;
+
+		String updateStrategy = (String)parameters.getOrDefault(
+			"updateStrategy", "UPDATE");
+
+		if ("UPDATE".equalsIgnoreCase(updateStrategy)) {
+			appUnsafeConsumer = app -> putApp(
 				app.getId() != null ? app.getId() :
 					Long.parseLong((String)parameters.get("appId")),
 				app);
+		}
+
+		if (appUnsafeConsumer == null) {
+			throw new NotSupportedException(
+				"Update strategy \"" + updateStrategy +
+					"\" is not supported for App");
+		}
+
+		if (contextBatchUnsafeConsumer != null) {
+			contextBatchUnsafeConsumer.accept(apps, appUnsafeConsumer);
+		}
+		else {
+			for (App app : apps) {
+				appUnsafeConsumer.accept(app);
+			}
 		}
 	}
 
