@@ -107,43 +107,6 @@ public class LocaleUtilTest extends PowerMockito {
 	}
 
 	@Test
-	public void testGetLocaleDisplayName() {
-		LanguageUtil languageUtil = new LanguageUtil();
-
-		Language language = Mockito.mock(Language.class);
-
-		languageUtil.setLanguage(language);
-
-		Mockito.when(
-			language.get(Locale.US, "language.en")
-		).thenReturn(
-			"English"
-		);
-
-		Mockito.when(
-			language.get(Locale.US, "language.ca")
-		).thenReturn(
-			"Catalan"
-		);
-
-		Assert.assertEquals(
-			"English (United States)",
-			LocaleUtil.getLocaleDisplayName(Locale.US, Locale.US));
-
-		Locale catalanLocale = new Locale("ca", "ES");
-
-		Assert.assertEquals(
-			"Catalan (Spain)",
-			LocaleUtil.getLocaleDisplayName(catalanLocale, Locale.US));
-
-		Locale catalanValenciaLocale = new Locale("ca", "ES", "VALENCIA");
-
-		Assert.assertEquals(
-			"Catalan (Spain, VALENCIA)",
-			LocaleUtil.getLocaleDisplayName(catalanValenciaLocale, Locale.US));
-	}
-
-	@Test
 	public void testGetLongDisplayName() {
 		LanguageUtil languageUtil = new LanguageUtil();
 
