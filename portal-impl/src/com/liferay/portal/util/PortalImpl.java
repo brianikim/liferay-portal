@@ -8257,7 +8257,7 @@ public class PortalImpl implements Portal {
 		return i18nErrorPath.concat(redirect);
 	}
 
-	private List<Portlet> _getAllPortlets(
+	private List<Portlet> _getAllNonembeddedPortlets(
 		Layout layout, LayoutTypePortlet layoutTypePortlet) {
 
 		List<Portlet> staticPortlets = _getStaticPortlets(layoutTypePortlet);
@@ -8271,8 +8271,7 @@ public class PortalImpl implements Portal {
 		}
 
 		return layoutTypePortlet.addStaticPortlets(
-			explicitlyAddedPortlets, staticPortlets,
-			layoutTypePortlet.getEmbeddedPortlets());
+			explicitlyAddedPortlets, staticPortlets, null);
 	}
 
 	private Map<Locale, String> _getAlternateURLs(
@@ -9258,10 +9257,11 @@ public class PortalImpl implements Portal {
 		LayoutTypePortlet layoutTypePortlet =
 			(LayoutTypePortlet)layout.getLayoutType();
 
-		for (Portlet portlet : _getAllPortlets(layout, layoutTypePortlet)) {
-			if ((portletId.equals(portlet.getPortletId()) ||
-				 portletId.equals(portlet.getRootPortletId())) &&
-				!layout.isPortletEmbedded(portletId, layout.getGroupId())) {
+		for (Portlet portlet :
+				_getAllNonembeddedPortlets(layout, layoutTypePortlet)) {
+
+			if (portletId.equals(portlet.getPortletId()) ||
+				portletId.equals(portlet.getRootPortletId())) {
 
 				return true;
 			}
