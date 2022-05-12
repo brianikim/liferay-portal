@@ -138,7 +138,7 @@ function EditSXPBlueprintForm({
 	/**
 	 * This method must go before the useFormik hook.
 	 */
-	const _handleFormikSubmit = async (values) => {
+	const _handleFormikSubmit = (values) => {
 		let configuration;
 		let elementInstances;
 
@@ -199,7 +199,7 @@ function EditSXPBlueprintForm({
 				}
 			}
 
-			const responseContent = await fetch(
+			fetch(
 				`/o/search-experiences-rest/v1.0/sxp-blueprints/${sxpBlueprintId}`,
 				{
 					body: JSON.stringify({
@@ -220,30 +220,37 @@ function EditSXPBlueprintForm({
 					}),
 					method: 'PATCH',
 				}
-			).then((response) => {
-				if (!response.ok) {
-					setShowSubmitWarningModal(false);
+			)
+				.then((response) => {
+					if (!response.ok) {
+						setShowSubmitWarningModal(false);
 
-					throw DEFAULT_ERROR;
-				}
+						throw DEFAULT_ERROR;
+					}
 
-				return response.json();
-			});
+					return response.json();
+				})
+				.then((responseContent) => {
+					if (
+						Object.prototype.hasOwnProperty.call(
+							responseContent,
+							'errors'
+						)
+					) {
+						responseContent.errors.forEach((message) =>
+							openErrorToast({message})
+						);
+					}
+					else {
+						setInitialSuccessToast(
+							Liferay.Language.get(
+								'the-blueprint-was-saved-successfully'
+							)
+						);
 
-			if (
-				Object.prototype.hasOwnProperty.call(responseContent, 'errors')
-			) {
-				responseContent.errors.forEach((message) =>
-					openErrorToast({message})
-				);
-			}
-			else {
-				setInitialSuccessToast(
-					Liferay.Language.get('the-blueprint-was-saved-successfully')
-				);
-
-				navigate(redirectURL);
-			}
+						navigate(redirectURL);
+					}
+				});
 		}
 		catch (error) {
 			openErrorToast();
@@ -554,12 +561,7 @@ function EditSXPBlueprintForm({
 	 * @param {number} page The page to return
 	 * @param {Array} attributes The search context attributes
 	 */
-	const _handleFetchPreviewSearch = async (
-		query,
-		delta,
-		page,
-		attributes
-	) => {
+	const _handleFetchPreviewSearch = (query, delta, page, attributes) => {
 		controllerRef.current = new AbortController();
 
 		setPreviewInfo((previewInfo) => ({
@@ -576,9 +578,9 @@ function EditSXPBlueprintForm({
 
 			// Touch inputs with errors to show validation errors.
 
-			const errors = await formik.validateForm();
-
-			formik.setTouched(setNestedObjectValues(errors, true));
+			formik.validateForm().then((errors) => {
+				formik.setTouched(setNestedObjectValues(errors, true));
+			});
 
 			// Don't perform a search if there are missing required fields.
 

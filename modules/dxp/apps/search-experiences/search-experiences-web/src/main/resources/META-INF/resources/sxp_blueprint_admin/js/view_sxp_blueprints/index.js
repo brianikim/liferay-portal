@@ -104,7 +104,7 @@ const ViewSXPBlueprints = ({
 		});
 	};
 
-	const _handleActionDelete = (id, title) => async () => {
+	const _handleActionDelete = (id, title) => () => {
 		if (
 			confirm(
 				Liferay.Language.get('are-you-sure-you-want-to-delete-this')
@@ -113,18 +113,18 @@ const ViewSXPBlueprints = ({
 			try {
 				_setLoading(true);
 
-				await fetch(`${apiURL}/${id}`, {
+				fetch(`${apiURL}/${id}`, {
 					method: 'DELETE',
-				});
+				}).then(() => {
+					openSuccessToast({
+						message: sub(
+							Liferay.Language.get('x-was-deleted-successfully'),
+							[title]
+						),
+					});
 
-				openSuccessToast({
-					message: sub(
-						Liferay.Language.get('x-was-deleted-successfully'),
-						[title]
-					),
+					refetch();
 				});
-
-				refetch();
 			}
 			catch {
 				openErrorToast();
@@ -134,7 +134,7 @@ const ViewSXPBlueprints = ({
 		}
 	};
 
-	const _handleActionCopy = (id) => async () => {
+	const _handleActionCopy = (id) => () => {
 		fetch(`${apiURL}/${id}/copy`, {
 			method: 'POST',
 		})
@@ -148,7 +148,7 @@ const ViewSXPBlueprints = ({
 			});
 	};
 
-	const _handleActionDownload = (id, title) => async () => {
+	const _handleActionDownload = (id, title) => () => {
 		fetch(`${apiURL}/${id}/export`, {
 			method: 'GET',
 		})

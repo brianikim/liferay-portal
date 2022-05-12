@@ -193,7 +193,7 @@ function EditSXPElementForm({
 		[predefinedVariables]
 	);
 
-	const _handleSubmit = async (event) => {
+	const _handleSubmit = (event) => {
 		event.preventDefault();
 
 		setIsSubmitting(true);
@@ -273,7 +273,7 @@ function EditSXPElementForm({
 				}
 			}
 
-			const responseContent = await fetch(
+			fetch(
 				`/o/search-experiences-rest/v1.0/sxp-elements/${sxpElementId}`,
 				{
 					body: JSON.stringify({
@@ -287,32 +287,39 @@ function EditSXPElementForm({
 					}),
 					method: 'PATCH',
 				}
-			).then((response) => {
-				if (!response.ok) {
-					setShowSubmitWarningModal(false);
+			)
+				.then((response) => {
+					if (!response.ok) {
+						setShowSubmitWarningModal(false);
 
-					throw DEFAULT_ERROR;
-				}
+						throw DEFAULT_ERROR;
+					}
 
-				return response.json();
-			});
+					return response.json();
+				})
+				.then((responseContent) => {
+					if (
+						Object.prototype.hasOwnProperty.call(
+							responseContent,
+							'errors'
+						)
+					) {
+						responseContent.errors.forEach((message) =>
+							openErrorToast({message})
+						);
 
-			if (
-				Object.prototype.hasOwnProperty.call(responseContent, 'errors')
-			) {
-				responseContent.errors.forEach((message) =>
-					openErrorToast({message})
-				);
+						setIsSubmitting(false);
+					}
+					else {
+						setInitialSuccessToast(
+							Liferay.Language.get(
+								'the-element-was-saved-successfully'
+							)
+						);
 
-				setIsSubmitting(false);
-			}
-			else {
-				setInitialSuccessToast(
-					Liferay.Language.get('the-element-was-saved-successfully')
-				);
-
-				navigate(redirectURL);
-			}
+						navigate(redirectURL);
+					}
+				});
 		}
 		catch (error) {
 			openErrorToast();
