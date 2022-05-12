@@ -30,7 +30,7 @@ import org.osgi.service.component.annotations.Component;
  * @author Petteri Karttunen
  */
 @Component(
-	enabled = false, immediate = true,
+	immediate = true,
 	property = "indexer.class.name=com.liferay.search.experiences.model.SXPElement",
 	service = ModelDocumentContributor.class
 )
