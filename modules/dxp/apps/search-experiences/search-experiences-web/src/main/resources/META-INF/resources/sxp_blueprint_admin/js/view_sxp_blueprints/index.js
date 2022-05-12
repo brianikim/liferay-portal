@@ -176,7 +176,7 @@ const ViewSXPBlueprints = ({
 			});
 	};
 
-	const _handleBulkDelete = async () => {
+	const _handleBulkDelete = () => {
 		if (
 			confirm(
 				selected.length > 1
@@ -188,29 +188,28 @@ const ViewSXPBlueprints = ({
 					  )
 			)
 		) {
-			try {
-				_setLoading(true);
+			_setLoading(true);
 
-				const formData = new FormData();
+			const formData = new FormData();
 
-				formData.append(`${namespace}id`, selected.join(','));
+			formData.append(`${namespace}id`, selected.join(','));
 
-				await fetch(deleteSXPBlueprintURL, {
-					body: formData,
-					method: 'POST',
+			fetch(deleteSXPBlueprintURL, {
+				body: formData,
+				method: 'POST',
+			})
+				.then(() => {
+					openSuccessToast();
+
+					setSelected([]);
+
+					refetch();
+				})
+				.catch(() => {
+					openErrorToast();
+
+					_setLoading(false);
 				});
-
-				openSuccessToast();
-
-				setSelected([]);
-
-				refetch();
-			}
-			catch {
-				openErrorToast();
-
-				_setLoading(false);
-			}
 		}
 	};
 
