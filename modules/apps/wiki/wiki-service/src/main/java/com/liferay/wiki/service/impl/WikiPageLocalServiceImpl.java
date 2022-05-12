@@ -3306,6 +3306,9 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 
 		// Workflow
 
+		page = wikiPagePersistence.findByN_T_First(
+			nodeId, page.getTitle(), null);
+
 		return _startWorkflowInstance(userId, page, serviceContext);
 	}
 
