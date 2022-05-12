@@ -10,20 +10,11 @@
  */
 
 import ClayTable from '@clayui/table';
-import React, {useEffect} from 'react';
+import React from 'react';
 
-import {useIsAdmin} from '../../shared/hooks/useIsAdmin.es';
 import {Item} from './InstanceListPageItem.es';
 
 const Table = ({items, totalCount}) => {
-	const {fetchData, isAdmin} = useIsAdmin();
-
-	useEffect(() => {
-		fetchData();
-
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
-
 	return (
 		<ClayTable>
 			<ClayTable.Head>
@@ -58,12 +49,7 @@ const Table = ({items, totalCount}) => {
 
 			<ClayTable.Body>
 				{items.map((item, index) => (
-					<Table.Item
-						{...item}
-						isAdmin={isAdmin}
-						key={index}
-						totalCount={totalCount}
-					/>
+					<Table.Item {...item} key={index} totalCount={totalCount} />
 				))}
 			</ClayTable.Body>
 		</ClayTable>
