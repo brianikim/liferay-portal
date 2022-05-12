@@ -69,7 +69,6 @@ import org.osgi.service.component.annotations.ServiceScope;
  * @author André de Oliveira
  */
 @Component(
-	enabled = false,
 	properties = "OSGI-INF/liferay/rest/v1_0/search-response.properties",
 	scope = ServiceScope.PROTOTYPE, service = SearchResponseResource.class
 )

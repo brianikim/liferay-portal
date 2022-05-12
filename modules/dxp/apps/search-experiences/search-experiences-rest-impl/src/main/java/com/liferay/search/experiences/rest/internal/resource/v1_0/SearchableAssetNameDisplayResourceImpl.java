@@ -29,7 +29,6 @@ import org.osgi.service.component.annotations.ServiceScope;
  * @author Brian Wing Shun Chan
  */
 @Component(
-	enabled = false,
 	properties = "OSGI-INF/liferay/rest/v1_0/searchable-asset-name-display.properties",
 	scope = ServiceScope.PROTOTYPE,
 	service = SearchableAssetNameDisplayResource.class

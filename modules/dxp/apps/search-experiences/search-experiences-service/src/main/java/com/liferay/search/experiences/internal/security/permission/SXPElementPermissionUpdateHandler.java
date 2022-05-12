@@ -26,7 +26,6 @@ import org.osgi.service.component.annotations.Reference;
  * @author Petteri Karttunen
  */
 @Component(
-	enabled = false,
 	property = "model.class.name=com.liferay.search.experiences.model.SXPElement",
 	service = PermissionUpdateHandler.class
 )
