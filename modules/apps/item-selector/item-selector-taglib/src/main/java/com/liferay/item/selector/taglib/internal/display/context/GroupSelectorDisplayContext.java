@@ -81,8 +81,9 @@ public class GroupSelectorDisplayContext {
 			"selectedTab",
 			ParamUtil.getString(_liferayPortletRequest, "selectedTab"));
 		portletURL.setParameter("showGroupSelector", Boolean.TRUE.toString());
-		portletURL.setParameter("scopeGroupType",
-			ParamUtil.getString(_liferayPortletRequest, "scopeGroupType")
+		portletURL.setParameter(
+			"scopeGroupType",
+			ParamUtil.getString(_liferayPortletRequest, "scopeGroupType"));
 
 		return portletURL;
 	}
