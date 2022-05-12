@@ -455,7 +455,9 @@
 .col-md-4 .calendar-portlet .popover.scheduler-event-recorder-popover {
 	max-width: 232px;
 }
-
+.dropdown-menu.clay-color-dropdown-menu {
+	z-index: 1021;
+}
 .portal-popup .calendar-portlet .fieldset {
 	margin-bottom: 2em;
 }
