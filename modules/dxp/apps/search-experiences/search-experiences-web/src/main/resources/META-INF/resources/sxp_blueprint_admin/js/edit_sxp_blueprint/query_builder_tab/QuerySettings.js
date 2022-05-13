@@ -72,13 +72,13 @@ function QuerySettings({
 			</ClayLayout.Row>
 
 			<div className="sheet">
-				<ClayPanel.Group flush small>
+				<ClayPanel.Group className="panel-group-sm" flush>
 					<ClayPanel
 						className="searchable-types"
 						collapsable
-						defaultExpanded
 						displayTitle={Liferay.Language.get('searchable-types')}
 						displayType="unstyled"
+						expanded
 						showCollapseIcon
 					>
 						<ClayPanel.Body>
@@ -130,7 +130,6 @@ function QuerySettings({
 
 					<ClayPanel
 						collapsable
-						defaultExpanded
 						displayTitle={
 							<ClayPanel.Title>
 								<span className="panel-title">
@@ -151,6 +150,7 @@ function QuerySettings({
 							</ClayPanel.Title>
 						}
 						displayType="unstyled"
+						expanded
 						showCollapseIcon
 					>
 						<ClayPanel.Body>
@@ -184,7 +184,6 @@ function QuerySettings({
 
 					<ClayPanel
 						collapsable
-						defaultExpanded
 						displayTitle={
 							<ClayPanel.Title>
 								<span className="panel-title">
@@ -195,6 +194,7 @@ function QuerySettings({
 							</ClayPanel.Title>
 						}
 						displayType="unstyled"
+						expanded
 						showCollapseIcon
 					>
 						<ClayPanel.Body>
