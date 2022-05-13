@@ -20,7 +20,7 @@ dependencies {
 	compileOnly project(":dxp:apps:search-experiences:search-experiences-api")
 	compileOnly project(":dxp:apps:search-experiences:search-experiences-rest-api")
 
-	testCompile group: "com.fasterxml.jackson.core", name: "jackson-core", version: "2.10.3"
+	testCompile group: "com.fasterxml.jackson.core", name: "jackson-core", version: "2.13.2"
 	testCompile project(":apps:portal-search:portal-search-test-util")
 	testCompile project(":dxp:apps:search-experiences:search-experiences-service")
 }
