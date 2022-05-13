@@ -137,6 +137,8 @@ public class AssetVocabularyIndexerIndexedFieldsTest {
 					AssetVocabulary.class
 				).queryString(
 					searchTerm
+				).fetchSource(
+					true
 				).build()));
 	}
 

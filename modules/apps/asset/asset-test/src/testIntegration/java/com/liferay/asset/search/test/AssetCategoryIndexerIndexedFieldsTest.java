@@ -137,6 +137,8 @@ public class AssetCategoryIndexerIndexedFieldsTest {
 					AssetCategory.class
 				).queryString(
 					searchTerm
+				).fetchSource(
+					true
 				).build()));
 	}
 
