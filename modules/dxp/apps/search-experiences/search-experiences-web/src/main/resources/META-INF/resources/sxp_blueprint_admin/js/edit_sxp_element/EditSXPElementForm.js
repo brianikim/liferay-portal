@@ -9,7 +9,6 @@
  * distribution rights of the Software.
  */
 
-import ClayAlert from '@clayui/alert';
 import ClayButton from '@clayui/button';
 import ClayEmptyState from '@clayui/empty-state';
 import ClayIcon from '@clayui/icon';
@@ -424,14 +423,27 @@ function EditSXPElementForm({
 
 								{readOnly && (
 									<ClayToolbar.Item>
-										<ClayAlert
-											className="m-0"
-											displayType="info"
-											title={Liferay.Language.get(
-												'read-only'
-											)}
-											variant="feedback"
-										/>
+										<div
+											className="alert alert-feedback alert-info m-0"
+											role="alert"
+										>
+											<div className="alert-autofit-row autofit-row">
+												<div className="autofit-col">
+													<div className="autofit-section">
+														<ClayIcon symbol="info-circle" />
+													</div>
+												</div>
+												<div className="autofit-col autofit-col-expand">
+													<div className="autofit-section">
+														<strong className="lead">
+															{Liferay.Language.get(
+																'read-only'
+															)}
+														</strong>
+													</div>
+												</div>
+											</div>
+										</div>
 									</ClayToolbar.Item>
 								)}
 
