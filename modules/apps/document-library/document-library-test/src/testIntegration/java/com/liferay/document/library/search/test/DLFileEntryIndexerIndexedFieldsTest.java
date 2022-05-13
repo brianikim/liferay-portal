@@ -272,7 +272,7 @@ public class DLFileEntryIndexerIndexedFieldsTest extends BaseDLIndexerTestCase {
 		populateLocalizedTitles(fileEntry, map);
 		populateViewCount(fileEntry, map);
 
-		indexedFieldsFixture.populatePriority("0.0", map, true);
+		indexedFieldsFixture.populatePriority("0.0", map);
 		indexedFieldsFixture.populateRoleIdFields(
 			fileEntry.getCompanyId(), DLFileEntry.class.getName(),
 			fileEntry.getPrimaryKey(), fileEntry.getGroupId(), null, map);
