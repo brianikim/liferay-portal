@@ -30,6 +30,7 @@ import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.search.legacy.searcher.SearchRequestBuilderFactory;
 import com.liferay.portal.search.test.util.FieldValuesAssert;
 import com.liferay.portal.search.test.util.IndexedFieldsFixture;
 import com.liferay.portal.search.test.util.IndexerFixture;
@@ -101,7 +102,8 @@ public class MessageIndexerIndexedFieldsTest {
 	}
 
 	protected void setUpMessageIndexerFixture() {
-		messageIndexerFixture = new IndexerFixture<>(Message.class);
+		messageIndexerFixture = new IndexerFixture<>(
+			Message.class, _searchRequestBuilderFactory);
 	}
 
 	protected void setUpUserSearchFixture() throws Exception {
@@ -195,6 +197,9 @@ public class MessageIndexerIndexedFieldsTest {
 
 	@DeleteAfterTestRun
 	private List<Message> _messages;
+
+	@Inject
+	private SearchRequestBuilderFactory _searchRequestBuilderFactory;
 
 	private User _user;
 

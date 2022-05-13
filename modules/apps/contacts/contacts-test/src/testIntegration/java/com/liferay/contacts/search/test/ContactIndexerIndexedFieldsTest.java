@@ -29,6 +29,7 @@ import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.search.legacy.searcher.SearchRequestBuilderFactory;
 import com.liferay.portal.search.test.util.FieldValuesAssert;
 import com.liferay.portal.search.test.util.IndexedFieldsFixture;
 import com.liferay.portal.search.test.util.IndexerFixture;
@@ -143,7 +144,8 @@ public class ContactIndexerIndexedFieldsTest {
 	}
 
 	protected void setUpContactIndexerFixture() {
-		contactIndexerFixture = new IndexerFixture<>(Contact.class);
+		contactIndexerFixture = new IndexerFixture<>(
+			Contact.class, _searchRequestBuilderFactory);
 	}
 
 	protected void setUpIndexedFieldsFixture() {
@@ -187,6 +189,9 @@ public class ContactIndexerIndexedFieldsTest {
 
 	@DeleteAfterTestRun
 	private List<Group> _groups;
+
+	@Inject
+	private SearchRequestBuilderFactory _searchRequestBuilderFactory;
 
 	@DeleteAfterTestRun
 	private List<User> _users;

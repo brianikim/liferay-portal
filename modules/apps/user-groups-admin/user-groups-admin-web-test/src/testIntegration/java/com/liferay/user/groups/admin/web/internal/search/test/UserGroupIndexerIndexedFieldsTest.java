@@ -35,6 +35,7 @@ import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.search.document.DocumentBuilderFactory;
+import com.liferay.portal.search.legacy.searcher.SearchRequestBuilderFactory;
 import com.liferay.portal.search.model.uid.UIDFactory;
 import com.liferay.portal.search.test.util.ExpandoTableSearchFixture;
 import com.liferay.portal.search.test.util.FieldValuesAssert;
@@ -152,7 +153,8 @@ public class UserGroupIndexerIndexedFieldsTest {
 	}
 
 	protected void setUpUserGroupIndexerFixture() {
-		userGroupIndexerFixture = new IndexerFixture<>(UserGroup.class);
+		userGroupIndexerFixture = new IndexerFixture<>(
+			UserGroup.class, _searchRequestBuilderFactory);
 	}
 
 	protected void setUpUserSearchFixture() throws Exception {
@@ -272,6 +274,9 @@ public class UserGroupIndexerIndexedFieldsTest {
 
 	@DeleteAfterTestRun
 	private List<Group> _groups;
+
+	@Inject
+	private SearchRequestBuilderFactory _searchRequestBuilderFactory;
 
 	@DeleteAfterTestRun
 	private List<UserGroup> _userGroups;
