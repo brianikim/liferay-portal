@@ -14,11 +14,15 @@
 
 package com.liferay.search.experiences.web.internal.blueprint.admin.display.context;
 
+import com.liferay.portal.kernel.portlet.PortletURLUtil;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermission;
 import com.liferay.search.experiences.constants.SXPActionKeys;
 import com.liferay.search.experiences.model.SXPElement;
 import com.liferay.search.experiences.web.internal.display.context.helper.SXPRequestHelper;
+
+import javax.portlet.PortletException;
+import javax.portlet.PortletURL;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -38,6 +42,14 @@ public class ViewSXPElementsDisplayContext {
 
 	public String getAPIURL() {
 		return "/o/search-experiences-rest/v1.0/sxp-elements";
+	}
+
+	public PortletURL getPortletURL() throws PortletException {
+		return PortletURLUtil.clone(
+			PortletURLUtil.getCurrent(
+				_sxpRequestHelper.getLiferayPortletRequest(),
+				_sxpRequestHelper.getLiferayPortletResponse()),
+			_sxpRequestHelper.getLiferayPortletResponse());
 	}
 
 	public boolean hasAddSXPElementPermission() {

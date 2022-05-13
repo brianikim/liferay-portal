@@ -41,6 +41,7 @@ const ViewSXPElements = ({
 	defaultLocale, // See view_sxp_elements.jsp
 	deleteSXPElementURL, // See view_sxp_elements.jsp
 	editSXPElementURL, // See view_sxp_elements.jsp
+	formName, // See view_sxp_elements.jsp
 	hasAddSXPElementPermission, // See ViewSXPElementsDisplayContext#hasAddSXPElementPermission
 	namespace, // See view_sxp_elements.jsp
 }) => {
@@ -188,29 +189,19 @@ const ViewSXPElements = ({
 					  )
 			)
 		) {
-			try {
-				_setLoading(true);
+			Liferay.Util.postForm(
+				document.getElementById(`${namespace}${formName}`),
+				{
 
-				const formData = new FormData();
+					// This depends on the hidden input field `${namespace}id`
+					// instead of the `data` property. The `data` property is
+					// still included since without it, the post request isn't
+					// performed.
 
-				formData.append(`${namespace}id`, selected.join(','));
-
-				fetch(deleteSXPElementURL, {
-					body: formData,
-					method: 'POST',
-				}).then(() => {
-					openSuccessToast();
-
-					setSelected([]);
-
-					refetch();
-				});
-			}
-			catch {
-				openErrorToast();
-
-				_setLoading(false);
-			}
+					data: {},
+					url: deleteSXPElementURL,
+				}
+			);
 		}
 	};
 
@@ -538,6 +529,12 @@ const ViewSXPElements = ({
 				namespace,
 			}}
 		>
+			<input
+				name={`${namespace}id`}
+				type="hidden"
+				value={selected.join(',')}
+			/>
+
 			<ManagementToolbar
 				loading={networkState.loading}
 				onBulkDelete={_handleBulkDelete}

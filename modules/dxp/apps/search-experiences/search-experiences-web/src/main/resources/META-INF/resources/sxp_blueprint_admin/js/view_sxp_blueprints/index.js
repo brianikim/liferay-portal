@@ -41,6 +41,7 @@ const ViewSXPBlueprints = ({
 	defaultLocale, // See view_sxp_blueprints.jsp
 	deleteSXPBlueprintURL, // See view_sxp_blueprints.jsp
 	editSXPBlueprintURL, // See view_sxp_blueprints.jsp
+	formName, // See view_sxp_blueprints.jsp
 	hasAddSXPBlueprintPermission, // See ViewSXPBlueprintsDisplayContext#hasAddSXPBlueprintPermission
 	namespace, // See view_sxp_blueprints.jsp
 }) => {
@@ -188,28 +189,19 @@ const ViewSXPBlueprints = ({
 					  )
 			)
 		) {
-			_setLoading(true);
+			Liferay.Util.postForm(
+				document.getElementById(`${namespace}${formName}`),
+				{
 
-			const formData = new FormData();
+					// This depends on the hidden input field `${namespace}id`
+					// instead of the `data` property. The `data` property is
+					// still included since without it, the post request isn't
+					// performed.
 
-			formData.append(`${namespace}id`, selected.join(','));
-
-			fetch(deleteSXPBlueprintURL, {
-				body: formData,
-				method: 'POST',
-			})
-				.then(() => {
-					openSuccessToast();
-
-					setSelected([]);
-
-					refetch();
-				})
-				.catch(() => {
-					openErrorToast();
-
-					_setLoading(false);
-				});
+					data: {},
+					url: deleteSXPBlueprintURL,
+				}
+			);
 		}
 	};
 
@@ -530,6 +522,12 @@ const ViewSXPBlueprints = ({
 				namespace,
 			}}
 		>
+			<input
+				name={`${namespace}id`}
+				type="hidden"
+				value={selected.join(',')}
+			/>
+
 			<ManagementToolbar
 				loading={networkState.loading}
 				onBulkDelete={_handleBulkDelete}
