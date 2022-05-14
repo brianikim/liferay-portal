@@ -4,8 +4,8 @@ definition {
 		Variables.assertDefined(parameterList = "${groupName},${title}");
 
 		var groupId = JSONWebcontentSetter.setGroupId(groupName = "${groupName}");
-
 		var urlTitle = StringUtil.replace("${title}", " ", "-");
+
 		var urlTitle = StringUtil.lowerCase("${urlTitle}");
 
 		var articleId = JSONWebcontentAPI._getArticleIdByURLTitle(

@@ -29,7 +29,6 @@ definition {
 		property portal.acceptance = "true";
 
 		var portalURL = PropsUtil.get("portal.url");
-
 		var siteName = TestCase.getSiteName(siteName = "${siteName}");
 
 		JSONLayout.addPublicLayout(
@@ -75,7 +74,6 @@ definition {
 	@priority = "5"
 	test ValidateLongInputs {
 		var portalURL = PropsUtil.get("portal.url");
-
 		var siteName = TestCase.getSiteName(siteName = "${siteName}");
 
 		JSONLayout.addPublicLayout(
@@ -123,7 +121,6 @@ definition {
 	@priority = "4"
 	test ViewPreviewWhenSwitchingTranslations {
 		var portalURL = PropsUtil.get("portal.url");
-
 		var siteName = TestCase.getSiteName(siteName = "${siteName}");
 
 		JSONLayout.addPublicLayout(
@@ -207,7 +204,6 @@ definition {
 	@priority = "5"
 	test ViewTranslatedLanguages {
 		var portalURL = PropsUtil.get("portal.url");
-
 		var siteName = TestCase.getSiteName(siteName = "${siteName}");
 
 		JSONGroup.addGroup(groupName = "Test Site Name");

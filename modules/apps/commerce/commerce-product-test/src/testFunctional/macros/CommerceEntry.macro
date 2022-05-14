@@ -506,7 +506,9 @@ definition {
 
 	macro deleteCommerceEntry {
 		var paginationResults = selenium.getText("CommerceEntry#PAGINATION_RESULTS");
+
 		var numberOfEntries = StringUtil.extractLast("${paginationResults}", " ");
+
 		var numberOfEntriesAfterDeletion = ${numberOfEntries} - 1;
 
 		ClickNoError(

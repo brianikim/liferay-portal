@@ -58,7 +58,6 @@ definition {
 
 	macro typeFileContent {
 		var content = TestCase.getFileContent(fileName = "${fileName}");
-
 		var fileExtension = File.getFileExtension(fileName = "${fileName}");
 
 		if ("${fileExtension}" == "html") {

@@ -211,7 +211,9 @@ definition {
 		}
 
 		var response = JSONCurlUtil.post("${tokenCurl}");
+
 		var partialResponse = StringUtil.extractFirst("${response}", "\",\"token_type");
+
 		var accessToken = StringUtil.extractLast("${partialResponse}", "access_token\":\"");
 
 		echo("## * Access Token: ${accessToken}");
@@ -573,7 +575,9 @@ definition {
 		if (isSet(globalScopeLinkValue)) {
 			if (contains("${scopeTranslation}", "+")) {
 				var partialScopeTranslation = StringUtil.extractFirst("${scopeTranslation}", "+");
+
 				var partialScopeTranslation = StringUtil.trim("${partialScopeTranslation}");
+
 				var key_scopeText = "${partialScopeTranslation}";
 			}
 			else {

@@ -484,6 +484,7 @@ definition {
 
 	macro openPagesAdmin {
 		var siteURLKey = StringUtil.replace("${siteURLKey}", " ", "-");
+
 		var siteURLKey = StringUtil.lowerCase("${siteURLKey}");
 
 		Navigator.openWithAppendToBaseURL(

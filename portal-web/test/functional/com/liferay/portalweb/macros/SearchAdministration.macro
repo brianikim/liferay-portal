@@ -25,8 +25,8 @@ definition {
 
 		if (contains("${searchEngineVendor}", "Elasticsearch")) {
 			var port = Elasticsearch.getServerPort();
-
 			var portalHostname = PropsUtil.get("portal.hostname");
+
 			var curl = "http://${portalHostname}:${port}/_tasks";
 		}
 

@@ -11,8 +11,11 @@ definition {
 			  -u test@liferay.com:test \
 			  -d value=${value}
 		''';
+
 		var classNameId = JSONCurlUtil.post("${curl}", "$.[?(@['value'] == '${value}')]['classNameId']");
+
 		var classNameId = StringUtil.replace("${classNameId}", "[\"", "");
+
 		var classNameId = StringUtil.replace("${classNameId}", "\"]", "");
 
 		if ("${classNameId}" == "") {

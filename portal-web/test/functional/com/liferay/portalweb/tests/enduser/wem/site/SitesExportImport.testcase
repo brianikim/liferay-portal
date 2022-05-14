@@ -45,7 +45,6 @@ definition {
 		FragmentsAdmin.addFragment(fragmentName = "Fragment Name");
 
 		var fragmentHTML = '''<lfr-widget-web-content>''';
-
 		var htmlSnippet = '''<lfr-''';
 
 		FragmentsEditor.autocompleteFragmentHTML(
@@ -88,7 +87,6 @@ definition {
 		LAR.exportSiteCP(siteScopeName = "Test Site Name");
 
 		var key_larFileName = "${larFileName}";
-
 		var larFileName = LAR.getLarFileName();
 
 		LAR.downloadLar();

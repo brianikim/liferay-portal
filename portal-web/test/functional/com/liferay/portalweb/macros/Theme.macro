@@ -86,6 +86,7 @@ definition {
 			value1 = "copy-log-file");
 
 		var projectDir = PropsUtil.get("project.dir");
+
 		var logContent = FileUtil.read("${projectDir}/log");
 
 		while (!(contains("${logContent}", "STARTED ${themeName}"))) {

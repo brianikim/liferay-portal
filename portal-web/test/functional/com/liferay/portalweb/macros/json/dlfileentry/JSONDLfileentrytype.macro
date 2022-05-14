@@ -11,8 +11,11 @@ definition {
 			  -u test@liferay.com:test \
 			  -d groupIds=[${groupId}]
 		''';
+
 		var fileEntryTypeId = JSONCurlUtil.post("${curl}", "$.[?(@['nameCurrentValue'] == '${fileEntryTypeName}')]['fileEntryTypeId']");
+
 		var fileEntryTypeId = StringUtil.replace("${fileEntryTypeId}", "[\"", "");
+
 		var fileEntryTypeId = StringUtil.replace("${fileEntryTypeId}", "\"]", "");
 
 		if ("${fileEntryTypeId}" == "") {

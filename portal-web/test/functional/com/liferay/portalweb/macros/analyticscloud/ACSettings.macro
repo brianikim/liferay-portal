@@ -757,6 +757,7 @@ definition {
 			title = "${propertyName}");
 
 		var propertyId = selenium.getText("ACSettings#HEADER_DESCRIPTION");
+
 		var propertyId = StringUtil.extractDigits("${propertyId}");
 
 		return "${propertyId}";
@@ -764,7 +765,9 @@ definition {
 
 	macro getUsagePercentage {
 		var usageSince = selenium.getText("//div[contains(@class,'overview-usage')][.//h3[contains(@class,'metric-name')][normalize-space(text())='${metricName}']]//span[contains(@class,'usage-since')]");
+
 		var percentage = StringUtil.extractFirst("${usageSince}", "since");
+
 		var percentage = StringUtil.trim("${percentage}");
 
 		return "${percentage}";

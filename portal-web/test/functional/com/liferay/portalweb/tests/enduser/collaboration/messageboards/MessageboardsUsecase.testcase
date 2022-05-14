@@ -386,7 +386,6 @@ definition {
 			userName = "Anonymous");
 
 		var actualScript = '''<script>alert(123);</script>''';
-
 		var escapedScript = '''&lt;script&gt;alert(123);&lt;/script&gt;''';
 
 		AssertHTMLSourceTextNotPresent(value1 = "${actualScript}");
@@ -462,7 +461,6 @@ definition {
 		property test.name.skip.portal.instance = "MessageboardsUsecase#ViewMBThreadAndReplyThreadInGmail";
 
 		var portalURL = PropsUtil.get("portal.url");
-
 		var siteName = TestCase.getSiteName(siteName = "${siteName}");
 
 		ApplicationsMenu.gotoPortlet(
@@ -882,7 +880,6 @@ definition {
 			threadSubject = '''<script>alert(123);</script>''');
 
 		var actualScript = '''<script>alert(123);</script>''';
-
 		var escapedScript = '''&lt;script&gt;alert(123);&lt;/script&gt;''';
 
 		AssertHTMLSourceTextNotPresent(value1 = "${actualScript}");

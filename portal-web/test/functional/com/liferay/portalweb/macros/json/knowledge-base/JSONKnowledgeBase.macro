@@ -9,7 +9,6 @@ definition {
 		var groupId = JSONGroupAPI._getGroupIdByName(
 			groupName = "${groupName}",
 			site = "${site}");
-
 		var portalURL = JSONCompany.getPortalURL();
 
 		if (isSet(folderName)) {
@@ -34,8 +33,11 @@ definition {
 				-d "end=-1" \
 				-d -orderByComparator=
 		''';
+
 		var resourcePrimKey = JSONCurlUtil.post("${curl}", "$.[?(@['title'] == '${kbChildArticleTitle}')]['resourcePrimKey']");
+
 		var resourcePrimKey = StringUtil.replace("${resourcePrimKey}", "[\"", "");
+
 		var resourcePrimKey = StringUtil.replace("${resourcePrimKey}", "\"]", "");
 
 		if ("${resourcePrimKey}" == "") {
@@ -64,7 +66,6 @@ definition {
 		var groupId = JSONGroupAPI._getGroupIdByName(
 			groupName = "${groupName}",
 			site = "${site}");
-
 		var portalURL = JSONCompany.getPortalURL();
 
 		var curl = '''
@@ -77,8 +78,11 @@ definition {
 				-d "end=-1" \
 				-d -orderByComparator=
 		''';
+
 		var resourcePrimKey = JSONCurlUtil.post("${curl}", "$.[?(@['title'] == '${kbArticleTitle}')]['resourcePrimKey']");
+
 		var resourcePrimKey = StringUtil.replace("${resourcePrimKey}", "[\"", "");
+
 		var resourcePrimKey = StringUtil.replace("${resourcePrimKey}", "\"]", "");
 
 		if ("${resourcePrimKey}" == "") {
@@ -133,7 +137,6 @@ definition {
 	@summary = "This calls the JSON WS API to add a kB child article"
 	macro addkBChildArticle {
 		var portalURL = JSONCompany.getPortalURL();
-
 		var parentResourceClassNameId = JSONClassname._getClassNameId(value = "com.liferay.knowledge.base.model.KBArticle");
 
 		if (isSet(folderName)) {
@@ -198,7 +201,6 @@ definition {
 		var groupId = JSONGroupAPI._getGroupIdByName(
 			groupName = "${groupName}",
 			site = "${site}");
-
 		var parentResourceClassNameId = JSONClassname._getClassNameId(value = "com.liferay.knowledge.base.model.KBFolder");
 
 		var curl = '''
@@ -223,7 +225,6 @@ definition {
 	@summary = "This calls the JSON WS API to add a kB grandchild article"
 	macro addkBGrandchildArticle {
 		var portalURL = JSONCompany.getPortalURL();
-
 		var parentResourceClassNameId = JSONClassname._getClassNameId(value = "com.liferay.knowledge.base.model.KBArticle");
 
 		if (isSet(folderName)) {
@@ -294,7 +295,6 @@ definition {
 		var groupId = JSONGroupAPI._getGroupIdByName(
 			groupName = "${groupName}",
 			site = "${site}");
-
 		var portalURL = JSONCompany.getPortalURL();
 
 		var curl = '''
@@ -305,8 +305,11 @@ definition {
 				-d "start=-1" \
 				-d "end=-1"
 		''';
+
 		var kbFolderId = JSONCurlUtil.post("${curl}", "$.[?(@['name'] == '${folderName}')]['kbFolderId']");
+
 		var kbFolderId = StringUtil.replace("${kbFolderId}", "[\"", "");
+
 		var kbFolderId = StringUtil.replace("${kbFolderId}", "\"]", "");
 
 		if ("${kbFolderId}" == "") {

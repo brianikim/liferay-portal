@@ -9,6 +9,7 @@ definition {
 			-u test@liferay.com:test \
 			-H Content-Type: application/json
 		''';
+
 		var JSON = JSONCurlUtil.get("${curl}");
 
 		return "${JSON}";
@@ -19,7 +20,6 @@ definition {
 		Variables.assertDefined(parameterList = "${domain},${virtualHost},${portalInstanceId}");
 
 		var portalURL = JSONCompany.getPortalURL();
-
 		var parameters = JSONUtil2._addJSONObject(
 			JSON = "{}",
 			key = "domain",
@@ -63,7 +63,6 @@ definition {
 		Variables.assertDefined(parameterList = "${portalInstanceId}");
 
 		var portalURL = JSONCompany.getPortalURL();
-
 		var portalInstanceId = StringUtil.replace("${portalInstanceId}", " ", "%20");
 
 		var curl = '''

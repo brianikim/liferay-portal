@@ -63,7 +63,9 @@ definition {
 		DMDocument.expandInfo();
 
 		var dmDocumentURL = selenium.getAttribute("//input[contains(@id,'urlInput')]@value");
+
 		var editDocumentURL = StringUtil.extractFirst("${dmDocumentURL}", "jpg");
+
 		var entryExternalURL = StringUtil.replace("${editDocumentURL}", "http://", "");
 
 		WebContentNavigator.openWebContentAdmin(siteURLKey = "guest");
@@ -658,7 +660,6 @@ definition {
 		LAR.exportSiteCP(siteScopeName = "Site A");
 
 		var key_larFileName = "${larFileName}";
-
 		var larFileName = LAR.getLarFileName();
 
 		LAR.downloadLar();
@@ -930,7 +931,6 @@ definition {
 			siteScopeName = "Guest");
 
 		var key_larFileName = "${larFileName}";
-
 		var larFileName = LAR.getLarFileName();
 
 		LAR.downloadLar();
@@ -1129,7 +1129,6 @@ definition {
 		LAR.exportSiteCP(siteScopeName = "Site A");
 
 		var key_larFileName = "${larFileName}";
-
 		var larFileName = LAR.getLarFileName();
 
 		LAR.downloadLar();
@@ -1236,7 +1235,6 @@ definition {
 		LAR.exportSiteCP(siteScopeName = "Guest");
 
 		var key_larFileName = "${larFileName}";
-
 		var larFileName = LAR.getLarFileName();
 
 		LAR.downloadLar();
@@ -1406,7 +1404,6 @@ definition {
 		LAR.exportSiteCP(siteScopeName = "Site Name B");
 
 		var key_larFileName = "${larFileName}";
-
 		var larFileName = LAR.getLarFileName();
 
 		LAR.downloadLar();
@@ -1489,7 +1486,6 @@ definition {
 		LAR.exportSiteCP(siteScopeName = "Site Name");
 
 		var key_larFileName = "${larFileName}";
-
 		var larFileName = LAR.getLarFileName();
 
 		LAR.downloadLar();
@@ -1843,6 +1839,7 @@ definition {
 		DMDocument.expandInfo();
 
 		var dmDocumentURL = selenium.getAttribute("//input[contains(@id,'urlInput')]@value");
+
 		var editDocumentURL = StringUtil.extractFirst("${dmDocumentURL}", ".jpg");
 
 		WebContentNavigator.openWebContentAdmin(siteURLKey = "guest");
@@ -2003,7 +2000,6 @@ definition {
 		LAR.exportSiteCP(siteScopeName = "Site B");
 
 		var key_larFileName = "${larFileName}";
-
 		var larFileName = LAR.getLarFileName();
 
 		LAR.downloadLar();
@@ -2183,7 +2179,6 @@ ${webContentData}
 		LAR.exportSiteCP(siteScopeName = "Site Name");
 
 		var key_larFileName = "${larFileName}";
-
 		var larFileName = LAR.getLarFileName();
 
 		LAR.downloadLar();
@@ -2226,7 +2221,6 @@ ${webContentData}
 		LAR.exportSiteCP(siteScopeName = "Site Name A");
 
 		var key_larFileName = "${larFileName}";
-
 		var larFileName = LAR.getLarFileName();
 
 		LAR.downloadLar();
@@ -2285,6 +2279,7 @@ ${webContentData}
 		DMDocument.expandInfo();
 
 		var dmDocumentURL = selenium.getAttribute("//input[contains(@id,'urlInput')]@value");
+
 		var entryExternalURL = StringUtil.replace("${dmDocumentURL}", "http://", "");
 
 		JSONDocument.deleteFile(

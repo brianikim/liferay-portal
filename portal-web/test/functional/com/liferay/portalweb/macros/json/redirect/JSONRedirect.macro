@@ -11,9 +11,7 @@ definition {
 		var groupId = JSONGroupAPI._getGroupIdByName(
 			groupName = "${groupName}",
 			site = "${site}");
-
 		var portalURL = JSONCompany.getPortalURL();
-
 		var destinationURL = StringUtil.replace("${destinationURL}", ":", "%3A");
 
 		if (!(isSet(expirationDate))) {

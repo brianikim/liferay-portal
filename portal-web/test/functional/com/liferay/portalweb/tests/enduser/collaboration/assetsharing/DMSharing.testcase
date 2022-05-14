@@ -314,7 +314,6 @@ definition {
 		property test.name.skip.portal.instance = "DMSharing#GoToSharedContentViaEmail";
 
 		var portalURL = PropsUtil.get("portal.url");
-
 		var siteName = TestCase.getSiteName(siteName = "${siteName}");
 
 		Gmail.login(

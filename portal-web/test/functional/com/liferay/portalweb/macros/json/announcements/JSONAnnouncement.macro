@@ -33,6 +33,7 @@ definition {
 			var displayDateDay = DateUtil.getCurrentDate();
 			var displayDateMonth = DateUtil.getCurrentMonth();
 			var displayDateYear = DateUtil.getCurrentYear();
+
 			var displayDate = "${displayDateYear}%2D${displayDateMonth}%2D${displayDateDay}";
 		}
 

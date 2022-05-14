@@ -848,10 +848,14 @@ definition {
 
 	macro clickMarginOfContentContainer {
 		var elementHeight = selenium.getElementHeight("WCEditWebContent#CONTENT_CONTAINER");
+
 		var offSetY = 50 * ${elementHeight};
+
 		var offSetY = ${offSetY} / 100;
 		var elementWidth = selenium.getElementWidth("WCEditWebContent#CONTENT_CONTAINER");
+
 		var offSetX = 2 * ${elementWidth};
+
 		var offSetX = ${offSetX} / 100;
 
 		Click.clickAt(
@@ -1762,6 +1766,7 @@ definition {
 
 		for (var documentType : list "${documentTypes}") {
 			var documentTypeUppercase = StringUtil.upperCase("${documentType}");
+
 			var key_documentType = "${documentTypeUppercase}";
 
 			AssertTextEquals.assertPartialText(

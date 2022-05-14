@@ -486,7 +486,6 @@ definition {
 		property test.name.skip.portal.instance = "SitetemplatesUsecase#SiteTemplatePageLinkInWebContentRedirectCorrectly";
 
 		var portalURL = PropsUtil.get("portal.url");
-
 		var siteName = TestCase.getSiteName(siteName = "${siteName}");
 
 		SiteTemplates.addCP(siteTemplateName = "Template Site");
@@ -685,7 +684,6 @@ definition {
 		LAR.exportSiteCP(siteScopeName = "Site A");
 
 		var key_larFileName = "${larFileName}";
-
 		var larFileName = LAR.getLarFileName();
 
 		LAR.downloadLar();

@@ -30,7 +30,6 @@ definition {
 		property test.name.skip.portal.instance = "ServiceAccessPolicy#ServiceAccessPolicySmoke";
 
 		var companyId = JSONCompany.getCompanyId();
-
 		var portalURL = JSONCompany.getPortalURL();
 
 		var curl = '''
@@ -38,6 +37,7 @@ definition {
 				-d companyId=${companyId} \
 				-d emailAddress=test@liferay.com
 		''';
+
 		var output = JSONCurlUtil.post("${curl}");
 
 		if (contains("${output}", "Access denied to com.liferay.portal.kernel.service.UserService#getUserByEmailAddress")) {
@@ -57,12 +57,12 @@ definition {
 			policyName = "SYSTEM_DEFAULT");
 
 		var userId = JSONUserAPI._getUserIdByEmailAddress(userEmailAddress = "test@liferay.com ");
-
 		var curl = '''
 			${portalURL}/api/jsonws/user/get-user-by-email-address \
 				-d companyId=${companyId} \
 				-d emailAddress=test@liferay.com
 		''';
+
 		var output = JSONCurlUtil.post("${curl}");
 
 		if (contains("${output}", "must have VIEW permission for com.liferay.portal.kernel.model.User ${userId}")) {
@@ -77,6 +77,7 @@ definition {
 				-basic \
 				-u test@liferay.com:test
 		''';
+
 		var output = JSONCurlUtil.post("${curl}");
 
 		if (contains("${output}", "\"agreedToTermsOfUse\":true") && contains("${output}", "\"companyId\":\"${companyId}\"")) {
@@ -100,6 +101,7 @@ definition {
 				-basic \
 				-u test@liferay.com:test
 		''';
+
 		var output = JSONCurlUtil.post("${curl}");
 
 		if (contains("${output}", "Access denied to com.liferay.portal.kernel.service.UserService#getCurrentUser")) {

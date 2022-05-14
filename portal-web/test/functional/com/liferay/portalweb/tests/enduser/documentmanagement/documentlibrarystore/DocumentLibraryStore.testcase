@@ -72,9 +72,7 @@ definition {
 		JSONGroup.addGroup(groupName = "Site A");
 
 		var bucketID = PropsUtil.get("aws.bucket.id");
-
 		var companyId = JSONCompany.getCompanyId();
-
 		var groupId = JSONGroupAPI._getGroupIdByName(
 			groupName = "Site A",
 			site = "true");
@@ -117,9 +115,7 @@ definition {
 		JSONGroup.addGroup(groupName = "Test Site Name");
 
 		var bucketID = PropsUtil.get("aws.bucket.id");
-
 		var companyId = JSONCompany.getCompanyId();
-
 		var groupId = JSONGroupAPI._getGroupIdByName(
 			groupName = "Test Site Name",
 			site = "true");

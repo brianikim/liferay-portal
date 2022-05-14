@@ -110,6 +110,7 @@ definition {
 				locator1 = "ACSites#TOOLTIP_UNIQUE_VISITORS");
 
 			var i = ${i} + 1;
+
 			var i = StringUtil.valueOf("${i}");
 		}
 	}

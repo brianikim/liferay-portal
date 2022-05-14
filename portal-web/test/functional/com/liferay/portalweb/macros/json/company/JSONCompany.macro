@@ -11,6 +11,7 @@ definition {
 			${portalURL}/api/jsonws/company/get-company-by-virtual-host/virtual-host/${portalInstanceName} \
 				-u test@liferay.com:test
 		''';
+
 		var companyId = JSONCurlUtil.get("${curl}", "$['companyId']");
 
 		return "${companyId}";
@@ -24,6 +25,7 @@ definition {
 			var portalURL = JSONCompany.getPortalURL();
 
 			var portalInstanceName = StringUtil.replace("${portalURL}", "http://", "");
+
 			var portalInstanceName = StringUtil.replace("${portalInstanceName}", ":8080", "");
 
 			return "${portalInstanceName}";

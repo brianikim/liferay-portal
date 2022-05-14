@@ -156,7 +156,6 @@ definition {
 			groupName = "Site Name (Staging)",
 			site = "false",
 			vocabularyName = "Vocabulary Name");
-
 		var secondCategoryId = JSONCategory.getCategoryId(
 			categoryName = "Category Name 2",
 			groupName = "Site Name (Staging)",

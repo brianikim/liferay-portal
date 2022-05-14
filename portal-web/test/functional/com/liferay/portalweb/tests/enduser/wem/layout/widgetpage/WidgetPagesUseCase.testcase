@@ -85,7 +85,6 @@ definition {
 		AssertAlertNotPresent();
 
 		var actualScript = '''<script>alert(123);</script>''';
-
 		var escapedScript = '''&lt;script&gt;alert(123);&lt;/script&gt;''';
 
 		AssertHTMLSourceTextNotPresent(value1 = "${actualScript}");
@@ -479,7 +478,6 @@ definition {
 			bodyLink = "CONTINUE READING");
 
 		var blogEntryURL = selenium.getLocation();
-
 		var messageBoardsThreadURL = MockMock.getBodySpecificText(
 			asset = "MB",
 			content = "MB Thread Message Body",
@@ -623,7 +621,6 @@ definition {
 			bodyLink = "CONTINUE READING");
 
 		var blogEntryURL = selenium.getLocation();
-
 		var messageBoardsThreadURL = MockMock.getBodySpecificText(
 			asset = "MB",
 			content = "MB Thread Message Body",
@@ -771,7 +768,6 @@ definition {
 			bodyLink = "CONTINUE READING");
 
 		var blogEntryURL = selenium.getLocation();
-
 		var messageBoardsThreadURL = MockMock.getBodySpecificText(
 			asset = "MB",
 			content = "MB Thread Message Body",

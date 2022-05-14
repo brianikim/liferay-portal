@@ -570,6 +570,7 @@ definition {
 			kbArticleTitle = "Knowledge Base Article Title");
 
 		var kbArticleRelatedAssetTitle = "Blogs Entry Title";
+
 		var key_kbArticleRelatedAssetTitle = "${kbArticleRelatedAssetTitle}";
 
 		AssertClick.assertTextClickAt(

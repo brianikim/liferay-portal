@@ -64,8 +64,11 @@ definition {
 			-d <CURL_DATA[end=-1]CURL_DATA> \
 			-d -orderByComparator=
 		''';
+
 		var collectionId = JSONCurlUtil.post("${curl}", "$.[?(@['name'] == '${collectionName}')]['fragmentCollectionId']");
+
 		var collectionId = StringUtil.replace("${collectionId}", "[\"", "");
+
 		var collectionId = StringUtil.replace("${collectionId}", "\"]", "");
 
 		if ("${collectionId}" == "") {
@@ -88,6 +91,7 @@ definition {
 			-d <CURL_DATA[end=-1]CURL_DATA> \
 			-d -orderByComparator=
 		''';
+
 		var collectionNameResult = JSONCurlUtil.post("${curl}", "$..[?(@['name'] == '${collectionName}')]");
 
 		return "${collectionNameResult}";
@@ -105,6 +109,7 @@ definition {
 			-d <CURL_DATA[start=-1]CURL_DATA> \
 			-d <CURL_DATA[end=-1]CURL_DATA>
 		''';
+
 		var fragmentNameResult = JSONCurlUtil.post("${curl}", "$..[?(@['name'] == '${fragmentName}')]");
 
 		return "${fragmentNameResult}";

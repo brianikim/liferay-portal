@@ -5,7 +5,6 @@ definition {
 		var javascript = '''
 			return document.readyState === "complete";
 		''';
-
 		var message = '''Page is still loading.''';
 
 		selenium.waitForJavaScriptNoError("${javascript}", "${message}", "");

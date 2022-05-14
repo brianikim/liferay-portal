@@ -1779,12 +1779,14 @@ definition {
 			webContentTitle = "WC Title");
 
 		var portalHostname = PropsUtil.get("portal.hostname");
-
 		var port = Elasticsearch.getServerPort();
 
 		var curl = "http://${portalHostname}:${port}/_search?q=entryClassName:com.liferay.journal.model.JournalArticle";
+
 		var journalArticleDocumentType = JSONCurlUtil.get("${curl}");
+
 		var classTypeId = RegexUtil.replace("${journalArticleDocumentType}", "ddm__keyword__(\d+)__Text", "1");
+
 		var aggregationField = "ddm__keyword__${classTypeId}__Text";
 
 		Search.openSearchPage();
@@ -2182,7 +2184,6 @@ definition {
 			searchAssetType = "Message Boards Message");
 
 		var actualScript = '''<script>alert(123);</script>''';
-
 		var escapedScript = '''&lt;script&gt;alert(123);&lt;/script&gt;''';
 
 		AssertHTMLSourceTextNotPresent(value1 = "${actualScript}");
@@ -2653,7 +2654,6 @@ definition {
 		var liferaySiteId = JSONGroupAPI._getGroupIdByName(
 			groupName = "Guest",
 			site = "true");
-
 		var siteName = TestCase.getSiteName();
 
 		var testSearchURL = SearchFacetPortlet.checkFacetAndViewURL(
@@ -2661,7 +2661,6 @@ definition {
 			facetValue = "${liferaySiteId}",
 			facetValueName = "${siteName}",
 			searchURL = "${testSearchURL}");
-
 		var newSiteId = JSONGroupAPI._getGroupIdByName(
 			groupName = "New Site",
 			site = "true");
@@ -2747,7 +2746,6 @@ definition {
 			facetValue = "${organicCategoryId}",
 			facetValueName = "organic",
 			searchURL = "${testSearchURL}");
-
 		var webContentFolderId1 = JSONWebcontent.getFolderIdByFolderName(
 			folderName = "${webContentFolderName1}",
 			groupName = "Guest");

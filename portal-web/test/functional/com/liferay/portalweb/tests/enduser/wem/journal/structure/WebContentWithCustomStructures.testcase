@@ -1597,6 +1597,7 @@ definition {
 		}
 
 		var currentDateYear = DateUtil.getCurrentYear();
+
 		var currentDatelastYear = ${currentDateYear} - 1;
 
 		task ("Add a Date field with predefined value") {

@@ -14,9 +14,7 @@ definition {
 		Variables.assertDefined(parameterList = "${groupName},${roleTitle},${userGroupName}");
 
 		var groupId = JSONGroupSetter.setGroupId(groupName = "${groupName}");
-
 		var roleId = JSONRoleAPI._getRoleIdByName(name = "${roleTitle}");
-
 		var userGroupId = JSONUserGroupAPI._getUserGroupIdByName(userGroupName = "${userGroupName}");
 
 		JSONUserGroupAPI._assignGroupRoleToUserGroup(

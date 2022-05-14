@@ -89,12 +89,10 @@ definition {
 			categoryName = "Category Name 3-1",
 			groupName = "Test Site Name",
 			vocabularyName = "Vocabulary Name 3");
-
 		var categoryId4 = JSONCategory.getCategoryId(
 			categoryName = "Category Name 3-2",
 			groupName = "Test Site Name",
 			vocabularyName = "Vocabulary Name 3");
-
 		var categoryId5 = JSONCategory.getCategoryId(
 			categoryName = "Category Name 3-3",
 			groupName = "Test Site Name",

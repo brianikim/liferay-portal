@@ -43,8 +43,11 @@ definition {
 				-u test@liferay.com:test \
 				-d name=${userGroupName}
 		''';
+
 		var userGroupId = JSONCurlUtil.post("${curl}", "$.userGroupId");
+
 		var userGroupId = StringUtil.replace("${userGroupId}", "[\"", "");
+
 		var userGroupId = StringUtil.replace("${userGroupId}", "\"]", "");
 
 		if ("${groupId}" == "") {

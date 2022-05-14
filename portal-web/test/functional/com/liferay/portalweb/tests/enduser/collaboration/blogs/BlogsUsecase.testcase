@@ -867,9 +867,12 @@ definition {
 		var entryContent = "Blogs Entry Content";
 		var entryTitle = "Blogs Entry Title";
 		var entryTitleURL = StringUtil.replace("Blogs Entry Title", " ", "-");
+
 		var entryTitleURL = StringUtil.lowerCase("${entryTitleURL}");
 		var pageNameURL = StringUtil.replace("Blogs Page", " ", "-");
+
 		var pageNameURL = StringUtil.lowerCase("${pageNameURL}");
+
 		var friendlyURL = "${portalURL}/web/guest/${pageNameURL}/-/blogs/${entryTitleURL}";
 
 		Blogs.addEntry(

@@ -124,6 +124,7 @@ definition {
 				position = "1");
 
 			var moduleHeight = selenium.getElementHeight("//div[contains(@class,'page-editor__topper__bar') and contains(.,'Grid')]//following-sibling::div[contains(@class,'page-editor__topper__content')]//div[contains(@class,'col-6')]");
+
 			var moduleHeight = StringUtil.replace("${moduleHeight}", "px", "");
 
 			TestUtils.isGreaterThan(
@@ -146,6 +147,7 @@ definition {
 				position = "1");
 
 			var moduleHeight = selenium.getElementHeight("//div[contains(@class,'page-editor__topper__bar') and contains(.,'Grid')]//following-sibling::div[contains(@class,'page-editor__topper__content')]//div[contains(@class,'col-4')]");
+
 			var moduleHeight = StringUtil.replace("${moduleHeight}", "px", "");
 
 			TestUtils.isGreaterThan(
@@ -170,6 +172,7 @@ definition {
 				position = "1");
 
 			var moduleHeight = selenium.getElementHeight("//div[contains(@class,'page-editor__topper__bar') and contains(.,'Grid')]//following-sibling::div[contains(@class,'page-editor__topper__content')]//div[contains(@class,'col-2')]");
+
 			var moduleHeight = StringUtil.replace("${moduleHeight}", "px", "");
 
 			TestUtils.isGreaterThan(
@@ -194,6 +197,7 @@ definition {
 				position = "1");
 
 			var moduleHeight = selenium.getElementHeight("//div[contains(@class,'page-editor__topper__bar') and contains(.,'Grid')]//following-sibling::div[contains(@class,'page-editor__topper__content')]//div[contains(@class,'col-12')]");
+
 			var moduleHeight = StringUtil.replace("${moduleHeight}", "px", "");
 
 			TestUtils.isGreaterThan(

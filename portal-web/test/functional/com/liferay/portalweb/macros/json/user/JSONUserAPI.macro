@@ -4,7 +4,6 @@ definition {
 		Variables.assertDefined(parameterList = "${locale},${userEmailAddress},${userFirstName},${userLastName},${userScreenName}");
 
 		var companyId = JSONCompany.getCompanyId();
-
 		var portalURL = JSONCompany.getPortalURL();
 
 		var curl = '''
@@ -75,7 +74,6 @@ definition {
 		Variables.assertDefined(parameterList = "${userId}");
 
 		var companyId = JSONCompany.getCompanyId();
-
 		var portalURL = JSONCompany.getPortalURL();
 
 		var curl = '''
@@ -109,7 +107,6 @@ definition {
 
 	macro _disablePasswordChangeRequired {
 		var companyId = JSONCompany.getCompanyId();
-
 		var portalURL = JSONCompany.getPortalURL();
 
 		var curl = '''
@@ -121,8 +118,11 @@ definition {
 				-d "end=-1" \
 				-d -orderByComparator=
 		''';
+
 		var passwordPolicyId = JSONCurlUtil.post("${curl}", "$.[?(@['name'] == 'Default Password Policy')]['passwordPolicyId']");
+
 		var passwordPolicyId = StringUtil.replace("${passwordPolicyId}", "[\"", "");
+
 		var passwordPolicyId = StringUtil.replace("${passwordPolicyId}", "\"]", "");
 
 		var curl = '''
@@ -163,13 +163,13 @@ definition {
 		Variables.assertDefined(parameterList = "${userEmailAddress}");
 
 		var companyId = JSONCompany.getCompanyId();
-
 		var portalURL = JSONCompany.getPortalURL();
 
 		var curl = '''
 			${portalURL}/api/jsonws/user/get-user-by-email-address/company-id/${companyId}/email-address/${userEmailAddress} \
 				-u test@liferay.com:test
 		''';
+
 		var userId = JSONCurlUtil.get("${curl}", "$['userId']");
 
 		return "${userId}";
@@ -177,7 +177,6 @@ definition {
 
 	macro _getUserIds {
 		var companyId = JSONCompany.getCompanyId();
-
 		var portalURL = JSONCompany.getPortalURL();
 
 		var curl = '''
@@ -187,9 +186,13 @@ definition {
 			-d <CURL_DATA[start=-1]CURL_DATA> \
 			-d <CURL_DATA[end=-1]CURL_DATA>
 		''';
+
 		var userIds = JSONCurlUtil.post("${curl}", "$..['userId']");
+
 		var userIds = StringUtil.replace("${userIds}", "[", "");
+
 		var userIds = StringUtil.replace("${userIds}", "]", "");
+
 		var userIds = StringUtil.replace("${userIds}", "\"", "");
 
 		return "${userIds}";

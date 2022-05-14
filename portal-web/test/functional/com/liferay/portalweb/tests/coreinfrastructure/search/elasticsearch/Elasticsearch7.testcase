@@ -57,7 +57,6 @@ definition {
 		Portlet.addPG(portletName = "Asset Publisher");
 
 		var companyId = JSONCompany.getCompanyId();
-
 		var port = Elasticsearch.getServerPort();
 
 		var curl = '''
@@ -134,7 +133,6 @@ definition {
 			portlet = "Search");
 
 		var clientVersion = Elasticsearch.getClientVersion();
-
 		var serverVersion = Elasticsearch.getServerVersion();
 
 		SearchAdministration.assertEngineVendorAndVersions(
@@ -627,7 +625,6 @@ definition {
 			portlet = "Search");
 
 		var clientVersion = Elasticsearch.getClientVersion();
-
 		var serverVersion = Elasticsearch.getServerVersion();
 
 		SearchAdministration.assertEngineVendorAndVersions(

@@ -228,6 +228,7 @@ definition {
 		MessageboardsCategory.gotoCP(categoryName = "Questions Test Category");
 
 		var messageBoardsCategoryURL = selenium.getLocation();
+
 		var parentCategoryId = StringUtil.extractLast("${messageBoardsCategoryURL}", "mbCategoryId=");
 
 		JSONMBMessage.addCategory(
@@ -993,6 +994,7 @@ definition {
 		MessageboardsCategory.gotoCP(categoryName = "Questions Test Category1");
 
 		var messageBoardsCategoryURL = selenium.getLocation();
+
 		var parentCategoryId = StringUtil.extractLast("${messageBoardsCategoryURL}", "mbCategoryId=");
 
 		JSONMBMessage.addCategory(
@@ -1008,6 +1010,7 @@ definition {
 		MessageboardsCategory.gotoCP(categoryName = "Questions Test Category2");
 
 		var messageBoardsCategoryURL = selenium.getLocation();
+
 		var parentCategoryId = StringUtil.extractLast("${messageBoardsCategoryURL}", "mbCategoryId=");
 
 		JSONMBMessage.addCategory(
@@ -1172,6 +1175,7 @@ definition {
 		MessageboardsCategory.gotoCP(categoryName = "Questions Test Category");
 
 		var messageBoardsCategoryURL = selenium.getLocation();
+
 		var parentCategoryId = StringUtil.extractLast("${messageBoardsCategoryURL}", "mbCategoryId=");
 
 		for (var num : list "1,2") {

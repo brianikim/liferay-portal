@@ -125,8 +125,11 @@ definition {
 				-u test@liferay.com:test \
 				-d groupId=${groupId}
 		''';
+
 		var layoutPageTemplateCollectionId = JSONCurlUtil.post("${curl}", "$.[?(@['name'] == '${layoutPageTemplateCollectionName}')]['layoutPageTemplateCollectionId']");
+
 		var layoutPageTemplateCollectionId = StringUtil.replace("${layoutPageTemplateCollectionId}", "[\"", "");
+
 		var layoutPageTemplateCollectionId = StringUtil.replace("${layoutPageTemplateCollectionId}", "\"]", "");
 
 		if ("${layoutPageTemplateCollectionId}" == "") {
@@ -151,8 +154,11 @@ definition {
 			  -d "end=-1" \
 			  -d -orderByComparator=
 		''';
+
 		var layoutPageTemplateEntryId = JSONCurlUtil.post("${curl}", "$.[?(@['name'] == '${layoutPageTemplateEntryName}')]['layoutPageTemplateEntryId']");
+
 		var layoutPageTemplateEntryId = StringUtil.replace("${layoutPageTemplateEntryId}", "[\"", "");
+
 		var layoutPageTemplateEntryId = StringUtil.replace("${layoutPageTemplateEntryId}", "\"]", "");
 
 		if ("${layoutPageTemplateEntryId}" == "") {
@@ -177,8 +183,11 @@ definition {
 			  -d "end=-1" \
 			  -d -orderByComparator=
 		''';
+
 		var masterLayoutPlid = JSONCurlUtil.post("${curl}", "$.[?(@['name'] == '${masterLayoutEntryName}')]['plid']");
+
 		var masterLayoutPlid = StringUtil.replace("${masterLayoutPlid}", "[\"", "");
+
 		var masterLayoutPlid = StringUtil.replace("${masterLayoutPlid}", "\"]", "");
 
 		if ("${masterLayoutPlid}" == "") {

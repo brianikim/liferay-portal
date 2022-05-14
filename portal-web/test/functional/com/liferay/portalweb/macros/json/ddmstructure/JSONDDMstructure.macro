@@ -5,7 +5,6 @@ definition {
 		Variables.assertDefined(parameterList = "${classNameId},${groupId},${structureName}");
 
 		var portalURL = JSONCompany.getPortalURL();
-
 		var companyId = JSONCompany.getCompanyId();
 
 		var curl = '''
@@ -18,8 +17,11 @@ definition {
 			  -d "end=-1" \
 			  -d -orderByComparator=
 		''';
+
 		var structureId = JSONCurlUtil.post("${curl}", "$.[?(@['nameCurrentValue'] == '${structureName}')]['structureId']");
+
 		var structureId = StringUtil.replace("${structureId}", "[\"", "");
+
 		var structureId = StringUtil.replace("${structureId}", "\"]", "");
 
 		if ("${structureId}" == "") {

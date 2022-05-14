@@ -626,10 +626,14 @@ definition {
 
 	macro clickManagementBar {
 		var elementHeight = selenium.getElementHeight("PageEditor#MANAGEMENT_BAR");
+
 		var offSetY = 50 * ${elementHeight};
+
 		var offSetY = ${offSetY} / 100;
 		var elementWidth = selenium.getElementWidth("PageEditor#MANAGEMENT_BAR");
+
 		var offSetX = 25 * ${elementWidth};
+
 		var offSetX = ${offSetX} / 100;
 
 		Click.clickAt(

@@ -1277,7 +1277,6 @@ definition {
 		property portal.upstream = "quarantine";
 
 		var username = "ac";
-
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 
 		var dataSource = StringUtil.extractFirst("${propertyName}", " ");

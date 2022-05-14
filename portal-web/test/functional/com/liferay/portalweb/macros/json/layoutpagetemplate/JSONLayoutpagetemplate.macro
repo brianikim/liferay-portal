@@ -9,7 +9,6 @@ definition {
 			groupKey = "${groupName}",
 			parentGroupName = "${parentGroupName}",
 			site = "${site}");
-
 		var classNameId = JSONLayoutpagetemplateSetter.setClassNameId(contentType = "${contentType}");
 
 		if ("${subType}" == "Basic Document") {
@@ -76,9 +75,7 @@ definition {
 		Variables.assertDefined(parameterList = "${pageTemplateEntryActive},${pageTemplateEntryName}");
 
 		var nameMap = JSONLayoutpagetemplateSetter.setNameMap(name = "${pageTemplateEntryName}");
-
 		var descriptionMap = JSONLayoutpagetemplateSetter.setDescriptionMap(description = "${pageTemplateEntryDescription}");
-
 		var serviceContext = JSONLayoutpagetemplateSetter.setServiceContext(
 			addGuestPermissions = "false",
 			assetCategoryIds = "${assetCategoryIds}",
@@ -158,9 +155,7 @@ definition {
 			assetTagNames = "${assetTagNames}",
 			serviceContext = "${serviceContext}",
 			workflowAction = "${workflowAction}");
-
 		var status = JSONLayoutpagetemplateUtil._getStatus(layoutPageTemplateStatus = "${layoutPageTemplateStatus}");
-
 		var type = JSONLayoutpagetemplateUtil._getType(layoutPageTemplateType = "${layoutPageTemplateType}");
 
 		JSONLayoutpagetemplateAPI._addLayoutPageTemplateEntry(
@@ -182,7 +177,6 @@ definition {
 			groupKey = "${groupName}",
 			parentGroupName = "${parentGroupName}",
 			site = "${site}");
-
 		var serviceContext = JSONLayoutpagetemplateSetter.setServiceContext(
 			addGuestPermissions = "true",
 			assetCategoryIds = "${assetCategoryIds}",

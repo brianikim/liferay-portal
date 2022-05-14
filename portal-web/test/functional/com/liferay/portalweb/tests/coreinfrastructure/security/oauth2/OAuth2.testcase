@@ -146,12 +146,12 @@ definition {
 			clientId = "${generatedClientId}",
 			clientSecret = "${generatedClientSecret}",
 			grantFlow = "clientCredentials");
-
 		var portalURL = PropsUtil.get("portal.url");
 
 		var portalVersionCurl = '''
 			${portalURL}/api/jsonws/portal/get-version -H 'Authorization: Bearer ${accessToken}'
 		''';
+
 		var portalVersionOutput = JSONCurlUtil.post("${portalVersionCurl}");
 
 		if (!(contains("${portalVersionOutput}", "7.3"))) {
@@ -227,6 +227,7 @@ definition {
 		var buildNumberCurl = '''
 			${portalURL}/api/jsonws/portal/get-build-number -H 'Authorization: Bearer ${accessToken}'
 		''';
+
 		var buildNumberOutput = JSONCurlUtil.post("${buildNumberCurl}");
 
 		if (!(contains("${buildNumberOutput}", "73"))) {
@@ -309,6 +310,7 @@ definition {
 			http://localhost:9080/o/oauth2/token \
 				 --data client_id=abc123&client_secret=abc123&grant_type=authorization_code&code=${authorizationCode}
 		''';
+
 		var reponse = JSONCurlUtil.post("${curl}");
 
 		if (contains("${reponse}", "access_token")) {
@@ -370,20 +372,16 @@ definition {
 			resourcePanels = "Portal Services");
 
 		var portalURL = PropsUtil.get("portal.url");
-
 		var siteName = TestCase.getSiteName(siteName = "${siteName}");
-
 		var tokenCurl = '''
 			${portalURL}/o/oauth2/token \
 				--data grant_type=client_credentials&client_id=abc123&client_secret=abc123
 		''';
 
 		var accessToken = OAuth2.getAccessToken(tokenCurl = "${tokenCurl}");
-
 		var articleId = JSONWebcontentSetter.setArticleId(
 			groupName = "Guest",
 			title = "WC Title");
-
 		var liferaySiteId = JSONGroupAPI._getGroupIdByName(
 			groupName = "Guest",
 			site = "true");
@@ -394,6 +392,7 @@ definition {
 				-d articleId=${articleId} \
 				-d articleURL='wc-title'
 		''';
+
 		var deleteOutput1 = JSONCurlUtil.post("${deleteCurl}");
 
 		if (!(contains("${deleteOutput1}", "must have DELETE permission for com.liferay.journal.model.JournalArticle"))) {

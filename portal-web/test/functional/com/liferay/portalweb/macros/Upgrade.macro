@@ -1445,7 +1445,6 @@ definition {
 
 	macro viewAndEditOpenGraph {
 		var portalURL = PropsUtil.get("portal.url");
-
 		var siteName = TestCase.getSiteName(siteName = "${siteName}");
 
 		SitePages.openPagesAdmin(siteURLKey = "test-site-name");
@@ -1508,7 +1507,6 @@ definition {
 
 	macro viewAndEditSERPPreview {
 		var portalURL = PropsUtil.get("portal.url");
-
 		var siteName = TestCase.getSiteName(siteName = "${siteName}");
 
 		Navigator.gotoPage(pageName = "Test Page");

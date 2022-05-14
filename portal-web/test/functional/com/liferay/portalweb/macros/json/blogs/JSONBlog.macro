@@ -5,7 +5,6 @@ definition {
 		Variables.assertDefined(parameterList = "${entryContent},${entryTitle}");
 
 		var portalURL = JSONCompany.getPortalURL();
-
 		var contentXML = JSONBlogSetter.setContentXML(content = "${entryContent}");
 
 		if (!(isSet(entrySubtitle))) {
@@ -76,7 +75,6 @@ definition {
 		var groupId = JSONGroupAPI._getGroupIdByName(
 			groupName = "${groupName}",
 			site = "${site}");
-
 		var portalURL = JSONCompany.getPortalURL();
 
 		if (isSet(friendlyURL)) {
@@ -110,7 +108,6 @@ definition {
 			entryTitle = "${entryTitle}",
 			friendlyURL = "${friendlyURL}",
 			groupName = "${groupName}");
-
 		var portalURL = JSONCompany.getPortalURL();
 
 		if (!(isSet(userEmailAddress))) {
@@ -126,6 +123,7 @@ definition {
 			-u ${userEmailAddress}:${userPassword} \
 			-d entryId=${entryId} \
 		''';
+
 		var messageId = JSONCurlUtil.post("${curl}");
 	}
 

@@ -105,15 +105,20 @@ definition {
 
 		if (isSet(enableOTP)) {
 			var bodyContent = selenium.getText("MockMock#MOCKMOCK_MESSAGE_BODY");
+
 			var bodyContent = StringUtil.extractLast("${bodyContent}", "${specificText}");
+
 			var bodySpecificText = StringUtil.extractFirst("${bodyContent}", "</pre>");
 
 			echo("Your one-time password is: ${bodySpecificText}");
 		}
 		else {
 			var bodyContent = selenium.getText("MockMock#MOCKMOCK_MESSAGE_BODY");
+
 			var bodyContent = StringUtil.extractLast("${bodyContent}", "${specificText}");
+
 			var bodySpecificText = StringUtil.extractFirst("${bodyContent}", "${extractFirstText}");
+
 			var bodySpecificText = StringUtil.trim("${bodySpecificText}");
 		}
 
@@ -136,7 +141,9 @@ definition {
 			subject = "${subject}");
 
 		var bodyContent = selenium.getText("MockMock#MOCKMOCK_MESSAGE_BODY");
+
 		var bodyContent = StringUtil.extractLast("${bodyContent}", " at ");
+
 		var bodyURL = StringUtil.extractFirst("${bodyContent}", ".");
 
 		Navigator.openSpecificURL(url = "${bodyURL}");
@@ -154,7 +161,9 @@ definition {
 			subject = "${subject}");
 
 		var bodyContent = selenium.getText("MockMock#MOCKMOCK_MESSAGE_BODY");
+
 		var bodyContent = StringUtil.extractLast("${bodyContent}", "href=\"");
+
 		var bodyURL = StringUtil.extractFirst("${bodyContent}", "\"");
 
 		Navigator.openSpecificURL(url = "${bodyURL}");
