@@ -58,7 +58,9 @@ public class Area implements Serializable {
 		return ObjectMapperUtil.unsafeReadValue(Area.class, json);
 	}
 
-	@Schema
+	@Schema(
+		example = "[{id=31130, name=Item 1, slug=/Item-1, street2=/Item/31130, thumbnail=/schema.jpg}]"
+	)
 	@Valid
 	public Breadcrumb[] getBreadcrumbs() {
 		return breadcrumbs;

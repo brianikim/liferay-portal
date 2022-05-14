@@ -60,7 +60,7 @@ public class Spot implements Serializable {
 	}
 
 	@DecimalMin("0")
-	@Schema
+	@Schema(example = "33130")
 	public Long getId() {
 		return id;
 	}
@@ -87,7 +87,7 @@ public class Spot implements Serializable {
 	protected Long id;
 
 	@DecimalMin("0")
-	@Schema
+	@Schema(example = "3")
 	public Integer getNumber() {
 		return number;
 	}
@@ -144,7 +144,7 @@ public class Spot implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected Position position;
 
-	@Schema
+	@Schema(example = "123e4567-e89b-12d3-a456-426655440000")
 	public String getProductId() {
 		return productId;
 	}
@@ -172,7 +172,7 @@ public class Spot implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected String productId;
 
-	@Schema
+	@Schema(example = "SKU01")
 	public String getSku() {
 		return sku;
 	}

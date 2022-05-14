@@ -58,7 +58,9 @@ public class ItemData implements Serializable {
 		return ObjectMapperUtil.unsafeReadValue(ItemData.class, json);
 	}
 
-	@Schema
+	@Schema(
+		example = "[{models=[{id=31231, name=Model 1, year=2019}], name=Brand 1}]"
+	)
 	@Valid
 	public Brand[] getBrands() {
 		return brands;
@@ -87,7 +89,9 @@ public class ItemData implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected Brand[] brands;
 
-	@Schema
+	@Schema(
+		example = "[{id=31130, name=Item 1, slug=/Item-1, street2=/Item/31130, thumbnail=/schema.jpg}]"
+	)
 	@Valid
 	public Item[] getItems() {
 		return items;
@@ -116,7 +120,9 @@ public class ItemData implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected Item[] items;
 
-	@Schema
+	@Schema(
+		example = "[{id=29130, name=Product 1, price=$ 12.99, sku=SKU01, thumbnailUrl=/product_thumbnail.png, url=/productUrl}]"
+	)
 	@Valid
 	public Product[] getProducts() {
 		return products;
@@ -145,7 +151,9 @@ public class ItemData implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected Product[] products;
 
-	@Schema
+	@Schema(
+		example = "[{id=34130, number=3, positionX=33.54, positionY=33.54, productId=29130}]"
+	)
 	@Valid
 	public Spot[] getSpots() {
 		return spots;

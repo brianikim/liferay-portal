@@ -416,7 +416,7 @@ public class CartItem implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected Long skuId;
 
-	@Schema
+	@Schema(example = "true")
 	public Boolean getSubscription() {
 		return subscription;
 	}

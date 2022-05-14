@@ -56,7 +56,7 @@ public class Breadcrumb implements Serializable {
 		return ObjectMapperUtil.unsafeReadValue(Breadcrumb.class, json);
 	}
 
-	@Schema
+	@Schema(example = "Item 1")
 	public String getLabel() {
 		return label;
 	}
@@ -84,7 +84,7 @@ public class Breadcrumb implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected String label;
 
-	@Schema
+	@Schema(example = "/folder/32344")
 	public String getUrl() {
 		return url;
 	}

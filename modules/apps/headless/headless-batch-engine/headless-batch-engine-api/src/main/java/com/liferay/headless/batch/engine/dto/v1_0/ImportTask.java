@@ -66,7 +66,8 @@ public class ImportTask implements Serializable {
 	}
 
 	@Schema(
-		description = "The item class name for which data will be processed in batch."
+		description = "The item class name for which data will be processed in batch.",
+		example = "com.liferay.headless.delivery.dto.v1_0.BlogPosting"
 	)
 	public String getClassName() {
 		return className;
@@ -97,7 +98,7 @@ public class ImportTask implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected String className;
 
-	@Schema(description = "The file content type.")
+	@Schema(description = "The file content type.", example = "JSON")
 	public String getContentType() {
 		return contentType;
 	}
@@ -125,7 +126,10 @@ public class ImportTask implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected String contentType;
 
-	@Schema(description = "The end time of import task operation.")
+	@Schema(
+		description = "The end time of import task operation.",
+		example = "2019-27-09'T'08:33:33'Z'"
+	)
 	public Date getEndTime() {
 		return endTime;
 	}
@@ -154,7 +158,8 @@ public class ImportTask implements Serializable {
 	protected Date endTime;
 
 	@Schema(
-		description = "The error message in case of import task's failed execution."
+		description = "The error message in case of import task's failed execution.",
+		example = "File import failed"
 	)
 	public String getErrorMessage() {
 		return errorMessage;
@@ -185,7 +190,10 @@ public class ImportTask implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected String errorMessage;
 
-	@Schema(description = "The status of import task's execution.")
+	@Schema(
+		description = "The status of import task's execution.",
+		example = "INITIALIZED"
+	)
 	@Valid
 	public ExecuteStatus getExecuteStatus() {
 		return executeStatus;
@@ -224,7 +232,7 @@ public class ImportTask implements Serializable {
 	protected ExecuteStatus executeStatus;
 
 	@DecimalMin("0")
-	@Schema(description = "The task's ID.")
+	@Schema(description = "The task's ID.", example = "30130")
 	public Long getId() {
 		return id;
 	}
@@ -250,7 +258,7 @@ public class ImportTask implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected Long id;
 
-	@Schema(description = "The operation of import task.")
+	@Schema(description = "The operation of import task.", example = "CREATE")
 	@Valid
 	public Operation getOperation() {
 		return operation;
@@ -288,7 +296,10 @@ public class ImportTask implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected Operation operation;
 
-	@Schema(description = "The start time of import task operation.")
+	@Schema(
+		description = "The start time of import task operation.",
+		example = "2019-27-09'T'08:23:33'Z'"
+	)
 	public Date getStartTime() {
 		return startTime;
 	}

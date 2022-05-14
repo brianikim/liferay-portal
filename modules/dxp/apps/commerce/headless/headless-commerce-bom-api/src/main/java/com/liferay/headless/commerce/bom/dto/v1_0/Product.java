@@ -56,7 +56,7 @@ public class Product implements Serializable {
 		return ObjectMapperUtil.unsafeReadValue(Product.class, json);
 	}
 
-	@Schema
+	@Schema(example = "sar2-fa3w-ffaw-waw3")
 	public String getId() {
 		return id;
 	}
@@ -82,7 +82,7 @@ public class Product implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected String id;
 
-	@Schema
+	@Schema(example = "Product 1")
 	public String getName() {
 		return name;
 	}
@@ -108,7 +108,7 @@ public class Product implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected String name;
 
-	@Schema
+	@Schema(example = "$ 12.99")
 	public String getPrice() {
 		return price;
 	}
@@ -136,7 +136,7 @@ public class Product implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected String price;
 
-	@Schema
+	@Schema(example = "SKU01")
 	public String getSku() {
 		return sku;
 	}
@@ -162,7 +162,7 @@ public class Product implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected String sku;
 
-	@Schema
+	@Schema(example = "/product_thumbnail.jpg")
 	public String getThumbnailUrl() {
 		return thumbnailUrl;
 	}
@@ -190,7 +190,7 @@ public class Product implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected String thumbnailUrl;
 
-	@Schema
+	@Schema(example = "/productUrl")
 	public String getUrl() {
 		return url;
 	}

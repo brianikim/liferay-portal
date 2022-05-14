@@ -66,7 +66,9 @@ public class Account implements Serializable {
 		return ObjectMapperUtil.unsafeReadValue(Account.class, json);
 	}
 
-	@Schema
+	@Schema(
+		example = "[{city=Diamond Bar, commerceCountryId=30130, commerceRegionId=30234, defaultBilling=true, defaultShipping=true, description=right stairs, first room on the left, id=31130, latitude=33.9976884, longitude=-117.8144595, name=Alessio Antonio Rendina, phoneNumber=(123) 456 7890, street1=1400 Montefino Ave, street2=1st floor, street3=suite 200, zip=91765}]"
+	)
 	@Valid
 	public AccountAddress[] getAccountAddresses() {
 		return accountAddresses;
@@ -96,7 +98,9 @@ public class Account implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected AccountAddress[] accountAddresses;
 
-	@Schema
+	@Schema(
+		example = "[{description={en_US=Account Administrator Description US, hr_HR=Account Administrator Description HR, hu_HU=Account Administrator Description HU}}, {id=31256, name=Alessio Antonio Rendina, roles=null}]"
+	)
 	@Valid
 	public AccountMember[] getAccountMembers() {
 		return accountMembers;
@@ -126,7 +130,9 @@ public class Account implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected AccountMember[] accountMembers;
 
-	@Schema
+	@Schema(
+		example = "[{id=20546, name=Liferay Italy, organizationId=20433, treePath=/Liferay/Liferay Italy}]"
+	)
 	@Valid
 	public AccountOrganization[] getAccountOrganizations() {
 		return accountOrganizations;
@@ -244,7 +250,7 @@ public class Account implements Serializable {
 	protected Date dateModified;
 
 	@DecimalMin("0")
-	@Schema
+	@Schema(example = "10130")
 	public Long getDefaultBillingAccountAddressId() {
 		return defaultBillingAccountAddressId;
 	}
@@ -277,7 +283,7 @@ public class Account implements Serializable {
 	protected Long defaultBillingAccountAddressId;
 
 	@DecimalMin("0")
-	@Schema
+	@Schema(example = "10131")
 	public Long getDefaultShippingAccountAddressId() {
 		return defaultShippingAccountAddressId;
 	}
@@ -309,7 +315,9 @@ public class Account implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected Long defaultShippingAccountAddressId;
 
-	@Schema
+	@Schema(
+		example = "[joe.1@commerce.com, joe.2@commerce.com, joe.3@commerce.com]"
+	)
 	public String[] getEmailAddresses() {
 		return emailAddresses;
 	}
@@ -337,7 +345,7 @@ public class Account implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected String[] emailAddresses;
 
-	@Schema
+	@Schema(example = "AB-34098-789-N")
 	public String getExternalReferenceCode() {
 		return externalReferenceCode;
 	}
@@ -367,7 +375,7 @@ public class Account implements Serializable {
 	protected String externalReferenceCode;
 
 	@DecimalMin("0")
-	@Schema
+	@Schema(example = "30130")
 	public Long getId() {
 		return id;
 	}
@@ -394,7 +402,7 @@ public class Account implements Serializable {
 	protected Long id;
 
 	@DecimalMin("0")
-	@Schema
+	@Schema(example = "20078")
 	public Long getLogoId() {
 		return logoId;
 	}
@@ -422,7 +430,7 @@ public class Account implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected Long logoId;
 
-	@Schema
+	@Schema(example = "AB-34098-789-N")
 	public String getLogoURL() {
 		return logoURL;
 	}
@@ -450,7 +458,7 @@ public class Account implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected String logoURL;
 
-	@Schema
+	@Schema(example = "Account Name")
 	public String getName() {
 		return name;
 	}
@@ -477,7 +485,7 @@ public class Account implements Serializable {
 	@NotEmpty
 	protected String name;
 
-	@Schema
+	@Schema(example = "true")
 	public Boolean getRoot() {
 		return root;
 	}
@@ -503,7 +511,7 @@ public class Account implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected Boolean root;
 
-	@Schema
+	@Schema(example = "Abcd1234")
 	public String getTaxId() {
 		return taxId;
 	}
@@ -533,7 +541,7 @@ public class Account implements Serializable {
 
 	@DecimalMax("2")
 	@DecimalMin("0")
-	@Schema
+	@Schema(example = "1")
 	public Integer getType() {
 		return type;
 	}

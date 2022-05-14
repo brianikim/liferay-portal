@@ -62,7 +62,7 @@ public class Item implements Serializable {
 	}
 
 	@DecimalMin("0")
-	@Schema
+	@Schema(example = "31130")
 	public Long getId() {
 		return id;
 	}
@@ -88,7 +88,7 @@ public class Item implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected Long id;
 
-	@Schema
+	@Schema(example = "Item 1")
 	public String getName() {
 		return name;
 	}
@@ -114,7 +114,7 @@ public class Item implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected String name;
 
-	@Schema
+	@Schema(example = "Item-1")
 	public String getSlug() {
 		return slug;
 	}
@@ -140,7 +140,7 @@ public class Item implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected String slug;
 
-	@Schema
+	@Schema(example = "/schema.jpg")
 	public String getThumbnail() {
 		return thumbnail;
 	}
@@ -168,7 +168,7 @@ public class Item implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected String thumbnail;
 
-	@Schema
+	@Schema(example = "folder")
 	@Valid
 	public Type getType() {
 		return type;
@@ -204,7 +204,7 @@ public class Item implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected Type type;
 
-	@Schema
+	@Schema(example = "/folder/31130")
 	public String getUrl() {
 		return url;
 	}

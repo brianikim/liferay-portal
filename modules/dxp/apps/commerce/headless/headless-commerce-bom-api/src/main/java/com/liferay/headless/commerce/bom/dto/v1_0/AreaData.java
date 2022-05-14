@@ -58,7 +58,7 @@ public class AreaData implements Serializable {
 		return ObjectMapperUtil.unsafeReadValue(AreaData.class, json);
 	}
 
-	@Schema
+	@Schema(example = "Name 1")
 	public String getId() {
 		return id;
 	}
@@ -84,7 +84,7 @@ public class AreaData implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected String id;
 
-	@Schema
+	@Schema(example = "Name 1")
 	public String getImageUrl() {
 		return imageUrl;
 	}
@@ -112,7 +112,7 @@ public class AreaData implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected String imageUrl;
 
-	@Schema
+	@Schema(example = "Name 1")
 	public String getName() {
 		return name;
 	}
@@ -138,7 +138,9 @@ public class AreaData implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected String name;
 
-	@Schema
+	@Schema(
+		example = "[{id=29130, name=Product 1, price=$ 12.99, sku=SKU01, thumbnailUrl=/product_thumbnail.png, url=/productUrl}]"
+	)
 	@Valid
 	public Product[] getProducts() {
 		return products;
@@ -167,7 +169,9 @@ public class AreaData implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected Product[] products;
 
-	@Schema
+	@Schema(
+		example = "[{id=34130, number=3, positionX=33.54, positionY=33.54, productId=29130}]"
+	)
 	@Valid
 	public Spot[] getSpots() {
 		return spots;
