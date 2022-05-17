@@ -299,7 +299,7 @@ public class LocaleUtil {
 				}
 
 				if (useDefault) {
-					return _locale;
+					return _getDefault();
 				}
 
 				return null;
