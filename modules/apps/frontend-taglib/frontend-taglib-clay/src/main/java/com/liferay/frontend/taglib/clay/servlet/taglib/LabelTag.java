@@ -70,15 +70,7 @@ public class LabelTag extends BaseContainerTag {
 		return _label;
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #isLarge()}
-	 */
-	@Deprecated
 	public boolean getLarge() {
-		return _large;
-	}
-
-	public boolean isLarge() {
 		return _large;
 	}
 
@@ -119,6 +111,10 @@ public class LabelTag extends BaseContainerTag {
 		return getDisplayType();
 	}
 
+	public boolean isTranslated() {
+		return _translated;
+	}
+
 	/**
 	 * @deprecated As of Athanasius (7.3.x), replaced by {@link
 	 *             #setDismissible(boolean)}
@@ -126,10 +122,6 @@ public class LabelTag extends BaseContainerTag {
 	@Deprecated
 	public void setCloseable(boolean closeable) {
 		setDismissible(closeable);
-	}
-
-	public boolean isTranslated() {
-		return _translated;
 	}
 
 	public void setDismissible(boolean dismissible) {
