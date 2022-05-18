@@ -82,7 +82,7 @@
 </tr>
 <tr>
 	<td>FRAGMENT_SECTION_CONTENT</td>
-	<td>//section[contains(@id,'content')]//p[contains(.,'${key_content}')]</td>
+	<td>//section[contains(@id,'content')]//div[contains(.,'${key_content}')]</td>
 	<td></td>
 </tr>
 <tr>
