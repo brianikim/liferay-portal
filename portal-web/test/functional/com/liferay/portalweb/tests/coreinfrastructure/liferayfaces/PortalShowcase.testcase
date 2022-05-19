@@ -118,7 +118,7 @@ definition {
 
 		AssertTextEquals.assertPartialText(
 			locator1 = "PortalShowcase#MODAL_VALUE",
-			value1 = "<p>Hello world!</p>");
+			value1 = "Hello world!");
 
 		Click(locator1 = "PortalShowcase#WRITEABLE_FIELD");
 
@@ -184,13 +184,13 @@ definition {
 			immediate = "true",
 			messageImmediate1 = "APPLY_REQUEST_VALUES",
 			text = "Hello World!",
-			textResult = "<p>Hello world!</p>");
+			textResult = "Hello world!");
 
 		PortalShowcase.submitImmediate(
 			immediate = "false",
 			messageImmediate2 = "PROCESS_VALIDATIONS",
 			text = "Hello World!",
-			textResult = "<p>Hello world!</p>");
+			textResult = "Hello world!");
 	}
 
 }
