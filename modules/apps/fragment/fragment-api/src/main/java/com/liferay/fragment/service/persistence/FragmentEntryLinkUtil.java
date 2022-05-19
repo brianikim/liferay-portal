@@ -1432,10 +1432,10 @@ public class FragmentEntryLinkUtil {
 	 * @param plid the plid
 	 * @return the matching fragment entry links
 	 */
-	public static List<FragmentEntryLink> findByG_O_P(
+	public static List<FragmentEntryLink> findByG_OFELI_P(
 		long groupId, long originalFragmentEntryLinkId, long plid) {
 
-		return getPersistence().findByG_O_P(
+		return getPersistence().findByG_OFELI_P(
 			groupId, originalFragmentEntryLinkId, plid);
 	}
 
@@ -1453,11 +1453,11 @@ public class FragmentEntryLinkUtil {
 	 * @param end the upper bound of the range of fragment entry links (not inclusive)
 	 * @return the range of matching fragment entry links
 	 */
-	public static List<FragmentEntryLink> findByG_O_P(
+	public static List<FragmentEntryLink> findByG_OFELI_P(
 		long groupId, long originalFragmentEntryLinkId, long plid, int start,
 		int end) {
 
-		return getPersistence().findByG_O_P(
+		return getPersistence().findByG_OFELI_P(
 			groupId, originalFragmentEntryLinkId, plid, start, end);
 	}
 
@@ -1476,11 +1476,11 @@ public class FragmentEntryLinkUtil {
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @return the ordered range of matching fragment entry links
 	 */
-	public static List<FragmentEntryLink> findByG_O_P(
+	public static List<FragmentEntryLink> findByG_OFELI_P(
 		long groupId, long originalFragmentEntryLinkId, long plid, int start,
 		int end, OrderByComparator<FragmentEntryLink> orderByComparator) {
 
-		return getPersistence().findByG_O_P(
+		return getPersistence().findByG_OFELI_P(
 			groupId, originalFragmentEntryLinkId, plid, start, end,
 			orderByComparator);
 	}
@@ -1501,12 +1501,12 @@ public class FragmentEntryLinkUtil {
 	 * @param useFinderCache whether to use the finder cache
 	 * @return the ordered range of matching fragment entry links
 	 */
-	public static List<FragmentEntryLink> findByG_O_P(
+	public static List<FragmentEntryLink> findByG_OFELI_P(
 		long groupId, long originalFragmentEntryLinkId, long plid, int start,
 		int end, OrderByComparator<FragmentEntryLink> orderByComparator,
 		boolean useFinderCache) {
 
-		return getPersistence().findByG_O_P(
+		return getPersistence().findByG_OFELI_P(
 			groupId, originalFragmentEntryLinkId, plid, start, end,
 			orderByComparator, useFinderCache);
 	}
@@ -1521,12 +1521,12 @@ public class FragmentEntryLinkUtil {
 	 * @return the first matching fragment entry link
 	 * @throws NoSuchEntryLinkException if a matching fragment entry link could not be found
 	 */
-	public static FragmentEntryLink findByG_O_P_First(
+	public static FragmentEntryLink findByG_OFELI_P_First(
 			long groupId, long originalFragmentEntryLinkId, long plid,
 			OrderByComparator<FragmentEntryLink> orderByComparator)
 		throws com.liferay.fragment.exception.NoSuchEntryLinkException {
 
-		return getPersistence().findByG_O_P_First(
+		return getPersistence().findByG_OFELI_P_First(
 			groupId, originalFragmentEntryLinkId, plid, orderByComparator);
 	}
 
@@ -1539,11 +1539,11 @@ public class FragmentEntryLinkUtil {
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the first matching fragment entry link, or <code>null</code> if a matching fragment entry link could not be found
 	 */
-	public static FragmentEntryLink fetchByG_O_P_First(
+	public static FragmentEntryLink fetchByG_OFELI_P_First(
 		long groupId, long originalFragmentEntryLinkId, long plid,
 		OrderByComparator<FragmentEntryLink> orderByComparator) {
 
-		return getPersistence().fetchByG_O_P_First(
+		return getPersistence().fetchByG_OFELI_P_First(
 			groupId, originalFragmentEntryLinkId, plid, orderByComparator);
 	}
 
@@ -1557,12 +1557,12 @@ public class FragmentEntryLinkUtil {
 	 * @return the last matching fragment entry link
 	 * @throws NoSuchEntryLinkException if a matching fragment entry link could not be found
 	 */
-	public static FragmentEntryLink findByG_O_P_Last(
+	public static FragmentEntryLink findByG_OFELI_P_Last(
 			long groupId, long originalFragmentEntryLinkId, long plid,
 			OrderByComparator<FragmentEntryLink> orderByComparator)
 		throws com.liferay.fragment.exception.NoSuchEntryLinkException {
 
-		return getPersistence().findByG_O_P_Last(
+		return getPersistence().findByG_OFELI_P_Last(
 			groupId, originalFragmentEntryLinkId, plid, orderByComparator);
 	}
 
@@ -1575,11 +1575,11 @@ public class FragmentEntryLinkUtil {
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the last matching fragment entry link, or <code>null</code> if a matching fragment entry link could not be found
 	 */
-	public static FragmentEntryLink fetchByG_O_P_Last(
+	public static FragmentEntryLink fetchByG_OFELI_P_Last(
 		long groupId, long originalFragmentEntryLinkId, long plid,
 		OrderByComparator<FragmentEntryLink> orderByComparator) {
 
-		return getPersistence().fetchByG_O_P_Last(
+		return getPersistence().fetchByG_OFELI_P_Last(
 			groupId, originalFragmentEntryLinkId, plid, orderByComparator);
 	}
 
@@ -1594,13 +1594,13 @@ public class FragmentEntryLinkUtil {
 	 * @return the previous, current, and next fragment entry link
 	 * @throws NoSuchEntryLinkException if a fragment entry link with the primary key could not be found
 	 */
-	public static FragmentEntryLink[] findByG_O_P_PrevAndNext(
+	public static FragmentEntryLink[] findByG_OFELI_P_PrevAndNext(
 			long fragmentEntryLinkId, long groupId,
 			long originalFragmentEntryLinkId, long plid,
 			OrderByComparator<FragmentEntryLink> orderByComparator)
 		throws com.liferay.fragment.exception.NoSuchEntryLinkException {
 
-		return getPersistence().findByG_O_P_PrevAndNext(
+		return getPersistence().findByG_OFELI_P_PrevAndNext(
 			fragmentEntryLinkId, groupId, originalFragmentEntryLinkId, plid,
 			orderByComparator);
 	}
@@ -1612,10 +1612,10 @@ public class FragmentEntryLinkUtil {
 	 * @param originalFragmentEntryLinkId the original fragment entry link ID
 	 * @param plid the plid
 	 */
-	public static void removeByG_O_P(
+	public static void removeByG_OFELI_P(
 		long groupId, long originalFragmentEntryLinkId, long plid) {
 
-		getPersistence().removeByG_O_P(
+		getPersistence().removeByG_OFELI_P(
 			groupId, originalFragmentEntryLinkId, plid);
 	}
 
@@ -1627,10 +1627,10 @@ public class FragmentEntryLinkUtil {
 	 * @param plid the plid
 	 * @return the number of matching fragment entry links
 	 */
-	public static int countByG_O_P(
+	public static int countByG_OFELI_P(
 		long groupId, long originalFragmentEntryLinkId, long plid) {
 
-		return getPersistence().countByG_O_P(
+		return getPersistence().countByG_OFELI_P(
 			groupId, originalFragmentEntryLinkId, plid);
 	}
 

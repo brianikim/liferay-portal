@@ -1139,7 +1139,7 @@ public interface FragmentEntryLinkPersistence
 	 * @param plid the plid
 	 * @return the matching fragment entry links
 	 */
-	public java.util.List<FragmentEntryLink> findByG_O_P(
+	public java.util.List<FragmentEntryLink> findByG_OFELI_P(
 		long groupId, long originalFragmentEntryLinkId, long plid);
 
 	/**
@@ -1156,7 +1156,7 @@ public interface FragmentEntryLinkPersistence
 	 * @param end the upper bound of the range of fragment entry links (not inclusive)
 	 * @return the range of matching fragment entry links
 	 */
-	public java.util.List<FragmentEntryLink> findByG_O_P(
+	public java.util.List<FragmentEntryLink> findByG_OFELI_P(
 		long groupId, long originalFragmentEntryLinkId, long plid, int start,
 		int end);
 
@@ -1175,7 +1175,7 @@ public interface FragmentEntryLinkPersistence
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @return the ordered range of matching fragment entry links
 	 */
-	public java.util.List<FragmentEntryLink> findByG_O_P(
+	public java.util.List<FragmentEntryLink> findByG_OFELI_P(
 		long groupId, long originalFragmentEntryLinkId, long plid, int start,
 		int end,
 		com.liferay.portal.kernel.util.OrderByComparator<FragmentEntryLink>
@@ -1197,7 +1197,7 @@ public interface FragmentEntryLinkPersistence
 	 * @param useFinderCache whether to use the finder cache
 	 * @return the ordered range of matching fragment entry links
 	 */
-	public java.util.List<FragmentEntryLink> findByG_O_P(
+	public java.util.List<FragmentEntryLink> findByG_OFELI_P(
 		long groupId, long originalFragmentEntryLinkId, long plid, int start,
 		int end,
 		com.liferay.portal.kernel.util.OrderByComparator<FragmentEntryLink>
@@ -1214,7 +1214,7 @@ public interface FragmentEntryLinkPersistence
 	 * @return the first matching fragment entry link
 	 * @throws NoSuchEntryLinkException if a matching fragment entry link could not be found
 	 */
-	public FragmentEntryLink findByG_O_P_First(
+	public FragmentEntryLink findByG_OFELI_P_First(
 			long groupId, long originalFragmentEntryLinkId, long plid,
 			com.liferay.portal.kernel.util.OrderByComparator<FragmentEntryLink>
 				orderByComparator)
@@ -1229,7 +1229,7 @@ public interface FragmentEntryLinkPersistence
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the first matching fragment entry link, or <code>null</code> if a matching fragment entry link could not be found
 	 */
-	public FragmentEntryLink fetchByG_O_P_First(
+	public FragmentEntryLink fetchByG_OFELI_P_First(
 		long groupId, long originalFragmentEntryLinkId, long plid,
 		com.liferay.portal.kernel.util.OrderByComparator<FragmentEntryLink>
 			orderByComparator);
@@ -1244,7 +1244,7 @@ public interface FragmentEntryLinkPersistence
 	 * @return the last matching fragment entry link
 	 * @throws NoSuchEntryLinkException if a matching fragment entry link could not be found
 	 */
-	public FragmentEntryLink findByG_O_P_Last(
+	public FragmentEntryLink findByG_OFELI_P_Last(
 			long groupId, long originalFragmentEntryLinkId, long plid,
 			com.liferay.portal.kernel.util.OrderByComparator<FragmentEntryLink>
 				orderByComparator)
@@ -1259,7 +1259,7 @@ public interface FragmentEntryLinkPersistence
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the last matching fragment entry link, or <code>null</code> if a matching fragment entry link could not be found
 	 */
-	public FragmentEntryLink fetchByG_O_P_Last(
+	public FragmentEntryLink fetchByG_OFELI_P_Last(
 		long groupId, long originalFragmentEntryLinkId, long plid,
 		com.liferay.portal.kernel.util.OrderByComparator<FragmentEntryLink>
 			orderByComparator);
@@ -1275,7 +1275,7 @@ public interface FragmentEntryLinkPersistence
 	 * @return the previous, current, and next fragment entry link
 	 * @throws NoSuchEntryLinkException if a fragment entry link with the primary key could not be found
 	 */
-	public FragmentEntryLink[] findByG_O_P_PrevAndNext(
+	public FragmentEntryLink[] findByG_OFELI_P_PrevAndNext(
 			long fragmentEntryLinkId, long groupId,
 			long originalFragmentEntryLinkId, long plid,
 			com.liferay.portal.kernel.util.OrderByComparator<FragmentEntryLink>
@@ -1289,7 +1289,7 @@ public interface FragmentEntryLinkPersistence
 	 * @param originalFragmentEntryLinkId the original fragment entry link ID
 	 * @param plid the plid
 	 */
-	public void removeByG_O_P(
+	public void removeByG_OFELI_P(
 		long groupId, long originalFragmentEntryLinkId, long plid);
 
 	/**
@@ -1300,7 +1300,7 @@ public interface FragmentEntryLinkPersistence
 	 * @param plid the plid
 	 * @return the number of matching fragment entry links
 	 */
-	public int countByG_O_P(
+	public int countByG_OFELI_P(
 		long groupId, long originalFragmentEntryLinkId, long plid);
 
 	/**
