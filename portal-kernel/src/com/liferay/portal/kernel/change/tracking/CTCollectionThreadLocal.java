@@ -55,7 +55,7 @@ public class CTCollectionThreadLocal {
 		return _ctCollectionId.setWithSafeCloseable(ctCollectionId);
 	}
 
-	public static SafeCloseable setToProductionWithSafeCloseable() {
+	public static SafeCloseable setProductionModeWithSafeCloseable() {
 		return setCTCollectionIdWithSafeCloseable(_CT_COLLECTION_ID_PRODUCTION);
 	}
 
