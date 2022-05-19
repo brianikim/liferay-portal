@@ -492,6 +492,20 @@ definition {
 		AssertVisible(locator1 = "Publications#DISABLED_PUBLISH_BUTTON");
 	}
 
+	macro viewPublicationOrderInHistory {
+		var resultOrder = "0";
+
+		for (var publicationName : list "${publicationList}") {
+			var resultOrder = ${resultOrder} + 1;
+
+			AssertTextEquals.assertPartialText(
+				key_publicationName = "${publicationName}",
+				locator1 = "Publications#PUBLICATION_ORDER_IN_HISTORY",
+				resultOrder = "${resultOrder}",
+				value1 = "${publicationName}");
+		}
+	}
+
 	macro viewPublicationPublished {
 		ApplicationsMenu.gotoPortlet(
 			category = "Publications",

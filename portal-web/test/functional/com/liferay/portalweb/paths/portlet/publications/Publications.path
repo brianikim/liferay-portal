@@ -136,6 +136,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>PUBLICATION_ORDER_IN_HISTORY</td>
+	<td>//dd[contains(@class,'list-group-item')][${resultOrder}]//div[contains(.,'${key_publicationName}')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>PUBLISH_BUTTON</td>
 	<td>//button[contains(.,'Publish')]</td>
 	<td></td>
