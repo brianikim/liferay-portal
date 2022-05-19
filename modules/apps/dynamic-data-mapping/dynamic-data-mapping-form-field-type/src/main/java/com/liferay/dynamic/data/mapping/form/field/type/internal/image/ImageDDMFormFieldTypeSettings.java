@@ -32,8 +32,8 @@ import com.liferay.dynamic.data.mapping.model.LocalizedValue;
 		@DDMFormRule(
 			actions = {
 				"setVisible('dataType', FALSE)",
-				"setVisible('requiredDescription', getValue('required') and" +
-					" isRequiredDescriptionEnabled())"
+				"setVisible('requiredDescription', getValue('required') and " +
+					"isRequiredDescriptionEnabled())"
 			}
 		)
 	}
