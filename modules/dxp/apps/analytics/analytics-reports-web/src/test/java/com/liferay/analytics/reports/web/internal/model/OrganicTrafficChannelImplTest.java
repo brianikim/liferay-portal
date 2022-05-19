@@ -43,46 +43,10 @@ public class OrganicTrafficChannelImplTest {
 	public void testToJSONObject() {
 		OrganicTrafficChannelImpl organicTrafficChannelImpl =
 			new OrganicTrafficChannelImpl(
-				Collections.singletonList(
-					new CountrySearchKeywords(
-						"us",
-						Arrays.asList(
-							new SearchKeyword("liferay", 1, 3600, 2880L),
-							new SearchKeyword(
-								"liferay portal", 1, 390, 312L)))),
 				RandomTestUtil.randomInt(), RandomTestUtil.randomDouble());
 
 		Assert.assertEquals(
 			JSONUtil.put(
-				"countryKeywords",
-				JSONUtil.putAll(
-					JSONUtil.put(
-						"countryCode", "us"
-					).put(
-						"countryName", "United States"
-					).put(
-						"keywords",
-						JSONUtil.putAll(
-							JSONUtil.put(
-								"keyword", "liferay"
-							).put(
-								"position", 1
-							).put(
-								"searchVolume", 3600
-							).put(
-								"traffic", 2880
-							),
-							JSONUtil.put(
-								"keyword", "liferay portal"
-							).put(
-								"position", 1
-							).put(
-								"searchVolume", 390
-							).put(
-								"traffic", 312
-							))
-					))
-			).put(
 				"helpMessage", organicTrafficChannelImpl.getHelpMessageKey()
 			).put(
 				"name", organicTrafficChannelImpl.getName()
@@ -114,34 +78,6 @@ public class OrganicTrafficChannelImplTest {
 				"name", organicTrafficChannelImpl.getName()
 			).put(
 				"title", organicTrafficChannelImpl.getName()
-			).toString(),
-			String.valueOf(
-				organicTrafficChannelImpl.toJSONObject(
-					LocaleUtil.US,
-					_getResourceBundle(organicTrafficChannelImpl))));
-	}
-
-	@Test
-	public void testToJSONObjectWithoutCountrySearchKeywords() {
-		OrganicTrafficChannelImpl organicTrafficChannelImpl =
-			new OrganicTrafficChannelImpl(
-				null, RandomTestUtil.randomInt(),
-				RandomTestUtil.randomDouble());
-
-		Assert.assertEquals(
-			JSONUtil.put(
-				"helpMessage", organicTrafficChannelImpl.getHelpMessageKey()
-			).put(
-				"name", organicTrafficChannelImpl.getName()
-			).put(
-				"share",
-				String.format(
-					"%.1f", organicTrafficChannelImpl.getTrafficShare())
-			).put(
-				"title", organicTrafficChannelImpl.getName()
-			).put(
-				"value",
-				Math.toIntExact(organicTrafficChannelImpl.getTrafficAmount())
 			).toString(),
 			String.valueOf(
 				organicTrafficChannelImpl.toJSONObject(

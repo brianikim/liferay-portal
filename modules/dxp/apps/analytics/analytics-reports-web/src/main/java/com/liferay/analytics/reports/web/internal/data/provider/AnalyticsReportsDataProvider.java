@@ -30,8 +30,6 @@ import com.liferay.analytics.reports.web.internal.model.TimeSpan;
 import com.liferay.analytics.reports.web.internal.model.TrafficChannel;
 import com.liferay.analytics.reports.web.internal.model.util.TrafficChannelUtil;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.Http;
@@ -40,7 +38,6 @@ import java.time.format.DateTimeFormatter;
 
 import java.util.AbstractMap;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -316,7 +313,7 @@ public class AnalyticsReportsDataProvider {
 			return stream.map(
 				acquisitionChannel -> TrafficChannelUtil.toTrafficChannel(
 					acquisitionChannel, domainReferringURLs, pageReferringURLs,
-					referringSocialMediaList, Collections.emptyMap())
+					referringSocialMediaList)
 			).map(
 				trafficChannel -> new AbstractMap.SimpleEntry<>(
 					trafficChannel.getName(), trafficChannel)
@@ -355,9 +352,6 @@ public class AnalyticsReportsDataProvider {
 
 		return value.longValue();
 	}
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		AnalyticsReportsDataProvider.class);
 
 	private static final ObjectMapper _objectMapper = new ObjectMapper() {
 		{

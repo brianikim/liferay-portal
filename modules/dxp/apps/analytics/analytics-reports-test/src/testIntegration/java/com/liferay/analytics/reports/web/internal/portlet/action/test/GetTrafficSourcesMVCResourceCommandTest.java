@@ -49,7 +49,6 @@ import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.HashMapBuilder;
-import com.liferay.portal.kernel.util.HashMapDictionary;
 import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.Portal;
@@ -63,7 +62,6 @@ import com.liferay.portal.util.PrefsPropsImpl;
 
 import java.io.ByteArrayOutputStream;
 
-import java.util.Dictionary;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
@@ -135,42 +133,7 @@ public class GetTrafficSourcesMVCResourceCommandTest {
 					() -> JSONUtil.put(
 						"facebook", 385.0
 					).toString()
-				).put(
-					"/api/seo/1.0/traffic-sources",
-					() -> JSONUtil.put(
-						JSONUtil.put(
-							"countryKeywords",
-							JSONUtil.put(
-								JSONUtil.put(
-									"countryCode", "us"
-								).put(
-									"countryName", "United States"
-								).put(
-									"keywords",
-									JSONUtil.put(
-										JSONUtil.put(
-											"keyword", "liferay"
-										).put(
-											"position", 1
-										).put(
-											"searchVolume", 3600
-										).put(
-											"traffic", 2880L
-										))
-								))
-						).put(
-							"name", "organic"
-						).put(
-							"trafficAmount", 3L
-						).put(
-							"trafficShare", 93.93D
-						)
-					).toString()
 				).build()));
-
-		Dictionary<String, Object> properties = new HashMapDictionary<>();
-
-		properties.put("trafficSourcesEnabled", true);
 
 		try {
 			MockContextUtil.testWithMockContext(
@@ -216,31 +179,6 @@ public class GetTrafficSourcesMVCResourceCommandTest {
 						89.20D, Double.valueOf(jsonObject2.getString("share")),
 						0.0);
 					Assert.assertEquals(3192, jsonObject2.get("value"));
-
-					JSONArray countryKeywordsJSONArray =
-						(JSONArray)jsonObject2.get("countryKeywords");
-
-					Assert.assertEquals(
-						JSONUtil.put(
-							JSONUtil.put(
-								"countryCode", "us"
-							).put(
-								"countryName", "United States"
-							).put(
-								"keywords",
-								JSONUtil.put(
-									JSONUtil.put(
-										"keyword", "liferay"
-									).put(
-										"position", 1
-									).put(
-										"searchVolume", 3600
-									).put(
-										"traffic", 2880
-									))
-							)
-						).toString(),
-						countryKeywordsJSONArray.toString());
 
 					JSONObject jsonObject3 = jsonArray.getJSONObject(1);
 

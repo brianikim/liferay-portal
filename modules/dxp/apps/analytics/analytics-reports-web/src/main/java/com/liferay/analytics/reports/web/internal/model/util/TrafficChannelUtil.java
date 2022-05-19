@@ -15,7 +15,6 @@
 package com.liferay.analytics.reports.web.internal.model.util;
 
 import com.liferay.analytics.reports.web.internal.model.AcquisitionChannel;
-import com.liferay.analytics.reports.web.internal.model.CountrySearchKeywords;
 import com.liferay.analytics.reports.web.internal.model.DirectTrafficChannelImpl;
 import com.liferay.analytics.reports.web.internal.model.OrganicTrafficChannelImpl;
 import com.liferay.analytics.reports.web.internal.model.PaidTrafficChannelImpl;
@@ -24,15 +23,11 @@ import com.liferay.analytics.reports.web.internal.model.ReferringSocialMedia;
 import com.liferay.analytics.reports.web.internal.model.ReferringURL;
 import com.liferay.analytics.reports.web.internal.model.SocialTrafficChannelImpl;
 import com.liferay.analytics.reports.web.internal.model.TrafficChannel;
-import com.liferay.analytics.reports.web.internal.model.TrafficSource;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * @author David Arques
@@ -66,8 +61,7 @@ public final class TrafficChannelUtil {
 		AcquisitionChannel acquisitionChannel,
 		List<ReferringURL> domainReferringURLs,
 		List<ReferringURL> pageReferringURLs,
-		List<ReferringSocialMedia> referringSocialMediaList,
-		Map<String, TrafficSource> trafficSourceMap) {
+		List<ReferringSocialMedia> referringSocialMediaList) {
 
 		if (Objects.equals("direct", acquisitionChannel.getName())) {
 			return new DirectTrafficChannelImpl(
@@ -76,15 +70,11 @@ public final class TrafficChannelUtil {
 		}
 		else if (Objects.equals("organic", acquisitionChannel.getName())) {
 			return new OrganicTrafficChannelImpl(
-				_getCountrySearchKeywords(
-					trafficSourceMap, acquisitionChannel.getName()),
 				acquisitionChannel.getTrafficAmount(),
 				acquisitionChannel.getTrafficShare());
 		}
 		else if (Objects.equals("paid", acquisitionChannel.getName())) {
 			return new PaidTrafficChannelImpl(
-				_getCountrySearchKeywords(
-					trafficSourceMap, acquisitionChannel.getName()),
 				acquisitionChannel.getTrafficAmount(),
 				acquisitionChannel.getTrafficShare());
 		}
@@ -102,18 +92,6 @@ public final class TrafficChannelUtil {
 
 		throw new IllegalArgumentException(
 			"Invalid acquisition channel name " + acquisitionChannel.getName());
-	}
-
-	private static List<CountrySearchKeywords> _getCountrySearchKeywords(
-		Map<String, TrafficSource> trafficSourceMap, String name) {
-
-		return Optional.ofNullable(
-			trafficSourceMap.get(name)
-		).map(
-			TrafficSource::getCountrySearchKeywordsList
-		).orElse(
-			Collections.emptyList()
-		);
 	}
 
 	private TrafficChannelUtil() {
