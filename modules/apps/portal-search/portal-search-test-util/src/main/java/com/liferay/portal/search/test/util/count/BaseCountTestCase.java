@@ -65,6 +65,49 @@ public abstract class BaseCountTestCase extends BaseIndexingTestCase {
 	}
 
 	@Test
+	public void testNestedPostFilter() throws Exception {
+		assertSearch(
+			indexingTestHelper -> {
+				BooleanQueryImpl booleanQueryImpl = new BooleanQueryImpl();
+
+				BooleanQueryImpl nestedBooleanQueryImpl =
+					new BooleanQueryImpl();
+
+				nestedBooleanQueryImpl.setPostFilter(_createBooleanFilter());
+
+				booleanQueryImpl.add(
+					nestedBooleanQueryImpl, BooleanClauseOccur.MUST);
+
+				indexingTestHelper.setQuery(booleanQueryImpl);
+
+				Assert.assertEquals(
+					_TOTAL_DOCUMENTS / 2, indexingTestHelper.searchCount());
+			});
+	}
+
+	@Test
+	public void testNestedPreFilter() throws Exception {
+		assertSearch(
+			indexingTestHelper -> {
+				BooleanQueryImpl booleanQueryImpl = new BooleanQueryImpl();
+
+				BooleanQueryImpl nestedBooleanQueryImpl =
+					new BooleanQueryImpl();
+
+				nestedBooleanQueryImpl.setPreBooleanFilter(
+					_createBooleanFilter());
+
+				booleanQueryImpl.add(
+					nestedBooleanQueryImpl, BooleanClauseOccur.MUST);
+
+				indexingTestHelper.setQuery(booleanQueryImpl);
+
+				Assert.assertEquals(
+					_TOTAL_DOCUMENTS / 2, indexingTestHelper.searchCount());
+			});
+	}
+
+	@Test
 	public void testPaginationIsIgnored() throws Exception {
 		assertSearch(
 			indexingTestHelper -> {
