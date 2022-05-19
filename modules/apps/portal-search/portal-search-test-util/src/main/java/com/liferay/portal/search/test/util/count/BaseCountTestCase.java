@@ -81,7 +81,7 @@ public abstract class BaseCountTestCase extends BaseIndexingTestCase {
 				indexingTestHelper.setQuery(booleanQueryImpl);
 
 				Assert.assertEquals(
-					_TOTAL_DOCUMENTS / 2, indexingTestHelper.searchCount());
+					_TOTAL_DOCUMENTS, indexingTestHelper.searchCount());
 			});
 	}
 
