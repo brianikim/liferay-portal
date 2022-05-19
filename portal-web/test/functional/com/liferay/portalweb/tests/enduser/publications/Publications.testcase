@@ -925,4 +925,47 @@ definition {
 		}
 	}
 
+	@description = "This is a test for LPS-148488. Can view Published Publications items pagination and order on History Tab."
+	@priority = "4"
+	test ViewPublicationHistoryItemsPaginationAndOrder {
+		for (var count : list "1,2,3,4,5,6,7") {
+			JSONPublications.addPublication(publicationName = "Publication Name ${count}");
+
+			JSONPublications.selectPublication(publicationName = "Publication Name ${count}");
+
+			JSONWebcontent.addWebContent(
+				content = "WC Content ${count}",
+				groupName = "Guest",
+				title = "WC Title ${count}");
+
+			JSONPublications.publishPublication(publicationName = "Publication Name ${count}");
+		}
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Publications",
+			panel = "Applications",
+			portlet = "Publications");
+
+		Click(
+			key_navBarTitle = "History",
+			locator1 = "Publications#MANGE_PUBLICATIONS_NAVBAR_TITLE",
+			value1 = "History");
+
+		Publications.viewPublicationOrderInHistory(publicationList = "Publication Name 7,Publication Name 6,Publication Name 5,Publication Name 4,Publication Name 3,Publication Name 2,Publication Name 1");
+
+		Pagination.viewResults(results = "Showing 1 to 7 of 7 entries.");
+
+		Pagination.changePagination(itemsPerPage = "4");
+
+		Pagination.viewResults(results = "Showing 1 to 4 of 7 entries.");
+
+		Publications.viewPublicationOrderInHistory(publicationList = "Publication Name 7,Publication Name 6,Publication Name 5,Publication Name 4");
+
+		Click(locator1 = "Pagination#NEXT_LINK");
+
+		Pagination.viewResults(results = "Showing 5 to 7 of 7 entries.");
+
+		Publications.viewPublicationOrderInHistory(publicationList = "Publication Name 3,Publication Name 2,Publication Name 1");
+	}
+
 }
