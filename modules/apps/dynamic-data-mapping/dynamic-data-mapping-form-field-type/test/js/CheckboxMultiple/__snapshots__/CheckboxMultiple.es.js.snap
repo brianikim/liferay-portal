@@ -154,6 +154,7 @@ exports[`Field Checkbox Multiple has a label 1`] = `
     class="form-group hide"
   >
     <label
+      aria-labelledby="undefined_fieldDetails"
       class="ddm-label"
       tabindex="0"
     >
@@ -215,7 +216,13 @@ exports[`Field Checkbox Multiple has a label 1`] = `
         </label>
       </div>
     </div>
-    
+    <span
+      class="sr-only"
+      id="undefined_fieldDetails"
+    >
+      label
+      <br />
+    </span>
   </div>
 </div>
 `;
@@ -760,6 +767,7 @@ exports[`Field Checkbox Multiple renders Label if showLabel is true 1`] = `
     class="form-group hide"
   >
     <label
+      aria-labelledby="undefined_fieldDetails"
       class="ddm-label"
       tabindex="0"
     >
@@ -821,7 +829,13 @@ exports[`Field Checkbox Multiple renders Label if showLabel is true 1`] = `
         </label>
       </div>
     </div>
-    
+    <span
+      class="sr-only"
+      id="undefined_fieldDetails"
+    >
+      text
+      <br />
+    </span>
   </div>
 </div>
 `;

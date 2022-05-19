@@ -25,10 +25,17 @@ exports[`ReactFieldBase does not render the add button when repeatable is true a
       </button>
     </div>
     <label
+      aria-labelledby="undefined_fieldDetails"
       class="ddm-empty"
       tabindex="0"
     />
-    
+    <span
+      class="sr-only"
+      id="undefined_fieldDetails"
+    >
+      Text
+      <br />
+    </span>
   </div>
 </div>
 `;
@@ -40,7 +47,13 @@ exports[`ReactFieldBase does not render the label if showLabel is false 1`] = `
     class="form-group hide"
     tabindex="0"
   >
-    
+    <span
+      class="sr-only"
+      id="undefined_fieldDetails"
+    >
+      Text
+      <br />
+    </span>
   </div>
 </div>
 `;
@@ -104,12 +117,19 @@ exports[`ReactFieldBase renders the FieldBase with label 1`] = `
     class="form-group hide"
   >
     <label
+      aria-labelledby="undefined_fieldDetails"
       class="ddm-label"
       tabindex="0"
     >
       Text
     </label>
-    
+    <span
+      class="sr-only"
+      id="undefined_fieldDetails"
+    >
+      Text
+      <br />
+    </span>
   </div>
 </div>
 `;
@@ -172,10 +192,17 @@ exports[`ReactFieldBase renders the add button when repeatable is true 1`] = `
       </button>
     </div>
     <label
+      aria-labelledby="undefined_fieldDetails"
       class="ddm-empty"
       tabindex="0"
     />
-    
+    <span
+      class="sr-only"
+      id="undefined_fieldDetails"
+    >
+      Text
+      <br />
+    </span>
   </div>
 </div>
 `;

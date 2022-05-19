@@ -72,8 +72,8 @@ exports[`Field DocumentLibrary has a label 1`] = `
     data-field-name="textField"
   >
     <label
+      aria-labelledby="textField_fieldDetails"
       class="ddm-label"
-      for="textField"
       tabindex="0"
     >
       label
@@ -118,7 +118,13 @@ exports[`Field DocumentLibrary has a label 1`] = `
         value="{}"
       />
     </div>
-    
+    <span
+      class="sr-only"
+      id="textField_fieldDetails"
+    >
+      label
+      <br />
+    </span>
   </div>
 </div>
 `;
@@ -450,8 +456,8 @@ exports[`Field DocumentLibrary renders Label if showLabel is true 1`] = `
     data-field-name="textField"
   >
     <label
+      aria-labelledby="textField_fieldDetails"
       class="ddm-label"
-      for="textField"
       tabindex="0"
     >
       text
@@ -496,7 +502,13 @@ exports[`Field DocumentLibrary renders Label if showLabel is true 1`] = `
         value="{}"
       />
     </div>
-    
+    <span
+      class="sr-only"
+      id="textField_fieldDetails"
+    >
+      text
+      <br />
+    </span>
   </div>
 </div>
 `;

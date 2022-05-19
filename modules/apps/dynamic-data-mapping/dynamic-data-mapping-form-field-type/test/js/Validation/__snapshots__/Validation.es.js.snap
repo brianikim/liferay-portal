@@ -34,7 +34,13 @@ exports[`Validation renders checkbox to enable Validation 1`] = `
           </span>
         </span>
       </label>
-      
+      <span
+        class="sr-only"
+        id="enableValidation_fieldDetails"
+      >
+        Validator
+        <br />
+      </span>
     </div>
   </div>
 </div>

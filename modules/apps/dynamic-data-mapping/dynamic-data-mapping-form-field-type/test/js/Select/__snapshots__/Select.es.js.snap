@@ -687,6 +687,7 @@ exports[`Select has a label 1`] = `
     class="form-group hide"
   >
     <label
+      aria-labelledby="undefined_fieldDetails"
       class="ddm-label"
       tabindex="0"
     >
@@ -750,7 +751,13 @@ exports[`Select has a label 1`] = `
         </ul>
       </div>
     </div>
-    
+    <span
+      class="sr-only"
+      id="undefined_fieldDetails"
+    >
+      label
+      <br />
+    </span>
   </div>
 </div>
 `;
@@ -1332,6 +1339,8 @@ exports[`Select puts an asterisk when field is required 1`] = `
       class="sr-only"
       id="undefined_fieldDetails"
     >
+      This is the label
+      <br />
       required
     </span>
   </div>
@@ -1344,6 +1353,7 @@ exports[`Select renders Label if showLabel is true 1`] = `
     class="form-group hide"
   >
     <label
+      aria-labelledby="undefined_fieldDetails"
       class="ddm-label"
       tabindex="0"
     >
@@ -1407,7 +1417,13 @@ exports[`Select renders Label if showLabel is true 1`] = `
         </ul>
       </div>
     </div>
-    
+    <span
+      class="sr-only"
+      id="undefined_fieldDetails"
+    >
+      text
+      <br />
+    </span>
   </div>
 </div>
 `;
