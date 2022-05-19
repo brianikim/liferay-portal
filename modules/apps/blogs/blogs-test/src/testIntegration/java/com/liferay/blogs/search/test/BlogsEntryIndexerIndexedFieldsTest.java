@@ -127,8 +127,8 @@ public class BlogsEntryIndexerIndexedFieldsTest {
 					MODEL_INDEXER_CLASS
 				).queryString(
 					searchTerm
-				).fetchSource(
-					true
+				).fetchSourceIncludes(
+					new String[] {"*_sortable"}
 				).build()));
 	}
 

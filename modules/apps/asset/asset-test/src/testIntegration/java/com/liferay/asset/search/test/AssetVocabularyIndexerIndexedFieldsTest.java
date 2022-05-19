@@ -137,8 +137,8 @@ public class AssetVocabularyIndexerIndexedFieldsTest {
 					AssetVocabulary.class
 				).queryString(
 					searchTerm
-				).fetchSource(
-					true
+				).fetchSourceIncludes(
+					new String[] {"*_sortable"}
 				).build()));
 	}
 

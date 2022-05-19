@@ -180,8 +180,8 @@ public abstract class BaseCalendarIndexerTestCase {
 
 		searchRequestBuilderFactory.builder(
 			searchContext
-		).fetchSource(
-			true
+		).fetchSourceIncludes(
+			new String[] {"*_sortable"}
 		).build();
 
 		search(searchContext);
