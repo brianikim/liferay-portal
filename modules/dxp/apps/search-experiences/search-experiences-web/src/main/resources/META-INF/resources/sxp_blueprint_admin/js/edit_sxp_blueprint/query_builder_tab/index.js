@@ -10,10 +10,10 @@
  */
 
 import ClayLayout from '@clayui/layout';
-import {ClayVerticalNav} from '@clayui/nav';
 import {PropTypes} from 'prop-types';
 import React, {useEffect, useState} from 'react';
 
+import VerticalNav from '../../shared/VerticalNav';
 import {SIDEBARS} from '../../utils/constants';
 import {SESSION_IDS} from '../../utils/sessionStorage';
 import QuerySXPElements from './QuerySXPElements';
@@ -109,7 +109,7 @@ function QueryBuilderTab({
 			<div className="builder-content-shift">
 				<ClayLayout.Row>
 					<ClayLayout.Col md={3} sm={12}>
-						<ClayVerticalNav
+						<VerticalNav
 							items={[
 								{
 									active:
