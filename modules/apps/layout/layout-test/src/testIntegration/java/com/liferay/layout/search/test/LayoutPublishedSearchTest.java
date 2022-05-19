@@ -54,7 +54,6 @@ import com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil;
 import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.WebKeys;
-import com.liferay.portal.search.legacy.searcher.SearchRequestBuilderFactory;
 import com.liferay.portal.search.test.util.IndexerFixture;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
@@ -201,8 +200,7 @@ public class LayoutPublishedSearchTest {
 	}
 
 	private void _setUpLayoutIndexerFixture() {
-		_layoutIndexerFixture = new IndexerFixture<>(
-			Layout.class, _searchRequestBuilderFactory);
+		_layoutIndexerFixture = new IndexerFixture<>(Layout.class);
 	}
 
 	private void _updateDraftLayout(Layout layout, String value)
@@ -324,8 +322,5 @@ public class LayoutPublishedSearchTest {
 
 	@Inject(filter = "mvc.command.name=/content_layout/publish_layout")
 	private MVCActionCommand _mvcActionCommand;
-
-	@Inject
-	private SearchRequestBuilderFactory _searchRequestBuilderFactory;
 
 }
