@@ -14,7 +14,6 @@
 
 package com.liferay.change.tracking.service.impl;
 
-import com.liferay.change.tracking.constants.CTConstants;
 import com.liferay.change.tracking.internal.background.task.CTPublishBackgroundTaskExecutor;
 import com.liferay.change.tracking.model.CTCollection;
 import com.liferay.change.tracking.model.CTProcess;
@@ -92,8 +91,7 @@ public class CTProcessLocalServiceImpl extends CTProcessLocalServiceBaseImpl {
 			).build();
 
 		try (SafeCloseable safeCloseable =
-				CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
-					CTConstants.CT_COLLECTION_ID_PRODUCTION)) {
+				CTCollectionThreadLocal.setProductionModeWithSafeCloseable()) {
 
 			BackgroundTask backgroundTask =
 				_backgroundTaskLocalService.addBackgroundTask(
