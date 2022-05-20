@@ -18,6 +18,7 @@ import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.search.BooleanClause;
+import com.liferay.portal.kernel.search.BooleanQuery;
 import com.liferay.portal.kernel.search.Query;
 import com.liferay.portal.kernel.search.facet.Facet;
 import com.liferay.portal.kernel.search.filter.BooleanFilter;
@@ -204,6 +205,10 @@ public class BaseSolrQueryAssemblerImpl implements BaseSolrQueryAssembler {
 		if (query != null) {
 			_add(filterQueries, query.getPreBooleanFilter());
 			_add(filterQueries, query.getPostFilter());
+
+			if (query instanceof BooleanQuery) {
+				_add(filterQueries, (BooleanQuery)query);
+			}
 		}
 
 		_addAll(filterQueries, solrQuery.getFilterQueries());
@@ -259,6 +264,20 @@ public class BaseSolrQueryAssemblerImpl implements BaseSolrQueryAssembler {
 			booleanClause.getClause(), booleanClause.getBooleanClauseOccur());
 
 		return _filterTranslator.translate(booleanFilter);
+	}
+
+	private void _add(
+		Collection<String> filterQueries, BooleanQuery booleanQuery) {
+
+		for (BooleanClause<Query> booleanClause : booleanQuery.clauses()) {
+			Query booleanClauseQuery = booleanClause.getClause();
+
+			_add(filterQueries, booleanClauseQuery.getPreBooleanFilter());
+
+			if (booleanClauseQuery instanceof BooleanQuery) {
+				_add(filterQueries, (BooleanQuery)booleanClauseQuery);
+			}
+		}
 	}
 
 	private void _add(Collection<String> filterQueries, Filter filter) {
