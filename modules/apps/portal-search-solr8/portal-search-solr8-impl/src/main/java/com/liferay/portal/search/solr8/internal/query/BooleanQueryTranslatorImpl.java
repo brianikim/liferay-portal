@@ -20,6 +20,8 @@ import com.liferay.portal.kernel.search.BooleanQuery;
 import com.liferay.portal.kernel.search.Query;
 import com.liferay.portal.kernel.search.query.QueryVisitor;
 
+import java.util.List;
+
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BoostQuery;
 
@@ -37,13 +39,23 @@ public class BooleanQueryTranslatorImpl implements BooleanQueryTranslator {
 		BooleanQuery booleanQuery,
 		QueryVisitor<org.apache.lucene.search.Query> queryVisitor) {
 
+		List<BooleanClause<Query>> clauses = booleanQuery.clauses();
+
+		if (clauses.isEmpty()) {
+			return null;
+		}
+
 		org.apache.lucene.search.BooleanQuery.Builder builder =
 			new org.apache.lucene.search.BooleanQuery.Builder();
 
-		for (BooleanClause<Query> booleanClause : booleanQuery.clauses()) {
-			builder.add(
-				translate(booleanClause.getClause(), queryVisitor),
-				translate(booleanClause.getBooleanClauseOccur()));
+		for (BooleanClause<Query> booleanClause : clauses) {
+			org.apache.lucene.search.Query query = translate(
+				booleanClause.getClause(), queryVisitor);
+
+			if (query != null) {
+				builder.add(
+					query, translate(booleanClause.getBooleanClauseOccur()));
+			}
 		}
 
 		org.apache.lucene.search.Query query = builder.build();
