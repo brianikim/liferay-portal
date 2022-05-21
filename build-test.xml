@@ -1703,7 +1703,6 @@ war.path=${app.server.portal.dir}/</echo>
 
 					<gradle-execute failonerror="@{failonerror}" gradlejvmargs="${poshi.gradle.jvm.args}" stacktrace="false" task="@{task}">
 						<arg value="--build-file=portal-web/build-test.gradle" />
-						<arg value="-PposhiRunnerExtProperties=${test.ext.properties.file}" />
 						<arg value="-Ptmp.maven.repository.dir=../.m2-tmp" />
 						<env key="ANT_OPTS" value="${poshi.java.jdk.opts}" />
 						<env key="JAVA_HOME" path="${java.jdk.home}" />
@@ -1712,7 +1711,6 @@ war.path=${app.server.portal.dir}/</echo>
 				<else>
 					<gradle-execute failonerror="@{failonerror}" stacktrace="false" task="@{task}">
 						<arg value="--build-file=portal-web/build-test.gradle" />
-						<arg value="-PposhiRunnerExtProperties=${test.ext.properties.file}" />
 						<arg value="-Ptmp.maven.repository.dir=../.m2-tmp" />
 					</gradle-execute>
 				</else>
