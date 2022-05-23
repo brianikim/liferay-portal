@@ -143,7 +143,7 @@ public class BrowserModulesResolution {
 		map.put("pathMap", _pathsMap);
 		map.put("resolvedModules", _resolvedModuleNames);
 
-		if (!_warnings.isEmpty) {
+		if (!_warnings.isEmpty()) {
 			List<String> sortedWarnings = new ArrayList<>(_warnings);
 
 			Collections.sort(sortedWarnings);
