@@ -37,7 +37,7 @@ import org.osgi.annotation.versioning.ProviderType;
 public interface ExportImportServiceConfiguration {
 
 	@Meta.AD(
-		deflt = "false", description = "include-all-asset-links-help",
+		deflt = "true", description = "include-all-asset-links-help",
 		name = "include-all-asset-links", required = false
 	)
 	public boolean includeAllAssetLinks();
