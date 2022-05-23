@@ -10406,6 +10406,25 @@ osb.lcs.portlet.oauth.consumer.secret=${osb.lcs.portlet.oauth.consumer.secret}</
 			</then>
 		</if>
 
+		<local name="invoker.filter.helper.log.level" />
+
+		<if>
+			<or>
+				<equals arg1="${test.portal.bundle.version}" arg2="7.3.10" />
+				<equals arg1="${test.portal.bundle.version}" arg2="7.3.10.1" />
+				<equals arg1="${test.portal.bundle.version}" arg2="7.3.10.3" />
+			</or>
+			<then>
+				<property name="invoker.filter.helper.log.level" value="" />
+			</then>
+			<else>
+				<property name="invoker.filter.helper.log.level"><![CDATA[
+	<category name="com.liferay.portal.kernel.servlet.filters.invoker.InvokerFilterHelper">
+		<priority value="ERROR" />
+	</category>]]></property>
+			</else>
+		</if>
+
 		<echo file="${app.server.classes.portal.dir}/META-INF/portal-log4j-ext.xml"><![CDATA[<?xml version="1.0"?>
 <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
 
@@ -10448,9 +10467,7 @@ osb.lcs.portlet.oauth.consumer.secret=${osb.lcs.portlet.oauth.consumer.secret}</
 		<priority value="DEBUG" />
 	</category>
 
-	<category name="com.liferay.portal.kernel.servlet.filters.invoker.InvokerFilterHelper">
-		<priority value="ERROR" />
-	</category>
+	${invoker.filter.helper.log.level}
 
 	<category name="com.liferay.portal.service.impl.ReleaseLocalServiceImpl">
 		<priority value="${release.local.service.impl.log.level}" />
