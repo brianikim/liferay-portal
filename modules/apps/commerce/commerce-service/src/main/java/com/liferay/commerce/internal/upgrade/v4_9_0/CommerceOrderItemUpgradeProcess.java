@@ -29,39 +29,30 @@ public class CommerceOrderItemUpgradeProcess
 		addColumn(
 			CommerceOrderItemTable.class, CommerceOrderItemTable.TABLE_NAME,
 			"parentCommerceOrderItemId", "LONG");
-
 		addColumn(
 			CommerceOrderItemTable.class, CommerceOrderItemTable.TABLE_NAME,
 			"unitPriceWithTaxAmount", "DECIMAL(30,16)");
-
 		addColumn(
 			CommerceOrderItemTable.class, CommerceOrderItemTable.TABLE_NAME,
 			"promoPriceWithTaxAmount", "DECIMAL(30,16)");
-
 		addColumn(
 			CommerceOrderItemTable.class, CommerceOrderItemTable.TABLE_NAME,
 			"discountWithTaxAmount", "DECIMAL(30,16)");
-
 		addColumn(
 			CommerceOrderItemTable.class, CommerceOrderItemTable.TABLE_NAME,
 			"finalPriceWithTaxAmount", "DECIMAL(30,16)");
-
 		addColumn(
 			CommerceOrderItemTable.class, CommerceOrderItemTable.TABLE_NAME,
 			"discountPctLevel1WithTaxAmount", "DECIMAL(30,16)");
-
 		addColumn(
 			CommerceOrderItemTable.class, CommerceOrderItemTable.TABLE_NAME,
 			"discountPctLevel2WithTaxAmount", "DECIMAL(30,16)");
-
 		addColumn(
 			CommerceOrderItemTable.class, CommerceOrderItemTable.TABLE_NAME,
 			"discountPctLevel3WithTaxAmount", "DECIMAL(30,16)");
-
 		addColumn(
 			CommerceOrderItemTable.class, CommerceOrderItemTable.TABLE_NAME,
 			"discountPctLevel4WithTaxAmount", "DECIMAL(30,16)");
-
 		addColumn(
 			CommerceOrderItemTable.class, CommerceOrderItemTable.TABLE_NAME,
 			"commercePriceListId", "LONG");

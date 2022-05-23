@@ -29,47 +29,36 @@ public class CommercePriceEntryUpgradeProcess
 		addColumn(
 			CommercePriceEntryTable.class, CommercePriceEntryTable.TABLE_NAME,
 			"discountDiscovery", "BOOLEAN");
-
 		addColumn(
 			CommercePriceEntryTable.class, CommercePriceEntryTable.TABLE_NAME,
 			"discountLevel1", "DECIMAL(30,16)");
-
 		addColumn(
 			CommercePriceEntryTable.class, CommercePriceEntryTable.TABLE_NAME,
 			"discountLevel2", "DECIMAL(30,16)");
-
 		addColumn(
 			CommercePriceEntryTable.class, CommercePriceEntryTable.TABLE_NAME,
 			"discountLevel3", "DECIMAL(30,16)");
-
 		addColumn(
 			CommercePriceEntryTable.class, CommercePriceEntryTable.TABLE_NAME,
 			"discountLevel4", "DECIMAL(30,16)");
-
 		addColumn(
 			CommercePriceEntryTable.class, CommercePriceEntryTable.TABLE_NAME,
 			"bulkPricing", "BOOLEAN");
-
 		addColumn(
 			CommercePriceEntryTable.class, CommercePriceEntryTable.TABLE_NAME,
 			"displayDate", "DATE");
-
 		addColumn(
 			CommercePriceEntryTable.class, CommercePriceEntryTable.TABLE_NAME,
 			"expirationDate", "DATE");
-
 		addColumn(
 			CommercePriceEntryTable.class, CommercePriceEntryTable.TABLE_NAME,
 			"status", "INTEGER");
-
 		addColumn(
 			CommercePriceEntryTable.class, CommercePriceEntryTable.TABLE_NAME,
 			"statusByUserId", "LONG");
-
 		addColumn(
 			CommercePriceEntryTable.class, CommercePriceEntryTable.TABLE_NAME,
 			"statusByUserName", "VARCHAR(75)");
-
 		addColumn(
 			CommercePriceEntryTable.class, CommercePriceEntryTable.TABLE_NAME,
 			"statusDate", "DATE");

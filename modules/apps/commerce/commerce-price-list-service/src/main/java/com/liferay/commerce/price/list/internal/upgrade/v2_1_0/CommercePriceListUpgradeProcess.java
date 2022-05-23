@@ -29,7 +29,6 @@ public class CommercePriceListUpgradeProcess
 		addColumn(
 			CommercePriceListTable.class, CommercePriceListTable.TABLE_NAME,
 			"type_", "VARCHAR(75)");
-
 		addColumn(
 			CommercePriceListTable.class, CommercePriceListTable.TABLE_NAME,
 			"catalogBasePriceList", "BOOLEAN");

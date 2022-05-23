@@ -29,6 +29,7 @@ public class CommerceOrderManuallyAdjustedUpgradeProcess
 		addColumn(
 			CommerceOrderModelImpl.class, CommerceOrderModelImpl.TABLE_NAME,
 			"manuallyAdjusted", "BOOLEAN");
+
 		addColumn(
 			CommerceOrderItemModelImpl.class,
 			CommerceOrderItemModelImpl.TABLE_NAME, "manuallyAdjusted",

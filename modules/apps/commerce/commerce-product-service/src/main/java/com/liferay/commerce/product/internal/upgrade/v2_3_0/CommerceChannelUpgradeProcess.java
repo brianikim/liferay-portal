@@ -29,7 +29,6 @@ public class CommerceChannelUpgradeProcess
 		addColumn(
 			CommerceChannelTable.class, CommerceChannelTable.TABLE_NAME,
 			"priceDisplayType", "VARCHAR(75)");
-
 		addColumn(
 			CommerceChannelTable.class, CommerceChannelTable.TABLE_NAME,
 			"discountsTargetNetPrice", "BOOLEAN");
