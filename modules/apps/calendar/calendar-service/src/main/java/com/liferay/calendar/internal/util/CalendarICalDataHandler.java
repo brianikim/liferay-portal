@@ -194,10 +194,10 @@ public class CalendarICalDataHandler implements CalendarDataHandler {
 
 		Map<Locale, String> descriptionMap = new HashMap<>();
 
-		Description description = vEvent.getDescription();
+		String description = _getXAltDescription(vEvent);
 
 		if (description != null) {
-			descriptionMap.put(user.getLocale(), description.getValue());
+			descriptionMap.put(user.getLocale(), description);
 		}
 
 		// Location
@@ -870,6 +870,16 @@ public class CalendarICalDataHandler implements CalendarDataHandler {
 		recur.setUntil(new DateTime(jCalendar.getTimeInMillis()));
 	}
 
+	private String _getDescription(VEvent vEvent) {
+		Property descriptionProperty = vEvent.getDescription();
+
+		if (descriptionProperty == null) {
+			return null;
+		}
+
+		return descriptionProperty.getValue();
+	}
+
 	private TimeZoneRegistry _getTimeZoneRegistry() {
 		if (_timeZoneRegistry == null) {
 			TimeZoneRegistryFactory timeZoneRegistryFactory =
@@ -879,6 +889,24 @@ public class CalendarICalDataHandler implements CalendarDataHandler {
 		}
 
 		return _timeZoneRegistry;
+	}
+
+	private String _getXAltDescription(VEvent vEvent) {
+		Property xAltDescProperty = vEvent.getProperty("X-ALT-DESC");
+
+		if (xAltDescProperty == null) {
+			return _getDescription(vEvent);
+		}
+
+		Parameter fmtTypeParameter = xAltDescProperty.getParameter("FMTTYPE");
+
+		if ((fmtTypeParameter == null) ||
+			!Objects.equals(fmtTypeParameter.getValue(), "text/html")) {
+
+			return _getDescription(vEvent);
+		}
+
+		return xAltDescProperty.getValue();
 	}
 
 	private net.fortuna.ical4j.model.TimeZone _toICalTimeZone(
