@@ -235,8 +235,6 @@ definition {
 		KBArticle.viewCPWithHTML(
 			kbArticleContent = "Knowledge Base’s Article Content",
 			kbArticleTitle = "Knowledge Base Article Title");
-
-		AssertElementNotPresent(locator1 = "KnowledgeBaseArticle#CONTENT");
 	}
 
 	@priority = "3"
