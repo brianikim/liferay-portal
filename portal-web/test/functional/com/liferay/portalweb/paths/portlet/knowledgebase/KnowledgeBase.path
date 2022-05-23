@@ -108,7 +108,7 @@
 <!--DISPLAY-->
 <tr>
 	<td>DISPLAY_CONTENT</td>
-	<td>//div[contains(@class,'kb-entity-body')]//p</td>
+	<td>//div[contains(@class,'kb-entity-body')]//div</td>
 	<td></td>
 </tr>
 <tr>

@@ -17,7 +17,7 @@
 </tr>
 <tr>
 	<td>CONTENT</td>
-	<td>//div[contains(@class,'panel-body')]//p</td>
+	<td>//div[contains(@class,'kb-entity-body')]/div[contains(@id,'knowledge_base_web_portlet_AdminPortlet')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -142,7 +142,7 @@
 <!--HISTORY-->
 <tr>
 	<td>HISTORY_CONTENT_ADDED_DIFF</td>
-	<td>//div[@class='card-body']//p//span[contains(@id,'added-diff')]</td>
+	<td>//div[@class='card-body']//div//span[contains(@id,'added-diff')]</td>
 	<td></td>
 </tr>
 <tr>
