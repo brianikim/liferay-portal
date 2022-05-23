@@ -126,7 +126,7 @@ public class BrowserModulesResolution {
 			"configMap", _mappedModuleNamesMap
 		).build();
 
-		if (_errors.size() > 0) {
+		if (!_errors.isEmpty()) {
 			List<String> sortedErrors = new ArrayList<>(_errors);
 
 			Collections.sort(sortedErrors);
@@ -143,7 +143,7 @@ public class BrowserModulesResolution {
 		map.put("pathMap", _pathsMap);
 		map.put("resolvedModules", _resolvedModuleNames);
 
-		if (_warnings.size() > 0) {
+		if (!_warnings.isEmpty) {
 			List<String> sortedWarnings = new ArrayList<>(_warnings);
 
 			Collections.sort(sortedWarnings);
