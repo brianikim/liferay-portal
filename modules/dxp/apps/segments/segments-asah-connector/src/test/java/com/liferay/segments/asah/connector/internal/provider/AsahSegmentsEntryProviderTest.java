@@ -121,7 +121,9 @@ public class AsahSegmentsEntryProviderTest {
 	}
 
 	@Test
-	public void testGetSegmentsEntryIdsWithCachedUserSegments() {
+	public void testGetSegmentsEntryIdsWithCachedUserSegments()
+		throws PortalException {
+
 		String userId = RandomTestUtil.randomString();
 
 		long[] segmentsEntryIds = {
@@ -155,7 +157,9 @@ public class AsahSegmentsEntryProviderTest {
 	}
 
 	@Test
-	public void testGetSegmentsEntryIdsWithContextAndEmptyAcClientUserId() {
+	public void testGetSegmentsEntryIdsWithContextAndEmptyAcClientUserId()
+		throws PortalException {
+
 		Context context = new Context();
 
 		context.put(
@@ -171,7 +175,9 @@ public class AsahSegmentsEntryProviderTest {
 	}
 
 	@Test
-	public void testGetSegmentsEntryIdsWithEmptyContext() {
+	public void testGetSegmentsEntryIdsWithEmptyContext()
+		throws PortalException {
+
 		Context context = new Context();
 
 		Assert.assertArrayEquals(
@@ -182,7 +188,9 @@ public class AsahSegmentsEntryProviderTest {
 	}
 
 	@Test
-	public void testGetSegmentsEntryIdsWithNullContext() {
+	public void testGetSegmentsEntryIdsWithNullContext()
+		throws PortalException {
+
 		Assert.assertArrayEquals(
 			new long[0],
 			_asahSegmentsEntryProvider.getSegmentsEntryIds(
@@ -191,7 +199,9 @@ public class AsahSegmentsEntryProviderTest {
 	}
 
 	@Test
-	public void testGetSegmentsEntryIdsWithUncachedUserSegments() {
+	public void testGetSegmentsEntryIdsWithUncachedUserSegments()
+		throws PortalException {
+
 		long groupId = RandomTestUtil.randomLong();
 
 		Mockito.when(
