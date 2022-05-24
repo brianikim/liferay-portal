@@ -19,13 +19,15 @@ import com.liferay.asset.list.constants.AssetListEntryTypeConstants;
 import com.liferay.asset.list.constants.AssetListPortletKeys;
 import com.liferay.asset.list.model.AssetListEntry;
 import com.liferay.asset.list.service.AssetListEntryLocalService;
-import com.liferay.layout.test.util.LayoutTestUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.LayoutConstants;
 import com.liferay.portal.kernel.model.LayoutTypePortlet;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.service.CompanyLocalService;
+import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
+import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.portlet.MockLiferayPortletActionRequest;
 import com.liferay.portal.kernel.test.portlet.MockLiferayPortletActionResponse;
@@ -39,11 +41,13 @@ import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
-import com.liferay.portal.kernel.util.UnicodePropertiesBuilder;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
+
+import java.util.HashMap;
+import java.util.Locale;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
@@ -79,9 +83,7 @@ public class AddAssetListEntryVariationMVCActionCommandTest {
 	@Test
 	public void testAddAssetListEntryVariation() throws Exception {
 		UnicodeProperties defaultSegmentsEntryUnicodeProperties =
-			UnicodePropertiesBuilder.create(
-				true
-			).build();
+			new UnicodeProperties(true);
 
 		defaultSegmentsEntryUnicodeProperties.setProperty(
 			"classNameIds",
@@ -122,11 +124,10 @@ public class AddAssetListEntryVariationMVCActionCommandTest {
 			new MockLiferayPortletActionResponse());
 
 		UnicodeProperties segmentsEntryUnicodeProperties =
-			UnicodePropertiesBuilder.create(
-				true
-			).fastLoad(
-				assetListEntry.getTypeSettings(segmentsEntryId)
-			).build();
+			new UnicodeProperties(true);
+
+		segmentsEntryUnicodeProperties.load(
+			assetListEntry.getTypeSettings(segmentsEntryId));
 
 		Assert.assertEquals(
 			defaultSegmentsEntryUnicodeProperties.getProperty("classNameIds"),
@@ -138,7 +139,19 @@ public class AddAssetListEntryVariationMVCActionCommandTest {
 
 		themeDisplay.setCompany(_company);
 
-		Layout layout = LayoutTestUtil.addLayout(_group);
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(_group.getGroupId());
+
+		Layout layout = LayoutLocalServiceUtil.addLayout(
+			serviceContext.getUserId(), _group.getGroupId(), false,
+			LayoutConstants.DEFAULT_PARENT_LAYOUT_ID,
+			RandomTestUtil.randomLocaleStringMap(),
+			RandomTestUtil.randomLocaleStringMap(),
+			RandomTestUtil.randomLocaleStringMap(),
+			RandomTestUtil.randomLocaleStringMap(),
+			RandomTestUtil.randomLocaleStringMap(),
+			LayoutConstants.TYPE_PORTLET, null, false,
+			new HashMap<Locale, String>(), serviceContext);
 
 		themeDisplay.setLayout(layout);
 		themeDisplay.setLayoutSet(layout.getLayoutSet());
