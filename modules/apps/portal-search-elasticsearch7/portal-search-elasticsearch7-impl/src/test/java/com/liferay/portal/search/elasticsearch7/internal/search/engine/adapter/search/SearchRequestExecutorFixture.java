@@ -382,6 +382,7 @@ public class SearchRequestExecutorFixture {
 		return new CompositeFacetProcessor() {
 			{
 				defaultFacetProcessor = new DefaultFacetProcessor();
+
 				setFacetProcessor(
 					new ModifiedFacetProcessor(),
 					Collections.singletonMap(

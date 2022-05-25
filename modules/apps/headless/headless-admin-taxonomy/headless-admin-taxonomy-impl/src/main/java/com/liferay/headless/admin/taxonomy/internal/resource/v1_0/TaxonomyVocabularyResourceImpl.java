@@ -280,6 +280,7 @@ public class TaxonomyVocabularyResourceImpl
 			{
 				required = ArrayUtil.contains(
 					requiredClassNameIds, classNameId);
+
 				setSubtype(
 					() -> {
 						if (classTypePK ==
