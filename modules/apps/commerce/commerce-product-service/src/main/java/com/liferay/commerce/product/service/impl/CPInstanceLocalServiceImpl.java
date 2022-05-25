@@ -237,9 +237,15 @@ public class CPInstanceLocalServiceImpl extends CPInstanceLocalServiceBaseImpl {
 
 		cpInstance = cpInstancePersistence.update(cpInstance);
 
-		cpInstanceOptionValueRelLocalService.updateCPInstanceOptionValueRels(
-			groupId, user.getCompanyId(), user.getUserId(), cpInstanceId,
-			cpDefinitionOptionRelIdCPDefinitionOptionValueRelIds);
+		if ((cpDefinitionOptionRelIdCPDefinitionOptionValueRelIds != null) &&
+			!cpDefinitionOptionRelIdCPDefinitionOptionValueRelIds.isEmpty()) {
+
+			cpInstanceOptionValueRelLocalService.
+				updateCPInstanceOptionValueRels(
+					groupId, user.getCompanyId(), user.getUserId(),
+					cpInstanceId,
+					cpDefinitionOptionRelIdCPDefinitionOptionValueRelIds);
+		}
 
 		reindexCPDefinition(cpDefinitionId);
 
