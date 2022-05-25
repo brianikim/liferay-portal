@@ -141,7 +141,6 @@ public abstract class BaseMultiLanguageSortTestCase
 			value -> DocumentCreationHelpers.twoKeywords(
 				fieldName, value, fieldNameSortable, value),
 			Arrays.asList(values));
-
 		assertOrder(
 			new Sort[] {new Sort(fieldNameSortable, Sort.STRING_TYPE, false)},
 			fieldName, expected, locale);
