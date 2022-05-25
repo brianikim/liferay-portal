@@ -37,6 +37,117 @@ definition {
 		}
 	}
 
+	@description = "This is a test for COMMERCE-9191. CheckTheFirstStatusForSingleApproverWorkflow"
+	@priority = "3"
+	test CheckTheFirstStatusForSingleApproverWorkflow {
+		property portal.acceptance = "false";
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Workflow",
+			panel = "Applications",
+			portlet = "Process Builder");
+
+		CommerceEntry.gotoMenuTab(menuTab = "Configuration");
+
+		Workflow.configureWorkflow(
+			workflowDefinition = "Single Approver",
+			workflowResourceValue = "Commerce Product");
+
+		CommerceNavigator.gotoPortlet(
+			category = "Product Management",
+			portlet = "Products");
+
+		CPCommerceCatalog.newProductsEntry(
+			compileDescription = "false",
+			productCatalog = "Master",
+			productName = "Simple T-Shirt",
+			productType = "Simple",
+			publishProduct = "false");
+
+		task ("Disable Single Approver for avoid issue on CI") {
+			ApplicationsMenu.gotoPortlet(
+				category = "Workflow",
+				panel = "Applications",
+				portlet = "Process Builder");
+
+			CommerceEntry.gotoMenuTab(menuTab = "Configuration");
+
+			Workflow.configureWorkflow(
+				workflowDefinition = "No Workflow",
+				workflowResourceValue = "Commerce Product");
+		}
+	}
+
+	@description = "This is a test for COMMERCE-9190. DuplicateADraftProduct"
+	@priority = "3"
+	test DuplicateADraftProduct {
+		property portal.acceptance = "false";
+
+		CommerceNavigator.gotoPortlet(
+			category = "Product Management",
+			portlet = "Products");
+
+		CPCommerceCatalog.newProductsEntry(
+			compileDescription = "false",
+			productCatalog = "Master",
+			productName = "Simple T-Shirt",
+			productType = "Simple",
+			publishProduct = "false");
+
+		Click(
+			key_itemName = "",
+			locator1 = "CommerceEntry#SPECIFIC_MENU_ITEM");
+
+		Click(
+			key_optionValue = "Duplicate",
+			locator1 = "CommerceFrontStore#FS_PRODUCT_OPTION");
+
+		CommerceEntry.addProductsEntry(
+			productCatalog = "Master",
+			productFullDescription = "",
+			productName = "Copy of Simple T-Shirt",
+			productShortDescription = "",
+			publishProduct = "false");
+
+		AssertElementPresent(
+			key_status = "Draft",
+			locator1 = "CommerceEntry#WORKFLOW_STATUS");
+	}
+
+	@description = "This is a test for COMMERCE-9189. DuplicateAnApprovedProduct"
+	@priority = "3"
+	test DuplicateAnApprovedProduct {
+		property portal.acceptance = "false";
+
+		CommerceNavigator.gotoPortlet(
+			category = "Product Management",
+			portlet = "Products");
+
+		CPCommerceCatalog.newProductsEntry(
+			productCatalog = "Master",
+			productName = "Simple T-Shirt",
+			productType = "Simple");
+
+		Click(
+			key_itemName = "",
+			locator1 = "CommerceEntry#SPECIFIC_MENU_ITEM");
+
+		Click(
+			key_optionValue = "Duplicate",
+			locator1 = "CommerceFrontStore#FS_PRODUCT_OPTION");
+
+		CommerceEntry.addProductsEntry(
+			productCatalog = "Master",
+			productFullDescription = "",
+			productName = "Copy of Simple T-Shirt",
+			productShortDescription = "",
+			publishProduct = "false");
+
+		AssertElementPresent(
+			key_status = "Draft",
+			locator1 = "CommerceEntry#WORKFLOW_STATUS");
+	}
+
 	test ProductPublishing {
 		property environment.acceptance = "quarantine";
 		property portal.acceptance = "quarantine";
@@ -117,6 +228,70 @@ definition {
 		CommerceEntry.viewProductSkus(skusList = "WHITESKU:30.00,BLUESKU:20.00,BLACKSKU:10.00");
 	}
 
+	@description = "This is a test for COMMERCE-9181. SaveAsDraftAnAlreadyDraftProduct"
+	@priority = "3"
+	test SaveAsDraftAnAlreadyDraftProduct {
+		property portal.acceptance = "false";
+
+		CommerceNavigator.gotoPortlet(
+			category = "Product Management",
+			portlet = "Products");
+
+		CPCommerceCatalog.newProductsEntry(
+			compileDescription = "false",
+			productCatalog = "Master",
+			productName = "Simple T-Shirt",
+			productType = "Simple",
+			publishProduct = "false");
+
+		Type(
+			locator1 = "CommerceEntry#NAME_FIELD",
+			value1 = "Simple T-Shirt 01");
+
+		Click(
+			key_text = "Save as Draft",
+			locator1 = "Button#ANY");
+
+		AssertElementPresent(
+			key_status = "Draft",
+			locator1 = "CommerceEntry#WORKFLOW_STATUS");
+
+		AssertTextEquals(
+			locator1 = "CommerceEntry#NAME_FIELD",
+			value1 = "Simple T-Shirt 01");
+	}
+
+	@description = "This is a test for COMMERCE-9183. SaveAsDraftAnApprovedProduct"
+	@priority = "3"
+	test SaveAsDraftAnApprovedProduct {
+		property portal.acceptance = "false";
+
+		CommerceNavigator.gotoPortlet(
+			category = "Product Management",
+			portlet = "Products");
+
+		CPCommerceCatalog.newProductsEntry(
+			productCatalog = "Master",
+			productName = "Simple T-Shirt",
+			productType = "Simple");
+
+		Type(
+			locator1 = "CommerceEntry#NAME_FIELD",
+			value1 = "Simple T-Shirt 01");
+
+		Click(
+			key_text = "Save as Draft",
+			locator1 = "Button#ANY");
+
+		AssertElementPresent(
+			key_status = "Draft",
+			locator1 = "CommerceEntry#WORKFLOW_STATUS");
+
+		AssertTextEquals(
+			locator1 = "CommerceEntry#NAME_FIELD",
+			value1 = "Simple T-Shirt 01");
+	}
+
 	test TranslateProductName {
 		property portal.acceptance = "quarantine";
 		property test.name.skip.portal.instance = "CPCommerceProducts#TranslateProductName";
@@ -160,80 +335,6 @@ definition {
 			textIcon = "english-United States");
 	}
 
-	@description = "This is a test for COMMERCE-9179. VerifyDraftStatus"
-	@priority = "3"
-	test VerifyDraftStatus {
-		property portal.acceptance = "false";
-
-		CommerceNavigator.gotoPortlet(
-			category = "Product Management",
-			portlet = "Products");
-
-		CPCommerceCatalog.newProductsEntry(
-			productCatalog = "Master",
-			productName = "Simple T-Shirt",
-			compileDescription = "false",
-			publishProduct = "false",
-			productType = "Simple");
-
-		AssertElementPresent(
-			key_text = "Publish",
-			locator1 = "Button#ANY");
-
-		AssertElementPresent(
-			key_text = "Save as Draft",
-			locator1 = "Button#ANY");
-	}
-
-	@description = "This is a test for COMMERCE-9180. VerifyDraftStatusNormalWorkflow"
-	@priority = "3"
-	test VerifyDraftStatusNormalWorkflow {
-		property portal.acceptance = "false";
-
-		CommerceNavigator.gotoPortlet(
-			category = "Product Management",
-			portlet = "Products");
-
-		CPCommerceCatalog.newProductsEntry(
-			productCatalog = "Master",
-			productName = "Simple T-Shirt",
-			productType = "Simple");
-	}
-
-	@description = "This is a test for COMMERCE-9181. SaveAsDraftAnAlreadyDraftProduct"
-	@priority = "3"
-	test SaveAsDraftAnAlreadyDraftProduct {
-		property portal.acceptance = "false";
-
-		CommerceNavigator.gotoPortlet(
-			category = "Product Management",
-			portlet = "Products");
-
-		CPCommerceCatalog.newProductsEntry(
-			productCatalog = "Master",
-			productName = "Simple T-Shirt",
-			compileDescription = "false",
-			publishProduct = "false",
-			productType = "Simple");
-
-		Type(
-			locator1 = "CommerceEntry#NAME_FIELD",
-			value1 = "Simple T-Shirt 01");
-
-		Click(
-			key_text = "Save as Draft",
-			locator1 = "Button#ANY");
-
-		AssertElementPresent(
-			key_status = "Draft",
-			locator1 = "CommerceEntry#WORKFLOW_STATUS");
-
-		AssertTextEquals(
-			locator1 = "CommerceEntry#NAME_FIELD",
-			value1 = "Simple T-Shirt 01");
-
-	}
-
 	@description = "This is a test for COMMERCE-9182. VerifyDraftProductNotAppearOnMiniumCatalogPage"
 	@priority = "3"
 	test VerifyDraftProductNotAppearOnMiniumCatalogPage {
@@ -266,7 +367,7 @@ definition {
 			newPassword = "testt",
 			requirePasswordReset = "true",
 			userScreenName = "buyer");
-		
+
 		CommerceNavigator.gotoPortlet(
 			category = "Product Management",
 			portlet = "Products");
@@ -274,8 +375,8 @@ definition {
 		CPCommerceCatalog.newProductsEntry(
 			productCatalog = "Minium",
 			productName = "Simple T-Shirt",
-			publishProduct = "false",
-			productType = "Simple");
+			productType = "Simple",
+			publishProduct = "false");
 
 		User.logoutPG();
 
@@ -327,9 +428,9 @@ definition {
 			locator1 = "CommerceAccelerators#MINIUM_CARD_NAME");
 	}
 
-	@description = "This is a test for COMMERCE-9183. SaveAsDraftAnApprovedProduct"
+	@description = "This is a test for COMMERCE-9179. VerifyDraftStatus"
 	@priority = "3"
-	test SaveAsDraftAnApprovedProduct {
+	test VerifyDraftStatus {
 		property portal.acceptance = "false";
 
 		CommerceNavigator.gotoPortlet(
@@ -337,30 +438,24 @@ definition {
 			portlet = "Products");
 
 		CPCommerceCatalog.newProductsEntry(
+			compileDescription = "false",
 			productCatalog = "Master",
 			productName = "Simple T-Shirt",
-			productType = "Simple");
+			productType = "Simple",
+			publishProduct = "false");
 
-		Type(
-			locator1 = "CommerceEntry#NAME_FIELD",
-			value1 = "Simple T-Shirt 01");
-
-		Click(
-			key_text = "Save as Draft",
+		AssertElementPresent(
+			key_text = "Publish",
 			locator1 = "Button#ANY");
 
 		AssertElementPresent(
-			key_status = "Draft",
-			locator1 = "CommerceEntry#WORKFLOW_STATUS");
-
-		AssertTextEquals(
-			locator1 = "CommerceEntry#NAME_FIELD",
-			value1 = "Simple T-Shirt 01");
+			key_text = "Save as Draft",
+			locator1 = "Button#ANY");
 	}
 
-	@description = "This is a test for COMMERCE-9189. DuplicateAnApprovedProduct"
+	@description = "This is a test for COMMERCE-9180. VerifyDraftStatusNormalWorkflow"
 	@priority = "3"
-	test DuplicateAnApprovedProduct {
+	test VerifyDraftStatusNormalWorkflow {
 		property portal.acceptance = "false";
 
 		CommerceNavigator.gotoPortlet(
@@ -371,101 +466,6 @@ definition {
 			productCatalog = "Master",
 			productName = "Simple T-Shirt",
 			productType = "Simple");
-
-		Click(
-			key_itemName = "",
-			locator1 = "CommerceEntry#SPECIFIC_MENU_ITEM");
-
-		Click(
-			key_optionValue = "Duplicate",
-			locator1 = "CommerceFrontStore#FS_PRODUCT_OPTION");
-
-		CommerceEntry.addProductsEntry(
-			productCatalog = "Master",
-			productFullDescription = "",
-			publishProduct = "false",
-			productName = "Copy of Simple T-Shirt",
-			productShortDescription = "");
-
-		AssertElementPresent(
-			key_status = "Draft",
-			locator1 = "CommerceEntry#WORKFLOW_STATUS");	
 	}
 
-	@description = "This is a test for COMMERCE-9190. DuplicateADraftProduct"
-	@priority = "3"
-	test DuplicateADraftProduct {
-		property portal.acceptance = "false";
-
-		CommerceNavigator.gotoPortlet(
-			category = "Product Management",
-			portlet = "Products");
-
-		CPCommerceCatalog.newProductsEntry(
-			productCatalog = "Master",
-			productName = "Simple T-Shirt",
-			compileDescription = "false",
-			publishProduct = "false",
-			productType = "Simple");
-
-		Click(
-			key_itemName = "",
-			locator1 = "CommerceEntry#SPECIFIC_MENU_ITEM");
-
-		Click(
-			key_optionValue = "Duplicate",
-			locator1 = "CommerceFrontStore#FS_PRODUCT_OPTION");
-
-		CommerceEntry.addProductsEntry(
-			productCatalog = "Master",
-			productFullDescription = "",
-			publishProduct = "false",
-			productName = "Copy of Simple T-Shirt",
-			productShortDescription = "");
-
-		AssertElementPresent(
-			key_status = "Draft",
-			locator1 = "CommerceEntry#WORKFLOW_STATUS");	
-	}
-
-	@description = "This is a test for COMMERCE-9191. CheckTheFirstStatusForSingleApproverWorkflow"
-	@priority = "3"
-	test CheckTheFirstStatusForSingleApproverWorkflow {
-		property portal.acceptance = "false";
-
-		ApplicationsMenu.gotoPortlet(
-			category = "Workflow",
-			panel = "Applications",
-			portlet = "Process Builder");
-
-		CommerceEntry.gotoMenuTab(menuTab = "Configuration");
-
-		Workflow.configureWorkflow(
-			workflowResourceValue = "Commerce Product",
-			workflowDefinition = "Single Approver");
-
-		CommerceNavigator.gotoPortlet(
-			category = "Product Management",
-			portlet = "Products");
-
-		CPCommerceCatalog.newProductsEntry(
-			productCatalog = "Master",
-			productName = "Simple T-Shirt",
-			compileDescription = "false",
-			publishProduct = "false",
-			productType = "Simple");
-
-		task ("Disable Single Approver for avoid issue on CI") { 
-			ApplicationsMenu.gotoPortlet(
-				category = "Workflow",
-				panel = "Applications",
-				portlet = "Process Builder");
-
-			CommerceEntry.gotoMenuTab(menuTab = "Configuration");
-
-			Workflow.configureWorkflow(
-				workflowResourceValue = "Commerce Product",
-				workflowDefinition = "No Workflow");
-		}
-	}
 }
