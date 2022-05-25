@@ -334,6 +334,8 @@ definition {
 	}
 
 	macro addProductsEntry {
+		WaitForElementPresent(locator1 = "IFrame#MODAL_BODY");
+
 		SelectFrame.selectFrameNoLoading(locator1 = "IFrame#MODAL_BODY");
 
 		Type(
@@ -349,6 +351,10 @@ definition {
 			locator1 = "MenuItem#DROPDOWN_MENU_ITEM");
 
 		Click(locator1 = "Button#SUBMIT");
+
+		WaitForElementPresent(
+			key_title = "${productName}",
+			locator1 = "Header#H3_TITLE");
 
 		AssertElementPresent(
 			key_status = "Draft",

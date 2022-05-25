@@ -243,18 +243,29 @@ definition {
 
 		ApplicationsMenu.gotoSite(site = "Minium");
 
-		CommerceEntry.addAccountEntryUser(
+		CommerceNavigator.gotoMiniumSidebarItem(menuItem = "Account Management");
+
+		CommerceAcceleratorsInitializer.createNewAccountViaFront(
 			accountName = "Commerce Account",
-			accountType = "Business",
-			agreeToTermsAndAnswerReminderQuery = "true",
-			createNewAccount = "true",
-			requireReset = "false",
-			userEmailAddress = "buyer@liferay.com",
-			userFirstName = "Buyer",
-			userLastName = "User",
-			userRole = "Buyer",
-			userScreenName = "buyeruser",
-			userSiteMembership = "Minium");
+			adminEmailAddress = "test@liferay.com");
+
+		Click(
+			key_navUnderline = "Members",
+			locator1 = "NavUnderline#NAV_UNDERLINE_LINK");
+
+		CommerceAcceleratorsInitializer.inviteNewMemberWithRoleToAccount(
+			emailAddress = "buyer@liferay.com",
+			role = "Buyer");
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Users",
+			panel = "Control Panel",
+			portlet = "Users and Organizations");
+
+		CommerceLogin.editPasswordCP(
+			newPassword = "testt",
+			requirePasswordReset = "true",
+			userScreenName = "buyer");
 		
 		CommerceNavigator.gotoPortlet(
 			category = "Product Management",
@@ -269,7 +280,8 @@ definition {
 		User.logoutPG();
 
 		CommerceLogin.miniumLogin(
-			password = "test",
+			password = "testt",
+			resetPassword = "test",
 			urlAppend = "web/minium",
 			userEmailAddress = "buyer@liferay.com");
 
@@ -281,7 +293,7 @@ definition {
 
 		AssertElementNotPresent(
 			key_productName = "Simple T-Shirt",
-			locator1 = "CommerceAccelerators#PRODUCT_CARD_NAME");
+			locator1 = "CommerceAccelerators#MINIUM_CARD_NAME");
 
 		User.logoutPG();
 
@@ -312,7 +324,7 @@ definition {
 
 		AssertElementPresent(
 			key_productName = "Simple T-Shirt",
-			locator1 = "CommerceAccelerators#PRODUCT_CARD_NAME");
+			locator1 = "CommerceAccelerators#MINIUM_CARD_NAME");
 	}
 
 	@description = "This is a test for COMMERCE-9183. SaveAsDraftAnApprovedProduct"
