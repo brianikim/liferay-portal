@@ -115,7 +115,7 @@ public interface SegmentsEntryProvider {
 	 * @param  classPK the primary key of the entity
 	 * @param  context the context
 	 * @param  filterSegmentsEntryIds the IDs of the segments entries that could
-	 *         be returner
+	 *         be returned
 	 * @param  segmentsEntryIds the IDs of the group's active segments entries
 	 *         that are currently related to the entity under the given context
 	 * @return the IDs of the active segments entries related to the entity
