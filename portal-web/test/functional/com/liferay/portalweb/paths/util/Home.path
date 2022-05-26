@@ -190,7 +190,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--SCOPE_SELECTOR_MENULIST-->
+
 <tr>
 	<td>SCOPE_SELECTOR_MENULIST_ITEM</td>
 	<td>//ul[contains(@aria-labelledby,'controlPanelSiteSelector')]/li/a[contains(.,'${key_siteScopeName}')]</td>
@@ -206,7 +208,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--CONTENT_SCOPE_SELECTOR_MENULIST-->
+
 <tr>
 	<td>CONTENT_SCOPE_SELECTOR_MENULIST_ITEM</td>
 	<td>//ul[contains(@class,'lfr-menu-list')]/li/a[contains(.,'${key_contentScopeName}')]</td>
@@ -217,7 +221,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--PAGE-->
+
 <tr>
 	<td>PAGE</td>
 	<td>//div[contains(@id,'navbar')]/ul/li/a[contains(.,'${key_pageName}')]</td>
@@ -348,7 +354,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--BREADCRUMB-->
+
 <tr>
 	<td>BREADCRUMB_1</td>
 	<td>xpath=(//div[contains(@class,'breadcrumb') and contains(@class,'breadcrumb-horizontal')]/ul/li/a)[1]</td>
@@ -369,7 +377,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--PAGE_COLUMN-->
+
 <tr>
 	<td>PAGE_COLUMN_1</td>
 	<td>//div[@id='layout-column_column-1']</td>
@@ -415,7 +425,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--PAGE_COLUMN_PORTLET-->
+
 <tr>
 	<td>PAGE_COLUMN_PORTLET_COLUMN_1_PORTLET_TITLE</td>
 	<td>//div[@id='column-1']//h2[contains(.,'${key_portletTitleName}')]</td>
@@ -457,7 +469,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--PAGE_CUSTOMIZATION-->
+
 <tr>
 	<td>PAGE_CUSTOMIZATION_MESSAGE_INFO</td>
 	<td>//li[contains(@class,'control-menu') and contains(@class,'nav-item')]/span[contains(.,'You can customize this page')]</td>
@@ -483,7 +497,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--PORTLET_COLUMN-->
+
 <tr>
 	<td>PORTLET_COLUMN_1</td>
 	<td>//div[contains(@class,'col-md-6 portlet-column portlet-column-first')]/div</td>
@@ -509,7 +525,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--NEW_PAGE-->
+
 <tr>
 	<td>NEW_PAGE_SAVE</td>
 	<td>//button[contains(@id,'Save')]</td>
@@ -525,7 +543,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--PORTLET-->
+
 <tr>
 	<td>PORTLET_LOADING_ANIMATION</td>
 	<td>//div[contains(@class,'loading-animation') and contains(@class,'portlet-boundary')]</td>
@@ -581,7 +601,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--CONTROL_PANEL-->
+
 <tr>
 	<td>CONTROL_PANEL_INFO_MESSAGE</td>
 	<td>//div[contains(@class,'alert') and contains(@class,'alert-info')]</td>
@@ -617,7 +639,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--SITE_ADMINISTRATION-->
+
 <tr>
 	<td>SITE_ADMINISTRATION_CATEGORY_COLLAPSED</td>
 	<td>//div[contains(@class,'toggler-header-collapsed')]/div[contains(.,'${key_portletCategoryName}')]</td>
@@ -663,7 +687,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--SITE_LOCALIZATION-->
+
 <tr>
 	<td>PORTAL_LOCALIZATION_DEFAULT_LANGUAGE_MESSAGE</td>
 	<td>//div[contains(@class,'alert-info')]//div[1]/a[contains(.,'${key_pageLocale}')]</td>

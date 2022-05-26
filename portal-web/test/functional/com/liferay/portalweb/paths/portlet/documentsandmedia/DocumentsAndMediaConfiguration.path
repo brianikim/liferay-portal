@@ -10,7 +10,9 @@
 </thead>
 
 <tbody>
+
 <!--DISPLAY_SETTINGS-->
+
 <tr>
 	<td>DISPLAY_SETTINGS_DROPDOWN</td>
 	<td>//div[@id='documentLibraryItemsListingPanel']/div[contains(@class,'toggler-header-expanded')]</td>

@@ -65,7 +65,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--POLLS_TABLE-->
+
 <tr>
 	<td>POLLS_TABLE_TITLE</td>
 	<td>//tr[contains(.,'${key_pollsQuestionTitle}')]/td[2]//a</td>
@@ -86,7 +88,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--VOTES-->
+
 <tr>
 	<td>VOTES_PERCENTAGE</td>
 	<td>//tr[contains(.,'${key_pollsQuestionChoice}')]/td[1]</td>
@@ -107,7 +111,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--CHART-->
+
 <tr>
 	<td>CHART_AREA</td>
 	<td>//a[contains(@href,'area')]</td>

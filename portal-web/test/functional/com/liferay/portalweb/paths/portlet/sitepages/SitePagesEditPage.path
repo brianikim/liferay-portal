@@ -10,7 +10,9 @@
 </thead>
 
 <tbody>
+
 <!--DETAILS-->
+
 <tr>
 	<td>LAYOUT_CARD</td>
 	<td>//div[contains(@class,'card')]//span[contains(.,'${key_columnName}')]</td>
@@ -61,7 +63,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--SEO-->
+
 <tr>
 	<td>PREVIEW_DESCRIPTION</td>
 	<td>//div[contains(@class,'preview-seo-description')]</td>
@@ -107,7 +111,9 @@
 	<td>portal/screenshots/page/preview_url_ellipses_og.png</td>
 	<td></td>
 </tr>
+
 <!--LOOK_AND_FEEL-->
+
 <tr>
 	<td>CHANGE_CURRENT_THEME_BUTTON</td>
 	<td>//button[contains(.,'Change Current Theme')]</td>
@@ -143,7 +149,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--CUSTOMIZATION_SETTINGS-->
+
 <tr>
 	<td>CUSTOMIZATION_SETTINGS_SHOW_CUSTOMIZABLE_SECTIONS</td>
 	<td>//input[contains(@id,'CUSTOMIZABLE_LAYOUT')]</td>

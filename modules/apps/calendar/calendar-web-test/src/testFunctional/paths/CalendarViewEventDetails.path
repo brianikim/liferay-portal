@@ -45,7 +45,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--TAGS-->
+
 <tr>
 	<td>TAGS_LABEL</td>
 	<td>//div[@class='entry-tags']/span[@class='taglib-asset-tags-summary' and contains(.,'Tags:')]</td>
@@ -61,7 +63,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--REPEAT_SUMMARY-->
+
 <tr>
 	<td>REPEAT_OCCURRENCE_SUMMARY</td>
 	<td>//dl[contains(@class,'property-list')]/dd[5]</td>

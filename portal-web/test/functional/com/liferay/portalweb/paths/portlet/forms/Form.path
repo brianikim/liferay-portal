@@ -75,7 +75,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--ALT_PAGINATION-->
+
 <tr>
 	<td>ALT_PAGINATION_PAGE</td>
 	<td>//*[contains(@class,'ddm-pagination')]//*[contains(@class,'page-item')]//*[contains(text(),'${key_page}')]</td>
@@ -91,7 +93,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--PAGE_CONTROLS-->
+
 <tr>
 	<td>PAGE_CONTROLS_ELLIPSIS_ICON</td>
 	<td>xpath=(//div[@class='form-builder-controls-trigger'] | //div[contains(@class,'dropdown-action')])[${key_formPageNumber}]</td>
@@ -142,7 +146,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--ADD_FIELD-->
+
 <tr>
 	<td>ADD_FIELD</td>
 	<td>//button[contains(@class,'add-button-large')]/span | //nav[contains(@class,'management-bar')]//button[contains(@class,'ddm-add-field')]</td>
@@ -173,7 +179,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--SUCCESS_PAGE-->
+
 <tr>
 	<td>SUCCESS_PAGE_TITLE_FIELD</td>
 	<td>//div[contains(@class,'form-builder-success-page')]//input[contains(@class,'form-builder-page-header-title')]</td>
@@ -189,7 +197,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--PUBLISH-->
+
 <tr>
 	<td>PUBLISH_FORM_NAME_FIELD</td>
 	<td>//h1[contains(@class,'form-name') and contains(.,'${key_formName}')]</td>
@@ -225,7 +235,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--SETTINGS_TAB-->
+
 <tr>
 	<td>SETTINGS_TAB_EMAIL_NOTIFICATIONS</td>
 	<td>//a[contains(@class,'tab-content') and contains(.,'Email Notifications')] | //span[contains(text(),'Email Notifications')]</td>
@@ -246,7 +258,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--FIELD-->
+
 <tr>
 	<td>FIELD_BODY</td>
 	<td>//div[contains(@class,'form-group')]//label[contains(text(),'${key_fieldName}')] | //div[contains(@class,'form-group')]//legend[contains(text(),'${key_fieldName}')] |//div[contains(@data-field-name,'${key_fieldName}')] | //div[contains(@class,'form-group')]//input[contains(@name,'${key_fieldName}')]/parent::div/parent::div</td>
@@ -272,7 +286,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--SIDEBAR -->
+
 <tr>
 	<td>SIDEBAR_AUTOCOMPLETE_TAB</td>
 	<td>//a[contains(@class,'tab') and .='Autocomplete'] | //a[contains(@aria-controls,'sidebarLightDetails')]//*[contains(text(),'Autocomplete')]</td>
@@ -368,7 +384,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--DATA_PROVIDER_INPUT_PARAMETER-->
+
 <tr>
 	<td>DATA_PROVIDER_INPUT_PARAMETER_LABEL_FIELD</td>
 	<td>//div[contains(@data-field-name,'inputParameters')]//input[@type='text' and contains(@name,'inputParameters') and contains(@placeholder,'label')]</td>
@@ -394,7 +412,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--DATA_PROVIDER_OUTPUT_PARAMETER-->
+
 <tr>
 	<td>DATA_PROVIDER_OUTPUT_PARAMETER_PATH_FIELD</td>
 	<td>//div[contains(@data-field-name,'outputParameters')]//input[@type='text' and contains(@name,'outputParameters') and contains(@placeholder,'path')]</td>
@@ -445,7 +465,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--DATA_PROVIDER_PERMISSIONS_PARAMETER-->
+
 <tr>
 	<td>DATA_PROVIDER_PERMISSIONS_PARAMETER_PANEL</td>
 	<td>//div[contains(@id,'permissionsTitle')]//a[contains(@class,'collapse-icon')]</td>
@@ -456,7 +478,9 @@
 	<td>//div[contains(@id,'permissionsContent')]//select[contains(@id,'inputPermissionsViewRole')]</td>
 	<td></td>
 </tr>
+
 <!--PAGE-->
+
 <tr>
 	<td>PAGE_MOVE_DISABLED</td>
 	<td>//input[contains(@class,'page-header-title') and @value='${key_formPageName}']/../../../../..//button[@disabled and @title='${key_movePage}']</td>

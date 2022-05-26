@@ -35,7 +35,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--CURRENT_AND_PREVIOUS-->
+
 <tr>
 	<td>CURRENT_AND_PREVIOUS_STATUS_1</td>
 	<td>//div[contains(@id,'importLayoutProcessesSearchContainer')]//span[contains(@data-qa-id,'processResult')] | //table[contains(@data-searchcontainerid,'backgroundTasksSearchContainer')]//tr//td[2]//h5</td>

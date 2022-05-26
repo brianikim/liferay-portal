@@ -10,7 +10,9 @@
 </thead>
 
 <tbody>
+
 <!--RESOURCE_TABLE-->
+
 <tr>
 	<td>RESOURCE_TABLE_WORKFLOW</td>
 	<td>//div[contains(@id,'WorkflowPortlet')]//tr[contains(.,'${key_workflowResourceValue}')]/td[2]</td>

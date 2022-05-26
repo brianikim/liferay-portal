@@ -145,7 +145,9 @@
 	<td>//div[contains(@class,'table-responsive')]</td>
 	<td></td>
 </tr>
+
 <!--SPEEDWELL-->
+
 <tr>
 	<td>SPEEDWELL_ACCOUNT_DASHBOARD_ITEM</td>
 	<td>//div[contains(@class,'account-dashboard')]//h3[contains(.,'${key_dashboardItem}')]</td>
@@ -176,7 +178,9 @@
 	<td>//div[contains(@class,'speedwell-main-menu__links')]//a/div[contains(.,'${key_menuItem}')]</td>
 	<td></td>
 </tr>
+
 <!--CHECKOUT-->
+
 <tr>
 	<td>CHECKOUT_GENERIC_SELECT</td>
 	<td>//div[contains(@class,'form-group')]//select[contains(@title,'${key_fieldName}')]</td>
@@ -252,7 +256,9 @@
 	<td>//div[@class='multi-step-indicator-label' and contains(.,'Shipping Address')]</td>
 	<td></td>
 </tr>
+
 <!--MINICART-->
+
 <tr>
 	<td>MINI_CART_CLOSE</td>
 	<td>//button[@class='mini-cart-close']</td>
@@ -288,7 +294,9 @@
 	<td>//div[contains(@class,'summary-table')]//*[contains(.,'Total')]/following::h4</td>
 	<td></td>
 </tr>
+
 <!--ORDERS-->
+
 <tr>
 	<td>ORDER_DETAILS_DISCOUNT</td>
 	<td>//tbody//td[5]</td>

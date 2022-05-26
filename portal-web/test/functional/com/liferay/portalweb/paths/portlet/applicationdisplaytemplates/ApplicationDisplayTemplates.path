@@ -30,7 +30,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--ADT_TABLE-->
+
 <tr>
 	<td>ADT_TABLE_NAME_1</td>
 	<td>//div[contains(@id,'ddmTemplatesSearchContainer')]//tr/td[3]//a</td>

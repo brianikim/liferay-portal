@@ -10,7 +10,9 @@
 </thead>
 
 <tbody>
+
 <!--APPS_LISTING_SCREEN-->
+
 <tr>
 	<td>COLUMN_ITEM</td>
 	<td>//table[contains(@class,'table')]//th[contains(text(),'${value1}')]</td>

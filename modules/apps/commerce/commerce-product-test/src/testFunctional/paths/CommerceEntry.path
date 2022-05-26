@@ -430,7 +430,9 @@
 	<td>//div[contains(.,'${key_table}')]//div[@class='data-set-display-wrapper']//*[contains(.,'${key_entryName}')]/../../td/a[contains(.,'Edit')]</td>
 	<td></td>
 </tr>
+
 <!--CATALOGS-->
+
 <tr>
 	<td>CATALOGS_FORM</td>
 	<td>//label[contains(.,'${key_title}')]/../select[contains(@class,'form-control')]</td>
@@ -441,7 +443,9 @@
 	<td>//input[@id='baseCommercePriceListId']/../input[@placeholder='Type Here']</td>
 	<td></td>
 </tr>
+
 <!--OPTION-->
+
 <tr>
 	<td>ADD_RELATION_FIELD</td>
 	<td>//div[h4[contains(.,'${key_title}')]]//input[@type='text']</td>
@@ -477,25 +481,33 @@
 	<td>//div[contains(@id,'item-finder')]//td[contains(.,'${key_entryName}')]</td>
 	<td></td>
 </tr>
+
 <!--IFRAME-->
+
 <tr>
 	<td>IFRAME_SIDE_PANEL</td>
 	<td>//div[contains(@class,'side-panel') and contains(@class,'is-visible')]//iframe</td>
 	<td></td>
 </tr>
+
 <!--PRICE-->
+
 <tr>
 	<td>INPUT_PRICE</td>
 	<td>//div/label[contains(.,'Price') and not(contains(.,'Promo'))]/..//input</td>
 	<td></td>
 </tr>
+
 <!--IMAGES-->
+
 <tr>
 	<td>IMAGES_PLUS_BUTTON</td>
 	<td>//h4[contains(.,'Images')]//..//button[contains(@class,'btn-primary')]</td>
 	<td></td>
 </tr>
+
 <!--CHANNELS-->
+
 <tr>
 	<td>SEARCH_TABLES_CHANNELS</td>
 	<td>//h4[contains(text(),'${key_nameTableChannels}')]</td>
@@ -511,7 +523,9 @@
 	<td>//label[contains(.,'${key_fieldLabel}')]/../select/option[@selected and contains(.,'${key_value}')]</td>
 	<td></td>
 </tr>
+
 <!--PRODUCT-->
+
 <tr>
 	<td>CREATE_NEW_PRODUCT_CATALOG_FIELD</td>
 	<td>//label[text()='Catalog']/following::div//input[@placeholder='Type Here']</td>
@@ -527,7 +541,9 @@
 	<td>//div/label[@class='control-label' and contains(.,'${key_customFieldName}')]/..//p</td>
 	<td></td>
 </tr>
+
 <!--OPTION-->
+
 <tr>
 	<td>DELETE_OPTION_BUTTON</td>
 	<td>//h4[contains(.,'Option')]//..//button[contains(.,'Delete')]</td>

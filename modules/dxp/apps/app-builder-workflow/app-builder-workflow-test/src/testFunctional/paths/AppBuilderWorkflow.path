@@ -10,7 +10,9 @@
 </thead>
 
 <tbody>
+
 <!--APP_CREATION-->
+
 <tr>
 	<td>BACK_BUTTON</td>
 	<td>//a[contains(@href,'workflow')]</td>
@@ -126,7 +128,9 @@
 	<td>//div[contains(@class,'save-app-modal')]//*[contains(@class,'btn')][normalize-space(text())='${key_buttonName}']</td>
 	<td></td>
 </tr>
+
 <!--APP_RUNNING-->
+
 <tr>
 	<td>SELECT_NEW_ASSIGNEE_BUTTON</td>
 	<td>//div[contains(@label,'Select a new assignee')]//button</td>

@@ -10,7 +10,9 @@
 </thead>
 
 <tbody>
+
 <!--TAG_ENTRY_TABLE-->
+
 <tr>
 	<td>TAG_ENTRY_TABLE_NAME</td>
 	<td>//tr[contains(.,'${key_tagName}')]/td[2]</td>

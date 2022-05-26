@@ -45,13 +45,17 @@
 	<td>//span[contains(@class,'custom-control-label-text') and contains(.,'${key_settingFieldName}')]/../..//input[@type='checkbox']</td>
 	<td></td>
 </tr>
+
 <!--ASSETS-->
+
 <tr>
 	<td>ASSETS_DYNAMIC_EXPORT_LIMIT</td>
 	<td>//div[contains(@data-field-name,'dynamicExportLimit')]//input[@type='text']</td>
 	<td></td>
 </tr>
+
 <!--CORS-->
+
 <tr>
 	<td>CORS_ADD_RESPONSE_HEADERS</td>
 	<td>//div[@id='senna_surface1-screen_10']//div[4]//div[1]//div[1]//div[1]//button</td>

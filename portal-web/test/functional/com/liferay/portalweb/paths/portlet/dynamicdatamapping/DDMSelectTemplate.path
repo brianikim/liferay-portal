@@ -25,7 +25,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--TEMPLATE_CARDS-->
+
 <tr>
 	<td>TEMPLATE_CARDS_NAME</td>
 	<td>//div[contains(@class,'autofit-col')]/a[contains(., '${key_ddlTemplateName}')] | //div[contains(@class,'autofit-col')]/div[contains(., '${key_ddlTemplateName}')]</td>
@@ -41,7 +43,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--TEMPLATE_TABLE-->
+
 <tr>
 	<td>TEMPLATE_TABLE_ALL_CHECKBOX</td>
 	<td>//div[contains(@id,'DDMPortlet_managementBarContainerId')]//input[contains(@name,'allRowIds')]</td>

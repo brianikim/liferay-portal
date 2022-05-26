@@ -20,7 +20,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--ENTRY-->
+
 <tr>
 	<td>ENTRY_TITLE</td>
 	<td>//div[contains(@class,'entry-title') and contains(.,'${key_entryTitle}')]/h2/a</td>

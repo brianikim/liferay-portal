@@ -15,7 +15,9 @@
 	<td>//a[contains(@class,'btn') and contains(.,'Add Identity Provider')]</td>
 	<td></td>
 </tr>
+
 <!--IDENTITY_PROVIDER_CONNECTION-->
+
 <tr>
 	<td>IDENTITY_PROVIDER_CONNECTION_ATTRIBUTE_TEXTAREA</td>
 	<td>//textarea[contains(@id,'SamlAdminPortlet_userAttributeMappings')]</td>

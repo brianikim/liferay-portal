@@ -25,7 +25,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--ADT_MULTI_COLUMN-->
+
 <tr>
 	<td>ADT_MULTI_COLUMN_PAGE_DISPLAY</td>
 	<td>//div[contains(@class,'col-md-3')]/div/h3[contains(.,'${pageName}')]</td>

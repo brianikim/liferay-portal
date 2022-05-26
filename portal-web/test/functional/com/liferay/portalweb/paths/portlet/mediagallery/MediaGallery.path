@@ -30,7 +30,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--ENTRY-->
+
 <tr>
 	<td>ENTRY_THUMBNAIL</td>
 	<td>//*[contains(@title,'${key_mgDocumentTitle}')]//div/img</td>
@@ -51,7 +53,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--FOLDER-->
+
 <tr>
 	<td>FOLDER_NAME</td>
 	<td>//span//a[@title='${key_mgFolderName}']</td>
@@ -67,7 +71,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--ADT_CAROUSEL-->
+
 <tr>
 	<td>ADT_CAROUSEL_ITEM</td>
 	<td>//div[contains(@class,'image-viewer-base carousel')]</td>

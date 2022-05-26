@@ -30,7 +30,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--WEB_CONTENT_TABLE-->
+
 <tr>
 	<td>WEB_CONTENT_TABLE_TITLE</td>
 	<td>//tr[contains(.,'${key_webContentTitle}')]/td[1]</td>

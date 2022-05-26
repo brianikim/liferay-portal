@@ -40,7 +40,9 @@
 	<td></td>
 	<td></td>
 </tr>
+
 <!--DETAILS_WORKFLOW-->
+
 <tr>
 	<td>DETAILS_WORKFLOW_CREATED_BY</td>
 	<td>//div[@class='sidebar-body']//p</td>
@@ -51,7 +53,9 @@
 	<td>//span[contains(@class,'workflow-status')]//strong</td>
 	<td></td>
 </tr>
+
 <!--TRANSLATIONS_PREVIEW-->
+
 <tr>
 	<td>TRANSLATIONS_PREVIEW_EDITOR</td>
 	<td>//div[contains(@class,'translate-editor-preview') and contains(.,'${key_fieldValue}')]</td>

@@ -125,13 +125,17 @@
 	<td>xpath=(//*[contains(@class,'fragment-${key_fragmentClass}')]//lfr-drop-zone//div[contains(@class,'no-fragments-message__title') and contains(.,'${key_content}')])[${key_position}]</td>
 	<td></td>
 </tr>
+
 <!--FRAGMENT_COMMENT-->
+
 <tr>
 	<td>FRAGMENT_COMMENT_ICON</td>
 	<td>//div[contains(@class,'page-editor__topper__bar') and contains(.,'${key_fragmentName}')]//button[*[name()='svg'][contains(@class,'icon-comments')]]</td>
 	<td></td>
 </tr>
+
 <!--CUSTOM_FRAGMENT_STYLE-->
+
 <tr>
 	<td>ALIGN</td>
 	<td>//div[contains(@class,'video')]/parent::div[contains(@style,'justify-content: ${key_alignment}')]</td>
@@ -172,7 +176,9 @@
 	<td>//div[contains(@class,'video')][contains(@style,'width: ${key_width}')]</td>
 	<td></td>
 </tr>
+
 <!--FRAGMENT_CONFIGURAION-->
+
 <tr>
 	<td>FRAGMENT_CHECKBOX</td>
 	<td>//div[contains(@class,'floating-toolbar')]//label[contains(.,'${checkboxName}')]//input[@type='checkbox']</td>
@@ -258,7 +264,9 @@
 	<td>//div[contains(@class,'component-${key_fragmentName}')]//a[contains(@class,'-${key_type}')]</td>
 	<td></td>
 </tr>
+
 <!--FRAGMENT_CONFIGURATION_IN_VIEW_MODE-->
+
 <tr>
 	<td>FRAGMENT_CONFIGURATION_ALIGNMENT_IN_VIEW_MODE</td>
 	<td>//*[contains(@class,'${key_fragmentName}')]/parent::div/parent::div[contains(@class,'text-${key_alignment}')]</td>
@@ -284,7 +292,9 @@
 	<td>//*[contains(@class,'${key_fragmentName}')]/parent::div/parent::div[contains(@style,'color: ${key_textColor}')]</td>
 	<td></td>
 </tr>
+
 <!--FRAGMENT_EDITABLE_FIELD-->
+
 <tr>
 	<td>CONTRIBUTED_FRAGMENT_EDITABLE_FIELD</td>
 	<td>//div[contains(@class,'page-editor__topper__bar') and contains(.,'${key_fragmentName}')]//following-sibling::div[contains(@class,'page-editor__topper__content')]//*[contains(@data-lfr-editable-id,'${id}')]</td>
@@ -330,7 +340,9 @@
 	<td>//div[contains(@class,'source-panel')]//div[contains(@class,'lfr-source-editor-code')]//textarea</td>
 	<td></td>
 </tr>
+
 <!--FRAGMENT_HEADER-->
+
 <tr>
 	<td>FRAGMENT_HEADER</td>
 	<td>//li[contains(@class,'topper__title') and contains(.,'${key_fragmentName}')]</td>
@@ -361,7 +373,9 @@
 	<td>xpath=(//div[contains(@class,'page-editor__topper__bar tbar')])[${key_position}]//li[contains(.,'${key_fragmentName}')]</td>
 	<td></td>
 </tr>
+
 <!--FRAGMENT_TABS-->
+
 <tr>
 	<td>ACTIVE_NAV_ITEM_TAB</td>
 	<td>//div[contains(@class,'navbar')]//button[contains(@aria-selected,'true') and normalize-space()='${key_navItem}']</td>
