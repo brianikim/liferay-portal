@@ -57,8 +57,7 @@ public class UserServiceWhenAddingUserWithDefaultRolesTest {
 		_company = CompanyTestUtil.addCompany();
 
 		PortalPreferences portalPreferences =
-			PortletPreferencesFactoryUtil.getPortalPreferences(
-				_company.getUserId(), true);
+			PortletPreferencesFactoryUtil.getPortalPreferences(0, true);
 
 		portalPreferences.setValue(
 			"", PropsKeys.ADMIN_DEFAULT_ROLE_NAMES, StringPool.BLANK);
