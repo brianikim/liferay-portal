@@ -39,6 +39,13 @@ public abstract class BaseTermFilterTestCase extends BaseIndexingTestCase {
 	}
 
 	@Test
+	public void testFilterWithEmptyStringValue() throws Exception {
+		index("One");
+
+		assertTermFilter("", "");
+	}
+
+	@Test
 	public void testLuceneSpecialCharacters() throws Exception {
 		String value = "One\\+-!():^[]\"{}~*?|&/Two";
 
