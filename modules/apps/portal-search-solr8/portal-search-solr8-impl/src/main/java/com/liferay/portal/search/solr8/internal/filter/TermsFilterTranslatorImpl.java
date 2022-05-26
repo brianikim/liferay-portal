@@ -14,6 +14,7 @@
 
 package com.liferay.portal.search.solr8.internal.filter;
 
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.search.filter.TermsFilter;
 
 import java.util.ArrayList;
@@ -42,6 +43,10 @@ public class TermsFilterTranslatorImpl implements TermsFilterTranslator {
 		List<BytesRef> bytesRefs = new ArrayList<>();
 
 		for (String value : termsFilter.getValues()) {
+			if (value.isEmpty()) {
+				value = StringPool.DOUBLE_APOSTROPHE;
+			}
+
 			Term term = new Term(field, ClientUtils.escapeQueryChars(value));
 
 			bytesRefs.add(term.bytes());
