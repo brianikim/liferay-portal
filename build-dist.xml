@@ -772,18 +772,24 @@ inst_group=appserver
 		<echo file="${app.server.weblogic.dir}/create_swap.sh">
 			<![CDATA[
 #!/bin/sh
+
 swapsize=1024
+
 grep -q "swapfile" /etc/fstab
 
-if [ $? -ne 0 ]; then
-        echo 'swapfile not found. Adding swapfile.'
-        fallocate -l ${swapsize}M /swapfile
-        chmod 600 /swapfile
-        mkswap /swapfile
-        swapon /swapfile
-        echo '/swapfile none swap defaults 0 0' >> /etc/fstab
-else
-        echo 'swapfile found. No changes made.'
+if [ $? -ne 0 ]
+then
+	echo "Adding swapfile."
+
+	fallocate -l ${swapsize}M /swapfile
+
+	chmod 600 /swapfile
+
+	mkswap /swapfile
+
+	swapon /swapfile
+
+	echo "/swapfile none swap defaults 0 0" >> /etc/fstab
 fi
 
 cat /proc/swaps
@@ -794,13 +800,16 @@ cat /proc/meminfo | grep Swap
 		<echo file="${app.server.weblogic.dir}/create_user.sh">
 			<![CDATA[
 #!/bin/bash
-if id appserver &>/dev/null; then
-        echo 'appserver user exists'
+
+if id appserver &>/dev/null
+then
+	echo ""
 else
-        echo 'appserver user not found'
-        sudo useradd appserver
-        echo -e "liferay123\nliferay123" | sudo passwd appserver
-        echo 'appserver user created'
+	echo "Adding user appserver."
+
+	sudo useradd appserver
+
+	echo -e "liferay123\nliferay123" | sudo passwd appserver
 fi
 			]]>
 		</echo>
@@ -808,6 +817,7 @@ fi
 		<echo file="${app.server.weblogic.dir}/install_weblogic.sh">
 			<![CDATA[
 #!/bin/bash
+
 export JAVA_HOME=/opt/java/jdk8-x64
 export PATH=$JAVA_HOME/bin:$PATH
 
@@ -825,11 +835,11 @@ java -jar ${app.server.weblogic.dir}/${app.server.weblogic.jar.name} -ignoreSysP
 
 		<execute dir="${app.server.weblogic.dir}">
 			<![CDATA[
-				rm -rf ${app.server.weblogic.dir}/oraInventory
+				rm -fr ${app.server.weblogic.dir}/oraInventory
 
 				mkdir ${app.server.weblogic.dir}/oraInventory
 
-				rm -rf ${app.server.weblogic.dir}/oracle
+				rm -fr ${app.server.weblogic.dir}/oracle
 
 				mkdir ${app.server.weblogic.dir}/oracle
 
