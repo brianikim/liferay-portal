@@ -1,0 +1,7 @@
+// This prevents search experience modals from being left-aligned due to
+// `position: fixed` added by aui-modal.css, which is applied only temporarily
+// before refreshing the page. See LPS-154002.
+
+.modal-dialog {
+	position: relative;
+}
