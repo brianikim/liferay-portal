@@ -99,7 +99,6 @@ public class WikiPageLocalServiceTest {
 		_group = GroupTestUtil.addGroup();
 
 		_node = WikiTestUtil.addNode(_group.getGroupId());
-
 		_user = UserTestUtil.addUser(_group.getGroupId());
 	}
 
