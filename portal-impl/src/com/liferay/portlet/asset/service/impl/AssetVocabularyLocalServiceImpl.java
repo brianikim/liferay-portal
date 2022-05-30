@@ -490,6 +490,7 @@ public class AssetVocabularyLocalServiceImpl
 		return assetVocabularyPersistence.update(vocabulary);
 	}
 
+	@Indexable(type = IndexableType.REINDEX)
 	@Override
 	public AssetVocabulary updateVocabulary(
 			long vocabularyId, String title, Map<Locale, String> titleMap,
@@ -497,29 +498,9 @@ public class AssetVocabularyLocalServiceImpl
 			ServiceContext serviceContext)
 		throws PortalException {
 
-		return assetVocabularyLocalService.updateVocabulary(
-			vocabularyId, titleMap.get(LocaleUtil.getSiteDefault()), title,
-			titleMap, descriptionMap, settings, serviceContext);
-	}
-
-	@Indexable(type = IndexableType.REINDEX)
-	@Override
-	public AssetVocabulary updateVocabulary(
-			long vocabularyId, String name, String title,
-			Map<Locale, String> titleMap, Map<Locale, String> descriptionMap,
-			String settings, ServiceContext serviceContext)
-		throws PortalException {
-
 		AssetVocabulary vocabulary =
 			assetVocabularyPersistence.findByPrimaryKey(vocabularyId);
 
-		name = _getVocabularyName(name);
-
-		if (!StringUtil.equalsIgnoreCase(vocabulary.getName(), name)) {
-			validate(vocabulary.getGroupId(), name);
-		}
-
-		vocabulary.setName(name);
 		vocabulary.setTitleMap(titleMap);
 
 		if (Validator.isNotNull(title)) {
@@ -530,6 +511,24 @@ public class AssetVocabularyLocalServiceImpl
 		vocabulary.setSettings(settings);
 
 		return assetVocabularyPersistence.update(vocabulary);
+	}
+
+	/**
+	 * @deprecated As of Athanasius (7.3.x), replaced by {@link
+	 *             #updateVocabulary(long, String, Map, Map, String,
+	 *             ServiceContext)}
+	 */
+	@Deprecated
+	@Override
+	public AssetVocabulary updateVocabulary(
+			long vocabularyId, String name, String title,
+			Map<Locale, String> titleMap, Map<Locale, String> descriptionMap,
+			String settings, ServiceContext serviceContext)
+		throws PortalException {
+
+		return assetVocabularyLocalService.updateVocabulary(
+			vocabularyId, title, titleMap, descriptionMap, settings,
+			serviceContext);
 	}
 
 	protected SearchContext buildSearchContext(
