@@ -29,6 +29,7 @@ import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.util.HashMapDictionary;
 import com.liferay.segments.SegmentsEntryRetriever;
 import com.liferay.segments.configuration.SegmentsConfiguration;
+import com.liferay.segments.constants.SegmentsWebKeys;
 import com.liferay.segments.context.RequestContextMapper;
 import com.liferay.segments.model.SegmentsEntryRole;
 import com.liferay.segments.provider.SegmentsEntryProviderRegistry;
@@ -117,11 +118,18 @@ public class SegmentsEntryRoleContributor implements RoleContributor {
 			return new long[0];
 		}
 
+		long[] cachedSegmentsEntryIds = (long[])httpServletRequest.getAttribute(
+			SegmentsWebKeys.SEGMENTS_ENTRY_IDS);
+
+		if (cachedSegmentsEntryIds != null) {
+			return cachedSegmentsEntryIds;
+		}
+
 		User user = roleCollection.getUser();
 
 		long[] segmentsEntryIds = _segmentsEntryRetriever.getSegmentsEntryIds(
 			roleCollection.getGroupId(), user.getUserId(),
-			_requestContextMapper.map(httpServletRequest));
+			_requestContextMapper.map(httpServletRequest), new long[0]);
 
 		if ((segmentsEntryIds.length > 0) && _log.isDebugEnabled()) {
 			_log.debug(
@@ -130,6 +138,9 @@ public class SegmentsEntryRoleContributor implements RoleContributor {
 					user.getUserId(), " in group ",
 					roleCollection.getGroupId()));
 		}
+
+		httpServletRequest.setAttribute(
+			SegmentsWebKeys.SEGMENTS_ENTRY_IDS, segmentsEntryIds);
 
 		return segmentsEntryIds;
 	}
