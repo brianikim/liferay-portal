@@ -137,7 +137,7 @@
 </tr>
 <tr>
 	<td>PUBLICATION_ORDER_IN_HISTORY</td>
-	<td>//tbody//tr[${resultOrder}]//div[contains(.,'${key_publicationName}')]</td>
+	<td>//dl//dd[${resultOrder}]//div[contains(.,'${key_publicationName}')]</td>
 	<td></td>
 </tr>
 <tr>
