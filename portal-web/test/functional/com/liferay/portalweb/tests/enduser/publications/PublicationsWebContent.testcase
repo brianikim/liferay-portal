@@ -272,7 +272,10 @@ definition {
 
 	@priority = "4"
 	test PublishWebContentWithDMAndImageFields {
-		property test.assert.warning.exceptions = "true";
+
+		// Workaround LPS-121020
+
+		//property test.assert.warning.exceptions = "true";
 
 		JSONPublications.addPublication(publicationName = "Publication Name");
 
