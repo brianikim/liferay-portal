@@ -651,6 +651,12 @@ public class AssetVocabularyLocalServiceUtil {
 			serviceContext);
 	}
 
+	/**
+	 * @deprecated As of Athanasius (7.3.x), replaced by {@link
+	 #updateVocabulary(long, String, Map, Map, String,
+	 ServiceContext)}
+	 */
+	@Deprecated
 	public static AssetVocabulary updateVocabulary(
 			long vocabularyId, String name, String title,
 			Map<java.util.Locale, String> titleMap,
