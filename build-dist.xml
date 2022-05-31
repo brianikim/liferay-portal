@@ -463,7 +463,7 @@ closeTemplate()
 			<arg value="create-weblogic-domain.sh" />
 		</exec>
 	</target>
-	
+
 	<target name="deploy-plugins">
 		<delete failonerror="false" includeemptydirs="true">
 			<fileset
