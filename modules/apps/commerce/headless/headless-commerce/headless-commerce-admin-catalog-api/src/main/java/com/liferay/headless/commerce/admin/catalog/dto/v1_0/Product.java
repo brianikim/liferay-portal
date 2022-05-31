@@ -979,7 +979,7 @@ public class Product implements Serializable {
 	}
 
 	@GraphQLField
-	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected Integer productStatus;
 
 	@Schema(example = "simple")
