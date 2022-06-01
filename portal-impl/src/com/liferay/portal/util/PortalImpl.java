@@ -8451,6 +8451,35 @@ public class PortalImpl implements Portal {
 		return alternateURLs;
 	}
 
+	private List<String> _getColumns(LayoutTypePortlet layoutTypePortlet) {
+		List<String> columns = new ArrayList<>();
+
+		Layout layout = layoutTypePortlet.getLayout();
+
+		if (layout.isTypePortlet()) {
+			if (Objects.equals(
+					layout.getType(),
+					LayoutConstants.TYPE_FULL_PAGE_APPLICATION)) {
+
+				columns.add("fullPageApplicationPortlet");
+			}
+			else {
+				LayoutTemplate layoutTemplate =
+					layoutTypePortlet.getLayoutTemplate();
+
+				columns.addAll(layoutTemplate.getColumns());
+
+				Collections.addAll(
+					columns, _getNestedColumns(layoutTypePortlet, layout));
+			}
+		}
+		else if (layout.isTypePanel()) {
+			columns.add("panelSelectedPortlets");
+		}
+
+		return columns;
+	}
+
 	private String _getColumnValue(
 		LayoutTypePortlet layoutTypePortlet, String columnId) {
 
@@ -8475,6 +8504,30 @@ public class PortalImpl implements Portal {
 		}
 
 		return layoutTypePortlet.getTypeSettingsProperty(columnId);
+	}
+
+	private List<Portlet> _getExplicitlyAddedPortletsWithoutCustomizableColumns(
+		LayoutTypePortlet layoutTypePortlet) {
+
+		List<Portlet> portlets = new ArrayList<>();
+
+		List<String> columns = _getColumns(layoutTypePortlet);
+
+		for (String columnId : columns) {
+			String customizableString =
+				layoutTypePortlet.getTypeSettingsProperty(
+					CustomizedPages.namespaceColumnId(columnId));
+
+			boolean customizable = GetterUtil.getBoolean(customizableString);
+
+			if (customizable && !_isLayoutSetPrototype(layoutTypePortlet)) {
+				continue;
+			}
+
+			portlets.addAll(layoutTypePortlet.getAllPortlets(columnId));
+		}
+
+		return portlets;
 	}
 
 	private String _getGroupFriendlyURL(
@@ -8645,6 +8698,66 @@ public class PortalImpl implements Portal {
 		sb.append(group.getFriendlyURL());
 
 		return sb.toString();
+	}
+
+	private String[] _getNestedColumnIds(
+		PortletPreferences portletPreferences) {
+
+		Map<String, String[]> preferencesMap = portletPreferences.getMap();
+
+		String[] columnIds = new String[0];
+
+		for (String key : preferencesMap.keySet()) {
+			if (!key.startsWith(
+					getPortletNamespace(PortletKeys.NESTED_PORTLETS))) {
+
+				continue;
+			}
+
+			columnIds = ArrayUtil.append(columnIds, key);
+		}
+
+		return columnIds;
+	}
+
+	private String[] _getNestedColumns(
+		LayoutTypePortlet layoutTypePortlet, Layout layout) {
+
+		String[] nestedColumnIds = StringUtil.split(
+			layoutTypePortlet.getTypeSettingsProperty(
+				com.liferay.portal.kernel.model.LayoutTypePortletConstants.
+					NESTED_COLUMN_IDS));
+
+		layoutTypePortlet.getPortalPreferences();
+
+		PortalPreferences portalPreferences =
+			layoutTypePortlet.getPortalPreferences();
+
+		if (portalPreferences == null) {
+			return nestedColumnIds;
+		}
+
+		for (String columnId : nestedColumnIds) {
+			if (columnId.lastIndexOf(StringPool.DOUBLE_UNDERLINE) != -1) {
+				columnId = columnId.substring(
+					columnId.lastIndexOf(StringPool.DOUBLE_UNDERLINE) + 2);
+			}
+
+			String[] portletIds = StringUtil.split(
+				portalPreferences.getValue(
+					CustomizedPages.namespacePlid(layout.getPlid()), columnId));
+
+			for (String portletId : portletIds) {
+				PortletPreferences portletPreferences =
+					PortletPreferencesFactoryUtil.getLayoutPortletSetup(
+						layout, portletId);
+
+				nestedColumnIds = ArrayUtil.append(
+					nestedColumnIds, _getNestedColumnIds(portletPreferences));
+			}
+		}
+
+		return nestedColumnIds;
 	}
 
 	private String _getPortalURL(
@@ -9120,6 +9233,21 @@ public class PortalImpl implements Portal {
 			if (nonstaticPortletId.equals(portletId)) {
 				return true;
 			}
+		}
+
+		return false;
+	}
+
+	private boolean _isLayoutSetPrototype(LayoutTypePortlet layoutTypePortlet) {
+		try {
+			Layout layout = layoutTypePortlet.getLayout();
+
+			Group group = layout.getGroup();
+
+			return group.isLayoutSetPrototype();
+		}
+		catch (Exception exception) {
+			_log.error(exception, exception);
 		}
 
 		return false;
