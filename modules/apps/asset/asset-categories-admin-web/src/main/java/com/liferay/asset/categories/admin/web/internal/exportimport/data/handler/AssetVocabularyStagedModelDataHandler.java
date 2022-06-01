@@ -215,10 +215,10 @@ public class AssetVocabularyStagedModelDataHandler
 				null, portletDataContext.getScopeGroupId(),
 				vocabulary.getName(), 2);
 
-			serviceContext.setUuid(vocabulary.getUuid());
-
 			Map<Locale, String> vocabularyTitleMap = getVocabularyTitleMap(
 				portletDataContext.getScopeGroupId(), vocabulary, name);
+
+			serviceContext.setUuid(vocabulary.getUuid());
 
 			importedVocabulary = _assetVocabularyLocalService.addVocabulary(
 				userId, portletDataContext.getScopeGroupId(), StringPool.BLANK,
