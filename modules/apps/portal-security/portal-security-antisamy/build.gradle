@@ -11,7 +11,7 @@ dependencies {
 	compileInclude group: "commons-codec", name: "commons-codec", version: "1.15"
 	compileInclude group: "net.sourceforge.nekohtml", name: "nekohtml", version: "1.9.22"
 	compileInclude group: "org.apache.httpcomponents", name: "httpclient", version: "4.5.13"
-	compileInclude group: "org.apache.httpcomponents", name: "httpcore", version: "4.4.13"
+	compileInclude group: "org.apache.httpcomponents", name: "httpcore", version: "4.4.14"
 	compileInclude group: "org.apache.xmlgraphics", name: "batik-constants", version: "1.14"
 	compileInclude group: "org.apache.xmlgraphics", name: "batik-css", version: "1.14"
 	compileInclude group: "org.apache.xmlgraphics", name: "batik-i18n", version: "1.14"
