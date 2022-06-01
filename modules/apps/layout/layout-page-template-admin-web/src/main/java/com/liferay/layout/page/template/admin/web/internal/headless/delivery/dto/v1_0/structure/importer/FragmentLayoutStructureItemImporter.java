@@ -214,11 +214,20 @@ public class FragmentLayoutStructureItemImporter
 		Map<String, String> editableTypes =
 			EditableFragmentEntryProcessorUtil.getEditableTypes(html);
 
-		JSONObject fragmentEntryProcessorValuesJSONObject = JSONUtil.put(
-			"com.liferay.fragment.entry.processor.background.image." +
-				"BackgroundImageFragmentEntryProcessor",
+		JSONObject fragmentEntryProcessorValuesJSONObject =
+			JSONFactoryUtil.createJSONObject();
+
+		JSONObject backgroundImageFragmentEntryProcessorJSONObject =
 			_toBackgroundImageFragmentEntryProcessorJSONObject(
-				(List<Object>)definitionMap.get("fragmentFields")));
+				(List<Object>)definitionMap.get("fragmentFields"));
+
+		if (backgroundImageFragmentEntryProcessorJSONObject.length() > 0) {
+			fragmentEntryProcessorValuesJSONObject.put(
+				"com.liferay.fragment.entry.processor.background.image." +
+					"BackgroundImageFragmentEntryProcessor",
+				_toBackgroundImageFragmentEntryProcessorJSONObject(
+					(List<Object>)definitionMap.get("fragmentFields")));
+		}
 
 		JSONObject editableFragmentEntryProcessorJSONObject =
 			_toEditableFragmentEntryProcessorJSONObject(
