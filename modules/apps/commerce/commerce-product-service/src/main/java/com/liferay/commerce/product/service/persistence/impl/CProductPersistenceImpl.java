@@ -2465,6 +2465,11 @@ public class CProductPersistenceImpl
 
 		CProductModelImpl cProductModelImpl = (CProductModelImpl)cProduct;
 
+		if (Validator.isNull(cProduct.getExternalReferenceCode())) {
+			cProduct.setExternalReferenceCode(
+				String.valueOf(cProduct.getPrimaryKey()));
+		}
+
 		if (Validator.isNull(cProduct.getUuid())) {
 			String uuid = PortalUUIDUtil.generate();
 

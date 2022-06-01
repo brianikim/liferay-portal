@@ -8095,6 +8095,11 @@ public class CommerceOrderPersistenceImpl
 		CommerceOrderModelImpl commerceOrderModelImpl =
 			(CommerceOrderModelImpl)commerceOrder;
 
+		if (Validator.isNull(commerceOrder.getExternalReferenceCode())) {
+			commerceOrder.setExternalReferenceCode(
+				String.valueOf(commerceOrder.getPrimaryKey()));
+		}
+
 		if (Validator.isNull(commerceOrder.getUuid())) {
 			String uuid = PortalUUIDUtil.generate();
 

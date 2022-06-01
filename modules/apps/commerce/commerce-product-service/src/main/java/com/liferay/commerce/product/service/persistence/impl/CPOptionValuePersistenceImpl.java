@@ -2999,6 +2999,11 @@ public class CPOptionValuePersistenceImpl
 		CPOptionValueModelImpl cpOptionValueModelImpl =
 			(CPOptionValueModelImpl)cpOptionValue;
 
+		if (Validator.isNull(cpOptionValue.getExternalReferenceCode())) {
+			cpOptionValue.setExternalReferenceCode(
+				String.valueOf(cpOptionValue.getPrimaryKey()));
+		}
+
 		if (Validator.isNull(cpOptionValue.getUuid())) {
 			String uuid = PortalUUIDUtil.generate();
 

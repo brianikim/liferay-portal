@@ -5312,6 +5312,13 @@ public class CommerceTierPriceEntryPersistenceImpl
 		CommerceTierPriceEntryModelImpl commerceTierPriceEntryModelImpl =
 			(CommerceTierPriceEntryModelImpl)commerceTierPriceEntry;
 
+		if (Validator.isNull(
+				commerceTierPriceEntry.getExternalReferenceCode())) {
+
+			commerceTierPriceEntry.setExternalReferenceCode(
+				String.valueOf(commerceTierPriceEntry.getPrimaryKey()));
+		}
+
 		if (Validator.isNull(commerceTierPriceEntry.getUuid())) {
 			String uuid = PortalUUIDUtil.generate();
 

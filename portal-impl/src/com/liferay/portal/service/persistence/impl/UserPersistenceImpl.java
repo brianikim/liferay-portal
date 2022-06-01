@@ -8589,6 +8589,10 @@ public class UserPersistenceImpl
 
 		UserModelImpl userModelImpl = (UserModelImpl)user;
 
+		if (Validator.isNull(user.getExternalReferenceCode())) {
+			user.setExternalReferenceCode(String.valueOf(user.getPrimaryKey()));
+		}
+
 		if (Validator.isNull(user.getUuid())) {
 			String uuid = PortalUUIDUtil.generate();
 

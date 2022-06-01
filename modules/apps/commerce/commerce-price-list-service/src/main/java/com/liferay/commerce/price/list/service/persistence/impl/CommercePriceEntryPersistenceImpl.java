@@ -5052,6 +5052,11 @@ public class CommercePriceEntryPersistenceImpl
 		CommercePriceEntryModelImpl commercePriceEntryModelImpl =
 			(CommercePriceEntryModelImpl)commercePriceEntry;
 
+		if (Validator.isNull(commercePriceEntry.getExternalReferenceCode())) {
+			commercePriceEntry.setExternalReferenceCode(
+				String.valueOf(commercePriceEntry.getPrimaryKey()));
+		}
+
 		if (Validator.isNull(commercePriceEntry.getUuid())) {
 			String uuid = PortalUUIDUtil.generate();
 

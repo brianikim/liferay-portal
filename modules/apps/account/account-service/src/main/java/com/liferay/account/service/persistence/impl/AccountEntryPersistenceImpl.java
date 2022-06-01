@@ -50,6 +50,7 @@ import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.Validator;
 
 import java.io.Serializable;
 
@@ -2435,6 +2436,11 @@ public class AccountEntryPersistenceImpl
 
 		AccountEntryModelImpl accountEntryModelImpl =
 			(AccountEntryModelImpl)accountEntry;
+
+		if (Validator.isNull(accountEntry.getExternalReferenceCode())) {
+			accountEntry.setExternalReferenceCode(
+				String.valueOf(accountEntry.getPrimaryKey()));
+		}
 
 		ServiceContext serviceContext =
 			ServiceContextThreadLocal.getServiceContext();

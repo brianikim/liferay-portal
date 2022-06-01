@@ -6413,6 +6413,11 @@ public class UserGroupPersistenceImpl
 
 		UserGroupModelImpl userGroupModelImpl = (UserGroupModelImpl)userGroup;
 
+		if (Validator.isNull(userGroup.getExternalReferenceCode())) {
+			userGroup.setExternalReferenceCode(
+				String.valueOf(userGroup.getPrimaryKey()));
+		}
+
 		if (Validator.isNull(userGroup.getUuid())) {
 			String uuid = PortalUUIDUtil.generate();
 

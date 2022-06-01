@@ -47,6 +47,7 @@ import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.Validator;
 
 import java.io.Serializable;
 
@@ -1112,6 +1113,11 @@ public class AccountGroupPersistenceImpl
 
 		AccountGroupModelImpl accountGroupModelImpl =
 			(AccountGroupModelImpl)accountGroup;
+
+		if (Validator.isNull(accountGroup.getExternalReferenceCode())) {
+			accountGroup.setExternalReferenceCode(
+				String.valueOf(accountGroup.getPrimaryKey()));
+		}
 
 		ServiceContext serviceContext =
 			ServiceContextThreadLocal.getServiceContext();

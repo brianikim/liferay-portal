@@ -44,6 +44,7 @@ import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.spring.extender.service.ServiceReference;
 
 import java.io.Serializable;
@@ -1674,6 +1675,11 @@ public class CommerceOrderNotePersistenceImpl
 
 		CommerceOrderNoteModelImpl commerceOrderNoteModelImpl =
 			(CommerceOrderNoteModelImpl)commerceOrderNote;
+
+		if (Validator.isNull(commerceOrderNote.getExternalReferenceCode())) {
+			commerceOrderNote.setExternalReferenceCode(
+				String.valueOf(commerceOrderNote.getPrimaryKey()));
+		}
 
 		ServiceContext serviceContext =
 			ServiceContextThreadLocal.getServiceContext();
