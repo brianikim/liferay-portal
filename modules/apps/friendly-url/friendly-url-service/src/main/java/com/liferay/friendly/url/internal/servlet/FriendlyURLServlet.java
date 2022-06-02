@@ -14,6 +14,8 @@
 
 package com.liferay.friendly.url.internal.servlet;
 
+import com.liferay.friendly.url.internal.configuration.FriendlyURLRedirectionConfiguration;
+import com.liferay.friendly.url.internal.configuration.admin.service.FriendlyURLRedirectionManagedServiceFactory;
 import com.liferay.petra.encryptor.Encryptor;
 import com.liferay.petra.encryptor.EncryptorException;
 import com.liferay.petra.lang.HashUtil;
@@ -278,7 +280,8 @@ public class FriendlyURLServlet extends HttpServlet {
 					boolean forcePermanentRedirect = true;
 
 					if (Validator.isNull(i18nLanguageId)) {
-						forcePermanentRedirect = false;
+						forcePermanentRedirect = _isPermanentRedirect(
+							group.getCompanyId());
 					}
 
 					return new Redirect(redirect, true, forcePermanentRedirect);
@@ -343,7 +346,9 @@ public class FriendlyURLServlet extends HttpServlet {
 
 		long userId = portal.getUserId(httpServletRequest);
 
-		if ((userId > 0) && _isImpersonated(httpServletRequest, userId)) {
+		boolean impersonated = _isImpersonated(httpServletRequest, userId);
+
+		if ((userId > 0) && impersonated) {
 			try {
 				Company company = portal.getCompany(httpServletRequest);
 
@@ -369,7 +374,9 @@ public class FriendlyURLServlet extends HttpServlet {
 					!actualURL.contains(StringPool.QUESTION)));
 		}
 
-		return new Redirect(actualURL);
+		return new Redirect(
+			actualURL, false,
+			!impersonated && _isPermanentRedirect(group.getCompanyId()));
 	}
 
 	@Override
@@ -664,6 +671,10 @@ public class FriendlyURLServlet extends HttpServlet {
 	}
 
 	@Reference
+	protected FriendlyURLRedirectionManagedServiceFactory
+		friendlyURLRedirectionManagedServiceFactory;
+
+	@Reference
 	protected GroupLocalService groupLocalService;
 
 	@Reference
@@ -811,6 +822,22 @@ public class FriendlyURLServlet extends HttpServlet {
 		}
 
 		return true;
+	}
+
+	private boolean _isPermanentRedirect(long companyId) {
+		FriendlyURLRedirectionConfiguration
+			friendlyURLRedirectionConfiguration =
+				friendlyURLRedirectionManagedServiceFactory.
+					getCompanyFriendlyURLConfiguration(companyId);
+
+		if (Objects.equals(
+				friendlyURLRedirectionConfiguration.redirectionType(),
+				"permanent")) {
+
+			return true;
+		}
+
+		return false;
 	}
 
 	private String _normalizeFriendlyURL(String friendlyURL) {
