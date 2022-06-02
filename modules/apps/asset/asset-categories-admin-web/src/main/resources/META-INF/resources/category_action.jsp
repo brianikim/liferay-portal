@@ -133,7 +133,8 @@ AssetCategory category = (AssetCategory)row.getObject();
 							document.<portlet:namespace />moveCategoryFm.<portlet:namespace />categoryId.value =
 								'<%= category.getCategoryId() %>';
 							document.<portlet:namespace />moveCategoryFm.<portlet:namespace />parentCategoryId.value = parentCategoryId;
-							document.<portlet:namespace />moveCategoryFm.<portlet:namespace />vocabularyId.value = vocabularyId;
+							document.<portlet:namespace />moveCategoryFm.<portlet:namespace />vocabularyId.value =
+								item.vocabularyId;
 
 							submitForm(document.<portlet:namespace />moveCategoryFm);
 						}
