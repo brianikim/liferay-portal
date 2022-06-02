@@ -359,7 +359,7 @@
 				);
 			});
 
-			AUI().use('aui-progressbar,uploader', (A) => {
+			AUI().use('aui-progressbar', 'uploader', (A) => {
 				const ATTR_DATA_RANDOM_ID = 'data-random-id';
 				const CSS_UPLOADING_IMAGE = 'uploading-image';
 
