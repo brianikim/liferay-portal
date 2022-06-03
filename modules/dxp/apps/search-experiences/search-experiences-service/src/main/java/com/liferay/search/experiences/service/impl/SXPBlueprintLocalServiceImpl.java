@@ -76,7 +76,6 @@ public class SXPBlueprintLocalServiceImpl
 		sxpBlueprint.setConfigurationJSON(configurationJSON);
 		sxpBlueprint.setDescriptionMap(descriptionMap);
 		sxpBlueprint.setElementInstancesJSON(elementInstancesJSON);
-		sxpBlueprint.setKey(String.valueOf(counterLocalService.increment()));
 		sxpBlueprint.setSchemaVersion(schemaVersion);
 		sxpBlueprint.setTitleMap(titleMap);
 		sxpBlueprint.setVersion(
@@ -139,6 +138,14 @@ public class SXPBlueprintLocalServiceImpl
 	}
 
 	@Override
+	public SXPBlueprint getSXPBlueprintByExternalReferenceCode(
+		long companyId, String externalReferenceCode) {
+
+		return sxpBlueprintPersistence.fetchByC_ERC(
+			companyId, externalReferenceCode);
+	}
+
+	@Override
 	public int getSXPBlueprintsCount(long companyId) {
 		return sxpBlueprintPersistence.countByCompanyId(companyId);
 	}
@@ -186,7 +193,8 @@ public class SXPBlueprintLocalServiceImpl
 		sxpBlueprint.setConfigurationJSON(configurationJSON);
 		sxpBlueprint.setDescriptionMap(descriptionMap);
 		sxpBlueprint.setElementInstancesJSON(elementInstancesJSON);
-		sxpBlueprint.setKey(sxpBlueprint.getKey());
+		sxpBlueprint.setExternalReferenceCode(
+			sxpBlueprint.getExternalReferenceCode());
 		sxpBlueprint.setTitleMap(titleMap);
 		sxpBlueprint.setVersion(
 			String.format(

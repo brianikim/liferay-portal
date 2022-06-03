@@ -72,7 +72,6 @@ public class SXPElementLocalServiceImpl extends SXPElementLocalServiceBaseImpl {
 		sxpElement.setDescriptionMap(descriptionMap);
 		sxpElement.setElementDefinitionJSON(elementDefinitionJSON);
 		sxpElement.setHidden(false);
-		sxpElement.setKey(String.valueOf(counterLocalService.increment()));
 		sxpElement.setReadOnly(readOnly);
 		sxpElement.setSchemaVersion(schemaVersion);
 		sxpElement.setTitleMap(titleMap);
@@ -127,6 +126,14 @@ public class SXPElementLocalServiceImpl extends SXPElementLocalServiceBaseImpl {
 	}
 
 	@Override
+	public SXPElement getSXPElementByExternalReferenceCode(
+		long companyId, String externalReferenceCode) {
+
+		return sxpElementPersistence.fetchByC_ERC(
+			companyId, externalReferenceCode);
+	}
+
+	@Override
 	public List<SXPElement> getSXPElements(long companyId, boolean readOnly) {
 		return sxpElementPersistence.findByC_R(companyId, readOnly);
 	}
@@ -165,7 +172,8 @@ public class SXPElementLocalServiceImpl extends SXPElementLocalServiceBaseImpl {
 		sxpElement.setDescriptionMap(descriptionMap);
 		sxpElement.setElementDefinitionJSON(elementDefinitionJSON);
 		sxpElement.setHidden(hidden);
-		sxpElement.setKey(sxpElement.getKey());
+		sxpElement.setExternalReferenceCode(
+			sxpElement.getExternalReferenceCode());
 		sxpElement.setSchemaVersion(schemaVersion);
 		sxpElement.setTitleMap(titleMap);
 		sxpElement.setVersion(
