@@ -16,13 +16,10 @@ package com.liferay.portal.layoutconfiguration.util.velocity;
 
 import com.liferay.petra.string.StringPool;
 import com.liferay.petra.xml.XMLUtil;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
-import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutTypePortlet;
 import com.liferay.portal.kernel.model.Portlet;
 import com.liferay.portal.kernel.portlet.PortletContainerUtil;
-import com.liferay.portal.kernel.portlet.PortletJSONUtil;
 import com.liferay.portal.kernel.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portal.kernel.portlet.PortletProvider;
 import com.liferay.portal.kernel.portlet.PortletProviderUtil;
@@ -269,27 +266,9 @@ public class TemplateProcessor implements ColumnProcessor {
 			}
 		}
 
-		_httpServletRequest.setAttribute(
-			WebKeys.RENDER_PORTLET_RESOURCE, Boolean.TRUE);
+		StringBundler sb = _renderPortlet(portlet, null, null, null);
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		PortletJSONUtil.populatePortletJSONObject(
-			_httpServletRequest, StringPool.BLANK, portlet, jsonObject);
-
-		try {
-			PortletJSONUtil.writeHeaderPaths(_httpServletResponse, jsonObject);
-
-			StringBundler sb = _renderPortlet(portlet, null, null, null);
-
-			PortletJSONUtil.writeFooterPaths(_httpServletResponse, jsonObject);
-
-			return sb.toString();
-		}
-		finally {
-			_httpServletRequest.removeAttribute(
-				WebKeys.RENDER_PORTLET_RESOURCE);
-		}
+		return sb.toString();
 	}
 
 	@Override
