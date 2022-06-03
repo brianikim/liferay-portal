@@ -272,9 +272,6 @@ public class TemplateProcessor implements ColumnProcessor {
 		_httpServletRequest.setAttribute(
 			WebKeys.RENDER_PORTLET_RESOURCE, Boolean.TRUE);
 
-		BufferCacheServletResponse bufferCacheServletResponse =
-			new BufferCacheServletResponse(_httpServletResponse);
-
 		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
 
 		PortletJSONUtil.populatePortletJSONObject(
@@ -283,16 +280,11 @@ public class TemplateProcessor implements ColumnProcessor {
 		try {
 			PortletJSONUtil.writeHeaderPaths(_httpServletResponse, jsonObject);
 
-			HttpServletRequest httpServletRequest =
-				PortletContainerUtil.setupOptionalRenderParameters(
-					_httpServletRequest, null, null, null, null);
-
-			PortletContainerUtil.render(
-				httpServletRequest, bufferCacheServletResponse, portlet);
+			StringBundler sb = _renderPortlet(portlet, null, null, null);
 
 			PortletJSONUtil.writeFooterPaths(_httpServletResponse, jsonObject);
 
-			return bufferCacheServletResponse.getString();
+			return sb.toString();
 		}
 		finally {
 			_httpServletRequest.removeAttribute(
