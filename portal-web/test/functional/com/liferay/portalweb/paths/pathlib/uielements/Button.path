@@ -806,6 +806,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>TRASH</td>
+	<td>//button[*[name()='svg'][contains(@class,'lexicon-icon-trash')]]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>UNDO</td>
 	<td>//button[contains(.,'Undo')]</td>
 	<td></td>

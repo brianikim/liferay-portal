@@ -37,6 +37,24 @@ definition {
 		selenium.assertLiferayErrors();
 	}
 
+	function uncheckNotVisible {
+		WaitForSPARefresh();
+
+		selenium.waitForElementPresent();
+
+		selenium.mouseOver();
+
+		if (selenium.isChecked()) {
+			selenium.clickAt();
+		}
+
+		selenium.assertNotChecked();
+
+		selenium.assertJavaScriptErrors();
+
+		selenium.assertLiferayErrors();
+	}
+
 	function uncheckToggleSwitch {
 		WaitForSPARefresh();
 

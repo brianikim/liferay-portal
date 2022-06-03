@@ -11,6 +11,11 @@
 
 <tbody>
 <tr>
+	<td>ANY_PAGE</td>
+	<td>//ul[contains(@class,'pagination')]//li[contains(@class,'page-item')]//*[contains(@class,'page-link')][normalize-space(text())='${key_pageNumber}']</td>
+	<td></td>
+</tr>
+<tr>
 	<td>PAGES</td>
 	<td>//div[@class='search-results' and contains(.,'Pages')]</td>
 	<td></td>
@@ -22,7 +27,7 @@
 </tr>
 <tr>
 	<td>PREVIOUS_LINK</td>
-	<td>//ul[contains(@class,'pagination')]/li/a[contains(.,'2')] | //ul[contains(@class,'pagination')]/li/a[contains(.,'Previous')] | //ul[contains(@class,'pagination')]/li/a/span[contains(@class,'icon-caret-left')]</td>
+	<td>//ul[contains(@class,'pagination')]/li/a[contains(.,'2')] | //ul[contains(@class,'pagination')]/li/a[contains(.,'Previous')] | //ul[contains(@class,'pagination')]/li/a/span[contains(@class,'icon-caret-left')] | //button[contains(@class, 'page-link')]//*[contains(@class,'left')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -67,7 +72,7 @@
 </tr>
 <tr>
 	<td>ITEMS_PER_PAGE_SELECT</td>
-	<td>//div[contains(@class,'pagination-items-per-page')]/a[contains(@class,'toggle')]</td>
+	<td>//div[contains(@class,'pagination-items-per-page')]/*[self::a or self::button][contains(@class,'toggle')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -77,7 +82,7 @@
 </tr>
 <tr>
 	<td>RESULTS</td>
-	<td>//p[@class='pagination-results']</td>
+	<td>xpath=(//div|//p)[@class='pagination-results']</td>
 	<td></td>
 </tr>
 <tr>

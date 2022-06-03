@@ -200,15 +200,15 @@ definition {
 		SearchPortlets.searchEmbedded(searchTerm = "apple");
 
 		AssertTextEquals.assertPartialText(
-			locator1 = "SearchResults#SEARCH_INSIGHTS_PORTLET_STRING_QUERY",
+			locator1 = "SearchResults#SEARCH_INSIGHTS_PORTLET_REQUEST_STRING",
 			value1 = "&quot;explain&quot;:true");
 
 		AssertTextEquals.assertPartialText(
-			locator1 = "SearchResults#SEARCH_INSIGHTS_PORTLET_RESPONSE_QUERY",
+			locator1 = "SearchResults#SEARCH_INSIGHTS_PORTLET_RESPONSE_STRING",
 			value1 = "buckets");
 
 		AssertTextEquals.assertPartialText(
-			locator1 = "SearchResults#SEARCH_INSIGHTS_PORTLET_RESPONSE_QUERY",
+			locator1 = "SearchResults#SEARCH_INSIGHTS_PORTLET_RESPONSE_STRING",
 			value1 = "_explanation");
 
 		Portlet.gotoPortletOptions(
@@ -228,11 +228,11 @@ definition {
 		SearchPortlets.searchEmbedded(searchTerm = "apple");
 
 		AssertTextEquals.assertPartialText(
-			locator1 = "SearchResults#SEARCH_INSIGHTS_PORTLET_STRING_QUERY",
+			locator1 = "SearchResults#SEARCH_INSIGHTS_PORTLET_REQUEST_STRING",
 			value1 = "&quot;explain&quot;:false");
 
 		AssertTextNotEquals.assertNotPartialText(
-			locator1 = "SearchResults#SEARCH_INSIGHTS_PORTLET_RESPONSE_QUERY",
+			locator1 = "SearchResults#SEARCH_INSIGHTS_PORTLET_RESPONSE_STRING",
 			value1 = "_explanation");
 	}
 
