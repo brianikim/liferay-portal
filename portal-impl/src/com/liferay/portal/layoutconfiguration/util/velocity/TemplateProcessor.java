@@ -351,38 +351,48 @@ public class TemplateProcessor implements ColumnProcessor {
 			Integer columnCount = Integer.valueOf(portlets.size());
 			Integer columnPos = Integer.valueOf(i);
 
-			PortletRenderer portletRenderer = new PortletRenderer(
-				portlet, columnId, columnCount, columnPos);
-
-			if (_portletAjaxRender && (portlet.getRenderWeight() < 1)) {
-				StringBundler renderResultSB = portletRenderer.renderAjax(
-					_httpServletRequest, _httpServletResponse);
-
-				sb.append(renderResultSB);
-			}
-			else {
-				Integer renderWeight = portlet.getRenderWeight();
-
-				List<PortletRenderer> portletRenderers = _portletRenderers.get(
-					renderWeight);
-
-				if (portletRenderers == null) {
-					portletRenderers = new ArrayList<>();
-
-					_portletRenderers.put(renderWeight, portletRenderers);
-				}
-
-				portletRenderers.add(portletRenderer);
-
-				sb.append("[$TEMPLATE_PORTLET_");
-				sb.append(portlet.getPortletId());
-				sb.append("$]");
-			}
+			sb.append(
+				_renderPortlet(portlet, columnId, columnCount, columnPos));
 		}
 
 		sb.append("</div>");
 
 		return sb.toString();
+	}
+
+	private StringBundler _renderPortlet(
+			Portlet portlet, String columnId, Integer columnCount,
+			Integer columnPos)
+		throws Exception {
+
+		PortletRenderer portletRenderer = new PortletRenderer(
+			portlet, columnId, columnCount, columnPos);
+
+		if (_portletAjaxRender && (portlet.getRenderWeight() < 1)) {
+			return portletRenderer.renderAjax(
+				_httpServletRequest, _httpServletResponse);
+		}
+
+		Integer renderWeight = portlet.getRenderWeight();
+
+		List<PortletRenderer> portletRenderers = _portletRenderers.get(
+			renderWeight);
+
+		if (portletRenderers == null) {
+			portletRenderers = new ArrayList<>();
+
+			_portletRenderers.put(renderWeight, portletRenderers);
+		}
+
+		portletRenderers.add(portletRenderer);
+
+		StringBundler sb = new StringBundler(3);
+
+		sb.append("[$TEMPLATE_PORTLET_");
+		sb.append(portlet.getPortletId());
+		sb.append("$]");
+
+		return sb;
 	}
 
 	private static final RenderWeightComparator _renderWeightComparator =
