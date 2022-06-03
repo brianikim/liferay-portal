@@ -9256,14 +9256,12 @@ public class JournalArticleLocalServiceImpl
 
 				Folder folder = article.addImagesFolder();
 
-				_portletFileRepository.addPortletFileEntry(
+				return _portletFileRepository.addPortletFileEntry(
 					article.getGroupId(), fileEntry.getUserId(),
 					JournalArticle.class.getName(),
 					article.getResourcePrimKey(), JournalConstants.SERVICE_NAME,
 					folder.getFolderId(), fileEntry.getContentStream(),
 					fileEntryName, fileEntry.getMimeType(), false);
-
-				return null;
 			});
 	}
 
