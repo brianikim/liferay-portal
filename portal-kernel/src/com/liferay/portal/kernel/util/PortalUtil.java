@@ -1905,6 +1905,10 @@ public class PortalUtil {
 		return getPortal().isGroupAdmin(user, groupId);
 	}
 
+	public static boolean isGroupControlPanelPath(String path) {
+		return _portal.isGroupControlPanelPath(path);
+	}
+
 	public static boolean isGroupFriendlyURL(
 		String fullURL, String groupFriendlyURL, String layoutFriendlyURL) {
 
