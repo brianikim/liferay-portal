@@ -56,6 +56,7 @@ import com.liferay.journal.internal.upgrade.v2_0_0.util.JournalFeedTable;
 import com.liferay.journal.internal.upgrade.v2_0_0.util.JournalFolderTable;
 import com.liferay.journal.internal.upgrade.v3_2_1.UpgradeJournalArticleLocalization;
 import com.liferay.journal.internal.upgrade.v3_3_0.UpgradeStorageLinks;
+import com.liferay.journal.internal.upgrade.v3_4_2.ArticleAssetsBasicWebContentClassTypeIdUpgradeProcess;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.portal.change.tracking.store.CTStoreFactory;
 import com.liferay.portal.configuration.upgrade.PrefsPropsToConfigurationUpgradeHelper;
@@ -277,6 +278,12 @@ public class JournalServiceUpgrade implements UpgradeStepRegistrator {
 			"3.4.0", "3.4.1",
 			new com.liferay.journal.internal.upgrade.v3_4_1.
 				UpgradeJournalArticleLocalization());
+
+		registry.register(
+			"3.4.1", "3.4.2",
+			new ArticleAssetsBasicWebContentClassTypeIdUpgradeProcess(
+				_assetEntryLocalService, _companyLocalService,
+				_groupLocalService, _ddmStructureLocalService));
 	}
 
 	protected void deleteTempImages() throws Exception {
