@@ -99,7 +99,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -1222,20 +1221,16 @@ public class LayoutImportController implements ImportController {
 
 		// Available locales
 
-		List<Locale> sourceAvailableLocales = Arrays.asList(
-			LocaleUtil.fromLanguageIds(
-				StringUtil.split(
-					headerElement.attributeValue("available-locales"))));
+		String[] sourceAvailableLanguageIds = StringUtil.split(
+			headerElement.attributeValue("available-locales"));
 
-		for (Locale sourceAvailableLocale : sourceAvailableLocales) {
-			if (!LanguageUtil.isAvailableLocale(
-					groupId, sourceAvailableLocale)) {
-
+		for (String languageId : sourceAvailableLanguageIds) {
+			if (!LanguageUtil.isAvailableLocale(groupId, languageId)) {
 				LocaleException localeException = new LocaleException(
 					LocaleException.TYPE_EXPORT_IMPORT);
 
-				localeException.setSourceAvailableLocales(
-					sourceAvailableLocales);
+				localeException.setSourceAvailableLanguageIds(
+					Arrays.asList(sourceAvailableLanguageIds));
 				localeException.setTargetAvailableLocales(
 					LanguageUtil.getAvailableLocales(groupId));
 
