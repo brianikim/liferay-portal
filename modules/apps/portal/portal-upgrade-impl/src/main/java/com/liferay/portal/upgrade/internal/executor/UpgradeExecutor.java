@@ -186,10 +186,10 @@ public class UpgradeExecutor {
 		if (fromSchemaVersion.equals("0.0.0") &&
 			upgradeStepName.equals("Initial Database Creation")) {
 
-			return false;
+			return true;
 		}
 
-		return true;
+		return false;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
