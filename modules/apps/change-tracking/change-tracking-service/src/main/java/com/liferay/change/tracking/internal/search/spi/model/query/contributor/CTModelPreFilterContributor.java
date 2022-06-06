@@ -17,6 +17,8 @@ package com.liferay.change.tracking.internal.search.spi.model.query.contributor;
 import com.liferay.change.tracking.constants.CTConstants;
 import com.liferay.change.tracking.model.CTEntry;
 import com.liferay.change.tracking.service.CTEntryLocalService;
+import com.liferay.journal.model.JournalArticle;
+import com.liferay.journal.service.JournalArticleLocalService;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory;
 import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
@@ -24,8 +26,8 @@ import com.liferay.portal.kernel.search.BooleanClauseOccur;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.filter.BooleanFilter;
-import com.liferay.portal.kernel.search.filter.ExistsFilter;
 import com.liferay.portal.kernel.search.filter.Filter;
+import com.liferay.portal.kernel.search.filter.MissingFilter;
 import com.liferay.portal.kernel.search.filter.TermsFilter;
 import com.liferay.portal.kernel.service.ClassNameLocalService;
 import com.liferay.portal.kernel.service.change.tracking.CTService;
@@ -74,6 +76,8 @@ public class CTModelPreFilterContributor implements ModelPreFilterContributor {
 			return;
 		}
 
+		BooleanFilter ctBooleanFilter = new BooleanFilter();
+
 		long ctCollectionId = GetterUtil.getLong(
 			ctCollectionIdString, CTCollectionThreadLocal.getCTCollectionId());
 
@@ -81,15 +85,12 @@ public class CTModelPreFilterContributor implements ModelPreFilterContributor {
 			if (!GetterUtil.getBoolean(
 					searchContext.getAttribute("relatedClassName"))) {
 
-				booleanFilter.add(
-					_CT_COLLECTION_ID_EXISTS_FILTER,
-					BooleanClauseOccur.MUST_NOT);
+				ctBooleanFilter.add(
+					_CT_COLLECTION_ID_MISSING_FILTER, BooleanClauseOccur.MUST);
 			}
 		}
 		else {
-			boolean added = false;
-
-			List<Long> excludeModelClassPKs = new ArrayList<>();
+			List<Long> excludeProductionModelClassPKs = new ArrayList<>();
 
 			for (CTEntry ctEntry :
 					_ctEntryLocalService.getCTEntries(
@@ -98,45 +99,48 @@ public class CTModelPreFilterContributor implements ModelPreFilterContributor {
 
 				int changeType = ctEntry.getChangeType();
 
-				if (changeType == CTConstants.CT_CHANGE_TYPE_ADDITION) {
-					added = true;
+				if ((changeType == CTConstants.CT_CHANGE_TYPE_DELETION) ||
+					(changeType == CTConstants.CT_CHANGE_TYPE_MODIFICATION)) {
+
+					excludeProductionModelClassPKs.add(
+						ctEntry.getModelClassPK());
 				}
-				else {
-					if (changeType == CTConstants.CT_CHANGE_TYPE_MODIFICATION) {
-						added = true;
-					}
-
-					excludeModelClassPKs.add(ctEntry.getModelClassPK());
+				else if (className.equals(JournalArticle.class.getName())) {
+					_excludeProductionJournalArticles(
+						ctEntry, excludeProductionModelClassPKs);
 				}
 			}
 
-			if (added) {
-				booleanFilter.addTerm(
-					_CT_COLLECTION_ID, String.valueOf(ctCollectionId),
-					BooleanClauseOccur.SHOULD);
-				booleanFilter.addTerm(
-					_CT_COLLECTION_ID,
-					String.valueOf(CTConstants.CT_COLLECTION_ID_PRODUCTION),
-					BooleanClauseOccur.SHOULD);
-			}
-			else {
-				booleanFilter.add(
-					_CT_COLLECTION_ID_EXISTS_FILTER,
-					BooleanClauseOccur.MUST_NOT);
-			}
+			ctBooleanFilter.add(
+				_CT_COLLECTION_ID_MISSING_FILTER, BooleanClauseOccur.SHOULD);
 
-			if (!excludeModelClassPKs.isEmpty()) {
-				TermsFilter termsFilter = new TermsFilter(Field.UID);
+			TermsFilter ctCollectionIdTermsFilter = new TermsFilter(
+				_CT_COLLECTION_ID);
 
-				for (Long classPK : excludeModelClassPKs) {
-					termsFilter.addValue(
+			ctCollectionIdTermsFilter.addValue(String.valueOf(ctCollectionId));
+			ctCollectionIdTermsFilter.addValue(
+				String.valueOf(CTConstants.CT_COLLECTION_ID_PRODUCTION));
+
+			ctBooleanFilter.add(
+				ctCollectionIdTermsFilter, BooleanClauseOccur.SHOULD);
+
+			if (!excludeProductionModelClassPKs.isEmpty()) {
+				TermsFilter uidTermsFilter = new TermsFilter(Field.UID);
+
+				for (Long classPK : excludeProductionModelClassPKs) {
+					uidTermsFilter.addValue(
 						_uidFactory.getUID(
 							className, String.valueOf(classPK),
 							CTConstants.CT_COLLECTION_ID_PRODUCTION));
 				}
 
-				booleanFilter.add(termsFilter, BooleanClauseOccur.MUST_NOT);
+				ctBooleanFilter.add(
+					uidTermsFilter, BooleanClauseOccur.MUST_NOT);
 			}
+		}
+
+		if (ctBooleanFilter.hasClauses()) {
+			booleanFilter.add(ctBooleanFilter, BooleanClauseOccur.MUST);
 		}
 	}
 
@@ -159,16 +163,45 @@ public class CTModelPreFilterContributor implements ModelPreFilterContributor {
 		_serviceTrackerMap.close();
 	}
 
+	private void _excludeProductionJournalArticles(
+		CTEntry ctEntry, List<Long> excludeProductionModelClassPKs) {
+
+		JournalArticle ctJournalArticle =
+			_journalArticleLocalService.fetchJournalArticle(
+				ctEntry.getModelClassPK());
+
+		if ((ctJournalArticle == null) ||
+			(ctJournalArticle.getVersion() == 1)) {
+
+			return;
+		}
+
+		List<JournalArticle> journalArticles =
+			_journalArticleLocalService.getArticlesByResourcePrimKey(
+				ctJournalArticle.getResourcePrimKey());
+
+		for (JournalArticle journalArticle : journalArticles) {
+			if (journalArticle.getCtCollectionId() ==
+					CTConstants.CT_COLLECTION_ID_PRODUCTION) {
+
+				excludeProductionModelClassPKs.add(journalArticle.getId());
+			}
+		}
+	}
+
 	private static final String _CT_COLLECTION_ID = "ctCollectionId";
 
-	private static final Filter _CT_COLLECTION_ID_EXISTS_FILTER =
-		new ExistsFilter(_CT_COLLECTION_ID);
+	private static final Filter _CT_COLLECTION_ID_MISSING_FILTER =
+		new MissingFilter(_CT_COLLECTION_ID);
 
 	@Reference
 	private ClassNameLocalService _classNameLocalService;
 
 	@Reference
 	private CTEntryLocalService _ctEntryLocalService;
+
+	@Reference
+	private JournalArticleLocalService _journalArticleLocalService;
 
 	private ServiceTrackerMap<String, CTService<?>> _serviceTrackerMap;
 
