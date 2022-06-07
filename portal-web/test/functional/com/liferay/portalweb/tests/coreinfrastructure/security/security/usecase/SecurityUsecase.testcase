@@ -330,22 +330,6 @@ out.println(PortalUtil.escapeRedirect("/"));
 		Alert.viewInfoMessageSpecific(infoMessage = "You do not belong to an organization and are not allowed to view other organizations.");
 	}
 
-	@description = "This is a use case for LPS-73595."
-	@priority = "5"
-	test ViewJSLoaderModulesURLNoWiki {
-		var portalURL = PropsUtil.get("portal.url");
-
-		Open.openNoError(locator1 = "${portalURL}/o/js_loader_modules");
-
-		AssertConsoleTextPresent(value1 = "com.liferay.wiki.engine.html");
-
-		AssertConsoleTextPresent(value1 = "com.liferay.wiki.engine.text");
-
-		AssertTextNotPresent(value1 = "com.liferay.wiki.engine.html");
-
-		AssertTextNotPresent(value1 = "com.liferay.wiki.engine.text");
-	}
-
 	@description = "This is a use case for LPS-55622."
 	@priority = "5"
 	test ViewNoInvokedPortletViaURL {
