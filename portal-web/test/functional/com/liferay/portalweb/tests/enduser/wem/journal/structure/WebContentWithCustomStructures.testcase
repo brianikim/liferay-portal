@@ -795,11 +795,11 @@ definition {
 			IFrame.closeFrame();
 
 			AssertTextEquals(
-				locator1 = "//div[@data-analytics-asset-title='WC WebContent Title']//dt",
+				locator1 = "//div[contains(@class,'journal-content-article')]//dl//dt",
 				value1 = "Text");
 
 			AssertTextEquals(
-				locator1 = "//div[@data-analytics-asset-title='WC WebContent Title']//dd",
+				locator1 = "//div[contains(@class,'journal-content-article')]//dl//dd",
 				value1 = "WC WebContent Text");
 		}
 	}
