@@ -57,7 +57,7 @@ public class LayoutAssetRenderer extends BaseJSPAssetRenderer<Layout> {
 
 	@Override
 	public long getClassPK() {
-		return _layout.getLayoutId();
+		return _layout.getPlid();
 	}
 
 	@Override
