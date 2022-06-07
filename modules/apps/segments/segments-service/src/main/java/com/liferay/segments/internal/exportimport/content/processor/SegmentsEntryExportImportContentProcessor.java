@@ -70,7 +70,7 @@ public class SegmentsEntryExportImportContentProcessor
 		content = _replaceExportCriteriaReferences(
 			portletDataContext, stagedModel, criteria);
 
-		return _replaceExportExpandoReferences(content);
+		return _replaceExportExpandoColumnReferences(content);
 	}
 
 	@Override
@@ -79,7 +79,7 @@ public class SegmentsEntryExportImportContentProcessor
 			String content)
 		throws Exception {
 
-		content = _replaceImportExpandoReferences(
+		content = _replaceImportExpandoColumnReferences(
 			portletDataContext.getCompanyId(), content);
 
 		Criteria criteria = CriteriaSerializer.deserialize(content);
@@ -132,7 +132,7 @@ public class SegmentsEntryExportImportContentProcessor
 		return CriteriaSerializer.serialize(criteria);
 	}
 
-	private String _replaceExportExpandoReferences(String content) {
+	private String _replaceExportExpandoColumnReferences(String content) {
 		Matcher matcher = _exportCustomFieldPattern.matcher(content);
 
 		StringBuffer sb = null;
@@ -142,11 +142,11 @@ public class SegmentsEntryExportImportContentProcessor
 				sb = new StringBuffer(content.length());
 			}
 
-			String columnId = matcher.group(1);
+			String expandoColumnId = matcher.group(1);
 
 			ExpandoColumn expandoColumn =
 				_expandoColumnLocalService.fetchExpandoColumn(
-					GetterUtil.getLong(columnId));
+					GetterUtil.getLong(expandoColumnId));
 
 			if (expandoColumn == null) {
 				continue;
@@ -172,7 +172,7 @@ public class SegmentsEntryExportImportContentProcessor
 		return content;
 	}
 
-	private String _replaceImportExpandoReferences(
+	private String _replaceImportExpandoColumnReferences(
 		long companyId, String content) {
 
 		Matcher matcher = _importCustomFieldPattern.matcher(content);
