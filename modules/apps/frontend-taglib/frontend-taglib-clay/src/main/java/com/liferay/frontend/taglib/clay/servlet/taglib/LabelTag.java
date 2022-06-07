@@ -234,6 +234,7 @@ public class LabelTag extends BaseContainerTag {
 			}
 
 			jspWriter.write(HtmlUtil.escape(translatedLabel));
+
 			jspWriter.write("</span>");
 
 			if (_dismissible) {
