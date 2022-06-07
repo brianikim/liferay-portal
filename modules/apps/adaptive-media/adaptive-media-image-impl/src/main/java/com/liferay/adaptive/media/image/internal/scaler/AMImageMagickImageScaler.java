@@ -21,8 +21,9 @@ import com.liferay.adaptive.media.image.scaler.AMImageScaler;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.image.ImageBag;
-import com.liferay.portal.kernel.image.ImageMagick;
+import com.liferay.portal.kernel.image.ImageMagickUtil;
 import com.liferay.portal.kernel.image.ImageTool;
+import com.liferay.portal.kernel.image.ImageToolUtil;
 import com.liferay.portal.kernel.repository.model.FileVersion;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
@@ -40,7 +41,6 @@ import java.util.Map;
 import java.util.concurrent.Future;
 
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Eric Yan
@@ -53,7 +53,7 @@ public class AMImageMagickImageScaler implements AMImageScaler {
 
 	@Override
 	public boolean isEnabled() {
-		if (_imageMagick.isEnabled()) {
+		if (ImageMagickUtil.isEnabled()) {
 			return true;
 		}
 
@@ -79,12 +79,12 @@ public class AMImageMagickImageScaler implements AMImageScaler {
 					"Unable to scale image using ImageMagick");
 			}
 
-			ImageBag imageBag = _imageTool.read(scaledImageFile);
+			ImageBag imageBag = ImageToolUtil.read(scaledImageFile);
 
 			RenderedImage renderedImage = imageBag.getRenderedImage();
 
 			return new AMImageScaledImageImpl(
-				_imageTool.getBytes(renderedImage, imageBag.getType()),
+				ImageToolUtil.getBytes(renderedImage, imageBag.getType()),
 				renderedImage.getHeight(), ContentTypes.IMAGE_PNG,
 				renderedImage.getWidth());
 		}
@@ -150,17 +150,11 @@ public class AMImageMagickImageScaler implements AMImageScaler {
 
 		arguments.add(scaledImageFile.getAbsolutePath());
 
-		Future<?> future = _imageMagick.convert(arguments);
+		Future<?> future = ImageMagickUtil.convert(arguments);
 
 		future.get();
 
 		return scaledImageFile;
 	}
-
-	@Reference
-	private ImageMagick _imageMagick;
-
-	@Reference
-	private ImageTool _imageTool;
 
 }
