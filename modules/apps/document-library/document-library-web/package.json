@@ -1,11 +1,11 @@
 {
 	"dependencies": {
 		"@clayui/alert": "3.5.0",
-		"@clayui/button": "3.5.0",
+		"@clayui/button": "3.56.0",
 		"@clayui/css": "3.57.0",
-		"@clayui/form": "3.12.0",
-		"@clayui/icon": "3.1.0",
-		"@clayui/loading-indicator": "3.2.0",
+		"@clayui/form": "3.58.0",
+		"@clayui/icon": "3.56.0",
+		"@clayui/loading-indicator": "3.60.0",
 		"@clayui/modal": "3.8.0",
 		"asset-taglib": "*",
 		"clay-button": "2.24.1",

@@ -1,6 +1,6 @@
 {
 	"dependencies": {
-		"@clayui/icon": "3.1.0",
+		"@clayui/icon": "3.56.0",
 		"@clayui/tabs": "3.3.0",
 		"codemirror": "^5.52.0",
 		"frontend-js-web": "*",
