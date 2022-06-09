@@ -35,7 +35,6 @@ import com.liferay.portal.security.permission.PermissionCacheUtil;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -235,6 +234,18 @@ public class DepotPermissionCheckerWrapper extends PermissionCheckerWrapper {
 		}
 	}
 
+	private boolean _hasRole(long companyId, long[] roleIds, String roleName)
+		throws Exception {
+
+		Role role = _roleLocalService.getRole(companyId, roleName);
+
+		if (Arrays.binarySearch(roleIds, role.getRoleId()) >= 0) {
+			return true;
+		}
+
+		return false;
+	}
+
 	private boolean _isContentReviewer(Group group) throws PortalException {
 		if ((group == null) || !group.isDepot()) {
 			return false;
@@ -299,17 +310,14 @@ public class DepotPermissionCheckerWrapper extends PermissionCheckerWrapper {
 
 		long[] roleIds = getRoleIds(getUserId(), group.getGroupId());
 
-		List<String> roleNames = Arrays.asList(
-			DepotRolesConstants.ASSET_LIBRARY_MEMBER,
-			DepotRolesConstants.ASSET_LIBRARY_CONNECTED_SITE_MEMBER);
+		if (_hasRole(
+				group.getCompanyId(), roleIds,
+				DepotRolesConstants.ASSET_LIBRARY_CONNECTED_SITE_MEMBER) ||
+			_hasRole(
+				group.getCompanyId(), roleIds,
+				DepotRolesConstants.ASSET_LIBRARY_MEMBER)) {
 
-		for (String roleName : roleNames) {
-			Role role = _roleLocalService.getRole(
-				group.getCompanyId(), roleName);
-
-			if (Arrays.binarySearch(roleIds, role.getRoleId()) >= 0) {
-				return true;
-			}
+			return true;
 		}
 
 		return false;
