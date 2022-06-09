@@ -35,6 +35,7 @@ import com.liferay.portal.security.permission.PermissionCacheUtil;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -298,21 +299,17 @@ public class DepotPermissionCheckerWrapper extends PermissionCheckerWrapper {
 
 		long[] roleIds = getRoleIds(getUserId(), group.getGroupId());
 
-		Role memberRole = _roleLocalService.getRole(
-			group.getCompanyId(), DepotRolesConstants.ASSET_LIBRARY_MEMBER);
-
-		if (Arrays.binarySearch(roleIds, memberRole.getRoleId()) >= 0) {
-			return true;
-		}
-
-		Role connectedSiteMemberRole = _roleLocalService.getRole(
-			group.getCompanyId(),
+		List<String> roleNames = Arrays.asList(
+			DepotRolesConstants.ASSET_LIBRARY_MEMBER,
 			DepotRolesConstants.ASSET_LIBRARY_CONNECTED_SITE_MEMBER);
 
-		if (Arrays.binarySearch(roleIds, connectedSiteMemberRole.getRoleId()) >=
-				0) {
+		for (String roleName : roleNames) {
+			Role role = _roleLocalService.getRole(
+				group.getCompanyId(), roleName);
 
-			return true;
+			if (Arrays.binarySearch(roleIds, role.getRoleId()) >= 0) {
+				return true;
+			}
 		}
 
 		return false;
