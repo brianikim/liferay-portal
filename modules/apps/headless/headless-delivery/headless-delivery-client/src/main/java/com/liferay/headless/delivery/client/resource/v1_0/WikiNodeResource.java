@@ -122,6 +122,12 @@ public interface WikiNodeResource {
 			return new WikiNodeResourceImpl(this);
 		}
 
+		public Builder contextPath(String contextPath) {
+			_contextPath = contextPath;
+
+			return this;
+		}
+
 		public Builder endpoint(String host, int port, String scheme) {
 			_host = host;
 			_port = port;
@@ -167,6 +173,7 @@ public interface WikiNodeResource {
 		private Builder() {
 		}
 
+		private String _contextPath = "";
 		private Map<String, String> _headers = new LinkedHashMap<>();
 		private String _host = "localhost";
 		private Locale _locale;
@@ -274,7 +281,7 @@ public interface WikiNodeResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/sites/{siteId}/wiki-nodes");
 
 			httpInvoker.path("siteId", siteId);
@@ -357,7 +364,7 @@ public interface WikiNodeResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/sites/{siteId}/wiki-nodes");
 
 			httpInvoker.path("siteId", siteId);
@@ -435,7 +442,7 @@ public interface WikiNodeResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/sites/{siteId}/wiki-nodes/batch");
 
 			httpInvoker.path("siteId", siteId);
@@ -514,7 +521,7 @@ public interface WikiNodeResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/wiki-nodes/{wikiNodeId}");
 
 			httpInvoker.path("wikiNodeId", wikiNodeId);
@@ -591,7 +598,7 @@ public interface WikiNodeResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/wiki-nodes/batch");
 
 			httpInvoker.userNameAndPassword(
@@ -667,7 +674,7 @@ public interface WikiNodeResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/wiki-nodes/{wikiNodeId}");
 
 			httpInvoker.path("wikiNodeId", wikiNodeId);
@@ -750,7 +757,7 @@ public interface WikiNodeResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/wiki-nodes/{wikiNodeId}");
 
 			httpInvoker.path("wikiNodeId", wikiNodeId);
@@ -827,7 +834,7 @@ public interface WikiNodeResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/wiki-nodes/batch");
 
 			httpInvoker.userNameAndPassword(
@@ -904,7 +911,7 @@ public interface WikiNodeResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/wiki-nodes/{wikiNodeId}/subscribe");
 
 			httpInvoker.path("wikiNodeId", wikiNodeId);
@@ -983,7 +990,7 @@ public interface WikiNodeResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/wiki-nodes/{wikiNodeId}/unsubscribe");
 
 			httpInvoker.path("wikiNodeId", wikiNodeId);

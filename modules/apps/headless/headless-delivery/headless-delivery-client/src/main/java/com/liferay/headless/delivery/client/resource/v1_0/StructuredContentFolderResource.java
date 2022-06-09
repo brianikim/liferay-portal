@@ -214,6 +214,12 @@ public interface StructuredContentFolderResource {
 			return new StructuredContentFolderResourceImpl(this);
 		}
 
+		public Builder contextPath(String contextPath) {
+			_contextPath = contextPath;
+
+			return this;
+		}
+
 		public Builder endpoint(String host, int port, String scheme) {
 			_host = host;
 			_port = port;
@@ -259,6 +265,7 @@ public interface StructuredContentFolderResource {
 		private Builder() {
 		}
 
+		private String _contextPath = "";
 		private Map<String, String> _headers = new LinkedHashMap<>();
 		private String _host = "localhost";
 		private Locale _locale;
@@ -375,7 +382,7 @@ public interface StructuredContentFolderResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/asset-libraries/{assetLibraryId}/structured-content-folders");
 
 			httpInvoker.path("assetLibraryId", assetLibraryId);
@@ -464,7 +471,7 @@ public interface StructuredContentFolderResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/asset-libraries/{assetLibraryId}/structured-content-folders");
 
 			httpInvoker.path("assetLibraryId", assetLibraryId);
@@ -544,7 +551,7 @@ public interface StructuredContentFolderResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/asset-libraries/{assetLibraryId}/structured-content-folders/batch");
 
 			httpInvoker.path("assetLibraryId", assetLibraryId);
@@ -657,7 +664,7 @@ public interface StructuredContentFolderResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/sites/{siteId}/structured-content-folders");
 
 			httpInvoker.path("siteId", siteId);
@@ -745,7 +752,7 @@ public interface StructuredContentFolderResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/sites/{siteId}/structured-content-folders");
 
 			httpInvoker.path("siteId", siteId);
@@ -825,7 +832,7 @@ public interface StructuredContentFolderResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/sites/{siteId}/structured-content-folders/batch");
 
 			httpInvoker.path("siteId", siteId);
@@ -934,7 +941,7 @@ public interface StructuredContentFolderResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/structured-content-folders/{parentStructuredContentFolderId}/structured-content-folders");
 
 			httpInvoker.path(
@@ -1026,7 +1033,7 @@ public interface StructuredContentFolderResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/structured-content-folders/{parentStructuredContentFolderId}/structured-content-folders");
 
 			httpInvoker.path(
@@ -1112,7 +1119,7 @@ public interface StructuredContentFolderResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/structured-content-folders/{structuredContentFolderId}");
 
 			httpInvoker.path(
@@ -1193,7 +1200,7 @@ public interface StructuredContentFolderResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/structured-content-folders/batch");
 
 			httpInvoker.userNameAndPassword(
@@ -1274,7 +1281,7 @@ public interface StructuredContentFolderResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/structured-content-folders/{structuredContentFolderId}");
 
 			httpInvoker.path(
@@ -1364,7 +1371,7 @@ public interface StructuredContentFolderResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/structured-content-folders/{structuredContentFolderId}");
 
 			httpInvoker.path(
@@ -1453,7 +1460,7 @@ public interface StructuredContentFolderResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/structured-content-folders/{structuredContentFolderId}");
 
 			httpInvoker.path(
@@ -1534,7 +1541,7 @@ public interface StructuredContentFolderResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/structured-content-folders/batch");
 
 			httpInvoker.userNameAndPassword(
@@ -1616,7 +1623,7 @@ public interface StructuredContentFolderResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/structured-content-folders/{structuredContentFolderId}/subscribe");
 
 			httpInvoker.path(
@@ -1701,7 +1708,7 @@ public interface StructuredContentFolderResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/structured-content-folders/{structuredContentFolderId}/unsubscribe");
 
 			httpInvoker.path(

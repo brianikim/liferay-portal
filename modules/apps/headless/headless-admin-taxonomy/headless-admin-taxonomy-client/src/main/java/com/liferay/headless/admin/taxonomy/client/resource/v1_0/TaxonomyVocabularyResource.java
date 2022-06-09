@@ -152,6 +152,12 @@ public interface TaxonomyVocabularyResource {
 			return new TaxonomyVocabularyResourceImpl(this);
 		}
 
+		public Builder contextPath(String contextPath) {
+			_contextPath = contextPath;
+
+			return this;
+		}
+
 		public Builder endpoint(String host, int port, String scheme) {
 			_host = host;
 			_port = port;
@@ -197,6 +203,7 @@ public interface TaxonomyVocabularyResource {
 		private Builder() {
 		}
 
+		private String _contextPath = "";
 		private Map<String, String> _headers = new LinkedHashMap<>();
 		private String _host = "localhost";
 		private Locale _locale;
@@ -306,7 +313,7 @@ public interface TaxonomyVocabularyResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-taxonomy/v1.0/asset-libraries/{assetLibraryId}/taxonomy-vocabularies");
 
 			httpInvoker.path("assetLibraryId", assetLibraryId);
@@ -392,7 +399,7 @@ public interface TaxonomyVocabularyResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-taxonomy/v1.0/asset-libraries/{assetLibraryId}/taxonomy-vocabularies");
 
 			httpInvoker.path("assetLibraryId", assetLibraryId);
@@ -472,7 +479,7 @@ public interface TaxonomyVocabularyResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-taxonomy/v1.0/asset-libraries/{assetLibraryId}/taxonomy-vocabularies/batch");
 
 			httpInvoker.path("assetLibraryId", assetLibraryId);
@@ -577,7 +584,7 @@ public interface TaxonomyVocabularyResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-taxonomy/v1.0/sites/{siteId}/taxonomy-vocabularies");
 
 			httpInvoker.path("siteId", siteId);
@@ -662,7 +669,7 @@ public interface TaxonomyVocabularyResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-taxonomy/v1.0/sites/{siteId}/taxonomy-vocabularies");
 
 			httpInvoker.path("siteId", siteId);
@@ -742,7 +749,7 @@ public interface TaxonomyVocabularyResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-taxonomy/v1.0/sites/{siteId}/taxonomy-vocabularies/batch");
 
 			httpInvoker.path("siteId", siteId);
@@ -823,7 +830,7 @@ public interface TaxonomyVocabularyResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-taxonomy/v1.0/taxonomy-vocabularies/{taxonomyVocabularyId}");
 
 			httpInvoker.path("taxonomyVocabularyId", taxonomyVocabularyId);
@@ -902,7 +909,7 @@ public interface TaxonomyVocabularyResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-taxonomy/v1.0/taxonomy-vocabularies/batch");
 
 			httpInvoker.userNameAndPassword(
@@ -982,7 +989,7 @@ public interface TaxonomyVocabularyResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-taxonomy/v1.0/taxonomy-vocabularies/{taxonomyVocabularyId}");
 
 			httpInvoker.path("taxonomyVocabularyId", taxonomyVocabularyId);
@@ -1069,7 +1076,7 @@ public interface TaxonomyVocabularyResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-taxonomy/v1.0/taxonomy-vocabularies/{taxonomyVocabularyId}");
 
 			httpInvoker.path("taxonomyVocabularyId", taxonomyVocabularyId);
@@ -1156,7 +1163,7 @@ public interface TaxonomyVocabularyResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-taxonomy/v1.0/taxonomy-vocabularies/{taxonomyVocabularyId}");
 
 			httpInvoker.path("taxonomyVocabularyId", taxonomyVocabularyId);
@@ -1234,7 +1241,7 @@ public interface TaxonomyVocabularyResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-taxonomy/v1.0/taxonomy-vocabularies/batch");
 
 			httpInvoker.userNameAndPassword(

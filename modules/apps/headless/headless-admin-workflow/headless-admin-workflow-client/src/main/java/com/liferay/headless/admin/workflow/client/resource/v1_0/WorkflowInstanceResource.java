@@ -96,6 +96,12 @@ public interface WorkflowInstanceResource {
 			return new WorkflowInstanceResourceImpl(this);
 		}
 
+		public Builder contextPath(String contextPath) {
+			_contextPath = contextPath;
+
+			return this;
+		}
+
 		public Builder endpoint(String host, int port, String scheme) {
 			_host = host;
 			_port = port;
@@ -141,6 +147,7 @@ public interface WorkflowInstanceResource {
 		private Builder() {
 		}
 
+		private String _contextPath = "";
 		private Map<String, String> _headers = new LinkedHashMap<>();
 		private String _host = "localhost";
 		private Locale _locale;
@@ -255,7 +262,7 @@ public interface WorkflowInstanceResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-workflow/v1.0/workflow-instances");
 
 			httpInvoker.userNameAndPassword(
@@ -338,7 +345,7 @@ public interface WorkflowInstanceResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-workflow/v1.0/workflow-instances/submit");
 
 			httpInvoker.userNameAndPassword(
@@ -417,7 +424,7 @@ public interface WorkflowInstanceResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-workflow/v1.0/workflow-instances/{workflowInstanceId}");
 
 			httpInvoker.path("workflowInstanceId", workflowInstanceId);
@@ -498,7 +505,7 @@ public interface WorkflowInstanceResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-workflow/v1.0/workflow-instances/{workflowInstanceId}");
 
 			httpInvoker.path("workflowInstanceId", workflowInstanceId);
@@ -584,7 +591,7 @@ public interface WorkflowInstanceResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-workflow/v1.0/workflow-instances/{workflowInstanceId}/change-transition");
 
 			httpInvoker.path("workflowInstanceId", workflowInstanceId);

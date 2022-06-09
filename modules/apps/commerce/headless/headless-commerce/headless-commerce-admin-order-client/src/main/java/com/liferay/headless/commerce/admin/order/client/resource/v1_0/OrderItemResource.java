@@ -144,6 +144,12 @@ public interface OrderItemResource {
 			return new OrderItemResourceImpl(this);
 		}
 
+		public Builder contextPath(String contextPath) {
+			_contextPath = contextPath;
+
+			return this;
+		}
+
 		public Builder endpoint(String host, int port, String scheme) {
 			_host = host;
 			_port = port;
@@ -189,6 +195,7 @@ public interface OrderItemResource {
 		private Builder() {
 		}
 
+		private String _contextPath = "";
 		private Map<String, String> _headers = new LinkedHashMap<>();
 		private String _host = "localhost";
 		private Locale _locale;
@@ -264,7 +271,7 @@ public interface OrderItemResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-commerce-admin-order/v1.0/orderItems/by-externalReferenceCode/{externalReferenceCode}");
 
 			httpInvoker.path("externalReferenceCode", externalReferenceCode);
@@ -348,7 +355,7 @@ public interface OrderItemResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-commerce-admin-order/v1.0/orderItems/by-externalReferenceCode/{externalReferenceCode}");
 
 			httpInvoker.path("externalReferenceCode", externalReferenceCode);
@@ -423,7 +430,7 @@ public interface OrderItemResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-commerce-admin-order/v1.0/orderItems/by-externalReferenceCode/{externalReferenceCode}");
 
 			httpInvoker.path("externalReferenceCode", externalReferenceCode);
@@ -490,7 +497,7 @@ public interface OrderItemResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-commerce-admin-order/v1.0/orderItems/{id}");
 
 			httpInvoker.path("id", id);
@@ -568,7 +575,7 @@ public interface OrderItemResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-commerce-admin-order/v1.0/orderItems/batch");
 
 			httpInvoker.path("id", id);
@@ -646,7 +653,7 @@ public interface OrderItemResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-commerce-admin-order/v1.0/orderItems/{id}");
 
 			httpInvoker.path("id", id);
@@ -718,7 +725,7 @@ public interface OrderItemResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-commerce-admin-order/v1.0/orderItems/{id}");
 
 			httpInvoker.path("id", id);
@@ -809,7 +816,7 @@ public interface OrderItemResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-commerce-admin-order/v1.0/orders/by-externalReferenceCode/{externalReferenceCode}/orderItems");
 
 			httpInvoker.path("externalReferenceCode", externalReferenceCode);
@@ -895,7 +902,7 @@ public interface OrderItemResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-commerce-admin-order/v1.0/orders/by-externalReferenceCode/{externalReferenceCode}/orderItems");
 
 			httpInvoker.path("externalReferenceCode", externalReferenceCode);
@@ -984,7 +991,7 @@ public interface OrderItemResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-commerce-admin-order/v1.0/orders/{id}/orderItems");
 
 			httpInvoker.path("id", id);
@@ -1067,7 +1074,7 @@ public interface OrderItemResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-commerce-admin-order/v1.0/orders/{id}/orderItems");
 
 			httpInvoker.path("id", id);
@@ -1145,7 +1152,7 @@ public interface OrderItemResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-commerce-admin-order/v1.0/orders/orderItems/batch");
 
 			httpInvoker.path("id", id);

@@ -101,6 +101,12 @@ public interface WorkflowDefinitionResource {
 			return new WorkflowDefinitionResourceImpl(this);
 		}
 
+		public Builder contextPath(String contextPath) {
+			_contextPath = contextPath;
+
+			return this;
+		}
+
 		public Builder endpoint(String host, int port, String scheme) {
 			_host = host;
 			_port = port;
@@ -146,6 +152,7 @@ public interface WorkflowDefinitionResource {
 		private Builder() {
 		}
 
+		private String _contextPath = "";
 		private Map<String, String> _headers = new LinkedHashMap<>();
 		private String _host = "localhost";
 		private Locale _locale;
@@ -238,7 +245,7 @@ public interface WorkflowDefinitionResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-workflow/v1.0/workflow-definitions");
 
 			httpInvoker.userNameAndPassword(
@@ -317,7 +324,7 @@ public interface WorkflowDefinitionResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-workflow/v1.0/workflow-definitions/by-name/{name}");
 
 			httpInvoker.path("name", name);
@@ -402,7 +409,7 @@ public interface WorkflowDefinitionResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-workflow/v1.0/workflow-definitions/deploy");
 
 			httpInvoker.userNameAndPassword(
@@ -484,7 +491,7 @@ public interface WorkflowDefinitionResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-workflow/v1.0/workflow-definitions/save");
 
 			httpInvoker.userNameAndPassword(
@@ -575,7 +582,7 @@ public interface WorkflowDefinitionResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-workflow/v1.0/workflow-definitions/undeploy");
 
 			httpInvoker.userNameAndPassword(
@@ -671,7 +678,7 @@ public interface WorkflowDefinitionResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-workflow/v1.0/workflow-definitions/update-active");
 
 			httpInvoker.userNameAndPassword(

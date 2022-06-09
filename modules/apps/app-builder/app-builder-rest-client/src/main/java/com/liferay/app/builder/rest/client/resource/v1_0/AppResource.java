@@ -130,6 +130,12 @@ public interface AppResource {
 			return new AppResourceImpl(this);
 		}
 
+		public Builder contextPath(String contextPath) {
+			_contextPath = contextPath;
+
+			return this;
+		}
+
 		public Builder endpoint(String host, int port, String scheme) {
 			_host = host;
 			_port = port;
@@ -175,6 +181,7 @@ public interface AppResource {
 		private Builder() {
 		}
 
+		private String _contextPath = "";
 		private Map<String, String> _headers = new LinkedHashMap<>();
 		private String _host = "localhost";
 		private Locale _locale;
@@ -301,7 +308,8 @@ public interface AppResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port + "/o/app-builder/v1.0/apps");
+					_builder._port + _builder._contextPath +
+						"/o/app-builder/v1.0/apps");
 
 			httpInvoker.userNameAndPassword(
 				_builder._login + ":" + _builder._password);
@@ -376,7 +384,8 @@ public interface AppResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port + "/o/app-builder/v1.0/apps/{appId}");
+					_builder._port + _builder._contextPath +
+						"/o/app-builder/v1.0/apps/{appId}");
 
 			httpInvoker.path("appId", appId);
 
@@ -452,7 +461,8 @@ public interface AppResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port + "/o/app-builder/v1.0/apps/batch");
+					_builder._port + _builder._contextPath +
+						"/o/app-builder/v1.0/apps/batch");
 
 			httpInvoker.userNameAndPassword(
 				_builder._login + ":" + _builder._password);
@@ -526,7 +536,8 @@ public interface AppResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port + "/o/app-builder/v1.0/apps/{appId}");
+					_builder._port + _builder._contextPath +
+						"/o/app-builder/v1.0/apps/{appId}");
 
 			httpInvoker.path("appId", appId);
 
@@ -605,7 +616,8 @@ public interface AppResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port + "/o/app-builder/v1.0/apps/{appId}");
+					_builder._port + _builder._contextPath +
+						"/o/app-builder/v1.0/apps/{appId}");
 
 			httpInvoker.path("appId", appId);
 
@@ -681,7 +693,8 @@ public interface AppResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port + "/o/app-builder/v1.0/apps/batch");
+					_builder._port + _builder._contextPath +
+						"/o/app-builder/v1.0/apps/batch");
 
 			httpInvoker.userNameAndPassword(
 				_builder._login + ":" + _builder._password);
@@ -745,7 +758,8 @@ public interface AppResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port + "/o/app-builder/v1.0/apps/{appId}/deploy");
+					_builder._port + _builder._contextPath +
+						"/o/app-builder/v1.0/apps/{appId}/deploy");
 
 			httpInvoker.path("appId", appId);
 
@@ -811,7 +825,7 @@ public interface AppResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/app-builder/v1.0/apps/{appId}/undeploy");
 
 			httpInvoker.path("appId", appId);
@@ -915,7 +929,7 @@ public interface AppResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/app-builder/v1.0/data-definitions/{dataDefinitionId}/apps");
 
 			httpInvoker.path("dataDefinitionId", dataDefinitionId);
@@ -998,7 +1012,7 @@ public interface AppResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/app-builder/v1.0/data-definitions/{dataDefinitionId}/apps");
 
 			httpInvoker.path("dataDefinitionId", dataDefinitionId);
@@ -1101,7 +1115,8 @@ public interface AppResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port + "/o/app-builder/v1.0/sites/{siteId}/apps");
+					_builder._port + _builder._contextPath +
+						"/o/app-builder/v1.0/sites/{siteId}/apps");
 
 			httpInvoker.path("siteId", siteId);
 

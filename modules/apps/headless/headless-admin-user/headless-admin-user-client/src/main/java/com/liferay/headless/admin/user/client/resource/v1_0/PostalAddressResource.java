@@ -76,6 +76,12 @@ public interface PostalAddressResource {
 			return new PostalAddressResourceImpl(this);
 		}
 
+		public Builder contextPath(String contextPath) {
+			_contextPath = contextPath;
+
+			return this;
+		}
+
 		public Builder endpoint(String host, int port, String scheme) {
 			_host = host;
 			_port = port;
@@ -121,6 +127,7 @@ public interface PostalAddressResource {
 		private Builder() {
 		}
 
+		private String _contextPath = "";
 		private Map<String, String> _headers = new LinkedHashMap<>();
 		private String _host = "localhost";
 		private Locale _locale;
@@ -207,7 +214,7 @@ public interface PostalAddressResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-user/v1.0/organizations/{organizationId}/postal-addresses");
 
 			httpInvoker.path("organizationId", organizationId);
@@ -288,7 +295,7 @@ public interface PostalAddressResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-user/v1.0/postal-addresses/{postalAddressId}");
 
 			httpInvoker.path("postalAddressId", postalAddressId);
@@ -371,7 +378,7 @@ public interface PostalAddressResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-user/v1.0/user-accounts/{userAccountId}/postal-addresses");
 
 			httpInvoker.path("userAccountId", userAccountId);

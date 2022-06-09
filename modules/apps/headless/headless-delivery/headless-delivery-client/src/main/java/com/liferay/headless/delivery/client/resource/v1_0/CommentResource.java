@@ -180,6 +180,12 @@ public interface CommentResource {
 			return new CommentResourceImpl(this);
 		}
 
+		public Builder contextPath(String contextPath) {
+			_contextPath = contextPath;
+
+			return this;
+		}
+
 		public Builder endpoint(String host, int port, String scheme) {
 			_host = host;
 			_port = port;
@@ -225,6 +231,7 @@ public interface CommentResource {
 		private Builder() {
 		}
 
+		private String _contextPath = "";
 		private Map<String, String> _headers = new LinkedHashMap<>();
 		private String _host = "localhost";
 		private Locale _locale;
@@ -332,7 +339,7 @@ public interface CommentResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/blog-postings/{blogPostingId}/comments");
 
 			httpInvoker.path("blogPostingId", blogPostingId);
@@ -416,7 +423,7 @@ public interface CommentResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/blog-postings/{blogPostingId}/comments");
 
 			httpInvoker.path("blogPostingId", blogPostingId);
@@ -495,7 +502,7 @@ public interface CommentResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/blog-postings/{blogPostingId}/comments/batch");
 
 			httpInvoker.path("blogPostingId", blogPostingId);
@@ -574,7 +581,7 @@ public interface CommentResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/comments/{commentId}");
 
 			httpInvoker.path("commentId", commentId);
@@ -651,7 +658,7 @@ public interface CommentResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/comments/batch");
 
 			httpInvoker.userNameAndPassword(
@@ -727,7 +734,7 @@ public interface CommentResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/comments/{commentId}");
 
 			httpInvoker.path("commentId", commentId);
@@ -810,7 +817,7 @@ public interface CommentResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/comments/{commentId}");
 
 			httpInvoker.path("commentId", commentId);
@@ -887,7 +894,7 @@ public interface CommentResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/comments/batch");
 
 			httpInvoker.userNameAndPassword(
@@ -990,7 +997,7 @@ public interface CommentResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/comments/{parentCommentId}/comments");
 
 			httpInvoker.path("parentCommentId", parentCommentId);
@@ -1073,7 +1080,7 @@ public interface CommentResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/comments/{parentCommentId}/comments");
 
 			httpInvoker.path("parentCommentId", parentCommentId);
@@ -1178,7 +1185,7 @@ public interface CommentResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/documents/{documentId}/comments");
 
 			httpInvoker.path("documentId", documentId);
@@ -1261,7 +1268,7 @@ public interface CommentResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/documents/{documentId}/comments");
 
 			httpInvoker.path("documentId", documentId);
@@ -1340,7 +1347,7 @@ public interface CommentResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/documents/{documentId}/comments/batch");
 
 			httpInvoker.path("documentId", documentId);
@@ -1448,7 +1455,7 @@ public interface CommentResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/structured-contents/{structuredContentId}/comments");
 
 			httpInvoker.path("structuredContentId", structuredContentId);
@@ -1534,7 +1541,7 @@ public interface CommentResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/structured-contents/{structuredContentId}/comments");
 
 			httpInvoker.path("structuredContentId", structuredContentId);
@@ -1614,7 +1621,7 @@ public interface CommentResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-delivery/v1.0/structured-contents/{structuredContentId}/comments/batch");
 
 			httpInvoker.path("structuredContentId", structuredContentId);

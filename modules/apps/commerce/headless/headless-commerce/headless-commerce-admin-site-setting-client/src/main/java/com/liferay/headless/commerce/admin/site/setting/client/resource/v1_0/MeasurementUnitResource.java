@@ -105,6 +105,12 @@ public interface MeasurementUnitResource {
 			return new MeasurementUnitResourceImpl(this);
 		}
 
+		public Builder contextPath(String contextPath) {
+			_contextPath = contextPath;
+
+			return this;
+		}
+
 		public Builder endpoint(String host, int port, String scheme) {
 			_host = host;
 			_port = port;
@@ -150,6 +156,7 @@ public interface MeasurementUnitResource {
 		private Builder() {
 		}
 
+		private String _contextPath = "";
 		private Map<String, String> _headers = new LinkedHashMap<>();
 		private String _host = "localhost";
 		private Locale _locale;
@@ -249,7 +256,7 @@ public interface MeasurementUnitResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-commerce-admin-site-setting/v1.0/commerceAdminSiteSetting/{groupId}/measurementUnit");
 
 			httpInvoker.path("groupId", groupId);
@@ -335,7 +342,7 @@ public interface MeasurementUnitResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-commerce-admin-site-setting/v1.0/commerceAdminSiteSetting/{groupId}/measurementUnit");
 
 			httpInvoker.path("groupId", groupId);
@@ -403,7 +410,7 @@ public interface MeasurementUnitResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-commerce-admin-site-setting/v1.0/measurementUnit/{id}");
 
 			httpInvoker.path("id", id);
@@ -481,7 +488,7 @@ public interface MeasurementUnitResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-commerce-admin-site-setting/v1.0/measurementUnit/batch");
 
 			httpInvoker.path("id", id);
@@ -559,7 +566,7 @@ public interface MeasurementUnitResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-commerce-admin-site-setting/v1.0/measurementUnit/{id}");
 
 			httpInvoker.path("id", id);
@@ -631,7 +638,7 @@ public interface MeasurementUnitResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-commerce-admin-site-setting/v1.0/measurementUnit/{id}");
 
 			httpInvoker.path("id", id);
@@ -709,7 +716,7 @@ public interface MeasurementUnitResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-commerce-admin-site-setting/v1.0/measurementUnit/batch");
 
 			httpInvoker.path("id", id);

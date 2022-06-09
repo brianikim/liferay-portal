@@ -144,6 +144,12 @@ public interface UserAccountResource {
 			return new UserAccountResourceImpl(this);
 		}
 
+		public Builder contextPath(String contextPath) {
+			_contextPath = contextPath;
+
+			return this;
+		}
+
 		public Builder endpoint(String host, int port, String scheme) {
 			_host = host;
 			_port = port;
@@ -189,6 +195,7 @@ public interface UserAccountResource {
 		private Builder() {
 		}
 
+		private String _contextPath = "";
 		private Map<String, String> _headers = new LinkedHashMap<>();
 		private String _host = "localhost";
 		private Locale _locale;
@@ -269,7 +276,7 @@ public interface UserAccountResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-user/v1.0/my-user-account");
 
 			httpInvoker.userNameAndPassword(
@@ -373,7 +380,7 @@ public interface UserAccountResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-user/v1.0/organizations/{organizationId}/user-accounts");
 
 			httpInvoker.path("organizationId", organizationId);
@@ -477,7 +484,7 @@ public interface UserAccountResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-user/v1.0/sites/{siteId}/user-accounts");
 
 			httpInvoker.path("siteId", siteId);
@@ -581,7 +588,7 @@ public interface UserAccountResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-user/v1.0/user-accounts");
 
 			httpInvoker.userNameAndPassword(
@@ -662,7 +669,7 @@ public interface UserAccountResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-user/v1.0/user-accounts");
 
 			httpInvoker.userNameAndPassword(
@@ -737,7 +744,7 @@ public interface UserAccountResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-user/v1.0/user-accounts/batch");
 
 			httpInvoker.userNameAndPassword(
@@ -814,7 +821,7 @@ public interface UserAccountResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-user/v1.0/user-accounts/{userAccountId}");
 
 			httpInvoker.path("userAccountId", userAccountId);
@@ -891,7 +898,7 @@ public interface UserAccountResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-user/v1.0/user-accounts/batch");
 
 			httpInvoker.userNameAndPassword(
@@ -968,7 +975,7 @@ public interface UserAccountResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-user/v1.0/user-accounts/{userAccountId}");
 
 			httpInvoker.path("userAccountId", userAccountId);
@@ -1052,7 +1059,7 @@ public interface UserAccountResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-user/v1.0/user-accounts/{userAccountId}");
 
 			httpInvoker.path("userAccountId", userAccountId);
@@ -1136,7 +1143,7 @@ public interface UserAccountResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-user/v1.0/user-accounts/{userAccountId}");
 
 			httpInvoker.path("userAccountId", userAccountId);
@@ -1213,7 +1220,7 @@ public interface UserAccountResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-admin-user/v1.0/user-accounts/batch");
 
 			httpInvoker.userNameAndPassword(

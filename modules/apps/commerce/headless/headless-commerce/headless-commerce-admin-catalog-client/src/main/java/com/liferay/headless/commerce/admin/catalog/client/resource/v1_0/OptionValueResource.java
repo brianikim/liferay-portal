@@ -94,6 +94,12 @@ public interface OptionValueResource {
 			return new OptionValueResourceImpl(this);
 		}
 
+		public Builder contextPath(String contextPath) {
+			_contextPath = contextPath;
+
+			return this;
+		}
+
 		public Builder endpoint(String host, int port, String scheme) {
 			_host = host;
 			_port = port;
@@ -139,6 +145,7 @@ public interface OptionValueResource {
 		private Builder() {
 		}
 
+		private String _contextPath = "";
 		private Map<String, String> _headers = new LinkedHashMap<>();
 		private String _host = "localhost";
 		private Locale _locale;
@@ -233,7 +240,7 @@ public interface OptionValueResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-commerce-admin-catalog/v1.0/options/by-externalReferenceCode/{externalReferenceCode}/optionValues");
 
 			httpInvoker.path("externalReferenceCode", externalReferenceCode);
@@ -319,7 +326,7 @@ public interface OptionValueResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-commerce-admin-catalog/v1.0/options/by-externalReferenceCode/{externalReferenceCode}/optionValues");
 
 			httpInvoker.path("externalReferenceCode", externalReferenceCode);
@@ -408,7 +415,7 @@ public interface OptionValueResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-commerce-admin-catalog/v1.0/options/{id}/optionValues");
 
 			httpInvoker.path("id", id);
@@ -492,7 +499,7 @@ public interface OptionValueResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-commerce-admin-catalog/v1.0/options/{id}/optionValues");
 
 			httpInvoker.path("id", id);
@@ -572,7 +579,7 @@ public interface OptionValueResource {
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
-					_builder._port +
+					_builder._port + _builder._contextPath +
 						"/o/headless-commerce-admin-catalog/v1.0/options/optionValues/batch");
 
 			httpInvoker.path("id", id);
