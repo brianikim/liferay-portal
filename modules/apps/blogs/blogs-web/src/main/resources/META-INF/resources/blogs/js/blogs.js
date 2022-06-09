@@ -529,15 +529,16 @@ AUI.add(
 									else {
 										saveStatus.hide();
 									}
-
-									Liferay.Util.toggleDisabled(
-										instance.one('#publishButton'),
-										false
-									);
 								})
 								.catch(() => {
 									instance._updateStatus(
 										strings.saveDraftError
+									);
+								})
+								.finally(() => {
+									Liferay.Util.toggleDisabled(
+										instance.one('#publishButton'),
+										false
 									);
 								});
 						}
