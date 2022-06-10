@@ -14,7 +14,6 @@
 
 package com.liferay.portal.util;
 
-import com.liferay.counter.kernel.service.CounterLocalServiceUtil;
 import com.liferay.document.library.kernel.exception.ImageSizeException;
 import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.model.DLFolder;
@@ -37,7 +36,6 @@ import com.liferay.portal.kernel.cache.thread.local.ThreadLocalCacheManager;
 import com.liferay.portal.kernel.cluster.ClusterExecutorUtil;
 import com.liferay.portal.kernel.cluster.ClusterInvokeThreadLocal;
 import com.liferay.portal.kernel.cluster.ClusterRequest;
-import com.liferay.portal.kernel.configuration.Filter;
 import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
 import com.liferay.portal.kernel.dao.jdbc.DataAccess;
@@ -61,7 +59,6 @@ import com.liferay.portal.kernel.model.BaseModel;
 import com.liferay.portal.kernel.model.ClassName;
 import com.liferay.portal.kernel.model.ColorScheme;
 import com.liferay.portal.kernel.model.Company;
-import com.liferay.portal.kernel.model.CustomizedPages;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.GroupConstants;
 import com.liferay.portal.kernel.model.Image;
@@ -70,14 +67,11 @@ import com.liferay.portal.kernel.model.LayoutConstants;
 import com.liferay.portal.kernel.model.LayoutFriendlyURL;
 import com.liferay.portal.kernel.model.LayoutQueryStringComposite;
 import com.liferay.portal.kernel.model.LayoutSet;
-import com.liferay.portal.kernel.model.LayoutTemplate;
 import com.liferay.portal.kernel.model.LayoutType;
 import com.liferay.portal.kernel.model.LayoutTypeController;
 import com.liferay.portal.kernel.model.LayoutTypePortlet;
 import com.liferay.portal.kernel.model.Organization;
 import com.liferay.portal.kernel.model.Portlet;
-import com.liferay.portal.kernel.model.PortletPreferencesIds;
-import com.liferay.portal.kernel.model.PortletWrapper;
 import com.liferay.portal.kernel.model.PublicRenderParameter;
 import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.ResourcePermission;
@@ -106,7 +100,6 @@ import com.liferay.portal.kernel.portlet.LiferayRenderRequest;
 import com.liferay.portal.kernel.portlet.LiferayRenderResponse;
 import com.liferay.portal.kernel.portlet.LiferayStateAwareResponse;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
-import com.liferay.portal.kernel.portlet.PortalPreferences;
 import com.liferay.portal.kernel.portlet.PortletBag;
 import com.liferay.portal.kernel.portlet.PortletBagPool;
 import com.liferay.portal.kernel.portlet.PortletConfigFactoryUtil;
@@ -127,7 +120,6 @@ import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
-import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
 import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
 import com.liferay.portal.kernel.service.CompanyLocalServiceUtil;
@@ -174,7 +166,6 @@ import com.liferay.portal.kernel.util.ClassUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.CookieKeys;
 import com.liferay.portal.kernel.util.DeterminateKeyGenerator;
-import com.liferay.portal.kernel.util.FastDateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.HtmlUtil;
@@ -254,8 +245,6 @@ import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-
-import java.text.Format;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8168,83 +8157,6 @@ public class PortalImpl implements Portal {
 		return false;
 	}
 
-	private void _copyPreferences(
-		Layout layout, long userId, String sourcePortletId,
-		String targetPortletId) {
-
-		try {
-			PortletPreferencesIds portletPreferencesIds =
-				PortletPreferencesFactoryUtil.getPortletPreferencesIds(
-					layout.getGroupId(), 0, layout, sourcePortletId, false);
-
-			PortletPreferences sourcePortletPreferences =
-				PortletPreferencesLocalServiceUtil.getStrictPreferences(
-					portletPreferencesIds);
-
-			portletPreferencesIds =
-				PortletPreferencesFactoryUtil.getPortletPreferencesIds(
-					layout.getGroupId(), userId, layout, targetPortletId,
-					false);
-
-			UnicodeProperties typeSettingsUnicodeProperties =
-				layout.getTypeSettingsProperties();
-
-			String sourcePortletNamespace = PortalUtil.getPortletNamespace(
-				sourcePortletId);
-
-			for (Map.Entry<String, String> entry :
-					typeSettingsUnicodeProperties.entrySet()) {
-
-				String key = entry.getKey();
-
-				if (key.startsWith(sourcePortletNamespace)) {
-					String targetKey =
-						PortalUtil.getPortletNamespace(targetPortletId) +
-							key.substring(sourcePortletNamespace.length());
-
-					sourcePortletPreferences.setValue(
-						targetKey, entry.getValue());
-				}
-			}
-
-			PortletPreferencesLocalServiceUtil.updatePreferences(
-				portletPreferencesIds.getOwnerId(),
-				portletPreferencesIds.getOwnerType(),
-				portletPreferencesIds.getPlid(),
-				portletPreferencesIds.getPortletId(), sourcePortletPreferences);
-		}
-		catch (Exception exception) {
-		}
-	}
-
-	private void _copyResourcePermissions(
-		Layout layout, String sourcePortletId, String targetPortletId) {
-
-		Portlet portlet = PortletLocalServiceUtil.getPortletById(
-			layout.getCompanyId(), sourcePortletId);
-
-		String sourcePortletPrimaryKey = PortletPermissionUtil.getPrimaryKey(
-			layout.getPlid(), sourcePortletId);
-
-		List<ResourcePermission> resourcePermissions =
-			ResourcePermissionLocalServiceUtil.getResourcePermissions(
-				portlet.getCompanyId(), portlet.getPortletName(),
-				PortletKeys.PREFS_OWNER_TYPE_USER, sourcePortletPrimaryKey);
-
-		for (ResourcePermission resourcePermission : resourcePermissions) {
-			String targetPortletPrimaryKey =
-				PortletPermissionUtil.getPrimaryKey(
-					layout.getPlid(), targetPortletId);
-
-			resourcePermission.setResourcePermissionId(
-				CounterLocalServiceUtil.increment());
-			resourcePermission.setPrimKey(targetPortletPrimaryKey);
-
-			ResourcePermissionLocalServiceUtil.addResourcePermission(
-				resourcePermission);
-		}
-	}
-
 	private String _get18nErrorRedirect(
 		HttpServletRequest httpServletRequest, String redirect) {
 
@@ -8471,85 +8383,6 @@ public class PortalImpl implements Portal {
 		return alternateURLs;
 	}
 
-	private List<String> _getColumns(LayoutTypePortlet layoutTypePortlet) {
-		List<String> columns = new ArrayList<>();
-
-		Layout layout = layoutTypePortlet.getLayout();
-
-		if (layout.isTypePortlet()) {
-			if (Objects.equals(
-					layout.getType(),
-					LayoutConstants.TYPE_FULL_PAGE_APPLICATION)) {
-
-				columns.add("fullPageApplicationPortlet");
-			}
-			else {
-				LayoutTemplate layoutTemplate =
-					layoutTypePortlet.getLayoutTemplate();
-
-				columns.addAll(layoutTemplate.getColumns());
-
-				Collections.addAll(
-					columns, _getNestedColumns(layoutTypePortlet, layout));
-			}
-		}
-		else if (layout.isTypePanel()) {
-			columns.add("panelSelectedPortlets");
-		}
-
-		return columns;
-	}
-
-	private String _getColumnValue(
-		LayoutTypePortlet layoutTypePortlet, String columnId) {
-
-		PortalPreferences portalPreferences =
-			layoutTypePortlet.getPortalPreferences();
-
-		if ((portalPreferences != null) && layoutTypePortlet.isCustomizable() &&
-			!layoutTypePortlet.isColumnDisabled(columnId) &&
-			!columnId.startsWith(
-				getPortletNamespace(PortletKeys.NESTED_PORTLETS))) {
-
-			return _getUserPreference(layoutTypePortlet, columnId);
-		}
-
-		if (PortletIdCodec.hasInstanceId(columnId) &&
-			PortletIdCodec.hasUserId(columnId)) {
-
-			PortletPreferences portletPreferences =
-				_getUserColumnPortletPreferences(layoutTypePortlet, columnId);
-
-			return portletPreferences.getValue(columnId, StringPool.BLANK);
-		}
-
-		return layoutTypePortlet.getTypeSettingsProperty(columnId);
-	}
-
-	private List<Portlet> _getExplicitlyAddedPortletsWithoutCustomizableColumns(
-		LayoutTypePortlet layoutTypePortlet) {
-
-		List<Portlet> portlets = new ArrayList<>();
-
-		List<String> columns = _getColumns(layoutTypePortlet);
-
-		for (String columnId : columns) {
-			String customizableString =
-				layoutTypePortlet.getTypeSettingsProperty(
-					CustomizedPages.namespaceColumnId(columnId));
-
-			boolean customizable = GetterUtil.getBoolean(customizableString);
-
-			if (customizable && !_isLayoutSetPrototype(layoutTypePortlet)) {
-				continue;
-			}
-
-			portlets.addAll(layoutTypePortlet.getAllPortlets(columnId));
-		}
-
-		return portlets;
-	}
-
 	private String _getGroupFriendlyURL(
 			Group group, LayoutSet layoutSet, ThemeDisplay themeDisplay,
 			boolean canonicalURL, boolean controlPanel)
@@ -8718,66 +8551,6 @@ public class PortalImpl implements Portal {
 		sb.append(group.getFriendlyURL());
 
 		return sb.toString();
-	}
-
-	private String[] _getNestedColumnIds(
-		PortletPreferences portletPreferences) {
-
-		Map<String, String[]> preferencesMap = portletPreferences.getMap();
-
-		String[] columnIds = new String[0];
-
-		for (String key : preferencesMap.keySet()) {
-			if (!key.startsWith(
-					getPortletNamespace(PortletKeys.NESTED_PORTLETS))) {
-
-				continue;
-			}
-
-			columnIds = ArrayUtil.append(columnIds, key);
-		}
-
-		return columnIds;
-	}
-
-	private String[] _getNestedColumns(
-		LayoutTypePortlet layoutTypePortlet, Layout layout) {
-
-		String[] nestedColumnIds = StringUtil.split(
-			layoutTypePortlet.getTypeSettingsProperty(
-				com.liferay.portal.kernel.model.LayoutTypePortletConstants.
-					NESTED_COLUMN_IDS));
-
-		layoutTypePortlet.getPortalPreferences();
-
-		PortalPreferences portalPreferences =
-			layoutTypePortlet.getPortalPreferences();
-
-		if (portalPreferences == null) {
-			return nestedColumnIds;
-		}
-
-		for (String columnId : nestedColumnIds) {
-			if (columnId.lastIndexOf(StringPool.DOUBLE_UNDERLINE) != -1) {
-				columnId = columnId.substring(
-					columnId.lastIndexOf(StringPool.DOUBLE_UNDERLINE) + 2);
-			}
-
-			String[] portletIds = StringUtil.split(
-				portalPreferences.getValue(
-					CustomizedPages.namespacePlid(layout.getPlid()), columnId));
-
-			for (String portletId : portletIds) {
-				PortletPreferences portletPreferences =
-					PortletPreferencesFactoryUtil.getLayoutPortletSetup(
-						layout, portletId);
-
-				nestedColumnIds = ArrayUtil.append(
-					nestedColumnIds, _getNestedColumnIds(portletPreferences));
-			}
-		}
-
-		return nestedColumnIds;
 	}
 
 	private String _getPortalURL(
@@ -8952,266 +8725,6 @@ public class PortalImpl implements Portal {
 		return group;
 	}
 
-	private String[] _getStaticPortletIds(LayoutTypePortlet layoutTypePortlet) {
-		Layout layout = layoutTypePortlet.getLayout();
-
-		Group group = null;
-
-		try {
-			group = layout.getGroup();
-		}
-		catch (Exception exception) {
-			if (_log.isWarnEnabled()) {
-				_log.warn(exception, exception);
-			}
-		}
-
-		if (group == null) {
-			_log.error("Unable to get group " + layout.getGroupId());
-
-			return new String[0];
-		}
-
-		String selector1 = StringPool.BLANK;
-
-		if (group.isUser()) {
-			selector1 =
-				com.liferay.portal.kernel.model.LayoutTypePortletConstants.
-					STATIC_PORTLET_USER_SELECTOR;
-		}
-		else if (group.isOrganization()) {
-			selector1 =
-				com.liferay.portal.kernel.model.LayoutTypePortletConstants.
-					STATIC_PORTLET_ORGANIZATION_SELECTOR;
-		}
-		else if (group.isRegularSite()) {
-			selector1 =
-				com.liferay.portal.kernel.model.LayoutTypePortletConstants.
-					STATIC_PORTLET_REGULAR_SITE_SELECTOR;
-		}
-
-		String selector2 = layout.getFriendlyURL();
-
-		String[] portletIds = PropsUtil.getArray(
-			PropsKeys.LAYOUT_STATIC_PORTLETS_ALL,
-			new Filter(selector1, selector2));
-
-		for (int i = 0; i < portletIds.length; i++) {
-			portletIds[i] = JS.getSafeName(portletIds[i]);
-		}
-
-		return portletIds;
-	}
-
-	private List<Portlet> _getStaticPortlets(
-		LayoutTypePortlet layoutTypePortlet) {
-
-		String[] portletIds = _getStaticPortletIds(layoutTypePortlet);
-
-		List<Portlet> portlets = new ArrayList<>();
-
-		for (String portletId : portletIds) {
-			if (Validator.isNull(portletId) ||
-				_hasNonstaticPortletId(layoutTypePortlet, portletId)) {
-
-				continue;
-			}
-
-			Layout layout = layoutTypePortlet.getLayout();
-
-			Portlet portlet = PortletLocalServiceUtil.getPortletById(
-				layout.getCompanyId(), portletId);
-
-			if (portlet == null) {
-				continue;
-			}
-
-			Portlet staticPortlet = portlet;
-
-			if (portlet.isInstanceable()) {
-
-				// Instanceable portlets do not need to be cloned because they
-				// are already cloned. See the method getPortletById in the
-				// class PortletLocalServiceImpl and how it references the
-				// method getClonedInstance in the class PortletImpl.
-
-			}
-			else {
-				staticPortlet = new PortletWrapper(portlet) {
-
-					@Override
-					public boolean getStatic() {
-						return _staticPortlet;
-					}
-
-					@Override
-					public boolean getStaticStart() {
-						return _staticPortletStart;
-					}
-
-					@Override
-					public boolean isStatic() {
-						return _staticPortlet;
-					}
-
-					@Override
-					public boolean isStaticStart() {
-						return _staticPortletStart;
-					}
-
-					@Override
-					public void setStatic(boolean staticPortlet) {
-						_staticPortlet = staticPortlet;
-					}
-
-					@Override
-					public void setStaticStart(boolean staticPortletStart) {
-						_staticPortletStart = staticPortletStart;
-					}
-
-					private boolean _staticPortlet;
-					private boolean _staticPortletStart;
-
-				};
-			}
-
-			staticPortlet.setStatic(true);
-
-			portlets.add(staticPortlet);
-		}
-
-		return portlets;
-	}
-
-	private PortletPreferences _getUserColumnPortletPreferences(
-		LayoutTypePortlet layoutTypePortlet, String columnId) {
-
-		String instanceId = PortletIdCodec.decodeInstanceId(columnId);
-
-		if (instanceId.indexOf(StringPool.UNDERLINE) != -1) {
-			instanceId = instanceId.substring(
-				0, instanceId.indexOf(StringPool.UNDERLINE));
-		}
-
-		long userId = PortletIdCodec.decodeUserId(columnId);
-
-		String portletName = PortletIdCodec.decodePortletName(columnId);
-
-		if (portletName.startsWith(StringPool.UNDERLINE)) {
-			portletName = portletName.substring(1);
-		}
-
-		return PortletPreferencesFactoryUtil.getLayoutPortletSetup(
-			layoutTypePortlet.getLayout(),
-			PortletIdCodec.encode(portletName, userId, instanceId));
-	}
-
-	private String _getUserPreference(
-		LayoutTypePortlet layoutTypePortlet, String key) {
-
-		String value = StringPool.BLANK;
-
-		PortalPreferences portalPreferences =
-			layoutTypePortlet.getPortalPreferences();
-
-		if (portalPreferences == null) {
-			return value;
-		}
-
-		Layout layout = layoutTypePortlet.getLayout();
-
-		value = portalPreferences.getValue(
-			CustomizedPages.namespacePlid(layout.getPlid()), key,
-			StringPool.NULL);
-
-		if (!value.equals(StringPool.NULL)) {
-			return value;
-		}
-
-		value = layoutTypePortlet.getTypeSettingsProperty(key);
-
-		if (Validator.isNull(value)) {
-			return value;
-		}
-
-		List<String> newPortletIds = new ArrayList<>();
-
-		PermissionChecker permissionChecker =
-			PermissionThreadLocal.getPermissionChecker();
-
-		String[] portletIds = StringUtil.split(value);
-
-		for (String portletId : portletIds) {
-			try {
-				if (!PortletPermissionUtil.contains(
-						permissionChecker, layoutTypePortlet.getLayout(),
-						portletId, ActionKeys.VIEW, true)) {
-
-					continue;
-				}
-
-				String rootPortletId = PortletIdCodec.decodePortletName(
-					portletId);
-
-				if (!PortletPermissionUtil.contains(
-						permissionChecker, rootPortletId,
-						ActionKeys.ADD_TO_PAGE)) {
-
-					continue;
-				}
-			}
-			catch (Exception exception) {
-				_log.error(exception, exception);
-			}
-
-			String newPortletId = null;
-
-			boolean preferencesUniquePerLayout = false;
-
-			try {
-				Portlet portlet = PortletLocalServiceUtil.getPortletById(
-					layout.getCompanyId(), portletId);
-
-				preferencesUniquePerLayout =
-					portlet.isPreferencesUniquePerLayout();
-			}
-			catch (SystemException systemException) {
-				_log.error(systemException, systemException);
-			}
-
-			if (PortletIdCodec.hasInstanceId(portletId) ||
-				preferencesUniquePerLayout) {
-
-				String instanceId = null;
-
-				if (PortletIdCodec.hasInstanceId(portletId)) {
-					instanceId = PortletIdCodec.generateInstanceId();
-				}
-
-				newPortletId = PortletIdCodec.encode(
-					PortletIdCodec.decodePortletName(portletId),
-					portalPreferences.getUserId(), instanceId);
-
-				_copyPreferences(
-					layout, portalPreferences.getUserId(), portletId,
-					newPortletId);
-
-				_copyResourcePermissions(layout, portletId, newPortletId);
-			}
-			else {
-				newPortletId = portletId;
-			}
-
-			newPortletIds.add(newPortletId);
-		}
-
-		value = StringUtil.merge(newPortletIds);
-
-		_setUserPreference(layoutTypePortlet, key, value);
-
-		return value;
-	}
-
 	private String _getVirtualHostname(
 		TreeMap<String, String> virtualHostnames, ThemeDisplay themeDisplay) {
 
@@ -9222,55 +8735,6 @@ public class PortalImpl implements Portal {
 		}
 
 		return virtualHostnames.firstKey();
-	}
-
-	private boolean _hasNonstaticPortletId(
-		LayoutTypePortlet layoutTypePortlet, String portletId) {
-
-		LayoutTemplate layoutTemplate = layoutTypePortlet.getLayoutTemplate();
-
-		List<String> columns = layoutTemplate.getColumns();
-
-		for (String columnId : columns) {
-			if (_hasNonstaticPortletId(
-					layoutTypePortlet, columnId, portletId)) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	private boolean _hasNonstaticPortletId(
-		LayoutTypePortlet layoutTypePortlet, String columnId,
-		String portletId) {
-
-		String[] columnValues = StringUtil.split(
-			_getColumnValue(layoutTypePortlet, columnId));
-
-		for (String nonstaticPortletId : columnValues) {
-			if (nonstaticPortletId.equals(portletId)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	private boolean _isLayoutSetPrototype(LayoutTypePortlet layoutTypePortlet) {
-		try {
-			Layout layout = layoutTypePortlet.getLayout();
-
-			Group group = layout.getGroup();
-
-			return group.isLayoutSetPrototype();
-		}
-		catch (Exception exception) {
-			_log.error(exception, exception);
-		}
-
-		return false;
 	}
 
 	private boolean _layoutContainsPortletId(Layout layout, String portletId) {
@@ -9312,30 +8776,9 @@ public class PortalImpl implements Portal {
 		return false;
 	}
 
-	private void _setUserPreference(
-		LayoutTypePortlet layoutTypePortlet, String key, String value) {
-
-		PortalPreferences portalPreferences =
-			layoutTypePortlet.getPortalPreferences();
-
-		Layout layout = layoutTypePortlet.getLayout();
-
-		portalPreferences.setValue(
-			CustomizedPages.namespacePlid(layout.getPlid()), key, value);
-
-		Format dateFormat = FastDateFormatFactoryUtil.getSimpleDateFormat(
-			PropsValues.INDEX_DATE_FORMAT_PATTERN);
-
-		portalPreferences.setValue(
-			CustomizedPages.namespacePlid(layout.getPlid()), _MODIFIED_DATE,
-			dateFormat.format(new Date()));
-	}
-
 	private static final String _J_SECURITY_CHECK = "j_security_check";
 
 	private static final String _LOCALHOST = "localhost";
-
-	private static final String _MODIFIED_DATE = "modifiedDate";
 
 	private static final Locale _NULL_LOCALE;
 
