@@ -339,12 +339,12 @@ public class JournalArticleInfoItemFieldValuesUpdaterImpl
 		return false;
 	}
 
-
 	@Reference
 	private AssetEntryLocalService _assetEntryLocalService;
 
 	@Reference
 	private AssetLinkLocalService _assetLinkLocalService;
+
 	@Reference
 	private JournalArticleLocalService _journalArticleLocalService;
 
