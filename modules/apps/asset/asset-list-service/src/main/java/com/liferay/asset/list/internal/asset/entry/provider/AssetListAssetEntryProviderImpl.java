@@ -573,7 +573,7 @@ public class AssetListAssetEntryProviderImpl
 					segmentEntryIds, SegmentsEntryConstants.ID_DEFAULT));
 		}
 
-		return longStream.mapToObj(
+		long[] filteredAndSortedSegmentEntryIds = longStream.mapToObj(
 			segmentsEntryId ->
 				_assetListEntrySegmentsEntryRelLocalService.
 					fetchAssetListEntrySegmentsEntryRel(
@@ -589,6 +589,14 @@ public class AssetListAssetEntryProviderImpl
 		).mapToLong(
 			segmentsEntryId -> segmentsEntryId
 		).toArray();
+
+		if (filteredAndSortedSegmentEntryIds.length == 0) {
+			filteredAndSortedSegmentEntryIds = new long[] {
+				SegmentsEntryConstants.ID_DEFAULT
+			};
+		}
+
+		return filteredAndSortedSegmentEntryIds;
 	}
 
 	private List<AssetEntry> _getDynamicAssetEntries(
