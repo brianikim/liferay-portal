@@ -14,8 +14,10 @@
 
 package com.liferay.portal.search.solr8.internal.filter;
 
+import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.search.filter.TermsFilter;
+import com.liferay.portal.kernel.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +40,7 @@ public class TermsFilterTranslatorImpl implements TermsFilterTranslator {
 
 	@Override
 	public Query translate(TermsFilter termsFilter) {
-		String field = termsFilter.getField();
+		String field = _escape(termsFilter.getField());
 
 		List<BytesRef> bytesRefs = new ArrayList<>();
 
@@ -63,6 +65,11 @@ public class TermsFilterTranslatorImpl implements TermsFilterTranslator {
 		builder.add(query, BooleanClause.Occur.SHOULD);
 
 		return builder.build();
+	}
+
+	private String _escape(String value) {
+		return StringUtil.replace(
+			value, CharPool.SPACE, StringPool.BACK_SLASH + StringPool.SPACE);
 	}
 
 }
