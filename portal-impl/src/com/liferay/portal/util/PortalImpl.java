@@ -29,6 +29,7 @@ import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.dao.orm.common.SQLTransformer;
 import com.liferay.portal.events.StartupHelperUtil;
+import com.liferay.portal.internal.util.LayoutTypePortletUtil;
 import com.liferay.portal.kernel.bean.BeanPropertiesUtil;
 import com.liferay.portal.kernel.cache.thread.local.Lifecycle;
 import com.liferay.portal.kernel.cache.thread.local.ThreadLocalCache;
@@ -8260,7 +8261,8 @@ public class PortalImpl implements Portal {
 	private List<Portlet> _getAllNonembeddedPortlets(
 		Layout layout, LayoutTypePortlet layoutTypePortlet) {
 
-		List<Portlet> staticPortlets = _getStaticPortlets(layoutTypePortlet);
+		List<Portlet> staticPortlets = LayoutTypePortletUtil.getStaticPortlets(
+			layoutTypePortlet);
 
 		List<Portlet> explicitlyAddedPortlets = new ArrayList<>();
 
@@ -8283,8 +8285,9 @@ public class PortalImpl implements Portal {
 		}
 		else {
 			explicitlyAddedPortlets =
-				_getExplicitlyAddedPortletsWithoutCustomizableColumns(
-					layoutTypePortlet);
+				LayoutTypePortletUtil.
+					getExplicitlyAddedPortletsWithoutCustomizableColumns(
+						layoutTypePortlet);
 		}
 
 		return layoutTypePortlet.addStaticPortlets(
