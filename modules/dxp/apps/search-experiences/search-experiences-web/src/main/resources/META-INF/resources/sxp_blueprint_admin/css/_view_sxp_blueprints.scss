@@ -1,0 +1,10 @@
+.view-sxp-blueprints-root,
+.view-sxp-elements-root {
+	.table-list {
+		th:first-child,
+		td:first-child {
+			padding-left: 12px;
+			padding-right: 12px;
+		}
+	}
+}

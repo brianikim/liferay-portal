@@ -513,38 +513,40 @@ const ViewSXPBlueprints = ({
 	};
 
 	return (
-		<PortletContext.Provider
-			value={{
-				apiURL,
-				defaultLocale,
-				editSXPBlueprintURL,
-				hasAddSXPBlueprintPermission,
-				namespace,
-			}}
-		>
-			<input
-				name={`${namespace}id`}
-				type="hidden"
-				value={selected.join(',')}
-			/>
+		<span className="view-sxp-blueprints-root">
+			<PortletContext.Provider
+				value={{
+					apiURL,
+					defaultLocale,
+					editSXPBlueprintURL,
+					hasAddSXPBlueprintPermission,
+					namespace,
+				}}
+			>
+				<input
+					name={`${namespace}id`}
+					type="hidden"
+					value={selected.join(',')}
+				/>
 
-			<ManagementToolbar
-				loading={networkState.loading}
-				onBulkDelete={_handleBulkDelete}
-				onSearch={_handleSearch}
-				onSelectAll={_handleSelectAll}
-				onSelectClear={_handleSelectClear}
-				searchValue={search}
-				selected={selected}
-				sortOrder={sortOrder}
-				totalCount={resource?.totalCount}
-				totalCurrentPageCount={resource?.items?.length}
-			/>
+				<ManagementToolbar
+					loading={networkState.loading}
+					onBulkDelete={_handleBulkDelete}
+					onSearch={_handleSearch}
+					onSelectAll={_handleSelectAll}
+					onSelectClear={_handleSelectClear}
+					searchValue={search}
+					selected={selected}
+					sortOrder={sortOrder}
+					totalCount={resource?.totalCount}
+					totalCurrentPageCount={resource?.items?.length}
+				/>
 
-			<ClayLayout.ContainerFluid view>
-				{_renderDataTable()}
-			</ClayLayout.ContainerFluid>
-		</PortletContext.Provider>
+				<ClayLayout.ContainerFluid view>
+					{_renderDataTable()}
+				</ClayLayout.ContainerFluid>
+			</PortletContext.Provider>
+		</span>
 	);
 };
 
