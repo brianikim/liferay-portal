@@ -151,6 +151,9 @@ public class CTModelPreFilterContributor implements ModelPreFilterContributor {
 
 	@Activate
 	protected void activate(BundleContext bundleContext) {
+		_serviceTrackerList = ServiceTrackerListFactory.open(
+			bundleContext, CTSearchExcludeModelClassPKContributor.class);
+
 		_serviceTrackerMap = ServiceTrackerMapFactory.openSingleValueMap(
 			bundleContext, (Class<CTService<?>>)(Class<?>)CTService.class, null,
 			(serviceReference, emitter) -> {
@@ -161,9 +164,6 @@ public class CTModelPreFilterContributor implements ModelPreFilterContributor {
 
 				emitter.emit(modelClass.getName());
 			});
-
-		_serviceTrackerList = ServiceTrackerListFactory.open(
-			bundleContext, CTSearchExcludeModelClassPKContributor.class);
 	}
 
 	@Deactivate
