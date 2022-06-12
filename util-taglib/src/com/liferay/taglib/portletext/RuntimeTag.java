@@ -319,9 +319,13 @@ public class RuntimeTag extends TagSupport implements DirectTag {
 
 			if (count < 1) {
 				try (SafeCloseable safeCloseable =
-							CTCollectionThreadLocal.
-								setProductionModeWithSafeCloseable()) {PortletPreferencesFactoryUtil.getLayoutPortletSetup(
-					layout, portletInstanceKey, defaultPreferences);}
+						CTCollectionThreadLocal.
+							setProductionModeWithSafeCloseable()) {
+
+					PortletPreferencesFactoryUtil.getLayoutPortletSetup(
+						layout, portletInstanceKey, defaultPreferences);
+				}
+
 				PortletPreferencesFactoryUtil.getPortletSetup(
 					httpServletRequest, portletInstanceKey, defaultPreferences);
 
