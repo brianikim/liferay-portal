@@ -14,8 +14,8 @@
 
 package com.liferay.portlet;
 
-import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.petra.encryptor.Encryptor;
+import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.cache.PortalCache;
