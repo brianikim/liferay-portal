@@ -33,7 +33,7 @@
 		.breadcrumb-item:before,
 		.breadcrumb-item + .breadcrumb-item:before {
 			color: $gray-600;
-			content: normal;
+			content: none;
 			float: none;
 			padding-left: 0;
 			padding-right: 0;

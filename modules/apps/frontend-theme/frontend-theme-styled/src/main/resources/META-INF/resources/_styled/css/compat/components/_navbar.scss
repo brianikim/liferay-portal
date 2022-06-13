@@ -179,7 +179,7 @@
 
 		.navbar-nav > .active > a:after {
 			@include media-breakpoint-down($scaling-breakpoint-down) {
-				content: normal;
+				content: none;
 			}
 		}
 	}
@@ -218,7 +218,7 @@
 
 		.navbar-nav > .active > a:after {
 			@include media-breakpoint-down($scaling-breakpoint-down) {
-				content: normal;
+				content: none;
 			}
 		}
 	}
