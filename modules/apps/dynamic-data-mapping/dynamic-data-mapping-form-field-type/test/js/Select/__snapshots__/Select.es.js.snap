@@ -47,11 +47,11 @@ exports[`Select calls onChange callback when an item is selected using multisele
                 type="button"
               >
                 <svg
-                  class="lexicon-icon lexicon-icon-times"
+                  class="lexicon-icon lexicon-icon-times-small"
                   role="presentation"
                 >
                   <use
-                    xlink:href="#times"
+                    xlink:href="#times-small"
                   />
                 </svg>
               </button>
@@ -549,6 +549,7 @@ exports[`Select has a help text 1`] = `
     </select>
     <div
       class="form-builder-select-field input-group-container"
+      style=""
     >
       <div
         class="form-control results-chosen select-field-trigger"
@@ -576,6 +577,7 @@ exports[`Select has a help text 1`] = `
     <div>
       <div
         class="dropdown-menu ddm-btn-full ddm-select-dropdown"
+        style="left: -999px; top: -995px;"
       >
         <ul
           class="list-unstyled"
@@ -631,6 +633,7 @@ exports[`Select has a key 1`] = `
     </select>
     <div
       class="form-builder-select-field input-group-container"
+      style=""
     >
       <div
         class="form-control results-chosen select-field-trigger"
@@ -658,6 +661,7 @@ exports[`Select has a key 1`] = `
     <div>
       <div
         class="dropdown-menu ddm-btn-full ddm-select-dropdown"
+        style="left: -999px; top: -995px;"
       >
         <ul
           class="list-unstyled"
@@ -706,6 +710,7 @@ exports[`Select has a label 1`] = `
     </select>
     <div
       class="form-builder-select-field input-group-container"
+      style=""
     >
       <div
         class="form-control results-chosen select-field-trigger"
@@ -733,6 +738,7 @@ exports[`Select has a label 1`] = `
     <div>
       <div
         class="dropdown-menu ddm-btn-full ddm-select-dropdown"
+        style="left: -999px; top: -995px;"
       >
         <ul
           class="list-unstyled"
@@ -782,6 +788,7 @@ exports[`Select has a placeholder 1`] = `
     </select>
     <div
       class="form-builder-select-field input-group-container"
+      style=""
     >
       <div
         class="form-control results-chosen select-field-trigger"
@@ -809,6 +816,7 @@ exports[`Select has a placeholder 1`] = `
     <div>
       <div
         class="dropdown-menu ddm-btn-full ddm-select-dropdown"
+        style="left: -999px; top: -995px;"
       >
         <ul
           class="list-unstyled"
@@ -852,6 +860,7 @@ exports[`Select has a predefinedValue 1`] = `
     </select>
     <div
       class="form-builder-select-field input-group-container"
+      style=""
     >
       <div
         class="form-control results-chosen select-field-trigger"
@@ -879,6 +888,7 @@ exports[`Select has a predefinedValue 1`] = `
     <div>
       <div
         class="dropdown-menu ddm-btn-full ddm-select-dropdown"
+        style="left: -999px; top: -995px;"
       >
         <ul
           class="list-unstyled"
@@ -922,6 +932,7 @@ exports[`Select has a value 1`] = `
     </select>
     <div
       class="form-builder-select-field input-group-container"
+      style=""
     >
       <div
         class="form-control results-chosen select-field-trigger"
@@ -949,6 +960,7 @@ exports[`Select has a value 1`] = `
     <div>
       <div
         class="dropdown-menu ddm-btn-full ddm-select-dropdown"
+        style="left: -999px; top: -995px;"
       >
         <ul
           class="list-unstyled"
@@ -992,6 +1004,7 @@ exports[`Select has an id 1`] = `
     </select>
     <div
       class="form-builder-select-field input-group-container"
+      style=""
     >
       <div
         class="form-control results-chosen select-field-trigger"
@@ -1020,6 +1033,7 @@ exports[`Select has an id 1`] = `
     <div>
       <div
         class="dropdown-menu ddm-btn-full ddm-select-dropdown"
+        style="left: -999px; top: -995px;"
       >
         <ul
           class="list-unstyled"
@@ -1063,6 +1077,7 @@ exports[`Select has class dropdown-opened when it's opened 1`] = `
     </select>
     <div
       class="form-builder-select-field input-group-container"
+      style=""
     >
       <div
         class="form-control results-chosen select-field-trigger"
@@ -1090,6 +1105,7 @@ exports[`Select has class dropdown-opened when it's opened 1`] = `
     <div>
       <div
         class="dropdown-menu ddm-btn-full ddm-select-dropdown"
+        style="left: -999px; top: -995px;"
       >
         <ul
           class="list-unstyled"
@@ -1133,6 +1149,7 @@ exports[`Select is closed by default 1`] = `
     </select>
     <div
       class="form-builder-select-field input-group-container"
+      style=""
     >
       <div
         class="form-control results-chosen select-field-trigger"
@@ -1160,6 +1177,7 @@ exports[`Select is closed by default 1`] = `
     <div>
       <div
         class="dropdown-menu ddm-btn-full ddm-select-dropdown"
+        style="left: -999px; top: -995px;"
       >
         <ul
           class="list-unstyled"
@@ -1203,6 +1221,7 @@ exports[`Select is not required 1`] = `
     </select>
     <div
       class="form-builder-select-field input-group-container"
+      style=""
     >
       <div
         class="form-control results-chosen select-field-trigger"
@@ -1230,6 +1249,7 @@ exports[`Select is not required 1`] = `
     <div>
       <div
         class="dropdown-menu ddm-btn-full ddm-select-dropdown"
+        style="left: -999px; top: -995px;"
       >
         <ul
           class="list-unstyled"
@@ -1290,6 +1310,7 @@ exports[`Select puts an asterisk when field is required 1`] = `
     </select>
     <div
       class="form-builder-select-field input-group-container"
+      style=""
     >
       <div
         class="form-control results-chosen select-field-trigger"
@@ -1317,6 +1338,7 @@ exports[`Select puts an asterisk when field is required 1`] = `
     <div>
       <div
         class="dropdown-menu ddm-btn-full ddm-select-dropdown"
+        style="left: -999px; top: -995px;"
       >
         <ul
           class="list-unstyled"
@@ -1372,6 +1394,7 @@ exports[`Select renders Label if showLabel is true 1`] = `
     </select>
     <div
       class="form-builder-select-field input-group-container"
+      style=""
     >
       <div
         class="form-control results-chosen select-field-trigger"
@@ -1399,6 +1422,7 @@ exports[`Select renders Label if showLabel is true 1`] = `
     <div>
       <div
         class="dropdown-menu ddm-btn-full ddm-select-dropdown"
+        style="left: -999px; top: -995px;"
       >
         <ul
           class="list-unstyled"
@@ -1448,6 +1472,7 @@ exports[`Select renders no options when options come empty 1`] = `
     </select>
     <div
       class="form-builder-select-field input-group-container"
+      style=""
     >
       <div
         class="form-control results-chosen select-field-trigger"
@@ -1475,6 +1500,7 @@ exports[`Select renders no options when options come empty 1`] = `
     <div>
       <div
         class="dropdown-menu ddm-btn-full ddm-select-dropdown"
+        style="left: -999px; top: -995px;"
       >
         <ul
           class="list-unstyled"
@@ -1518,6 +1544,7 @@ exports[`Select renders options 1`] = `
     </select>
     <div
       class="form-builder-select-field input-group-container"
+      style=""
     >
       <div
         class="form-control results-chosen select-field-trigger"
@@ -1545,6 +1572,7 @@ exports[`Select renders options 1`] = `
     <div>
       <div
         class="dropdown-menu ddm-btn-full ddm-select-dropdown"
+        style="left: -999px; top: -995px;"
       >
         <ul
           class="list-unstyled"
