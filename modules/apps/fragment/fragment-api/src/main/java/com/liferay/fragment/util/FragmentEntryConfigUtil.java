@@ -54,7 +54,7 @@ public class FragmentEntryConfigUtil {
 			_serviceTracker.getService();
 
 		return fragmentEntryConfigurationParser.getConfigurationJSONObject(
-			configuration, editableValues, segmentsExperienceIds);
+			configuration, editableValues);
 	}
 
 	public static Map<String, Object> getContextObjects(

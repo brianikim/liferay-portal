@@ -132,10 +132,47 @@ public class FragmentEntryConfigurationParserImpl
 	public Map<String, Object> getContextObjects(
 		JSONObject configurationValuesJSONObject, String configuration) {
 
-		return getContextObjects(
-			configurationValuesJSONObject, configuration, new long[] {0});
-	}
+		HashMap<String, Object> contextObjects = new HashMap<>();
 
+		List<FragmentConfigurationField> fragmentConfigurationFields =
+			getFragmentConfigurationFields(configuration);
+
+		for (FragmentConfigurationField fragmentConfigurationField :
+				fragmentConfigurationFields) {
+
+			String name = fragmentConfigurationField.getName();
+
+			if (StringUtil.equalsIgnoreCase(
+					fragmentConfigurationField.getType(), "itemSelector")) {
+
+				Object contextObject = _getInfoDisplayObjectEntry(
+					configurationValuesJSONObject.getString(name));
+
+				if (contextObject != null) {
+					contextObjects.put(
+						name + _CONTEXT_OBJECT_SUFFIX, contextObject);
+				}
+
+				continue;
+			}
+
+			if (StringUtil.equalsIgnoreCase(
+					fragmentConfigurationField.getType(),
+					"collectionSelector")) {
+
+				Object contextListObject = _getInfoListObjectEntry(
+					configurationValuesJSONObject.getString(name), null);
+
+				if (contextListObject != null) {
+					contextObjects.put(
+						name + _CONTEXT_OBJECT_LIST_SUFFIX, contextListObject);
+				}
+			}
+		}
+
+		return contextObjects;
+	}
+	
 	@Override
 	public Map<String, Object> getContextObjects(
 		JSONObject configurationValuesJSONObject, String configuration,
@@ -181,19 +218,6 @@ public class FragmentEntryConfigurationParserImpl
 		}
 
 		return contextObjects;
-	}
-
-	/**
-	 * @deprecated As of Athanasius (7.3.x), replaced by {@link
-	 *             #getContextObjects(JSONObject, String)}
-	 */
-	@Deprecated
-	@Override
-	public Map<String, Object> getContextObjects(
-		JSONObject configurationValuesJSONObject, String configuration,
-		long[] segmentsExperienceIds) {
-
-		return getContextObjects(configurationValuesJSONObject, configuration);
 	}
 
 	@Override
@@ -545,8 +569,7 @@ public class FragmentEntryConfigurationParserImpl
 				defaultLayoutListRetrieverContext =
 					new DefaultLayoutListRetrieverContext();
 
-			defaultLayoutListRetrieverContext.setSegmentsEntryIds(
-				segmentsEntryIds);
+            if (segmentsEntryIds != null) defaultLayoutListRetrieverContext.setSegmentsEntryIds(segmentsEntryIds);
 
 			return layoutListRetriever.getList(
 				listObjectReferenceFactory.getListObjectReference(jsonObject),

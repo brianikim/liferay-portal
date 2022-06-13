@@ -38,16 +38,6 @@ public interface FragmentEntryConfigurationParser {
 
 	/**
 	 * @deprecated As of Athanasius (7.3.x), replaced by {@link
-	 *             #getConfigurationJSONObject(String, String)}
-	 */
-	@Deprecated
-	public JSONObject getConfigurationJSONObject(
-			String configuration, String editableValues,
-			long[] segmentsExperienceIds)
-		throws JSONException;
-
-	/**
-	 * @deprecated As of Athanasius (7.3.x), replaced by {@link
 	 *             #getContextObjects(JSONObject, String, long[])}
 	 */
 	@Deprecated
