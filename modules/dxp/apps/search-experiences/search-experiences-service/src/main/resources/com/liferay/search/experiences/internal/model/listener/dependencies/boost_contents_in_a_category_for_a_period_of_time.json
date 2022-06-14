@@ -46,7 +46,7 @@
 							"type": "number"
 						},
 						{
-							"label": "Create Date: From",
+							"label": "Date: From",
 							"name": "start_date",
 							"type": "date",
 							"typeOptions": {
@@ -54,7 +54,7 @@
 							}
 						},
 						{
-							"label": "Create Date: To",
+							"label": "Date: To",
 							"name": "end_date",
 							"type": "date",
 							"typeOptions": {
