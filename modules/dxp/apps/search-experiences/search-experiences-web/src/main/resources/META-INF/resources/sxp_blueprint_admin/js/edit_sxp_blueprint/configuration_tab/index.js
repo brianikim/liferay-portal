@@ -12,7 +12,7 @@
 import ClayForm from '@clayui/form';
 import ClayLayout from '@clayui/layout';
 import getCN from 'classnames';
-import React, {useContext} from 'react';
+import React from 'react';
 
 import advancedConfigurationSchema from '../../../schemas/advancedConfigurationSchema';
 import aggregationConfigurationSchema from '../../../schemas/aggregationConfigurationSchema';
@@ -21,7 +21,6 @@ import parameterConfigurationSchema from '../../../schemas/parameterConfiguratio
 import sortConfigurationSchema from '../../../schemas/sortConfigurationSchema';
 import CodeMirrorEditor from '../../shared/CodeMirrorEditor';
 import LearnMessage from '../../shared/LearnMessage';
-import ThemeContext from '../../shared/ThemeContext';
 
 const CONFIGURATION_SCHEMAS = {
 	advancedConfig: advancedConfigurationSchema,
@@ -42,8 +41,6 @@ function ConfigurationTab({
 	sortConfig,
 	touched,
 }) {
-	const {featureFlagLps143720} = useContext(ThemeContext);
-
 	const _renderEditor = (configName, configValue) => (
 		<div
 			className={getCN({
@@ -52,11 +49,7 @@ function ConfigurationTab({
 			onBlur={() => setFieldTouched(configName)}
 		>
 			<CodeMirrorEditor
-				autocompleteSchema={
-					featureFlagLps143720
-						? CONFIGURATION_SCHEMAS[configName]
-						: null
-				}
+				autocompleteSchema={CONFIGURATION_SCHEMAS[configName]}
 				onChange={(value) => setFieldValue(configName, value)}
 				value={configValue}
 			/>
