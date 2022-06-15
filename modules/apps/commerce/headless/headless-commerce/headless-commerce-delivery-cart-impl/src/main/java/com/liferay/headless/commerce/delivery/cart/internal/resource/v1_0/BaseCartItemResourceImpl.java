@@ -434,6 +434,9 @@ public abstract class BaseCartItemResourceImpl
 			java.util.Collection<CartItem> cartItems,
 			Map<String, Serializable> parameters)
 		throws Exception {
+
+		throw new UnsupportedOperationException(
+			"This method needs to be implemented");
 	}
 
 	@Override
@@ -480,7 +483,8 @@ public abstract class BaseCartItemResourceImpl
 			Map<String, Serializable> parameters, String search)
 		throws Exception {
 
-		return null;
+		throw new UnsupportedOperationException(
+			"This method needs to be implemented");
 	}
 
 	@Override

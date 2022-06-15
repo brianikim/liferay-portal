@@ -407,8 +407,15 @@ public abstract class BaseInstanceResourceImpl
 			"createStrategy", "INSERT");
 
 		if ("INSERT".equalsIgnoreCase(createStrategy)) {
-			instanceUnsafeConsumer = instance -> postProcessInstance(
-				Long.parseLong((String)parameters.get("processId")), instance);
+			if (parameters.containsKey("processId")) {
+				instanceUnsafeConsumer = instance -> postProcessInstance(
+					Long.parseLong((String)parameters.get("processId")),
+					instance);
+			}
+			else {
+				throw new NotSupportedException(
+					"One of the following parameters must be specified: [processId]");
+			}
 		}
 
 		if (instanceUnsafeConsumer == null) {
@@ -433,6 +440,9 @@ public abstract class BaseInstanceResourceImpl
 			java.util.Collection<Instance> instances,
 			Map<String, Serializable> parameters)
 		throws Exception {
+
+		throw new UnsupportedOperationException(
+			"This method needs to be implemented");
 	}
 
 	public Set<String> getAvailableCreateStrategies() {
@@ -468,15 +478,21 @@ public abstract class BaseInstanceResourceImpl
 			Map<String, Serializable> parameters, String search)
 		throws Exception {
 
-		return getProcessInstancesPage(
-			Long.parseLong((String)parameters.get("processId")),
-			(Long[])parameters.get("assigneeIds"),
-			(Long[])parameters.get("classPKs"),
-			Boolean.parseBoolean((String)parameters.get("completed")),
-			new java.util.Date((String)parameters.get("dateEnd")),
-			new java.util.Date((String)parameters.get("dateStart")),
-			(String[])parameters.get("slaStatuses"),
-			(String[])parameters.get("taskNames"), pagination);
+		if (parameters.containsKey("processId")) {
+			return getProcessInstancesPage(
+				Long.parseLong((String)parameters.get("processId")),
+				(Long[])parameters.get("assigneeIds"),
+				(Long[])parameters.get("classPKs"),
+				Boolean.parseBoolean((String)parameters.get("completed")),
+				new java.util.Date((String)parameters.get("dateEnd")),
+				new java.util.Date((String)parameters.get("dateStart")),
+				(String[])parameters.get("slaStatuses"),
+				(String[])parameters.get("taskNames"), pagination);
+		}
+		else {
+			throw new NotSupportedException(
+				"One of the following parameters must be specified: [processId]");
+		}
 	}
 
 	@Override
@@ -506,6 +522,9 @@ public abstract class BaseInstanceResourceImpl
 			java.util.Collection<Instance> instances,
 			Map<String, Serializable> parameters)
 		throws Exception {
+
+		throw new UnsupportedOperationException(
+			"This method needs to be implemented");
 	}
 
 	public void setContextAcceptLanguage(AcceptLanguage contextAcceptLanguage) {

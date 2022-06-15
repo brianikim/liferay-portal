@@ -906,11 +906,12 @@ public abstract class BaseDocumentResourceImpl
 			"createStrategy", "INSERT");
 
 		if ("INSERT".equalsIgnoreCase(createStrategy)) {
-			documentUnsafeConsumer = document -> postDocumentFolderDocument(
-				Long.parseLong((String)parameters.get("documentFolderId")),
-				(MultipartBody)parameters.get("multipartBody"));
-
-			if (parameters.containsKey("assetLibraryId")) {
+			if (parameters.containsKey("documentFolderId")) {
+				documentUnsafeConsumer = document -> postDocumentFolderDocument(
+					Long.parseLong((String)parameters.get("documentFolderId")),
+					(MultipartBody)parameters.get("multipartBody"));
+			}
+			else if (parameters.containsKey("assetLibraryId")) {
 				documentUnsafeConsumer = document -> postAssetLibraryDocument(
 					(Long)parameters.get("assetLibraryId"),
 					(MultipartBody)parameters.get("multipartBody"));
@@ -919,6 +920,10 @@ public abstract class BaseDocumentResourceImpl
 				documentUnsafeConsumer = document -> postSiteDocument(
 					(Long)parameters.get("siteId"),
 					(MultipartBody)parameters.get("multipartBody"));
+			}
+			else {
+				throw new NotSupportedException(
+					"One of the following parameters must be specified: [documentFolderId, assetLibraryId, siteId]");
 			}
 		}
 
@@ -995,11 +1000,15 @@ public abstract class BaseDocumentResourceImpl
 				Boolean.parseBoolean((String)parameters.get("flatten")), search,
 				null, filter, pagination, sorts);
 		}
-		else {
+		else if (parameters.containsKey("documentFolderId")) {
 			return getDocumentFolderDocumentsPage(
 				Long.parseLong((String)parameters.get("documentFolderId")),
 				Boolean.parseBoolean((String)parameters.get("flatten")), search,
 				null, filter, pagination, sorts);
+		}
+		else {
+			throw new NotSupportedException(
+				"One of the following parameters must be specified: [assetLibraryId, siteId, documentFolderId]");
 		}
 	}
 

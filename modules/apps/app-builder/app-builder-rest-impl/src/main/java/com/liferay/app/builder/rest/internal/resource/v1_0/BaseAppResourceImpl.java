@@ -537,6 +537,9 @@ public abstract class BaseAppResourceImpl
 			java.util.Collection<App> apps,
 			Map<String, Serializable> parameters)
 		throws Exception {
+
+		throw new UnsupportedOperationException(
+			"This method needs to be implemented");
 	}
 
 	@Override
