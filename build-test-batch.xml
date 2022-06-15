@@ -6019,7 +6019,6 @@ log.sanitizer.enabled=false</echo>
 		<run-modules-integration-test database.type="postgresql" database.version="13.4" />
 	</target>
 
-
 	<target name="modules-integration-sqlserver2017-jdk8">
 		<run-modules-integration-test database.type="sqlserver" database.version="2017" />
 	</target>
