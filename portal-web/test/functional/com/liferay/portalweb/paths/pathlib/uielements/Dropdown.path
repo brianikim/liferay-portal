@@ -49,6 +49,11 @@
 <!--FILTER-->
 
 <tr>
+	<td>FILTER</td>
+	<td>//button[*[normalize-space(text())='Filter']]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>FILTER_AND_ORDER</td>
 	<td>//button[*[normalize-space(text())='Filter and Order']]</td>
 	<td></td>
