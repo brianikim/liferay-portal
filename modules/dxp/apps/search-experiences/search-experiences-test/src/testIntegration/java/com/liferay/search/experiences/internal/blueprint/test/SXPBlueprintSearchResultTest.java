@@ -1228,7 +1228,7 @@ public class SXPBlueprintSearchResultTest {
 		_addFileEntry("PDF file", ".pdf");
 
 		_setUpJournalArticles(
-			new String[] {"", "", ""},
+			new String[] {"", ""},
 			new String[] {"Article file 1", "Article file 2"});
 
 		_updateElementInstancesJSON(
@@ -1236,12 +1236,15 @@ public class SXPBlueprintSearchResultTest {
 
 		_keywords = "file";
 
-		_assertSearch("[PDF file]");
+		_assertSearch("[PDF file]", "title");
 
 		_updateElementInstancesJSON(null, null);
 
 		_assertSearchIgnoreRelevance(
-			"[Article file 1, Article file 2, PDF file]");
+			"[com.liferay.document.library.kernel.model.DLFileEntry, " +
+				"com.liferay.journal.model.JournalArticle, " +
+					"com.liferay.journal.model.JournalArticle]",
+			"entryClassName");
 	}
 
 	@Test
@@ -1856,12 +1859,20 @@ public class SXPBlueprintSearchResultTest {
 			Consumer<SearchRequestBuilder>... searchRequestBuilderConsumer)
 		throws Exception {
 
+		_assertSearch(expected, "title_en_US", searchRequestBuilderConsumer);
+	}
+
+	private void _assertSearch(
+			String expected, String fieldName,
+			Consumer<SearchRequestBuilder>... searchRequestBuilderConsumer)
+		throws Exception {
+
 		SearchResponse searchResponse = _getSearchResponseSearchPage(
 			searchRequestBuilderConsumer);
 
 		DocumentsAssert.assertValues(
 			searchResponse.getRequestString(),
-			searchResponse.getDocumentsStream(), "title_en_US", expected);
+			searchResponse.getDocumentsStream(), fieldName, expected);
 
 		if (!Objects.equals("{}", _sxpBlueprint.getElementInstancesJSON())) {
 			searchResponse = _getSearchResponsePreview(
@@ -1869,7 +1880,7 @@ public class SXPBlueprintSearchResultTest {
 
 			DocumentsAssert.assertValues(
 				searchResponse.getRequestString(),
-				searchResponse.getDocumentsStream(), "title_en_US", expected);
+				searchResponse.getDocumentsStream(), fieldName, expected);
 		}
 	}
 
@@ -1878,12 +1889,21 @@ public class SXPBlueprintSearchResultTest {
 			Consumer<SearchRequestBuilder>... searchRequestBuilderConsumer)
 		throws Exception {
 
+		_assertSearchIgnoreRelevance(
+			expected, "title_en_US", searchRequestBuilderConsumer);
+	}
+
+	private void _assertSearchIgnoreRelevance(
+			String expected, String fieldName,
+			Consumer<SearchRequestBuilder>... searchRequestBuilderConsumer)
+		throws Exception {
+
 		SearchResponse searchResponse = _getSearchResponseSearchPage(
 			searchRequestBuilderConsumer);
 
 		DocumentsAssert.assertValuesIgnoreRelevance(
 			searchResponse.getRequestString(),
-			searchResponse.getDocumentsStream(), "title_en_US", expected);
+			searchResponse.getDocumentsStream(), fieldName, expected);
 
 		if (!Objects.equals("{}", _sxpBlueprint.getElementInstancesJSON())) {
 			searchResponse = _getSearchResponsePreview(
@@ -1891,7 +1911,7 @@ public class SXPBlueprintSearchResultTest {
 
 			DocumentsAssert.assertValuesIgnoreRelevance(
 				searchResponse.getRequestString(),
-				searchResponse.getDocumentsStream(), "title_en_US", expected);
+				searchResponse.getDocumentsStream(), fieldName, expected);
 		}
 	}
 
