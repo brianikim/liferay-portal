@@ -123,7 +123,7 @@ public class FragmentEntryConfigurationParserImpl
 		return configurationDefaultValuesJSONObject;
 	}
 
-    /**
+	/**
 	 * @deprecated As of Athanasius (7.3.x), replaced by {@link
 	 *             #getContextObjects(JSONObject, String, long[])}
 	 */
@@ -172,7 +172,7 @@ public class FragmentEntryConfigurationParserImpl
 
 		return contextObjects;
 	}
-	
+
 	@Override
 	public Map<String, Object> getContextObjects(
 		JSONObject configurationValuesJSONObject, String configuration,
@@ -569,7 +569,10 @@ public class FragmentEntryConfigurationParserImpl
 				defaultLayoutListRetrieverContext =
 					new DefaultLayoutListRetrieverContext();
 
-            if (segmentsEntryIds != null) defaultLayoutListRetrieverContext.setSegmentsEntryIds(segmentsEntryIds);
+			if (segmentsEntryIds != null) {
+				defaultLayoutListRetrieverContext.setSegmentsEntryIds(
+					segmentsEntryIds);
+			}
 
 			return layoutListRetriever.getList(
 				listObjectReferenceFactory.getListObjectReference(jsonObject),
