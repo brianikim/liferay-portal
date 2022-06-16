@@ -23,6 +23,7 @@ import com.liferay.layout.taglib.internal.servlet.ServletContextUtil;
 import com.liferay.layout.util.structure.DropZoneLayoutStructureItem;
 import com.liferay.layout.util.structure.LayoutStructure;
 import com.liferay.layout.util.structure.LayoutStructureItem;
+import com.liferay.layout.util.structure.constants.LayoutStructureWebKeys;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Layout;
@@ -158,7 +159,7 @@ public class RenderFragmentLayoutTag extends IncludeTag {
 		}
 
 		_layoutStructure = (LayoutStructure)httpServletRequest.getAttribute(
-			RenderLayoutStructureTag.LAYOUT_STRUCTURE);
+			LayoutStructureWebKeys.LAYOUT_STRUCTURE);
 
 		if (_layoutStructure != null) {
 			return _layoutStructure;
