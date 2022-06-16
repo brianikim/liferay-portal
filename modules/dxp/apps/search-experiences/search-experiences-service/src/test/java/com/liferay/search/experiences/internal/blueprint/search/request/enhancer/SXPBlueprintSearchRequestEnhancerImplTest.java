@@ -52,6 +52,8 @@ import com.liferay.portal.search.sort.SortOrder;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
 import com.liferay.portal.vulcan.dto.converter.DTOConverter;
 import com.liferay.portal.vulcan.dto.converter.DTOConverterRegistry;
+import com.liferay.registry.BasicRegistryImpl;
+import com.liferay.registry.RegistryUtil;
 import com.liferay.search.experiences.blueprint.exception.InvalidElementInstanceException;
 import com.liferay.search.experiences.blueprint.exception.InvalidParameterException;
 import com.liferay.search.experiences.blueprint.exception.InvalidQueryEntryException;
@@ -106,6 +108,8 @@ public class SXPBlueprintSearchRequestEnhancerImplTest {
 	@Before
 	public void setUp() throws Exception {
 		MockitoAnnotations.initMocks(this);
+
+		RegistryUtil.setRegistry(new BasicRegistryImpl());
 
 		_sxpBlueprintSearchRequestEnhancerImpl =
 			new SXPBlueprintSearchRequestEnhancerImpl();
