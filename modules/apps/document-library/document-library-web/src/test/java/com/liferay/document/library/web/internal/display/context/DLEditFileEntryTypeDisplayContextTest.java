@@ -22,20 +22,16 @@ import com.liferay.dynamic.data.mapping.service.DDMStructureLocalService;
 import com.liferay.dynamic.data.mapping.util.DDM;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.bean.BeanPropertiesImpl;
-import com.liferay.portal.json.JSONFactoryImpl;
 import com.liferay.portal.kernel.bean.BeanPropertiesUtil;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.test.portlet.MockLiferayPortletRenderRequest;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
-import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.language.LanguageImpl;
 import com.liferay.portal.language.LanguageResources;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
-import com.liferay.portal.util.PropsImpl;
 
 import java.util.Collections;
 
@@ -86,17 +82,11 @@ public class DLEditFileEntryTypeDisplayContextTest {
 		_ddmStructureLocalService = Mockito.mock(
 			DDMStructureLocalService.class);
 
-		JSONFactoryUtil jsonFactoryUtil = new JSONFactoryUtil();
-
-		jsonFactoryUtil.setJSONFactory(new JSONFactoryImpl());
-
 		_language = new LanguageImpl();
 
 		LanguageResources languageResources = new LanguageResources();
 
 		languageResources.setConfig(StringPool.BLANK);
-
-		PropsUtil.setProps(new PropsImpl());
 	}
 
 	@Test
