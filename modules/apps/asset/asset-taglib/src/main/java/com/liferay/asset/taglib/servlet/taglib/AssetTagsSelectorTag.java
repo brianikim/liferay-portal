@@ -221,7 +221,6 @@ public class AssetTagsSelectorTag extends IncludeTag {
 
 			portletURL.setParameter(
 				"groupIds", StringUtil.merge(getGroupIds(), StringPool.COMMA));
-
 			portletURL.setParameter("eventName", getEventName());
 			portletURL.setParameter("selectedTagNames", "{selectedTagNames}");
 			portletURL.setWindowState(LiferayWindowState.POP_UP);
