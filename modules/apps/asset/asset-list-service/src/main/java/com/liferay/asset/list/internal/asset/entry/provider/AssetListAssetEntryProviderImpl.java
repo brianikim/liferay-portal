@@ -573,7 +573,7 @@ public class AssetListAssetEntryProviderImpl
 					segmentEntryIds, SegmentsEntryConstants.ID_DEFAULT));
 		}
 
-		long[] filteredAndSortedSegmentEntryIds = longStream.mapToObj(
+		long[] combinedSegmentsEntryIds = longStream.mapToObj(
 			segmentsEntryId ->
 				_assetListEntrySegmentsEntryRelLocalService.
 					fetchAssetListEntrySegmentsEntryRel(
@@ -590,13 +590,13 @@ public class AssetListAssetEntryProviderImpl
 			segmentsEntryId -> segmentsEntryId
 		).toArray();
 
-		if (filteredAndSortedSegmentEntryIds.length == 0) {
-			filteredAndSortedSegmentEntryIds = new long[] {
+		if (combinedSegmentsEntryIds.length == 0) {
+			combinedSegmentsEntryIds = new long[] {
 				SegmentsEntryConstants.ID_DEFAULT
 			};
 		}
 
-		return filteredAndSortedSegmentEntryIds;
+		return combinedSegmentsEntryIds;
 	}
 
 	private List<AssetEntry> _getDynamicAssetEntries(
