@@ -16,8 +16,6 @@ package com.liferay.dynamic.data.mapping.form.field.type.internal.grid;
 
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.json.JSONFactoryImpl;
-import com.liferay.portal.kernel.json.JSONFactory;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
 
@@ -45,9 +43,7 @@ public class GridDDMFormFieldValueRequestParameterRetrieverTest {
 			new GridDDMFormFieldValueRequestParameterRetriever();
 
 		_gridDDMFormFieldValueRequestParameterRetriever.jsonFactory =
-			_jsonFactory;
-
-		_setUpJSONFactoryUtil();
+			new JSONFactoryImpl();
 	}
 
 	@Test
@@ -133,16 +129,9 @@ public class GridDDMFormFieldValueRequestParameterRetrieverTest {
 		Assert.assertEquals("{}", parameterValue);
 	}
 
-	private void _setUpJSONFactoryUtil() {
-		JSONFactoryUtil jsonFactoryUtil = new JSONFactoryUtil();
-
-		jsonFactoryUtil.setJSONFactory(_jsonFactory);
-	}
-
 	private static final String _PARAMETER_NAME = "ddmFormFieldGrid";
 
 	private GridDDMFormFieldValueRequestParameterRetriever
 		_gridDDMFormFieldValueRequestParameterRetriever;
-	private final JSONFactory _jsonFactory = new JSONFactoryImpl();
 
 }
