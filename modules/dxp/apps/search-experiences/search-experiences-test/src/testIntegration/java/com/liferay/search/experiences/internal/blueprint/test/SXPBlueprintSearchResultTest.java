@@ -421,7 +421,7 @@ public class SXPBlueprintSearchResultTest {
 					"user_segment_ids", segmentsEntry.getSegmentsEntryId()
 				).build()
 			},
-			new String[] {"Boost Contents in a Category for a User Segment"});
+			new String[] {"Boost Contents in a Category for User Segments"});
 
 		_assertSearch("[Article With Category, Article]");
 
@@ -1825,7 +1825,7 @@ public class SXPBlueprintSearchResultTest {
 					"operator", "and"
 				).build()
 			},
-			new String[] {"Search with the Lucene Syntax"});
+			new String[] {"Search with Query String Syntax"});
 
 		_assertSearch("[Coca Cola]");
 
@@ -1841,7 +1841,7 @@ public class SXPBlueprintSearchResultTest {
 					"operator", "and"
 				).build()
 			},
-			new String[] {"Search with the Lucene Syntax"});
+			new String[] {"Search with Query String Syntax"});
 
 		_assertSearch("[Pepsi Cola]");
 	}
