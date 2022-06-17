@@ -143,7 +143,13 @@ definition {
 	macro editParagraphBody {
 		SelectFrame.selectFrameNoLoading(locator1 = "CKEditor#BODY_FIELD_IFRAME");
 
-		Type.clickAtType(
+		SelectFieldText(locator1 = "CKEditor#BODY");
+
+		KeyPress(
+			locator1 = "CKEditor#BODY",
+			value1 = "\BACK_SPACE");
+
+		KeyPress(
 			locator1 = "CKEditor#BODY",
 			value1 = "${content}");
 
