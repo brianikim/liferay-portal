@@ -6,7 +6,7 @@
 		<libraries>
 			<library>
 				<file-name>com.liferay.adaptive.media.image.impl.jar!metadata-extractor.jar</file-name>
-				<version>2.13.0</version>
+				<version>2.18.0</version>
 				<project-name>metadata-extractor</project-name>
 				<project-url>https://drewnoakes.com/code/exif/</project-url>
 				<licenses>
@@ -240,6 +240,114 @@
 					<license>
 						<license-name>Public Domain</license-name>
 						<license-url>http://creativecommons.org/licenses/publicdomain</license-url>
+					</license>
+				</licenses>
+			</library>
+			<library>
+				<file-name>com.liferay.calendar.service.jar!cache-api.jar</file-name>
+				<version>1.1.1</version>
+				<project-name>JSR107 API and SPI</project-name>
+				<project-url>https://github.com/jsr107/jsr107spec</project-url>
+				<licenses>
+					<license>
+						<license-name>Apache License, Version 2.0</license-name>
+						<license-url>https://www.apache.org/licenses/LICENSE-2.0.txt</license-url>
+					</license>
+				</licenses>
+			</library>
+			<library>
+				<file-name>com.liferay.calendar.service.jar!commons-lang3.jar</file-name>
+				<version>3.12.0</version>
+				<project-name>Apache Commons Lang</project-name>
+				<project-url>https://commons.apache.org/proper/commons-lang/</project-url>
+				<licenses>
+					<license>
+						<license-name>Apache License, Version 2.0</license-name>
+						<license-url>https://www.apache.org/licenses/LICENSE-2.0.txt</license-url>
+					</license>
+				</licenses>
+			</library>
+			<library>
+				<file-name>com.liferay.calendar.service.jar!handy-uri-templates.jar</file-name>
+				<version>2.1.7</version>
+				<project-name>Handy URI Templates</project-name>
+				<project-url>https://github.com/damnhandy/Handy-URI-Templates</project-url>
+				<licenses>
+					<license>
+						<license-name>The Apache Software License, Version 2.0</license-name>
+						<license-url>http://www.apache.org/licenses/LICENSE-2.0.txt</license-url>
+					</license>
+				</licenses>
+			</library>
+			<library>
+				<file-name>com.liferay.calendar.service.jar!ical4j.jar</file-name>
+				<version>3.2.2</version>
+				<project-name>ical4j</project-name>
+				<project-url>http://ical4j.github.io</project-url>
+				<licenses>
+					<license>
+						<license-name>BSD-3-Clause</license-name>
+						<license-url>https://raw.githubusercontent.com/ical4j/ical4j/master/LICENSE.txt</license-url>
+					</license>
+				</licenses>
+			</library>
+			<library>
+				<file-name>com.liferay.calendar.service.jar!joda-convert.jar</file-name>
+				<version>2.2.1</version>
+				<project-name>Joda-Convert</project-name>
+				<project-url>https://www.joda.org/${joda.artifactId}/</project-url>
+				<licenses>
+					<license>
+						<license-name>Apache License, Version 2.0</license-name>
+						<license-url>https://www.apache.org/licenses/LICENSE-2.0</license-url>
+					</license>
+				</licenses>
+			</library>
+			<library>
+				<file-name>com.liferay.calendar.service.jar!joda-time.jar</file-name>
+				<version>2.9.1</version>
+				<project-name>Joda-Time</project-name>
+				<project-url>http://www.joda.org/joda-time/</project-url>
+				<licenses>
+					<license>
+						<license-name>Apache License, Version 2.0</license-name>
+						<license-url>https://www.apache.org/licenses/LICENSE-2.0</license-url>
+					</license>
+				</licenses>
+			</library>
+			<library>
+				<file-name>com.liferay.calendar.service.jar!jparsec.jar</file-name>
+				<version>3.1</version>
+				<project-name>jparsec</project-name>
+				<project-url>http://jparsec.org</project-url>
+				<licenses>
+					<license>
+						<license-name>Apache License 2.0</license-name>
+						<license-url>http://www.apache.org/licenses/LICENSE-2.0</license-url>
+					</license>
+				</licenses>
+			</library>
+			<library>
+				<file-name>com.liferay.calendar.service.jar!org.everit.json.schema.jar</file-name>
+				<version>1.11.1</version>
+				<project-name>everit-org/json-schema</project-name>
+				<project-url>https://github.com/everit-org/json-schema</project-url>
+				<licenses>
+					<license>
+						<license-name>Apache License, Version 2.0</license-name>
+						<license-url>http://www.apache.org/licenses/LICENSE-2.0.txt</license-url>
+					</license>
+				</licenses>
+			</library>
+			<library>
+				<file-name>com.liferay.calendar.service.jar!re2j.jar</file-name>
+				<version>1.2</version>
+				<project-name>RE2/J</project-name>
+				<project-url>http://github.com/google/re2j</project-url>
+				<licenses>
+					<license>
+						<license-name>Go License</license-name>
+						<license-url>https://golang.org/LICENSE</license-url>
 					</license>
 				</licenses>
 			</library>
@@ -7598,7 +7706,7 @@
 			</library>
 			<library>
 				<file-name>lib/portal/metadata-extractor.jar</file-name>
-				<version>2.13.0</version>
+				<version>2.18.0</version>
 				<project-name>Metadata Extractor</project-name>
 				<project-url>http://www.drewnoakes.com/code/exif</project-url>
 				<licenses>
