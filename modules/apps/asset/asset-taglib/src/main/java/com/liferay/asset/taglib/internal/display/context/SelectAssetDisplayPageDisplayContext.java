@@ -179,7 +179,10 @@ public class SelectAssetDisplayPageDisplayContext {
 			_getAssetDisplayPageEntry();
 
 		if (assetDisplayPageEntry == null) {
-			if (Validator.isNull(getLayoutUuid())) {
+			if (_classPK != 0) {
+				_displayPageType = AssetDisplayPageConstants.TYPE_NONE;
+			}
+			else if (Validator.isNull(getLayoutUuid())) {
 				_displayPageType = AssetDisplayPageConstants.TYPE_DEFAULT;
 			}
 			else {
