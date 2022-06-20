@@ -6796,15 +6796,14 @@ public class CPInstancePersistenceImpl
 		CPInstanceModelImpl cpInstanceModelImpl =
 			(CPInstanceModelImpl)cpInstance;
 
-		if (Validator.isNull(cpInstance.getExternalReferenceCode())) {
-			cpInstance.setExternalReferenceCode(
-				String.valueOf(cpInstance.getPrimaryKey()));
-		}
-
 		if (Validator.isNull(cpInstance.getUuid())) {
 			String uuid = PortalUUIDUtil.generate();
 
 			cpInstance.setUuid(uuid);
+		}
+
+		if (Validator.isNull(cpInstance.getExternalReferenceCode())) {
+			cpInstance.setExternalReferenceCode(cpInstance.getUuid());
 		}
 
 		ServiceContext serviceContext =

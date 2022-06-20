@@ -6864,15 +6864,15 @@ public class CommerceDiscountPersistenceImpl
 		CommerceDiscountModelImpl commerceDiscountModelImpl =
 			(CommerceDiscountModelImpl)commerceDiscount;
 
-		if (Validator.isNull(commerceDiscount.getExternalReferenceCode())) {
-			commerceDiscount.setExternalReferenceCode(
-				String.valueOf(commerceDiscount.getPrimaryKey()));
-		}
-
 		if (Validator.isNull(commerceDiscount.getUuid())) {
 			String uuid = PortalUUIDUtil.generate();
 
 			commerceDiscount.setUuid(uuid);
+		}
+
+		if (Validator.isNull(commerceDiscount.getExternalReferenceCode())) {
+			commerceDiscount.setExternalReferenceCode(
+				commerceDiscount.getUuid());
 		}
 
 		ServiceContext serviceContext =
