@@ -19,7 +19,6 @@ import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.layoutconfiguration.util.RuntimePageUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
-import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutSet;
 import com.liferay.portal.kernel.model.LayoutTemplateConstants;
 import com.liferay.portal.kernel.model.LayoutTypePortlet;
@@ -90,7 +89,7 @@ public class EmbeddedPortletWhenEmbeddingPortletInLayoutTemplateTest
 		String templateContent =
 			"${processor.processPortlet(\"" + TEST_PORTLET_ID + "\")}";
 
-		_processLayoutTemplate(layout, templateId, templateContent);
+		_processLayoutTemplate(templateId, templateContent);
 
 		Assert.assertTrue(testPortlet.isCalledRender());
 	}
@@ -121,7 +120,7 @@ public class EmbeddedPortletWhenEmbeddingPortletInLayoutTemplateTest
 			"${processor.processColumn(\"column-1\"",
 			"\"portlet-column-content portlet-column-content-first\")}");
 
-		_processLayoutTemplate(layout, templateId, templateContent);
+		_processLayoutTemplate(templateId, templateContent);
 
 		Assert.assertEquals(
 			Arrays.asList(
@@ -132,7 +131,7 @@ public class EmbeddedPortletWhenEmbeddingPortletInLayoutTemplateTest
 	}
 
 	private HttpServletRequest _getHttpServletRequest(
-			Layout layout, HttpServletResponse httpServletResponse)
+			HttpServletResponse httpServletResponse)
 		throws Exception {
 
 		MockHttpServletRequest httpServletRequest =
@@ -191,13 +190,13 @@ public class EmbeddedPortletWhenEmbeddingPortletInLayoutTemplateTest
 	}
 
 	private void _processLayoutTemplate(
-			Layout layout, String templateId, String templateContent)
+			String templateId, String templateContent)
 		throws Exception {
 
 		HttpServletResponse httpServletResponse = new MockHttpServletResponse();
 
 		HttpServletRequest httpServletRequest = _getHttpServletRequest(
-			layout, httpServletResponse);
+			httpServletResponse);
 
 		RuntimePageUtil.processTemplate(
 			httpServletRequest, httpServletResponse, null,
