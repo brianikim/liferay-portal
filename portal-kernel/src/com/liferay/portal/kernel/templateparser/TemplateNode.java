@@ -221,7 +221,7 @@ public class TemplateNode extends LinkedHashMap<String, Object> {
 					layoutGroupId, privateLayout, layoutId);
 
 				if (layout != null) {
-					return PortalUtil.getLayoutFriendlyURL(
+					return PortalUtil.getLayoutRelativeURL(
 						layout, _themeDisplay);
 				}
 
