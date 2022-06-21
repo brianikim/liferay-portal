@@ -15,10 +15,10 @@
 package com.liferay.layout.taglib.servlet.taglib;
 
 import com.liferay.fragment.constants.FragmentEntryLinkConstants;
+import com.liferay.layout.constants.LayoutWebKeys;
 import com.liferay.layout.taglib.internal.display.context.RenderLayoutStructureDisplayContext;
 import com.liferay.layout.taglib.internal.servlet.ServletContextUtil;
 import com.liferay.layout.util.structure.LayoutStructure;
-import com.liferay.layout.util.structure.constants.LayoutStructureWebKeys;
 import com.liferay.taglib.servlet.PipingServletResponse;
 import com.liferay.taglib.util.IncludeTag;
 
@@ -53,7 +53,7 @@ public class RenderLayoutStructureTag extends IncludeTag {
 				isShowPreview()));
 
 		request.setAttribute(
-			LayoutStructureWebKeys.LAYOUT_STRUCTURE, _layoutStructure);
+			LayoutWebKeys.LAYOUT_STRUCTURE, _layoutStructure);
 
 		return super.doStartTag();
 	}

@@ -12,12 +12,12 @@
  * details.
  */
 
-package com.liferay.layout.util.structure.constants;
+package com.liferay.layout.constants;
 
 /**
  * @author Dante Wang
  */
-public class LayoutStructureWebKeys {
+public class LayoutWebKeys {
 
 	public static final String LAYOUT_STRUCTURE = "LAYOUT_STRUCTURE";
 
