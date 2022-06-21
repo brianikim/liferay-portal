@@ -707,6 +707,9 @@ public class LayoutStructure {
 			new ColumnLayoutStructureItem(parentItemId);
 
 		columnLayoutStructureItem.setSize(size);
+		columnLayoutStructureItem.setViewportConfiguration(
+			ViewportSize.MOBILE_LANDSCAPE.getViewportSizeId(),
+			JSONUtil.put("size", 12));
 
 		_updateLayoutStructure(columnLayoutStructureItem, position);
 	}
