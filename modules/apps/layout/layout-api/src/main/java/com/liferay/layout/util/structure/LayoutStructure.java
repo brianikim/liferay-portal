@@ -872,17 +872,16 @@ public class LayoutStructure {
 
 			viewportConfigurationJSONObject.put("modulesPerRow", 1);
 		}
-		else if (viewportConfigurationJSONObject.has("modulesPerRow")) {
-			if (Objects.equals(
+		else if (Objects.equals(
 					ViewportSize.PORTRAIT_MOBILE.getViewportSizeId(),
-					viewportSizeId)) {
+					viewportSizeId) &&
+				 viewportConfigurationJSONObject.has("modulesPerRow")) {
 
-				viewportConfigurationJSONObject.remove("modulesPerRow");
-			}
-			else {
-				viewportConfigurationJSONObject.put(
-					"modulesPerRow", numberOfColumns);
-			}
+			viewportConfigurationJSONObject.remove("modulesPerRow");
+		}
+		else if (viewportConfigurationJSONObject.has("modulesPerRow")) {
+			viewportConfigurationJSONObject.put(
+				"modulesPerRow", numberOfColumns);
 		}
 
 		_updateColumnSizes(
