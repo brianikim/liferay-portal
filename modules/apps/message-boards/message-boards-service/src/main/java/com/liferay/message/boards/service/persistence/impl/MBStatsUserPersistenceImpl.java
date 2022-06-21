@@ -2271,7 +2271,9 @@ public class MBStatsUserPersistenceImpl
 	 */
 	@Override
 	public MBStatsUser fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(MBStatsUser.class)) {
+		if (ctPersistenceHelper.isProductionMode(
+				MBStatsUser.class, primaryKey)) {
+
 			return super.fetchByPrimaryKey(primaryKey);
 		}
 

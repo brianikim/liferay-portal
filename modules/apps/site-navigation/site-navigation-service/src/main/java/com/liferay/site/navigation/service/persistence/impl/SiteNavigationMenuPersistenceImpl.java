@@ -7619,7 +7619,9 @@ public class SiteNavigationMenuPersistenceImpl
 	 */
 	@Override
 	public SiteNavigationMenu fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(SiteNavigationMenu.class)) {
+		if (ctPersistenceHelper.isProductionMode(
+				SiteNavigationMenu.class, primaryKey)) {
+
 			return super.fetchByPrimaryKey(primaryKey);
 		}
 

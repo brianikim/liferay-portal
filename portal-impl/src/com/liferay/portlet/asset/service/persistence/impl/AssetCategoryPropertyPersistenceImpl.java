@@ -2418,7 +2418,7 @@ public class AssetCategoryPropertyPersistenceImpl
 	@Override
 	public AssetCategoryProperty fetchByPrimaryKey(Serializable primaryKey) {
 		if (CTPersistenceHelperUtil.isProductionMode(
-				AssetCategoryProperty.class)) {
+				AssetCategoryProperty.class, primaryKey)) {
 
 			return super.fetchByPrimaryKey(primaryKey);
 		}

@@ -1706,7 +1706,7 @@ public class WorkflowInstanceLinkPersistenceImpl
 	@Override
 	public WorkflowInstanceLink fetchByPrimaryKey(Serializable primaryKey) {
 		if (CTPersistenceHelperUtil.isProductionMode(
-				WorkflowInstanceLink.class)) {
+				WorkflowInstanceLink.class, primaryKey)) {
 
 			return super.fetchByPrimaryKey(primaryKey);
 		}

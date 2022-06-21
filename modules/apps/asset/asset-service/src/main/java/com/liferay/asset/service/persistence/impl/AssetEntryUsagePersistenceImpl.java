@@ -4479,7 +4479,9 @@ public class AssetEntryUsagePersistenceImpl
 	 */
 	@Override
 	public AssetEntryUsage fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(AssetEntryUsage.class)) {
+		if (ctPersistenceHelper.isProductionMode(
+				AssetEntryUsage.class, primaryKey)) {
+
 			return super.fetchByPrimaryKey(primaryKey);
 		}
 

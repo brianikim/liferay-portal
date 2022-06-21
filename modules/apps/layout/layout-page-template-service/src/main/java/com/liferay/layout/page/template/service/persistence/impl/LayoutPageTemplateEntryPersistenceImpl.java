@@ -24161,7 +24161,7 @@ public class LayoutPageTemplateEntryPersistenceImpl
 	@Override
 	public LayoutPageTemplateEntry fetchByPrimaryKey(Serializable primaryKey) {
 		if (ctPersistenceHelper.isProductionMode(
-				LayoutPageTemplateEntry.class)) {
+				LayoutPageTemplateEntry.class, primaryKey)) {
 
 			return super.fetchByPrimaryKey(primaryKey);
 		}

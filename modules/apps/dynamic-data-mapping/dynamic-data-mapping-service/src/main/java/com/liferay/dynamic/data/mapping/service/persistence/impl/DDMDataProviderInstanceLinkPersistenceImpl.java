@@ -1811,7 +1811,7 @@ public class DDMDataProviderInstanceLinkPersistenceImpl
 		Serializable primaryKey) {
 
 		if (ctPersistenceHelper.isProductionMode(
-				DDMDataProviderInstanceLink.class)) {
+				DDMDataProviderInstanceLink.class, primaryKey)) {
 
 			return super.fetchByPrimaryKey(primaryKey);
 		}

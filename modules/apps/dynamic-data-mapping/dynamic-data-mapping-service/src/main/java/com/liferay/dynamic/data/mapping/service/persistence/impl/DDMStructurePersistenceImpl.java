@@ -10728,7 +10728,9 @@ public class DDMStructurePersistenceImpl
 	 */
 	@Override
 	public DDMStructure fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(DDMStructure.class)) {
+		if (ctPersistenceHelper.isProductionMode(
+				DDMStructure.class, primaryKey)) {
+
 			return super.fetchByPrimaryKey(primaryKey);
 		}
 

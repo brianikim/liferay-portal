@@ -3868,7 +3868,7 @@ public class WorkflowDefinitionLinkPersistenceImpl
 	@Override
 	public WorkflowDefinitionLink fetchByPrimaryKey(Serializable primaryKey) {
 		if (CTPersistenceHelperUtil.isProductionMode(
-				WorkflowDefinitionLink.class)) {
+				WorkflowDefinitionLink.class, primaryKey)) {
 
 			return super.fetchByPrimaryKey(primaryKey);
 		}

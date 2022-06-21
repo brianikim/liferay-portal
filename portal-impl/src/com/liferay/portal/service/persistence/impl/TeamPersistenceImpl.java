@@ -3529,7 +3529,7 @@ public class TeamPersistenceImpl
 	 */
 	@Override
 	public Team fetchByPrimaryKey(Serializable primaryKey) {
-		if (CTPersistenceHelperUtil.isProductionMode(Team.class)) {
+		if (CTPersistenceHelperUtil.isProductionMode(Team.class, primaryKey)) {
 			return super.fetchByPrimaryKey(primaryKey);
 		}
 

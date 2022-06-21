@@ -33052,7 +33052,9 @@ public class JournalArticlePersistenceImpl
 	 */
 	@Override
 	public JournalArticle fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(JournalArticle.class)) {
+		if (ctPersistenceHelper.isProductionMode(
+				JournalArticle.class, primaryKey)) {
+
 			return super.fetchByPrimaryKey(primaryKey);
 		}
 

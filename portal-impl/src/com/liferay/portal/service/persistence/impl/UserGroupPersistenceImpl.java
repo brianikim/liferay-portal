@@ -6541,7 +6541,9 @@ public class UserGroupPersistenceImpl
 	 */
 	@Override
 	public UserGroup fetchByPrimaryKey(Serializable primaryKey) {
-		if (CTPersistenceHelperUtil.isProductionMode(UserGroup.class)) {
+		if (CTPersistenceHelperUtil.isProductionMode(
+				UserGroup.class, primaryKey)) {
+
 			return super.fetchByPrimaryKey(primaryKey);
 		}
 

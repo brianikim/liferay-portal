@@ -5752,7 +5752,9 @@ public class FragmentCompositionPersistenceImpl
 	 */
 	@Override
 	public FragmentComposition fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(FragmentComposition.class)) {
+		if (ctPersistenceHelper.isProductionMode(
+				FragmentComposition.class, primaryKey)) {
+
 			return super.fetchByPrimaryKey(primaryKey);
 		}
 

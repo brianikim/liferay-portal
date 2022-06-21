@@ -13625,7 +13625,7 @@ public class GroupPersistenceImpl
 	 */
 	@Override
 	public Group fetchByPrimaryKey(Serializable primaryKey) {
-		if (CTPersistenceHelperUtil.isProductionMode(Group.class)) {
+		if (CTPersistenceHelperUtil.isProductionMode(Group.class, primaryKey)) {
 			return super.fetchByPrimaryKey(primaryKey);
 		}
 

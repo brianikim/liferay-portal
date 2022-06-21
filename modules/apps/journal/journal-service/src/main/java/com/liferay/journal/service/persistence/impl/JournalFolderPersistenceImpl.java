@@ -7889,7 +7889,9 @@ public class JournalFolderPersistenceImpl
 	 */
 	@Override
 	public JournalFolder fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(JournalFolder.class)) {
+		if (ctPersistenceHelper.isProductionMode(
+				JournalFolder.class, primaryKey)) {
+
 			return super.fetchByPrimaryKey(primaryKey);
 		}
 

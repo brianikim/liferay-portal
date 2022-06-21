@@ -3159,7 +3159,9 @@ public class MBThreadFlagPersistenceImpl
 	 */
 	@Override
 	public MBThreadFlag fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(MBThreadFlag.class)) {
+		if (ctPersistenceHelper.isProductionMode(
+				MBThreadFlag.class, primaryKey)) {
+
 			return super.fetchByPrimaryKey(primaryKey);
 		}
 

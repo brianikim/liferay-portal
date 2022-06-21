@@ -3623,7 +3623,7 @@ public class MBBanPersistenceImpl
 	 */
 	@Override
 	public MBBan fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(MBBan.class)) {
+		if (ctPersistenceHelper.isProductionMode(MBBan.class, primaryKey)) {
 			return super.fetchByPrimaryKey(primaryKey);
 		}
 

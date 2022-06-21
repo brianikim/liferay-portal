@@ -2924,7 +2924,9 @@ public class CTSContentPersistenceImpl
 	 */
 	@Override
 	public CTSContent fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(CTSContent.class)) {
+		if (ctPersistenceHelper.isProductionMode(
+				CTSContent.class, primaryKey)) {
+
 			return super.fetchByPrimaryKey(primaryKey);
 		}
 

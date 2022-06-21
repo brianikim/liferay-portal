@@ -8713,7 +8713,7 @@ public class UserPersistenceImpl
 	 */
 	@Override
 	public User fetchByPrimaryKey(Serializable primaryKey) {
-		if (CTPersistenceHelperUtil.isProductionMode(User.class)) {
+		if (CTPersistenceHelperUtil.isProductionMode(User.class, primaryKey)) {
 			return super.fetchByPrimaryKey(primaryKey);
 		}
 

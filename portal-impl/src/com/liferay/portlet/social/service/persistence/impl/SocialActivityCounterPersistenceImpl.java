@@ -2959,7 +2959,7 @@ public class SocialActivityCounterPersistenceImpl
 	@Override
 	public SocialActivityCounter fetchByPrimaryKey(Serializable primaryKey) {
 		if (CTPersistenceHelperUtil.isProductionMode(
-				SocialActivityCounter.class)) {
+				SocialActivityCounter.class, primaryKey)) {
 
 			return super.fetchByPrimaryKey(primaryKey);
 		}

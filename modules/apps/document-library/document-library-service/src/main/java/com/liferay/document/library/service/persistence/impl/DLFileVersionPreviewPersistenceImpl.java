@@ -2046,7 +2046,9 @@ public class DLFileVersionPreviewPersistenceImpl
 	 */
 	@Override
 	public DLFileVersionPreview fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(DLFileVersionPreview.class)) {
+		if (ctPersistenceHelper.isProductionMode(
+				DLFileVersionPreview.class, primaryKey)) {
+
 			return super.fetchByPrimaryKey(primaryKey);
 		}
 

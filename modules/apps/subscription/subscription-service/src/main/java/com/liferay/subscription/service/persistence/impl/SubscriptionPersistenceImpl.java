@@ -3813,7 +3813,9 @@ public class SubscriptionPersistenceImpl
 	 */
 	@Override
 	public Subscription fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(Subscription.class)) {
+		if (ctPersistenceHelper.isProductionMode(
+				Subscription.class, primaryKey)) {
+
 			return super.fetchByPrimaryKey(primaryKey);
 		}
 

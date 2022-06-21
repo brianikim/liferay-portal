@@ -10340,7 +10340,7 @@ public class RolePersistenceImpl
 	 */
 	@Override
 	public Role fetchByPrimaryKey(Serializable primaryKey) {
-		if (CTPersistenceHelperUtil.isProductionMode(Role.class)) {
+		if (CTPersistenceHelperUtil.isProductionMode(Role.class, primaryKey)) {
 			return super.fetchByPrimaryKey(primaryKey);
 		}
 

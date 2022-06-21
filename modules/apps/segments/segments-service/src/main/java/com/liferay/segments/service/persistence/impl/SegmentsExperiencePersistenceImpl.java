@@ -11090,7 +11090,9 @@ public class SegmentsExperiencePersistenceImpl
 	 */
 	@Override
 	public SegmentsExperience fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(SegmentsExperience.class)) {
+		if (ctPersistenceHelper.isProductionMode(
+				SegmentsExperience.class, primaryKey)) {
+
 			return super.fetchByPrimaryKey(primaryKey);
 		}
 

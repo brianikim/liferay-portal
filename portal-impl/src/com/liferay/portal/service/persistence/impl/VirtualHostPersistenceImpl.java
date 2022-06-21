@@ -1536,7 +1536,9 @@ public class VirtualHostPersistenceImpl
 	 */
 	@Override
 	public VirtualHost fetchByPrimaryKey(Serializable primaryKey) {
-		if (CTPersistenceHelperUtil.isProductionMode(VirtualHost.class)) {
+		if (CTPersistenceHelperUtil.isProductionMode(
+				VirtualHost.class, primaryKey)) {
+
 			return super.fetchByPrimaryKey(primaryKey);
 		}
 

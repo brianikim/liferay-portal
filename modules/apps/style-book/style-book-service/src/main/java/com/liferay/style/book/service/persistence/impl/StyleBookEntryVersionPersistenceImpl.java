@@ -9007,7 +9007,9 @@ public class StyleBookEntryVersionPersistenceImpl
 	 */
 	@Override
 	public StyleBookEntryVersion fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(StyleBookEntryVersion.class)) {
+		if (ctPersistenceHelper.isProductionMode(
+				StyleBookEntryVersion.class, primaryKey)) {
+
 			return super.fetchByPrimaryKey(primaryKey);
 		}
 

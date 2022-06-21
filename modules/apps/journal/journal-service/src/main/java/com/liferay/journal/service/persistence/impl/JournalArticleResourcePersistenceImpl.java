@@ -2728,7 +2728,7 @@ public class JournalArticleResourcePersistenceImpl
 	@Override
 	public JournalArticleResource fetchByPrimaryKey(Serializable primaryKey) {
 		if (ctPersistenceHelper.isProductionMode(
-				JournalArticleResource.class)) {
+				JournalArticleResource.class, primaryKey)) {
 
 			return super.fetchByPrimaryKey(primaryKey);
 		}

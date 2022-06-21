@@ -5754,7 +5754,9 @@ public class LayoutFriendlyURLPersistenceImpl
 	 */
 	@Override
 	public LayoutFriendlyURL fetchByPrimaryKey(Serializable primaryKey) {
-		if (CTPersistenceHelperUtil.isProductionMode(LayoutFriendlyURL.class)) {
+		if (CTPersistenceHelperUtil.isProductionMode(
+				LayoutFriendlyURL.class, primaryKey)) {
+
 			return super.fetchByPrimaryKey(primaryKey);
 		}
 

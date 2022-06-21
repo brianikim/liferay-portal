@@ -6533,7 +6533,9 @@ public class DLFileShortcutPersistenceImpl
 	 */
 	@Override
 	public DLFileShortcut fetchByPrimaryKey(Serializable primaryKey) {
-		if (CTPersistenceHelperUtil.isProductionMode(DLFileShortcut.class)) {
+		if (CTPersistenceHelperUtil.isProductionMode(
+				DLFileShortcut.class, primaryKey)) {
+
 			return super.fetchByPrimaryKey(primaryKey);
 		}
 

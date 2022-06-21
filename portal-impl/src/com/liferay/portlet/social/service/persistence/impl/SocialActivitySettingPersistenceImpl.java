@@ -3053,7 +3053,7 @@ public class SocialActivitySettingPersistenceImpl
 	@Override
 	public SocialActivitySetting fetchByPrimaryKey(Serializable primaryKey) {
 		if (CTPersistenceHelperUtil.isProductionMode(
-				SocialActivitySetting.class)) {
+				SocialActivitySetting.class, primaryKey)) {
 
 			return super.fetchByPrimaryKey(primaryKey);
 		}

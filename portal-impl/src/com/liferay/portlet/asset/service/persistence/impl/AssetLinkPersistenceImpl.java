@@ -3376,7 +3376,9 @@ public class AssetLinkPersistenceImpl
 	 */
 	@Override
 	public AssetLink fetchByPrimaryKey(Serializable primaryKey) {
-		if (CTPersistenceHelperUtil.isProductionMode(AssetLink.class)) {
+		if (CTPersistenceHelperUtil.isProductionMode(
+				AssetLink.class, primaryKey)) {
+
 			return super.fetchByPrimaryKey(primaryKey);
 		}
 

@@ -2613,7 +2613,7 @@ public class DLContentPersistenceImpl
 	 */
 	@Override
 	public DLContent fetchByPrimaryKey(Serializable primaryKey) {
-		if (ctPersistenceHelper.isProductionMode(DLContent.class)) {
+		if (ctPersistenceHelper.isProductionMode(DLContent.class, primaryKey)) {
 			return super.fetchByPrimaryKey(primaryKey);
 		}
 

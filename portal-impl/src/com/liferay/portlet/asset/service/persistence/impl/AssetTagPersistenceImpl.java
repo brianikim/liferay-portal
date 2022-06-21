@@ -4658,7 +4658,9 @@ public class AssetTagPersistenceImpl
 	 */
 	@Override
 	public AssetTag fetchByPrimaryKey(Serializable primaryKey) {
-		if (CTPersistenceHelperUtil.isProductionMode(AssetTag.class)) {
+		if (CTPersistenceHelperUtil.isProductionMode(
+				AssetTag.class, primaryKey)) {
+
 			return super.fetchByPrimaryKey(primaryKey);
 		}
 
