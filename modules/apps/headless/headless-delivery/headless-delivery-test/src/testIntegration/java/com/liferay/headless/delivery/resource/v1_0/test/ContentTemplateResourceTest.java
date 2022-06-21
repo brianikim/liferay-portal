@@ -37,12 +37,14 @@ import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.odata.entity.EntityField;
 import com.liferay.portal.test.rule.Inject;
 
 import java.io.InputStream;
 
 import java.util.Collections;
 
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
@@ -51,6 +53,53 @@ import org.junit.runner.RunWith;
 @RunWith(Arquillian.class)
 public class ContentTemplateResourceTest
 	extends BaseContentTemplateResourceTestCase {
+
+	@Override
+	@Test
+	public void testGetAssetLibraryContentTemplatesPageWithSortInteger()
+		throws Exception {
+
+		testGetAssetLibraryContentTemplatesPageWithSort(
+			EntityField.Type.INTEGER,
+			(entityField, contentTemplate1, contentTemplate2) -> {
+				if (BeanTestUtil.hasProperty(
+						contentTemplate1, entityField.getName())) {
+
+					BeanTestUtil.setProperty(
+						contentTemplate1, entityField.getName(), 0);
+				}
+
+				if (BeanTestUtil.hasProperty(
+						contentTemplate2, entityField.getName())) {
+
+					BeanTestUtil.setProperty(
+						contentTemplate2, entityField.getName(), 1);
+				}
+			});
+	}
+
+	@Test
+	public void testGetSiteContentTemplatesPageWithSortInteger()
+		throws Exception {
+
+		testGetSiteContentTemplatesPageWithSort(
+			EntityField.Type.INTEGER,
+			(entityField, contentTemplate1, contentTemplate2) -> {
+				if (BeanTestUtil.hasProperty(
+						contentTemplate1, entityField.getName())) {
+
+					BeanTestUtil.setProperty(
+						contentTemplate1, entityField.getName(), 0);
+				}
+
+				if (BeanTestUtil.hasProperty(
+						contentTemplate2, entityField.getName())) {
+
+					BeanTestUtil.setProperty(
+						contentTemplate2, entityField.getName(), 1);
+				}
+			});
+	}
 
 	@Override
 	protected ContentTemplate
