@@ -51,4 +51,6 @@ public interface FragmentEntryProcessorContext {
 
 	public long[] getSegmentsEntryIds();
 
+	public long[] getSegmentsExperienceIds();
+
 }

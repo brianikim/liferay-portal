@@ -81,6 +81,15 @@ public class DefaultFragmentRendererContext implements FragmentRendererContext {
 		return _segmentsSegmentsEntryIds;
 	}
 
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
+	@Override
+	public long[] getSegmentsExperienceIds() {
+		return null;
+	}
+
 	@Override
 	public boolean isUseCachedContent() {
 		return _useCachedContent;
@@ -120,6 +129,13 @@ public class DefaultFragmentRendererContext implements FragmentRendererContext {
 
 	public void setSegmentsEntryIds(long[] segmentsSegmentsEntryIds) {
 		_segmentsSegmentsEntryIds = segmentsSegmentsEntryIds;
+	}
+
+	/**
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
+	 */
+	@Deprecated
+	public void setSegmentsExperienceIds(long[] segmentsExperienceIds) {
 	}
 
 	public void setUseCachedContent(boolean useCachedContent) {

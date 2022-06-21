@@ -95,6 +95,11 @@ public class DefaultFragmentEntryProcessorContext
 		return _segmentsEntryIds;
 	}
 
+	@Override
+	public long[] getSegmentsExperienceIds() {
+		return null;
+	}
+
 	public void setDisplayObject(Object object) {
 		_displayObject = object;
 	}
@@ -121,6 +126,9 @@ public class DefaultFragmentEntryProcessorContext
 
 	public void setSegmentsEntryIds(long[] segmentsEntryIds) {
 		_segmentsEntryIds = segmentsEntryIds;
+	}
+
+	public void setSegmentsExperienceIds(long[] segmentsExperienceIds) {
 	}
 
 	private Object _displayObject;
