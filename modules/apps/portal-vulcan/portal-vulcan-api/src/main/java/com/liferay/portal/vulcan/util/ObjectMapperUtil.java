@@ -62,9 +62,9 @@ public class ObjectMapperUtil {
 	static {
 		_objectMapper = new ObjectMapper() {
 			{
-				configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
 				configure(
 					DeserializationFeature.USE_JAVA_ARRAY_FOR_JSON_ARRAY, true);
+				configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
 				configure(
 					SerializationFeature.WRITE_ENUMS_USING_TO_STRING, true);
 				enable(SerializationFeature.INDENT_OUTPUT);
