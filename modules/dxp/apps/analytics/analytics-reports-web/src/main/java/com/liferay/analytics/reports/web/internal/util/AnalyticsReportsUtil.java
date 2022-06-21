@@ -22,6 +22,7 @@ import com.liferay.asset.kernel.model.AssetRenderer;
 import com.liferay.asset.kernel.model.AssetRendererFactory;
 import com.liferay.layout.display.page.LayoutDisplayPageObjectProvider;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
@@ -143,6 +144,10 @@ public class AnalyticsReportsUtil {
 			LayoutDisplayPageObjectProvider<?> layoutDisplayPageObjectProvider,
 			PermissionChecker permissionChecker, Portal portal)
 		throws PortalException {
+
+		if (!CTCollectionThreadLocal.isProductionMode()) {
+			return false;
+		}
 
 		if (!layout.isTypeAssetDisplay()) {
 			return false;
