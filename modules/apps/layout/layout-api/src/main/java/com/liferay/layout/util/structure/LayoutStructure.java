@@ -24,9 +24,11 @@ import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
+import com.liferay.portal.util.PropsUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -788,6 +790,17 @@ public class LayoutStructure {
 				continue;
 			}
 
+			if (!updateEmpty &&
+				Objects.equals(
+					ViewportSize.MOBILE_LANDSCAPE.getViewportSizeId(),
+					viewportSizeId)) {
+
+				columnLayoutStructureItem.setViewportConfiguration(
+					viewportSizeId, JSONUtil.put("size", 12));
+
+				continue;
+			}
+
 			Map<String, JSONObject> columnViewportConfigurations =
 				columnLayoutStructureItem.getViewportConfigurations();
 
@@ -844,7 +857,13 @@ public class LayoutStructure {
 
 		viewportConfigurationJSONObject.put("numberOfColumns", numberOfColumns);
 
-		if (viewportConfigurationJSONObject.has("modulesPerRow")) {
+		if (Objects.equals(
+				ViewportSize.MOBILE_LANDSCAPE.getViewportSizeId(),
+				viewportSizeId)) {
+
+			viewportConfigurationJSONObject.put("modulesPerRow", 1);
+		}
+		else if (viewportConfigurationJSONObject.has("modulesPerRow")) {
 			viewportConfigurationJSONObject.put(
 				"modulesPerRow", numberOfColumns);
 		}
