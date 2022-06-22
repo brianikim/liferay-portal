@@ -52,8 +52,7 @@ public class RenderLayoutStructureTag extends IncludeTag {
 				ServletContextUtil.getSegmentsEntryRetriever(),
 				isShowPreview()));
 
-		request.setAttribute(
-			LayoutWebKeys.LAYOUT_STRUCTURE, _layoutStructure);
+		request.setAttribute(LayoutWebKeys.LAYOUT_STRUCTURE, _layoutStructure);
 
 		return super.doStartTag();
 	}
