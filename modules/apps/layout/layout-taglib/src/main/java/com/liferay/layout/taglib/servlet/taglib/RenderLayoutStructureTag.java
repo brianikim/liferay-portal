@@ -121,6 +121,11 @@ public class RenderLayoutStructureTag extends IncludeTag {
 		return _PAGE;
 	}
 
+	/**
+	 * @deprecated As of Athanasius (7.3.x), replaced by {@link
+	 *             LayoutWebKeys.LAYOUT_STRUCTURE}
+	 */
+	@Deprecated
 	protected static final String LAYOUT_STRUCTURE =
 		RenderLayoutStructureTag.class.getName() + "#LAYOUT_STRUCTURE";
 
