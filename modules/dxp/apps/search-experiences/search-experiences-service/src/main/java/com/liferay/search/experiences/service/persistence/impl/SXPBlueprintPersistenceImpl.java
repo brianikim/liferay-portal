@@ -3220,7 +3220,6 @@ public class SXPBlueprintPersistenceImpl
 		Map<String, String> dbColumnNames = new HashMap<String, String>();
 
 		dbColumnNames.put("uuid", "uuid_");
-		dbColumnNames.put("key", "key_");
 
 		setDBColumnNames(dbColumnNames);
 
@@ -4021,7 +4020,7 @@ public class SXPBlueprintPersistenceImpl
 		SXPBlueprintPersistenceImpl.class);
 
 	private static final Set<String> _badColumnNames = SetUtil.fromArray(
-		new String[] {"uuid", "key"});
+		new String[] {"uuid"});
 
 	private FinderPath _createFinderPath(
 		String cacheName, String methodName, String[] params,
