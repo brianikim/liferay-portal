@@ -21,6 +21,7 @@ import com.liferay.portal.search.test.util.indexing.DocumentCreationHelpers;
 
 import java.util.Arrays;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -33,16 +34,16 @@ public abstract class BaseTermFilterTestCase extends BaseIndexingTestCase {
 	public void testBasicSearch() throws Exception {
 		index("One");
 
-		assertTermFilter("One", "One");
+		assertTermFilterValue("One", "One");
 
-		assertTermFilter("one", "");
+		assertTermFilterValue("one", "");
 	}
 
 	@Test
 	public void testFilterWithEmptyStringValue() throws Exception {
 		index("One");
 
-		assertTermFilter("", "");
+		assertTermFilterValue("", "");
 	}
 
 	@Test
@@ -51,7 +52,17 @@ public abstract class BaseTermFilterTestCase extends BaseIndexingTestCase {
 
 		index(value);
 
-		assertTermFilter(value, value);
+		assertTermFilterValue(value, value);
+	}
+
+	@Test
+	public void testSolrFilterWithSpacedFieldName() throws Exception {
+		String fieldName = "expando__keyword__custom_fields__spaced name";
+		String value = "one";
+
+		index(fieldName, value);
+
+		assertTermFilterFieldName(fieldName, value);
 	}
 
 	@Test
@@ -60,20 +71,43 @@ public abstract class BaseTermFilterTestCase extends BaseIndexingTestCase {
 
 		index(value);
 
-		assertTermFilter(value, value);
+		assertTermFilterValue(value, value);
 	}
 
 	@Test
 	public void testSpaces() throws Exception {
 		index("One Two");
 
-		assertTermFilter("One Two", "One Two");
+		assertTermFilterValue("One Two", "One Two");
 
-		assertTermFilter("One", "");
-		assertTermFilter("Two", "");
+		assertTermFilterValue("One", "");
+		assertTermFilterValue("Two", "");
 	}
 
-	protected void assertTermFilter(String filterValue, String expectedValue)
+	protected void assertTermFilterFieldName(
+			String filterFieldName, String value)
+		throws Exception {
+
+		assertSearch(
+			indexingTestHelper -> {
+				indexingTestHelper.setFilter(
+					new TermFilter(filterFieldName, value));
+
+				indexingTestHelper.search();
+
+				StringBuilder sb = new StringBuilder(3);
+
+				sb.append("Expected \"");
+				sb.append(filterFieldName);
+				sb.append("\" to be escaped in Solr and return a result.");
+
+				Assert.assertEquals(
+					sb.toString(), 1, indexingTestHelper.searchCount());
+			});
+	}
+
+	protected void assertTermFilterValue(
+			String filterValue, String expectedValue)
 		throws Exception {
 
 		assertSearch(
@@ -89,7 +123,11 @@ public abstract class BaseTermFilterTestCase extends BaseIndexingTestCase {
 	}
 
 	protected void index(String value) throws Exception {
-		addDocument(DocumentCreationHelpers.singleKeyword(_FIELD, value));
+		index(_FIELD, value);
+	}
+
+	protected void index(String fieldName, String value) throws Exception {
+		addDocument(DocumentCreationHelpers.singleKeyword(fieldName, value));
 	}
 
 	private static final String _FIELD = Field.FOLDER_ID;
