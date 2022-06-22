@@ -7,6 +7,8 @@ Export-Package:\
 	com.liferay.change.tracking.store.service,\
 	com.liferay.change.tracking.store.service.persistence
 Import-Package:\
+	javassist.util.proxy,\
+	\
 	org.hibernate.proxy,\
 	\
 	*
