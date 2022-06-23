@@ -1427,7 +1427,7 @@ definition {
 		Button.click(button = "Customize Contributors");
 
 		Uncheck.uncheckToggleSwitch(
-			contributorClass = "AccountEntryKeywordQueryContributor",
+			contributorClass = "BlogsEntryKeywordQueryContributor",
 			locator1 = "Blueprints#BLUEPRINTS_CLAUSE_CONTRIBUTOR_ON_OFF_TOGGLE");
 
 		Navigator.gotoNavTab(navTab = "Configuration");
@@ -1478,7 +1478,7 @@ definition {
 		Button.click(button = "Customize Contributors");
 
 		AssertNotChecked.assertNotCheckedNotVisible(
-			contributorClass = "AccountEntryKeywordQueryContributor",
+			contributorClass = "BlogsEntryKeywordQueryContributor",
 			locator1 = "Blueprints#BLUEPRINTS_CLAUSE_CONTRIBUTOR_ON_OFF_TOGGLE");
 
 		Navigator.gotoNavTab(navTab = "Configuration");
@@ -2873,7 +2873,7 @@ definition {
 			locator1 = "Blueprints#BLUEPRINTS_CLAUSE_CONTRIBUTOR_ON_OFF_TOGGLE");
 
 		Uncheck.uncheckToggleSwitch(
-			contributorClass = "AccountEntryModelPreFilterContributor",
+			contributorClass = "BlogsEntryModelPreFilterContributor",
 			locator1 = "Blueprints#BLUEPRINTS_CLAUSE_CONTRIBUTOR_ON_OFF_TOGGLE");
 
 		Uncheck.uncheckToggleSwitch(
@@ -2889,7 +2889,7 @@ definition {
 			locator1 = "Blueprints#BLUEPRINTS_CLAUSE_CONTRIBUTOR_ITEM");
 
 		AssertElementPresent(
-			contributorClass = "AccountEntryModelPreFilterContributor",
+			contributorClass = "BlogsEntryModelPreFilterContributor",
 			locator1 = "Blueprints#BLUEPRINTS_CLAUSE_CONTRIBUTOR_ITEM");
 
 		AssertElementPresent(
@@ -2997,7 +2997,7 @@ definition {
 			locator1 = "Blueprints#BLUEPRINTS_CLAUSE_CONTRIBUTOR_ITEM");
 
 		AssertElementNotPresent(
-			contributorClass = "AccountEntryModelPreFilterContributor",
+			contributorClass = "BlogsEntryModelPreFilterContributor",
 			locator1 = "Blueprints#BLUEPRINTS_CLAUSE_CONTRIBUTOR_ITEM");
 
 		AssertElementNotPresent(
@@ -3009,7 +3009,7 @@ definition {
 		AssertTextEquals.assertPartialText(
 			index = "1",
 			locator1 = "Blueprints#BLUEPRINTS_CLAUSE_CONTRIBUTOR_NTH_ITEM",
-			value1 = "Account Entry Keyword Query Contributor");
+			value1 = "Blogs Entry Keyword Query Contributor");
 
 		Click.clickNoMouseOver(locator1 = "Blueprints#BLUEPRINTS_CLAUSE_CONTRIBUTOR_SORT_BUTTON");
 
@@ -3075,7 +3075,7 @@ definition {
 		AssertElementNotPresent(locator1 = "Blueprints#BLUEPRINTS_CLAUSE_CONTRIBUTOR_TOGGLE_DISABLED");
 
 		Uncheck.uncheckToggleSwitch(
-			contributorClass = "AccountEntryKeywordQueryContributor",
+			contributorClass = "BlogsEntryKeywordQueryContributor",
 			locator1 = "Blueprints#BLUEPRINTS_CLAUSE_CONTRIBUTOR_ON_OFF_TOGGLE");
 
 		PortletEntry.save();
@@ -3087,7 +3087,7 @@ definition {
 		Button.click(button = "Customize Contributors");
 
 		AssertNotChecked.assertNotCheckedNotVisible(
-			contributorClass = "AccountEntryKeywordQueryContributor",
+			contributorClass = "BlogsEntryKeywordQueryContributor",
 			locator1 = "Blueprints#BLUEPRINTS_CLAUSE_CONTRIBUTOR_ON_OFF_TOGGLE");
 
 		Type(
