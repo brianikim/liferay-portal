@@ -3035,6 +3035,10 @@ public class PortalImpl implements Portal {
 			Layout layout, ThemeDisplay themeDisplay, boolean doAsUser)
 		throws PortalException {
 
+		if (layout.isTypeURL()) {
+			return getLayoutURL(layout, themeDisplay, doAsUser);
+		}
+
 		return HttpUtil.removeDomain(
 			getLayoutFullURL(layout, themeDisplay, doAsUser));
 	}
