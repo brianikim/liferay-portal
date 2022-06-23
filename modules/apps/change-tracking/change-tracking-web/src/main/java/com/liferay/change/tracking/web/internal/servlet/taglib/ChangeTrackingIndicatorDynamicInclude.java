@@ -21,6 +21,7 @@ import com.liferay.change.tracking.model.CTPreferences;
 import com.liferay.change.tracking.service.CTCollectionLocalService;
 import com.liferay.change.tracking.service.CTEntryLocalService;
 import com.liferay.change.tracking.service.CTPreferencesLocalService;
+import com.liferay.change.tracking.web.internal.configuration.helper.CTSettingsConfigurationHelper;
 import com.liferay.change.tracking.web.internal.constants.CTPortletKeys;
 import com.liferay.change.tracking.web.internal.util.PublicationsPortletURLUtil;
 import com.liferay.frontend.js.loader.modules.extender.npm.NPMResolver;
@@ -42,7 +43,6 @@ import com.liferay.portal.kernel.servlet.taglib.DynamicInclude;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.Html;
-import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
 import com.liferay.portal.kernel.util.WebKeys;
@@ -170,6 +170,8 @@ public class ChangeTrackingIndicatorDynamicInclude extends BaseDynamicInclude {
 				new ComponentDescriptor(module, componentId),
 				_getReactData(
 					httpServletRequest, ctCollection, ctPreferences,
+					_ctSettingsConfigurationHelper.isSandboxEnabled(
+						themeDisplay.getCompanyId()),
 					themeDisplay),
 				httpServletRequest, writer);
 
@@ -188,7 +190,8 @@ public class ChangeTrackingIndicatorDynamicInclude extends BaseDynamicInclude {
 
 	private Map<String, Object> _getReactData(
 			HttpServletRequest httpServletRequest, CTCollection ctCollection,
-			CTPreferences ctPreferences, ThemeDisplay themeDisplay)
+			CTPreferences ctPreferences, boolean sandboxOnlyEnabled,
+			ThemeDisplay themeDisplay)
 		throws PortalException {
 
 		PortletURL checkoutURL = _portal.getControlPanelPortletURL(
@@ -270,28 +273,35 @@ public class ChangeTrackingIndicatorDynamicInclude extends BaseDynamicInclude {
 				}
 			}
 			else {
-				checkoutURL.setParameter(
-					"ctCollectionId",
-					String.valueOf(CTConstants.CT_COLLECTION_ID_PRODUCTION));
+				if (!sandboxOnlyEnabled ||
+					_portletPermission.contains(
+						themeDisplay.getPermissionChecker(),
+						CTPortletKeys.PUBLICATIONS,
+						CTActionKeys.WORK_ON_PRODUCTION)) {
 
-				jsonArray.put(
-					JSONUtil.put(
-						"href",
-						StringBundler.concat(
-							"javascript: confirm('",
+					checkoutURL.setParameter(
+						"ctCollectionId",
+						String.valueOf(
+							CTConstants.CT_COLLECTION_ID_PRODUCTION));
+
+					jsonArray.put(
+						JSONUtil.put(
+							"confirmationMessage",
 							_language.get(
-								resourceBundle,
+								themeDisplay.getLocale(),
 								"any-changes-made-in-production-will-" +
 									"immediately-be-live.-continue-to-" +
-										"production"),
-							"') && submitForm(document.hrefFm, '",
-							HtmlUtil.escapeJS(checkoutURL.toString()), "');")
-					).put(
-						"label",
-						_language.get(resourceBundle, "work-on-production")
-					).put(
-						"symbolLeft", "simple-circle"
-					));
+										"production")
+						).put(
+							"href", checkoutURL.toString()
+						).put(
+							"label",
+							_language.get(
+								themeDisplay.getLocale(), "work-on-production")
+						).put(
+							"symbolLeft", "simple-circle"
+						));
+				}
 			}
 		}
 
@@ -420,6 +430,9 @@ public class ChangeTrackingIndicatorDynamicInclude extends BaseDynamicInclude {
 
 	@Reference
 	private CTPreferencesLocalService _ctPreferencesLocalService;
+
+	@Reference
+	private CTSettingsConfigurationHelper _ctSettingsConfigurationHelper;
 
 	@Reference
 	private Html _html;
