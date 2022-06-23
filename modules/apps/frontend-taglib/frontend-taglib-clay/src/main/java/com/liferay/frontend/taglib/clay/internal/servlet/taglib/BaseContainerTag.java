@@ -380,6 +380,7 @@ public class BaseContainerTag extends AttributesTagSupport {
 			getDynamicAttributes());
 
 		if (!dynamicAttributesString.isEmpty()) {
+			jspWriter.write(StringPool.SPACE);
 			jspWriter.write(dynamicAttributesString);
 		}
 	}
