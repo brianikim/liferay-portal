@@ -21,7 +21,6 @@ import com.liferay.oauth2.provider.service.OAuth2AuthorizationLocalService;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
-import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.Time;
@@ -30,7 +29,6 @@ import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.ClassRule;
@@ -85,31 +83,23 @@ public class ExpiredAuthorizationsAfterlifeTest extends BaseClientTestCase {
 					"oauth2.expired.authorizations.afterlife.duration",
 					Time.HOUR * 12 / Time.SECOND));
 
-			long defaultCompanyId = PortalUtil.getDefaultCompanyId();
+			long companyId = PortalUtil.getDefaultCompanyId();
 
-			User user = UserTestUtil.getAdminUser(defaultCompanyId);
+			User user = UserTestUtil.getAdminUser(companyId);
 
 			OAuth2Application oAuth2Application = createOAuth2Application(
-				defaultCompanyId, user, "oauthTestApplication",
+				companyId, user, "oauthTestApplication",
 				Arrays.asList("everything.read"));
 
-			Map<String, Date> accessTokenMap = HashMapBuilder.<String, Date>put(
-				"accessToken1",
-				new Date(System.currentTimeMillis() - (Time.HOUR * 15))
-			).put(
-				"accessToken2",
-				new Date(System.currentTimeMillis() - (Time.HOUR * 10))
-			).put(
-				"accessToken3",
-				new Date(System.currentTimeMillis() + (Time.HOUR * 1))
-			).build();
-
-			accessTokenMap.forEach(
-				(accessTokenContent, accessTokenExpirationDate) ->
-					addOAuth2Authorization(
-						defaultCompanyId, user, oAuth2Application,
-						accessTokenContent, new Date(),
-						accessTokenExpirationDate));
+			addOAuth2Authorization(
+				companyId, user, oAuth2Application, "accessToken1", new Date(),
+				new Date(System.currentTimeMillis() - (Time.HOUR * 15)));
+			addOAuth2Authorization(
+				companyId, user, oAuth2Application, "accessToken2", new Date(),
+				new Date(System.currentTimeMillis() - (Time.HOUR * 10)));
+			addOAuth2Authorization(
+				companyId, user, oAuth2Application, "accessToken3", new Date(),
+				new Date(System.currentTimeMillis() + (Time.HOUR * 1)));
 		}
 
 	}
