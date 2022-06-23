@@ -53,8 +53,8 @@ export default class UnsafeHTML extends React.PureComponent {
 		).filter(
 			(script) =>
 				!script.type ||
-				script.type === 'text/javascript' ||
-				script.type === 'module'
+				script.type === 'module' ||
+				script.type === 'text/javascript'
 		);
 
 		const runNextScript = () => {
