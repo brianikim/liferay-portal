@@ -3006,10 +3006,8 @@ definition {
 
 		Button.click(button = "Clear");
 
-		AssertTextEquals.assertPartialText(
-			index = "1",
-			locator1 = "Blueprints#BLUEPRINTS_CLAUSE_CONTRIBUTOR_NTH_ITEM",
-			value1 = "Blogs Entry Keyword Query Contributor");
+		var index = "1";
+		var clauseContributorTitle = selenium.getText("Blueprints#BLUEPRINTS_CLAUSE_CONTRIBUTOR_NTH_ITEM");
 
 		Click.clickNoMouseOver(locator1 = "Blueprints#BLUEPRINTS_CLAUSE_CONTRIBUTOR_SORT_BUTTON");
 
@@ -3017,6 +3015,13 @@ definition {
 			index = "1",
 			locator1 = "Blueprints#BLUEPRINTS_CLAUSE_CONTRIBUTOR_NTH_ITEM",
 			value1 = "User Keyword Query Contributor");
+
+		Click.clickNoMouseOver(locator1 = "Blueprints#BLUEPRINTS_CLAUSE_CONTRIBUTOR_SORT_BUTTON");
+
+		AssertTextEquals.assertPartialText(
+			index = "1",
+			locator1 = "Blueprints#BLUEPRINTS_CLAUSE_CONTRIBUTOR_NTH_ITEM",
+			value1 = "${clauseContributorTitle}");
 	}
 
 	test ViewClauseContributorsUI {
