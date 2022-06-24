@@ -28,7 +28,7 @@
 		"react-dom": "16.12.0"
 	},
 	"devDependencies": {
-		"clay-css": "2.24.1"
+		"clay-css": "^2.24.3"
 	},
 	"jest": {
 		"testPathIgnorePatterns": [
