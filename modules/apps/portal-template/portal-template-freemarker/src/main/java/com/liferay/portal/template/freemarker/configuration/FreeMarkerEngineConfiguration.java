@@ -61,7 +61,7 @@ public interface FreeMarkerEngineConfiguration {
 	public int resourceModificationCheck();
 
 	@Meta.AD(
-		deflt = "true", name = "include-nav-items-in-the-context",
+		deflt = "true", name = "include-navigation-items-in-the-context",
 		required = false
 	)
 	public boolean includeNavItemsInTheContext();
