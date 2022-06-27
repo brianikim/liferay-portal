@@ -49,6 +49,10 @@ public class ImageMagickImpl implements ImageMagick {
 		return _imageMagickImpl;
 	}
 
+	public ImageMagickImpl() {
+		reset();
+	}
+
 	@Override
 	public Future<?> convert(List<String> arguments) throws Exception {
 		if (!isEnabled()) {
