@@ -49,15 +49,15 @@ public class ImageMagickImpl implements ImageMagick {
 		return _imageMagickImpl;
 	}
 
-	public ImageMagickImpl() {
-		reset();
-	}
-
 	@Override
 	public Future<?> convert(List<String> arguments) throws Exception {
 		if (!isEnabled()) {
 			throw new IllegalStateException(
 				"Cannot call \"convert\" when ImageMagick is disabled");
+		}
+
+		if (_globalSearchPath == null) {
+			reset();
 		}
 
 		ProcessExecutor processExecutor = _getProcessExecutor();
