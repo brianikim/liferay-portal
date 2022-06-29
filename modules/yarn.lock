@@ -1070,10 +1070,10 @@
     classnames "^2.2.6"
     tinycolor2 "^1.4.2"
 
-"@clayui/css@3.57.0":
-  version "3.57.0"
-  resolved "https://registry.yarnpkg.com/@clayui/css/-/css-3.57.0.tgz#4f25be0718892c15fd569135b4a813a59722e09c"
-  integrity sha512-fvpJFxpJ6qrd9zr3SHeRg4k9Q8HavTWBNzJG85CYtNQvzoHcjO5/ZW5HVi+XUancdFHelmnZ9ylIdubjpOtoLA==
+"@clayui/css@3.63.0":
+  version "3.63.0"
+  resolved "https://registry.yarnpkg.com/@clayui/css/-/css-3.63.0.tgz#97e4762bc930233ee9d08c9a262972a4095e6ce6"
+  integrity sha512-8QTrsvN8hx0FdjnmBRkU03fiX1dKwPFbpCCbGo6dhgqbtk5Q1TdN8/NUURJXBbUWxmEyFLqKeTri4H0KOP/1Qw==
 
 "@clayui/data-provider@3.3.5":
   version "3.3.5"
