@@ -4,7 +4,7 @@
 		"@clayui/data-provider": "3.3.5",
 		"@clayui/form": "3.58.0",
 		"@clayui/icon": "3.56.0",
-		"@clayui/multi-select": "3.8.0",
+		"@clayui/multi-select": "3.64.0",
 		"classnames": "2.2.6",
 		"frontend-js-react-web": "*",
 		"metal-dom": "2.16.8",
