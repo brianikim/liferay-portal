@@ -59,7 +59,7 @@ public class StripFilterTest {
 	}
 
 	@Test
-	public void testHasMarker() {
+	public void testExtractAndMinifyJavaScript() {
 		StripFilter stripFilter = new StripFilter();
 
 		// Marker is longer than buffer's remaining
@@ -104,7 +104,7 @@ public class StripFilterTest {
 	}
 
 	@Test
-	public void testProcessCSS() throws Exception {
+	public void testExtractAndTrimCSS() throws Exception {
 		StripFilter stripFilter = new StripFilter();
 
 		char[] styleOpenTag = "style type=\"text/css\">".toCharArray();
@@ -119,7 +119,7 @@ public class StripFilterTest {
 				JDKLoggerTestUtil.configureJDKLogger(
 					StripFilter.class.getName(), Level.WARNING)) {
 
-			stripFilter.processCSS(
+			stripFilter.extractAndMinifyCSS(
 				null, null, charBuffer, stringWriter, styleOpenTag);
 
 			List<LogRecord> logRecords = captureHandler.getLogRecords();
@@ -140,7 +140,7 @@ public class StripFilterTest {
 		charBuffer = CharBuffer.wrap("style type=\"text/css\"></style>");
 		stringWriter = new StringWriter();
 
-		stripFilter.processCSS(
+		stripFilter.extractAndMinifyCSS(
 			null, null, charBuffer, stringWriter, styleOpenTag);
 
 		Assert.assertEquals(
@@ -153,7 +153,7 @@ public class StripFilterTest {
 		charBuffer = CharBuffer.wrap("style type=\"text/css\"> \r\t\n</style>");
 		stringWriter = new StringWriter();
 
-		stripFilter.processCSS(
+		stripFilter.extractAndMinifyCSS(
 			null, null, charBuffer, stringWriter, styleOpenTag);
 
 		Assert.assertEquals(
@@ -174,7 +174,7 @@ public class StripFilterTest {
 
 		stringWriter = new StringWriter();
 
-		stripFilter.processCSS(
+		stripFilter.extractAndMinifyCSS(
 			null, null, charBuffer, stringWriter, styleOpenTag);
 
 		Assert.assertEquals(
@@ -189,7 +189,7 @@ public class StripFilterTest {
 			"style type=\"text/css\">" + code + "</style> \r\t\n");
 		stringWriter = new StringWriter();
 
-		stripFilter.processCSS(
+		stripFilter.extractAndMinifyCSS(
 			null, null, charBuffer, stringWriter, styleOpenTag);
 
 		Assert.assertEquals(
@@ -200,50 +200,7 @@ public class StripFilterTest {
 	}
 
 	@Test
-	public void testProcessJavaScript() throws Exception {
-		StripFilter stripFilter = new StripFilter();
-
-		// Missing close tag
-
-		CharBuffer charBuffer = CharBuffer.wrap("script>abc");
-
-		StringWriter stringWriter = new StringWriter();
-
-		try (CaptureHandler captureHandler =
-				JDKLoggerTestUtil.configureJDKLogger(
-					StripFilter.class.getName(), Level.WARNING)) {
-
-			stripFilter.processJavaScript(
-				"test.js", charBuffer, stringWriter, "script".toCharArray());
-
-			List<LogRecord> logRecords = captureHandler.getLogRecords();
-
-			Assert.assertEquals(logRecords.toString(), 1, logRecords.size());
-
-			LogRecord logRecord = logRecords.get(0);
-
-			Assert.assertEquals("Missing </script>", logRecord.getMessage());
-
-			Assert.assertEquals("script>", stringWriter.toString());
-		}
-
-		Assert.assertEquals(7, charBuffer.position());
-
-		// Empty tag
-
-		charBuffer = CharBuffer.wrap("script></script>");
-		stringWriter = new StringWriter();
-
-		stripFilter.processJavaScript(
-			"test.js", charBuffer, stringWriter, "script".toCharArray());
-
-		Assert.assertEquals("script></script>", stringWriter.toString());
-
-		Assert.assertEquals(16, charBuffer.position());
-	}
-
-	@Test
-	public void testProcessPre() throws Exception {
+	public void testExtractAndTrimPre() throws Exception {
 		StripFilter stripFilter = new StripFilter();
 
 		// Missing close tag
@@ -256,7 +213,7 @@ public class StripFilterTest {
 				JDKLoggerTestUtil.configureJDKLogger(
 					StripFilter.class.getName(), Level.WARNING)) {
 
-			stripFilter.processPre(charBuffer, stringWriter);
+			stripFilter.extractAndTrimPre(charBuffer, stringWriter);
 
 			List<LogRecord> logRecords = captureHandler.getLogRecords();
 
@@ -276,7 +233,7 @@ public class StripFilterTest {
 
 		stringWriter = new StringWriter();
 
-		stripFilter.processPre(charBuffer, stringWriter);
+		stripFilter.extractAndTrimPre(charBuffer, stringWriter);
 
 		Assert.assertEquals("pre>a b </pre>", stringWriter.toString());
 
@@ -288,7 +245,7 @@ public class StripFilterTest {
 
 		stringWriter = new StringWriter();
 
-		stripFilter.processPre(charBuffer, stringWriter);
+		stripFilter.extractAndTrimPre(charBuffer, stringWriter);
 
 		Assert.assertEquals("pre>a b </pre> ", stringWriter.toString());
 
@@ -296,7 +253,7 @@ public class StripFilterTest {
 	}
 
 	@Test
-	public void testProcessTextArea() throws Exception {
+	public void testExtractAndTrimTextArea() throws Exception {
 		StripFilter stripFilter = new StripFilter();
 
 		// Missing close tag
@@ -309,7 +266,7 @@ public class StripFilterTest {
 				JDKLoggerTestUtil.configureJDKLogger(
 					StripFilter.class.getName(), Level.WARNING)) {
 
-			stripFilter.processTextArea(charBuffer, stringWriter);
+			stripFilter.extractAndTrimTextArea(charBuffer, stringWriter);
 
 			List<LogRecord> logRecords = captureHandler.getLogRecords();
 
@@ -329,7 +286,7 @@ public class StripFilterTest {
 
 		stringWriter = new StringWriter();
 
-		stripFilter.processTextArea(charBuffer, stringWriter);
+		stripFilter.extractAndTrimTextArea(charBuffer, stringWriter);
 
 		Assert.assertEquals(
 			"textarea >a b </textarea>", stringWriter.toString());
@@ -342,12 +299,57 @@ public class StripFilterTest {
 
 		stringWriter = new StringWriter();
 
-		stripFilter.processTextArea(charBuffer, stringWriter);
+		stripFilter.extractAndTrimTextArea(charBuffer, stringWriter);
 
 		Assert.assertEquals(
 			"textarea >a b </textarea> ", stringWriter.toString());
 
 		Assert.assertEquals(29, charBuffer.position());
+	}
+
+	@Test
+	public void testHasMarker() {
+		StripFilter stripFilter = new StripFilter();
+
+		// Marker is longer than buffer's remaining
+
+		CharBuffer charBuffer = CharBuffer.wrap("abcdef");
+
+		charBuffer.position(2);
+		charBuffer.limit(4);
+
+		char[] marker = "cdef".toCharArray();
+
+		Assert.assertFalse(stripFilter.hasMarker(charBuffer, marker));
+
+		Assert.assertEquals(2, charBuffer.position());
+
+		// No match
+
+		charBuffer = CharBuffer.wrap("abcdef");
+		marker = "abce".toCharArray();
+
+		Assert.assertFalse(stripFilter.hasMarker(charBuffer, marker));
+
+		Assert.assertEquals(0, charBuffer.position());
+
+		// Exact match
+
+		charBuffer = CharBuffer.wrap("abcdef");
+		marker = "abcd".toCharArray();
+
+		Assert.assertTrue(stripFilter.hasMarker(charBuffer, marker));
+
+		Assert.assertEquals(0, charBuffer.position());
+
+		// Match ignore case
+
+		charBuffer = CharBuffer.wrap("aBcDef");
+		marker = "abcd".toCharArray();
+
+		Assert.assertTrue(stripFilter.hasMarker(charBuffer, marker));
+
+		Assert.assertEquals(0, charBuffer.position());
 	}
 
 	@Test
