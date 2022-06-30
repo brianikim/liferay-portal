@@ -8347,23 +8347,27 @@ public class PortalImpl implements Portal {
 					FriendlyURLResolverRegistryUtil.getURLSeparators();
 
 				for (String urlSeparator : urlSeparators) {
-					if (canonicalURLSuffix.startsWith(urlSeparator)) {
-						FriendlyURLResolver friendlyURLResolver =
-							FriendlyURLResolverRegistryUtil.
-								getFriendlyURLResolver(urlSeparator);
+					if (!canonicalURLSuffix.startsWith(urlSeparator)) {
+						continue;
+					}
 
-						HttpServletRequest httpServletRequest =
-							themeDisplay.getRequest();
+					FriendlyURLResolver friendlyURLResolver =
+						FriendlyURLResolverRegistryUtil.getFriendlyURLResolver(
+							urlSeparator);
 
-						Map<String, Object> requestContext =
-							HashMapBuilder.<String, Object>put(
-								"request", httpServletRequest
-							).put(
-								WebKeys.LOCALE, locale
-							).build();
-						Map<String, String[]> params =
-							httpServletRequest.getParameterMap();
+					HttpServletRequest httpServletRequest =
+						themeDisplay.getRequest();
 
+					Map<String, Object> requestContext =
+						HashMapBuilder.<String, Object>put(
+							"request", httpServletRequest
+						).put(
+							WebKeys.LOCALE, locale
+						).build();
+					Map<String, String[]> params =
+						httpServletRequest.getParameterMap();
+
+					try {
 						LayoutFriendlyURLComposite layoutFriendlyURLComposite =
 							friendlyURLResolver.getLayoutFriendlyURLComposite(
 								themeDisplay.getCompanyId(),
@@ -8374,6 +8378,11 @@ public class PortalImpl implements Portal {
 							layoutFriendlyURLComposite.getFriendlyURL();
 
 						break;
+					}
+					catch (PortalException portalException) {
+						if (_log.isDebugEnabled()) {
+							_log.debug(portalException);
+						}
 					}
 				}
 
