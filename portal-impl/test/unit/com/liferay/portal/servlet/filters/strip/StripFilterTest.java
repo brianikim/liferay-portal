@@ -200,6 +200,60 @@ public class StripFilterTest {
 	}
 
 	@Test
+	public void testExtractAndTrimInput() throws Exception {
+		StripFilter stripFilter = new StripFilter();
+
+		// Missing close tag
+
+		CharBuffer charBuffer = CharBuffer.wrap("input type=\"text\"");
+
+		StringWriter stringWriter = new StringWriter();
+
+		try (CaptureHandler captureHandler =
+				JDKLoggerTestUtil.configureJDKLogger(
+					StripFilter.class.getName(), Level.WARNING)) {
+
+			stripFilter.extractAndTrimInput(charBuffer, stringWriter);
+
+			List<LogRecord> logRecords = captureHandler.getLogRecords();
+
+			Assert.assertEquals(logRecords.toString(), 1, logRecords.size());
+
+			LogRecord logRecord = logRecords.get(0);
+
+			Assert.assertEquals("Missing >", logRecord.getMessage());
+
+			Assert.assertEquals("input", stringWriter.toString());
+			Assert.assertEquals(
+				" type=\"text\"", String.valueOf(charBuffer.slice()));
+		}
+
+		// Without trailing spaces
+
+		charBuffer = CharBuffer.wrap("input type=\"text\">");
+
+		stringWriter = new StringWriter();
+
+		stripFilter.extractAndTrimInput(charBuffer, stringWriter);
+
+		Assert.assertEquals("input type=\"text\">", stringWriter.toString());
+
+		Assert.assertEquals("", String.valueOf(charBuffer.slice()));
+
+		// With trailing spaces
+
+		charBuffer = CharBuffer.wrap("input type=\"text\"> \r\n\tc");
+
+		stringWriter = new StringWriter();
+
+		stripFilter.extractAndTrimInput(charBuffer, stringWriter);
+
+		Assert.assertEquals("input type=\"text\"> ", stringWriter.toString());
+
+		Assert.assertEquals("c", String.valueOf(charBuffer.slice()));
+	}
+
+	@Test
 	public void testExtractAndTrimPre() throws Exception {
 		StripFilter stripFilter = new StripFilter();
 
