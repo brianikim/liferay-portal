@@ -133,7 +133,7 @@ public class StripFilterTest {
 
 		Assert.assertEquals(
 			"style type=\"text/css\">", stringWriter.toString());
-		Assert.assertEquals(22, charBuffer.position());
+		Assert.assertEquals("abc", String.valueOf(charBuffer.slice()));
 
 		// Empty tag
 
@@ -146,7 +146,7 @@ public class StripFilterTest {
 		Assert.assertEquals(
 			"style type=\"text/css\"></style>", stringWriter.toString());
 
-		Assert.assertEquals(30, charBuffer.position());
+		Assert.assertEquals("", String.valueOf(charBuffer.slice()));
 
 		// Minifier spaces
 
@@ -159,7 +159,7 @@ public class StripFilterTest {
 		Assert.assertEquals(
 			"style type=\"text/css\"></style>", stringWriter.toString());
 
-		Assert.assertEquals(34, charBuffer.position());
+		Assert.assertEquals("", String.valueOf(charBuffer.slice()));
 
 		// Minifier code
 
@@ -181,7 +181,7 @@ public class StripFilterTest {
 			"style type=\"text/css\">" + minifiedCode + "</style>",
 			stringWriter.toString());
 
-		Assert.assertEquals(code.length() + 30, charBuffer.position());
+		Assert.assertEquals("", String.valueOf(charBuffer.slice()));
 
 		// Minifier code with trailing spaces
 
@@ -196,7 +196,7 @@ public class StripFilterTest {
 			"style type=\"text/css\">" + minifiedCode + "</style> ",
 			stringWriter.toString());
 
-		Assert.assertEquals(code.length() + 34, charBuffer.position());
+		Assert.assertEquals("", String.valueOf(charBuffer.slice()));
 	}
 
 	@Test
@@ -278,7 +278,7 @@ public class StripFilterTest {
 			Assert.assertEquals("Missing </pre>", logRecord.getMessage());
 
 			Assert.assertEquals("pre", stringWriter.toString());
-			Assert.assertEquals(3, charBuffer.position());
+			Assert.assertEquals(">abcde", String.valueOf(charBuffer.slice()));
 		}
 
 		// Without trailing spaces
@@ -291,7 +291,7 @@ public class StripFilterTest {
 
 		Assert.assertEquals("pre>a b </pre>", stringWriter.toString());
 
-		Assert.assertEquals(14, charBuffer.position());
+		Assert.assertEquals("", String.valueOf(charBuffer.slice()));
 
 		// With trailing spaces
 
@@ -303,7 +303,7 @@ public class StripFilterTest {
 
 		Assert.assertEquals("pre>a b </pre> ", stringWriter.toString());
 
-		Assert.assertEquals(18, charBuffer.position());
+		Assert.assertEquals("c", String.valueOf(charBuffer.slice()));
 	}
 
 	@Test
@@ -331,7 +331,7 @@ public class StripFilterTest {
 			Assert.assertEquals("Missing </textArea>", logRecord.getMessage());
 
 			Assert.assertEquals("textarea ", stringWriter.toString());
-			Assert.assertEquals(9, charBuffer.position());
+			Assert.assertEquals(">abcde", String.valueOf(charBuffer.slice()));
 		}
 
 		// Without trailing spaces
@@ -345,7 +345,7 @@ public class StripFilterTest {
 		Assert.assertEquals(
 			"textarea >a b </textarea>", stringWriter.toString());
 
-		Assert.assertEquals(25, charBuffer.position());
+		Assert.assertEquals("", String.valueOf(charBuffer.slice()));
 
 		// With trailing spaces
 
@@ -358,7 +358,7 @@ public class StripFilterTest {
 		Assert.assertEquals(
 			"textarea >a b </textarea> ", stringWriter.toString());
 
-		Assert.assertEquals(29, charBuffer.position());
+		Assert.assertEquals("c", String.valueOf(charBuffer.slice()));
 	}
 
 	@Test
@@ -420,7 +420,7 @@ public class StripFilterTest {
 
 		Assert.assertEquals("", stringWriter.toString());
 
-		Assert.assertEquals(0, charBuffer.position());
+		Assert.assertEquals("", String.valueOf(charBuffer.slice()));
 
 		// No leading space
 
@@ -431,7 +431,7 @@ public class StripFilterTest {
 
 		Assert.assertEquals("", stringWriter.toString());
 
-		Assert.assertEquals(0, charBuffer.position());
+		Assert.assertEquals("abc \t\r\n", String.valueOf(charBuffer.slice()));
 
 		// Single leading space
 
@@ -442,7 +442,7 @@ public class StripFilterTest {
 
 		Assert.assertEquals(" ", stringWriter.toString());
 
-		Assert.assertEquals(1, charBuffer.position());
+		Assert.assertEquals("", String.valueOf(charBuffer.slice()));
 
 		charBuffer = CharBuffer.wrap("\t");
 		stringWriter = new StringWriter();
@@ -451,7 +451,7 @@ public class StripFilterTest {
 
 		Assert.assertEquals(" ", stringWriter.toString());
 
-		Assert.assertEquals(1, charBuffer.position());
+		Assert.assertEquals("", String.valueOf(charBuffer.slice()));
 
 		charBuffer = CharBuffer.wrap("\r");
 		stringWriter = new StringWriter();
@@ -460,7 +460,7 @@ public class StripFilterTest {
 
 		Assert.assertEquals(" ", stringWriter.toString());
 
-		Assert.assertEquals(1, charBuffer.position());
+		Assert.assertEquals("", String.valueOf(charBuffer.slice()));
 
 		charBuffer = CharBuffer.wrap("\n");
 		stringWriter = new StringWriter();
@@ -469,7 +469,7 @@ public class StripFilterTest {
 
 		Assert.assertEquals(" ", stringWriter.toString());
 
-		Assert.assertEquals(1, charBuffer.position());
+		Assert.assertEquals("", String.valueOf(charBuffer.slice()));
 
 		// Multiple leading spaces
 
@@ -480,7 +480,7 @@ public class StripFilterTest {
 
 		Assert.assertEquals(" ", stringWriter.toString());
 
-		Assert.assertEquals(4, charBuffer.position());
+		Assert.assertEquals("", String.valueOf(charBuffer.slice()));
 	}
 
 }
