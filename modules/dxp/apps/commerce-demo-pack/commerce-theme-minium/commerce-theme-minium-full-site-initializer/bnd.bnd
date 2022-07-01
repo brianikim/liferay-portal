@@ -1,6 +1,6 @@
 Bundle-Name: Liferay Commerce Theme Minium Full Site Initializer
 Bundle-SymbolicName: com.liferay.commerce.theme.minium.full.site.initializer
-Bundle-Version: 3.0.16
+Bundle-Version: 3.0.17
 Import-Package:\
 	com.liferay.asset.kernel.service;version="[2.0.0,99.0.0)",\
 	com.liferay.commerce.account.service;version="[3.0.0,99.0.0)",\
