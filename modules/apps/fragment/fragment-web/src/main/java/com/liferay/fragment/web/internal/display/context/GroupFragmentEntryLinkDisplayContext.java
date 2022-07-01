@@ -184,7 +184,7 @@ public class GroupFragmentEntryLinkDisplayContext {
 			return _groupFragmentEntryUsages;
 		}
 
-		_groupFragmentEntryUsages = new HashMap<>();
+		Map<Group, Integer> groupFragmentEntryUsages = new HashMap<>();
 
 		DSLQuery dslQuery = DSLQueryFactoryUtil.selectDistinct(
 			FragmentEntryLinkTable.INSTANCE.groupId
@@ -199,12 +199,14 @@ public class GroupFragmentEntryLinkDisplayContext {
 			dslQuery);
 
 		for (long groupId : groupIds) {
-			_groupFragmentEntryUsages.put(
+			groupFragmentEntryUsages.put(
 				GroupLocalServiceUtil.fetchGroup(groupId),
 				FragmentEntryLinkLocalServiceUtil.
 					getLayoutFragmentEntryLinksCountByFragmentEntryId(
 						groupId, getFragmentEntryId()));
 		}
+
+		_groupFragmentEntryUsages = groupFragmentEntryUsages;
 
 		return _groupFragmentEntryUsages;
 	}
