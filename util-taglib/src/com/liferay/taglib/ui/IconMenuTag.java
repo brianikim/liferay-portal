@@ -358,7 +358,7 @@ public class IconMenuTag extends BaseBodyTagSupport implements BodyTag {
 							_message);
 					}
 
-					jspWriter.write("\" href=\"javascript:;\" id=\"");
+					jspWriter.write("\" href=\"javascript:void(0);\" id=\"");
 					jspWriter.write(_id);
 					jspWriter.write("\" title=\"");
 					jspWriter.write(message);
