@@ -127,7 +127,6 @@ public class EmbeddedPortletWhenEmbeddingPortletInLayoutTemplateTest
 			WebKeys.CTX, httpServletRequest.getServletContext());
 		httpServletRequest.setAttribute(
 			WebKeys.CURRENT_URL, RandomTestUtil.randomString());
-
 		httpServletRequest.setMethod(HttpMethods.GET);
 
 		ThemeDisplay themeDisplay =
