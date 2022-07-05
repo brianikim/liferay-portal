@@ -23,8 +23,8 @@ import com.liferay.dynamic.data.mapping.storage.DDMFormValues;
 import com.liferay.dynamic.data.mapping.test.util.DDMFormTestUtil;
 import com.liferay.dynamic.data.mapping.test.util.DDMFormValuesTestUtil;
 import com.liferay.portal.json.JSONFactoryImpl;
-import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactory;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
@@ -52,106 +52,47 @@ public class SelectDDMFormFieldValueRendererAccessorTest {
 	}
 
 	@Test
-	public void testRenderMultipleValues() throws Exception {
+	public void testRender() throws Exception {
 		DDMForm ddmForm = DDMFormTestUtil.createDDMForm();
 
 		DDMFormField ddmFormField = DDMFormTestUtil.createDDMFormField(
 			"Select", "Select", "select", "string", false, false, false);
 
 		ddmFormField.setProperty("dataSourceType", "manual");
-
-		int numberOfOptions = 2;
-
-		DDMFormFieldOptions ddmFormFieldOptions = createDDMFormFieldOptions(
-			numberOfOptions);
-
-		ddmFormField.setDDMFormFieldOptions(ddmFormFieldOptions);
-
-		ddmForm.addDDMFormField(ddmFormField);
-
-		DDMFormValues ddmFormValues = DDMFormValuesTestUtil.createDDMFormValues(
-			ddmForm);
-
-		JSONArray optionsValuesJSONArray = createOptionsValuesJSONArray(
-			numberOfOptions);
-
-		DDMFormFieldValue ddmFormFieldValue =
-			DDMFormValuesTestUtil.createDDMFormFieldValue(
-				"Select",
-				new UnlocalizedValue(optionsValuesJSONArray.toString()));
-
-		ddmFormValues.addDDMFormFieldValue(ddmFormFieldValue);
-
-		SelectDDMFormFieldValueRenderer selectDDMFormFieldValueRenderer =
-			createSelectDDMFormFieldValueRenderer();
-
-		Assert.assertEquals(
-			"option 1, option 2",
-			selectDDMFormFieldValueRenderer.render(
-				ddmFormFieldValue, LocaleUtil.US));
-	}
-
-	@Test
-	public void testRenderSingleValue() throws Exception {
-		DDMForm ddmForm = DDMFormTestUtil.createDDMForm();
-
-		DDMFormField ddmFormField = DDMFormTestUtil.createDDMFormField(
-			"Select", "Select", "select", "string", false, false, false);
-
-		ddmFormField.setProperty("dataSourceType", "manual");
-
-		int numberOfOptions = 1;
-
-		DDMFormFieldOptions ddmFormFieldOptions = createDDMFormFieldOptions(
-			numberOfOptions);
-
-		ddmFormField.setDDMFormFieldOptions(ddmFormFieldOptions);
-
-		ddmForm.addDDMFormField(ddmFormField);
-
-		DDMFormValues ddmFormValues = DDMFormValuesTestUtil.createDDMFormValues(
-			ddmForm);
-
-		JSONArray optionsValuesJSONArray = createOptionsValuesJSONArray(
-			numberOfOptions);
-
-		DDMFormFieldValue ddmFormFieldValue =
-			DDMFormValuesTestUtil.createDDMFormFieldValue(
-				"Select",
-				new UnlocalizedValue(optionsValuesJSONArray.toString()));
-
-		ddmFormValues.addDDMFormFieldValue(ddmFormFieldValue);
-
-		SelectDDMFormFieldValueRenderer selectDDMFormFieldValueRenderer =
-			createSelectDDMFormFieldValueRenderer();
-
-		Assert.assertEquals(
-			"option 1",
-			selectDDMFormFieldValueRenderer.render(
-				ddmFormFieldValue, LocaleUtil.US));
-	}
-
-	protected DDMFormFieldOptions createDDMFormFieldOptions(
-		int numberOfOptions) {
 
 		DDMFormFieldOptions ddmFormFieldOptions = new DDMFormFieldOptions();
 
-		for (int i = 1; i <= numberOfOptions; i++) {
-			ddmFormFieldOptions.addOptionLabel(
-				"value " + i, LocaleUtil.US, "option " + i);
-		}
+		ddmFormFieldOptions.addOptionLabel(
+			"value 1", LocaleUtil.US, "option 1");
+		ddmFormFieldOptions.addOptionLabel(
+			"value 2", LocaleUtil.US, "option 2");
+		ddmFormFieldOptions.addOptionLabel(
+			"value 3", LocaleUtil.US, "option with &");
 
-		return ddmFormFieldOptions;
-	}
+		ddmFormField.setDDMFormFieldOptions(ddmFormFieldOptions);
 
-	protected JSONArray createOptionsValuesJSONArray(int numberOfOptions) {
-		JSONArray jsonArray = _jsonFactory.createJSONArray();
+		ddmForm.addDDMFormField(ddmFormField);
 
-		for (int i = 1; i <= numberOfOptions; i++) {
-			jsonArray.put("value " + i);
-		}
+		DDMFormValues ddmFormValues = DDMFormValuesTestUtil.createDDMFormValues(
+			ddmForm);
 
-		return jsonArray;
+		DDMFormFieldValue ddmFormFieldValue =
+			DDMFormValuesTestUtil.createDDMFormFieldValue(
+				"Select",
+				new UnlocalizedValue(
+					JSONUtil.putAll(
+						"value 1", "value 2", "value 3"
+					).toString()));
+
+		ddmFormValues.addDDMFormFieldValue(ddmFormFieldValue);
+
+		SelectDDMFormFieldValueRenderer selectDDMFormFieldValueRenderer =
+			createSelectDDMFormFieldValueRenderer();
+
+		Assert.assertEquals(
+			"option 1, option 2, option with &amp;",
+			selectDDMFormFieldValueRenderer.render(
+				ddmFormFieldValue, LocaleUtil.US));
 	}
 
 	protected SelectDDMFormFieldValueAccessor
