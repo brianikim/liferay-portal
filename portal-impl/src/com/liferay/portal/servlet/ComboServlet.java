@@ -57,6 +57,8 @@ import java.util.Enumeration;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -353,12 +355,18 @@ public class ComboServlet extends HttpServlet {
 
 			String stringFileContent = objectValuePair.getKey();
 
-			if (!StringUtil.endsWith(resourcePath, _CSS_MINIFIED_DASH_SUFFIX) &&
-				!StringUtil.endsWith(resourcePath, _CSS_MINIFIED_DOT_SUFFIX) &&
-				!StringUtil.endsWith(
-					resourcePath, _JAVASCRIPT_MINIFIED_DASH_SUFFIX) &&
-				!StringUtil.endsWith(
-					resourcePath, _JAVASCRIPT_MINIFIED_DOT_SUFFIX)) {
+			Pattern pattern = Pattern.compile(_BUNDLER_MODULE_PATTERN);
+
+			Matcher matcher = pattern.matcher(resourcePath);
+
+			if (matcher.find() ||
+				(!StringUtil.endsWith(
+					resourcePath, _CSS_MINIFIED_DASH_SUFFIX) &&
+				 !StringUtil.endsWith(resourcePath, _CSS_MINIFIED_DOT_SUFFIX) &&
+				 !StringUtil.endsWith(
+					 resourcePath, _JAVASCRIPT_MINIFIED_DASH_SUFFIX) &&
+				 !StringUtil.endsWith(
+					 resourcePath, _JAVASCRIPT_MINIFIED_DOT_SUFFIX))) {
 
 				if (minifierType.equals("css")) {
 					try {
@@ -512,6 +520,9 @@ public class ComboServlet extends HttpServlet {
 
 		return FileUtil.getExtension(resourcePath);
 	}
+
+	private static final String _BUNDLER_MODULE_PATTERN =
+		"\\/o\\/js\\/resolved-module.*\\$.*";
 
 	private static final String _CSS_CHARSET_UTF_8 = "@charset \"UTF-8\";";
 
