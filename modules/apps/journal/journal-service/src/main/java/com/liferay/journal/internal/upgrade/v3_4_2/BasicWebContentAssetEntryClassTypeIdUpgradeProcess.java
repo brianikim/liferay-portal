@@ -78,9 +78,9 @@ public class BasicWebContentAssetEntryClassTypeIdUpgradeProcess
 			if (_log.isWarnEnabled()) {
 				_log.warn(
 					StringBundler.concat(
-						"No DDMStructure with structure key ", structureKey,
-						" found in Global site", companyGroup.getGroupId(),
-						" for companyId ", companyId));
+						"No dynamic data mapping structure with structure key ",
+						structureKey, " found in group ",
+						companyGroup.getGroupId(), " for company ", companyId));
 			}
 
 			return;
