@@ -15,8 +15,10 @@
 package com.liferay.portal.search.solr8.internal.query;
 
 import com.liferay.petra.string.CharPool;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.search.QueryTerm;
 import com.liferay.portal.kernel.search.WildcardQuery;
+import com.liferay.portal.kernel.util.StringUtil;
 
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.QueryParser;
@@ -37,7 +39,9 @@ public class WildcardQueryTranslatorImpl implements WildcardQueryTranslator {
 		QueryTerm queryTerm = wildcardQuery.getQueryTerm();
 
 		Query query = new org.apache.lucene.search.WildcardQuery(
-			new Term(queryTerm.getField(), escape(queryTerm.getValue())));
+			new Term(
+				_escapeSpaces(queryTerm.getField()),
+				_escape(queryTerm.getValue())));
 
 		if (!wildcardQuery.isDefaultBoost()) {
 			return new BoostQuery(query, wildcardQuery.getBoost());
@@ -46,7 +50,7 @@ public class WildcardQueryTranslatorImpl implements WildcardQueryTranslator {
 		return query;
 	}
 
-	protected String escape(String value) {
+	private String _escape(String value) {
 		int x = 0;
 		int y = 0;
 
@@ -77,6 +81,11 @@ public class WildcardQueryTranslatorImpl implements WildcardQueryTranslator {
 		sb.append(QueryParser.escape(value.substring(x)));
 
 		return sb.toString();
+	}
+
+	private String _escapeSpaces(String value) {
+		return StringUtil.replace(
+			value, CharPool.SPACE, StringPool.BACK_SLASH + StringPool.SPACE);
 	}
 
 }
