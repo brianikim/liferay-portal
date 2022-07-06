@@ -282,8 +282,8 @@ public class JournalServiceUpgrade implements UpgradeStepRegistrator {
 		registry.register(
 			"3.4.1", "3.4.2",
 			new BasicWebContentAssetEntryClassTypeIdUpgradeProcess(
-				_assetEntryLocalService, _companyLocalService,
-				_ddmStructureLocalService, _groupLocalService));
+				_companyLocalService, _ddmStructureLocalService,
+				_groupLocalService));
 	}
 
 	protected void deleteTempImages() throws Exception {
