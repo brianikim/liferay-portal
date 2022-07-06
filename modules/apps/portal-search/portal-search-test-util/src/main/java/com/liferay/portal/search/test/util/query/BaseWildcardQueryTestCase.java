@@ -15,6 +15,8 @@
 package com.liferay.portal.search.test.util.query;
 
 import com.liferay.portal.kernel.search.Field;
+import com.liferay.portal.kernel.search.filter.TermFilter;
+import com.liferay.portal.kernel.search.generic.WildcardQueryImpl;
 import com.liferay.portal.search.document.Document;
 import com.liferay.portal.search.engine.adapter.SearchEngineAdapter;
 import com.liferay.portal.search.engine.adapter.search.SearchSearchRequest;
@@ -34,6 +36,16 @@ import org.junit.Test;
  * @author Michael C. Han
  */
 public abstract class BaseWildcardQueryTestCase extends BaseIndexingTestCase {
+
+	@Test
+	public void testSolrFilterWithSpacedFieldName() throws Exception {
+		String fieldName = "expando__keyword__custom_fields__spaced name";
+		String value = "one";
+
+		index(fieldName, value);
+
+		assertTermFilterFieldName(fieldName, value);
+	}
 
 	@Test
 	public void testWildcardQuery() {
@@ -88,4 +100,29 @@ public abstract class BaseWildcardQueryTestCase extends BaseIndexingTestCase {
 			});
 	}
 
+	protected void index(String fieldName, String value) throws Exception {
+		addDocument(DocumentCreationHelpers.singleKeyword(fieldName, value));
+	}
+
+	protected void assertTermFilterFieldName(
+		String filterFieldName, String value)
+		throws Exception {
+
+		assertSearch(
+			indexingTestHelper -> {
+				indexingTestHelper.setQuery(
+					new WildcardQueryImpl(filterFieldName, value));
+
+				indexingTestHelper.search();
+
+				StringBuilder sb = new StringBuilder(3);
+
+				sb.append("Expected \"");
+				sb.append(filterFieldName);
+				sb.append("\" to be escaped in Solr and return a result.");
+
+				Assert.assertEquals(
+					sb.toString(), 1, indexingTestHelper.searchCount());
+			});
+	}
 }
