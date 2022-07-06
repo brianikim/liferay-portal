@@ -15,7 +15,6 @@
 package com.liferay.portal.search.test.util.query;
 
 import com.liferay.portal.kernel.search.Field;
-import com.liferay.portal.kernel.search.filter.TermFilter;
 import com.liferay.portal.kernel.search.generic.WildcardQueryImpl;
 import com.liferay.portal.search.document.Document;
 import com.liferay.portal.search.engine.adapter.SearchEngineAdapter;
@@ -38,7 +37,7 @@ import org.junit.Test;
 public abstract class BaseWildcardQueryTestCase extends BaseIndexingTestCase {
 
 	@Test
-	public void testSolrFilterWithSpacedFieldName() throws Exception {
+	public void testSolrSpacedFieldName() {
 		String fieldName = "expando__keyword__custom_fields__spaced name";
 		String value = "one";
 
@@ -50,15 +49,9 @@ public abstract class BaseWildcardQueryTestCase extends BaseIndexingTestCase {
 	@Test
 	public void testWildcardQuery() {
 		for (int i = 0; i < 10; i++) {
-			addDocument(
-				DocumentCreationHelpers.singleKeyword(
-					Field.USER_NAME, "SomeUser" + i));
-			addDocument(
-				DocumentCreationHelpers.singleKeyword(
-					Field.USER_NAME, "OtherUser" + i));
-			addDocument(
-				DocumentCreationHelpers.singleKeyword(
-					Field.USER_NAME, "Other" + i));
+			index(Field.USER_NAME, "SomeUser" + i);
+			index(Field.USER_NAME, "OtherUser" + i);
+			index(Field.USER_NAME, "Other" + i);
 		}
 
 		assertSearch(
@@ -100,29 +93,27 @@ public abstract class BaseWildcardQueryTestCase extends BaseIndexingTestCase {
 			});
 	}
 
-	protected void index(String fieldName, String value) throws Exception {
-		addDocument(DocumentCreationHelpers.singleKeyword(fieldName, value));
-	}
-
-	protected void assertTermFilterFieldName(
-		String filterFieldName, String value)
-		throws Exception {
-
+	protected void assertTermFilterFieldName(String fieldName, String value) {
 		assertSearch(
 			indexingTestHelper -> {
 				indexingTestHelper.setQuery(
-					new WildcardQueryImpl(filterFieldName, value));
+					new WildcardQueryImpl(fieldName, value));
 
 				indexingTestHelper.search();
 
 				StringBuilder sb = new StringBuilder(3);
 
 				sb.append("Expected \"");
-				sb.append(filterFieldName);
+				sb.append(fieldName);
 				sb.append("\" to be escaped in Solr and return a result.");
 
 				Assert.assertEquals(
 					sb.toString(), 1, indexingTestHelper.searchCount());
 			});
 	}
+
+	protected void index(String fieldName, String value) {
+		addDocument(DocumentCreationHelpers.singleKeyword(fieldName, value));
+	}
+
 }
