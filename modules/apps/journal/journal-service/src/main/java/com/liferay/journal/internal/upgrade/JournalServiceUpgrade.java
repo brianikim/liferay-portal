@@ -283,7 +283,7 @@ public class JournalServiceUpgrade implements UpgradeStepRegistrator {
 			"3.4.1", "3.4.2",
 			new ArticleAssetsBasicWebContentClassTypeIdUpgradeProcess(
 				_assetEntryLocalService, _companyLocalService,
-				_groupLocalService, _ddmStructureLocalService));
+				_ddmStructureLocalService, _groupLocalService));
 	}
 
 	protected void deleteTempImages() throws Exception {
