@@ -143,22 +143,18 @@ private String _buildTagsNavigation(long scopeGroupId, String selectedTagName, l
 		if (tagName.equals(selectedTagName)) {
 			sb.append("<a class=\"tag-selected\" href=\"");
 
-			PortletURL portletURL = PortletURLBuilder.createRenderURL(
-				renderResponse
-			).setParameter(
-				"tag", StringPool.BLANK
-			).build();
+			PortletURL portletURL = renderResponse.createRenderURL();
+
+			portletURL.setParameter("tag", StringPool.BLANK);
 
 			sb.append(HtmlUtil.escape(portletURL.toString()));
 		}
 		else {
 			sb.append("<a href=\"");
 
-			PortletURL portletURL = PortletURLBuilder.createRenderURL(
-				renderResponse
-			).setParameter(
-				"tag", tagName
-			).build();
+			PortletURL portletURL = renderResponse.createRenderURL();
+
+			portletURL.setParameter("tag", tagName);
 
 			sb.append(HtmlUtil.escape(portletURL.toString()));
 		}
