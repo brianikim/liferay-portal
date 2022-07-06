@@ -30,7 +30,7 @@ import org.junit.Test;
 public abstract class BaseTermsFilterTestCase extends BaseIndexingTestCase {
 
 	@Test
-	public void testBasicSearch() throws Exception {
+	public void testBasicSearch() {
 		index("One");
 		index("Two");
 		index("Three");
@@ -39,23 +39,14 @@ public abstract class BaseTermsFilterTestCase extends BaseIndexingTestCase {
 	}
 
 	@Test
-	public void testFilterWithEmptyStringValue() throws Exception {
+	public void testFilterWithEmptyStringValue() {
 		index("One");
 
 		assertTermsFilterValue(new String[] {""});
 	}
 
 	@Test
-	public void testFilterWithSpacedFieldName() throws Exception {
-		String fieldName = "expando__keyword__custom_fields__spaced name";
-
-		index(fieldName, "one");
-
-		assertTermsFilterFieldName(fieldName, new String[] {"one"});
-	}
-
-	@Test
-	public void testLuceneSpecialCharacters() throws Exception {
+	public void testLuceneSpecialCharacters() {
 		index("One\\+-!():^[]\"{}~*?|&/Two");
 		index("Three");
 
@@ -64,7 +55,16 @@ public abstract class BaseTermsFilterTestCase extends BaseIndexingTestCase {
 	}
 
 	@Test
-	public void testSolrSpecialCharacters() throws Exception {
+	public void testSolrSpacedFieldName() {
+		String fieldName = "expando__keyword__custom_fields__spaced name";
+
+		index(fieldName, "one");
+
+		assertTermsFilterFieldName(fieldName, new String[] {"one"});
+	}
+
+	@Test
+	public void testSolrSpecialCharacters() {
 		index("One\\+-!():^[]\"{}~*?|&/; Two");
 		index("Three");
 
@@ -73,7 +73,7 @@ public abstract class BaseTermsFilterTestCase extends BaseIndexingTestCase {
 	}
 
 	@Test
-	public void testSpaces() throws Exception {
+	public void testSpaces() {
 		index("One Two");
 		index("Three");
 
@@ -81,13 +81,12 @@ public abstract class BaseTermsFilterTestCase extends BaseIndexingTestCase {
 	}
 
 	protected void assertTermsFilterFieldName(
-			String filterFieldName, String[] values)
-		throws Exception {
+		String fieldName, String[] values) {
 
 		assertSearch(
 			indexingTestHelper -> {
 				indexingTestHelper.setFilter(
-					new TermsFilter(filterFieldName) {
+					new TermsFilter(fieldName) {
 						{
 							addValues(values);
 						}
@@ -98,7 +97,7 @@ public abstract class BaseTermsFilterTestCase extends BaseIndexingTestCase {
 				StringBuilder sb = new StringBuilder(3);
 
 				sb.append("Expected \"");
-				sb.append(filterFieldName);
+				sb.append(fieldName);
 				sb.append("\" to be escaped in Solr and return a result.");
 
 				Assert.assertEquals(
@@ -106,7 +105,7 @@ public abstract class BaseTermsFilterTestCase extends BaseIndexingTestCase {
 			});
 	}
 
-	protected void assertTermsFilterValue(String[] values) throws Exception {
+	protected void assertTermsFilterValue(String[] values) {
 		assertSearch(
 			indexingTestHelper -> {
 				indexingTestHelper.setFilter(
@@ -122,11 +121,11 @@ public abstract class BaseTermsFilterTestCase extends BaseIndexingTestCase {
 			});
 	}
 
-	protected void index(String value) throws Exception {
+	protected void index(String value) {
 		index(_FIELD, value);
 	}
 
-	protected void index(String fieldName, String value) throws Exception {
+	protected void index(String fieldName, String value) {
 		addDocument(DocumentCreationHelpers.singleKeyword(fieldName, value));
 	}
 
