@@ -111,7 +111,7 @@ public class FreeMarkerTemplateContextHelper extends TemplateContextHelper {
 
 				try {
 					List<NavItem> navItems = NavItem.fromLayouts(
-						httpServletRequest, themeDisplay, contextObjects);
+						httpServletRequest, themeDisplay);
 
 					contextObjects.put("navItems", navItems);
 				}
