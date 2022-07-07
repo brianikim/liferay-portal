@@ -68,19 +68,8 @@ public class LayoutStructure {
 
 				layoutStructureItems.put(key, layoutStructureItem);
 
-				if (layoutStructureItem instanceof
-						FragmentStyledLayoutStructureItem) {
-
-					FragmentStyledLayoutStructureItem
-						fragmentStyledLayoutStructureItem =
-							(FragmentStyledLayoutStructureItem)
-								layoutStructureItem;
-
-					fragmentLayoutStructureItems.put(
-						fragmentStyledLayoutStructureItem.
-							getFragmentEntryLinkId(),
-						fragmentStyledLayoutStructureItem);
-				}
+				_updateLayoutStructureItemMaps(
+					fragmentLayoutStructureItems, layoutStructureItem);
 			}
 
 			JSONArray deletedLayoutStructureItemJSONArray = Optional.ofNullable(
@@ -251,17 +240,8 @@ public class LayoutStructure {
 		_layoutStructureItems.put(
 			layoutStructureItem.getItemId(), layoutStructureItem);
 
-		if (layoutStructureItem instanceof
-					FragmentStyledLayoutStructureItem) {
-
-			FragmentStyledLayoutStructureItem
-				fragmentStyledLayoutStructureItem =
-					(FragmentStyledLayoutStructureItem)layoutStructureItem;
-
-			_fragmentLayoutStructureItems.put(
-				fragmentStyledLayoutStructureItem.getFragmentEntryLinkId(),
-				fragmentStyledLayoutStructureItem);
-		}
+		_updateLayoutStructureItemMaps(
+			_fragmentLayoutStructureItems, layoutStructureItem);
 
 		return layoutStructureItem;
 	}
@@ -698,6 +678,21 @@ public class LayoutStructure {
 		}
 
 		return deletedLayoutStructureItems;
+	}
+
+	private static void _updateLayoutStructureItemMaps(
+		Map<Long, LayoutStructureItem> fragmentLayoutStructureItems,
+		LayoutStructureItem layoutStructureItem) {
+
+		if (layoutStructureItem instanceof FragmentStyledLayoutStructureItem) {
+			FragmentStyledLayoutStructureItem
+				fragmentStyledLayoutStructureItem =
+					(FragmentStyledLayoutStructureItem)layoutStructureItem;
+
+			fragmentLayoutStructureItems.put(
+				fragmentStyledLayoutStructureItem.getFragmentEntryLinkId(),
+				fragmentStyledLayoutStructureItem);
+		}
 	}
 
 	private LayoutStructure(
