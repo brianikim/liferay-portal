@@ -109,23 +109,13 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 	private String _renameElementDefinitionJSON(
 		String elementDefinitionJSON, String title) {
 
-		String currentTitle =
-			"Boost Contents in a Category for a Period of Time";
-
-		if (title.indexOf(currentTitle) > -1) {
-			elementDefinitionJSON = StringUtil.replace(
-				elementDefinitionJSON, "Create Date: From", "Date: From");
-			elementDefinitionJSON = StringUtil.replace(
-				elementDefinitionJSON, "Creat Date: To", "Date: To");
-		}
-
-		currentTitle = "Boost Contents in a Category for the Time of Day";
-
-		if (title.indexOf(currentTitle) > -1) {
-			elementDefinitionJSON = StringUtil.replace(
-				elementDefinitionJSON, "Morning (4am - 12am)",
-				"Morning (4am - 12pm)");
-		}
+		elementDefinitionJSON = StringUtil.replace(
+			elementDefinitionJSON, "Create Date: From", "Date: From");
+		elementDefinitionJSON = StringUtil.replace(
+			elementDefinitionJSON, "Creat Date: To", "Date: To");
+		elementDefinitionJSON = StringUtil.replace(
+			elementDefinitionJSON, "Morning (4am - 12am)",
+			"Morning (4am - 12pm)");
 
 		return elementDefinitionJSON;
 	}
