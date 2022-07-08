@@ -138,17 +138,15 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 			ResultSet resultSet = preparedStatement.executeQuery()) {
 
 			while (resultSet.next()) {
-				SXPElementImpl sxpElementImpl = new SXPElementImpl();
+				SXPElement sxpElement = new SXPElementImpl();
 
-				sxpElementImpl.setSXPElementId(
-					resultSet.getLong("sxpElementId"));
-				sxpElementImpl.setExternalReferenceCode(
+				sxpElement.setSXPElementId(resultSet.getLong("sxpElementId"));
+				sxpElement.setExternalReferenceCode(
 					resultSet.getString("externalReferenceCode"));
-				sxpElementImpl.setReadOnly(resultSet.getBoolean("readOnly"));
-				sxpElementImpl.setVersion(resultSet.getString("version"));
+				sxpElement.setReadOnly(resultSet.getBoolean("readOnly"));
+				sxpElement.setVersion(resultSet.getString("version"));
 
-				sxpElements.put(
-					sxpElementImpl.getSXPElementId(), sxpElementImpl);
+				sxpElements.put(sxpElement.getSXPElementId(), sxpElement);
 			}
 		}
 
