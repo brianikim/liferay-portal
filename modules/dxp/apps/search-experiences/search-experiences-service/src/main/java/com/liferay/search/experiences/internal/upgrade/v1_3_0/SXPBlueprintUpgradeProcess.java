@@ -104,8 +104,6 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 				description_i18n.put(
 					"en-US", _renameDescription(description_i18n.get("en-US")));
 
-				sxpElement.setDescription_i18n(description_i18n);
-
 				Map<String, String> title_i18n = sxpElement.getTitle_i18n();
 
 				sxpElement.setElementDefinition(
@@ -115,8 +113,6 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 								sxpElement.getElementDefinition()))));
 
 				title_i18n.put("en-US", _renameTitle(title_i18n.get("en-US")));
-
-				sxpElement.setTitle_i18n(title_i18n);
 			}
 
 			sxpElement.setExternalReferenceCode(
