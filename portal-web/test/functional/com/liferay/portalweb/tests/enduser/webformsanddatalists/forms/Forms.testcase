@@ -5784,9 +5784,7 @@ definition {
 
 		FormFields.viewSwitcher(fieldName = "Switcher 1");
 
-		FormFields.viewSwitcherLabelNotPresent(
-			fieldLabel = "Multiple Selection",
-			fieldName = "${fieldMultipleSelectionField}");
+		FormFields.viewSwitcherLabelNotPresent(fieldLabel = "Multiple Selection");
 
 		Form.save();
 
@@ -5814,9 +5812,7 @@ definition {
 
 		FormFields.viewSwitcher(fieldName = "${fieldMultipleSelectionField}");
 
-		FormFields.viewSwitcherLabelNotPresent(
-			fieldLabel = "Multiple Selection",
-			fieldName = "${fieldMultipleSelectionField}");
+		FormFields.viewSwitcherLabelNotPresent(fieldLabel = "Multiple Selection");
 
 		FormPortlet.submitSuccessfully();
 	}
