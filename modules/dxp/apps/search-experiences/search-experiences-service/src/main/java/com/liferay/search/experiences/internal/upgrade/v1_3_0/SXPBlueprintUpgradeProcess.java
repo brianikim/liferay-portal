@@ -206,32 +206,29 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 					String description = resultSet.getString("description");
 					String elementDefinitionJSON = resultSet.getString(
 						"elementDefinitionJSON");
-
-					boolean readOnly = resultSet.getBoolean("readOnly");
-
-					long sxpElementId = resultSet.getLong("sxpElementId");
-
 					String title = resultSet.getString("title");
-					String version = resultSet.getString("version");
 
-					if (readOnly) {
+					if (resultSet.getBoolean("readOnly")) {
 						description = _renameDescription(description);
 						elementDefinitionJSON = _renameElementDefinitionJSON(
 							elementDefinitionJSON);
 						title = _renameTitle(title);
 					}
 
+					preparedStatement2.setString(1, description);
+					preparedStatement2.setString(2, elementDefinitionJSON);
+					preparedStatement2.setString(3, title);
+
+					String version = resultSet.getString("version");
+
 					if (Validator.isNull(version)) {
 						version = "1.0";
 					}
 
-					preparedStatement2.setString(1, description);
-					preparedStatement2.setString(2, elementDefinitionJSON);
-					preparedStatement2.setString(3, title);
 					preparedStatement2.setString(4, version);
 
-					preparedStatement2.setLong(5, sxpElementId);
-
+					preparedStatement2.setLong(
+						5, resultSet.getLong("sxpElementId"));
 					preparedStatement2.addBatch();
 				}
 
