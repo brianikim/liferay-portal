@@ -17,6 +17,8 @@ package com.liferay.search.experiences.internal.upgrade.v1_3_0;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.jdbc.AutoBatchPreparedStatementUtil;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -83,6 +85,10 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 				sxpElementDTO = elementInstance.getSxpElement();
 
 			SXPElement sxpElement = _fetchSXPElement(sxpElementDTO.getId());
+
+			_log.error(
+				"No search experiences element exists with ID " +
+					sxpElementDTO.getId());
 
 			if (sxpElement == null) {
 				continue;
@@ -236,5 +242,8 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 			}
 		}
 	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		SXPBlueprintUpgradeProcess.class);
 
 }
