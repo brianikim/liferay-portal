@@ -185,6 +185,7 @@ definition {
 		DMNavigator.openDocumentsAndMediaAdmin(siteURLKey = "guest");
 
 		DMDocument.addCP(
+			dateValue = "01/01/2022",
 			dmDocumentDescription = "DM Document Type Contract Description",
 			dmDocumentFile = "Document_1.doc",
 			dmDocumentTitle = "DM Document Type Contract Title",
