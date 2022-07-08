@@ -114,23 +114,17 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 			new String[] {"Date: From", "Date: To", "Morning (4am - 12pm)"});
 	}
 
-	private String _renameTitle(String currentTitle) {
-		String oldTitle = "Boost Contents in a Category for a User Segment";
-
-		if (currentTitle.indexOf(oldTitle) > -1) {
-			return StringUtil.replace(
-				currentTitle, oldTitle,
-				"Boost Contents in a Category for User Segments");
-		}
-
-		oldTitle = "Search with the Lucene Syntax";
-
-		if (currentTitle.indexOf(oldTitle) > -1) {
-			return StringUtil.replace(
-				currentTitle, oldTitle, "Search with Query String Syntax");
-		}
-
-		return currentTitle;
+	private String _renameTitle(String title) {
+		return StringUtil.replace(
+			title,
+			new String[] {
+				"Boost Contents in a Category for a User Segment",
+				"Search with the Lucene Syntax"
+			},
+			new String[] {
+				"Boost Contents in a Category for User Segments",
+				"Search with Query String Syntax"
+			});
 	}
 
 	private void _upgradeSXPBlueprint() throws Exception {
