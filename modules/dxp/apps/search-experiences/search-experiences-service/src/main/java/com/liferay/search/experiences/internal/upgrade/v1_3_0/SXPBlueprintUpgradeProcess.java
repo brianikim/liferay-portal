@@ -81,8 +81,7 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 					ElementDefinition.unsafeToDTO(
 						_renameElementDefinitionJSON(
 							String.valueOf(
-								sxpElementDTO.getElementDefinition()),
-							title_i18n.get("en-US"))));
+								sxpElementDTO.getElementDefinition()))));
 
 				title_i18n.put("en-US", _renameTitle(title_i18n.get("en-US")));
 
@@ -106,18 +105,13 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 				"user segments");
 	}
 
-	private String _renameElementDefinitionJSON(
-		String elementDefinitionJSON, String title) {
-
-		elementDefinitionJSON = StringUtil.replace(
-			elementDefinitionJSON, "Create Date: From", "Date: From");
-		elementDefinitionJSON = StringUtil.replace(
-			elementDefinitionJSON, "Creat Date: To", "Date: To");
-		elementDefinitionJSON = StringUtil.replace(
-			elementDefinitionJSON, "Morning (4am - 12am)",
-			"Morning (4am - 12pm)");
-
-		return elementDefinitionJSON;
+	private String _renameElementDefinitionJSON(String elementDefinitionJSON) {
+		return StringUtil.replace(
+			elementDefinitionJSON,
+			new String[] {
+				"Create Date: From", "Creat Date: To", "Morning (4am - 12am)"
+			},
+			new String[] {"Date: From", "Date: To", "Morning (4am - 12pm)"});
 	}
 
 	private String _renameTitle(String currentTitle) {
@@ -248,7 +242,7 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 					if (readOnly) {
 						description = _renameDescription(description);
 						elementDefinitionJSON = _renameElementDefinitionJSON(
-							elementDefinitionJSON, title);
+							elementDefinitionJSON);
 						title = _renameTitle(title);
 					}
 
