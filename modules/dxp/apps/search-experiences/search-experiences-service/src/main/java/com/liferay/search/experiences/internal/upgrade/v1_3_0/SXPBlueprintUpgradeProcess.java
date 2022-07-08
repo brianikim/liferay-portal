@@ -128,9 +128,7 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 	}
 
 	private void _upgradeSXPBlueprint() throws Exception {
-		if (hasColumn("SXPBlueprint", "key_")) {
-			alterTableDropColumn("SXPBlueprint", "key_");
-		}
+		alterTableDropColumn("SXPBlueprint", "key_");
 
 		Map<Long, SXPElement> sxpElements = new HashMap<>();
 
@@ -198,9 +196,7 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 	}
 
 	private void _upgradeSXPElement() throws Exception {
-		if (hasColumn("SXPElement", "key_")) {
-			alterTableDropColumn("SXPElement", "key_");
-		}
+		alterTableDropColumn("SXPElement", "key_");
 
 		StringBundler selectSB = new StringBundler(3);
 
