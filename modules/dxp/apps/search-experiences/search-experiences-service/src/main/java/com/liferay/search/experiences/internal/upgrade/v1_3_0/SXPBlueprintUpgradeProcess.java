@@ -31,7 +31,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -46,8 +45,31 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 		_upgradeSXPBlueprint();
 	}
 
-	private String _getElementInstancesJSON(
-		String elementInstancesJSON, Map<Long, SXPElement> sxpElements) {
+	private SXPElement _fetchSXPElement(long sxpElementId) throws Exception {
+		try (PreparedStatement preparedStatement = connection.prepareStatement(
+				"select sxpElementId, externalReferenceCode, readOnly, " +
+					"version from SXPElement where sxpElementId = " +
+						sxpElementId);
+			ResultSet resultSet = preparedStatement.executeQuery()) {
+
+			while (resultSet.next()) {
+				SXPElement sxpElement = new SXPElementImpl();
+
+				sxpElement.setSXPElementId(resultSet.getLong("sxpElementId"));
+				sxpElement.setExternalReferenceCode(
+					resultSet.getString("externalReferenceCode"));
+				sxpElement.setReadOnly(resultSet.getBoolean("readOnly"));
+				sxpElement.setVersion(resultSet.getString("version"));
+
+				return sxpElement;
+			}
+		}
+
+		return null;
+	}
+
+	private String _getElementInstancesJSON(String elementInstancesJSON)
+		throws Exception {
 
 		ElementInstance[] elementInstances =
 			ElementInstanceUtil.toElementInstances(elementInstancesJSON);
@@ -60,7 +82,7 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 			com.liferay.search.experiences.rest.dto.v1_0.SXPElement
 				sxpElementDTO = elementInstance.getSxpElement();
 
-			SXPElement sxpElement = sxpElements.get(sxpElementDTO.getId());
+			SXPElement sxpElement = _fetchSXPElement(sxpElementDTO.getId());
 
 			if (sxpElement == null) {
 				continue;
@@ -130,26 +152,6 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 	private void _upgradeSXPBlueprint() throws Exception {
 		alterTableDropColumn("SXPBlueprint", "key_");
 
-		Map<Long, SXPElement> sxpElements = new HashMap<>();
-
-		try (PreparedStatement preparedStatement = connection.prepareStatement(
-				"select sxpElementId, externalReferenceCode, readOnly, " +
-					"version from SXPElement");
-			ResultSet resultSet = preparedStatement.executeQuery()) {
-
-			while (resultSet.next()) {
-				SXPElement sxpElement = new SXPElementImpl();
-
-				sxpElement.setSXPElementId(resultSet.getLong("sxpElementId"));
-				sxpElement.setExternalReferenceCode(
-					resultSet.getString("externalReferenceCode"));
-				sxpElement.setReadOnly(resultSet.getBoolean("readOnly"));
-				sxpElement.setVersion(resultSet.getString("version"));
-
-				sxpElements.put(sxpElement.getSXPElementId(), sxpElement);
-			}
-		}
-
 		try (PreparedStatement preparedStatement1 = connection.prepareStatement(
 				"select sxpBlueprintId, elementInstancesJSON, version from " +
 					"SXPBlueprint");
@@ -164,8 +166,7 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 					preparedStatement2.setString(
 						1,
 						_getElementInstancesJSON(
-							resultSet.getString("elementInstancesJSON"),
-							sxpElements));
+							resultSet.getString("elementInstancesJSON")));
 
 					String version = resultSet.getString("version");
 
