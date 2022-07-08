@@ -77,7 +77,7 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 			ElementInstanceUtil.toElementInstances(elementInstancesJSON);
 
 		if (ArrayUtil.isEmpty(elementInstances)) {
-			return StringPool.BLANK;
+			return "{}";
 		}
 
 		for (ElementInstance elementInstance : elementInstances) {
