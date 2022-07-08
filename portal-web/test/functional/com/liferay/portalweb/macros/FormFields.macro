@@ -867,9 +867,8 @@ definition {
 	}
 
 	macro viewSwitcherLabelNotPresent {
-		var key_fieldName = "${fieldName}";
-
-		AssertTextNotPresent(
+		AssertElementNotPresent(
+			key_fieldLabel = "${fieldLabel}",
 			locator1 = "FormFields#LABEL",
 			value1 = "${fieldLabel}");
 	}
