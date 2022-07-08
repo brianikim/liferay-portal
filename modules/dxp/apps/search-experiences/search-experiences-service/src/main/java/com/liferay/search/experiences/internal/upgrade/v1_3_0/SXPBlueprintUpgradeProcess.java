@@ -15,7 +15,6 @@
 package com.liferay.search.experiences.internal.upgrade.v1_3_0;
 
 import com.liferay.petra.string.StringBundler;
-import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.jdbc.AutoBatchPreparedStatementUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -23,10 +22,10 @@ import com.liferay.portal.kernel.upgrade.UpgradeProcess;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.search.experiences.model.SXPElement;
 import com.liferay.search.experiences.model.impl.SXPElementImpl;
 import com.liferay.search.experiences.rest.dto.v1_0.ElementDefinition;
 import com.liferay.search.experiences.rest.dto.v1_0.ElementInstance;
+import com.liferay.search.experiences.rest.dto.v1_0.SXPElement;
 import com.liferay.search.experiences.rest.dto.v1_0.util.ElementInstanceUtil;
 
 import java.sql.PreparedStatement;
@@ -47,7 +46,10 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 		_upgradeSXPBlueprint();
 	}
 
-	private SXPElement _fetchSXPElement(long sxpElementId) throws Exception {
+	private com.liferay.search.experiences.model.SXPElement _fetchSXPElement(
+			long sxpElementId)
+		throws Exception {
+
 		try (PreparedStatement preparedStatement = connection.prepareStatement(
 				"select sxpElementId, externalReferenceCode, readOnly, " +
 					"version from SXPElement where sxpElementId = " +
@@ -55,7 +57,8 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 			ResultSet resultSet = preparedStatement.executeQuery()) {
 
 			while (resultSet.next()) {
-				SXPElement sxpElement = new SXPElementImpl();
+				com.liferay.search.experiences.model.SXPElement sxpElement =
+					new SXPElementImpl();
 
 				sxpElement.setSXPElementId(resultSet.getLong("sxpElementId"));
 				sxpElement.setExternalReferenceCode(
@@ -81,44 +84,44 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 		}
 
 		for (ElementInstance elementInstance : elementInstances) {
-			com.liferay.search.experiences.rest.dto.v1_0.SXPElement
-				sxpElementDTO = elementInstance.getSxpElement();
+			SXPElement sxpElement = elementInstance.getSxpElement();
 
-			SXPElement sxpElement = _fetchSXPElement(sxpElementDTO.getId());
+			com.liferay.search.experiences.model.SXPElement
+				serviceBuilderSXPElement = _fetchSXPElement(sxpElement.getId());
 
 			_log.error(
 				"No search experiences element exists with ID " +
-					sxpElementDTO.getId());
+					sxpElement.getId());
 
-			if (sxpElement == null) {
+			if (serviceBuilderSXPElement == null) {
 				continue;
 			}
 
-			if (sxpElement.isReadOnly()) {
+			if (serviceBuilderSXPElement.isReadOnly()) {
 				Map<String, String> description_i18n =
-					sxpElementDTO.getDescription_i18n();
+					sxpElement.getDescription_i18n();
 
 				description_i18n.put(
 					"en-US", _renameDescription(description_i18n.get("en-US")));
 
-				sxpElementDTO.setDescription_i18n(description_i18n);
+				sxpElement.setDescription_i18n(description_i18n);
 
-				Map<String, String> title_i18n = sxpElementDTO.getTitle_i18n();
+				Map<String, String> title_i18n = sxpElement.getTitle_i18n();
 
-				sxpElementDTO.setElementDefinition(
+				sxpElement.setElementDefinition(
 					ElementDefinition.unsafeToDTO(
 						_renameElementDefinitionJSON(
 							String.valueOf(
-								sxpElementDTO.getElementDefinition()))));
+								sxpElement.getElementDefinition()))));
 
 				title_i18n.put("en-US", _renameTitle(title_i18n.get("en-US")));
 
-				sxpElementDTO.setTitle_i18n(title_i18n);
+				sxpElement.setTitle_i18n(title_i18n);
 			}
 
-			sxpElementDTO.setExternalReferenceCode(
-				sxpElement.getExternalReferenceCode());
-			sxpElementDTO.setVersion(sxpElement.getVersion());
+			sxpElement.setExternalReferenceCode(
+				serviceBuilderSXPElement.getExternalReferenceCode());
+			sxpElement.setVersion(serviceBuilderSXPElement.getVersion());
 		}
 
 		return Arrays.toString(elementInstances);
