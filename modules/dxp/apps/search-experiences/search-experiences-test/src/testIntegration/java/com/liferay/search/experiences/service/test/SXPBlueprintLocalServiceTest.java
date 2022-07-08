@@ -66,53 +66,10 @@ public class SXPBlueprintLocalServiceTest {
 	public void setUp() throws Exception {
 		_group = GroupTestUtil.addGroup();
 
-		_sxpBlueprint = _sxpBlueprintLocalService.addSXPBlueprint(
-			TestPropsValues.getUserId(), "{}",
-			Collections.singletonMap(LocaleUtil.US, ""), null, "",
-			Collections.singletonMap(
-				LocaleUtil.US, RandomTestUtil.randomString()),
-			ServiceContextTestUtil.getServiceContext(
-				_group, TestPropsValues.getUserId()));
-
-		_sxpBlueprints.add(_sxpBlueprint);
+		_sxpBlueprint = _addSXPBlueprint();
 	}
 
-	@Test
-	public void testAddSXPBlueprintWithExternalReferenceCodeVersion()
-		throws Exception {
-
-		Assert.assertEquals("1.0", _sxpBlueprint.getVersion());
-
-		Assert.assertNotNull(_sxpBlueprint.getExternalReferenceCode());
-	}
-
-	@Test
-	public void testGetSXPBlueprintByExternalReferenceCode() throws Exception {
-		Assert.assertEquals(
-			_sxpBlueprint,
-			_sxpBlueprintLocalService.getSXPBlueprintByExternalReferenceCode(
-				_group.getCompanyId(),
-				_sxpBlueprint.getExternalReferenceCode()));
-	}
-
-	@Test(expected = NoSuchSXPBlueprintException.class)
-	public void testGetSXPBlueprintByExternalReferenceCodeNoExisting()
-		throws Exception {
-
-		_sxpBlueprintLocalService.getSXPBlueprintByExternalReferenceCode(
-			_group.getCompanyId(), RandomTestUtil.randomString());
-	}
-
-	@Test(expected = PersistenceException.class)
-	public void testSXPBlueprintExternalReferenceCodeUniqueness()
-		throws Exception {
-
-		Assert.assertEquals(
-			_sxpBlueprint,
-			_sxpBlueprintLocalService.getSXPBlueprintByExternalReferenceCode(
-				_group.getCompanyId(),
-				_sxpBlueprint.getExternalReferenceCode()));
-
+	private SXPBlueprint _addSXPBlueprint() throws Exception {
 		SXPBlueprint sxpBlueprint = _sxpBlueprintLocalService.addSXPBlueprint(
 			TestPropsValues.getUserId(), "{}",
 			Collections.singletonMap(LocaleUtil.US, ""), null, "",
@@ -121,7 +78,39 @@ public class SXPBlueprintLocalServiceTest {
 			ServiceContextTestUtil.getServiceContext(
 				_group, TestPropsValues.getUserId()));
 
-		_sxpBlueprints.add(sxpBlueprint);
+		_sxpBlueprints.add(sxpBlueprint);		
+
+		return sxpBlueprint;
+	}
+
+	@Test
+	public void testAddSXPBlueprint() throws Exception {
+		Assert.assertNotNull(_sxpBlueprint.getExternalReferenceCode());
+		Assert.assertEquals("1.0", _sxpBlueprint.getVersion());
+	}
+
+	@Test
+	public void testGetSXPBlueprint() throws Exception {
+		Assert.assertEquals(
+			_sxpBlueprint,
+			_sxpBlueprintLocalService.getSXPBlueprintByExternalReferenceCode(
+				_group.getCompanyId(),
+				_sxpBlueprint.getExternalReferenceCode()));
+
+		try {
+			_sxpBlueprintLocalService.getSXPBlueprintByExternalReferenceCode(
+				_group.getCompanyId(), RandomTestUtil.randomString());
+
+			Assert.fail();
+		}
+		catch (NoSuchSXPBlueprintException noSuchSXPBlueprintException) {
+			Assert.assertNotNull(noSuchSXPBlueprintException);
+		}
+	}
+
+	@Test
+	public void testUpdateSXPBlueprint() throws Exception {
+		SXPBlueprint sxpBlueprint = _addSXPBlueprint();
 
 		sxpBlueprint.setExternalReferenceCode(
 			_sxpBlueprint.getExternalReferenceCode());
