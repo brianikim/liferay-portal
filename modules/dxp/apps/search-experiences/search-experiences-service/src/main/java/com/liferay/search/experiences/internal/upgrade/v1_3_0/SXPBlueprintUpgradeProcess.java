@@ -161,17 +161,18 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 
 			try (ResultSet resultSet = preparedStatement1.executeQuery()) {
 				while (resultSet.next()) {
+					preparedStatement2.setString(
+						1,
+						_getElementInstancesJSON(
+							resultSet.getString("elementInstancesJSON"),
+							sxpElements));
+
 					String version = resultSet.getString("version");
 
 					if (Validator.isNull(version)) {
 						version = "1.0";
 					}
 
-					preparedStatement2.setString(
-						1,
-						_getElementInstancesJSON(
-							resultSet.getString("elementInstancesJSON"),
-							sxpElements));
 					preparedStatement2.setString(2, version);
 
 					preparedStatement2.setLong(
