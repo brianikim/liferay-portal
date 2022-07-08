@@ -132,13 +132,9 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 
 		Map<Long, SXPElement> sxpElements = new HashMap<>();
 
-		StringBundler sb = new StringBundler(2);
-
-		sb.append("select sxpElementId, externalReferenceCode, readOnly, ");
-		sb.append("version from SXPElement");
-
 		try (PreparedStatement preparedStatement = connection.prepareStatement(
-				sb.toString());
+				"select sxpElementId, externalReferenceCode, readOnly, " +
+					"version from SXPElement");
 			ResultSet resultSet = preparedStatement.executeQuery()) {
 
 			while (resultSet.next()) {
@@ -156,13 +152,9 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 			}
 		}
 
-		sb = new StringBundler(2);
-
-		sb.append("select sxpBlueprintId, elementInstancesJSON, version from ");
-		sb.append("SXPBlueprint");
-
 		try (PreparedStatement preparedStatement1 = connection.prepareStatement(
-				sb.toString());
+				"select sxpBlueprintId, elementInstancesJSON, version from " +
+					"SXPBlueprint");
 			PreparedStatement preparedStatement2 =
 				AutoBatchPreparedStatementUtil.concurrentAutoBatch(
 					connection,
@@ -198,23 +190,16 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 	private void _upgradeSXPElement() throws Exception {
 		alterTableDropColumn("SXPElement", "key_");
 
-		StringBundler selectSB = new StringBundler(3);
-
-		selectSB.append("select sxpElementId, description, ");
-		selectSB.append("elementDefinitionJSON, readOnly, title, version ");
-		selectSB.append("from SXPElement");
-
-		StringBundler updateSB = new StringBundler(3);
-
-		updateSB.append("update SXPElement set description = ?, ");
-		updateSB.append("elementDefinitionJSON = ?, title = ?, version = ? ");
-		updateSB.append("where sxpElementId = ?");
-
 		try (PreparedStatement preparedStatement1 = connection.prepareStatement(
-				selectSB.toString());
+				"select sxpElementId, description, elementDefinitionJSON, " +
+					"readOnly, title, version from SXPElement");
 			PreparedStatement preparedStatement2 =
 				AutoBatchPreparedStatementUtil.concurrentAutoBatch(
-					connection, updateSB.toString())) {
+					connection,
+					StringBundler.concat(
+						"update SXPElement set description = ?, ",
+						"elementDefinitionJSON = ?, title = ?, version = ? ",
+						"where sxpElementId = ?"))) {
 
 			try (ResultSet resultSet = preparedStatement1.executeQuery()) {
 				while (resultSet.next()) {
