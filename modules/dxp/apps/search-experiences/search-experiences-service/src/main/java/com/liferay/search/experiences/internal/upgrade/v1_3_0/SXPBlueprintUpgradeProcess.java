@@ -75,15 +75,14 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 
 				sxpElementDTO.setDescription_i18n(description_i18n);
 
-				String elementDefinitionString = String.valueOf(
-					sxpElementDTO.getElementDefinition());
-
 				Map<String, String> title_i18n = sxpElementDTO.getTitle_i18n();
 
 				sxpElementDTO.setElementDefinition(
 					ElementDefinition.unsafeToDTO(
 						_renameElementDefinitionJSON(
-							elementDefinitionString, title_i18n.get("en-US"))));
+							String.valueOf(
+								sxpElementDTO.getElementDefinition()),
+							title_i18n.get("en-US"))));
 
 				title_i18n.put("en-US", _renameTitle(title_i18n.get("en-US")));
 
@@ -108,27 +107,27 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 	}
 
 	private String _renameElementDefinitionJSON(
-		String currentElementDefinition, String title) {
+		String elementDefinitionJSON, String title) {
 
 		String currentTitle =
 			"Boost Contents in a Category for a Period of Time";
 
 		if (title.indexOf(currentTitle) > -1) {
-			currentElementDefinition = StringUtil.replace(
-				currentElementDefinition, "Create Date: From", "Date: From");
-			currentElementDefinition = StringUtil.replace(
-				currentElementDefinition, "Creat Date: To", "Date: To");
+			elementDefinitionJSON = StringUtil.replace(
+				elementDefinitionJSON, "Create Date: From", "Date: From");
+			elementDefinitionJSON = StringUtil.replace(
+				elementDefinitionJSON, "Creat Date: To", "Date: To");
 		}
 
 		currentTitle = "Boost Contents in a Category for the Time of Day";
 
 		if (title.indexOf(currentTitle) > -1) {
-			currentElementDefinition = StringUtil.replace(
-				currentElementDefinition, "Morning (4am - 12am)",
+			elementDefinitionJSON = StringUtil.replace(
+				elementDefinitionJSON, "Morning (4am - 12am)",
 				"Morning (4am - 12pm)");
 		}
 
-		return currentElementDefinition;
+		return elementDefinitionJSON;
 	}
 
 	private String _renameTitle(String currentTitle) {
