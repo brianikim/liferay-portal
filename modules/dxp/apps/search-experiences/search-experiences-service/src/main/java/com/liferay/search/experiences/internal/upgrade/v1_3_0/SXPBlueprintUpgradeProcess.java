@@ -134,7 +134,7 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 
 		StringBundler sb = new StringBundler(2);
 
-		sb.append("select externalReferenceCode, readOnly, sxpElementId, ");
+		sb.append("select sxpElementId, externalReferenceCode, readOnly, ");
 		sb.append("version from SXPElement");
 
 		try (PreparedStatement preparedStatement = connection.prepareStatement(
@@ -144,11 +144,11 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 			while (resultSet.next()) {
 				SXPElementImpl sxpElementImpl = new SXPElementImpl();
 
+				sxpElementImpl.setSXPElementId(
+					resultSet.getLong("sxpElementId"));
 				sxpElementImpl.setExternalReferenceCode(
 					resultSet.getString("externalReferenceCode"));
 				sxpElementImpl.setReadOnly(resultSet.getBoolean("readOnly"));
-				sxpElementImpl.setSXPElementId(
-					resultSet.getLong("sxpElementId"));
 				sxpElementImpl.setVersion(resultSet.getString("version"));
 
 				sxpElements.put(
@@ -158,7 +158,7 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 
 		sb = new StringBundler(2);
 
-		sb.append("select elementInstancesJSON, sxpBlueprintId, version from ");
+		sb.append("select sxpBlueprintId, elementInstancesJSON, version from ");
 		sb.append("SXPBlueprint");
 
 		try (PreparedStatement preparedStatement1 = connection.prepareStatement(
@@ -200,9 +200,9 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 
 		StringBundler selectSB = new StringBundler(3);
 
-		selectSB.append("select description, elementDefinitionJSON, ");
-		selectSB.append("readOnly, title, sxpElementId, version from ");
-		selectSB.append("SXPElement");
+		selectSB.append("select sxpElementId, description, ");
+		selectSB.append("elementDefinitionJSON, readOnly, title, version ");
+		selectSB.append("from SXPElement");
 
 		StringBundler updateSB = new StringBundler(3);
 
