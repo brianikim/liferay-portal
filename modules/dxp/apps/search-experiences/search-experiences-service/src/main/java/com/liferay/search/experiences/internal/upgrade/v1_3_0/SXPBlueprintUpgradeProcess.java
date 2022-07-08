@@ -98,19 +98,13 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 		return Arrays.toString(elementInstances);
 	}
 
-	private String _renameDescription(String currentDescription) {
-		String oldDescription =
+	private String _renameDescription(String description) {
+		return StringUtil.replace(
+			description,
 			"Boost contents in a category for users belonging to a given " +
-				"user segment";
-
-		if (currentDescription.indexOf(oldDescription) > -1) {
-			return StringUtil.replace(
-				currentDescription, oldDescription,
-				"Boost contents in a category for users belonging to the " +
-					"given user segments");
-		}
-
-		return currentDescription;
+				"user segment",
+			"Boost contents in a category for users belonging to the given " +
+				"user segments");
 	}
 
 	private String _renameElementDefinitionJSON(
