@@ -41,6 +41,7 @@ definition {
 	@priority = "3"
 	test CheckTheFirstStatusForSingleApproverWorkflow {
 		property portal.acceptance = "false";
+		property test.name.skip.portal.instance = "CPCommerceProducts#CheckTheFirstStatusForSingleApproverWorkflow";
 
 		ApplicationsMenu.gotoPortlet(
 			category = "Workflow",
@@ -82,6 +83,7 @@ definition {
 	@priority = "3"
 	test DuplicateADraftProduct {
 		property portal.acceptance = "false";
+		property test.name.skip.portal.instance = "CPCommerceProducts#DuplicateADraftProduct";
 
 		CommerceNavigator.gotoPortlet(
 			category = "Product Management",
@@ -118,6 +120,7 @@ definition {
 	@priority = "3"
 	test DuplicateAnApprovedProduct {
 		property portal.acceptance = "false";
+		property test.name.skip.portal.instance = "CPCommerceProducts#DuplicateAnApprovedProduct";
 
 		CommerceNavigator.gotoPortlet(
 			category = "Product Management",
@@ -232,6 +235,7 @@ definition {
 	@priority = "3"
 	test SaveAsDraftAnAlreadyDraftProduct {
 		property portal.acceptance = "false";
+		property test.name.skip.portal.instance = "CPCommerceProducts#SaveAsDraftAnAlreadyDraftProduct";
 
 		CommerceNavigator.gotoPortlet(
 			category = "Product Management",
@@ -265,6 +269,7 @@ definition {
 	@priority = "3"
 	test SaveAsDraftAnApprovedProduct {
 		property portal.acceptance = "false";
+		property test.name.skip.portal.instance = "CPCommerceProducts#SaveAsDraftAnApprovedProduct";
 
 		CommerceNavigator.gotoPortlet(
 			category = "Product Management",
@@ -432,6 +437,7 @@ definition {
 	@priority = "3"
 	test VerifyDraftStatus {
 		property portal.acceptance = "false";
+		property test.name.skip.portal.instance = "CPCommerceProducts#VerifyDraftStatus";
 
 		CommerceNavigator.gotoPortlet(
 			category = "Product Management",
@@ -457,6 +463,7 @@ definition {
 	@priority = "3"
 	test VerifyDraftStatusNormalWorkflow {
 		property portal.acceptance = "false";
+		property test.name.skip.portal.instance = "CPCommerceProducts#VerifyDraftStatusNormalWorkflow";
 
 		CommerceNavigator.gotoPortlet(
 			category = "Product Management",
