@@ -1034,6 +1034,8 @@ public class LayoutStagedModelDataHandler
 
 		importedLayout = _layoutLocalService.updateLayout(importedLayout);
 
+		importLayoutFriendlyURLs(portletDataContext, layout, importedLayout);
+
 		if ((Objects.equals(layout.getType(), LayoutConstants.TYPE_PORTLET) &&
 			 Validator.isNotNull(layout.getTypeSettings())) ||
 			layout.isTypeAssetDisplay() || layout.isTypeContent()) {
@@ -1043,8 +1045,6 @@ public class LayoutStagedModelDataHandler
 		}
 
 		importAssets(portletDataContext, layout, importedLayout);
-
-		importLayoutFriendlyURLs(portletDataContext, layout, importedLayout);
 
 		importLayoutPageTemplateStructures(
 			portletDataContext, layout, importedLayout);
