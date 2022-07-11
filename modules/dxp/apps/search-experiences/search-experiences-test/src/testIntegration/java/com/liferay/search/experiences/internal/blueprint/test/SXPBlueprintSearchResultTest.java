@@ -2270,24 +2270,6 @@ public class SXPBlueprintSearchResultTest {
 		return UserTestUtil.addGroupUser(group, role.getName());
 	}
 
-	private JournalArticle _addJournalArticle(
-			long groupId, long folderId, String name, String content,
-			boolean workflowEnabled, boolean approved)
-		throws Exception {
-
-		return JournalTestUtil.addArticle(
-			groupId, folderId, PortalUtil.getClassNameId(JournalArticle.class),
-			HashMapBuilder.put(
-				LocaleUtil.US, name
-			).build(),
-			null,
-			HashMapBuilder.put(
-				LocaleUtil.US, content
-			).build(),
-			LocaleUtil.getSiteDefault(), workflowEnabled, approved,
-			_serviceContext);
-	}
-
 	private SegmentsEntry _addSegmentsEntry(User user) throws Exception {
 		Criteria criteria = new Criteria();
 
@@ -2582,12 +2564,6 @@ public class SXPBlueprintSearchResultTest {
 
 	@DeleteAfterTestRun
 	private Group _group;
-
-	@DeleteAfterTestRun
-	private Group _groupA;
-
-	@DeleteAfterTestRun
-	private Group _groupB;
 
 	@DeleteAfterTestRun
 	private List<Group> _groups = new ArrayList<>();
