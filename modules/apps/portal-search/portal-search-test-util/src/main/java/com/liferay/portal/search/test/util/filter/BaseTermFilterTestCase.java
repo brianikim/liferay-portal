@@ -56,22 +56,13 @@ public abstract class BaseTermFilterTestCase extends BaseIndexingTestCase {
 	}
 
 	@Test
-	public void testSolrSpacedFieldName() {
+	public void testSpacedFieldName() {
 		String fieldName = "expando__keyword__custom_fields__spaced name";
 		String value = "one";
 
 		index(fieldName, value);
 
 		assertTermFilterFieldName(fieldName, value);
-	}
-
-	@Test
-	public void testSolrSpecialCharacters() {
-		String value = "One\\+-!():^[]\"{}~*?|&/; Two";
-
-		index(value);
-
-		assertTermFilterValue(value, value);
 	}
 
 	@Test
@@ -82,6 +73,15 @@ public abstract class BaseTermFilterTestCase extends BaseIndexingTestCase {
 
 		assertTermFilterValue("One", "");
 		assertTermFilterValue("Two", "");
+	}
+
+	@Test
+	public void testSpecialCharacters() {
+		String value = "One\\+-!():^[]\"{}~*?|&/; Two";
+
+		index(value);
+
+		assertTermFilterValue(value, value);
 	}
 
 	protected void assertTermFilterFieldName(String fieldName, String value) {

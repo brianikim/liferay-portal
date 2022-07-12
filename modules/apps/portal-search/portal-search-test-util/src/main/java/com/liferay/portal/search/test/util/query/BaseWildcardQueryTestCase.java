@@ -37,7 +37,7 @@ import org.junit.Test;
 public abstract class BaseWildcardQueryTestCase extends BaseIndexingTestCase {
 
 	@Test
-	public void testSolrSpacedFieldName() {
+	public void testSpacedFieldName() {
 		String fieldName = "expando__keyword__custom_fields__spaced name";
 		String value = "one";
 
