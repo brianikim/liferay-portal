@@ -66,6 +66,13 @@ public class SXPElementLocalServiceImpl extends SXPElementLocalServiceBaseImpl {
 		SXPElement sxpElement = createSXPElement(
 			counterLocalService.increment(SXPElement.class.getName()));
 
+		if (readOnly) {
+			sxpElement.setExternalReferenceCode(
+				StringUtil.replace(
+					StringUtil.toUpperCase(titleMap.get(LocaleUtil.US)),
+					CharPool.SPACE, CharPool.UNDERLINE));
+		}
+
 		User user = _userLocalService.getUser(userId);
 
 		sxpElement.setCompanyId(user.getCompanyId());
@@ -74,14 +81,6 @@ public class SXPElementLocalServiceImpl extends SXPElementLocalServiceBaseImpl {
 
 		sxpElement.setDescriptionMap(descriptionMap);
 		sxpElement.setElementDefinitionJSON(elementDefinitionJSON);
-
-		if (readOnly) {
-			sxpElement.setExternalReferenceCode(
-				StringUtil.replace(
-					StringUtil.toUpperCase(titleMap.get(LocaleUtil.US)),
-					CharPool.SPACE, CharPool.UNDERLINE));
-		}
-
 		sxpElement.setHidden(false);
 		sxpElement.setReadOnly(readOnly);
 		sxpElement.setSchemaVersion(schemaVersion);
