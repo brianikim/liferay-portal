@@ -1573,6 +1573,8 @@ definition {
 
 		Search.openSearchPage();
 
+		SearchPortlets.searchWidget(searchTerm = "test");
+
 		Blueprints.applyBlueprintViaOptionsWidget(blueprintTitle = "Test Blueprint");
 
 		Blueprints.configureFederatedSearchKeyForOptionsWidget(federatedSearchKey = "key");
