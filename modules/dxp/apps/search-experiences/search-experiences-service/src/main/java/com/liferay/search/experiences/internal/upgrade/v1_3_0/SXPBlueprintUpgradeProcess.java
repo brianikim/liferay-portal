@@ -208,38 +208,38 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 		alterTableDropColumn("SXPElement", "key_");
 
 		try (PreparedStatement preparedStatement1 = connection.prepareStatement(
-				"select sxpElementId, description, elementDefinitionJSON, " +
-					"externalReferenceCode, readOnly, title, version from " +
+				"select externalReferenceCode, sxpElementId, description, " +
+					"elementDefinitionJSON, readOnly, title, version from " +
 						"SXPElement");
 			PreparedStatement preparedStatement2 =
 				AutoBatchPreparedStatementUtil.concurrentAutoBatch(
 					connection,
 					StringBundler.concat(
-						"update SXPElement set description = ?, ",
-						"elementDefinitionJSON = ?, externalReferenceCode = ?,",
+						"update SXPElement set externalReferenceCode = ?, ",
+						"description = ?, elementDefinitionJSON = ?, ",
 						"title = ?, version = ? where sxpElementId = ?"))) {
 
 			try (ResultSet resultSet = preparedStatement1.executeQuery()) {
 				while (resultSet.next()) {
+					String externalReferenceCode = resultSet.getString(
+						"externalReferenceCode");
 					String description = resultSet.getString("description");
 					String elementDefinitionJSON = resultSet.getString(
 						"elementDefinitionJSON");
-					String externalReferenceCode = resultSet.getString(
-						"externalReferenceCode");
 					String title = resultSet.getString("title");
 
 					if (resultSet.getBoolean("readOnly")) {
+						externalReferenceCode = _getExternalReferenceCode(
+							title);
 						description = _renameDescription(description);
 						elementDefinitionJSON = _renameElementDefinitionJSON(
 							elementDefinitionJSON);
-						externalReferenceCode = _getExternalReferenceCode(
-							title);
 						title = _renameTitle(title);
 					}
 
-					preparedStatement2.setString(1, description);
-					preparedStatement2.setString(2, elementDefinitionJSON);
-					preparedStatement2.setString(3, externalReferenceCode);
+					preparedStatement2.setString(1, externalReferenceCode);
+					preparedStatement2.setString(2, description);
+					preparedStatement2.setString(3, elementDefinitionJSON);
 					preparedStatement2.setString(4, title);
 
 					String version = resultSet.getString("version");
