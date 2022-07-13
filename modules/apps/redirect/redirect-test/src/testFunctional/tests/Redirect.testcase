@@ -623,6 +623,30 @@ definition {
 		AssertLocation(value1 = "${portalURL}/web/test-site-name/test-page2");
 	}
 
+	@description = "This ensures that the 404 tab is not shown and no new 404 tracking is performed when 404 tracking is disabled."
+	@priority = "5"
+	test CannotView404ByDefault {
+		property test.name.skip.portal.instance = "Redirect#CannotView404ByDefault";
+
+		var portalURL = PropsUtil.get("portal.url");
+
+		Navigator.openSpecificURL(url = "${portalURL}/web/test-site-name/my-url-that-does-not-exist");
+
+		Redirect.openRedirectAdmin(siteURLKey = "test-site-name");
+
+		Redirect.view404URLsTab(disabled404Tracking = "true");
+
+		Redirect.openToConfigInSystemSettings();
+
+		FormFields.enableCheckbox(fieldName = "enabled");
+
+		PortletEntry.save();
+
+		Redirect.open404URLsAdmin(siteURLKey = "test-site-name");
+
+		Redirect.view404URLsDefault();
+	}
+
 	@description = "This ensures that the destination URL passes validation before it can be used."
 	@priority = "5"
 	test CheckDestinationURL {
@@ -908,31 +932,6 @@ definition {
 			ignoreURL = "${portalURL}/web/test-site-name/test-destination-page1",
 			requestNumber = "1");
 	}
-
-		@description = "This ensures that the 404 tab is not shown and no new 404 tracking is performed when 404 tracking is disabled."
-    	@priority = "5"
-    	test CannotView404ByDefault {
-    		property test.name.skip.portal.instance = "Redirect#CannotView404ByDefault";
-
-    		var portalURL = PropsUtil.get("portal.url");
-
-    		Navigator.openSpecificURL(url = "${portalURL}/web/test-site-name/my-url-that-does-not-exist");
-
-    		Redirect.openRedirectAdmin(siteURLKey = "test-site-name");
-
-    		Redirect.view404URLsTab(disabled404Tracking = "true");
-
-    		Redirect.openToConfigInSystemSettings();
-
-    		FormFields.enableCheckbox(fieldName = "enabled");
-
-    		PortletEntry.save();
-
-    		Redirect.open404URLsAdmin(siteURLKey = "test-site-name");
-
-    		Redirect.view404URLsDefault();
-    	}
-
 
 	@description = "This will be ignored until LPS-121379 is fixed. This ensures that the 404 URLs can be ordered by requests."
 	@ignore = "true"
