@@ -234,15 +234,15 @@ public class DDMFormInstanceRecordXLSWriterTest extends PowerMockito {
 			ByteArrayOutputStream.class);
 
 		when(
-			ddmFormInstanceRecordXLSWriter.createByteArrayOutputStream()
-		).thenReturn(
-			byteArrayOutputStream
-		);
-
-		when(
 			byteArrayOutputStream.toByteArray()
 		).thenReturn(
 			new byte[] {1, 2, 3}
+		);
+
+		when(
+			ddmFormInstanceRecordXLSWriter.createByteArrayOutputStream()
+		).thenReturn(
+			byteArrayOutputStream
 		);
 
 		Workbook workbook = mock(Workbook.class);
@@ -258,6 +258,16 @@ public class DDMFormInstanceRecordXLSWriterTest extends PowerMockito {
 			workbook
 		).write(
 			byteArrayOutputStream
+		);
+
+		CellStyle cellStyle = Mockito.mock(CellStyle.class);
+
+		Mockito.when(
+			ddmFormInstanceRecordXLSWriter.createCellStyle(
+				Mockito.any(Workbook.class), Mockito.anyBoolean(),
+				Mockito.anyString(), Mockito.anyShort())
+		).thenReturn(
+			cellStyle
 		);
 
 		when(
