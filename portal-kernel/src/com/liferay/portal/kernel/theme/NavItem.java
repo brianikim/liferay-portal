@@ -53,8 +53,7 @@ import javax.servlet.http.HttpServletRequest;
 public class NavItem implements Serializable {
 
 	public static List<NavItem> fromLayouts(
-			HttpServletRequest httpServletRequest, ThemeDisplay themeDisplay,
-			Map<String, Object> contextObjects)
+			HttpServletRequest httpServletRequest, ThemeDisplay themeDisplay)
 		throws PortalException {
 
 		List<Layout> parentLayouts = themeDisplay.getLayouts();
@@ -96,12 +95,38 @@ public class NavItem implements Serializable {
 			navItems.add(
 				new NavItem(
 					httpServletRequest, themeDisplay, parentLayout,
-					childLayouts, contextObjects));
+					childLayouts));
 		}
 
 		return navItems;
 	}
 
+	/**
+	 * @deprecated As of Athanasius (7.3.x), replaced by {@link
+	 *             #fromLayouts(HttpServletRequest, ThemeDisplay)}
+	 */
+	@Deprecated
+	public static List<NavItem> fromLayouts(
+			HttpServletRequest httpServletRequest, ThemeDisplay themeDisplay,
+			Map<String, Object> contextObjects)
+		throws PortalException {
+
+		return fromLayouts(httpServletRequest, themeDisplay);
+	}
+
+	public NavItem(HttpServletRequest httpServletRequest, Layout layout) {
+		this(
+			httpServletRequest,
+			(ThemeDisplay)httpServletRequest.getAttribute(
+				WebKeys.THEME_DISPLAY),
+			layout);
+	}
+
+	/**
+	 * @deprecated As of Athanasius (7.3.x), replaced by {@link
+	 *             #NavItem(HttpServletRequest, Layout)}
+	 */
+	@Deprecated
 	public NavItem(
 		HttpServletRequest httpServletRequest, Layout layout,
 		Map<String, Object> contextObjects) {
@@ -110,9 +135,23 @@ public class NavItem implements Serializable {
 			httpServletRequest,
 			(ThemeDisplay)httpServletRequest.getAttribute(
 				WebKeys.THEME_DISPLAY),
-			layout, contextObjects);
+			layout, (Map<String, Object>)null);
 	}
 
+	public NavItem(
+		HttpServletRequest httpServletRequest, ThemeDisplay themeDisplay,
+		Layout layout) {
+
+		_httpServletRequest = httpServletRequest;
+		_themeDisplay = themeDisplay;
+		_layout = layout;
+	}
+
+	/**
+	 * @deprecated As of Athanasius (7.3.x), replaced by {@link
+	 *             #NavItem(HttpServletRequest, ThemeDisplay, Layout)}
+	 */
+	@Deprecated
 	public NavItem(
 		HttpServletRequest httpServletRequest, ThemeDisplay themeDisplay,
 		Layout layout, Map<String, Object> contextObjects) {
@@ -120,7 +159,6 @@ public class NavItem implements Serializable {
 		_httpServletRequest = httpServletRequest;
 		_themeDisplay = themeDisplay;
 		_layout = layout;
-		_contextObjects = contextObjects;
 	}
 
 	@Override
@@ -173,7 +211,7 @@ public class NavItem implements Serializable {
 				_themeDisplay.getPermissionChecker());
 
 			_children = _fromLayouts(
-				_httpServletRequest, _themeDisplay, layouts, _contextObjects);
+				_httpServletRequest, _themeDisplay, layouts);
 		}
 
 		return _children;
@@ -407,21 +445,19 @@ public class NavItem implements Serializable {
 
 	private NavItem(
 		HttpServletRequest httpServletRequest, ThemeDisplay themeDisplay,
-		Layout layout, List<Layout> childLayouts,
-		Map<String, Object> contextObjects) {
+		Layout layout, List<Layout> childLayouts) {
 
 		_httpServletRequest = httpServletRequest;
 		_themeDisplay = themeDisplay;
 		_layout = layout;
-		_contextObjects = contextObjects;
 
 		_children = _fromLayouts(
-			httpServletRequest, themeDisplay, childLayouts, contextObjects);
+			httpServletRequest, themeDisplay, childLayouts);
 	}
 
 	private List<NavItem> _fromLayouts(
 		HttpServletRequest httpServletRequest, ThemeDisplay themeDisplay,
-		List<Layout> layouts, Map<String, Object> contextObjects) {
+		List<Layout> layouts) {
 
 		if (ListUtil.isEmpty(layouts)) {
 			return Collections.emptyList();
@@ -430,9 +466,7 @@ public class NavItem implements Serializable {
 		List<NavItem> navItems = new ArrayList<>(layouts.size());
 
 		for (Layout layout : layouts) {
-			navItems.add(
-				new NavItem(
-					httpServletRequest, themeDisplay, layout, contextObjects));
+			navItems.add(new NavItem(httpServletRequest, themeDisplay, layout));
 		}
 
 		return navItems;
@@ -440,7 +474,6 @@ public class NavItem implements Serializable {
 
 	private List<NavItem> _browsableChildren;
 	private List<NavItem> _children;
-	private final Map<String, Object> _contextObjects;
 	private final HttpServletRequest _httpServletRequest;
 	private final Layout _layout;
 	private final ThemeDisplay _themeDisplay;
