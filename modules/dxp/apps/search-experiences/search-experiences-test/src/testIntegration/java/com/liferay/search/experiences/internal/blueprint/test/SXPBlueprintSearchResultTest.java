@@ -157,15 +157,14 @@ public class SXPBlueprintSearchResultTest {
 
 		_user = TestPropsValues.getUser();
 
+		_journalArticleBuilder = new JournalArticleBuilder(
+			_group, _journalArticles, _serviceContext, _user);
 		_sxpBlueprint = _sxpBlueprintLocalService.addSXPBlueprint(
 			_user.getUserId(), _configurationJSONObject.toString(),
 			Collections.singletonMap(LocaleUtil.US, ""), null, "",
 			Collections.singletonMap(
 				LocaleUtil.US, RandomTestUtil.randomString()),
 			_serviceContext);
-
-		_journalArticleBuilder = new JournalArticleBuilder(
-			_group, _journalArticles, _serviceContext, _user);
 	}
 
 	@Test
