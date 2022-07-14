@@ -287,7 +287,6 @@ const Sharing = ({
 							<ClayMultiSelect
 								filter={multiSelectFilter}
 								inputName={`${portletNamespace}userEmailAddress`}
-								inputValue={multiSelectValue}
 								items={selectedItems}
 								menuRenderer={SharingAutocomplete}
 								onChange={handleChange}
@@ -311,6 +310,7 @@ const Sharing = ({
 										  })
 										: []
 								}
+								value={multiSelectValue}
 							/>
 							<ClayForm.FeedbackGroup>
 								<ClayForm.Text>

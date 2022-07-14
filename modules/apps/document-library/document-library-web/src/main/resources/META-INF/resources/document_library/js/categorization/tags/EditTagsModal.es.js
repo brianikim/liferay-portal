@@ -218,10 +218,8 @@ const EditTagsModal = ({
 					{multiple && (
 						<ClayRadioGroup
 							name="add-replace"
-							onSelectedValueChange={
-								handleMultipleSelectedOptionChange
-							}
-							selectedValue={selectedRadioGroupValue}
+							onChange={handleMultipleSelectedOptionChange}
+							value={selectedRadioGroupValue}
 						>
 							<ClayRadio
 								label={Liferay.Language.get('edit')}
