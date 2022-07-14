@@ -290,7 +290,7 @@ public class WikiPageAssetRenderer
 			LiferayPortletRequest liferayPortletRequest,
 			LiferayPortletResponse liferayPortletResponse,
 			String noSuchEntryRedirect)
-		throws Exception {
+		throws PortalException {
 
 		ThemeDisplay themeDisplay =
 			(ThemeDisplay)liferayPortletRequest.getAttribute(
@@ -302,7 +302,7 @@ public class WikiPageAssetRenderer
 	@Override
 	public String getURLViewInContext(
 			ThemeDisplay themeDisplay, String noSuchEntryRedirect)
-		throws Exception {
+		throws PortalException {
 
 		if (_assetDisplayPageFriendlyURLProvider != null) {
 			String friendlyURL =
