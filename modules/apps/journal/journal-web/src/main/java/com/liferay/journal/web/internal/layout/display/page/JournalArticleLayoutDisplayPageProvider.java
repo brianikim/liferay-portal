@@ -17,6 +17,7 @@ package com.liferay.journal.web.internal.layout.display.page;
 import com.liferay.info.item.InfoItemReference;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.service.JournalArticleLocalService;
+import com.liferay.journal.web.internal.asset.model.JournalArticleAssetRendererFactory;
 import com.liferay.layout.display.page.LayoutDisplayPageObjectProvider;
 import com.liferay.layout.display.page.LayoutDisplayPageProvider;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -52,7 +53,8 @@ public class JournalArticleLayoutDisplayPageProvider
 		}
 
 		try {
-			return new JournalArticleLayoutDisplayPageObjectProvider(article);
+			return new JournalArticleLayoutDisplayPageObjectProvider(
+				article, journalArticleAssetRendererFactory);
 		}
 		catch (PortalException portalException) {
 			throw new RuntimeException(portalException);
@@ -72,7 +74,8 @@ public class JournalArticleLayoutDisplayPageProvider
 		}
 
 		try {
-			return new JournalArticleLayoutDisplayPageObjectProvider(article);
+			return new JournalArticleLayoutDisplayPageObjectProvider(
+				article, journalArticleAssetRendererFactory);
 		}
 		catch (PortalException portalException) {
 			throw new RuntimeException(portalException);
@@ -83,6 +86,10 @@ public class JournalArticleLayoutDisplayPageProvider
 	public String getURLSeparator() {
 		return "/w/";
 	}
+
+	@Reference
+	protected JournalArticleAssetRendererFactory
+		journalArticleAssetRendererFactory;
 
 	@Reference
 	protected JournalArticleLocalService journalArticleLocalService;

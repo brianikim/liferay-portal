@@ -14,14 +14,13 @@
 
 package com.liferay.journal.web.internal.info.display.contributor;
 
-import com.liferay.asset.kernel.AssetRendererFactoryRegistryUtil;
 import com.liferay.asset.kernel.model.AssetEntry;
 import com.liferay.asset.kernel.model.AssetRenderer;
-import com.liferay.asset.kernel.model.AssetRendererFactory;
 import com.liferay.asset.kernel.service.AssetCategoryLocalServiceUtil;
 import com.liferay.asset.kernel.service.AssetTagLocalServiceUtil;
 import com.liferay.info.display.contributor.InfoDisplayObjectProvider;
 import com.liferay.journal.model.JournalArticle;
+import com.liferay.journal.web.internal.asset.model.JournalArticleAssetRendererFactory;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -34,12 +33,18 @@ import java.util.Locale;
 public class JournalArticleInfoDisplayObjectProvider
 	implements InfoDisplayObjectProvider<JournalArticle> {
 
-	public JournalArticleInfoDisplayObjectProvider(JournalArticle article)
+	public JournalArticleInfoDisplayObjectProvider(
+			JournalArticle article,
+			JournalArticleAssetRendererFactory
+				journalArticleAssetRendererFactory)
 		throws PortalException {
 
 		_article = article;
 
 		_assetEntry = _getAssetEntry(article);
+
+		_journalArticleAssetRendererFactory =
+			journalArticleAssetRendererFactory;
 	}
 
 	@Override
@@ -103,16 +108,14 @@ public class JournalArticleInfoDisplayObjectProvider
 	private AssetEntry _getAssetEntry(JournalArticle journalArticle)
 		throws PortalException {
 
-		AssetRendererFactory<?> assetRendererFactory =
-			AssetRendererFactoryRegistryUtil.getAssetRendererFactoryByClassName(
-				JournalArticle.class.getName());
-
-		return assetRendererFactory.getAssetEntry(
+		return _journalArticleAssetRendererFactory.getAssetEntry(
 			JournalArticle.class.getName(),
 			journalArticle.getResourcePrimKey());
 	}
 
 	private final JournalArticle _article;
 	private final AssetEntry _assetEntry;
+	private final JournalArticleAssetRendererFactory
+		_journalArticleAssetRendererFactory;
 
 }

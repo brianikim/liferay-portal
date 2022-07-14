@@ -64,7 +64,9 @@ import org.osgi.service.component.annotations.Reference;
 @Component(
 	immediate = true,
 	property = "javax.portlet.name=" + JournalPortletKeys.JOURNAL,
-	service = AssetRendererFactory.class
+	service = {
+		AssetRendererFactory.class, JournalArticleAssetRendererFactory.class
+	}
 )
 public class JournalArticleAssetRendererFactory
 	extends BaseAssetRendererFactory<JournalArticle> {
