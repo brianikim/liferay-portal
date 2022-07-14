@@ -113,6 +113,13 @@ public class LayoutAssetRenderer extends BaseJSPAssetRenderer<Layout> {
 			(ThemeDisplay)liferayPortletRequest.getAttribute(
 				WebKeys.THEME_DISPLAY);
 
+		return getURLViewInContext(themeDisplay, noSuchEntryRedirect);
+	}
+
+	@Override
+	public String getURLViewInContext(
+		ThemeDisplay themeDisplay, String noSuchEntryRedirect) {
+
 		try {
 			if (_layout.getStatus() != WorkflowConstants.STATUS_PENDING) {
 				return PortalUtil.getLayoutFriendlyURL(_layout, themeDisplay);

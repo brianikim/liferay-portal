@@ -194,6 +194,13 @@ public class CommentAssetRenderer
 	}
 
 	@Override
+	public String getURLViewInContext(
+		ThemeDisplay themeDisplay, String noSuchEntryRedirect) {
+
+		return null;
+	}
+
+	@Override
 	public long getUserId() {
 		return _workflowableComment.getUserId();
 	}

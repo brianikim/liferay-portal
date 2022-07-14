@@ -304,11 +304,19 @@ public class DLFileEntryAssetRenderer
 			String noSuchEntryRedirect)
 		throws PortalException {
 
-		if (_assetDisplayPageFriendlyURLProvider != null) {
-			ThemeDisplay themeDisplay =
-				(ThemeDisplay)liferayPortletRequest.getAttribute(
-					WebKeys.THEME_DISPLAY);
+		ThemeDisplay themeDisplay =
+			(ThemeDisplay)liferayPortletRequest.getAttribute(
+				WebKeys.THEME_DISPLAY);
 
+		return getURLViewInContext(themeDisplay, noSuchEntryRedirect);
+	}
+
+	@Override
+	public String getURLViewInContext(
+			ThemeDisplay themeDisplay, String noSuchEntryRedirect)
+		throws PortalException {
+
+		if (_assetDisplayPageFriendlyURLProvider != null) {
 			String friendlyURL =
 				_assetDisplayPageFriendlyURLProvider.getFriendlyURL(
 					FileEntry.class.getName(), getClassPK(), themeDisplay);
@@ -318,10 +326,6 @@ public class DLFileEntryAssetRenderer
 			}
 		}
 
-		ThemeDisplay themeDisplay =
-			(ThemeDisplay)liferayPortletRequest.getAttribute(
-				WebKeys.THEME_DISPLAY);
-
 		if (!_hasViewInContextGroupLayout(
 				themeDisplay, _fileEntry.getGroupId())) {
 
@@ -329,7 +333,7 @@ public class DLFileEntryAssetRenderer
 		}
 
 		return getURLViewInContext(
-			liferayPortletRequest, noSuchEntryRedirect,
+			themeDisplay, noSuchEntryRedirect,
 			"/document_library/find_file_entry", "fileEntryId",
 			_fileEntry.getFileEntryId());
 	}
