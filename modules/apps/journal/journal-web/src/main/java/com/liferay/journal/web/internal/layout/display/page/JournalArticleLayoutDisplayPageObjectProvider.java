@@ -40,11 +40,10 @@ public class JournalArticleLayoutDisplayPageObjectProvider
 		throws PortalException {
 
 		_article = article;
-
-		_assetEntry = _getAssetEntry(article);
-
 		_journalArticleAssetRendererFactory =
 			journalArticleAssetRendererFactory;
+
+		_assetEntry = _getAssetEntry(article);
 	}
 
 	@Override
