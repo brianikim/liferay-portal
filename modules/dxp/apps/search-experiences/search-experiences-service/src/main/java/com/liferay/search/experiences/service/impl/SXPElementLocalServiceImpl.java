@@ -70,7 +70,7 @@ public class SXPElementLocalServiceImpl extends SXPElementLocalServiceBaseImpl {
 		User user = _userLocalService.getUser(userId);
 
 		_validateExternalReferenceCode(
-			user.getCompanyId(), sxpElement.getSXPElementId(),
+			sxpElement.getSXPElementId(), user.getCompanyId(),
 			sxpElement.getExternalReferenceCode());
 
 		sxpElement.setCompanyId(user.getCompanyId());
@@ -199,7 +199,7 @@ public class SXPElementLocalServiceImpl extends SXPElementLocalServiceBaseImpl {
 	}
 
 	private void _validateExternalReferenceCode(
-			long companyId, long sxpElementId, String externalReferenceCode)
+			long sxpElementId, long companyId, String externalReferenceCode)
 		throws PortalException {
 
 		SXPElement sxpElement = fetchSXPElementByExternalReferenceCode(
