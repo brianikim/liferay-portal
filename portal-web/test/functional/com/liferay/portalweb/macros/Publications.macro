@@ -186,6 +186,10 @@ definition {
 			configurationScope = "Virtual Instance Scope");
 
 		FormFields.enableCheckbox(fieldName = "Sandbox Enabled");
+
+		Click(locator1 = "Button#SAVE");
+
+		Alert.viewSuccessMessage();
 	}
 
 	macro generateSandboxedPublicationName {
@@ -584,6 +588,27 @@ definition {
 				locator1 = "Publications#COLUMN_VALUE_IN_PUBLICATION",
 				value1 = "${columnValueInPublication}");
 		}
+	}
+
+	macro viewSandboxedPublication {
+		var key_publicationName = "${sandboxedPublicationName}";
+
+		if ("${sandboxedUser}" == "true") {
+			AssertTextEquals.assertPartialText(
+				locator1 = "Publications#PUBLICATIONS_INDICATOR_TITLE",
+				value1 = "${sandboxedPublicationName}");
+		}
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Publications",
+			panel = "Applications",
+			portlet = "Publications");
+
+		LexiconEntry.changeDisplayStyle(displayStyle = "list");
+
+		AssertTextEquals.assertPartialText(
+			locator1 = "Publications#PUBLICATION_NAME_IN_ONGOING",
+			value1 = "${sandboxedPublicationName}");
 	}
 
 	macro workOnProduction {
