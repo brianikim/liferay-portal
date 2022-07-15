@@ -188,6 +188,15 @@ definition {
 		FormFields.enableCheckbox(fieldName = "Sandbox Enabled");
 	}
 
+	macro generateSandboxedPublicationName {
+		var sandboxTime = DateUtil.getFormattedCurrentDate("h:mm", "UTC");
+		var sandboxDate = DateUtil.getFormattedCurrentDate("M/d/yy", "UTC");
+
+		var sandboxedPublicationName = "${userScreenName} - ${sandboxDate} ${sandboxTime}";
+
+		return "${sandboxedPublicationName}";
+	}
+
 	macro gotoPublish {
 		if ("${gotoManagePublications}" == "true") {
 			ApplicationsMenu.gotoPortlet(
