@@ -19,7 +19,10 @@ import com.liferay.portal.kernel.search.filter.BooleanFilter;
 import com.liferay.portal.kernel.search.filter.Filter;
 import com.liferay.portal.kernel.search.filter.FilterVisitor;
 
+import java.util.List;
+
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
 
 import org.osgi.service.component.annotations.Component;
@@ -36,6 +39,8 @@ public class BooleanFilterTranslatorImpl implements BooleanFilterTranslator {
 
 		BooleanQuery.Builder builder = new BooleanQuery.Builder();
 
+		boolean matchAllAdded = false;
+
 		for (BooleanClause<Filter> booleanClause :
 				booleanFilter.getMustBooleanClauses()) {
 
@@ -46,6 +51,14 @@ public class BooleanFilterTranslatorImpl implements BooleanFilterTranslator {
 
 		for (BooleanClause<Filter> booleanClause :
 				booleanFilter.getMustNotBooleanClauses()) {
+
+			if (!matchAllAdded && _onlyMustNotClauses(booleanFilter)) {
+				builder.add(
+					new MatchAllDocsQuery(),
+					org.apache.lucene.search.BooleanClause.Occur.SHOULD);
+
+				matchAllAdded = true;
+			}
 
 			builder.add(
 				translate(booleanClause, filterVisitor),
@@ -70,6 +83,29 @@ public class BooleanFilterTranslatorImpl implements BooleanFilterTranslator {
 		Filter filter = booleanClause.getClause();
 
 		return filter.accept(filterVisitor);
+	}
+
+	private boolean _onlyMustNotClauses(BooleanFilter booleanFilter) {
+		List<BooleanClause<Filter>> clauses =
+			booleanFilter.getMustBooleanClauses();
+
+		if (clauses.size() > 0) {
+			return false;
+		}
+
+		clauses = booleanFilter.getShouldBooleanClauses();
+
+		if (clauses.size() > 0) {
+			return false;
+		}
+
+		clauses = booleanFilter.getMustNotBooleanClauses();
+
+		if (clauses.size() > 0) {
+			return true;
+		}
+
+		return false;
 	}
 
 }
