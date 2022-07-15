@@ -1,0 +1,130 @@
+@component-name = "portal-publications"
+definition {
+
+	property custom.properties = "jsonws.web.service.paths.excludes=";
+	property database.types = "db2,hypersonic,mariadb,mysql,oracle,postgresql,sqlserver";
+	property portal.release = "true";
+	property portal.upstream = "true";
+	property testray.main.component.name = "Publications";
+
+	setUp {
+		TestCase.setUpPortalInstance();
+
+		User.firstLoginPG();
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Publications",
+			panel = "Applications",
+			portlet = "Settings");
+
+		Publications.enablePublications();
+	}
+
+	tearDown {
+		var testPortalInstance = PropsUtil.get("test.portal.instance");
+
+		if ("${testPortalInstance}" == "true") {
+			PortalInstances.tearDownCP();
+		}
+		else {
+			ApplicationsMenu.gotoPortlet(
+				category = "Publications",
+				panel = "Applications",
+				portlet = "Settings");
+
+			Publications.disablePublications();
+		}
+	}
+
+	@description = "All users with access to publications (view and access in control panel) will be sandboxed."
+	@priority = "4"
+	test UserWithAccessToPublicationsPermissionsCanbeSandboxed {
+		JSONUser.addUser(
+			userEmailAddress = "userea@liferay.com",
+			userFirstName = "userfn",
+			userLastName = "userln",
+			userScreenName = "usersn");
+
+		JSONUser.setFirstPassword(
+			agreeToTermsAndAnswerReminderQuery = "true",
+			requireReset = "false",
+			userEmailAddress = "userea@liferay.com");
+
+		JSONRole.addRegularRole(
+			roleKey = "Regrole Name",
+			roleTitle = "Regrole Name");
+
+		for (var resourceActionIndex : list "ACCESS_IN_CONTROL_PANEL,VIEW") {
+			Permissions.definePermissionViaJSONAPI(
+				resourceAction = "${resourceActionIndex}",
+				resourceName = "com_liferay_change_tracking_web_portlet_PublicationsPortlet",
+				roleTitle = "Regrole Name");
+		}
+
+		Permissions.definePermissionViaJSONAPI(
+			resourceAction = "VIEW_CONTROL_PANEL",
+			resourceName = "90",
+			roleTitle = "Regrole Name");
+
+		for (var resourceActionIndex : list "ACCESS_IN_CONTROL_PANEL,VIEW") {
+			Permissions.definePermissionViaJSONAPI(
+				resourceAction = "${resourceActionIndex}",
+				resourceName = "com_liferay_journal_web_portlet_JournalPortlet",
+				roleTitle = "Regrole Name");
+		}
+
+		for (var resourceActionIndex : list "ADD_ARTICLE,VIEW") {
+			Permissions.definePermissionViaJSONAPI(
+				resourceAction = "${resourceActionIndex}",
+				resourceName = "com.liferay.journal",
+				roleTitle = "Regrole Name");
+		}
+
+		JSONRole.assignRoleToUser(
+			roleTitle = "Regrole Name",
+			userEmailAddress = "userea@liferay.com");
+
+		Publications.enableSandboxOnly();
+
+		Publications.createNewPublication(publicationName = "Publication Name");
+
+		SignOut.signOut();
+
+		User.firstLoginUI(
+			password = "test",
+			userEmailAddress = "userea@liferay.com");
+
+		var sandboxedPublicationName1 = Publications.generateSandboxedPublicationName(userScreenName = "usersn");
+
+		Publications.viewSandboxedPublication(
+			sandboxedPublicationName = "${sandboxedPublicationName1}",
+			sandboxedUser = "true");
+
+		Publications.deletePublication(publicationName = "${sandboxedPublicationName1}");
+
+		var sandboxedPublicationName2 = Publications.generateSandboxedPublicationName(userScreenName = "usersn");
+
+		Publications.viewSandboxedPublication(
+			sandboxedPublicationName = "${sandboxedPublicationName2}",
+			sandboxedUser = "true");
+
+		JSONWebcontent.addWebContent(
+			content = "WC WebContent Content",
+			groupName = "Guest",
+			title = "WC WebContent Title",
+			userEmailAddress = "userea@liferay.com");
+
+		Publications.gotoPublish(
+			gotoManagePublications = "true",
+			publicationName = "${sandboxedPublicationName2}");
+
+		Publications.publishPublication(publicationName = "${sandboxedPublicationName2}");
+
+		var sandboxedPublicationName3 = Publications.generateSandboxedPublicationName(userScreenName = "usersn");
+
+		Publications.viewSandboxedPublication(
+			sandboxedPublicationName = "${sandboxedPublicationName3}",
+			sandboxedUser = "true");
+	}
+
+}
