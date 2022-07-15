@@ -209,7 +209,7 @@ for (String childrenItemId : childrenItemIds) {
 							DefaultFragmentRendererContext defaultFragmentRendererContext = renderLayoutStructureDisplayContext.getDefaultFragmentRendererContext(fragmentEntryLink, fragmentStyledLayoutStructureItem.getItemId());
 							%>
 
-							<div class="<%= renderLayoutStructureDisplayContext.getCssClass(fragmentStyledLayoutStructureItem) %>" style="<%= renderLayoutStructureDisplayContext.getStyle(fragmentStyledLayoutStructureItem) %>">
+							<div class="<%= renderLayoutStructureDisplayContext.getCssClass(fragmentEntryLink, fragmentStyledLayoutStructureItem) %>" style="<%= renderLayoutStructureDisplayContext.getStyle(fragmentEntryLink, fragmentStyledLayoutStructureItem) %>">
 								<%= fragmentRendererController.render(defaultFragmentRendererContext, request, response) %>
 							</div>
 						</c:if>

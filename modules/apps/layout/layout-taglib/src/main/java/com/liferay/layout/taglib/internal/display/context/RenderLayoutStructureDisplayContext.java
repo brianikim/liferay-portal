@@ -65,10 +65,15 @@ import com.liferay.portal.kernel.model.ClassedModel;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutConstants;
 import com.liferay.portal.kernel.model.LayoutSet;
+import com.liferay.portal.kernel.model.LayoutTypeAccessPolicy;
+import com.liferay.portal.kernel.model.Portlet;
+import com.liferay.portal.kernel.model.impl.DefaultLayoutTypeAccessPolicyImpl;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.service.LayoutSetLocalServiceUtil;
+import com.liferay.portal.kernel.service.PortletLocalServiceUtil;
 import com.liferay.portal.kernel.servlet.BrowserSnifferUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
@@ -339,6 +344,28 @@ public class RenderLayoutStructureDisplayContext {
 	}
 
 	public String getCssClass(
+			FragmentEntryLink fragmentEntryLink,
+			StyledLayoutStructureItem styledLayoutStructureItem)
+		throws Exception {
+
+		String editableValues = fragmentEntryLink.getEditableValues();
+
+		JSONObject jsonObject = JSONFactoryUtil.createJSONObject(
+			editableValues);
+
+		String portletId = jsonObject.getString("portletId");
+
+		if (Validator.isNotNull(portletId) &&
+			!_checkAccessAllowedToPortlet(portletId) &&
+			!_themeDisplay.isSignedIn()) {
+
+			return StringPool.BLANK;
+		}
+
+		return getCssClass(styledLayoutStructureItem);
+	}
+
+	public String getCssClass(
 			StyledLayoutStructureItem styledLayoutStructureItem)
 		throws Exception {
 
@@ -556,6 +583,28 @@ public class RenderLayoutStructureDisplayContext {
 		return layoutStructureItem.getChildrenItemIds();
 	}
 
+	public String getStyle(
+			FragmentEntryLink fragmentEntryLink,
+			StyledLayoutStructureItem styledLayoutStructureItem)
+		throws Exception {
+
+		String editableValues = fragmentEntryLink.getEditableValues();
+
+		JSONObject jsonObject = JSONFactoryUtil.createJSONObject(
+			editableValues);
+
+		String portletId = jsonObject.getString("portletId");
+
+		if (Validator.isNotNull(portletId) &&
+			!_checkAccessAllowedToPortlet(portletId) &&
+			!_themeDisplay.isSignedIn()) {
+
+			return StringPool.BLANK;
+		}
+
+		return getStyle(styledLayoutStructureItem);
+	}
+
 	public String getStyle(StyledLayoutStructureItem styledLayoutStructureItem)
 		throws Exception {
 
@@ -728,6 +777,34 @@ public class RenderLayoutStructureDisplayContext {
 			FrontendTokenMapping.TYPE_CSS_VARIABLE);
 
 		return "var(--" + cssVariable + ")";
+	}
+
+	private boolean _checkAccessAllowedToPortlet(String portletId) {
+		try {
+			Layout layout = _themeDisplay.getLayout();
+
+			Portlet portlet = PortletLocalServiceUtil.getPortletById(
+				_themeDisplay.getCompanyId(), portletId);
+
+			LayoutTypeAccessPolicy defaultLayoutTypeAccessPolicy =
+				DefaultLayoutTypeAccessPolicyImpl.create();
+
+			defaultLayoutTypeAccessPolicy.checkAccessAllowedToPortlet(
+				_httpServletRequest, layout, portlet);
+
+			String checkAccessAllowedToPortletCacheKey = StringBundler.concat(
+				"LIFERAY_SHARED_",
+				DefaultLayoutTypeAccessPolicyImpl.class.getName(), "#",
+				layout.getPlid(), "#", portlet.getPortletId());
+
+			return GetterUtil.getBoolean(
+				_httpServletRequest.getAttribute(
+					checkAccessAllowedToPortletCacheKey),
+				true);
+		}
+		catch (Exception exception) {
+			return false;
+		}
 	}
 
 	private String _getBackgroundImage(JSONObject rowConfigJSONObject)
