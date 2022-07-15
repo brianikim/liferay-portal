@@ -23,10 +23,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 
 /**
- * Base class that returns objects that follow the Problem+JSON specification
- *
  * @author Javier Gamarra
- * @review
  */
 public abstract class BaseExceptionMapper<T extends Throwable>
 	implements ExceptionMapper<T> {
