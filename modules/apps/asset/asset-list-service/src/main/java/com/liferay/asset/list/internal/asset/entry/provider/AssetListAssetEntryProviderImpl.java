@@ -58,6 +58,7 @@ import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.search.hits.SearchHits;
 import com.liferay.segments.constants.SegmentsEntryConstants;
 
 import java.io.Serializable;
@@ -182,8 +183,17 @@ public class AssetListAssetEntryProviderImpl
 					true);
 		}
 
-		return _assetEntryLocalService.getEntriesCount(
-			getAssetEntryQuery(assetListEntry, segmentsEntryIds, userId));
+		LongStream longStream = Arrays.stream(
+			_getCombinedSegmentsEntryIds(assetListEntry, segmentsEntryIds));
+
+		return _searchCount(
+			assetListEntry.getCompanyId(),
+			longStream.mapToObj(
+				segmentsEntryId -> getAssetEntryQuery(
+					assetListEntry, segmentsEntryId, userId)
+			).collect(
+				Collectors.toList()
+			));
 	}
 
 	@Override
@@ -612,15 +622,22 @@ public class AssetListAssetEntryProviderImpl
 			assetEntryQuery.setEnd(end);
 			assetEntryQuery.setStart(start);
 
-			return _search(assetListEntry.getCompanyId(), assetEntryQuery);
+			return _search(
+				assetListEntry.getCompanyId(),
+				Collections.singletonList(assetEntryQuery));
 		}
 
-		AssetEntryQuery assetEntryQuery = getAssetEntryQuery(
-			assetListEntry,
-			_getCombinedSegmentsEntryIds(assetListEntry, segmentsEntryIds),
-			userId, end, start);
+		LongStream longStream = Arrays.stream(
+			_getCombinedSegmentsEntryIds(assetListEntry, segmentsEntryIds));
 
-		return _search(assetListEntry.getCompanyId(), assetEntryQuery);
+		return _search(
+			assetListEntry.getCompanyId(),
+			longStream.mapToObj(
+				segmentsEntryId -> getAssetEntryQuery(
+					assetListEntry, segmentsEntryId, userId)
+			).collect(
+				Collectors.toList()
+			));
 	}
 
 	private long _getFirstSegmentsEntryId(
@@ -744,7 +761,6 @@ public class AssetListAssetEntryProviderImpl
 				"ddmStructureFieldValue", ddmStructureFieldValue);
 		}
 
-		searchContext.setClassTypeIds(assetEntryQuery.getClassTypeIds());
 		searchContext.setCompanyId(companyId);
 		searchContext.setEnd(assetEntryQuery.getEnd());
 		searchContext.setKeywords(assetEntryQuery.getKeywords());
@@ -767,14 +783,30 @@ public class AssetListAssetEntryProviderImpl
 	}
 
 	private List<AssetEntry> _search(
-		long companyId, AssetEntryQuery assetEntryQuery) {
+		long companyId, List<AssetEntryQuery> assetEntryQueries) {
 
 		try {
-			Hits hits = _assetHelper.search(
-				_getSearchContext(companyId, assetEntryQuery), assetEntryQuery,
-				assetEntryQuery.getStart(), assetEntryQuery.getEnd());
+			if (ListUtil.isEmpty(assetEntryQueries)) {
+				return Collections.emptyList();
+			}
 
-			return _assetHelper.getAssetEntries(hits);
+			AssetEntryQuery assetEntryQuery = assetEntryQueries.get(0);
+
+			if (assetEntryQueries.size() == 1) {
+				Hits hits = _assetHelper.search(
+					_getSearchContext(companyId, assetEntryQuery),
+					assetEntryQuery, assetEntryQuery.getStart(),
+					assetEntryQuery.getEnd());
+
+				return _assetHelper.getAssetEntries(hits);
+			}
+
+			SearchHits searchHits = _assetHelper.search(
+				_getSearchContext(companyId, assetEntryQueries.get(0)),
+				assetEntryQueries, assetEntryQuery.getStart(),
+				assetEntryQuery.getEnd());
+
+			return _assetHelper.getAssetEntries(searchHits);
 		}
 		catch (Exception exception) {
 			_log.error("Unable to get asset entries", exception);
@@ -783,10 +815,30 @@ public class AssetListAssetEntryProviderImpl
 		return Collections.emptyList();
 	}
 
-	private long _searchCount(long companyId, AssetEntryQuery assetEntryQuery) {
+	private int _searchCount(
+		long companyId, List<AssetEntryQuery> assetEntryQueries) {
+
 		try {
-			return _assetHelper.searchCount(
-				_getSearchContext(companyId, assetEntryQuery), assetEntryQuery);
+			if (ListUtil.isEmpty(assetEntryQueries)) {
+				return 0;
+			}
+
+			AssetEntryQuery assetEntryQuery = assetEntryQueries.get(0);
+
+			if (assetEntryQueries.size() == 1) {
+				Long count = _assetHelper.searchCount(
+					_getSearchContext(companyId, assetEntryQuery),
+					assetEntryQuery);
+
+				return count.intValue();
+			}
+
+			Long count = _assetHelper.searchCount(
+				_getSearchContext(companyId, assetEntryQuery),
+				assetEntryQueries, assetEntryQuery.getStart(),
+				assetEntryQuery.getEnd());
+
+			return count.intValue();
 		}
 		catch (Exception exception) {
 			_log.error("Unable to get asset entries", exception);
