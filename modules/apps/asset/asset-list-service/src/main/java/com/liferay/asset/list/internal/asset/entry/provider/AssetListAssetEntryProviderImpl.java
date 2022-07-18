@@ -61,8 +61,6 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.search.hits.SearchHits;
 import com.liferay.segments.constants.SegmentsEntryConstants;
 
-import java.io.Serializable;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -746,20 +744,6 @@ public class AssetListAssetEntryProviderImpl
 		long companyId, AssetEntryQuery assetEntryQuery) {
 
 		SearchContext searchContext = new SearchContext();
-
-		String ddmStructureFieldName = GetterUtil.getString(
-			assetEntryQuery.getAttribute("ddmStructureFieldName"));
-		Serializable ddmStructureFieldValue = assetEntryQuery.getAttribute(
-			"ddmStructureFieldValue");
-
-		if (Validator.isNotNull(ddmStructureFieldName) &&
-			Validator.isNotNull(ddmStructureFieldValue)) {
-
-			searchContext.setAttribute(
-				"ddmStructureFieldName", ddmStructureFieldName);
-			searchContext.setAttribute(
-				"ddmStructureFieldValue", ddmStructureFieldValue);
-		}
 
 		searchContext.setCompanyId(companyId);
 		searchContext.setEnd(assetEntryQuery.getEnd());
