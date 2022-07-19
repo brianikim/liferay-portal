@@ -95,7 +95,7 @@ public class TunnelServlet extends HttpServlet {
 			MethodHandler methodHandler = ovp.getValue();
 
 			if (_log.isDebugEnabled()) {
-				_log.debug("Received method handler " + methodHandler);
+				_log.debug("Method handler " + methodHandler);
 			}
 
 			if (methodHandler != null) {
