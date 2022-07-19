@@ -596,10 +596,15 @@ definition {
 		}
 
 		task ("Add a web content article") {
-			JSONWebcontent.addWebContent(
-				content = "Webcontent Content",
-				groupName = "Test Site Name",
-				title = "Webcontent Title");
+			WebContentNavigator.openWebContentAdmin(siteURLKey = "test-site-name");
+
+			WebContentNavigator.gotoAddCP();
+
+			WebContent.addCP(
+				webContentContent = "Webcontent Content",
+				webContentTitle = "Webcontent Title");
+
+			PortletEntry.publish();
 
 			WebContentNavigator.openWebContentAdmin(siteURLKey = "test-site-name");
 
@@ -677,10 +682,15 @@ definition {
 		}
 
 		task ("Add a web content article") {
-			JSONWebcontent.addWebContent(
-				content = "Webcontent Content",
-				groupName = "Test Site Name",
-				title = "Webcontent Title");
+			WebContentNavigator.openWebContentAdmin(siteURLKey = "test-site-name");
+
+			WebContentNavigator.gotoAddCP();
+
+			WebContent.addCP(
+				webContentContent = "Webcontent Content",
+				webContentTitle = "Webcontent Title");
+
+			PortletEntry.publish();
 
 			WebContentNavigator.openWebContentAdmin(siteURLKey = "test-site-name");
 
