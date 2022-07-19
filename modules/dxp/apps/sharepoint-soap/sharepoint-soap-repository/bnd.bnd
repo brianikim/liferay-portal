@@ -9,6 +9,7 @@ Import-Package:\
 	\
 	!net.sf.saxon.*,\
 	\
+	!org.apache.axiom.util.io,\
 	!org.apache.axis2.jaxws.description.*,\
 	!org.apache.axis2.jaxws.i18n.*,\
 	!org.apache.axis2.jaxws.server.config.*,\
@@ -18,6 +19,8 @@ Import-Package:\
 	!org.apache.http.*,\
 	!org.apache.james.mime4j.*,\
 	!org.apache.neethi.*,\
+	\
+	!org.aspectj.lang.*,\
 	\
 	*
 -fixupmessages: Classes found in the wrong directory: ...;is:=ignore
