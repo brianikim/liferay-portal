@@ -121,7 +121,9 @@ definition {
 
 	macro translateFields {
 		if (isSet(webContentTitle)) {
-			PortletEntry.inputTitle(title = "${webContentTitle}");
+			Type(
+				locator1 = "TextInput#TITLE_NOT_READONLY",
+				value1 = "${webContentTitle}");
 		}
 
 		if (isSet(webContentContent)) {
@@ -265,7 +267,7 @@ definition {
 	macro viewTargetFields {
 		if (isSet(webContentTitle)) {
 			AssertElementPresent(
-				key_fieldName = "title",
+				key_fieldName = "Title",
 				key_fieldValue = "${webContentTitle}",
 				locator1 = "Translation#TARGET_LANGUAGE_FIELD");
 		}
@@ -307,13 +309,13 @@ definition {
 		}
 
 		if (isSet(webContentHTML)) {
-			SelectFrame.selectFrameNoLoading(locator1 = "CKEditor#BODY_FIELD_IFRAME_2");
+			Click(locator1 = "CKEditor#TOOLBAR_SOURCE_BUTTON_2");
 
-			AssertTextEquals.assertPartialText(
-				locator1 = "CKEditor#BODY",
+			Type.typeCodeMirrorEditorNoError(
+				locator1 = "CKEditor#BODY_FIELD_SOURCE_ON",
 				value1 = "${webContentHTML}");
 
-			SelectFrame(value1 = "relative=top");
+			Click(locator1 = "CKEditor#TOOLBAR_SOURCE_BUTTON_2");
 		}
 
 		if (isSet(webContentText)) {
@@ -325,7 +327,7 @@ definition {
 
 		if (isSet(webContentTextBox)) {
 			AssertElementPresent(
-				key_fieldName = "TextBox",
+				key_fieldName = "Text Box",
 				key_fieldValue = "${webContentTextBox}",
 				locator1 = "Translation#TARGET_LANGUAGE_TEXT_BOX_FIELD");
 		}
