@@ -636,6 +636,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>TITLE_NOT_READONLY</td>
+	<td>//input[contains(@id,'title') and (not(@readonly='true'))]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>TRACKBACKS</td>
 	<td>//input[contains(@id,'trackbacks')]</td>
 	<td></td>
