@@ -14,7 +14,9 @@
 
 package com.liferay.search.experiences.internal.upgrade.v1_1_0;
 
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
+import com.liferay.portal.kernel.util.StringBundler;
 
 /**
  * @author Gustavo Lima
@@ -23,8 +25,21 @@ public class SXPElementUpgradeProcess extends UpgradeProcess {
 
 	@Override
 	protected void doUpgrade() throws Exception {
-		alterTableAddColumn("SXPElement", "key_", "VARCHAR(75) null");
-		alterTableAddColumn("SXPElement", "version", "VARCHAR(75) null");
+		_alterTableAddColumn("key_", "VARCHAR(75) null");
+		_alterTableAddColumn("version", "VARCHAR(75) null");
+	}
+
+	private void _alterTableAddColumn(String columnName, String columnType)
+		throws Exception {
+
+		if (hasColumn("SXPElement", columnName)) {
+			return;
+		}
+
+		runSQL(
+			StringBundler.concat(
+				"alter table SXPElement add ", columnName, StringPool.SPACE,
+				columnType));
 	}
 
 }

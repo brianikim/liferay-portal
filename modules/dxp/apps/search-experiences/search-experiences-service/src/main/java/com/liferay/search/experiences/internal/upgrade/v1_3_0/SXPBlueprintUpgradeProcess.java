@@ -50,6 +50,30 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 		_upgradeSXPBlueprint();
 	}
 
+	private void _dropColumn(String tableName, String columnName)
+		throws Exception {
+
+		if (_log.isInfoEnabled()) {
+			_log.info(
+				String.format(
+					"Dropping column %s from table %s", columnName, tableName));
+		}
+
+		if (hasColumn(tableName, columnName)) {
+			runSQL(
+				StringBundler.concat(
+					"alter table ", tableName, " drop column ", columnName));
+		}
+		else {
+			if (_log.isInfoEnabled()) {
+				_log.info(
+					String.format(
+						"Column %s already does not exist on table %s",
+						columnName, tableName));
+			}
+		}
+	}
+
 	private com.liferay.search.experiences.model.SXPElement _fetchSXPElement(
 			long sxpElementId)
 		throws Exception {
@@ -184,7 +208,7 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 	}
 
 	private void _upgradeSXPBlueprint() throws Exception {
-		alterTableDropColumn("SXPBlueprint", "key_");
+		_dropColumn("SXPBlueprint", "key_");
 
 		try (PreparedStatement preparedStatement1 = connection.prepareStatement(
 				"select sxpBlueprintId, elementInstancesJSON, version from " +
@@ -222,7 +246,7 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 	}
 
 	private void _upgradeSXPElement() throws Exception {
-		alterTableDropColumn("SXPElement", "key_");
+		_dropColumn("SXPElement", "key_");
 
 		try (PreparedStatement preparedStatement1 = connection.prepareStatement(
 				"select externalReferenceCode, sxpElementId, description, " +
@@ -233,8 +257,8 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 					connection,
 					StringBundler.concat(
 						"update SXPElement set externalReferenceCode = ?, ",
-						"description = ?, elementDefinitionJSON = ?, ",
-						"title = ?, version = ? where sxpElementId = ?"))) {
+						"description = ?, elementDefinitionJSON = ?, title = ",
+						"?, version = ? where sxpElementId = ?"))) {
 
 			try (ResultSet resultSet = preparedStatement1.executeQuery()) {
 				while (resultSet.next()) {
