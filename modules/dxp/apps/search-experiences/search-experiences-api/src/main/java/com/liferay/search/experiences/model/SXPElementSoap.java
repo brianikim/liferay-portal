@@ -35,6 +35,7 @@ public class SXPElementSoap implements Serializable {
 
 		soapModel.setMvccVersion(model.getMvccVersion());
 		soapModel.setUuid(model.getUuid());
+		soapModel.setExternalReferenceCode(model.getExternalReferenceCode());
 		soapModel.setSXPElementId(model.getSXPElementId());
 		soapModel.setCompanyId(model.getCompanyId());
 		soapModel.setUserId(model.getUserId());
@@ -48,6 +49,7 @@ public class SXPElementSoap implements Serializable {
 		soapModel.setSchemaVersion(model.getSchemaVersion());
 		soapModel.setTitle(model.getTitle());
 		soapModel.setType(model.getType());
+		soapModel.setVersion(model.getVersion());
 		soapModel.setStatus(model.getStatus());
 
 		return soapModel;
@@ -116,6 +118,14 @@ public class SXPElementSoap implements Serializable {
 
 	public void setUuid(String uuid) {
 		_uuid = uuid;
+	}
+
+	public String getExternalReferenceCode() {
+		return _externalReferenceCode;
+	}
+
+	public void setExternalReferenceCode(String externalReferenceCode) {
+		_externalReferenceCode = externalReferenceCode;
 	}
 
 	public long getSXPElementId() {
@@ -230,6 +240,14 @@ public class SXPElementSoap implements Serializable {
 		_type = type;
 	}
 
+	public String getVersion() {
+		return _version;
+	}
+
+	public void setVersion(String version) {
+		_version = version;
+	}
+
 	public int getStatus() {
 		return _status;
 	}
@@ -240,6 +258,7 @@ public class SXPElementSoap implements Serializable {
 
 	private long _mvccVersion;
 	private String _uuid;
+	private String _externalReferenceCode;
 	private long _sxpElementId;
 	private long _companyId;
 	private long _userId;
@@ -253,6 +272,7 @@ public class SXPElementSoap implements Serializable {
 	private String _schemaVersion;
 	private String _title;
 	private int _type;
+	private String _version;
 	private int _status;
 
 }

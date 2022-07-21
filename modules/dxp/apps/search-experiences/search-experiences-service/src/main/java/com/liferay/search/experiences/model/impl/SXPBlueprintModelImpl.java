@@ -194,6 +194,7 @@ public class SXPBlueprintModelImpl
 
 		model.setMvccVersion(soapModel.getMvccVersion());
 		model.setUuid(soapModel.getUuid());
+		model.setExternalReferenceCode(soapModel.getExternalReferenceCode());
 		model.setSXPBlueprintId(soapModel.getSXPBlueprintId());
 		model.setCompanyId(soapModel.getCompanyId());
 		model.setUserId(soapModel.getUserId());
@@ -205,6 +206,7 @@ public class SXPBlueprintModelImpl
 		model.setElementInstancesJSON(soapModel.getElementInstancesJSON());
 		model.setSchemaVersion(soapModel.getSchemaVersion());
 		model.setTitle(soapModel.getTitle());
+		model.setVersion(soapModel.getVersion());
 		model.setStatus(soapModel.getStatus());
 		model.setStatusByUserId(soapModel.getStatusByUserId());
 		model.setStatusByUserName(soapModel.getStatusByUserName());
@@ -1259,49 +1261,6 @@ public class SXPBlueprintModelImpl
 		sxpBlueprintImpl.setStatusDate(getStatusDate());
 
 		sxpBlueprintImpl.resetOriginalValues();
-
-		return sxpBlueprintImpl;
-	}
-
-	@Override
-	public SXPBlueprint cloneWithOriginalValues() {
-		SXPBlueprintImpl sxpBlueprintImpl = new SXPBlueprintImpl();
-
-		sxpBlueprintImpl.setMvccVersion(
-			this.<Long>getColumnOriginalValue("mvccVersion"));
-		sxpBlueprintImpl.setUuid(this.<String>getColumnOriginalValue("uuid_"));
-		sxpBlueprintImpl.setExternalReferenceCode(
-			this.<String>getColumnOriginalValue("externalReferenceCode"));
-		sxpBlueprintImpl.setSXPBlueprintId(
-			this.<Long>getColumnOriginalValue("sxpBlueprintId"));
-		sxpBlueprintImpl.setCompanyId(
-			this.<Long>getColumnOriginalValue("companyId"));
-		sxpBlueprintImpl.setUserId(this.<Long>getColumnOriginalValue("userId"));
-		sxpBlueprintImpl.setUserName(
-			this.<String>getColumnOriginalValue("userName"));
-		sxpBlueprintImpl.setCreateDate(
-			this.<Date>getColumnOriginalValue("createDate"));
-		sxpBlueprintImpl.setModifiedDate(
-			this.<Date>getColumnOriginalValue("modifiedDate"));
-		sxpBlueprintImpl.setConfigurationJSON(
-			this.<String>getColumnOriginalValue("configurationJSON"));
-		sxpBlueprintImpl.setDescription(
-			this.<String>getColumnOriginalValue("description"));
-		sxpBlueprintImpl.setElementInstancesJSON(
-			this.<String>getColumnOriginalValue("elementInstancesJSON"));
-		sxpBlueprintImpl.setSchemaVersion(
-			this.<String>getColumnOriginalValue("schemaVersion"));
-		sxpBlueprintImpl.setTitle(this.<String>getColumnOriginalValue("title"));
-		sxpBlueprintImpl.setVersion(
-			this.<String>getColumnOriginalValue("version"));
-		sxpBlueprintImpl.setStatus(
-			this.<Integer>getColumnOriginalValue("status"));
-		sxpBlueprintImpl.setStatusByUserId(
-			this.<Long>getColumnOriginalValue("statusByUserId"));
-		sxpBlueprintImpl.setStatusByUserName(
-			this.<String>getColumnOriginalValue("statusByUserName"));
-		sxpBlueprintImpl.setStatusDate(
-			this.<Date>getColumnOriginalValue("statusDate"));
 
 		return sxpBlueprintImpl;
 	}

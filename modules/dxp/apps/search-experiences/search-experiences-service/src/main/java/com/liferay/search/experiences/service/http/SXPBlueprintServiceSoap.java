@@ -135,6 +135,26 @@ public class SXPBlueprintServiceSoap {
 	}
 
 	public static com.liferay.search.experiences.model.SXPBlueprintSoap
+			getSXPBlueprintByExternalReferenceCode(
+				long companyId, String externalReferenceCode)
+		throws RemoteException {
+
+		try {
+			com.liferay.search.experiences.model.SXPBlueprint returnValue =
+				SXPBlueprintServiceUtil.getSXPBlueprintByExternalReferenceCode(
+					companyId, externalReferenceCode);
+
+			return com.liferay.search.experiences.model.SXPBlueprintSoap.
+				toSoapModel(returnValue);
+		}
+		catch (Exception exception) {
+			_log.error(exception, exception);
+
+			throw new RemoteException(exception.getMessage());
+		}
+	}
+
+	public static com.liferay.search.experiences.model.SXPBlueprintSoap
 			updateSXPBlueprint(
 				long sxpBlueprintId, String configurationJSON,
 				String[] descriptionMapLanguageIds,

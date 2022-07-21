@@ -210,6 +210,7 @@ public class SXPElementModelImpl
 
 		model.setMvccVersion(soapModel.getMvccVersion());
 		model.setUuid(soapModel.getUuid());
+		model.setExternalReferenceCode(soapModel.getExternalReferenceCode());
 		model.setSXPElementId(soapModel.getSXPElementId());
 		model.setCompanyId(soapModel.getCompanyId());
 		model.setUserId(soapModel.getUserId());
@@ -223,6 +224,7 @@ public class SXPElementModelImpl
 		model.setSchemaVersion(soapModel.getSchemaVersion());
 		model.setTitle(soapModel.getTitle());
 		model.setType(soapModel.getType());
+		model.setVersion(soapModel.getVersion());
 		model.setStatus(soapModel.getStatus());
 
 		return model;
@@ -1177,46 +1179,6 @@ public class SXPElementModelImpl
 		sxpElementImpl.setStatus(getStatus());
 
 		sxpElementImpl.resetOriginalValues();
-
-		return sxpElementImpl;
-	}
-
-	@Override
-	public SXPElement cloneWithOriginalValues() {
-		SXPElementImpl sxpElementImpl = new SXPElementImpl();
-
-		sxpElementImpl.setMvccVersion(
-			this.<Long>getColumnOriginalValue("mvccVersion"));
-		sxpElementImpl.setUuid(this.<String>getColumnOriginalValue("uuid_"));
-		sxpElementImpl.setExternalReferenceCode(
-			this.<String>getColumnOriginalValue("externalReferenceCode"));
-		sxpElementImpl.setSXPElementId(
-			this.<Long>getColumnOriginalValue("sxpElementId"));
-		sxpElementImpl.setCompanyId(
-			this.<Long>getColumnOriginalValue("companyId"));
-		sxpElementImpl.setUserId(this.<Long>getColumnOriginalValue("userId"));
-		sxpElementImpl.setUserName(
-			this.<String>getColumnOriginalValue("userName"));
-		sxpElementImpl.setCreateDate(
-			this.<Date>getColumnOriginalValue("createDate"));
-		sxpElementImpl.setModifiedDate(
-			this.<Date>getColumnOriginalValue("modifiedDate"));
-		sxpElementImpl.setDescription(
-			this.<String>getColumnOriginalValue("description"));
-		sxpElementImpl.setElementDefinitionJSON(
-			this.<String>getColumnOriginalValue("elementDefinitionJSON"));
-		sxpElementImpl.setHidden(
-			this.<Boolean>getColumnOriginalValue("hidden_"));
-		sxpElementImpl.setReadOnly(
-			this.<Boolean>getColumnOriginalValue("readOnly"));
-		sxpElementImpl.setSchemaVersion(
-			this.<String>getColumnOriginalValue("schemaVersion"));
-		sxpElementImpl.setTitle(this.<String>getColumnOriginalValue("title"));
-		sxpElementImpl.setType(this.<Integer>getColumnOriginalValue("type_"));
-		sxpElementImpl.setVersion(
-			this.<String>getColumnOriginalValue("version"));
-		sxpElementImpl.setStatus(
-			this.<Integer>getColumnOriginalValue("status"));
 
 		return sxpElementImpl;
 	}
