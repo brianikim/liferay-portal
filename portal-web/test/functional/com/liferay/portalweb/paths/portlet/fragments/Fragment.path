@@ -321,6 +321,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>CONTRIBUTED_FRAGMENT_INLINE_RICH_TEXT_STYLE</td>
+	<td>xpath=(//*[contains(@data-lfr-editable-id,'${id}')])${key_style}[normalize-space()='${key_text}']</td>
+	<td></td>
+</tr>
+<tr>
 	<td>EDITABLE_FIELD</td>
 	<td>//div[contains(@class,'page-editor')]//div[contains(.,'${key_fragmentName}')]//lfr-editable[contains(@id,'${id}')] | //div[contains(@class,'page-editor')]//lfr-editable[contains(@id,'${id}')]</td>
 	<td></td>
