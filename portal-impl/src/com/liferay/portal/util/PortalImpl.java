@@ -8365,21 +8365,18 @@ public class PortalImpl implements Portal {
 					HttpServletRequest httpServletRequest =
 						themeDisplay.getRequest();
 
-					Map<String, Object> requestContext =
-						HashMapBuilder.<String, Object>put(
-							"request", httpServletRequest
-						).put(
-							WebKeys.LOCALE, locale
-						).build();
-					Map<String, String[]> params =
-						httpServletRequest.getParameterMap();
-
 					try {
 						LayoutFriendlyURLComposite layoutFriendlyURLComposite =
 							friendlyURLResolver.getLayoutFriendlyURLComposite(
 								themeDisplay.getCompanyId(),
 								themeDisplay.getScopeGroupId(), false,
-								currentURL, params, requestContext);
+								currentURL,
+								httpServletRequest.getParameterMap(),
+								HashMapBuilder.<String, Object>put(
+									"request", httpServletRequest
+								).put(
+									WebKeys.LOCALE, locale
+								).build());
 
 						alternateURLSuffix =
 							groupFriendlyURL +
