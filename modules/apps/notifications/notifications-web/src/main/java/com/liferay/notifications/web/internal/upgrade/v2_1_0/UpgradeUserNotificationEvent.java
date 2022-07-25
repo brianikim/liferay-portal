@@ -61,7 +61,7 @@ public class UpgradeUserNotificationEvent extends UpgradeProcess {
 			runSQL(sb.toString());
 
 			runSQL(
-				"update UserNotificationEvent set actionRequired = FALSE " +
+				"update UserNotificationEvent set actionRequired = [$FALSE$] " +
 					"where actionRequired IS NULL");
 		}
 	}
@@ -79,7 +79,7 @@ public class UpgradeUserNotificationEvent extends UpgradeProcess {
 						"actionRequired = ? where userNotificationEventId = ?");
 			ResultSet rs = ps1.executeQuery()) {
 
-			runSQL("update UserNotificationEvent set delivered = TRUE");
+			runSQL("update UserNotificationEvent set delivered = [$TRUE$]");
 
 			runSQL(
 				StringBundler.concat(
