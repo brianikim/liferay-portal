@@ -12,7 +12,6 @@ dependencies {
 	compileInclude group: "aopalliance", name: "aopalliance", version: "1.0"
 	compileInclude group: "args4j", name: "args4j", version: "2.0.23"
 	compileInclude group: "com.google.code.findbugs", name: "jsr305", version: "3.0.2"
-	compileInclude group: "com.google.code.gson", name: "gson", version: "2.9.0"
 	compileInclude group: "com.google.common.html.types", name: "types", version: "1.0.4"
 	compileInclude group: "com.google.errorprone", name: "error_prone_annotations", version: "2.2.0"
 	compileInclude group: "com.google.guava", name: "failureaccess", version: "1.0.1"
@@ -30,6 +29,7 @@ dependencies {
 	compileInclude group: "org.checkerframework", name: "checker-qual", version: "2.5.2"
 
 	compileOnly group: "biz.aQute.bnd", name: "biz.aQute.bnd.annotation", version: "4.2.0"
+	compileOnly group: "com.google.code.gson", name: "gson", version: "2.9.0"
 	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.impl", version: "default"
 	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "default"
 	compileOnly group: "javax.portlet", name: "portlet-api", version: "3.0.1"
