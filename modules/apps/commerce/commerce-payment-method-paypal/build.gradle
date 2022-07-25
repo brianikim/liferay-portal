@@ -1,5 +1,5 @@
 dependencies {
-	compileInclude group: "com.google.code.gson", name: "gson", version: "2.2.2"
+	compileInclude group: "com.google.code.gson", name: "gson", version: "2.9.0"
 	compileInclude group: "com.paypal.sdk", name: "rest-api-sdk", version: "1.14.0"
 
 	compileOnly group: "biz.aQute.bnd", name: "biz.aQute.bndlib", version: "3.1.0"
