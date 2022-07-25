@@ -585,7 +585,6 @@ definition {
 
 			AssertVisible(
 				key_assetContent = "Web Content Content",
-				key_assetTitle = "Web Content Title",
 				locator1 = "PageEditor#ASSET_CONTENT");
 		}
 	}
