@@ -23,7 +23,11 @@ import com.liferay.portal.kernel.model.LayoutSet;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCResourceCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
 import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.service.permission.LayoutPermissionUtil;
 import com.liferay.portal.kernel.servlet.ServletContextPool;
 import com.liferay.portal.kernel.servlet.ServletResponseUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
@@ -72,6 +76,21 @@ public class GetPagePreviewMVCResourceCommand extends BaseMVCResourceCommand {
 
 		ThemeDisplay themeDisplay = (ThemeDisplay)resourceRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
+
+		PermissionChecker permissionChecker =
+			PermissionCheckerFactoryUtil.create(themeDisplay.getRealUser());
+
+		if (!LayoutPermissionUtil.contains(
+				permissionChecker, themeDisplay.getLayout(),
+				ActionKeys.UPDATE) &&
+			!LayoutPermissionUtil.contains(
+				permissionChecker, themeDisplay.getLayout(),
+				ActionKeys.UPDATE_LAYOUT_CONTENT)) {
+
+			resourceResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
+
+			return;
+		}
 
 		Locale currentLocale = themeDisplay.getLocale();
 
