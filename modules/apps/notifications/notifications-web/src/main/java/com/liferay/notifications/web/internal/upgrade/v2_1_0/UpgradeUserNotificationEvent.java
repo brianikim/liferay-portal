@@ -53,10 +53,10 @@ public class UpgradeUserNotificationEvent extends UpgradeProcess {
 			StringBundler sb = new StringBundler(5);
 
 			sb.append("update UserNotificationEvent set actionRequired = ");
-			sb.append("TRUE where userNotificationEventId in (select ");
+			sb.append("[$TRUE$] where userNotificationEventId in (select ");
 			sb.append("userNotificationEventId from ");
 			sb.append("Notifications_UserNotificationEvent where ");
-			sb.append("actionRequired = TRUE)");
+			sb.append("actionRequired = [$TRUE$])");
 
 			runSQL(sb.toString());
 
