@@ -230,9 +230,9 @@ definition {
 	@priority = "5"
 	test ConflictingPublicationsAutomaticallyResolved {
 
-		// Wrokaround LPS-127348 and LPS-129369
+		// Wrokaround LPS-127348
 
-		property database.types = "hypersonic,mariadb,mysql,postgresql";
+		property database.types = "hypersonic,mariadb,mysql,oracle,postgresql,sqlserver";
 
 		Navigator.openURL();
 
