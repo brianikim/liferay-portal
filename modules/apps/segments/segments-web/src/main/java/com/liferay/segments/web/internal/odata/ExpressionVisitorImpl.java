@@ -134,7 +134,7 @@ public class ExpressionVisitorImpl implements ExpressionVisitor<Object> {
 
 		if (entityField == null) {
 			throw new ExpressionVisitException(
-				"Invoked visitlambdavariableexpression when no entity field " +
+				"Invoked visitLambdaVariableExpression when no entity field " +
 					"is stored for lambda variable name " +
 						lambdaVariableExpression.getVariableName());
 		}
@@ -181,7 +181,7 @@ public class ExpressionVisitorImpl implements ExpressionVisitor<Object> {
 			if (expressions.size() != 2) {
 				throw new UnsupportedOperationException(
 					StringBundler.concat(
-						"Unsupported method visitMethodExpression with method",
+						"Unsupported method visitMethodExpression with method ",
 						"type ", type, " and ", expressions.size(), "params"));
 			}
 

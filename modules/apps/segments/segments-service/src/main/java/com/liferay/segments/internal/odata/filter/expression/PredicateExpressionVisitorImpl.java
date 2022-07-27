@@ -161,7 +161,7 @@ public class PredicateExpressionVisitorImpl<T extends Map>
 
 		if (entityField == null) {
 			throw new ExpressionVisitException(
-				"Invoked visitlambdavariableexpression when no entity field " +
+				"Invoked visitLambdaVariableExpression when no entity field " +
 					"is stored for lambda variable name " +
 						lambdaVariableExpression.getVariableName());
 		}
