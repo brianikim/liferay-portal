@@ -26,7 +26,7 @@ public class UpgradeJournalArticleLocalization extends UpgradeProcess {
 		runSQL(
 			"create unique index IX_97DC9F36 on JournalArticleLocalization " +
 				"(companyId, articlePK, title[$COLUMN_LENGTH:400$], " +
-					"languageId[$COLUMN_LENGTH:75$], ctCollectionId);");
+					"languageId[$COLUMN_LENGTH:75$], ctCollectionId)");
 	}
 
 }

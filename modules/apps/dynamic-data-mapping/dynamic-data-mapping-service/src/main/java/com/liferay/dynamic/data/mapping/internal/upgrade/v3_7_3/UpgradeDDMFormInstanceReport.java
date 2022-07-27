@@ -69,7 +69,7 @@ public class UpgradeDDMFormInstanceReport extends UpgradeProcess {
 
 	@Override
 	protected void doUpgrade() throws Exception {
-		runSQL("delete from DDMFormInstanceReport;");
+		runSQL("delete from DDMFormInstanceReport");
 
 		StringBundler sb1 = new StringBundler(21);
 

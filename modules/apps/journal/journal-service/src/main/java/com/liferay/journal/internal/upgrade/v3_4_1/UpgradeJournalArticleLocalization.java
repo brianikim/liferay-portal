@@ -25,7 +25,7 @@ public class UpgradeJournalArticleLocalization extends UpgradeProcess {
 	protected void doUpgrade() throws Exception {
 		runSQL(
 			"create index IX_F1F3A975 on JournalArticleLocalization " +
-				"(companyId, articlePK, ctCollectionId);");
+				"(companyId, articlePK, ctCollectionId)");
 	}
 
 }
