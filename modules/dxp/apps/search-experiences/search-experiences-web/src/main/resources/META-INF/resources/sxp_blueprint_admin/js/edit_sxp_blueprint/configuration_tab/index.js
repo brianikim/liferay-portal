@@ -14,11 +14,11 @@ import ClayLayout from '@clayui/layout';
 import getCN from 'classnames';
 import React, {useContext} from 'react';
 
-import advancedConfigurationSchema from '../../../schemas/advanced-configuration.schema.json';
-import aggregationConfigurationSchema from '../../../schemas/aggregation-configuration.schema.json';
-import highlightConfigurationSchema from '../../../schemas/highlight-configuration.schema.json';
-import parameterConfigurationSchema from '../../../schemas/parameter-configuration.schema.json';
-import sortConfigurationSchema from '../../../schemas/sort-configuration.schema.json';
+import advancedConfigurationSchema from '../../../schemas/advancedConfigurationSchema';
+import aggregationConfigurationSchema from '../../../schemas/aggregationConfigurationSchema';
+import highlightConfigurationSchema from '../../../schemas/highlightConfigurationSchema';
+import parameterConfigurationSchema from '../../../schemas/parameterConfigurationSchema';
+import sortConfigurationSchema from '../../../schemas/sortConfigurationSchema';
 import CodeMirrorEditor from '../../shared/CodeMirrorEditor';
 import LearnMessage from '../../shared/LearnMessage';
 import ThemeContext from '../../shared/ThemeContext';

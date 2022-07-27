@@ -151,11 +151,11 @@ export default {
 		},
 		Field: {
 			properties: {
-				fieldMappings: {
+				defaultValue: {
 					items: {
 						$ref: '#/definitions/FieldMapping',
 					},
-					type: 'array',
+					type: ['array', 'number', 'object', 'string'],
 				},
 				helpText: {
 					type: 'string',
@@ -166,10 +166,20 @@ export default {
 				name: {
 					type: 'string',
 				},
-				step: {
-					type: 'object',
-				},
 				type: {
+					enum: [
+						'date',
+						'fieldMapping',
+						'fieldMappingList',
+						'json',
+						'keywords',
+						'multiselect',
+						'number',
+						'searchableType',
+						'select',
+						'slider',
+						'text',
+					],
 					type: 'string',
 				},
 				typeOptions: {
@@ -345,18 +355,14 @@ export default {
 	},
 	properties: {
 		description_i18n: {
-			additionalProperties: {
-				type: 'string',
-			},
+			$ref: 'LanguageId',
 			type: 'object',
 		},
 		elementDefinition: {
 			$ref: '#/definitions/ElementDefinition',
 		},
 		title_i18n: {
-			additionalProperties: {
-				type: 'string',
-			},
+			$ref: 'LanguageId',
 			type: 'object',
 		},
 	},
