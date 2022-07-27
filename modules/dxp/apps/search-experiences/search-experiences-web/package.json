@@ -39,7 +39,8 @@
 			"<rootDir>/test/js/mocks/fetch.js"
 		],
 		"testPathIgnorePatterns": [
-			"<rootDir>/test/js/mocks/*"
+			"<rootDir>/test/js/mocks/*",
+			"<rootDir>/test/js/shared/CodeMirrorEditor.js"
 		],
 		"transformIgnorePatterns": [
 			"<rootDir>/.*\\.json$"

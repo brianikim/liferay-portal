@@ -16,10 +16,13 @@ import React from 'react';
 import '@testing-library/jest-dom/extend-expect';
 
 import {getCodeMirrorHints} from '../../../src/main/resources/META-INF/resources/sxp_blueprint_admin/js/shared/CodeMirrorEditor';
-import aggregationConfigurationSchema from '../../../src/main/resources/META-INF/resources/sxp_blueprint_admin/schemas/aggregation-configuration.schema.json';
-import parameterConfigurationSchema from '../../../src/main/resources/META-INF/resources/sxp_blueprint_admin/schemas/parameter-configuration.schema.json';
-import sortConfigurationSchema from '../../../src/main/resources/META-INF/resources/sxp_blueprint_admin/schemas/sort-configuration.schema.json';
-import sxpQueryElementSchema from '../../../src/main/resources/META-INF/resources/sxp_blueprint_admin/schemas/sxp-query-element.schema.json';
+import aggregationConfigurationSchema from '../../../src/main/resources/META-INF/resources/sxp_blueprint_admin/schemas/aggregationConfigurationSchema';
+import parameterConfigurationSchema from '../../../src/main/resources/META-INF/resources/sxp_blueprint_admin/schemas/parameterConfigurationSchema';
+import sortConfigurationSchema from '../../../src/main/resources/META-INF/resources/sxp_blueprint_admin/schemas/sortConfigurationSchema';
+import sxpQueryElementSchema from '../../../src/main/resources/META-INF/resources/sxp_blueprint_admin/schemas/sxpQueryElementSchema';
+
+// Since Jest in 7.3.x cannot parse CSS files from CodeMirror, this file
+// is excluded from the list of runnable tests, within testPathIgnorePatterns.
 
 const availableLanguages = {
 	de_DE: 'German (Germany)',
