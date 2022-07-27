@@ -171,7 +171,7 @@ public class CTClosureFactoryImplTest {
 			StringBundler.concat(
 				"create table ParentTable (parentId LONG not null, ",
 				"ctCollectionId LONG not null, grandParentId LONG, name ",
-				"VARCHAR(75) null, primary key (parentId, ctCollectionId));"));
+				"VARCHAR(75) null, primary key (parentId, ctCollectionId))"));
 
 		_db.runSQL(
 			"create unique index IX_GP_N on ParentTable (grandParentId, " +
@@ -182,7 +182,7 @@ public class CTClosureFactoryImplTest {
 				"create table ChildTable (childId LONG not null, ",
 				"ctCollectionId LONG not null, grandParentId LONG, ",
 				"parentChildId LONG, parentName VARCHAR(75) null, primary key ",
-				"(childId, ctCollectionId));"));
+				"(childId, ctCollectionId))"));
 
 		_ctCollection = _ctCollectionLocalService.addCTCollection(
 			TestPropsValues.getCompanyId(), TestPropsValues.getUserId(),
