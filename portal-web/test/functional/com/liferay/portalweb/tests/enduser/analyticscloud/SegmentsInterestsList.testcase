@@ -67,7 +67,7 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8613 | Test Summary: Assert no interest found in segment"
 	@priority = "3"
 	test AssertNoInterestFoundInSegment {
-		property custom.properties = "jsonws.web.service.paths.excludes=";
+		property analytics.cloud.upstream = "false";
 
 		task ("Add new user") {
 			JSONUser.addUser(
@@ -130,7 +130,7 @@ definition {
 		}
 
 		task ("View no interest results") {
-			ACInterests.viewNoInterestResults();
+			ACUtils.viewGenericText(textValueList = "There are no results found.,Please try a different search term.");
 		}
 	}
 

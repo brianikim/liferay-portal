@@ -45,12 +45,15 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-9018 | Test Summary: Search an Individual's Activities List with a query that won't return results"
 	@priority = "3"
 	test AssertNoIndividualsActivitiesResults {
+		property analytics.cloud.upstream = "false";
+		property test.name.skip.portal.instance = "KnownIndividualsSearch#AssertNoIndividualsActivitiesResults";
+
 		task ("Add DM to AC Page") {
 			ACUtils.createDMAndAddToPage();
 		}
 
 		task ("Get site assigned property name") {
-			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
+			ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 		}
 
 		task ("Add a new user in DXP") {
@@ -59,11 +62,6 @@ definition {
 				userFirstName = "ac",
 				userLastName = "ac",
 				userScreenName = "ac");
-
-			JSONUser.setFirstPassword(
-				agreeToTermsAndAnswerReminderQuery = "true",
-				requireReset = "false",
-				userEmailAddress = "ac@liferay.com");
 		}
 
 		task ("Sync the Contact Data") {
@@ -87,7 +85,7 @@ definition {
 
 			ACUtils.launchAC();
 
-			ACProperties.switchProperty(propertyName = "${propertyName}");
+			ACProperties.switchProperty(propertyName = "${assignedPropertyName}");
 		}
 
 		task ("Navigate to the Individual Activity Overview") {
@@ -113,7 +111,7 @@ definition {
 		}
 
 		task ("Assert there are no activities found") {
-			AssertElementPresent(locator1 = "ACIndividualsDashboard#NO_EVENTS_FOUND");
+			ACUtils.viewGenericText(textValueList = "There are no events found.,Check back later to verify if data has been received from your data sources.,Learn more about individuals.");
 		}
 	}
 

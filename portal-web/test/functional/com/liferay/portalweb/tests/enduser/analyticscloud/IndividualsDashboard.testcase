@@ -62,7 +62,11 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8907 | Test Summary: Expand activity in individual overview"
 	@priority = "3"
 	test CanExpandActivityInIndividualOverview {
-		property portal.upstream = "quarantine";
+		property analytics.cloud.upstream = "false";
+
+		task ("Create Blog to Add to Page") {
+			ACUtils.createBlogsAndAddToPage();
+		}
 
 		task ("Sign in as new user") {
 			User.logoutAndLoginPG(
@@ -70,8 +74,10 @@ definition {
 				userLoginFullName = "userfn userln");
 		}
 
-		task ("View the site page") {
+		task ("View the blog page") {
 			ACUtils.navigateToSitePage(
+				actionType = "View Blog",
+				documentTitleList = "Blogs AC Title",
 				pageName = "AC Page",
 				siteName = "Site Name");
 		}
@@ -105,7 +111,7 @@ definition {
 		}
 
 		task ("Expand access timeline") {
-			Click(locator1 = "ACIndividualsDashboard#BASE_RESULTS_TIMELINE");
+			ACIndividualsDashboard.expandActivity(eventName = "pageViewed");
 
 			AssertElementPresent(
 				locator1 = "ACIndividualsDashboard#BASE_RESULTS_TIMELINE_ATTRIBUTES_TITLE",

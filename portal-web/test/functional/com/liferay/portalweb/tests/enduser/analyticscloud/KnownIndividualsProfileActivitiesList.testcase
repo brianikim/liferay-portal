@@ -34,9 +34,11 @@ definition {
 	}
 
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8151 | Test Summary: Individual activities list shows accurate activities from today when switched to 24 hour view"
+	@ignore = "true"
 	@priority = "5"
 	test IndividualActivitiesListShowsAccurateActivitiesWhenSwitchedTo24HourView {
-		property portal.upstream = "quarantine";
+
+		// AC Bug ticket: LRAC-10734
 
 		var usernameList = "ac,liferay";
 		var emailList = "ac@liferay.com,liferay@liferay.com";
@@ -73,9 +75,10 @@ definition {
 
 			ACIndividualsDashboard.goToKnownIndividualsTab();
 
-			ACIndividualsDashboard.viewTotalActivities(
-				activitiesNumber = "12",
-				userName = "${name} ${name}");
+			ACUtils.viewNameList(nameList = "${name} ${name}");
+
+			var key_userName = "${name} ${name}";
+			var currentTotalActivities = selenium.getText("ACIndividualsDashboard#TOTAL_ACTIVITIES");
 
 			ACNavigation.openItem(itemName = "${name} ${name}");
 
@@ -83,7 +86,7 @@ definition {
 
 			ACTimeFilter.setLast24Hours();
 
-			ACIndividualsDashboard.viewActivitiesNumberInPeriod(activitiesNumber = "12");
+			ACIndividualsDashboard.viewActivitiesNumberInPeriod(activitiesNumber = "${currentTotalActivities}");
 		}
 	}
 
