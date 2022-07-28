@@ -166,12 +166,7 @@ public abstract class BaseAssetDisplayPageFriendlyURLResolver
 		Layout layout = _getLayoutDisplayPageObjectProviderLayout(
 			layoutDisplayPageObjectProvider);
 
-		HttpServletRequest httpServletRequest =
-			(HttpServletRequest)requestContext.get("request");
-
-		HttpSession httpSession = httpServletRequest.getSession();
-
-		Locale locale = (Locale)httpSession.getAttribute(WebKeys.LOCALE);
+		Locale locale = getLocale(requestContext);
 
 		if (locale != null) {
 			String urlTitle = layoutDisplayPageObjectProvider.getURLTitle(
@@ -183,6 +178,25 @@ public abstract class BaseAssetDisplayPageFriendlyURLResolver
 		}
 
 		return new LayoutFriendlyURLComposite(layout, friendlyURL);
+	}
+
+	protected Locale getLocale(Map<String, Object> requestContext) {
+		Locale locale = (Locale)requestContext.get(WebKeys.LOCALE);
+
+		if (locale == null) {
+			HttpServletRequest httpServletRequest =
+				(HttpServletRequest)requestContext.get("request");
+
+			HttpSession httpSession = httpServletRequest.getSession();
+
+			locale = (Locale)httpSession.getAttribute(WebKeys.LOCALE);
+
+			if (locale == null) {
+				locale = portal.getLocale(httpServletRequest);
+			}
+		}
+
+		return locale;
 	}
 
 	@Reference
