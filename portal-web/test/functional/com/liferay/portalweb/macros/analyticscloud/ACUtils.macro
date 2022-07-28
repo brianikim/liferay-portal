@@ -390,6 +390,14 @@ definition {
 		}
 	}
 
+	macro clearLocalStorage {
+		var javaScript = '''
+		localStorage.clear();
+		''';
+
+		var localStorageItem = selenium.getEval("${javaScript}");
+	}
+
 	macro clearSearchBar {
 		Click(locator1 = "ACUtils#CLEAR_SEARCH_BAR_BUTTON");
 	}
@@ -402,11 +410,25 @@ definition {
 			locator1 = "ACUtils#GENERIC_BUTTON");
 	}
 
+	macro clickGenericHyperlink {
+		var key_textValue = "${hyperlinkText}";
+
+		if (!(isSet(index))) {
+			var index = "1";
+		}
+
+		Click(locator1 = "ACUtils#GENERIC_TEXT_ORDER");
+	}
+
 	macro clickKebab {
 		Click(locator1 = "ACSegments#SEGMENT_ELLIPSIS");
 	}
 
 	macro closeAllSessions {
+		AntCommand(
+			locator1 = "build-test.xml",
+			value1 = "clear-redis");
+
 		var analyticsCloudAsahCuratorBatchURL = PropsUtil.get("analytics.cloud.asah.curator.batch.url");
 
 		var cleanCurl = '''
@@ -505,7 +527,7 @@ definition {
 
 		Form.editName(formTitle = "${formAcTitle}");
 
-		Form.addTextField(fieldPositionNumber = "1");
+		Form.addTextField(fieldPositionNumber = "0");
 
 		Form.closeSidebar();
 
@@ -622,6 +644,20 @@ definition {
 		return "${country}";
 	}
 
+	macro getLocalStorageItem {
+		var javaScript = '''
+		var localStorageItem = localStorage.getItem('${keyName}');
+
+		return localStorageItem;
+		''';
+
+		var localStorageItem = selenium.getEval("${javaScript}");
+
+		var localStorageItem = StringUtil.replace("${localStorageItem}", "\"", "");
+
+		return "${localStorageItem}";
+	}
+
 	macro getPageRefRequestPropertyValue {
 		var postDataText = ProxyUtil.getHarRecording("$..[?(@['pageref'] == '${pageRef}')].request[?(@.method == 'POST' && @.url contains '/${pageRef}')]..text");
 
@@ -687,12 +723,26 @@ definition {
 		}
 	}
 
+	macro logInPause {
+
+		// Pause is necessary because poshi logs in from one user to another quickly. For more information about pause see LRAC-9514
+
+		Pause(locator1 = "5000");
+	}
+
 	@summary = "This macro access a page/document"
 	macro navigateToSitePage {
 		for (var documentTitle : list "${documentTitleList}") {
 			Navigator.gotoSitePage(
 				pageName = "${pageName}",
 				siteName = "${siteName}");
+
+			if ("${actionType}" == "View WC") {
+
+				// Pause is necessary because the web content event is sent too fast and doesn't have time to process if you navigate to another page quickly. See LRAC-11461
+
+				Pause(locator1 = "5000");
+			}
 
 			if ("${actionType}" == "View Blog") {
 				BlogsNavigator.gotoPG(entryTitle = "${documentTitle}");
@@ -744,9 +794,7 @@ definition {
 				siteName = "${siteName}",
 				submitText = "${submitText}");
 
-			// Pause is necessary because poshi logs in from one user to another very quickly. For more information about pause see LRAC-9514
-
-			Pause(locator1 = "5000");
+			ACUtils.logInPause();
 		}
 	}
 
@@ -786,6 +834,14 @@ definition {
 				Click(locator1 = "ACUtils#ORDER_ARROW_TABLE_BUTTON_DOWN");
 			}
 		}
+	}
+
+	macro restartDockerContainer {
+		var containerName = "${containerName}";
+
+		AntCommand(
+			locator1 = "build-test.xml",
+			value1 = "restart-docker-container -Ddocker.container=${containerName}");
 	}
 
 	macro saveButton {
@@ -855,6 +911,12 @@ definition {
 			value1 = "${infoMessage}");
 	}
 
+	macro viewGenericButton {
+		var key_buttonName = "${buttonName}";
+
+		AssertElementPresent(locator1 = "ACUtils#GENERIC_BUTTON");
+	}
+
 	macro viewGenericText {
 		for (var textValue : list "${textValueList}") {
 			var key_textValue = "${textValue}";
@@ -865,9 +927,25 @@ definition {
 				TestUtils.hardRefresh();
 			}
 
-			AssertTextEquals(
-				locator1 = "ACUtils#GENERIC_TEXT",
-				value1 = "${textValue}");
+			AssertElementPresent(locator1 = "ACUtils#GENERIC_TEXT");
+		}
+	}
+
+	macro viewGenericTextInOrder {
+		if (!(isSet(index))) {
+			var index = "1";
+		}
+
+		for (var textValue : list "${textValueList}") {
+			var key_textValue = "${textValue}";
+
+			WaitForPageLoad();
+
+			while (IsElementNotPresent(locator1 = "ACUtils#GENERIC_TEXT_ORDER") && (maxIterations = "50")) {
+				TestUtils.hardRefresh();
+			}
+
+			AssertElementPresent(locator1 = "ACUtils#GENERIC_TEXT_ORDER");
 		}
 	}
 
@@ -1010,6 +1088,21 @@ definition {
 
 	macro waitForLoading {
 		WaitForElementNotPresent(locator1 = "ACUtils#LOADING_ANIMATION");
+	}
+
+	macro waitForSendingRequest {
+		if (isSet(time)) {
+
+			// Pausing for harRecording test for reuse purpose, see LRAC-10600
+
+			Pause(locator1 = "${time}");
+		}
+		else if (!(isSet(time))) {
+
+			// Pausing for harRecording tests, see LRAC-10600
+
+			Pause(locator1 = "5000");
+		}
 	}
 
 }

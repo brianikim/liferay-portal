@@ -290,6 +290,13 @@ definition {
 				locator1 = "ACUsage#USAGE_SINCE",
 				value1 = "${usageSince}");
 		}
+
+		if (isSet(notEquals)) {
+			AssertTextNotEquals(
+				key_metricName = "${metricName}",
+				locator1 = "ACUsage#USAGE_CURRENT_NUMBER",
+				value1 = "${notEquals}");
+		}
 	}
 
 	@summary = "Asserts the page views usage value \  @param pageViewsUsageValue"
@@ -472,7 +479,9 @@ definition {
 
 		ACSettings.goToDataControlAndPrivacy();
 
-		Click(locator1 = "ACDataControlAndPrivacy#REQUEST_LOG");
+		ACSettings.navigateToRequestOrSuppressedOptions(
+			optionName = "Request Log",
+			optionValue = "Manage");
 
 		Click(locator1 = "ACDataControlAndPrivacy#CREATE_REQUEST");
 
@@ -758,7 +767,7 @@ definition {
 
 		var propertyId = selenium.getText("ACSettings#HEADER_DESCRIPTION");
 
-		var propertyId = StringUtil.extractDigits("${propertyId}");
+		var propertyId = StringUtil.extractLast("${propertyId}", " ");
 
 		return "${propertyId}";
 	}
@@ -845,6 +854,34 @@ definition {
 		ACSettings.goToSettingsNavigation(settingsNavigation = "settings/workspace");
 	}
 
+	macro navigateToRequestOrSuppressedOptions {
+		var key_optionName = "${optionName}";
+		var key_optionValue = "${optionValue}";
+
+		Click(locator1 = "ACDataControlAndPrivacy#REQUEST_SUPPRESSED_OPTIONS");
+	}
+
+	@summary = "Rename an existing Data Source"
+	macro renameDataSource {
+		Click(locator1 = "Icon#EDIT_PENCIL");
+
+		Click(
+			inputFieldId = "dataSourceName",
+			locator1 = "TextInput#INPUT_ID");
+
+		KeyPress(
+			inputFieldId = "dataSourceName",
+			locator1 = "TextInput#INPUT_ID",
+			value1 = "\BACK_SPACE");
+
+		Type(
+			inputFieldId = "dataSourceName",
+			locator1 = "TextInput#INPUT_ID",
+			value1 = "${dataSourceNewName}");
+
+		Button.clickSubmitButton();
+	}
+
 	@summary = "Takes the token from Analytics Clouds to use on during the DXP connection process"
 	macro takeTokenFromAnalyticsCloud {
 		ACSettings.goToDataSources();
@@ -852,6 +889,19 @@ definition {
 		Click(locator1 = "ACDXPSettings#AC_GENERIC_ADD_OR_CONFIRMATION_BUTTON");
 
 		Click(locator1 = "ACSettings#DXP_DATA_SOURCE_OPTION");
+
+		Copy(locator1 = "ACSettings#TOKEN_INPUT_FIELD");
+	}
+
+	@summary = "Takes the token from an existing data source to make a reconnection"
+	macro takeTokenFromExistingDataSource {
+		ACSettings.goToDataSources();
+
+		ACUtils.searchBar(searchItem = "${dataSourceName}");
+
+		ACNavigation.openItem(itemName = "${dataSourceName}");
+
+		ACUtils.clickAnyButton(button = "Reconnect");
 
 		Copy(locator1 = "ACSettings#TOKEN_INPUT_FIELD");
 	}
