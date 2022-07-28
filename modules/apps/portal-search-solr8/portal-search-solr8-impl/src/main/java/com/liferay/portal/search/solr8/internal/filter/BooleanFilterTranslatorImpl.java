@@ -39,8 +39,6 @@ public class BooleanFilterTranslatorImpl implements BooleanFilterTranslator {
 
 		BooleanQuery.Builder builder = new BooleanQuery.Builder();
 
-		boolean matchAllAdded = false;
-
 		for (BooleanClause<Filter> booleanClause :
 				booleanFilter.getMustBooleanClauses()) {
 
@@ -52,17 +50,15 @@ public class BooleanFilterTranslatorImpl implements BooleanFilterTranslator {
 		for (BooleanClause<Filter> booleanClause :
 				booleanFilter.getMustNotBooleanClauses()) {
 
-			if (!matchAllAdded && _onlyMustNotClauses(booleanFilter)) {
-				builder.add(
-					new MatchAllDocsQuery(),
-					org.apache.lucene.search.BooleanClause.Occur.SHOULD);
-
-				matchAllAdded = true;
-			}
-
 			builder.add(
 				translate(booleanClause, filterVisitor),
 				org.apache.lucene.search.BooleanClause.Occur.MUST_NOT);
+		}
+
+		if (_isOnlyMustNotClauses(booleanFilter)) {
+			builder.add(
+				new MatchAllDocsQuery(),
+				org.apache.lucene.search.BooleanClause.Occur.SHOULD);
 		}
 
 		for (BooleanClause<Filter> booleanClause :
@@ -85,7 +81,7 @@ public class BooleanFilterTranslatorImpl implements BooleanFilterTranslator {
 		return filter.accept(filterVisitor);
 	}
 
-	private boolean _onlyMustNotClauses(BooleanFilter booleanFilter) {
+	private boolean _isOnlyMustNotClauses(BooleanFilter booleanFilter) {
 		List<BooleanClause<Filter>> clauses =
 			booleanFilter.getMustBooleanClauses();
 
