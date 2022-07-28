@@ -19,6 +19,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>DISABLED_ADD_EVENT_BUTTON</td>
+	<td>//*[contains(@class,'link-disabled')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>ADD_ATTRIBUTE_BUTTON</td>
 	<td>//div[contains(@class,'attribute-${key_sectionType}-section-root')]//button[contains(@class,'add-attribute')]</td>
 	<td></td>
@@ -46,7 +51,7 @@
 
 <tr>
 	<td>FILTER_BUTTON</td>
-	<td>//button[contains(@class,'btn-secondary')]//*</td>
+	<td>//*[text()='${key_attributeName}']/..//button[contains(@class,'options-button')]//*</td>
 	<td></td>
 </tr>
 <tr>
@@ -101,7 +106,7 @@
 	<td></td>
 </tr>
 <tr>
-	<td>VIEW_ANALYSIS_INFORMATION_SPECIFC_ORDER</td>
+	<td>VIEW_ANALYSIS_INFORMATION_SPECIFIC_ORDER</td>
 	<td>xpath=(//span[@class='text-truncate' and contains(text(),'${key_commonInformation}')])[${index}]</td>
 	<td></td>
 </tr>

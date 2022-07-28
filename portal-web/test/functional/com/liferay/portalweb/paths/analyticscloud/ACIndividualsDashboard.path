@@ -108,7 +108,7 @@
 </tr>
 <tr>
 	<td>TOTAL_ACTIVITIES</td>
-	<td>//a[@class='text-truncate'and text()='${key_userName}']/ancestor::td/following-sibling::td[text()='${key_activitiesNumber}']</td>
+	<td>//a[@class='text-truncate'and text()='${key_userName}']/ancestor::td/following-sibling::td[@class='table-column-text-end']</td>
 	<td></td>
 </tr>
 <tr>
@@ -143,31 +143,6 @@
 <!--INDIVIDUALS_ACTIVITIES_CHART-->
 
 <tr>
-	<td>BASE_RESULTS_TIMELINE</td>
-	<td>//div[contains(@class,'base-results')]//li[contains(@class,'timeline-item')]//span[contains(@class,'title')]//span</td>
-	<td></td>
-</tr>
-<tr>
-	<td>BASE_RESULTS_TIMELINE_ITEM</td>
-	<td>xpath=(//div[contains(@class,'base-results')]//li[contains(@class,'timeline-item')]//span[contains(@class,'title')][normalize-space(text())='${itemName}'])[${index}]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>BASE_RESULTS_TIMELINE_ITEM_GENERAL</td>
-	<td>//div[contains(@class,'base-results')]//li[contains(@class,'timeline-item')]//span[contains(@class,'title')][normalize-space(text())='${itemName}']</td>
-	<td></td>
-</tr>
-<tr>
-	<td>BASE_RESULTS_TIMELINE_ITEM_SUBTITLE</td>
-	<td>xpath=(//div[contains(@class,'base-results')]//li[contains(@class,'timeline-item')][.//span[contains(@class,'title')][normalize-space(text())='Visited ${itemName}']])[${index}]//span[contains(@class,'subtitle')][normalize-space()='${subtitle}']</td>
-	<td></td>
-</tr>
-<tr>
-	<td>BASE_RESULTS_TIMELINE_ITEM_NESTED</td>
-	<td>xpath=(//div[contains(@class,'base-results')]//li[contains(@class,'timeline-item')][.//span[contains(@class,'title')][normalize-space(text())='Visited ${itemName}']]//ul[contains(@class,'timeline-nested')]//a[contains(@class,'title')][normalize-space()='Visited ${pageName}'])[${index}]</td>
-	<td></td>
-</tr>
-<tr>
 	<td>BASE_RESULTS_TIMELINE_ATTRIBUTES_TITLE</td>
 	<td>//div[contains(@class,'attributes-title')]</td>
 	<td></td>
@@ -185,11 +160,6 @@
 
 <!-- OVERVIEW -->
 
-<tr>
-	<td>NO_EVENTS_FOUND</td>
-	<td>//span[contains(text(),'No Events Found')]</td>
-	<td></td>
-</tr>
 <tr>
 	<td>CHARTS_WRAPPER</td>
 	<td>//div[contains(@class,'recharts-wrapper')]</td>
