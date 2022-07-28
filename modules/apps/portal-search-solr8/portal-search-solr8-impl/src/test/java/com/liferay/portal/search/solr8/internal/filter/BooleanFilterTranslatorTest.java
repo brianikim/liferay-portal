@@ -44,7 +44,7 @@ public class BooleanFilterTranslatorTest extends BaseIndexingTestCase {
 		LiferayUnitTestRule.INSTANCE;
 
 	@Test
-	public void testMustNotContainsReturnsResultsSolr() throws Exception {
+	public void testMustNotContainsReturnsResultsSolr() {
 		addDocuments("alpha bravo", "alpha charlie", "charlie delta");
 
 		BooleanFilter mustNotContainBooleanFilter = new BooleanFilter();
@@ -59,15 +59,14 @@ public class BooleanFilterTranslatorTest extends BaseIndexingTestCase {
 			Arrays.asList("alpha bravo", "alpha charlie"));
 	}
 
-	protected void addDocuments(String... values) throws Exception {
+	protected void addDocuments(String... values) {
 		addDocuments(
 			value -> DocumentCreationHelpers.singleText(_FIELD_NAME, value),
 			Arrays.asList(values));
 	}
 
 	protected void assertSearch(
-			BooleanFilter booleanFilter, List<String> expectedValues)
-		throws Exception {
+		BooleanFilter booleanFilter, List<String> expectedValues) {
 
 		BooleanFilter baseBooleanFilter = new BooleanFilter();
 
@@ -75,7 +74,6 @@ public class BooleanFilterTranslatorTest extends BaseIndexingTestCase {
 			Field.ENTRY_CLASS_NAME, getEntryClassName());
 
 		baseBooleanFilter.add(booleanFilter, BooleanClauseOccur.MUST);
-
 		baseBooleanFilter.add(classTermFilter, BooleanClauseOccur.MUST);
 
 		assertSearch(
