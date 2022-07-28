@@ -161,7 +161,7 @@ definition {
 		}
 
 		task ("Wait for sending requests") {
-			Pause(locator1 = "10000");
+			ACUtils.waitForSendingRequest();
 		}
 
 		task ("View the Page events triggered for guest") {
@@ -202,7 +202,7 @@ definition {
 				key_content = '''//h1[normalize-space(text())="What's your favorite portal?"]''',
 				locator1 = "WCD#WEB_CONTENT_CONTENT_ANY");
 
-			Pause(locator1 = "5000");
+			ACUtils.waitForSendingRequest();
 
 			ACUtils.assertEventPropertyValue(
 				applicationId = "WebContent",
@@ -244,7 +244,7 @@ definition {
 		task ("View the Blog events triggered for guest") {
 			BlogsNavigator.gotoPG(entryTitle = "Blogs AC Title");
 
-			Pause(locator1 = "10000");
+			ACUtils.waitForSendingRequest();
 
 			ACUtils.assertEventPropertyValue(
 				applicationId = "Blog",
@@ -268,7 +268,7 @@ definition {
 				key_entryContent = "This is the blog test for AC",
 				locator1 = "BlogsEntry#CONTENT");
 
-			Pause(locator1 = "5000");
+			ACUtils.waitForSendingRequest();
 
 			ACUtils.assertEventPropertyValue(
 				applicationId = "Blog",
@@ -304,7 +304,7 @@ definition {
 		}
 
 		task ("Wait for sending requests") {
-			Pause(locator1 = "10000");
+			ACUtils.waitForSendingRequest();
 		}
 
 		task ("View the Document events triggered for guest") {
@@ -340,7 +340,7 @@ definition {
 
 			Click(locator1 = "Button#DOWNLOAD");
 
-			Pause(locator1 = "5000");
+			ACUtils.waitForSendingRequest();
 
 			ACUtils.assertEventPropertyValue(
 				applicationId = "Document",
@@ -352,7 +352,7 @@ definition {
 				applicationId = "Document",
 				eventId = "documentDownloaded",
 				property = "title",
-				value = "Document_1.jpg");
+				value = "DM AC Title");
 
 			ACUtils.assertEventPropertyValue(
 				applicationId = "Document",
@@ -386,7 +386,7 @@ definition {
 		}
 
 		task ("View the Form events triggered for guest") {
-			Pause(locator1 = "10000");
+			ACUtils.waitForSendingRequest();
 
 			ACUtils.assertEventPropertyValue(
 				applicationId = "Form",
@@ -422,7 +422,7 @@ definition {
 				key_fieldName = "Text",
 				locator1 = "FormFields#TEXT_FIELD");
 
-			Pause(locator1 = "5000");
+			ACUtils.waitForSendingRequest();
 
 			ACUtils.assertEventPropertyValue(
 				applicationId = "Form",
@@ -446,7 +446,7 @@ definition {
 				key_fieldLabel = "Text",
 				locator1 = "FormFields#LABEL");
 
-			Pause(locator1 = "5000");
+			ACUtils.waitForSendingRequest();
 
 			ACUtils.assertEventPropertyValue(
 				applicationId = "Form",
@@ -485,7 +485,7 @@ definition {
 
 			ProxyUtil.startHarRecording("formEvents");
 
-			Pause(locator1 = "10000");
+			ACUtils.waitForSendingRequest();
 
 			ACUtils.assertEventPropertyValue(
 				applicationId = "Form",
@@ -504,37 +504,19 @@ definition {
 				siteName = "Site Name");
 		}
 
-		task ("Wait for sending requests") {
-			Pause(locator1 = "10000");
+		task ("Start a new recording") {
+			ProxyUtil.startHarRecording("socialBookmarksEvents");
 		}
 
 		task ("Click the Fackbook icon of blogs enty") {
 			SocialBookmarks.clickBookmarkIcon(socialBookmark = "Facebook");
 		}
 
-		task ("Start a new recording") {
-			ProxyUtil.startHarRecording("socialBookmarksEvents");
-		}
-
 		task ("Wait for sending requests") {
-			Pause(locator1 = "5000");
+			ACUtils.waitForSendingRequest();
 		}
 
 		task ("View the SocialBookmarks events triggered for guest") {
-			var portalURL = PropsUtil.get("portal.url");
-
-			ACUtils.assertEventPropertyValue(
-				applicationId = "SocialBookmarks",
-				eventId = "shared",
-				property = "className",
-				value = "com.liferay.blogs.model.BlogsEntry");
-
-			ACUtils.assertEventPropertyValue(
-				applicationId = "SocialBookmarks",
-				eventId = "shared",
-				property = "classPK",
-				value = "${entryId}");
-
 			ACUtils.assertEventPropertyValue(
 				applicationId = "SocialBookmarks",
 				eventId = "shared",
@@ -544,8 +526,8 @@ definition {
 			ACUtils.assertEventPropertyValue(
 				applicationId = "SocialBookmarks",
 				eventId = "shared",
-				property = "url",
-				value = "${portalURL}/web/site-name/blog/-/blogs/blogs-ac-title");
+				property = "classPK",
+				value = "${entryId}");
 		}
 	}
 
