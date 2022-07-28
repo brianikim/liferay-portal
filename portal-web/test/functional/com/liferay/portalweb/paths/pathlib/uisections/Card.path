@@ -22,7 +22,7 @@
 </tr>
 <tr>
 	<td>CARD_LINK</td>
-	<td>//div[contains(@data-analytics-asset-title,'${key_card}')]//a[contains(@class,'card-link')]</td>
+	<td>//a[contains(@class,'card-link') and contains(@href,'${key_card}')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -67,7 +67,7 @@
 </tr>
 <tr>
 	<td>CARD_STYLE</td>
-	<td>//div[contains(@data-analytics-asset-title,'${key_card}')]/parent::div[contains(@class,'${key_cardStyle}') or contains(@style,'${key_cardStyle}')]</td>
+	<td>//a[contains(@class,'card-link') and contains(@href,'${key_card}')]</td>
 	<td></td>
 </tr>
 <tr>
