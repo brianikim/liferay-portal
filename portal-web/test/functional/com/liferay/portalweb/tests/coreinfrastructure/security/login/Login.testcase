@@ -652,7 +652,7 @@ definition {
 
 	@priority = "3"
 	test ViewInstanceSettingsAuthentication {
-		property osgi.app.includes = "portal-security-sso-google,portal-security-sso-ntlm,portal-security-sso-openid";
+		property osgi.app.includes = "portal-security-sso-google,portal-security-sso-ntlm";
 
 		User.firstLoginPG();
 
