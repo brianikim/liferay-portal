@@ -41,6 +41,7 @@ public class XmlMapperContextResolver implements ContextResolver<XmlMapper> {
 				configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
 				registerModule(new JaxbAnnotationModule());
 				setDateFormat(new ISO8601DateFormat());
+				setDefaultUseWrapper(false);
 				setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
 			}
 		};
