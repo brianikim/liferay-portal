@@ -82,22 +82,22 @@ public class BooleanFilterTranslatorImpl implements BooleanFilterTranslator {
 	}
 
 	private boolean _isOnlyMustNotClauses(BooleanFilter booleanFilter) {
-		List<BooleanClause<Filter>> clauses =
+		List<BooleanClause<Filter>> booleanClauses =
 			booleanFilter.getMustBooleanClauses();
 
-		if (clauses.size() > 0) {
+		if (booleanClauses.size() > 0) {
 			return false;
 		}
 
-		clauses = booleanFilter.getShouldBooleanClauses();
+		booleanClauses = booleanFilter.getShouldBooleanClauses();
 
-		if (clauses.size() > 0) {
+		if (booleanClauses.size() > 0) {
 			return false;
 		}
 
-		clauses = booleanFilter.getMustNotBooleanClauses();
+		booleanClauses = booleanFilter.getMustNotBooleanClauses();
 
-		if (clauses.size() > 0) {
+		if (booleanClauses.size() > 0) {
 			return true;
 		}
 
