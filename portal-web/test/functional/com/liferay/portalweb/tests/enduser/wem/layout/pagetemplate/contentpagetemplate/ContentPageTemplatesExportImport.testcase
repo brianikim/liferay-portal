@@ -896,7 +896,7 @@ definition {
 	@description = "This is a use case for LPS-106815. The specific message will be shown when import content page template where the widget has permission settings for a Role if it doesn't exist in site."
 	@priority = "4"
 	test ShowSpecificWarningMessageWhenImportContentPageTemplateWithPermissionSettingsOfWidgetsToSiteWhereTheSpecificRoleNotExist {
-		property osgi.app.includes = "account";
+		property osgi.modules.includes = "account";
 
 		task ("Add a organization and organization site") {
 			JSONOrganization.addOrganization(
