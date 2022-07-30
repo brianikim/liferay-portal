@@ -90,9 +90,22 @@ definition {
 
 	@priority = "5"
 	test BlacklistModuleLPKG {
-		property osgi.app.includes = "gogo-shell";
 		property portal.acceptance = "true";
 		property test.name.skip.portal.instance = "BundleBlacklist#BlacklistModuleLPKG";
+
+		var liferayHome = PropsUtil.get("liferay.home.dir.name");
+
+		var gogoShellLPKGExists = FileUtil.exists("${liferayHome}/osgi/marketplace/Liferay Foundation - Liferay Gogo Shell - Impl.lpkg");
+
+		if ("${gogoShellLPKGExists}" == "false") {
+			AntCommand(
+				locator1 = "build-test.xml",
+				value1 = "deploy-osgi-apps -Dosgi.app.includes=gogo-shell");
+
+			Portlet.shutdownServer();
+
+			Portlet.startServer(deleteLiferayHome = "false");
+		}
 
 		ApplicationsMenu.gotoPortlet(
 			category = "System",
