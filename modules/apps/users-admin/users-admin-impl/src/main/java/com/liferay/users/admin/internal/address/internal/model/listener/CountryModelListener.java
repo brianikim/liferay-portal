@@ -14,6 +14,7 @@
 
 package com.liferay.users.admin.internal.address.internal.model.listener;
 
+import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.exception.ModelListenerException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
@@ -65,9 +66,9 @@ public class CountryModelListener extends BaseModelListener<Country> {
 		String a2 = country.getA2();
 
 		try {
-			String path =
-				"com/liferay/users/admin/internal/address/dependencies/regions/" + a2 +
-					".json";
+			String path = StringBundler.concat(
+				"com/liferay/users/admin/internal/address/dependencies/regions",
+				"/", a2, ".json");
 
 			if (_classLoader.getResource(path) == null) {
 				return;

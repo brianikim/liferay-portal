@@ -81,7 +81,8 @@ public class PortalInstanceLifecycleListenerImpl
 		}
 
 		JSONArray countriesJSONArray = _getJSONArray(
-			"com/liferay/users/admin/internal/address/dependencies/countries.json");
+			"com/liferay/users/admin/internal/address/dependencies/countries." +
+				"json");
 
 		for (int i = 0; i < countriesJSONArray.length(); i++) {
 			JSONObject countryJSONObject = countriesJSONArray.getJSONObject(i);
