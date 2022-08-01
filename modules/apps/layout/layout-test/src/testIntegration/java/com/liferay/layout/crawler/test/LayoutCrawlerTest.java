@@ -205,7 +205,7 @@ public class LayoutCrawlerTest {
 			"test journal article");
 
 		JSONObject widgetValueJSONObject = JSONUtil.put(
-			"instanceid", StringUtil.randomString()
+			"instanceId", StringUtil.randomString()
 		).put(
 			"portletId", AssetPublisherPortletKeys.ASSET_PUBLISHER
 		);
