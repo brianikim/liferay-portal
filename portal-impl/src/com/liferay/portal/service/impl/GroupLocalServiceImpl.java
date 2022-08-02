@@ -89,6 +89,7 @@ import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
 import com.liferay.portal.kernel.security.permission.RolePermissions;
 import com.liferay.portal.kernel.security.permission.UserBag;
+import com.liferay.portal.kernel.service.GroupServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.http.TunnelUtil;
 import com.liferay.portal.kernel.service.permission.GroupPermissionUtil;
@@ -5093,19 +5094,9 @@ public class GroupLocalServiceImpl extends GroupLocalServiceBaseImpl {
 			// Ping the remote host and verify that the remote group exists in
 			// the same company as the remote user
 
-			Class<?> groupServiceUtilClass = null;
-
-			try {
-				groupServiceUtilClass = Class.forName(
-					"com.liferay.portal.kernel.service.GroupServiceUtil");
-			}
-			catch (ClassNotFoundException classNotFoundException) {
-				throw new SystemException(classNotFoundException);
-			}
-
 			try {
 				MethodKey methodKey = new MethodKey(
-					groupServiceUtilClass, "checkRemoteStagingGroup",
+					GroupServiceUtil.class, "checkRemoteStagingGroup",
 					_CHECK_REMOTE_STAGING_GROUP_PARAMETER_TYPES);
 
 				MethodHandler methodHandler = new MethodHandler(
