@@ -31,7 +31,6 @@
 	{@param spritemap: string}
 	{@param prices: ? }
 	{@param? _handleRemoveProduct: any}
-	{@param? _handleCheckboxCompareUpdate: any}
 	{@param? _handleWishListButtonClick: any}
 
 	<div class="minium-card product-card" data-href="{$detailsLink}" data-onkeypress="_handleCardKeypress" id="{$id}" tabindex="0">
@@ -60,9 +59,6 @@
 			{if isNonnull($compareState) and isNonnull($productId) and isNonnull($pictureUrl)}
 				<div class="minium-card__compare">
 					{call CompareCheckbox.render}
-						{param events: [
-							'checkboxCompareUpdated': $_handleCheckboxCompareUpdate
-						]/}
 						{param productId: $productId /}
 						{param checkboxVisible: $compareState.checkboxVisible /}
 						{param compareAvailable: $compareState.compareAvailable /}
