@@ -1224,8 +1224,10 @@ public class LayoutImportController implements ImportController {
 		String[] sourceAvailableLanguageIds = StringUtil.split(
 			headerElement.attributeValue("available-locales"));
 
-		for (String languageId : sourceAvailableLanguageIds) {
-			if (!LanguageUtil.isAvailableLocale(groupId, languageId)) {
+		for (String sourceAvailableLanguageId : sourceAvailableLanguageIds) {
+			if (!LanguageUtil.isAvailableLocale(
+					groupId, sourceAvailableLanguageId)) {
+
 				LocaleException localeException = new LocaleException(
 					LocaleException.TYPE_EXPORT_IMPORT);
 
