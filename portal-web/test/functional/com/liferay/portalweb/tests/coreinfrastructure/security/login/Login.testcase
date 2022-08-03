@@ -227,7 +227,7 @@ definition {
 	@priority = "4"
 	test GoogleSSOSmoke {
 		property dummy.socket.proxy.disabled = "true";
-		property osgi.app.includes = "portal-security-sso-google";
+		property osgi.modules.includes = "portal-security-sso-google";
 		property test.name.skip.portal.instance = "Login#GoogleSSOSmoke";
 
 		var googleClientID = PropsUtil.get("google.client.id.2");
@@ -652,7 +652,7 @@ definition {
 
 	@priority = "3"
 	test ViewInstanceSettingsAuthentication {
-		property osgi.app.includes = "portal-security-sso-google,portal-security-sso-ntlm";
+		property osgi.modules.includes = "portal-security-sso-google,portal-security-sso-ntlm";
 
 		User.firstLoginPG();
 
