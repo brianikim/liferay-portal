@@ -212,15 +212,14 @@ definition {
 				actual = "${containerWidth}",
 				expected = "${screenWidth}");
 
-			for (var assetTitle : list "WK1774476306 - Liferay Employee,LF1774476306 - David Aragonés,HL1774476306 - David Aragonés,AU1774476306 - Volkswagen Golf 1.6,HM1774476306 - Sepulveda Blvd") {
+			for (var cardLink : list "wk1774476306-liferay-employee,lf1774476306-david-aragon,hl1774476306-david-aragon,au1774476306-volkswagen-golf-1.6,hm1774476306-sepulveda-blvd") {
 				AssertElementPresent(
-					key_card = "${assetTitle}",
-					key_cardStyle = "mb-5",
+					key_card = "${cardLink}",
 					locator1 = "Card#CARD_STYLE");
 			}
 
 			Click(
-				key_card = "WK1774476306 - Liferay Employee",
+				key_card = "wk1774476306-liferay-employee",
 				locator1 = "Card#CARD_LINK");
 
 			ControlMenu.viewHeaderTitle(headerTitle = "Policy");
@@ -259,15 +258,14 @@ definition {
 					expected = "${screenWidth}");
 			}
 
-			for (var assetTitle : list "Sepulveda Blvd - CHM2546333,Volkswagen Golf - CAU5846990,David Aragonés - CHE3326955,Volkswagen Golf - CAU4536398,Volkswagen Golf - CAU6821256,Sepulveda Blvd - CHM2371402,David Aragonés - CHL22214389,Sepulveda Blvd - CHM6821402") {
+			for (var cardLink : list "sepulveda-blvd-chm2546333,volkswagen-golf-cau5846990,david-aragon%C3%A9s-che3326955,volkswagen-golf-cau4536398,volkswagen-golf-cau6821256,sepulveda-blvd-chm2371402,david-aragon%C3%A9s-chl22214389,sepulveda-blvd-chm6821402") {
 				AssertElementPresent(
-					key_card = "${assetTitle}",
-					key_cardStyle = "mb-5",
+					key_card = "${cardLink}",
 					locator1 = "Card#CARD_STYLE");
 			}
 
 			Click(
-				key_card = "Sepulveda Blvd - CHM2546333",
+				key_card = "sepulveda-blvd-chm2546333",
 				locator1 = "Card#CARD_LINK");
 
 			ControlMenu.viewHeaderTitle(headerTitle = "Claim");
@@ -289,7 +287,7 @@ definition {
 			ControlMenu.viewHeaderTitle(headerTitle = "Claims");
 
 			Click(
-				key_card = "Volkswagen Golf - CAU4536398",
+				key_card = "volkswagen-golf-cau4536398",
 				locator1 = "Card#CARD_LINK");
 
 			ControlMenu.viewHeaderTitle(headerTitle = "Claim");
