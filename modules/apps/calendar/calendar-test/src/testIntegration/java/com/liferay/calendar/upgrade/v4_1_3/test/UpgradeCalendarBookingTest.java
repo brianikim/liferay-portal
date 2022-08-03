@@ -47,7 +47,6 @@ import org.junit.runner.RunWith;
 /**
  * @author István András Dézsi
  */
-@DataGuard(scope = DataGuard.Scope.METHOD)
 @RunWith(Arquillian.class)
 public class UpgradeCalendarBookingTest {
 
