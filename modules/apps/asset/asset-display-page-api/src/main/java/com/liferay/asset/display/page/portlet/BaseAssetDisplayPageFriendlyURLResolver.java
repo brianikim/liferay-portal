@@ -295,7 +295,7 @@ public abstract class BaseAssetDisplayPageFriendlyURLResolver
 		InfoItemIdentifier infoItemIdentifier = new ClassPKInfoItemIdentifier(
 			layoutDisplayPageObjectProvider.getClassPK());
 
-		infoItemIdentifier.setVersion(InfoItemIdentifier.VERSION_LATEST);
+		infoItemIdentifier.setVersion(version);
 
 		return infoItemObjectProvider.getInfoItem(infoItemIdentifier);
 	}
