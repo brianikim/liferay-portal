@@ -424,6 +424,12 @@ public class DDMFormInstanceRecordLocalServiceImpl
 			ddmFormInstanceRecordPersistence.findByPrimaryKey(
 				ddmFormInstanceRecordId);
 
+		DDMFormInstance ddmFormInstance =
+			ddmFormInstanceRecord.getFormInstance();
+
+		ddmFormInstanceRecord.setFormInstanceVersion(
+			ddmFormInstance.getVersion());
+
 		ddmFormInstanceRecord.setModifiedDate(
 			serviceContext.getModifiedDate(null));
 
@@ -432,9 +438,6 @@ public class DDMFormInstanceRecordLocalServiceImpl
 
 		DDMFormInstanceRecordVersion ddmFormInstanceRecordVersion =
 			ddmFormInstanceRecord.getLatestFormInstanceRecordVersion();
-
-		DDMFormInstance ddmFormInstance =
-			ddmFormInstanceRecord.getFormInstance();
 
 		if (ddmFormInstanceRecordVersion.isApproved()) {
 			long ddmStorageId = createDDMContent(
@@ -457,6 +460,7 @@ public class DDMFormInstanceRecordLocalServiceImpl
 
 			updateFormInstanceRecordVersion(
 				user, ddmFormInstanceRecordVersion,
+				ddmFormInstance.getVersion(),
 				ddmFormInstanceRecordVersion.getStatus(), version,
 				serviceContext);
 
@@ -928,10 +932,13 @@ public class DDMFormInstanceRecordLocalServiceImpl
 
 	protected void updateFormInstanceRecordVersion(
 		User user, DDMFormInstanceRecordVersion ddmFormInstanceRecordVersion,
-		int status, String version, ServiceContext serviceContext) {
+		String formInstanceVersion, int status, String version,
+		ServiceContext serviceContext) {
 
 		ddmFormInstanceRecordVersion.setUserId(user.getUserId());
 		ddmFormInstanceRecordVersion.setUserName(user.getFullName());
+		ddmFormInstanceRecordVersion.setFormInstanceVersion(
+			formInstanceVersion);
 		ddmFormInstanceRecordVersion.setVersion(version);
 		ddmFormInstanceRecordVersion.setStatus(status);
 		ddmFormInstanceRecordVersion.setStatusByUserId(user.getUserId());
