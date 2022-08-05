@@ -48,6 +48,11 @@ public class SXPUpgradeStepRegistrator implements UpgradeStepRegistrator {
 				}
 
 			});
+
+		registry.register(
+			"1.2.0", "1.3.0",
+			new com.liferay.search.experiences.internal.upgrade.v1_3_0.
+				SXPBlueprintUpgradeProcess());
 	}
 
 }
