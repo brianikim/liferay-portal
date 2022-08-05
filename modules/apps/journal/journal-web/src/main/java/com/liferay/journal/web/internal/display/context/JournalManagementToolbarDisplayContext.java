@@ -353,12 +353,13 @@ public class JournalManagementToolbarDisplayContext
 						ddmStructureName);
 			}
 		).add(
-			() -> status != _journalDisplayContext.getDefaultStatus(),
+			() -> status != WorkflowConstants.STATUS_ANY,
 			labelItem -> {
 				PortletURL removeLabelURL = PortletURLUtil.clone(
 					currentURLObj, liferayPortletResponse);
 
-				removeLabelURL.setParameter("status", (String)null);
+				removeLabelURL.setParameter(
+					"status", String.valueOf(WorkflowConstants.STATUS_ANY));
 
 				labelItem.putData("removeLabelURL", removeLabelURL.toString());
 
