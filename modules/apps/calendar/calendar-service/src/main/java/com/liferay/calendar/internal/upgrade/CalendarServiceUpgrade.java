@@ -147,7 +147,7 @@ public class CalendarServiceUpgrade implements UpgradeStepRegistrator {
 		registry.register(
 			"4.1.2", "4.1.3",
 			new com.liferay.calendar.internal.upgrade.v4_1_3.
-				UpgradeCalendarBooking());
+				UpgradeCalendarBooking(_userLocalService));
 	}
 
 	@Reference

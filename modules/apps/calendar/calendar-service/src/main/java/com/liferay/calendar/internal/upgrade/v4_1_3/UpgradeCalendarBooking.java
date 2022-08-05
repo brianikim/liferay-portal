@@ -15,9 +15,12 @@
 package com.liferay.calendar.internal.upgrade.v4_1_3;
 
 import com.liferay.calendar.util.JCalendarUtil;
+import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.dao.orm.common.SQLTransformer;
 import com.liferay.portal.kernel.dao.jdbc.AutoBatchPreparedStatementUtil;
+import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
 
 import java.sql.PreparedStatement;
@@ -31,13 +34,19 @@ import java.util.TimeZone;
  */
 public class UpgradeCalendarBooking extends UpgradeProcess {
 
+	public UpgradeCalendarBooking(UserLocalService userLocalService) {
+		_userLocalService = userLocalService;
+	}
+
 	@Override
 	protected void doUpgrade() throws Exception {
 		try (PreparedStatement selectPreparedStatement =
 				connection.prepareStatement(
 					SQLTransformer.transform(
-						"select calendarBookingId, startTime, endtime from " +
-							"CalendarBooking where allDay = [$TRUE$]"));
+						StringBundler.concat(
+							"select calendarBookingId, startTime, endTime, ",
+							"userId from CalendarBooking where allDay = ",
+							"[$TRUE$]")));
 			PreparedStatement updatePreparedStatement =
 				AutoBatchPreparedStatementUtil.autoBatch(
 					connection.prepareStatement(
@@ -46,13 +55,25 @@ public class UpgradeCalendarBooking extends UpgradeProcess {
 			ResultSet resultSet = selectPreparedStatement.executeQuery()) {
 
 			while (resultSet.next()) {
-				Calendar startTimeJCalendar = JCalendarUtil.getJCalendar(
-					resultSet.getLong("startTime"), _utcTimeZone);
-				Calendar endTimeJCalendar = JCalendarUtil.getJCalendar(
-					resultSet.getLong("endTime"), _utcTimeZone);
+				long startTime = resultSet.getLong("startTime");
+				long endTime = resultSet.getLong("endTime");
 
-				if (_isLastHour(endTimeJCalendar) &&
-					_isMidnight(startTimeJCalendar)) {
+				if (_isValidAllDayEvent(endTime, startTime)) {
+					continue;
+				}
+
+				User user = _userLocalService.getUser(
+					resultSet.getLong("userId"));
+
+				Calendar startTimeJCalendar = JCalendarUtil.getJCalendar(
+					startTime, user.getTimeZone());
+
+				Calendar endTimeJCalendar = JCalendarUtil.getJCalendar(
+					endTime, user.getTimeZone());
+
+				if (!_isLastHour(endTimeJCalendar) ||
+					!_isMidnight(startTimeJCalendar) ||
+					!_isSameDay(endTimeJCalendar, startTimeJCalendar)) {
 
 					continue;
 				}
@@ -85,9 +106,9 @@ public class UpgradeCalendarBooking extends UpgradeProcess {
 		}
 	}
 
-	private boolean _isLastHour(Calendar jCalendar) {
-		if ((jCalendar.get(Calendar.HOUR_OF_DAY) == 23) &&
-			(jCalendar.get(Calendar.MINUTE) == 59)) {
+	private boolean _isLastHour(Calendar endTimeJCalendar) {
+		if ((endTimeJCalendar.get(Calendar.HOUR_OF_DAY) == 23) &&
+			(endTimeJCalendar.get(Calendar.MINUTE) == 59)) {
 
 			return true;
 		}
@@ -95,9 +116,36 @@ public class UpgradeCalendarBooking extends UpgradeProcess {
 		return false;
 	}
 
-	private boolean _isMidnight(Calendar jCalendar) {
-		if ((jCalendar.get(Calendar.HOUR_OF_DAY) == 0) &&
-			(jCalendar.get(Calendar.MINUTE) == 0)) {
+	private boolean _isMidnight(Calendar startTimeJCalendar) {
+		if ((startTimeJCalendar.get(Calendar.HOUR_OF_DAY) == 0) &&
+			(startTimeJCalendar.get(Calendar.MINUTE) == 0)) {
+
+			return true;
+		}
+
+		return false;
+	}
+
+	private boolean _isSameDay(
+		Calendar endTimeJCalendar, Calendar startTimeJCalendar) {
+
+		if (startTimeJCalendar.get(Calendar.DATE) == endTimeJCalendar.get(
+				Calendar.DATE)) {
+
+			return true;
+		}
+
+		return false;
+	}
+
+	private boolean _isValidAllDayEvent(long endTime, long startTime) {
+		Calendar endTimeJCalendar = JCalendarUtil.getJCalendar(
+			endTime, _utcTimeZone);
+		Calendar startTimeJCalendar = JCalendarUtil.getJCalendar(
+			startTime, _utcTimeZone);
+
+		if (_isMidnight(startTimeJCalendar) && _isLastHour(endTimeJCalendar) &&
+			_isSameDay(endTimeJCalendar, startTimeJCalendar)) {
 
 			return true;
 		}
@@ -107,5 +155,7 @@ public class UpgradeCalendarBooking extends UpgradeProcess {
 
 	private static final TimeZone _utcTimeZone = TimeZone.getTimeZone(
 		StringPool.UTC);
+
+	private final UserLocalService _userLocalService;
 
 }
