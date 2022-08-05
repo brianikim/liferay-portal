@@ -58,7 +58,9 @@ public abstract class BaseUuidUpgradeProcess extends UpgradeProcess {
 		}
 
 		if (!hasColumn(tableName, "uuid_")) {
-			alterTableAddColumn(tableName, "uuid_", "VARCHAR(75) null");
+			runSQL(
+				StringBundler.concat(
+					"alter table ", tableName, " add uuid_ VARCHAR(75) null"));
 		}
 
 		try (LoggingTimer loggingTimer = new LoggingTimer()) {

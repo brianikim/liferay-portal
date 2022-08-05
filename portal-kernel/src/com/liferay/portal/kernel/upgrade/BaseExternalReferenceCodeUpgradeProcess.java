@@ -59,8 +59,10 @@ public abstract class BaseExternalReferenceCodeUpgradeProcess
 		}
 
 		if (!hasColumn(tableName, "externalReferenceCode")) {
-			alterTableAddColumn(
-				tableName, "externalReferenceCode", "VARCHAR(75)");
+			runSQL(
+				StringBundler.concat(
+					"alter table ", tableName,
+					" add externalReferenceCode VARCHAR(75)"));
 		}
 
 		try (LoggingTimer loggingTimer = new LoggingTimer()) {
