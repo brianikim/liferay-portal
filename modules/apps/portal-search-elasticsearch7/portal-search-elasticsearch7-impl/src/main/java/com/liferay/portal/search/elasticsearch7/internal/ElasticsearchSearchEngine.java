@@ -65,6 +65,7 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 /**
@@ -125,8 +126,11 @@ public class ElasticsearchSearchEngine extends BaseSearchEngine {
 
 		waitForYellowStatus();
 
-		if (_crossClusterReplicationHelper != null) {
-			_crossClusterReplicationHelper.follow(
+		CrossClusterReplicationHelper crossClusterReplicationHelper =
+			_crossClusterReplicationHelper;
+
+		if (crossClusterReplicationHelper != null) {
+			crossClusterReplicationHelper.follow(
 				_indexNameBuilder.getIndexName(companyId));
 		}
 	}
@@ -147,8 +151,11 @@ public class ElasticsearchSearchEngine extends BaseSearchEngine {
 	public void removeCompany(long companyId) {
 		super.removeCompany(companyId);
 
-		if (_crossClusterReplicationHelper != null) {
-			_crossClusterReplicationHelper.unfollow(
+		CrossClusterReplicationHelper crossClusterReplicationHelper =
+			_crossClusterReplicationHelper;
+
+		if (crossClusterReplicationHelper != null) {
+			crossClusterReplicationHelper.unfollow(
 				_indexNameBuilder.getIndexName(companyId));
 		}
 
@@ -211,12 +218,6 @@ public class ElasticsearchSearchEngine extends BaseSearchEngine {
 		super.setIndexWriter(indexWriter);
 	}
 
-	public void unsetCrossClusterReplicationHelper(
-		CrossClusterReplicationHelper crossClusterReplicationHelper) {
-
-		_crossClusterReplicationHelper = null;
-	}
-
 	public void unsetElasticsearchConnectionManager(
 		ElasticsearchConnectionManager elasticsearchConnectionManager) {
 
@@ -273,16 +274,6 @@ public class ElasticsearchSearchEngine extends BaseSearchEngine {
 		}
 
 		return false;
-	}
-
-	@Reference(
-		cardinality = ReferenceCardinality.OPTIONAL,
-		policyOption = ReferencePolicyOption.GREEDY
-	)
-	protected void setCrossClusterReplicationHelper(
-		CrossClusterReplicationHelper crossClusterReplicationHelper) {
-
-		_crossClusterReplicationHelper = crossClusterReplicationHelper;
 	}
 
 	@Reference(unbind = "-")
@@ -430,7 +421,14 @@ public class ElasticsearchSearchEngine extends BaseSearchEngine {
 	private static final Log _log = LogFactoryUtil.getLog(
 		ElasticsearchSearchEngine.class);
 
-	private CrossClusterReplicationHelper _crossClusterReplicationHelper;
+	@Reference(
+		cardinality = ReferenceCardinality.OPTIONAL,
+		policy = ReferencePolicy.DYNAMIC,
+		policyOption = ReferencePolicyOption.GREEDY
+	)
+	private volatile CrossClusterReplicationHelper
+		_crossClusterReplicationHelper;
+
 	private volatile ElasticsearchConfigurationWrapper
 		_elasticsearchConfigurationWrapper;
 	private ElasticsearchConnectionManager _elasticsearchConnectionManager;

@@ -37,6 +37,7 @@ import java.util.List;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 /**
@@ -94,23 +95,26 @@ public class FileEntryInfoItemFormVariationsProvider
 	private long[] _getCurrentAndAncestorSiteGroupIds(long groupId)
 		throws PortalException {
 
-		if (_depotEntryLocalService == null) {
+		DepotEntryLocalService depotEntryLocalService = _depotEntryLocalService;
+
+		if (depotEntryLocalService == null) {
 			return _portal.getCurrentAndAncestorSiteGroupIds(groupId);
 		}
 
 		return ArrayUtil.append(
 			_portal.getCurrentAndAncestorSiteGroupIds(groupId),
 			ListUtil.toLongArray(
-				_depotEntryLocalService.getGroupConnectedDepotEntries(
+				depotEntryLocalService.getGroupConnectedDepotEntries(
 					groupId, true, QueryUtil.ALL_POS, QueryUtil.ALL_POS),
 				DepotEntry::getGroupId));
 	}
 
 	@Reference(
 		cardinality = ReferenceCardinality.OPTIONAL,
+		policy = ReferencePolicy.DYNAMIC,
 		policyOption = ReferencePolicyOption.GREEDY
 	)
-	private DepotEntryLocalService _depotEntryLocalService;
+	private volatile DepotEntryLocalService _depotEntryLocalService;
 
 	@Reference
 	private DLFileEntryTypeLocalService _dlFileEntryTypeLocalService;

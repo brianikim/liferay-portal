@@ -111,6 +111,7 @@ import java.util.regex.Pattern;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 /**
@@ -2034,15 +2035,17 @@ public class DDMStructureLocalServiceImpl
 	}
 
 	private long[] _getAncestorSiteAndDepotGroupIds(long groupId) {
+		DepotEntryLocalService depotEntryLocalService = _depotEntryLocalService;
+
 		try {
-			if (_depotEntryLocalService == null) {
+			if (depotEntryLocalService == null) {
 				return _portal.getAncestorSiteGroupIds(groupId);
 			}
 
 			return ArrayUtil.append(
 				_portal.getAncestorSiteGroupIds(groupId),
 				ListUtil.toLongArray(
-					_depotEntryLocalService.getGroupConnectedDepotEntries(
+					depotEntryLocalService.getGroupConnectedDepotEntries(
 						groupId, true, QueryUtil.ALL_POS, QueryUtil.ALL_POS),
 					DepotEntry::getGroupId));
 		}
@@ -2097,9 +2100,10 @@ public class DDMStructureLocalServiceImpl
 
 	@Reference(
 		cardinality = ReferenceCardinality.OPTIONAL,
+		policy = ReferencePolicy.DYNAMIC,
 		policyOption = ReferencePolicyOption.GREEDY
 	)
-	private DepotEntryLocalService _depotEntryLocalService;
+	private volatile DepotEntryLocalService _depotEntryLocalService;
 
 	@Reference(target = "(ddm.form.deserializer.type=json)")
 	private DDMFormDeserializer _jsonDDMFormDeserializer;
