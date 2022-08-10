@@ -147,8 +147,15 @@ public class RolesAdminPortlet extends MVCPortlet {
 		long roleId = ParamUtil.getLong(actionRequest, "roleId");
 		String name = ParamUtil.getString(actionRequest, "name");
 		int scope = ParamUtil.getInteger(actionRequest, "scope");
-		String primKey = ParamUtil.getString(actionRequest, "primKey");
+		String[] primKeys = ParamUtil.getStringValues(
+			actionRequest, "primKeys");
 		String actionId = ParamUtil.getString(actionRequest, "actionId");
+
+		for (String primKey : primKeys) {
+			_resourcePermissionService.removeResourcePermission(
+				themeDisplay.getScopeGroupId(), themeDisplay.getCompanyId(),
+				name, scope, primKey, roleId, actionId);
+		}
 
 		Role role = _roleLocalService.getRole(roleId);
 
@@ -163,10 +170,6 @@ public class RolesAdminPortlet extends MVCPortlet {
 
 			throw new RolePermissionsException(roleName);
 		}
-
-		_resourcePermissionService.removeResourcePermission(
-			themeDisplay.getScopeGroupId(), themeDisplay.getCompanyId(), name,
-			scope, primKey, roleId, actionId);
 
 		// Send redirect
 

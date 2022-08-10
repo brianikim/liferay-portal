@@ -112,8 +112,6 @@ List<com.liferay.portal.kernel.dao.search.ResultRow> resultRows = searchContaine
 for (int i = 0; i < results.size(); i++) {
 	PermissionDisplay permissionDisplay = results.get(i);
 
-	Permission permission = permissionDisplay.getPermission();
-
 	Resource resource = permissionDisplay.getResource();
 
 	String curResource = resource.getName();
@@ -123,8 +121,6 @@ for (int i = 0; i < results.size(); i++) {
 	String curModelLabel = permissionDisplay.getModelLabel();
 	String actionId = permissionDisplay.getActionId();
 	String actionLabel = permissionDisplay.getActionLabel();
-
-	ResultRow row = new ResultRow(new Object[] {permission, role}, actionId, i);
 
 	List<Group> groups = Collections.emptyList();
 
@@ -150,6 +146,22 @@ for (int i = 0; i < results.size(); i++) {
 	else {
 		scope = ResourceConstants.SCOPE_GROUP_TEMPLATE;
 	}
+
+	Permission permission = permissionDisplay.getPermission();
+
+	String[] primKeys = {permission.getPrimKey()};
+
+	if (scope == ResourceConstants.SCOPE_GROUP) {
+		primKeys = new String[groups.size()];
+
+		for (int j = 0; j < groups.size(); j++) {
+			Group group = groups.get(j);
+
+			primKeys[j] = String.valueOf(group.getGroupId());
+		}
+	}
+
+	ResultRow row = new ResultRow(new Object[] {permission, role, primKeys}, actionId, i);
 
 	boolean selected = ResourcePermissionLocalServiceUtil.hasScopeResourcePermission(company.getCompanyId(), curResource, scope, role.getRoleId(), actionId);
 
