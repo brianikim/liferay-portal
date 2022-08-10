@@ -14,6 +14,7 @@
 
 package com.liferay.headless.commerce.admin.site.setting.internal.resource.v1_0.factory;
 
+import com.liferay.headless.commerce.admin.site.setting.internal.security.permission.LiberalPermissionChecker;
 import com.liferay.headless.commerce.admin.site.setting.resource.v1_0.AvailabilityEstimateResource;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.User;
@@ -195,7 +196,7 @@ public class AvailabilityEstimateResourceFactoryImpl
 		}
 		else {
 			PermissionThreadLocal.setPermissionChecker(
-				_liberalPermissionCheckerFactory.create(user));
+				new LiberalPermissionChecker(user));
 		}
 
 		AvailabilityEstimateResource availabilityEstimateResource =
@@ -263,9 +264,6 @@ public class AvailabilityEstimateResourceFactoryImpl
 
 	@Reference
 	private GroupLocalService _groupLocalService;
-
-	@Reference(target = "(permission.checker.type=liberal)")
-	private PermissionCheckerFactory _liberalPermissionCheckerFactory;
 
 	@Reference
 	private ResourceActionLocalService _resourceActionLocalService;
