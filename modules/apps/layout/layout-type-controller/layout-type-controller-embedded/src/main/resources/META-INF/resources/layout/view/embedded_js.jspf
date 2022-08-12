@@ -22,20 +22,21 @@
 
 		iframe.on('load', function () {
 			var height = A.Plugin.AutosizeIframe.getContentHeight(iframe);
-			var heightNormal = 600;
+			var normalHeight = 600;
 
 			if (height == null) {
 				if (themeDisplay.isStateMaximized()) {
 					height = A.getDoc().get('docHeight');
 				}
 				else {
-					height = heightNormal;
+					height = normalHeight;
 
 					iframe.autosizeiframe.set('monitorHeight', false);
 				}
 			}
-			if (height < heightNormal) {
-				height = heightNormal;
+
+			if (height < normalHeight) {
+				height = normalHeight;
 			}
 
 			iframe.setStyle('height', height);
