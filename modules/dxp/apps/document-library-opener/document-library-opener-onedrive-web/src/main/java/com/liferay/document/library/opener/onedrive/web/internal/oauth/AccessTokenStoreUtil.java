@@ -53,28 +53,26 @@ public class AccessTokenStoreUtil {
 	public static Optional<AccessToken> getAccessTokenOptional(
 		long companyId, long userId) {
 
-		Map<Long, AccessToken> companyAccessTokens =
-			_accessTokenMap.getOrDefault(companyId, new HashMap<>());
+		Map<Long, AccessToken> accessTokens = _accessTokens.getOrDefault(
+			companyId, new HashMap<>());
 
-		return Optional.ofNullable(companyAccessTokens.get(userId));
+		return Optional.ofNullable(accessTokens.get(userId));
 	}
 
 	private static void _add(
 		long companyId, long userId, AccessToken accessToken) {
 
-		Map<Long, AccessToken> companyAccessTokens =
-			_accessTokenMap.computeIfAbsent(
-				companyId, key -> new ConcurrentHashMap<>());
+		Map<Long, AccessToken> accessTokens = _accessTokens.computeIfAbsent(
+			companyId, key -> new ConcurrentHashMap<>());
 
-		companyAccessTokens.put(userId, accessToken);
+		accessTokens.put(userId, accessToken);
 	}
 
 	private static void _delete(long companyId, long userId) {
-		Map<Long, AccessToken> companyAccessTokens =
-			_accessTokenMap.computeIfAbsent(
-				companyId, key -> new ConcurrentHashMap<>());
+		Map<Long, AccessToken> accessTokens = _accessTokens.computeIfAbsent(
+			companyId, key -> new ConcurrentHashMap<>());
 
-		companyAccessTokens.remove(userId);
+		accessTokens.remove(userId);
 	}
 
 	private static void _executeOnCluster(MethodHandler methodHandler) {
@@ -86,7 +84,7 @@ public class AccessTokenStoreUtil {
 		ClusterExecutorUtil.execute(clusterRequest);
 	}
 
-	private static final Map<Long, Map<Long, AccessToken>> _accessTokenMap =
+	private static final Map<Long, Map<Long, AccessToken>> _accessTokens =
 		new ConcurrentHashMap<>();
 	private static final MethodKey _addMethodKey = new MethodKey(
 		AccessTokenStoreUtil.class, "_add", long.class, long.class,
