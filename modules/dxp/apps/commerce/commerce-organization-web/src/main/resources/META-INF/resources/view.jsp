@@ -24,7 +24,7 @@ String viewMode = commerceOrganizationDisplayContext.getViewMode();
 request.setAttribute("view.jsp-filterPerOrganization", false);
 %>
 
-<div class="<%= "commerce-organization-view-modes mb-3 text-right" %>">
+<div class="commerce-organization-view-modes mb-3 text-right">
 
 	<%
 	for (String curViewMode : CommerceOrganizationConstants.VIEW_MODES) {

@@ -42,7 +42,7 @@ if (mvcPath.startsWith("/edit_entry.jsp")) {
 					<div>
 						<a class="company-link" href="<%= PortalUtil.addPreservedParameters(themeDisplay, themeDisplay.getURLPortal(), false, true) %>">
 							<span class="company-details text-truncate">
-								<img alt="" class="company-logo" src="<%= themeDisplay.getPathImage() + "/company_logo?img_id=" + company.getLogoId() + "&t=" + WebServerServletTokenUtil.getToken(company.getLogoId()) %>" />
+								<img alt="" class="company-logo" src="<%= themeDisplay.getPathImage() %>/company_logo?img_id=<%= company.getLogoId() %>&t=<%= WebServerServletTokenUtil.getToken(company.getLogoId()) %>" />
 
 								<span class="company-name"><%= HtmlUtil.escape(company.getName()) %></span>
 							</span>

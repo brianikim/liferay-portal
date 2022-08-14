@@ -24,7 +24,7 @@ CommerceDataIntegrationProcess commerceDataIntegrationProcess = (CommerceDataInt
 String runNowButton = "runNowButton" + row.getRowId();
 %>
 
-<span aria-hidden="true" class="<%= "hide icon-spinner icon-spin commerce-data-integration-check-row-icon-spinner" + row.getRowId() %>"></span>
+<span aria-hidden="true" class="hide icon-spinner icon-spin commerce-data-integration-check-row-icon-spinner<%= row.getRowId() %>"></span>
 
 <aui:button cssClass="btn-lg" name="<%= runNowButton %>" type="cancel" value="run-now" />
 

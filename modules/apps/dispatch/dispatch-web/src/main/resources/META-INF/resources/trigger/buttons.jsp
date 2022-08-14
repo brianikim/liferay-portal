@@ -24,7 +24,7 @@ DispatchTrigger dispatchTrigger = (DispatchTrigger)row.getObject();
 String runNowButton = "runNowButton" + row.getRowId();
 %>
 
-<span aria-hidden="true" class="<%= "hide icon-spinner icon-spin dispatch-check-row-icon-spinner" + row.getRowId() %>"></span>
+<span aria-hidden="true" class="hide icon-spinner icon-spin dispatch-check-row-icon-spinner<%= row.getRowId() %>"></span>
 
 <c:if test="<%= DispatchTriggerPermission.contains(permissionChecker, dispatchTrigger, ActionKeys.UPDATE) %>">
 	<aui:button cssClass="btn-lg" name="<%= runNowButton %>" type="cancel" value="run-now" />
