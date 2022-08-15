@@ -18,10 +18,13 @@ import com.github.scribejava.core.model.OAuth2AccessToken;
 
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
+import com.liferay.registry.BasicRegistryImpl;
+import com.liferay.registry.RegistryUtil;
 
 import java.util.Optional;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -35,6 +38,11 @@ public class AccessTokenStoreUtilTest {
 	@Rule
 	public static final LiferayUnitTestRule liferayUnitTestRule =
 		LiferayUnitTestRule.INSTANCE;
+
+	@Before
+	public void setUp() throws Exception {
+		RegistryUtil.setRegistry(new BasicRegistryImpl());
+	}
 
 	@Test
 	public void testAdd() {
