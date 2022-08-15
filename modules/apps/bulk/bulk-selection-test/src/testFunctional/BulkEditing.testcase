@@ -382,6 +382,8 @@ definition {
 	@description = "This test covers LPS-89636. It saves tags without clicking Enter or adding a Comma."
 	@priority = "4"
 	test SaveTags {
+		property portal.acceptance = "true";
+
 		DMDocument.addMultiplePG(dmDocumentFileList = "Document_1.doc,Document_2.jpg,Document_3.xls,Document_4.txt");
 
 		for (var key_dmDocumentTitle : list "Document_1.doc,Document_2.jpg,Document_3.xls,Document_4.txt") {
