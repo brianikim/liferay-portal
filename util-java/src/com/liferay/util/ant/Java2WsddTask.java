@@ -177,6 +177,13 @@ public class Java2WsddTask {
 
 		SAXReader saxReader = new SAXReader();
 
+		saxReader.setFeature(
+			"http://apache.org/xml/features/disallow-doctype-decl", true);
+		saxReader.setFeature(
+			"http://xml.org/sax/features/external-general-entities", false);
+		saxReader.setFeature(
+			"http://xml.org/sax/features/external-parameter-entities", false);
+
 		Document document = saxReader.read(new XMLSafeReader(content));
 
 		Element rootElement = document.getRootElement();
