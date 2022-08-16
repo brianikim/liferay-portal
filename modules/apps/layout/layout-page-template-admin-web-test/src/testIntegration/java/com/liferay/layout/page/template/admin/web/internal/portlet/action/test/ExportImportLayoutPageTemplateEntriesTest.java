@@ -353,13 +353,20 @@ public class ExportImportLayoutPageTemplateEntriesTest {
 			LayoutPageTemplateAdminWebTestPortletKeys.
 				LAYOUT_PAGE_TEMPLATE_ADMIN_WEB_TEST_PORTLET);
 
+		LayoutPrototype layoutPrototype =
+			LayoutPrototypeLocalServiceUtil.getLayoutPrototype(
+				layoutPageTemplateEntry.getLayoutPrototypeId());
+
+		serviceContext.setAttribute(
+			"layoutPrototypeUuid", layoutPrototype.getUuid());
+
 		String layoutName = RandomTestUtil.randomString();
 
 		_addLayoutFromLayoutPrototypeAndChangeFriendlyURL(
-			group, layoutPageTemplateEntry, layoutName);
+			group, layoutName, serviceContext);
 
 		_addLayoutFromLayoutPrototypeAndChangeFriendlyURL(
-			group, layoutPageTemplateEntry, layoutName);
+			group, layoutName, serviceContext);
 
 		long[] layoutIds = ListUtil.toLongArray(
 			_layoutLocalService.getLayouts(group.getGroupId(), false),
@@ -433,19 +440,8 @@ public class ExportImportLayoutPageTemplateEntriesTest {
 	}
 
 	private Layout _addLayoutFromLayoutPrototypeAndChangeFriendlyURL(
-			Group group, LayoutPageTemplateEntry layoutPageTemplateEntry,
-			String name)
+			Group group, String name, ServiceContext serviceContext)
 		throws Exception {
-
-		LayoutPrototype layoutPrototype =
-			LayoutPrototypeLocalServiceUtil.getLayoutPrototype(
-				layoutPageTemplateEntry.getLayoutPrototypeId());
-
-		ServiceContext serviceContext =
-			ServiceContextTestUtil.getServiceContext(group.getGroupId());
-
-		serviceContext.setAttribute(
-			"layoutPrototypeUuid", layoutPrototype.getUuid());
 
 		Layout layout = _layoutLocalService.addLayout(
 			TestPropsValues.getUserId(), group.getGroupId(), false,
