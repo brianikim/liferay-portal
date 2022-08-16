@@ -1009,16 +1009,6 @@
     "@clayui/loading-indicator" "^3.60.0"
     fuzzy "^0.1.3"
 
-"@clayui/autocomplete@^3.58.0":
-  version "3.62.0"
-  resolved "https://registry.yarnpkg.com/@clayui/autocomplete/-/autocomplete-3.62.0.tgz#9f8b85bd9d7041c7076063150240ce47f1e470af"
-  integrity sha512-1ivHodM89RgkayArF9r+ETxu3Rsi21Z5U/rytlwpRSRXldJaUAvRm4MW+Q4mGi0+7xDsD0ZlQe4+HBQuN7wODw==
-  dependencies:
-    "@clayui/drop-down" "^3.62.0"
-    "@clayui/form" "^3.58.0"
-    "@clayui/loading-indicator" "^3.60.0"
-    fuzzy "^0.1.3"
-
 "@clayui/autocomplete@^3.64.0":
   version "3.65.1"
   resolved "https://registry.yarnpkg.com/@clayui/autocomplete/-/autocomplete-3.65.1.tgz#36d4eb056ba114a1d99c9affa02532b77da98265"
@@ -1157,20 +1147,6 @@
     react-transition-group "^4.4.1"
     warning "^4.0.3"
 
-"@clayui/drop-down@^3.62.0":
-  version "3.62.0"
-  resolved "https://registry.yarnpkg.com/@clayui/drop-down/-/drop-down-3.62.0.tgz#71919fca633dd57ba8533e15829a75ee661fdc15"
-  integrity sha512-JxmebiNDWqu7Sunobn8uPJ8t+I4Pm5BSIyY5VOfMuhlKIVlRB2HUB+q6pwiVKfAMMgRFq36yRBC/6bB/sHK/2g==
-  dependencies:
-    "@clayui/button" "^3.56.0"
-    "@clayui/form" "^3.58.0"
-    "@clayui/icon" "^3.56.0"
-    "@clayui/link" "^3.56.0"
-    "@clayui/shared" "^3.58.0"
-    classnames "^2.2.6"
-    react-transition-group "^4.4.1"
-    warning "^4.0.3"
-
 "@clayui/drop-down@^3.64.0", "@clayui/drop-down@^3.65.1":
   version "3.65.1"
   resolved "https://registry.yarnpkg.com/@clayui/drop-down/-/drop-down-3.65.1.tgz#4c421bff5b39c81f5571d1fcb52dc3b006aacb3e"
@@ -1265,7 +1241,7 @@
     classnames "^2.2.6"
     warning "^4.0.3"
 
-"@clayui/loading-indicator@3.60.0", "@clayui/loading-indicator@^3.56.0", "@clayui/loading-indicator@^3.60.0":
+"@clayui/loading-indicator@3.60.0", "@clayui/loading-indicator@^3.60.0":
   version "3.60.0"
   resolved "https://registry.yarnpkg.com/@clayui/loading-indicator/-/loading-indicator-3.60.0.tgz#d5573f0d391367599740fb23d1999a9064ba71b1"
   integrity sha512-UpPwjJqex0tX+asB4hDRe50qJop6hvAyvDjfE6P6ivYxpuLjdTqhk7CN9QKLWSesPh8DFvmG32BYnuW9OZ59XQ==
@@ -1312,21 +1288,6 @@
     "@clayui/shared" "^3.65.0"
     classnames "^2.2.6"
     warning "^4.0.3"
-
-"@clayui/multi-select@3.58.0":
-  version "3.58.0"
-  resolved "https://registry.yarnpkg.com/@clayui/multi-select/-/multi-select-3.58.0.tgz#26dc10343399399c27d18b338a9ba66d528934eb"
-  integrity sha512-EQ0xyFrDTak4SccDx4SjoTjZYjZfAkgGvPiLmAvJa3PAUkfwqlxDG0lki/JtdPsQvexPr4tmoV+vfupFPBc6kg==
-  dependencies:
-    "@clayui/autocomplete" "^3.58.0"
-    "@clayui/button" "^3.56.0"
-    "@clayui/drop-down" "^3.58.0"
-    "@clayui/form" "^3.58.0"
-    "@clayui/label" "^3.56.0"
-    "@clayui/loading-indicator" "^3.56.0"
-    "@clayui/shared" "^3.58.0"
-    classnames "^2.2.6"
-    fuzzy "^0.1.3"
 
 "@clayui/multi-select@3.64.0":
   version "3.64.0"
@@ -12624,10 +12585,6 @@ object.values@^1.1.0, object.values@^1.1.1:
 obuf@^1.0.0, obuf@^1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/obuf/-/obuf-1.1.2.tgz#09bea3343d41859ebd446292d11c9d4db619084e"
-
-odata-v4-parser@^0.1.29:
-  version "0.1.29"
-  resolved "https://registry.yarnpkg.com/odata-v4-parser/-/odata-v4-parser-0.1.29.tgz#49e466037dbc4fc088572a2deae822fc14e6c137"
 
 on-finished@~2.3.0:
   version "2.3.0"
