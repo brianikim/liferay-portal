@@ -320,7 +320,7 @@ public class ExportImportLayoutPageTemplateEntriesTest {
 	}
 
 	@Test
-	public void testExportImportLayoutsWithSameNameAndDeletedOldFriendlyURLSAndCreatedFromLayoutPageTemplateEntry()
+	public void testExportImportLayoutsCreatedFromLayoutPrototypeWithSameName()
 		throws Exception {
 
 		Group group = GroupTestUtil.addGroup();
@@ -355,10 +355,10 @@ public class ExportImportLayoutPageTemplateEntriesTest {
 
 		String layoutName = RandomTestUtil.randomString();
 
-		_addLayoutFromTemplateWithAnOldFriendlyURL(
+		_addLayoutFromLayoutPrototypeAndChangeFriendlyURL(
 			group, layoutPageTemplateEntry, layoutName);
 
-		_addLayoutFromTemplateWithAnOldFriendlyURL(
+		_addLayoutFromLayoutPrototypeAndChangeFriendlyURL(
 			group, layoutPageTemplateEntry, layoutName);
 
 		long[] layoutIds = ListUtil.toLongArray(
@@ -432,7 +432,7 @@ public class ExportImportLayoutPageTemplateEntriesTest {
 			serviceContext);
 	}
 
-	private Layout _addLayoutFromTemplateWithAnOldFriendlyURL(
+	private Layout _addLayoutFromLayoutPrototypeAndChangeFriendlyURL(
 			Group group, LayoutPageTemplateEntry layoutPageTemplateEntry,
 			String name)
 		throws Exception {
