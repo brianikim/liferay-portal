@@ -5768,7 +5768,7 @@ public class TasksEntryPersistenceImpl
 	 * </p>
 	 *
 	 * @param userId the user ID
-	 * @param status the status
+	 * @param statuses the statuses
 	 * @param start the lower bound of the range of tasks entries
 	 * @param end the upper bound of the range of tasks entries (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
@@ -6576,7 +6576,7 @@ public class TasksEntryPersistenceImpl
 	 * </p>
 	 *
 	 * @param assigneeUserId the assignee user ID
-	 * @param status the status
+	 * @param statuses the statuses
 	 * @param start the lower bound of the range of tasks entries
 	 * @param end the upper bound of the range of tasks entries (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
@@ -7931,7 +7931,7 @@ public class TasksEntryPersistenceImpl
 	 *
 	 * @param groupId the group ID
 	 * @param userId the user ID
-	 * @param status the status
+	 * @param statuses the statuses
 	 * @param start the lower bound of the range of tasks entries
 	 * @param end the upper bound of the range of tasks entries (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
@@ -9448,7 +9448,7 @@ public class TasksEntryPersistenceImpl
 	 *
 	 * @param groupId the group ID
 	 * @param assigneeUserId the assignee user ID
-	 * @param status the status
+	 * @param statuses the statuses
 	 * @param start the lower bound of the range of tasks entries
 	 * @param end the upper bound of the range of tasks entries (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)

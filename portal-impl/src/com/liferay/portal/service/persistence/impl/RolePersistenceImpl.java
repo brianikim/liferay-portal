@@ -7005,7 +7005,7 @@ public class RolePersistenceImpl
 	 * </p>
 	 *
 	 * @param companyId the company ID
-	 * @param type the type
+	 * @param types the types
 	 * @param start the lower bound of the range of roles
 	 * @param end the upper bound of the range of roles (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
@@ -8531,7 +8531,7 @@ public class RolePersistenceImpl
 	 *
 	 * @param companyId the company ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class pk
+	 * @param classPKs the class pks
 	 * @param start the lower bound of the range of roles
 	 * @param end the upper bound of the range of roles (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
@@ -9246,7 +9246,7 @@ public class RolePersistenceImpl
 	 *
 	 * @param companyId the company ID
 	 * @param classNameId the class name ID
-	 * @param classPK the class pk
+	 * @param classPKs the class pks
 	 * @param type the type
 	 * @param start the lower bound of the range of roles
 	 * @param end the upper bound of the range of roles (not inclusive)

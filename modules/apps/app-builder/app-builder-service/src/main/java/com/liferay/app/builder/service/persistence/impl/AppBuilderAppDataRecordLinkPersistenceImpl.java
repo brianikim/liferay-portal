@@ -1381,7 +1381,7 @@ public class AppBuilderAppDataRecordLinkPersistenceImpl
 	 * </p>
 	 *
 	 * @param appBuilderAppId the app builder app ID
-	 * @param ddlRecordId the ddl record ID
+	 * @param ddlRecordIds the ddl record IDs
 	 * @param start the lower bound of the range of app builder app data record links
 	 * @param end the upper bound of the range of app builder app data record links (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)

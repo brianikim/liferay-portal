@@ -4913,7 +4913,7 @@ public class SyncDLObjectPersistenceImpl
 	 *
 	 * @param modifiedTime the modified time
 	 * @param repositoryId the repository ID
-	 * @param event the event
+	 * @param events the events
 	 * @param start the lower bound of the range of sync dl objects
 	 * @param end the upper bound of the range of sync dl objects (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
@@ -5871,7 +5871,7 @@ public class SyncDLObjectPersistenceImpl
 	 *
 	 * @param repositoryId the repository ID
 	 * @param parentFolderId the parent folder ID
-	 * @param type the type
+	 * @param types the types
 	 * @param start the lower bound of the range of sync dl objects
 	 * @param end the upper bound of the range of sync dl objects (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
