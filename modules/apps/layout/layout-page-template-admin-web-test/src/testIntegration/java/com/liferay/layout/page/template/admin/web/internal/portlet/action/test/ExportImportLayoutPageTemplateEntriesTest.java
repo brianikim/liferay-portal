@@ -30,6 +30,7 @@ import com.liferay.fragment.service.FragmentEntryLinkLocalService;
 import com.liferay.fragment.service.FragmentEntryLocalService;
 import com.liferay.friendly.url.model.FriendlyURLEntry;
 import com.liferay.friendly.url.service.FriendlyURLEntryLocalService;
+import com.liferay.layout.friendly.url.LayoutFriendlyURLEntryHelper;
 import com.liferay.layout.page.template.constants.LayoutPageTemplateEntryTypeConstants;
 import com.liferay.layout.page.template.importer.LayoutPageTemplatesImporter;
 import com.liferay.layout.page.template.importer.LayoutPageTemplatesImporterResultEntry;
@@ -78,7 +79,6 @@ import com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.LinkedHashMapBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.test.rule.Inject;
@@ -450,13 +450,13 @@ public class ExportImportLayoutPageTemplateEntriesTest {
 			layout.getUserId(), layout.getPlid(),
 			StringPool.SLASH + newFriendlyURL, "en_US");
 
-		String className = "com.liferay.portal.kernel.model.Layout-false";
+		long classNameId = _layoutFriendlyURLEntryHelper.getClassNameId(false);
 
 		String oldFriendlyURL = FriendlyURLNormalizerUtil.normalize(name);
 
 		FriendlyURLEntry oldFriendlyURLEntry =
 			_friendlyURLEntryLocalService.fetchFriendlyURLEntry(
-				layout.getGroupId(), PortalUtil.getClassNameId(className),
+				layout.getGroupId(), classNameId,
 				StringPool.SLASH + oldFriendlyURL);
 
 		Assert.assertNotNull(oldFriendlyURLEntry);
@@ -468,8 +468,7 @@ public class ExportImportLayoutPageTemplateEntriesTest {
 
 		List<FriendlyURLEntry> friendlyURLEntries =
 			_friendlyURLEntryLocalService.getFriendlyURLEntries(
-				layout.getGroupId(), PortalUtil.getClassNameId(className),
-				layout.getPlid());
+				layout.getGroupId(), classNameId, layout.getPlid());
 
 		Assert.assertEquals(
 			friendlyURLEntries.toString(), 1, friendlyURLEntries.size());
@@ -785,6 +784,9 @@ public class ExportImportLayoutPageTemplateEntriesTest {
 
 	@Inject
 	private LayoutCopyHelper _layoutCopyHelper;
+
+	@Inject
+	private LayoutFriendlyURLEntryHelper _layoutFriendlyURLEntryHelper;
 
 	@Inject
 	private LayoutLocalService _layoutLocalService;
