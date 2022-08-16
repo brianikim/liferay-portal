@@ -56,6 +56,7 @@ import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.LayoutConstants;
 import com.liferay.portal.kernel.model.LayoutPrototype;
 import com.liferay.portal.kernel.model.Repository;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
@@ -80,15 +81,18 @@ import com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.LinkedHashMapBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
+import com.liferay.sites.kernel.util.Sites;
 
 import java.io.File;
 import java.io.Serializable;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -433,23 +437,28 @@ public class ExportImportLayoutPageTemplateEntriesTest {
 			String name)
 		throws Exception {
 
-		Layout layout = LayoutTestUtil.addTypePortletLayout(
-			group.getGroupId(), name, false);
-
-		Layout templateLayout = LayoutLocalServiceUtil.getLayout(
-			layoutPageTemplateEntry.getPlid());
-
-		layout = _layoutCopyHelper.copyLayout(templateLayout, layout);
-
 		LayoutPrototype layoutPrototype =
 			LayoutPrototypeLocalServiceUtil.getLayoutPrototype(
 				layoutPageTemplateEntry.getLayoutPrototypeId());
 
-		layout.setLayoutPrototypeUuid(layoutPrototype.getUuid());
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(group.getGroupId());
 
-		layout.setLayoutPrototypeLinkEnabled(true);
+		serviceContext.setAttribute(
+			"layoutPrototypeUuid", layoutPrototype.getUuid());
 
-		layout = _layoutLocalService.updateLayout(layout);
+		Layout layout = _layoutLocalService.addLayout(
+			TestPropsValues.getUserId(), group.getGroupId(), false,
+			LayoutConstants.DEFAULT_PARENT_LAYOUT_ID,
+			HashMapBuilder.put(
+				_portal.getSiteDefaultLocale(group.getGroupId()), name
+			).build(),
+			Collections.emptyMap(), Collections.emptyMap(),
+			Collections.emptyMap(), Collections.emptyMap(),
+			LayoutConstants.TYPE_PORTLET, StringPool.BLANK, false,
+			Collections.emptyMap(), serviceContext);
+
+		_sites.mergeLayoutPrototypeLayout(layout.getGroup(), layout);
 
 		String newFriendlyURL = FriendlyURLNormalizerUtil.normalize(
 			RandomTestUtil.randomString());
@@ -820,7 +829,13 @@ public class ExportImportLayoutPageTemplateEntriesTest {
 	)
 	private MVCResourceCommand _mvcResourceCommand;
 
+	@Inject
+	private Portal _portal;
+
 	private ServiceContext _serviceContext1;
 	private ServiceContext _serviceContext2;
+
+	@Inject
+	private Sites _sites;
 
 }
