@@ -122,7 +122,9 @@ public class JournalArticleExportImportContentProcessor
 			Element entityElement = portletDataContext.getExportDataElement(
 				stagedModel);
 
-			entityElement.addAttribute("cached", "true");
+			if (Validator.isNull(entityElement.attributeValue("cached"))) {
+				entityElement.addAttribute("cached", "true");
+			}
 
 			return processedContent;
 		}
@@ -160,6 +162,11 @@ public class JournalArticleExportImportContentProcessor
 					exportReferencedContent, escapeContent);
 
 		_journalArticleExportImportCache.put(sb.toString(), content);
+
+		Element entityElement = portletDataContext.getExportDataElement(
+			stagedModel);
+
+		entityElement.addAttribute("cached", "false");
 
 		return content;
 	}
