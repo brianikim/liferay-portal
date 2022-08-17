@@ -327,6 +327,13 @@ public class LocalizationUtil {
 		return getLocalization().getXml(map, defaultLanguageId, key);
 	}
 
+	public static String getXml(
+		Map<String, String> map, String defaultLanguageId, String key,
+		boolean cdata) {
+
+		return _localization.getXml(map, defaultLanguageId, key, cdata);
+	}
+
 	public static Map<Locale, String> populateLocalizationMap(
 		Map<Locale, String> localizationMap, String defaultLanguageId,
 		long groupId) {

@@ -832,6 +832,14 @@ public class LocalizationImpl implements Localization {
 	public String getXml(
 		Map<String, String> map, String defaultLanguageId, String key) {
 
+		return getXml(map, defaultLanguageId, key, false);
+	}
+
+	@Override
+	public String getXml(
+		Map<String, String> map, String defaultLanguageId, String key,
+		boolean cdata) {
+
 		UnsyncStringWriter unsyncStringWriter = new UnsyncStringWriter();
 
 		XMLStreamWriter xmlStreamWriter = null;
@@ -872,13 +880,19 @@ public class LocalizationImpl implements Localization {
 
 			for (Map.Entry<String, String> entry : map.entrySet()) {
 				String languageId = entry.getKey();
-				String value = entry.getValue();
 
 				xmlStreamWriter.writeStartElement(key);
 
 				xmlStreamWriter.writeAttribute(_LANGUAGE_ID, languageId);
-				xmlStreamWriter.writeCharacters(
-					XMLUtil.stripInvalidChars(value));
+
+				if (cdata) {
+					xmlStreamWriter.writeCData(
+						XMLUtil.stripInvalidChars(entry.getValue()));
+				}
+				else {
+					xmlStreamWriter.writeCharacters(
+						XMLUtil.stripInvalidChars(entry.getValue()));
+				}
 
 				xmlStreamWriter.writeEndElement();
 			}
