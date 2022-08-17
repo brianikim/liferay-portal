@@ -85,19 +85,19 @@ public class BooleanFilterTranslatorImpl implements BooleanFilterTranslator {
 		List<BooleanClause<Filter>> booleanClauses =
 			booleanFilter.getMustBooleanClauses();
 
-		if (booleanClauses.size() > 0) {
+		if (!booleanClauses.isEmpty()) {
 			return false;
 		}
 
 		booleanClauses = booleanFilter.getShouldBooleanClauses();
 
-		if (booleanClauses.size() > 0) {
+		if (!booleanClauses.isEmpty()) {
 			return false;
 		}
 
 		booleanClauses = booleanFilter.getMustNotBooleanClauses();
 
-		if (booleanClauses.size() > 0) {
+		if (!booleanClauses.isEmpty()) {
 			return true;
 		}
 
