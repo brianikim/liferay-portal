@@ -14,6 +14,7 @@
 
 package com.liferay.dynamic.data.mapping.form.web.internal.upload;
 
+import com.liferay.document.library.kernel.antivirus.AntivirusScannerException;
 import com.liferay.document.library.kernel.exception.FileExtensionException;
 import com.liferay.document.library.kernel.exception.FileNameException;
 import com.liferay.document.library.kernel.exception.FileSizeException;
@@ -74,6 +75,10 @@ public class DDMFormUploadResponseHandler implements UploadResponseHandler {
 		}
 		else if (portalException instanceof InvalidFileException) {
 			errorMessage = themeDisplay.translate("please-enter-a-valid-file");
+		}
+		else if (portalException instanceof AntivirusScannerException) {
+			errorMessage = themeDisplay.translate(
+				"a-virus-was-detected-in-the-file");
 		}
 		else {
 			errorMessage = themeDisplay.translate(
