@@ -52,6 +52,7 @@
 			]
 		}
 	},
+	"externalReferenceCode": "HIDE_BY_EXACT_TERM_MATCH",
 	"title_i18n": {
 		"en_US": "Hide by Exact Term Match",
 		"ja_JP": "完全一致のコンテンツを隠す"

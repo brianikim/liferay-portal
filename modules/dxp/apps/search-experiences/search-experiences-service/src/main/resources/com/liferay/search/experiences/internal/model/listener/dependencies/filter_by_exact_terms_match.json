@@ -44,6 +44,7 @@
 			]
 		}
 	},
+	"externalReferenceCode": "FILTER_BY_EXACT_TERMS_MATCH",
 	"title_i18n": {
 		"en_US": "Filter by Exact Terms Match",
 		"ja_JP": "完全一致によるフィルタ"

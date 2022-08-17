@@ -84,6 +84,7 @@
 			]
 		}
 	},
+	"externalReferenceCode": "BOOST_FRESHNESS",
 	"title_i18n": {
 		"en_US": "Boost Freshness",
 		"ja_JP": "記事の新鮮度でブースト"

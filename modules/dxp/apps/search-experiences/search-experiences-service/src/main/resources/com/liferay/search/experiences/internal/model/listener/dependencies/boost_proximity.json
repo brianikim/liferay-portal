@@ -88,6 +88,7 @@
 			]
 		}
 	},
+	"externalReferenceCode": "BOOST_PROXIMITY",
 	"title_i18n": {
 		"en_US": "Boost Proximity",
 		"ja_JP": "近似値によるブースト"

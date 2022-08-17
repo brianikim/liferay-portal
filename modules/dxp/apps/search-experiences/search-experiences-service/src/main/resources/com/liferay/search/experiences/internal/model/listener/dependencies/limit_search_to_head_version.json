@@ -62,6 +62,7 @@
 		"uiConfiguration": {
 		}
 	},
+	"externalReferenceCode": "LIMIT_SEARCH_TO_HEAD_VERSION",
 	"title_i18n": {
 		"en_US": "Limit Search to HEAD Version",
 		"ja_JP": "Webコンテンツ記事の最新バージョンのみを返すように検索を制限"

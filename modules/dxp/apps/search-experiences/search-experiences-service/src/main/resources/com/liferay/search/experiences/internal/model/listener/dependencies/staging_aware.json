@@ -57,6 +57,7 @@
 		"uiConfiguration": {
 		}
 	},
+	"externalReferenceCode": "STAGING_AWARE",
 	"title_i18n": {
 		"en_US": "Staging Aware",
 		"ja_JP": "ライブサイトでは、公開されたコンテンツのみを表示、ステージングサイトでは、公開されたコンテンツとステージングされたコンテンツのみを表示"

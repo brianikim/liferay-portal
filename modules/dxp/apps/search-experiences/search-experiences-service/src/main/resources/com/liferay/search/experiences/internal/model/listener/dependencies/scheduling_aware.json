@@ -89,6 +89,7 @@
 		"uiConfiguration": {
 		}
 	},
+	"externalReferenceCode": "SCHEDULING_AWARE",
 	"title_i18n": {
 		"en_US": "Scheduling Aware",
 		"ja_JP": "表示日が未来でないコンテンツのみを表示"

@@ -63,6 +63,7 @@
 			]
 		}
 	},
+	"externalReferenceCode": "PASTE_ANY_ELASTICSEARCH_QUERY",
 	"title_i18n": {
 		"en_US": "Paste Any Elasticsearch Query",
 		"ja_JP": "Elasticsearch DSLのクエリ本体をそのまま要素に貼り付け"
