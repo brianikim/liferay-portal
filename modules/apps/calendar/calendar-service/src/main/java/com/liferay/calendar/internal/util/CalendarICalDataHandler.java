@@ -43,12 +43,12 @@ import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.ListUtil;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ReleaseInfo;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
-import com.liferay.portal.kernel.util.LocaleUtil;
 
 import java.net.URI;
 
@@ -704,7 +704,7 @@ public class CalendarICalDataHandler implements CalendarDataHandler {
 
 		long firstReminder = calendarBooking.getFirstReminder();
 
-		if (firstReminder > 0 && user != null) {
+		if ((firstReminder > 0) && (user != null)) {
 			VAlarm vAlarm = toICalAlarm(
 				calendarBooking.getFirstReminderNotificationType(),
 				firstReminder, user.getEmailAddress());
@@ -714,7 +714,7 @@ public class CalendarICalDataHandler implements CalendarDataHandler {
 
 		long secondReminder = calendarBooking.getSecondReminder();
 
-		if (secondReminder > 0 && user != null) {
+		if ((secondReminder > 0) && (user != null)) {
 			VAlarm alarm = toICalAlarm(
 				calendarBooking.getSecondReminderNotificationType(),
 				secondReminder, user.getEmailAddress());
