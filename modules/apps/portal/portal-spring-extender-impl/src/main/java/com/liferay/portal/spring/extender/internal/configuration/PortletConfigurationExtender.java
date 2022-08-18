@@ -102,7 +102,7 @@ public class PortletConfigurationExtender
 
 		public void start() {
 			try {
-				_resourceActions.readAndCheck(
+				_resourceActions.populateModelResources(
 					_classLoader,
 					StringUtil.split(
 						_portletConfiguration.get(
