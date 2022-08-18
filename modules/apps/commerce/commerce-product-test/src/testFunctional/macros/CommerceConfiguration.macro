@@ -76,7 +76,7 @@ definition {
 			category = "Product Management",
 			portlet = "Products");
 
-		while (IsElementPresent(locator1 = "CommerceEntry#BODY_VERTICAL_ELLIPSIS") && (maxIterations = "50")) {
+		while ((IsElementPresent(locator1 = "CommerceEntry#BODY_VERTICAL_ELLIPSIS")) && (maxIterations = "50")) {
 			CommerceEntry.deleteCommerceEntry();
 		}
 
@@ -144,7 +144,7 @@ definition {
 			category = "Inventory Management",
 			portlet = "Inventory");
 
-		while (IsElementPresent(locator1 = "CommerceEntry#BODY_VERTICAL_ELLIPSIS") && (maxIterations = "100")) {
+		while ((IsElementPresent(locator1 = "CommerceEntry#BODY_VERTICAL_ELLIPSIS")) && (maxIterations = "100")) {
 			CommerceEntry.deleteCommerceEntry();
 		}
 

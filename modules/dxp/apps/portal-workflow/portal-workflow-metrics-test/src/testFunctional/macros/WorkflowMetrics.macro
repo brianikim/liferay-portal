@@ -16,7 +16,7 @@ definition {
 		Click(locator1 = "WorkflowAllItems#WORKFLOW_ALL_ITEMS_FILTER_BY");
 
 		for (var assigneeName : list "${assigneeName}") {
-			while (IsElementNotPresent(locator1 = "WorkflowAllItems#WORKFLOW_ALL_ITEMS_FILTER_BY_ASSIGNEE_VALUE") && (maxIterations = "10")) {
+			while ((IsElementNotPresent(locator1 = "WorkflowAllItems#WORKFLOW_ALL_ITEMS_FILTER_BY_ASSIGNEE_VALUE")) && (maxIterations = "10")) {
 				Refresh();
 
 				WaitForSPARefresh();
@@ -43,7 +43,7 @@ definition {
 		for (var isInstancePresent : list "${isPresent}") {
 			var key_instanceInfo = "${isInstancePresent}";
 
-			while (IsElementNotPresent(locator1 = "WorkflowMetrics#METRICS_ALL_ITEMS_TABLE_NAME") && (maxIterations = "10")) {
+			while ((IsElementNotPresent(locator1 = "WorkflowMetrics#METRICS_ALL_ITEMS_TABLE_NAME")) && (maxIterations = "10")) {
 				Refresh();
 
 				WaitForSPARefresh();
@@ -536,7 +536,7 @@ definition {
 
 		Click(locator1 = "WorkflowMetricsIndex#METRICS_MENU_INDEX");
 
-		while (IsElementNotPresent(locator1 = "WorkflowMetricsIndex#METRICS_INDEX_SETTINGS") && (maxIterations = "5")) {
+		while ((IsElementNotPresent(locator1 = "WorkflowMetricsIndex#METRICS_INDEX_SETTINGS")) && (maxIterations = "5")) {
 			Click(locator1 = "WorkflowMetricsIndex#METRICS_MENU_INDEX");
 
 			Pause(locator1 = "1000");
@@ -755,7 +755,7 @@ definition {
 			panel = "Applications",
 			portlet = "Metrics");
 
-		while (IsElementNotPresent(locator1 = "WorkflowMetrics#METRICS_WORKFLOW_PROCESS_NAME") && (maxIterations = "10")) {
+		while ((IsElementNotPresent(locator1 = "WorkflowMetrics#METRICS_WORKFLOW_PROCESS_NAME")) && (maxIterations = "10")) {
 			ApplicationsMenu.gotoPortlet(
 				category = "Workflow",
 				panel = "Applications",
@@ -966,7 +966,7 @@ definition {
 
 		Click(locator1 = "WorkflowMetrics#METRICS_PERFORMANCE_BY_ASSIGNEE_VIEW_STEPS_DROPDOWN");
 
-		while (IsElementNotPresent(locator1 = "WorkflowMetrics#METRICS_PERFORMANCE_BY_ASSIGNEE_DROPDOWN_STEP_${velocityUnit}") && (maxIterations = "10")) {
+		while ((IsElementNotPresent(locator1 = "WorkflowMetrics#METRICS_PERFORMANCE_BY_ASSIGNEE_DROPDOWN_STEP_${velocityUnit}")) && (maxIterations = "10")) {
 			Refresh();
 
 			ScrollWebElementIntoView(locator1 = "WorkflowMetrics#METRICS_PERFORMANCE_BY_ASSIGNEE_VIEW_STEPS_DROPDOWN");
@@ -1003,7 +1003,7 @@ definition {
 		for (var key_workflowStep : list "${workflowStep}") {
 			Click(locator1 = "WorkflowMetrics#METRICS_WORKLOAD_BY_ASSIGNEE_CARD_FILTER");
 
-			while (IsElementNotPresent(locator1 = "WorkflowMetrics#METRICS_WORKLOAD_BY_ASSIGNEE_CARD_FILTER_OPTION") && (maxIterations = "10")) {
+			while ((IsElementNotPresent(locator1 = "WorkflowMetrics#METRICS_WORKLOAD_BY_ASSIGNEE_CARD_FILTER_OPTION")) && (maxIterations = "10")) {
 				Refresh();
 
 				Click(locator1 = "WorkflowMetrics#METRICS_WORKLOAD_BY_ASSIGNEE_CARD_FILTER");
@@ -1028,7 +1028,7 @@ definition {
 
 		Click(locator1 = "WorkflowMetrics#METRICS_WORKLOAD_BY_ASSIGNEE_CARD_FILTER_PROCESS_STEP");
 
-		while (IsElementNotPresent(locator1 = "WorkflowMetrics#METRICS_WORKLOAD_BY_ASSIGNEE_CARD_FILTER_OPTION") && (maxIterations = "10")) {
+		while ((IsElementNotPresent(locator1 = "WorkflowMetrics#METRICS_WORKLOAD_BY_ASSIGNEE_CARD_FILTER_OPTION")) && (maxIterations = "10")) {
 			Refresh();
 
 			Click(locator1 = "WorkflowMetrics#METRICS_WORKLOAD_BY_ASSIGNEE_CARD_FILTER_PROCESS_STEP");
@@ -1425,7 +1425,7 @@ definition {
 	}
 
 	macro waitForCompletedSLA {
-		while (IsTextEqual(locator1 = "WorkflowMetrics#DASHBOARD_TOTAL_${key_status}_ITEMS_VALUE", value1 = "${key_expectedValue}") && (maxIterations = "24")) {
+		while ((IsTextEqual(locator1 = "WorkflowMetrics#DASHBOARD_TOTAL_${key_status}_ITEMS_VALUE", value1 = "${key_expectedValue}")) && (maxIterations = "24")) {
 			echo("Waiting 5 seconds, until the Completed SLA shows up");
 
 			Pause(locator1 = "5000");
@@ -1441,7 +1441,7 @@ definition {
 	}
 
 	macro waitForSLA {
-		while (IsTextEqual(locator1 = "WorkflowMetrics#DASHBOARD_TOTAL_${key_status}_ITEMS_VALUE", value1 = "${key_expectedValue}") && (maxIterations = "24")) {
+		while ((IsTextEqual(locator1 = "WorkflowMetrics#DASHBOARD_TOTAL_${key_status}_ITEMS_VALUE", value1 = "${key_expectedValue}")) && (maxIterations = "24")) {
 			echo("Waiting 5 seconds to recheck");
 
 			Pause(locator1 = "5000");
@@ -1457,7 +1457,7 @@ definition {
 	macro waitForSLAPendingNotChange {
 		var count = "1";
 
-		while ((IsTextEqual(locator1 = "WorkflowMetrics#DASHBOARD_TOTAL_${key_status}_ITEMS_VALUE", value1 = "${key_expectedValue}")) && ("${count}" != "${key_pauseTime}") && (maxIterations = "48")) {
+		while (((IsTextEqual(locator1 = "WorkflowMetrics#DASHBOARD_TOTAL_${key_status}_ITEMS_VALUE", value1 = "${key_expectedValue}")) && ("${count}" != "${key_pauseTime}")) && (maxIterations = "48")) {
 			var count = ${count} + 1;
 
 			echo("Waiting 5 seconds to recheck");

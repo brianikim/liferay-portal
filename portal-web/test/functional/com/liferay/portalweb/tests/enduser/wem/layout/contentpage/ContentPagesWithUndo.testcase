@@ -563,7 +563,7 @@ definition {
 
 		var count = "0";
 
-		while ("${count}" != "100" && (maxIterations = "100")) {
+		while (("${count}" != "100") && (maxIterations = "100")) {
 			Click(
 				key_text = "undo",
 				locator1 = "Icon#ANY");

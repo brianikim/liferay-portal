@@ -195,7 +195,7 @@ definition {
 	}
 
 	macro editElementSetFieldLabel {
-		while (IsTextNotEqual(key_fieldName = "label", locator1 = "FormFields#TEXT_FIELD", value1 = "") && (maxIterations = "10")) {
+		while ((IsTextNotEqual(key_fieldName = "label", locator1 = "FormFields#TEXT_FIELD", value1 = "")) && (maxIterations = "10")) {
 			FormFields.editTextWithBackspace(fieldName = "label");
 		}
 
