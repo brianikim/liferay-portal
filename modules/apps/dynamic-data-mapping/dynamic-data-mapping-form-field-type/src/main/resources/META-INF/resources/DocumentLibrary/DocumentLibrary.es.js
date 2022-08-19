@@ -381,9 +381,11 @@ const Main = ({
 	const handleGuestUploadFileChanged = (errorMessage, event, value) => {
 		configureErrorMessage(errorMessage);
 
-		setCurrentValue(value);
+		if (value != null) {
+			setCurrentValue(value);
 
-		onChange(event, value ? value : '{}');
+			onChange(event, value ? value : '{}');
+		}
 	};
 
 	const isExceededUploadRequestSizeLimit = (fileSize) => {
