@@ -311,7 +311,9 @@ public class SearchResultsPortlet extends MVCPortlet {
 					portletURLFactory, searchResultsPortletPreferences,
 					searchResultPreferences);
 
-			if (searchResultSummaryDisplayContext != null) {
+			if ((searchResultSummaryDisplayContext != null) &&
+				!searchResultSummaryDisplayContext.isTemporarilyUnavailable()) {
+
 				searchResultsSummariesHolder.put(
 					document, searchResultSummaryDisplayContext);
 			}
