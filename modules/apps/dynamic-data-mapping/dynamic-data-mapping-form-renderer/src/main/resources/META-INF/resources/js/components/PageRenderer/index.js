@@ -195,11 +195,7 @@ const Renderer = ({
 	if (pages?.[activePage]) {
 		const visitor = new PagesVisitor([pages[activePage]]);
 
-		visitor.mapFields((field) => {
-			if (field.required) {
-				hasFieldRequired = true;
-			}
-		});
+		hasFieldRequired = !!visitor.findField((field) => field.required);
 	}
 
 	const isDDMFormPortletNamespace = portletNamespace.includes(
