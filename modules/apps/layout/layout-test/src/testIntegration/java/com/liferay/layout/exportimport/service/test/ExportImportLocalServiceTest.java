@@ -237,47 +237,19 @@ public class ExportImportLocalServiceTest {
 
 	private Map<String, String[]> _getExportParameterMap() throws Exception {
 		return LinkedHashMapBuilder.put(
+			Constants.CMD, new String[] {Constants.EXPORT}
+		).put(
+			PortletDataHandlerKeys.LAYOUT_SET_PROTOTYPE_SETTINGS,
+			new String[] {Boolean.TRUE.toString()}
+		).put(
 			PortletDataHandlerKeys.LAYOUT_SET_SETTINGS,
-			new String[] {Boolean.TRUE.toString()}
-		).put(
-			"_page-templates_page-template-sets",
-			new String[] {Boolean.TRUE.toString()}
-		).put(
-			PortletDataHandlerKeys.PORTLET_DATA,
-			new String[] {Boolean.TRUE.toString()}
-		).put(
-			PortletDataHandlerKeys.PORTLET_DATA_ALL,
-			new String[] {Boolean.TRUE.toString()}
-		).put(
-			PortletDataHandlerKeys.PORTLET_SETUP_ALL,
-			new String[] {Boolean.TRUE.toString()}
-		).put(
-			"_page-templates_page-templates",
-			new String[] {Boolean.TRUE.toString()}
-		).put(
-			"_page-templates_page-template-setsDisplay",
-			new String[] {Boolean.TRUE.toString()}
-		).put(
-			PortletDataHandlerKeys.PORTLET_CONFIGURATION_ALL,
 			new String[] {Boolean.TRUE.toString()}
 		).put(
 			PortletDataHandlerKeys.PORTLET_CONFIGURATION,
 			new String[] {Boolean.TRUE.toString()}
 		).put(
-			PortletDataHandlerKeys.LAYOUT_SET_PROTOTYPE_SETTINGS,
+			PortletDataHandlerKeys.PORTLET_CONFIGURATION_ALL,
 			new String[] {Boolean.TRUE.toString()}
-		).put(
-			Constants.CMD, new String[] {Constants.EXPORT}
-		).build();
-	}
-
-	private Map<String, String[]> _getImportParameterMap() throws Exception {
-		return LinkedHashMapBuilder.put(
-			PortletDataHandlerKeys.LAYOUT_SET_SETTINGS,
-			new String[] {Boolean.TRUE.toString()}
-		).put(
-			"_page-templates_page-template-sets",
-			new String[] {Boolean.FALSE.toString()}
 		).put(
 			PortletDataHandlerKeys.PORTLET_DATA,
 			new String[] {Boolean.TRUE.toString()}
@@ -288,16 +260,44 @@ public class ExportImportLocalServiceTest {
 			PortletDataHandlerKeys.PORTLET_SETUP_ALL,
 			new String[] {Boolean.TRUE.toString()}
 		).put(
+			"_page-templates_page-template-sets",
+			new String[] {Boolean.TRUE.toString()}
+		).put(
+			"_page-templates_page-template-setsDisplay",
+			new String[] {Boolean.TRUE.toString()}
+		).put(
 			"_page-templates_page-templates",
+			new String[] {Boolean.TRUE.toString()}
+		).build();
+	}
+
+	private Map<String, String[]> _getImportParameterMap() throws Exception {
+		return LinkedHashMapBuilder.put(
+			Constants.CMD, new String[] {Constants.IMPORT}
+		).put(
+			PortletDataHandlerKeys.LAYOUT_SET_PROTOTYPE_SETTINGS,
+			new String[] {Boolean.TRUE.toString()}
+		).put(
+			PortletDataHandlerKeys.LAYOUT_SET_SETTINGS,
 			new String[] {Boolean.TRUE.toString()}
 		).put(
 			PortletDataHandlerKeys.PORTLET_CONFIGURATION_ALL,
 			new String[] {Boolean.TRUE.toString()}
 		).put(
-			PortletDataHandlerKeys.LAYOUT_SET_PROTOTYPE_SETTINGS,
+			PortletDataHandlerKeys.PORTLET_DATA,
 			new String[] {Boolean.TRUE.toString()}
 		).put(
-			Constants.CMD, new String[] {Constants.IMPORT}
+			PortletDataHandlerKeys.PORTLET_DATA_ALL,
+			new String[] {Boolean.TRUE.toString()}
+		).put(
+			PortletDataHandlerKeys.PORTLET_SETUP_ALL,
+			new String[] {Boolean.TRUE.toString()}
+		).put(
+			"_page-templates_page-template-sets",
+			new String[] {Boolean.FALSE.toString()}
+		).put(
+			"_page-templates_page-templates",
+			new String[] {Boolean.TRUE.toString()}
 		).build();
 	}
 
