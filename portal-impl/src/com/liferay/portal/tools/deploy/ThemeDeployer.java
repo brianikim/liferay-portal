@@ -14,7 +14,6 @@
 
 package com.liferay.portal.tools.deploy;
 
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Plugin;
@@ -79,28 +78,6 @@ public class ThemeDeployer extends BaseDeployer {
 			throw new IllegalArgumentException(
 				"The system property deployer.util.taglib.dtd is not set");
 		}
-	}
-
-	@Override
-	public String getExtraFiltersContent(double webXmlVersion, File srcFile)
-		throws Exception {
-
-		StringBundler sb = new StringBundler(3);
-
-		String extraFiltersContent = super.getExtraFiltersContent(
-			webXmlVersion, srcFile);
-
-		sb.append(extraFiltersContent);
-
-		// Ignore filters
-
-		sb.append(getIgnoreFiltersContent(srcFile));
-
-		// Speed filters
-
-		sb.append(getSpeedFiltersContent(srcFile));
-
-		return sb.toString();
 	}
 
 	@Override

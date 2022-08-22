@@ -1301,31 +1301,6 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 		return sb.toString();
 	}
 
-	public String getExtraFiltersContent(double webXmlVersion, File srcFile)
-		throws Exception {
-
-		return getSessionFiltersContent();
-	}
-
-	public String getIgnoreFiltersContent(File srcFile) throws Exception {
-		boolean ignoreFiltersEnabled = true;
-
-		Properties properties = getPluginPackageProperties(srcFile);
-
-		if (properties != null) {
-			ignoreFiltersEnabled = GetterUtil.getBoolean(
-				properties.getProperty("ignore-filters-enabled"), true);
-		}
-
-		if (ignoreFiltersEnabled) {
-			return FileUtil.read(
-				DeployUtil.getResourcePath(
-					tempDirPaths, "ignore-filters-web.xml"));
-		}
-
-		return StringPool.BLANK;
-	}
-
 	public String getInvokerFilterContent() {
 		StringBundler sb = new StringBundler(5);
 
@@ -1551,58 +1526,6 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 
 	public String getPluginType() {
 		return null;
-	}
-
-	public String getServletContextIncludeFiltersContent(
-			double webXmlVersion, File srcFile)
-		throws Exception {
-
-		if (webXmlVersion < 2.4) {
-			return StringPool.BLANK;
-		}
-
-		Properties properties = getPluginPackageProperties(srcFile);
-
-		if (properties == null) {
-			return StringPool.BLANK;
-		}
-
-		if (!GetterUtil.getBoolean(
-				properties.getProperty(
-					"servlet-context-include-filters-enabled"),
-				true)) {
-
-			return StringPool.BLANK;
-		}
-
-		return FileUtil.read(
-			DeployUtil.getResourcePath(
-				tempDirPaths, "servlet-context-include-filters-web.xml"));
-	}
-
-	public String getSessionFiltersContent() throws Exception {
-		return FileUtil.read(
-			DeployUtil.getResourcePath(
-				tempDirPaths, "session-filters-web.xml"));
-	}
-
-	public String getSpeedFiltersContent(File srcFile) throws Exception {
-		boolean speedFiltersEnabled = true;
-
-		Properties properties = getPluginPackageProperties(srcFile);
-
-		if (properties != null) {
-			speedFiltersEnabled = GetterUtil.getBoolean(
-				properties.getProperty("speed-filters-enabled"), true);
-		}
-
-		if (speedFiltersEnabled) {
-			return FileUtil.read(
-				DeployUtil.getResourcePath(
-					tempDirPaths, "speed-filters-web.xml"));
-		}
-
-		return StringPool.BLANK;
 	}
 
 	public boolean isJEEDeploymentEnabled() {
@@ -2082,14 +2005,8 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 		}
 
 		if (webXmlVersion < 2.4) {
-			return webXmlContent.substring(0, x) +
-				getExtraFiltersContent(webXmlVersion, srcFile) +
-					webXmlContent.substring(y);
+			return webXmlContent.substring(0, x) + webXmlContent.substring(y);
 		}
-
-		String filtersContent =
-			webXmlFiltersContent +
-				getExtraFiltersContent(webXmlVersion, srcFile);
 
 		String liferayWebXmlContent = FileUtil.read(
 			DeployUtil.getResourcePath(tempDirPaths, "web.xml"));
@@ -2097,7 +2014,7 @@ public class BaseDeployer implements AutoDeployer, Deployer {
 		int z = liferayWebXmlContent.indexOf("</web-app>");
 
 		liferayWebXmlContent =
-			liferayWebXmlContent.substring(0, z) + filtersContent +
+			liferayWebXmlContent.substring(0, z) + webXmlFiltersContent +
 				liferayWebXmlContent.substring(z);
 
 		liferayWebXmlContent = WebXMLBuilder.organizeWebXML(

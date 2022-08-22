@@ -138,33 +138,6 @@ public class PortletDeployer extends BaseDeployer {
 	}
 
 	@Override
-	public String getExtraFiltersContent(double webXmlVersion, File srcFile)
-		throws Exception {
-
-		StringBundler sb = new StringBundler(4);
-
-		String extraFiltersContent = super.getExtraFiltersContent(
-			webXmlVersion, srcFile);
-
-		sb.append(extraFiltersContent);
-
-		// Ignore filters
-
-		sb.append(getIgnoreFiltersContent(srcFile));
-
-		// Speed filters
-
-		sb.append(getSpeedFiltersContent(srcFile));
-
-		// Servlet context include filters
-
-		sb.append(
-			getServletContextIncludeFiltersContent(webXmlVersion, srcFile));
-
-		return sb.toString();
-	}
-
-	@Override
 	public String getPluginType() {
 		return Plugin.TYPE_PORTLET;
 	}
