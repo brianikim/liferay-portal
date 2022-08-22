@@ -137,6 +137,10 @@ public class SegmentsServicePreAction extends Action {
 						httpServletRequest, httpServletResponse, groupId,
 						classNameId, classPK);
 
+			if (segmentsExperienceIds.length == 0) {
+				return new long[] {SegmentsExperienceConstants.ID_DEFAULT};
+			}
+
 			Set<Long> segmentsExperienceIdsSegmentsEntryIds = new HashSet<>();
 
 			for (long segmentsExperienceId : segmentsExperienceIds) {
@@ -152,29 +156,29 @@ public class SegmentsServicePreAction extends Action {
 				(long[])httpServletRequest.getAttribute(
 					SegmentsWebKeys.SEGMENTS_ENTRY_IDS);
 
+			long[] segmentsEntryIds = null;
+
 			if (cachedSegmentsEntryIds != null) {
-				return cachedSegmentsEntryIds;
+				segmentsEntryIds = cachedSegmentsEntryIds;
+			}
+			else {
+				segmentsEntryIds = _segmentsEntryRetriever.getSegmentsEntryIds(
+					groupId, userId,
+					_requestContextMapper.map(httpServletRequest),
+					ArrayUtil.toArray(
+						segmentsExperienceIdsSegmentsEntryIds.toArray(
+							new Long[0])));
 			}
 
-			if (segmentsExperienceIds.length > 0) {
-				long[] segmentsEntryIds =
-					_segmentsEntryRetriever.getSegmentsEntryIds(
-						groupId, userId,
-						_requestContextMapper.map(httpServletRequest),
-						ArrayUtil.toArray(
-							segmentsExperienceIdsSegmentsEntryIds.toArray(
-								new Long[0])));
+			httpServletRequest.setAttribute(
+				SegmentsWebKeys.SEGMENTS_ENTRY_IDS, segmentsEntryIds);
 
-				httpServletRequest.setAttribute(
-					SegmentsWebKeys.SEGMENTS_ENTRY_IDS, segmentsEntryIds);
-
-				return ArrayUtil.append(
-					_segmentsExperienceRequestProcessorRegistry.
-						getSegmentsExperienceIds(
-							httpServletRequest, httpServletResponse, groupId,
-							classNameId, classPK, segmentsEntryIds),
-					SegmentsExperienceConstants.ID_DEFAULT);
-			}
+			return ArrayUtil.append(
+				_segmentsExperienceRequestProcessorRegistry.
+					getSegmentsExperienceIds(
+						httpServletRequest, httpServletResponse, groupId,
+						classNameId, classPK, segmentsEntryIds),
+				SegmentsExperienceConstants.ID_DEFAULT);
 		}
 		catch (PortalException portalException) {
 			if (_log.isWarnEnabled()) {
