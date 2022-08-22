@@ -1890,7 +1890,7 @@
 					</license>
 				</licenses>
 				<current-version-publish-date>2017-02-02 12:36:52</current-version-publish-date>
-				<latest-version-publish-date>2022-02-22 05:55:29</latest-version-publish-date>
+				<latest-version-publish-date>2022-08-19 08:54:25</latest-version-publish-date>
 			</library>
 			<library>
 				<file-name>com.liferay.imageio.plugins.jar!common-io.jar</file-name>
@@ -1903,7 +1903,7 @@
 					</license>
 				</licenses>
 				<current-version-publish-date>2017-02-02 12:36:38</current-version-publish-date>
-				<latest-version-publish-date>2022-02-22 06:02:04</latest-version-publish-date>
+				<latest-version-publish-date>2022-08-19 08:52:01</latest-version-publish-date>
 			</library>
 			<library>
 				<file-name>com.liferay.imageio.plugins.jar!common-lang.jar</file-name>
@@ -1916,7 +1916,7 @@
 					</license>
 				</licenses>
 				<current-version-publish-date>2017-02-02 12:36:05</current-version-publish-date>
-				<latest-version-publish-date>2022-02-22 05:54:35</latest-version-publish-date>
+				<latest-version-publish-date>2022-08-19 08:53:33</latest-version-publish-date>
 			</library>
 			<library>
 				<file-name>com.liferay.imageio.plugins.jar!imageio-bmp.jar</file-name>
@@ -1929,7 +1929,7 @@
 					</license>
 				</licenses>
 				<current-version-publish-date>2020-01-09 10:52:49</current-version-publish-date>
-				<latest-version-publish-date>2022-02-22 05:59:07</latest-version-publish-date>
+				<latest-version-publish-date>2022-08-19 08:51:00</latest-version-publish-date>
 			</library>
 			<library>
 				<file-name>com.liferay.imageio.plugins.jar!imageio-core.jar</file-name>
@@ -1942,7 +1942,7 @@
 					</license>
 				</licenses>
 				<current-version-publish-date>2020-01-22 12:57:08</current-version-publish-date>
-				<latest-version-publish-date>2022-02-22 06:01:53</latest-version-publish-date>
+				<latest-version-publish-date>2022-08-19 08:54:23</latest-version-publish-date>
 			</library>
 			<library>
 				<file-name>com.liferay.imageio.plugins.jar!imageio-hdr.jar</file-name>
@@ -1955,7 +1955,7 @@
 					</license>
 				</licenses>
 				<current-version-publish-date>2020-01-22 12:59:24</current-version-publish-date>
-				<latest-version-publish-date>2022-02-22 05:57:33</latest-version-publish-date>
+				<latest-version-publish-date>2022-08-19 08:50:54</latest-version-publish-date>
 			</library>
 			<library>
 				<file-name>com.liferay.imageio.plugins.jar!imageio-icns.jar</file-name>
@@ -1968,7 +1968,7 @@
 					</license>
 				</licenses>
 				<current-version-publish-date>2020-01-22 12:59:46</current-version-publish-date>
-				<latest-version-publish-date>2022-02-22 05:58:37</latest-version-publish-date>
+				<latest-version-publish-date>2022-08-19 08:52:22</latest-version-publish-date>
 			</library>
 			<library>
 				<file-name>com.liferay.imageio.plugins.jar!imageio-iff.jar</file-name>
@@ -1981,7 +1981,7 @@
 					</license>
 				</licenses>
 				<current-version-publish-date>2020-01-22 13:00:18</current-version-publish-date>
-				<latest-version-publish-date>2022-02-22 05:58:55</latest-version-publish-date>
+				<latest-version-publish-date>2022-08-19 08:50:52</latest-version-publish-date>
 			</library>
 			<library>
 				<file-name>com.liferay.imageio.plugins.jar!imageio-jpeg.jar</file-name>
@@ -1994,7 +1994,7 @@
 					</license>
 				</licenses>
 				<current-version-publish-date>2020-01-22 13:00:52</current-version-publish-date>
-				<latest-version-publish-date>2022-02-22 05:59:01</latest-version-publish-date>
+				<latest-version-publish-date>2022-08-19 08:53:17</latest-version-publish-date>
 			</library>
 			<library>
 				<file-name>com.liferay.imageio.plugins.jar!imageio-metadata.jar</file-name>
@@ -2007,7 +2007,7 @@
 					</license>
 				</licenses>
 				<current-version-publish-date>2020-01-22 12:57:34</current-version-publish-date>
-				<latest-version-publish-date>2022-02-22 05:57:32</latest-version-publish-date>
+				<latest-version-publish-date>2022-08-19 08:52:38</latest-version-publish-date>
 			</library>
 			<library>
 				<file-name>com.liferay.imageio.plugins.jar!imageio-pcx.jar</file-name>
@@ -2020,7 +2020,7 @@
 					</license>
 				</licenses>
 				<current-version-publish-date>2020-01-22 13:02:35</current-version-publish-date>
-				<latest-version-publish-date>2022-02-22 05:58:59</latest-version-publish-date>
+				<latest-version-publish-date>2022-08-19 08:52:44</latest-version-publish-date>
 			</library>
 			<library>
 				<file-name>com.liferay.imageio.plugins.jar!imageio-pict.jar</file-name>
@@ -2033,7 +2033,7 @@
 					</license>
 				</licenses>
 				<current-version-publish-date>2020-01-22 13:03:23</current-version-publish-date>
-				<latest-version-publish-date>2022-02-22 05:54:41</latest-version-publish-date>
+				<latest-version-publish-date>2022-08-19 08:53:44</latest-version-publish-date>
 			</library>
 			<library>
 				<file-name>com.liferay.imageio.plugins.jar!imageio-pnm.jar</file-name>
@@ -2046,7 +2046,7 @@
 					</license>
 				</licenses>
 				<current-version-publish-date>2020-01-22 13:03:52</current-version-publish-date>
-				<latest-version-publish-date>2022-02-22 05:54:24</latest-version-publish-date>
+				<latest-version-publish-date>2022-08-19 08:53:29</latest-version-publish-date>
 			</library>
 			<library>
 				<file-name>com.liferay.imageio.plugins.jar!imageio-psd.jar</file-name>
@@ -2059,7 +2059,7 @@
 					</license>
 				</licenses>
 				<current-version-publish-date>2020-01-22 13:04:19</current-version-publish-date>
-				<latest-version-publish-date>2022-02-22 05:56:00</latest-version-publish-date>
+				<latest-version-publish-date>2022-08-19 08:54:31</latest-version-publish-date>
 			</library>
 			<library>
 				<file-name>com.liferay.imageio.plugins.jar!imageio-sgi.jar</file-name>
@@ -2072,7 +2072,7 @@
 					</license>
 				</licenses>
 				<current-version-publish-date>2020-01-22 13:05:28</current-version-publish-date>
-				<latest-version-publish-date>2022-02-22 06:02:50</latest-version-publish-date>
+				<latest-version-publish-date>2022-08-19 08:54:37</latest-version-publish-date>
 			</library>
 			<library>
 				<file-name>com.liferay.imageio.plugins.jar!imageio-tga.jar</file-name>
@@ -2085,7 +2085,7 @@
 					</license>
 				</licenses>
 				<current-version-publish-date>2020-01-22 13:05:55</current-version-publish-date>
-				<latest-version-publish-date>2022-02-22 05:53:57</latest-version-publish-date>
+				<latest-version-publish-date>2022-08-19 08:53:24</latest-version-publish-date>
 			</library>
 			<library>
 				<file-name>com.liferay.imageio.plugins.jar!imageio-thumbsdb.jar</file-name>
@@ -2098,7 +2098,7 @@
 					</license>
 				</licenses>
 				<current-version-publish-date>2020-01-22 13:06:19</current-version-publish-date>
-				<latest-version-publish-date>2022-02-22 06:00:19</latest-version-publish-date>
+				<latest-version-publish-date>2022-08-19 08:50:57</latest-version-publish-date>
 			</library>
 			<library>
 				<file-name>com.liferay.imageio.plugins.jar!imageio-tiff.jar</file-name>
@@ -2111,7 +2111,7 @@
 					</license>
 				</licenses>
 				<current-version-publish-date>2020-01-22 13:06:48</current-version-publish-date>
-				<latest-version-publish-date>2022-02-22 06:02:17</latest-version-publish-date>
+				<latest-version-publish-date>2022-08-19 08:54:45</latest-version-publish-date>
 			</library>
 			<library>
 				<file-name>com.liferay.knowledge.base.markdown.converter.impl.jar!asm-analysis.jar</file-name>
@@ -2620,7 +2620,7 @@
 					</license>
 				</licenses>
 				<current-version-publish-date>2019-10-28 08:54:30</current-version-publish-date>
-				<latest-version-publish-date>2022-08-10 08:06:32</latest-version-publish-date>
+				<latest-version-publish-date>2022-08-19 08:24:32</latest-version-publish-date>
 			</library>
 			<library>
 				<file-name>com.liferay.portal.odata.impl.jar!netty-codec-http.jar</file-name>
@@ -4021,7 +4021,7 @@
 					</license>
 				</licenses>
 				<current-version-publish-date>2020-04-09 03:08:17</current-version-publish-date>
-				<latest-version-publish-date>2022-08-16 03:28:12</latest-version-publish-date>
+				<latest-version-publish-date>2022-08-19 08:10:27</latest-version-publish-date>
 			</library>
 			<library>
 				<file-name>com.liferay.portal.security.sso.openid.connect.impl.jar!oauth2-oidc-sdk.jar</file-name>
@@ -4531,7 +4531,7 @@
 					</license>
 				</licenses>
 				<current-version-publish-date>2022-07-15 13:54:32</current-version-publish-date>
-				<latest-version-publish-date>2022-08-18 13:21:17</latest-version-publish-date>
+				<latest-version-publish-date>2022-08-19 14:19:53</latest-version-publish-date>
 			</library>
 			<library>
 				<file-name>com.liferay.portal.store.s3.jar!aws-java-sdk-kms.jar</file-name>
@@ -4545,7 +4545,7 @@
 					</license>
 				</licenses>
 				<current-version-publish-date>2022-07-15 13:54:29</current-version-publish-date>
-				<latest-version-publish-date>2022-08-18 13:22:18</latest-version-publish-date>
+				<latest-version-publish-date>2022-08-19 14:24:56</latest-version-publish-date>
 			</library>
 			<library>
 				<file-name>com.liferay.portal.store.s3.jar!aws-java-sdk-s3.jar</file-name>
@@ -4559,7 +4559,7 @@
 					</license>
 				</licenses>
 				<current-version-publish-date>2022-07-15 13:53:45</current-version-publish-date>
-				<latest-version-publish-date>2022-08-18 13:21:31</latest-version-publish-date>
+				<latest-version-publish-date>2022-08-19 14:23:34</latest-version-publish-date>
 			</library>
 			<library>
 				<file-name>com.liferay.portal.store.s3.jar!commons-codec.jar</file-name>
@@ -5176,8 +5176,8 @@
 						<license-url>https://github.com/graphql-java/graphql-java/blob/master/LICENSE.md</license-url>
 					</license>
 				</licenses>
-				<current-version-publish-date>2021-07-12 22:18:49</current-version-publish-date>
-				<latest-version-publish-date>2022-08-16 17:20:15</latest-version-publish-date>
+				<current-version-publish-date>2021-07-14 04:06:10</current-version-publish-date>
+				<latest-version-publish-date>2022-08-21 23:47:10</latest-version-publish-date>
 			</library>
 			<library>
 				<file-name>com.liferay.portal.vulcan.impl.jar!guava.jar</file-name>
@@ -6756,7 +6756,7 @@
 			</library>
 			<library>
 				<file-name>lib/development/mysql.jar</file-name>
-				<version>8.0.21</version>
+				<version>8.0.29</version>
 				<project-name>MySQL Connector/J</project-name>
 				<project-url>http://www.mysql.com/products/connector/j</project-url>
 				<licenses>
