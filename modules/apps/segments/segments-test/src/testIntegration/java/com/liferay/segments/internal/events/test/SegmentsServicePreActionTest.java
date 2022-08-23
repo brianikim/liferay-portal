@@ -35,6 +35,7 @@ import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.test.rule.Inject;
@@ -43,9 +44,13 @@ import com.liferay.registry.Filter;
 import com.liferay.registry.Registry;
 import com.liferay.registry.RegistryUtil;
 import com.liferay.registry.ServiceTracker;
+import com.liferay.segments.constants.SegmentsExperienceConstants;
 import com.liferay.segments.constants.SegmentsWebKeys;
+import com.liferay.segments.model.SegmentsExperience;
+import com.liferay.segments.service.SegmentsExperienceLocalService;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -227,6 +232,72 @@ public class SegmentsServicePreActionTest {
 				SegmentsWebKeys.SEGMENTS_EXPERIENCE_IDS));
 	}
 
+	@Test
+	public void testProcessLifecycleUsesCorrectSegmentsExperienceWithCachedSegmentsEntryId()
+		throws Exception {
+
+		LifecycleAction lifecycleAction = _getLifecycleAction();
+
+		MockHttpServletRequest mockHttpServletRequest =
+			new MockHttpServletRequest();
+
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(
+				_group.getGroupId(), TestPropsValues.getUserId());
+
+		Map<Locale, String> nameMap = Collections.singletonMap(
+			LocaleUtil.getDefault(), RandomTestUtil.randomString());
+
+		UnicodeProperties typeSettingsUnicodeProperties =
+			new UnicodeProperties();
+
+		typeSettingsUnicodeProperties.put("published", "true");
+
+		Layout layout = _layoutLocalService.addLayout(
+			TestPropsValues.getUserId(), _group.getGroupId(), false,
+			LayoutConstants.DEFAULT_PARENT_LAYOUT_ID, 0, 0, nameMap, nameMap,
+			Collections.emptyMap(), Collections.emptyMap(),
+			Collections.emptyMap(), LayoutConstants.TYPE_COLLECTION,
+			typeSettingsUnicodeProperties.toString(), false, false,
+			Collections.emptyMap(), 0, serviceContext);
+
+		mockHttpServletRequest.setAttribute(
+			WebKeys.THEME_DISPLAY, _getThemeDisplay(layout));
+
+		LifecycleEvent lifecycleEvent = new LifecycleEvent(
+			mockHttpServletRequest, new MockHttpServletResponse());
+
+		mockHttpServletRequest.setAttribute(
+			SegmentsWebKeys.SEGMENTS_ENTRY_IDS, new long[] {0L});
+
+		lifecycleAction.processLifecycleEvent(lifecycleEvent);
+
+		List<SegmentsExperience> segmentsExperiences =
+			_segmentsExperienceLocalService.getSegmentsExperiences(
+				_group.getGroupId(),
+				_portal.getClassNameId(Layout.class.getName()),
+				layout.getPlid());
+
+		long[] expectedSegmentsExperienceIds =
+			new long[segmentsExperiences.size()];
+
+		for (int i = 0; i < segmentsExperiences.size(); i++) {
+			SegmentsExperience segmentsExperience = segmentsExperiences.get(i);
+
+			expectedSegmentsExperienceIds[i] =
+				segmentsExperience.getSegmentsExperienceId();
+		}
+
+		expectedSegmentsExperienceIds = ArrayUtil.append(
+			expectedSegmentsExperienceIds,
+			SegmentsExperienceConstants.ID_DEFAULT);
+
+		Assert.assertArrayEquals(
+			expectedSegmentsExperienceIds,
+			(long[])mockHttpServletRequest.getAttribute(
+				SegmentsWebKeys.SEGMENTS_EXPERIENCE_IDS));
+	}
+
 	private LifecycleAction _getLifecycleAction() {
 		Object[] services = _serviceTracker.getServices();
 
@@ -274,5 +345,11 @@ public class SegmentsServicePreActionTest {
 
 	@Inject
 	private LayoutLocalService _layoutLocalService;
+
+	@Inject
+	private Portal _portal;
+
+	@Inject
+	private SegmentsExperienceLocalService _segmentsExperienceLocalService;
 
 }
