@@ -1478,7 +1478,8 @@ public class SXPBlueprintSearchResultTest {
 
 		_updateElementInstancesJSON(null, null);
 
-		_assertSearchIgnoreRelevance("[Article file 1, PDF file]");
+		_assertSearchIgnoreRelevance(
+			"[article file 1, pdf file]", "localized_title_en_US");
 	}
 
 	@Test
