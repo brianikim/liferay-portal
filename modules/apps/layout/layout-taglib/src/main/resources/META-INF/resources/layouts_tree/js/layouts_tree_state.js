@@ -391,6 +391,7 @@ AUI.add(
 
 					data = A.merge(
 						{
+							doAsUserId: themeDisplay.getDoAsUserIdEncoded(),
 							groupId: root.groupId,
 							privateLayout: root.privateLayout,
 							recursive: true,
