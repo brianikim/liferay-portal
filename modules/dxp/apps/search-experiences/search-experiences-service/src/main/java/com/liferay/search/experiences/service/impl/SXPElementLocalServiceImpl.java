@@ -60,8 +60,10 @@ public class SXPElementLocalServiceImpl extends SXPElementLocalServiceBaseImpl {
 			ServiceContext serviceContext)
 		throws PortalException {
 
+		User user = _userLocalService.getUser(userId);
+
 		_validateExternalReferenceCode(
-			serviceContext.getCompanyId(), externalReferenceCode);
+			user.getCompanyId(), externalReferenceCode);
 
 		_validate(elementDefinitionJSON, titleMap, type, serviceContext);
 
@@ -69,13 +71,9 @@ public class SXPElementLocalServiceImpl extends SXPElementLocalServiceBaseImpl {
 			counterLocalService.increment(SXPElement.class.getName()));
 
 		sxpElement.setExternalReferenceCode(externalReferenceCode);
-		sxpElement.setCompanyId(serviceContext.getCompanyId());
-
-		User user = _userLocalService.getUser(userId);
-
+		sxpElement.setCompanyId(user.getCompanyId());
 		sxpElement.setUserId(user.getUserId());
 		sxpElement.setUserName(user.getFullName());
-
 		sxpElement.setDescriptionMap(descriptionMap);
 		sxpElement.setElementDefinitionJSON(elementDefinitionJSON);
 		sxpElement.setHidden(false);
