@@ -28,6 +28,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.LayoutSet;
 import com.liferay.portal.kernel.model.LayoutSetPrototype;
 import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.service.LayoutSetLocalServiceUtil;
 import com.liferay.portal.kernel.service.LayoutSetPrototypeLocalServiceUtil;
 import com.liferay.portal.kernel.transaction.TransactionInvokerUtil;
 import com.liferay.portal.kernel.util.FileUtil;
@@ -35,7 +36,6 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.sites.kernel.util.Sites;
-import com.liferay.sites.kernel.util.SitesUtil;
 
 import java.io.File;
 import java.io.Serializable;
@@ -122,6 +122,12 @@ public class LayoutSetPrototypeImportBackgroundTaskExecutor
 
 				mergeFailCount++;
 
+				layoutSetPrototypeSettingsUnicodeProperties.setProperty(
+					Sites.MERGE_FAIL_COUNT, String.valueOf(mergeFailCount));
+
+				LayoutSetLocalServiceUtil.updateLayoutSet(
+					layoutSetPrototypeLayoutSet);
+
 				StringBundler sb = new StringBundler(4);
 
 				sb.append("Merge fail count increased to ");
@@ -130,8 +136,6 @@ public class LayoutSetPrototypeImportBackgroundTaskExecutor
 				sb.append(layoutSetPrototype.getLayoutSetPrototypeId());
 
 				_log.error(sb.toString(), throwable);
-
-				SitesUtil.setMergeFailCount(layoutSetPrototype, mergeFailCount);
 			}
 			finally {
 				MergeLayoutPrototypesThreadLocal.setInProgress(false);
