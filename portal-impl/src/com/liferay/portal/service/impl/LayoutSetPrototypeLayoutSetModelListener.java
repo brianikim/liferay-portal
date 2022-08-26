@@ -23,6 +23,8 @@ import com.liferay.portal.kernel.model.LayoutSet;
 import com.liferay.portal.kernel.model.LayoutSetPrototype;
 import com.liferay.portal.kernel.service.LayoutSetPrototypeLocalServiceUtil;
 import com.liferay.portal.kernel.service.persistence.LayoutSetPrototypeUtil;
+import com.liferay.portal.kernel.service.persistence.LayoutSetUtil;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 
 import java.util.Date;
@@ -34,18 +36,54 @@ public class LayoutSetPrototypeLayoutSetModelListener
 	extends BaseModelListener<LayoutSet> {
 
 	@Override
-	public void onAfterCreate(LayoutSet layoutSet) {
-		updateLayoutSetPrototype(layoutSet, layoutSet.getModifiedDate());
-	}
-
-	@Override
-	public void onAfterRemove(LayoutSet layoutSet) {
-		updateLayoutSetPrototype(layoutSet, new Date());
-	}
-
-	@Override
 	public void onAfterUpdate(LayoutSet layoutSet) {
 		updateLayoutSetPrototype(layoutSet, layoutSet.getModifiedDate());
+	}
+
+	@Override
+	public void onBeforeUpdate(LayoutSet layoutSet) {
+		if (layoutSet == null) {
+			return;
+		}
+
+		Group group = _getGroup(layoutSet);
+
+		if (group == null) {
+			return;
+		}
+
+		try {
+			LayoutSetPrototype layoutSetPrototype =
+				LayoutSetPrototypeLocalServiceUtil.getLayoutSetPrototype(
+					group.getClassPK());
+
+			LayoutSet originalLayoutSet = layoutSetPrototype.getLayoutSet();
+
+			UnicodeProperties originalSettingsUnicodeProperties =
+				originalLayoutSet.getSettingsProperties();
+
+			int originalMergeFailCount = GetterUtil.getInteger(
+				originalSettingsUnicodeProperties.getProperty(
+					"merge-fail-count"));
+
+			UnicodeProperties settingsUnicodeProperties =
+				layoutSet.getSettingsProperties();
+
+			int mergeFailCount = GetterUtil.getInteger(
+				settingsUnicodeProperties.getProperty("merge-fail-count"));
+
+			if ((mergeFailCount == originalMergeFailCount) &&
+				(mergeFailCount != 0)) {
+
+				settingsUnicodeProperties.setProperty(
+					"remove-merge-fail-count", "true");
+			}
+
+			LayoutSetUtil.updateImpl(originalLayoutSet);
+		}
+		catch (Exception exception) {
+			_log.error(exception, exception);
+		}
 	}
 
 	protected void updateLayoutSetPrototype(
@@ -55,23 +93,9 @@ public class LayoutSetPrototypeLayoutSetModelListener
 			return;
 		}
 
-		Group group = null;
+		Group group = _getGroup(layoutSet);
 
-		try {
-			group = layoutSet.getGroup();
-
-			if (!group.isLayoutSetPrototype()) {
-				return;
-			}
-		}
-		catch (PortalException portalException) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(portalException, portalException);
-			}
-
+		if (group == null) {
 			return;
 		}
 
@@ -80,18 +104,49 @@ public class LayoutSetPrototypeLayoutSetModelListener
 				LayoutSetPrototypeLocalServiceUtil.getLayoutSetPrototype(
 					group.getClassPK());
 
-			layoutSetPrototype.setModifiedDate(modifiedDate);
+			layoutSetPrototype.setModifiedDate(layoutSet.getModifiedDate());
+
+			LayoutSetPrototypeUtil.update(layoutSetPrototype);
 
 			UnicodeProperties settingsUnicodeProperties =
 				layoutSet.getSettingsProperties();
 
-			settingsUnicodeProperties.remove("merge-fail-count");
+			boolean removeMergeFailCount = GetterUtil.getBoolean(
+				settingsUnicodeProperties.getProperty(
+					"remove-merge-fail-count"));
 
-			LayoutSetPrototypeUtil.update(layoutSetPrototype);
+			if (removeMergeFailCount) {
+				settingsUnicodeProperties.remove("merge-fail-count");
+			}
+
+			settingsUnicodeProperties.remove("remove-merge-fail-count");
+
+			LayoutSetUtil.updateImpl(layoutSet);
 		}
 		catch (Exception exception) {
 			_log.error(exception, exception);
 		}
+	}
+
+	private Group _getGroup(LayoutSet layoutSet) {
+		Group group = null;
+
+		try {
+			group = layoutSet.getGroup();
+
+			if (!group.isLayoutSetPrototype()) {
+				return null;
+			}
+		}
+		catch (PortalException portalException) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(portalException, portalException);
+			}
+
+			return null;
+		}
+
+		return group;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
