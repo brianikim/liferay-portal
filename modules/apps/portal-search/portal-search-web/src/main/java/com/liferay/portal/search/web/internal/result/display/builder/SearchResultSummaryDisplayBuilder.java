@@ -601,7 +601,7 @@ public class SearchResultSummaryDisplayBuilder {
 		AssetRendererFactory<?> assetRendererFactory,
 		AssetRenderer<?> assetRenderer) {
 
-		if (!_imageRequested) {
+		if (!_imageRequested || (assetRendererFactory == null)) {
 			return;
 		}
 
