@@ -32,9 +32,11 @@ import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.servlet.DynamicServletRequest;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Html;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.search.spi.model.index.contributor.ModelDocumentContributor;
 import com.liferay.segments.constants.SegmentsExperienceConstants;
@@ -104,42 +106,23 @@ public class LayoutModelDocumentContributor
 		Set<Locale> locales = LanguageUtil.getAvailableLocales(
 			layout.getGroupId());
 
-		for (Locale locale : locales) {
-			String content = StringPool.BLANK;
-
-			try {
-				content = _getLayoutContent(
-					layout, layoutPageTemplateStructure, locale);
-			}
-			catch (Exception exception) {
-				if (_log.isWarnEnabled()) {
-					_log.warn("Unable to get layout content", exception);
-				}
-			}
-
-			if (Validator.isNull(content)) {
-				continue;
-			}
-
-			content = _html.stripHtml(_getWrapper(content));
-
-			if (Validator.isNull(content)) {
-				continue;
-			}
-
-			document.addText(
-				Field.getLocalizedName(locale, Field.CONTENT), content);
-		}
-	}
-
-	private String _getLayoutContent(
-			Layout layout,
-			LayoutPageTemplateStructure layoutPageTemplateStructure,
-			Locale locale)
-		throws Exception {
-
 		if (!layout.isPrivateLayout()) {
-			return _layoutCrawler.getLayoutContent(layout, locale);
+			for (Locale locale : locales) {
+				String content = StringPool.BLANK;
+
+				try {
+					content = _layoutCrawler.getLayoutContent(layout, locale);
+				}
+				catch (Exception exception) {
+					if (_log.isWarnEnabled()) {
+						_log.warn("Unable to get layout content", exception);
+					}
+				}
+
+				_addLocalizedContentField(content, document, locale);
+			}
+
+			return;
 		}
 
 		HttpServletRequest httpServletRequest = null;
@@ -157,14 +140,74 @@ public class LayoutModelDocumentContributor
 		}
 
 		if ((httpServletRequest == null) || (httpServletResponse == null)) {
-			return StringPool.BLANK;
+			return;
 		}
 
-		return LayoutPageTemplateStructureRenderUtil.renderLayoutContent(
-			_fragmentRendererController, httpServletRequest,
-			httpServletResponse, layoutPageTemplateStructure,
-			FragmentEntryLinkConstants.VIEW, Collections.emptyMap(), locale,
-			new long[] {SegmentsExperienceConstants.ID_DEFAULT});
+		Layout originalRequestLayout = (Layout)httpServletRequest.getAttribute(
+			WebKeys.LAYOUT);
+
+		ThemeDisplay themeDisplay =
+			(ThemeDisplay)httpServletRequest.getAttribute(
+				WebKeys.THEME_DISPLAY);
+
+		Layout originalThemeDisplayLayout = themeDisplay.getLayout();
+		long originalThemeDisplayPlid = themeDisplay.getPlid();
+
+		try {
+			httpServletRequest.setAttribute(WebKeys.LAYOUT, layout);
+
+			themeDisplay.setLayout(layout);
+			themeDisplay.setPlid(layout.getPlid());
+
+			for (Locale locale : locales) {
+				String content = StringPool.BLANK;
+
+				try {
+					content =
+						LayoutPageTemplateStructureRenderUtil.
+							renderLayoutContent(
+								_fragmentRendererController, httpServletRequest,
+								httpServletResponse,
+								layoutPageTemplateStructure,
+								FragmentEntryLinkConstants.VIEW,
+								Collections.emptyMap(), locale,
+								new long[] {
+									SegmentsExperienceConstants.ID_DEFAULT
+								});
+				}
+				catch (Exception exception) {
+					if (_log.isWarnEnabled()) {
+						_log.warn("Unable to get layout content", exception);
+					}
+				}
+
+				_addLocalizedContentField(content, document, locale);
+			}
+		}
+		finally {
+			httpServletRequest.setAttribute(
+				WebKeys.LAYOUT, originalRequestLayout);
+
+			themeDisplay.setLayout(originalThemeDisplayLayout);
+			themeDisplay.setPlid(originalThemeDisplayPlid);
+		}
+	}
+
+	private void _addLocalizedContentField(
+		String content, Document document, Locale locale) {
+
+		if (Validator.isNull(content)) {
+			return;
+		}
+
+		content = _html.stripHtml(_getWrapper(content));
+
+		if (Validator.isNull(content)) {
+			return;
+		}
+
+		document.addText(
+			Field.getLocalizedName(locale, Field.CONTENT), content);
 	}
 
 	private int _getStatus(Layout layout) {
