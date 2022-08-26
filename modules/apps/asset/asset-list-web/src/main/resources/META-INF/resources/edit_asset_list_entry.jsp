@@ -64,6 +64,9 @@ renderResponse.setTitle(assetListDisplayContext.getAssetListEntryTitle());
 										<strong class="text-uppercase">
 											<liferay-ui:message key="personalized-variations" />
 										</strong>
+										<p>
+											<liferay-ui:message key="personalized-variations-help" />
+										</p
 									</clay:content-col>
 
 									<c:if test="<%= Validator.isNotNull(assetListEntry.getAssetEntryType()) %>">
