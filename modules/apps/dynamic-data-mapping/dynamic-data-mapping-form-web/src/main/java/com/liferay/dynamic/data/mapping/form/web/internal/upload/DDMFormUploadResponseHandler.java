@@ -55,7 +55,11 @@ public class DDMFormUploadResponseHandler implements UploadResponseHandler {
 		ThemeDisplay themeDisplay = (ThemeDisplay)portletRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		if (portalException instanceof FileExtensionException) {
+		if (portalException instanceof AntivirusScannerException) {
+			errorMessage = themeDisplay.translate(
+				"a-virus-was-detected-in-the-file");
+		}
+		else if (portalException instanceof FileExtensionException) {
 			errorMessage = themeDisplay.translate(
 				"please-enter-a-file-with-a-valid-extension-x",
 				StringUtil.merge(
@@ -75,10 +79,6 @@ public class DDMFormUploadResponseHandler implements UploadResponseHandler {
 		}
 		else if (portalException instanceof InvalidFileException) {
 			errorMessage = themeDisplay.translate("please-enter-a-valid-file");
-		}
-		else if (portalException instanceof AntivirusScannerException) {
-			errorMessage = themeDisplay.translate(
-				"a-virus-was-detected-in-the-file");
 		}
 		else {
 			errorMessage = themeDisplay.translate(
