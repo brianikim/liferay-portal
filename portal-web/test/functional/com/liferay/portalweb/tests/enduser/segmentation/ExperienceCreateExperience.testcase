@@ -121,6 +121,8 @@ definition {
 
 		PageEditor.changeExperience(newExperience = "NewExp1");
 
+		Click(locator1 = "PageEditor#EXPERIENCE_LABEL");
+
 		PageEditor.duplicateExperience(experienceName = "NewExp1");
 
 		PageEditor.clickPublish();
