@@ -32,7 +32,7 @@
 </tr>
 <tr>
 	<td>DUE_DATE_ICON</td>
-	<td>//div[@class="quick-action-menu"]//button[2]</td>
+	<td>//li//div[@class="quick-action-menu"]//button[2]</td>
 	<td></td>
 </tr>
 <tr>
