@@ -21,6 +21,7 @@ import com.liferay.journal.service.JournalArticleLocalService;
 import com.liferay.journal.util.comparator.ArticleVersionComparator;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.service.persistence.change.tracking.CTPersistence;
 import com.liferay.portal.kernel.util.MathUtil;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
@@ -97,10 +98,15 @@ public class JournalArticleVersionConstraintResolver
 		double currentVersion = MathUtil.format(
 			latestVersion + (0.1 * sourceArticles.size()), 1, 1);
 
+		CTPersistence ctPersistence =
+			_journalArticleLocalService.getCTPersistence();
+
 		for (JournalArticle article : sourceArticles) {
 			article.setVersion(currentVersion);
 
 			_journalArticleLocalService.updateJournalArticle(article);
+
+			ctPersistence.flush();
 
 			currentVersion = MathUtil.format(currentVersion - 0.1, 1, 1);
 		}
