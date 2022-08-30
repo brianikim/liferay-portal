@@ -337,7 +337,7 @@ renderResponse.setTitle(headerTitle);
 
 							<c:choose>
 								<c:when test="<%= dlFileEntryTypes.size() > 1 %>">
-									<aui:select changesContext="<%= true %>" label="document-type" name="fileEntryTypeId" onChange='<%= liferayPortletResponse.getNamespace() + "changeFileEntryType();" %>' onFocus="this.prevValue = this.selectedOptions[0].index">
+									<aui:select changesContext="<%= true %>" label="document-type" name="fileEntryTypeId" onChange='<%= liferayPortletResponse.getNamespace() + "changeFileEntryType();" %>'>
 
 										<%
 										for (DLFileEntryType curDLFileEntryType : dlFileEntryTypes) {
@@ -585,11 +585,9 @@ renderResponse.setTitle(headerTitle);
 			submitForm(form, uri, false, false);
 		}
 		else {
-			var formFileEntryType = document.getElementById(
-				'<portlet:namespace />fileEntryTypeId'
-			);
-
-			formFileEntryType.selectedIndex = formFileEntryType.prevValue;
+					Liferay.Util.setFormValues(form, {
+						fileEntryTypeId: '<%= fileEntryTypeId %>',
+					});
 		}
 	}
 
