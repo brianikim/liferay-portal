@@ -319,6 +319,7 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 
 		layoutLocalServiceHelper.validate(
 			groupId, privateLayout, layoutId, parentLayoutId, name, type,
+			layoutLocalServiceHelper.isDraftLayout(classNameId, classPK, type),
 			hidden, friendlyURLMap, serviceContext);
 
 		Date now = new Date();
@@ -2838,17 +2839,19 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 
 		String friendlyURL = friendlyURLMap.get(LocaleUtil.getSiteDefault());
 
+		Layout layout = layoutPersistence.findByG_P_L(
+			groupId, privateLayout, layoutId);
+
 		layoutLocalServiceHelper.validate(
 			groupId, privateLayout, layoutId, parentLayoutId, name, type,
+			layoutLocalServiceHelper.isDraftLayout(
+				layout.getClassNameId(), layout.getClassPK(), type),
 			hidden, friendlyURLMap, serviceContext);
 
 		layoutLocalServiceHelper.validateParentLayoutId(
 			groupId, privateLayout, layoutId, parentLayoutId);
 
 		Date now = new Date();
-
-		Layout layout = layoutPersistence.findByG_P_L(
-			groupId, privateLayout, layoutId);
 
 		if (parentLayoutId != layout.getParentLayoutId()) {
 			layout.setParentPlid(
