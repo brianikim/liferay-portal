@@ -26,10 +26,12 @@ import com.liferay.dynamic.data.mapping.service.DDMFormInstanceService;
 import com.liferay.dynamic.data.mapping.util.comparator.DDMFormInstanceRecordIdComparator;
 import com.liferay.dynamic.data.mapping.util.comparator.DDMFormInstanceRecordModifiedDateComparator;
 import com.liferay.petra.string.CharPool;
+import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.portlet.PortalPreferences;
+import com.liferay.portal.kernel.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portal.kernel.portlet.PortletResponseUtil;
-import com.liferay.portal.kernel.portlet.SearchOrderByUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCResourceCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
@@ -37,6 +39,7 @@ import com.liferay.portal.kernel.util.MimeTypesUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
@@ -134,28 +137,68 @@ public class ExportFormInstanceMVCResourceCommand
 		_ddmFormWebConfigurationActivator = null;
 	}
 
+	private String _getOrderByCol(
+		ResourceRequest resourceRequest, PortalPreferences portalPreferences) {
+
+		String orderByCol = ParamUtil.getString(
+			resourceRequest, SearchContainer.DEFAULT_ORDER_BY_COL_PARAM);
+
+		if (Validator.isNull(orderByCol)) {
+			orderByCol = portalPreferences.getValue(
+				DDMPortletKeys.DYNAMIC_DATA_MAPPING_FORM_ADMIN,
+				"view-entries-order-by-col", "modified-date");
+		}
+		else {
+			portalPreferences.setValue(
+				DDMPortletKeys.DYNAMIC_DATA_MAPPING_FORM_ADMIN,
+				"view-entries-order-by-col", orderByCol);
+		}
+
+		return orderByCol;
+	}
+
 	private OrderByComparator<DDMFormInstanceRecord> _getOrderByComparator(
 		ResourceRequest resourceRequest) {
 
 		boolean orderByAsc = false;
 
-		String orderByType = SearchOrderByUtil.getOrderByType(
-			resourceRequest, DDMPortletKeys.DYNAMIC_DATA_MAPPING_FORM_ADMIN,
-			"view-entries-order-by-type", "asc");
+		PortalPreferences portalPreferences =
+			PortletPreferencesFactoryUtil.getPortalPreferences(resourceRequest);
+
+		String orderByType = _getOrderByType(
+			resourceRequest, portalPreferences);
 
 		if (orderByType.equals("asc")) {
 			orderByAsc = true;
 		}
 
-		String orderByCol = SearchOrderByUtil.getOrderByCol(
-			resourceRequest, DDMPortletKeys.DYNAMIC_DATA_MAPPING_FORM_ADMIN,
-			"view-entries-order-by-col", "modified-date");
+		String orderByCol = _getOrderByCol(resourceRequest, portalPreferences);
 
 		if (orderByCol.equals("modified-date")) {
 			return new DDMFormInstanceRecordModifiedDateComparator(orderByAsc);
 		}
 
 		return new DDMFormInstanceRecordIdComparator(orderByAsc);
+	}
+
+	private String _getOrderByType(
+		ResourceRequest resourceRequest, PortalPreferences portalPreferences) {
+
+		String orderByType = ParamUtil.getString(
+			resourceRequest, SearchContainer.DEFAULT_ORDER_BY_TYPE_PARAM);
+
+		if (Validator.isNull(orderByType)) {
+			orderByType = portalPreferences.getValue(
+				DDMPortletKeys.DYNAMIC_DATA_MAPPING_FORM_ADMIN,
+				"view-entries-order-by-type", "asc");
+		}
+		else {
+			portalPreferences.setValue(
+				DDMPortletKeys.DYNAMIC_DATA_MAPPING_FORM_ADMIN,
+				"view-entries-order-by-type", orderByType);
+		}
+
+		return orderByType;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
