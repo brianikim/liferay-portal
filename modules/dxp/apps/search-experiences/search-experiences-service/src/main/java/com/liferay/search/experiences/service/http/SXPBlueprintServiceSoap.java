@@ -69,7 +69,8 @@ public class SXPBlueprintServiceSoap {
 
 	public static com.liferay.search.experiences.model.SXPBlueprintSoap
 			addSXPBlueprint(
-				String configurationJSON, String[] descriptionMapLanguageIds,
+				String externalReferenceCode, String configurationJSON,
+				String[] descriptionMapLanguageIds,
 				String[] descriptionMapValues, String elementInstancesJSON,
 				String schemaVersion, String[] titleMapLanguageIds,
 				String[] titleMapValues,
@@ -85,8 +86,9 @@ public class SXPBlueprintServiceSoap {
 
 			com.liferay.search.experiences.model.SXPBlueprint returnValue =
 				SXPBlueprintServiceUtil.addSXPBlueprint(
-					configurationJSON, descriptionMap, elementInstancesJSON,
-					schemaVersion, titleMap, serviceContext);
+					externalReferenceCode, configurationJSON, descriptionMap,
+					elementInstancesJSON, schemaVersion, titleMap,
+					serviceContext);
 
 			return com.liferay.search.experiences.model.SXPBlueprintSoap.
 				toSoapModel(returnValue);
