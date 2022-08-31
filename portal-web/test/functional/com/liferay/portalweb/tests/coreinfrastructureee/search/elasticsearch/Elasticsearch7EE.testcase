@@ -280,6 +280,7 @@ definition {
 		property elastic.xpack.enabled = "true";
 		property elasticsearch.jdk11.enabled = "true";
 		property environment.acceptance = "openjdk11";
+		property minimum.slave.ram = "24";
 		property osgi.app.includes = "portal-search-elasticsearch-monitoring";
 		property portal.release = "openjdk11";
 		property portal.suite.search.engine = "openjdk11";
@@ -355,6 +356,7 @@ definition {
 		property elastic.xpack.enabled = "true";
 		property elasticsearch.jdk11.enabled = "true";
 		property environment.acceptance = "openjdk11";
+		property minimum.slave.ram = "24";
 		property osgi.app.includes = "portal-search-elasticsearch-monitoring";
 		property portal.release = "openjdk11";
 		property portal.suite.search.engine = "openjdk11";
