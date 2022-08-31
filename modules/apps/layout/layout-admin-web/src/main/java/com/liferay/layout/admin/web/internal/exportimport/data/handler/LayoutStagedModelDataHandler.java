@@ -631,6 +631,14 @@ public class LayoutStagedModelDataHandler
 			existingLayout = _layoutLocalService.fetchLayoutByUuidAndGroupId(
 				uuid, groupId, privateLayout);
 
+			if (existingLayout != null) {
+				Map<Long, Long> layoutPlids =
+					(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
+						Layout.class);
+
+				layoutPlids.put(layout.getPlid(), existingLayout.getPlid());
+			}
+
 			if (SitesUtil.isLayoutModifiedSinceLastMerge(existingLayout) ||
 				!_isLayoutOutdated(existingLayout, layout)) {
 
