@@ -129,8 +129,8 @@ public class PortalImplUnitTest {
 
 		Map<String, String[]> params = _createMapParams();
 
-		params.put(_PASSWORD1, new String[] {"abc_123"});
-		params.put(_PASSWORD2, new String[] {"def_456"});
+		params.put("password1", new String[] {"abc_123"});
+		params.put("password2", new String[] {"def_456"});
 
 		Enumeration<String> enumeration = _createEnumerationParams();
 
@@ -801,16 +801,17 @@ public class PortalImplUnitTest {
 			(MutableRenderParametersImpl)actionResponse.getRenderParameters();
 
 		Assert.assertEquals(
-			mutableRenderParametersImpl.getValues(_REDIRECT)[0].toString(),
-			params.get(_REDIRECT)[0]);
+			mutableRenderParametersImpl.getValues("redirect")[0].toString(),
+			params.get("redirect")[0]);
 		Assert.assertEquals(
-			mutableRenderParametersImpl.getValues(_P_U_I_D)[0].toString(),
-			params.get(_P_U_I_D)[0]);
+			mutableRenderParametersImpl.getValues("p_u_i_d")[0].toString(),
+			params.get("p_u_i_d")[0]);
 		Assert.assertEquals(
-			mutableRenderParametersImpl.getValues(_PASSWORDRESET)[0].toString(),
-			params.get(_PASSWORDRESET)[0]);
-		Assert.assertNull(mutableRenderParametersImpl.getValues(_PASSWORD1));
-		Assert.assertNull(mutableRenderParametersImpl.getValues(_PASSWORD2));
+			mutableRenderParametersImpl.getValues("passwordReset")[0].
+				toString(),
+			params.get("passwordReset")[0]);
+		Assert.assertNull(mutableRenderParametersImpl.getValues("password1"));
+		Assert.assertNull(mutableRenderParametersImpl.getValues("password2"));
 	}
 
 	private void _assertGetHost(String httpHostHeader, String host) {
@@ -855,29 +856,29 @@ public class PortalImplUnitTest {
 			enumeration
 		);
 		Mockito.when(
-			actionRequestMock.getParameterValues(_REDIRECT)
+			actionRequestMock.getParameterValues("redirect")
 		).thenReturn(
-			params.get(_REDIRECT)
+			params.get("redirect")
 		);
 		Mockito.when(
-			actionRequestMock.getParameterValues(_P_U_I_D)
+			actionRequestMock.getParameterValues("p_u_i_d")
 		).thenReturn(
-			params.get(_P_U_I_D)
+			params.get("p_u_i_d")
 		);
 		Mockito.when(
-			actionRequestMock.getParameterValues(_PASSWORDRESET)
+			actionRequestMock.getParameterValues("passwordReset")
 		).thenReturn(
-			params.get(_PASSWORDRESET)
+			params.get("passwordReset")
 		);
 		Mockito.when(
-			actionRequestMock.getParameterValues(_PASSWORD1)
+			actionRequestMock.getParameterValues("password1")
 		).thenReturn(
-			params.get(_PASSWORD1)
+			params.get("password1")
 		);
 		Mockito.when(
-			actionRequestMock.getParameterValues(_PASSWORD2)
+			actionRequestMock.getParameterValues("password2")
 		).thenReturn(
-			params.get(_PASSWORD2)
+			params.get("password2")
 		);
 
 		return actionRequestMock;
@@ -921,34 +922,24 @@ public class PortalImplUnitTest {
 	private Enumeration<String> _createEnumerationParams() {
 		List<String> arrayList = new ArrayList<>();
 
-		arrayList.add(_REDIRECT);
-		arrayList.add(_P_U_I_D);
-		arrayList.add(_PASSWORDRESET);
-		arrayList.add(_PASSWORD1);
-		arrayList.add(_PASSWORD2);
+		arrayList.add("redirect");
+		arrayList.add("p_u_i_d");
+		arrayList.add("passwordReset");
+		arrayList.add("password1");
+		arrayList.add("password2");
 
 		return Collections.enumeration(arrayList);
 	}
 
 	private Map<String, String[]> _createMapParams() {
 		return HashMapBuilder.put(
-			_P_U_I_D, new String[] {String.valueOf(4200L)}
+			"p_u_i_d", new String[] {String.valueOf(4200L)}
 		).put(
-			_PASSWORDRESET, new String[] {Boolean.TRUE.toString()}
+			"passwordReset", new String[] {Boolean.TRUE.toString()}
 		).put(
-			_REDIRECT, new String[] {"http://localhost:8080/test"}
+			"redirect", new String[] {"http://localhost:8080/test"}
 		).build();
 	}
-
-	private static final String _P_U_I_D = "p_u_i_d";
-
-	private static final String _PASSWORD1 = "password1";
-
-	private static final String _PASSWORD2 = "password2";
-
-	private static final String _PASSWORDRESET = "passwordReset";
-
-	private static final String _REDIRECT = "redirect";
 
 	private final PortalImpl _portalImpl = new PortalImpl();
 
