@@ -30,7 +30,7 @@ definition {
 	test CanSearchForPagePropertiesList {
 		var propertyList = "Property Name 1,Property Name 2,Property Name 3,Property Name 4";
 
-		task ("go to property and add new  properties") {
+		task ("go to property and add new properties") {
 			ACNavigation.goToSettings();
 
 			for (var n : list "${propertyList}") {
@@ -56,7 +56,7 @@ definition {
 	test CanSearchForProperty {
 		var propertyList = "Property Name 1,Property Name 2,Property Name 3,Property Name 4";
 
-		task ("go to property and add new  properties") {
+		task ("go to property and add new properties") {
 			ACNavigation.goToSettings();
 
 			for (var n : list "${propertyList}") {
