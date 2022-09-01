@@ -637,29 +637,28 @@ public class AssetListAssetEntryProviderImpl
 	private long _getFirstSegmentsEntryId(
 		AssetListEntry assetListEntry, long[] segmentsEntryIds) {
 
-		if (segmentsEntryIds.length == 0){
+		if (segmentsEntryIds.length == 0) {
 			return SegmentsEntryConstants.ID_DEFAULT;
 		}
 
 		LongStream longStream = Arrays.stream(segmentsEntryIds);
 
 		Stream<AssetListEntrySegmentsEntryRel>
-			assetListEntrySegmentsEntryRelStream = longStream
-			.mapToObj(segmentsEntryId ->
-				_assetListEntrySegmentsEntryRelLocalService.
-					fetchAssetListEntrySegmentsEntryRel(
-						assetListEntry.getAssetListEntryId(),
-						segmentsEntryId)
-			);
+			assetListEntrySegmentsEntryRelStream = longStream.mapToObj(
+				segmentsEntryId ->
+					_assetListEntrySegmentsEntryRelLocalService.
+						fetchAssetListEntrySegmentsEntryRel(
+							assetListEntry.getAssetListEntryId(),
+							segmentsEntryId));
 
-		return assetListEntrySegmentsEntryRelStream
-				.filter(Objects::nonNull)
-				.min(
-				Comparator.comparing(
-					AssetListEntrySegmentsEntryRel::getCreateDate,
-					Comparator.reverseOrder()))
-			.get()
-			.getSegmentsEntryId();
+		return assetListEntrySegmentsEntryRelStream.filter(
+			Objects::nonNull
+		).min(
+			Comparator.comparing(
+				AssetListEntrySegmentsEntryRel::getCreateDate,
+				Comparator.reverseOrder())
+		).get(
+		).getSegmentsEntryId();
 	}
 
 	private String[] _getKeywords(UnicodeProperties unicodeProperties) {
@@ -962,24 +961,28 @@ public class AssetListAssetEntryProviderImpl
 		assetEntryQuery.setNotAnyTagIds(notAnyAssetTagIds);
 	}
 
-	private long[] _sortSegmentsByPriority(AssetListEntry assetListEntry, long[] segmentsEntryIds) {
+	private long[] _sortSegmentsByPriority(
+		AssetListEntry assetListEntry, long[] segmentsEntryIds) {
+
 		LongStream longStream = Arrays.stream(segmentsEntryIds);
 
 		Stream<AssetListEntrySegmentsEntryRel>
-			assetListEntrySegmentsEntryRelStream = longStream
-			.mapToObj(segmentsEntryId ->
-				_assetListEntrySegmentsEntryRelLocalService.
-					fetchAssetListEntrySegmentsEntryRel(
-						assetListEntry.getAssetListEntryId(),
-						segmentsEntryId)
-			);
+			assetListEntrySegmentsEntryRelStream = longStream.mapToObj(
+				segmentsEntryId ->
+					_assetListEntrySegmentsEntryRelLocalService.
+						fetchAssetListEntrySegmentsEntryRel(
+							assetListEntry.getAssetListEntryId(),
+							segmentsEntryId));
 
 		return assetListEntrySegmentsEntryRelStream.filter(
-			Objects::nonNull)
-			.sorted(
-				Comparator.comparing(AssetListEntrySegmentsEntryRel::getCreateDate, Comparator.reverseOrder())
-			).mapToLong(AssetListEntrySegmentsEntryRelModel::getSegmentsEntryId)
-			.toArray();
+			Objects::nonNull
+		).sorted(
+			Comparator.comparing(
+				AssetListEntrySegmentsEntryRel::getCreateDate,
+				Comparator.reverseOrder())
+		).mapToLong(
+			AssetListEntrySegmentsEntryRelModel::getSegmentsEntryId
+		).toArray();
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
