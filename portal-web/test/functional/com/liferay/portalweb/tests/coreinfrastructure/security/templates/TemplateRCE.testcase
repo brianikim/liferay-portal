@@ -70,7 +70,7 @@ definition {
 		WebContentTemplates.inputTemplateAddScreenFields(
 			structureName = "WC Structure Name",
 			templateDescription = "WC Template Description",
-			templateName = "WC Template Name");
+			templateName = "WC Template Name 1");
 
 		var templateScript = '''
 ${Application['org.apache.tomcat.InstanceManager'].newInstance('com.sun.org.apache.bcel.internal.util.ClassLoader')}
@@ -101,7 +101,7 @@ ${Application['org.apache.catalina.resources'].getContext().getInstanceManager()
 
 		WebContent.addStructuredPGViaWCD(
 			structureName = "WC Structure Name",
-			templateName = "WC Template Name",
+			templateName = "WC Template Name 1",
 			webContentTitle = "WC Title");
 
 		Portlet.viewBody(
