@@ -32,7 +32,7 @@ import org.osgi.service.component.annotations.Component;
 	immediate = true, property = "type=html",
 	service = EditableElementParser.class
 )
-public class HTMLEditableElementParser extends TextEditableElementParser {
+public class HTMLTextEditableElementParser extends TextEditableElementParser {
 
 	@Override
 	public String getValue(Element element) {
