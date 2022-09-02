@@ -603,15 +603,7 @@ public class AssetListAssetEntryProviderImpl
 		AssetListEntry assetListEntry, long[] segmentsEntryIds, String userId,
 		int start, int end) {
 
-		if (_assetListConfiguration.combineAssetsFromAllSegmentsDynamic()) {
-			AssetEntryQuery assetEntryQuery = getAssetEntryQuery(
-				assetListEntry,
-				_getCombinedSegmentsEntryIds(assetListEntry, segmentsEntryIds),
-				userId, end, start);
-
-			return _search(assetListEntry.getCompanyId(), assetEntryQuery);
-		}
-		else {
+		if (!_assetListConfiguration.combineAssetsFromAllSegmentsDynamic()) {
 			AssetEntryQuery assetEntryQuery = getAssetEntryQuery(
 				assetListEntry,
 				_getFirstSegmentsEntryId(assetListEntry, segmentsEntryIds),
@@ -622,6 +614,13 @@ public class AssetListAssetEntryProviderImpl
 
 			return _search(assetListEntry.getCompanyId(), assetEntryQuery);
 		}
+
+		AssetEntryQuery assetEntryQuery = getAssetEntryQuery(
+			assetListEntry,
+			_getCombinedSegmentsEntryIds(assetListEntry, segmentsEntryIds),
+			userId, end, start);
+
+		return _search(assetListEntry.getCompanyId(), assetEntryQuery);
 	}
 
 	private long _getFirstSegmentsEntryId(
@@ -726,20 +725,7 @@ public class AssetListAssetEntryProviderImpl
 		);
 	}
 
-	private void _processAssetEntryQuery(
-		long companyId, String userId, UnicodeProperties unicodeProperties,
-		AssetEntryQuery assetEntryQuery) {
-
-		for (AssetListAssetEntryQueryProcessor
-				assetListAssetEntryQueryProcessor :
-					_assetListAssetEntryQueryProcessors) {
-
-			assetListAssetEntryQueryProcessor.processAssetEntryQuery(
-				companyId, userId, unicodeProperties, assetEntryQuery);
-		}
-	}
-
-	private List<AssetEntry> _search(
+	private SearchContext _getSearchContext(
 		long companyId, AssetEntryQuery assetEntryQuery) {
 
 		SearchContext searchContext = new SearchContext();
@@ -764,10 +750,29 @@ public class AssetListAssetEntryProviderImpl
 		searchContext.setKeywords(assetEntryQuery.getKeywords());
 		searchContext.setStart(assetEntryQuery.getStart());
 
+		return searchContext;
+	}
+
+	private void _processAssetEntryQuery(
+		long companyId, String userId, UnicodeProperties unicodeProperties,
+		AssetEntryQuery assetEntryQuery) {
+
+		for (AssetListAssetEntryQueryProcessor
+				assetListAssetEntryQueryProcessor :
+					_assetListAssetEntryQueryProcessors) {
+
+			assetListAssetEntryQueryProcessor.processAssetEntryQuery(
+				companyId, userId, unicodeProperties, assetEntryQuery);
+		}
+	}
+
+	private List<AssetEntry> _search(
+		long companyId, AssetEntryQuery assetEntryQuery) {
+
 		try {
 			Hits hits = _assetHelper.search(
-				searchContext, assetEntryQuery, assetEntryQuery.getStart(),
-				assetEntryQuery.getEnd());
+				_getSearchContext(companyId, assetEntryQuery), assetEntryQuery,
+				assetEntryQuery.getStart(), assetEntryQuery.getEnd());
 
 			return _assetHelper.getAssetEntries(hits);
 		}
@@ -779,30 +784,9 @@ public class AssetListAssetEntryProviderImpl
 	}
 
 	private long _searchCount(long companyId, AssetEntryQuery assetEntryQuery) {
-		SearchContext searchContext = new SearchContext();
-
-		String ddmStructureFieldName = GetterUtil.getString(
-			assetEntryQuery.getAttribute("ddmStructureFieldName"));
-		Serializable ddmStructureFieldValue = assetEntryQuery.getAttribute(
-			"ddmStructureFieldValue");
-
-		if (Validator.isNotNull(ddmStructureFieldName) &&
-			Validator.isNotNull(ddmStructureFieldValue)) {
-
-			searchContext.setAttribute(
-				"ddmStructureFieldName", ddmStructureFieldName);
-			searchContext.setAttribute(
-				"ddmStructureFieldValue", ddmStructureFieldValue);
-		}
-
-		searchContext.setClassTypeIds(assetEntryQuery.getClassTypeIds());
-		searchContext.setCompanyId(companyId);
-		searchContext.setEnd(assetEntryQuery.getEnd());
-		searchContext.setKeywords(assetEntryQuery.getKeywords());
-		searchContext.setStart(assetEntryQuery.getStart());
-
 		try {
-			return _assetHelper.searchCount(searchContext, assetEntryQuery);
+			return _assetHelper.searchCount(
+				_getSearchContext(companyId, assetEntryQuery), assetEntryQuery);
 		}
 		catch (Exception exception) {
 			_log.error("Unable to get asset entries", exception);
