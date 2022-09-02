@@ -28,6 +28,7 @@ import com.liferay.portal.search.hits.SearchHits;
 
 import java.io.Serializable;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -72,7 +73,9 @@ public interface AssetHelper {
 
 	public List<AssetEntry> getAssetEntries(Hits hits);
 
-	public List<AssetEntry> getAssetEntries(SearchHits searchHits);
+	public default List<AssetEntry> getAssetEntries(SearchHits searchHits) {
+		return Collections.emptyList();
+	}
 
 	public String getAssetKeywords(String className, long classPK);
 
@@ -98,10 +101,13 @@ public interface AssetHelper {
 			int start, int end)
 		throws Exception;
 
-	public SearchHits search(
+	public default SearchHits search(
 			SearchContext searchContext,
 			List<AssetEntryQuery> assetEntryQueries, int start, int end)
-		throws Exception;
+		throws Exception {
+
+		return null;
+	}
 
 	public BaseModelSearchResult<AssetEntry> searchAssetEntries(
 			AssetEntryQuery assetEntryQuery, long[] assetCategoryIds,
@@ -125,9 +131,12 @@ public interface AssetHelper {
 			SearchContext searchContext, AssetEntryQuery assetEntryQuery)
 		throws Exception;
 
-	public long searchCount(
+	public default long searchCount(
 			SearchContext searchContext,
 			List<AssetEntryQuery> assetEntryQueries, int start, int end)
-		throws Exception;
+		throws Exception {
+
+		return 0;
+	}
 
 }
