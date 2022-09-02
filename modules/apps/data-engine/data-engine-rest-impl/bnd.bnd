@@ -4,8 +4,6 @@ Bundle-Version: 2.0.88
 Import-Package:\
 	!com.fasterxml.jackson.*,\
 	\
-	!com.google.gson.*,\
-	\
 	!org.apache.tapestry5.json.*,\
 	\
 	*
