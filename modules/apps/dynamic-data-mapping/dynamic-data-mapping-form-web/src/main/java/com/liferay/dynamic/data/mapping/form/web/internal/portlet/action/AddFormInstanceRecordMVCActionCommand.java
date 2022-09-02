@@ -38,7 +38,6 @@ import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextFactory;
 import com.liferay.portal.kernel.servlet.SessionErrors;
-import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
@@ -131,31 +130,26 @@ public class AddFormInstanceRecordMVCActionCommand
 		DDMFormInstanceSettings formInstanceSettings =
 			ddmFormInstance.getSettingsModel();
 
+		String successRedirectURL = formInstanceSettings.redirectURL();
+
 		String redirectURL = ParamUtil.getString(
-			actionRequest, "redirect", formInstanceSettings.redirectURL());
+			actionRequest, "redirect", successRedirectURL);
 
-		if (Validator.isNotNull(redirectURL)) {
-			portletSession.setAttribute(
-				DDMFormWebKeys.DYNAMIC_DATA_MAPPING_FORM_INSTANCE_ID,
-				formInstanceId);
-			portletSession.setAttribute(DDMFormWebKeys.GROUP_ID, groupId);
+		DDMFormSuccessPageSettings ddmFormSuccessPageSettings =
+			ddmForm.getDDMFormSuccessPageSettings();
 
-			sendRedirect(actionRequest, actionResponse, redirectURL);
+		if (Validator.isNotNull(successRedirectURL) ||
+			ddmFormSuccessPageSettings.isEnabled()) {
+
+			hideDefaultSuccessMessage(actionRequest);
 		}
-		else {
-			DDMFormSuccessPageSettings ddmFormSuccessPageSettings =
-				ddmForm.getDDMFormSuccessPageSettings();
 
-			if (ddmFormSuccessPageSettings.isEnabled()) {
-				String portletId = _portal.getPortletId(actionRequest);
+		portletSession.setAttribute(
+			DDMFormWebKeys.DYNAMIC_DATA_MAPPING_FORM_INSTANCE_ID,
+			formInstanceId);
+		portletSession.setAttribute(DDMFormWebKeys.GROUP_ID, groupId);
 
-				SessionMessages.add(
-					actionRequest,
-					portletId.concat(
-						SessionMessages.
-							KEY_SUFFIX_HIDE_DEFAULT_SUCCESS_MESSAGE));
-			}
-		}
+		sendRedirect(actionRequest, actionResponse, redirectURL);
 	}
 
 	protected DDMForm getDDMForm(DDMFormInstance ddmFormInstance)
