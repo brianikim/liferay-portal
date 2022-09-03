@@ -29,7 +29,7 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 public interface DataRemovalConfiguration {
 
 	@Meta.AD(
-		deflt = "false", name = "remove-published-ctscontent-data",
+		deflt = "false", name = "remove-published-cts-content-data",
 		required = false
 	)
 	public boolean removePublishedCTSContentData();
