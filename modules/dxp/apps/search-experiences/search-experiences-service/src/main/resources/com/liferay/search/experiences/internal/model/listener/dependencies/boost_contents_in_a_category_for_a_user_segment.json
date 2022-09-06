@@ -1,6 +1,7 @@
 {
 	"description_i18n": {
-		"en_US": "Boost contents in a category for users belonging to a given user segment."
+		"en_US": "Boost contents in a category for users belonging to the given user segments.",
+		"ja_JP": "あるカテゴリ内のコンテンツで、指定されたユーザーセグメントに属するユーザーに対してブーストする。"
 	},
 	"elementDefinition": {
 		"category": "conditional",
@@ -62,6 +63,7 @@
 		}
 	},
 	"title_i18n": {
-		"en_US": "Boost Contents in a Category for a User Segment"
+		"en_US": "Boost Contents in a Category for User Segments",
+		"ja_JP": "ユーザーセグメントのカテゴリ内コンテンツをブースト"
 	}
 }

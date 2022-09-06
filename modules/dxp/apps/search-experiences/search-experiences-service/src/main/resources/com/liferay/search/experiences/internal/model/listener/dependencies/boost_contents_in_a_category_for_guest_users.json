@@ -1,6 +1,7 @@
 {
 	"description_i18n": {
-		"en_US": "Boost contents in a category if a user is not logged in."
+		"en_US": "Boost contents in a category if a user is not logged in.",
+		"ja_JP": "ユーザーがログインしていない場合、カテゴリ内のコンテンツをブーストします。"
 	},
 	"elementDefinition": {
 		"category": "conditional",
@@ -57,6 +58,7 @@
 		}
 	},
 	"title_i18n": {
-		"en_US": "Boost Contents in a Category for Guest Users"
+		"en_US": "Boost Contents in a Category for Guest Users",
+		"ja_JP": "ゲストユーザー向けにカテゴリー内のコンテンツをブースト"
 	}
 }

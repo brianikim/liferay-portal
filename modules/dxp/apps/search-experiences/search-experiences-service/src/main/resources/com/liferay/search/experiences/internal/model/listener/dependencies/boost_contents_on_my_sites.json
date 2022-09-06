@@ -1,6 +1,7 @@
 {
 	"description_i18n": {
-		"en_US": "Boost contents on sites the user is a member of."
+		"en_US": "Boost contents on sites the user is a member of.",
+		"ja_JP": "ユーザーがメンバーになっているサイトのコンテンツをブースト。"
 	},
 	"elementDefinition": {
 		"category": "boost",
@@ -44,6 +45,7 @@
 		}
 	},
 	"title_i18n": {
-		"en_US": "Boost Contents on My Sites"
+		"en_US": "Boost Contents on My Sites",
+		"ja_JP": "マイサイトでのコンテンツをブースト"
 	}
 }
