@@ -84,7 +84,7 @@ public class BaseClayCardTag extends BaseClayTag {
 		List<DropdownItem> actionItems = _baseClayCard.getActionDropdownItems();
 
 		if ((context.get("actionItems") == null) &&
-			!ListUtil.isEmpty(actionItems)) {
+			ListUtil.isNotEmpty(actionItems)) {
 
 			setActionDropdownItems(actionItems);
 		}

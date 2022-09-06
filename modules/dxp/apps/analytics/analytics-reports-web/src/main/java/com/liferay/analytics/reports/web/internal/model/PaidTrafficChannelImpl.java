@@ -125,7 +125,7 @@ public class PaidTrafficChannelImpl implements TrafficChannel {
 			getName(), ResourceBundleUtil.getString(resourceBundle, getName()),
 			_trafficAmount, _trafficShare);
 
-		if (!ListUtil.isEmpty(_countrySearchKeywordsList)) {
+		if (ListUtil.isNotEmpty(_countrySearchKeywordsList)) {
 			jsonObject.put(
 				"countryKeywords", _getCountryKeywordsJSONArray(locale));
 		}

@@ -71,7 +71,7 @@ public class ScopedConfigurationManager implements ManagedServiceFactory {
 		Map<String, Object> scopeConfigurationBeans = _configurationBeans.get(
 			new ScopeKey(scopePK, scope));
 
-		if (!MapUtil.isEmpty(scopeConfigurationBeans)) {
+		if (MapUtil.isNotEmpty(scopeConfigurationBeans)) {
 			List<Object> valuesList = ListUtil.fromCollection(
 				scopeConfigurationBeans.values());
 

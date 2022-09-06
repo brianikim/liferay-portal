@@ -415,7 +415,7 @@ public class DefaultSearchSearchResponseAssemblerHelperImpl
 		Hits hits, Map<String, StatsResponse> statsResponseMap,
 		SearchSearchRequest searchSearchRequest) {
 
-		if (!MapUtil.isEmpty(searchSearchRequest.getStats())) {
+		if (MapUtil.isNotEmpty(searchSearchRequest.getStats())) {
 			statsResponseMap.forEach(
 				(key, statsResponse) -> hits.addStatsResults(
 					getStatsResults(statsResponse)));

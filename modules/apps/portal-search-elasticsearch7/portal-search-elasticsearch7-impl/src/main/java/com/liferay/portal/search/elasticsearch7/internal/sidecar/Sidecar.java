@@ -571,7 +571,7 @@ public class Sidecar {
 
 			List<String> list = settings.getAsList(key);
 
-			if (!ListUtil.isEmpty(list)) {
+			if (ListUtil.isNotEmpty(list)) {
 				String keyValue = StringBundler.concat(
 					key, StringPool.EQUAL, StringUtil.merge(list));
 

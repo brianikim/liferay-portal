@@ -433,7 +433,7 @@ public class CommonSearchSourceBuilderAssemblerImpl
 
 		List<StatsRequest> statsRequests = baseSearchRequest.getStatsRequests();
 
-		if (!ListUtil.isEmpty(statsRequests)) {
+		if (ListUtil.isNotEmpty(statsRequests)) {
 			statsRequests.forEach(
 				statsRequest -> _statsTranslator.populateRequest(
 					searchSourceBuilder, statsRequest));
