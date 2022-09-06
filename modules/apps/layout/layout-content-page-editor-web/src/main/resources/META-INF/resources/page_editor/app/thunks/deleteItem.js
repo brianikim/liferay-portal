@@ -33,12 +33,10 @@ export default function deleteItem({itemId, selectItem = () => {}, store}) {
 			.then(({portletIds = [], layoutData}) => {
 				selectItem(null);
 
-				const fragmentEntryLinkIds = getFragmentEntryLinkIdsFromItemId(
-					{
-						itemId,
-						layoutData,
-					}
-				);
+				const fragmentEntryLinkIds = getFragmentEntryLinkIdsFromItemId({
+					itemId,
+					layoutData,
+				});
 
 				dispatch(
 					deleteItemAction({
