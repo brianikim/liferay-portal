@@ -94,6 +94,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -170,11 +171,17 @@ public class EditAssetListDisplayContext {
 			return _assetListEntrySegmentsEntryRels;
 		}
 
-		_assetListEntrySegmentsEntryRels =
+		List<AssetListEntrySegmentsEntryRel> assetListEntrySegmentsEntryRels =
 			AssetListEntrySegmentsEntryRelLocalServiceUtil.
 				getAssetListEntrySegmentsEntryRels(
 					getAssetListEntryId(), QueryUtil.ALL_POS,
 					QueryUtil.ALL_POS);
+
+		_assetListEntrySegmentsEntryRels = ListUtil.sort(
+			assetListEntrySegmentsEntryRels,
+			Comparator.comparing(
+				AssetListEntrySegmentsEntryRel::getCreateDate,
+				Comparator.reverseOrder()));
 
 		return _assetListEntrySegmentsEntryRels;
 	}
