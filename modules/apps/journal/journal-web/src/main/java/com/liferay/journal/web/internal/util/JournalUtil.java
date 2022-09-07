@@ -430,11 +430,7 @@ public class JournalUtil {
 	private static Layout _getViewableLayout(
 		boolean privateLayout, ThemeDisplay themeDisplay) {
 
-		int start = 0;
-		int end = 0;
-		int interval = 20;
-
-		while (true) {
+		for (int end = 0, interval = 20, start = 0;;) {
 			end = start + interval;
 
 			List<Layout> layouts = LayoutLocalServiceUtil.getLayouts(
