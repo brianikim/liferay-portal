@@ -32,6 +32,7 @@ dependencies {
 	compileInclude group: "org.jfree", name: "jfreechart", version: "1.0.19"
 	compileInclude group: "org.olap4j", name: "olap4j", version: "1.2.0"
 
+	compileOnly group: "com.liferay", name: "org.apache.xalan", version: "2.7.2.LIFERAY-PATCHED-1"
 	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "default"
 	compileOnly group: "commons-collections", name: "commons-collections", version: "3.2.2"
 	compileOnly group: "org.apache.commons", name: "commons-compress", version: "1.21"
@@ -39,7 +40,6 @@ dependencies {
 	compileOnly group: "org.osgi", name: "org.osgi.service.component", version: "1.3.0"
 	compileOnly group: "org.osgi", name: "org.osgi.service.component.annotations", version: "1.3.0"
 	compileOnly group: "org.osgi", name: "osgi.core", version: "6.0.0"
-	compileOnly group: "xalan", name: "xalan", version: "2.7.2"
 	compileOnly group: "xml-apis", name: "xml-apis", version: "1.4.01"
 	compileOnly project(":apps:portal-reports-engine:portal-reports-engine-api")
 	compileOnly project(":apps:portal:portal-spring-extender-api")
