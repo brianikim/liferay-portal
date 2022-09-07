@@ -415,6 +415,10 @@ public class LayoutModelDocumentContributor
 					new MockHttpServletRequest(), "p_l_id=" + _layout.getPlid(),
 					false);
 
+			httpServletRequest.setAttribute(
+				WebKeys.COMPANY_ID, Long.valueOf(_layout.getCompanyId()));
+			httpServletRequest.setAttribute(WebKeys.LAYOUT, _layout);
+
 			ThemeDisplay themeDisplay = _getThemeDisplay();
 
 			themeDisplay.setLanguageId(LocaleUtil.toLanguageId(locale));
@@ -425,9 +429,6 @@ public class LayoutModelDocumentContributor
 			httpServletRequest.setAttribute(
 				WebKeys.THEME_DISPLAY, themeDisplay);
 
-			httpServletRequest.setAttribute(
-				WebKeys.COMPANY_ID, Long.valueOf(_layout.getCompanyId()));
-			httpServletRequest.setAttribute(WebKeys.LAYOUT, _layout);
 			httpServletRequest.setAttribute(WebKeys.USER, _user);
 			httpServletRequest.setAttribute(WebKeys.USER_ID, _user.getUserId());
 
