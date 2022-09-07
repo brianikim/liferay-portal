@@ -240,10 +240,10 @@ public class JournalUtil {
 			!LayoutPermissionUtil.contains(
 				themeDisplay.getPermissionChecker(), layout, ActionKeys.VIEW)) {
 
-			layout = _searchFirstLayoutHasViewPermission(themeDisplay, false);
+			layout = _getViewableLayout(themeDisplay, false);
 
 			if (layout == null) {
-				layout = _searchFirstLayoutHasViewPermission(
+				layout = _getViewableLayout(
 					themeDisplay, true);
 			}
 		}
@@ -427,7 +427,7 @@ public class JournalUtil {
 		return recentArticles;
 	}
 
-	private static Layout _searchFirstLayoutHasViewPermission(
+	private static Layout _getViewableLayout(
 		ThemeDisplay themeDisplay, boolean privateLayout) {
 
 		boolean hasNext = true;
