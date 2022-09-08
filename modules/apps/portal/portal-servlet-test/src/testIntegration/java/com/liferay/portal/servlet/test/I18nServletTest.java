@@ -201,6 +201,27 @@ public class I18nServletTest extends I18nServlet {
 	}
 
 	@Test
+	public void testI18nGroupControlPanelWithLocaleDisabledInCompany()
+		throws Exception {
+
+		_group = GroupTestUtil.updateDisplaySettings(
+			_group.getGroupId(), Arrays.asList(LocaleUtil.US), LocaleUtil.US);
+
+		MockHttpServletRequest mockHttpServletRequest =
+			new MockHttpServletRequest();
+
+		Locale locale = LocaleUtil.NETHERLANDS;
+
+		mockHttpServletRequest.setServletPath(
+			String.format("/%s_%s", locale.getLanguage(), locale.getCountry()));
+
+		mockHttpServletRequest.setPathInfo(
+			_getSampleGroupControlPanelPath(_group));
+
+		Assert.assertNull(getI18nData(mockHttpServletRequest));
+	}
+
+	@Test
 	public void testI18nGroupControlPanelWithLocaleEnabledInCompany()
 		throws Exception {
 
@@ -224,27 +245,6 @@ public class I18nServletTest extends I18nServlet {
 		Assert.assertNotNull(i18nData);
 
 		_testGetI18nData(locale, groupControlPanelPath, i18nData);
-	}
-
-	@Test
-	public void testI18nGroupControlPanelWithLocaleDisabledInCompany()
-		throws Exception {
-
-		_group = GroupTestUtil.updateDisplaySettings(
-			_group.getGroupId(), Arrays.asList(LocaleUtil.US), LocaleUtil.US);
-
-		MockHttpServletRequest mockHttpServletRequest =
-			new MockHttpServletRequest();
-
-		Locale locale = LocaleUtil.NETHERLANDS;
-
-		mockHttpServletRequest.setServletPath(
-			String.format("/%s_%s", locale.getLanguage(), locale.getCountry()));
-
-		mockHttpServletRequest.setPathInfo(
-			_getSampleGroupControlPanelPath(_group));
-
-		Assert.assertNull(getI18nData(mockHttpServletRequest));
 	}
 
 	@Test
