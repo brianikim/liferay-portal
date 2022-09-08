@@ -12,7 +12,7 @@
  *
  */
 
-package com.liferay.search.experiences.internal.upgrade.v1_3_0;
+package com.liferay.search.experiences.internal.upgrade.v2_0_0;
 
 import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringBundler;
@@ -25,6 +25,8 @@ import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.search.experiences.internal.upgrade.v2_0_0.util.SXPBlueprintTable;
+import com.liferay.search.experiences.internal.upgrade.v2_0_0.util.SXPElementTable;
 import com.liferay.search.experiences.model.impl.SXPElementImpl;
 import com.liferay.search.experiences.rest.dto.v1_0.ElementDefinition;
 import com.liferay.search.experiences.rest.dto.v1_0.ElementInstance;
@@ -48,30 +50,6 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 		_upgradeSXPElement();
 
 		_upgradeSXPBlueprint();
-	}
-
-	private void _dropColumn(String tableName, String columnName)
-		throws Exception {
-
-		if (_log.isInfoEnabled()) {
-			_log.info(
-				String.format(
-					"Dropping column %s from table %s", columnName, tableName));
-		}
-
-		if (hasColumn(tableName, columnName)) {
-			runSQL(
-				StringBundler.concat(
-					"alter table ", tableName, " drop column ", columnName));
-		}
-		else {
-			if (_log.isInfoEnabled()) {
-				_log.info(
-					String.format(
-						"Column %s already does not exist on table %s",
-						columnName, tableName));
-			}
-		}
 	}
 
 	private com.liferay.search.experiences.model.SXPElement _fetchSXPElement(
@@ -208,7 +186,9 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 	}
 
 	private void _upgradeSXPBlueprint() throws Exception {
-		_dropColumn("SXPBlueprint", "key_");
+		if (hasColumn("SXPBlueprint", "key_")) {
+			alter(SXPBlueprintTable.class, new AlterTableDropColumn("key_"));
+		}
 
 		try (PreparedStatement preparedStatement1 = connection.prepareStatement(
 				"select sxpBlueprintId, elementInstancesJSON, version from " +
@@ -246,7 +226,9 @@ public class SXPBlueprintUpgradeProcess extends UpgradeProcess {
 	}
 
 	private void _upgradeSXPElement() throws Exception {
-		_dropColumn("SXPElement", "key_");
+		if (hasColumn("SXPElement", "key_")) {
+			alter(SXPElementTable.class, new AlterTableDropColumn("key_"));
+		}
 
 		try (PreparedStatement preparedStatement1 = connection.prepareStatement(
 				"select externalReferenceCode, sxpElementId, description, " +
