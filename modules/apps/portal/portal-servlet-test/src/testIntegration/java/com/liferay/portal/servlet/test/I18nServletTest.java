@@ -227,7 +227,7 @@ public class I18nServletTest extends I18nServlet {
 	}
 
 	@Test
-	public void testI18nGroupControlPanelIfLocaleNotEnabledInCompany()
+	public void testI18nGroupControlPanelIfLocaleDisabledInCompany()
 		throws Exception {
 
 		_group = GroupTestUtil.updateDisplaySettings(
