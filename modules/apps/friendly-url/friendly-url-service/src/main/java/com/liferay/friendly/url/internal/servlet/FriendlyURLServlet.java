@@ -205,6 +205,13 @@ public class FriendlyURLServlet extends HttpServlet {
 				if (!LayoutPermissionUtil.contains(
 						permissionChecker, layout, ActionKeys.VIEW)) {
 
+					if (PropsValues.AUTH_LOGIN_PROMPT_ENABLED) {
+						String redirect = portal.getLayoutActualURL(
+							layout, Portal.PATH_MAIN);
+
+						return new Redirect(redirect);
+					}
+
 					throw new LayoutPermissionException();
 				}
 			}
