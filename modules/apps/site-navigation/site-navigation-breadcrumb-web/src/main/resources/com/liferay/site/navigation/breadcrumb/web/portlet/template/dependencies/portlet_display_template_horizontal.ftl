@@ -9,8 +9,7 @@
 						<#if entry.isBrowsable()>
 							href="${entry.getURL()!""}"
 						</#if>
-
-						>
+					>
 						<span class="breadcrumb-text-truncate">${htmlUtil.escape(entry.getTitle())}</span>
 					</a>
 				<#else>
