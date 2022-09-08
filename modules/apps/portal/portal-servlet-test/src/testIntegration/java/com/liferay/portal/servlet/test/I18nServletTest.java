@@ -216,7 +216,7 @@ public class I18nServletTest extends I18nServlet {
 			String.format("/%s_%s", locale.getLanguage(), locale.getCountry()));
 
 		mockHttpServletRequest.setPathInfo(
-			_getSampleGroupControlPanelPath(_group));
+			_getControlPanelPath(_group));
 
 		Assert.assertNull(getI18nData(mockHttpServletRequest));
 	}
@@ -236,7 +236,7 @@ public class I18nServletTest extends I18nServlet {
 		mockHttpServletRequest.setServletPath(
 			String.format("/%s_%s", locale.getLanguage(), locale.getCountry()));
 
-		String groupControlPanelPath = _getSampleGroupControlPanelPath(_group);
+		String groupControlPanelPath = _getControlPanelPath(_group);
 
 		mockHttpServletRequest.setPathInfo(groupControlPanelPath);
 
@@ -499,19 +499,12 @@ public class I18nServletTest extends I18nServlet {
 		return getI18nData(mockHttpServletRequest);
 	}
 
-	private String _getSampleGroupControlPanelPath(Group group) {
-		StringBundler sb = new StringBundler(4);
-
-		sb.append(
-			PropsValues.LAYOUT_FRIENDLY_URL_PRIVATE_GROUP_SERVLET_MAPPING);
-
-		sb.append(group.getFriendlyURL());
-
-		sb.append(VirtualLayoutConstants.CANONICAL_URL_SEPARATOR);
-
-		sb.append(GroupConstants.CONTROL_PANEL_FRIENDLY_URL);
-
-		return sb.toString();
+	private String _getControlPanelPath(Group group) {
+		return StringBundler.concat(
+			PropsValues.LAYOUT_FRIENDLY_URL_PRIVATE_GROUP_SERVLET_MAPPING,
+			group.getFriendlyURL(),
+			VirtualLayoutConstants.CANONICAL_URL_SEPARATOR,
+			GroupConstants.CONTROL_PANEL_FRIENDLY_URL);
 	}
 
 	private void _testGetI18nData(
