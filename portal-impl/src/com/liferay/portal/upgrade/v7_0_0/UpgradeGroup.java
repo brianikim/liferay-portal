@@ -123,7 +123,9 @@ public class UpgradeGroup extends UpgradeProcess {
 				typeSettingsUnicodeProperties.fastLoad(typeSettings);
 
 				String defaultLanguageId =
-					typeSettingsUnicodeProperties.getProperty("languageId");
+					typeSettingsUnicodeProperties.getProperty(
+						"languageId",
+						LocaleUtil.toLanguageId(LocaleUtil.getSiteDefault()));
 
 				Locale currentDefaultLocale =
 					LocaleThreadLocal.getSiteDefaultLocale();
