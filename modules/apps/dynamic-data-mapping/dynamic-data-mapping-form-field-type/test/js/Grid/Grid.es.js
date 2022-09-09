@@ -229,7 +229,7 @@ describe('Grid', () => {
 		);
 
 		const radioInputElement = container.querySelector(
-			'input[value][type="radio"][name="rowFieldId1"]:not([value="colFieldId2"])'
+			'input[value][type="radio"][data-name="rowFieldId1"]:not([value="colFieldId2"])'
 		);
 
 		fireEvent.blur(radioInputElement);
@@ -273,7 +273,7 @@ describe('Grid', () => {
 		);
 
 		const radioInputElement = container.querySelector(
-			'input[value][type="radio"][name="rowFieldId1"]:not([value="colFieldId2"])'
+			'input[value][type="radio"][data-name="rowFieldId1"]:not([value="colFieldId2"])'
 		);
 
 		userEvent.click(radioInputElement);
@@ -317,7 +317,7 @@ describe('Grid', () => {
 		);
 
 		const radioInputElement = container.querySelector(
-			'input[value][type="radio"][name="rowFieldId1"]:not([value="colFieldId2"])'
+			'input[value][type="radio"][data-name="rowFieldId1"]:not([value="colFieldId2"])'
 		);
 
 		fireEvent.focus(radioInputElement);
