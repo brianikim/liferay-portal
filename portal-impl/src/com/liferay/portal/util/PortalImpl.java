@@ -912,12 +912,11 @@ public class PortalImpl implements Portal {
 				continue;
 			}
 
-			String[] renderParameter = renderParameters.get(
+			String[] values = renderParameters.get(
 				actionResponse.getNamespace() + actionParameterName);
 
-			if (renderParameter == null) {
-				String[] values = actionRequest.getParameterValues(
-					actionParameterName);
+			if (values == null) {
+				values = actionRequest.getParameterValues(actionParameterName);
 
 				if (values == null) {
 					values = new String[0];
