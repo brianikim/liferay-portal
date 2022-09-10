@@ -902,11 +902,9 @@ public class PortalImplUnitTest {
 			portletMode
 		).toString();
 
-		HttpServletResponse httpServletResponse =
-			new DummyHttpServletResponse();
-
 		return ActionResponseFactory.create(
-			_createActionRequest(portletMode), httpServletResponse,
+			_createActionRequest(portletMode),
+			new DummyHttpServletResponse(),
 			new UserImpl(), new LayoutImpl());
 	}
 
