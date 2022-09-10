@@ -857,9 +857,8 @@ public class PortalImplUnitTest {
 		HttpServletRequest httpServletRequest = new DynamicServletRequest(
 			mockHttpServletRequest, new HashMap<>());
 
-		ThemeDisplay themeDisplay = ThemeDisplayFactory.create();
-
-		httpServletRequest.setAttribute(WebKeys.THEME_DISPLAY, themeDisplay);
+		httpServletRequest.setAttribute(
+			WebKeys.THEME_DISPLAY, ThemeDisplayFactory.create());
 
 		Portlet portlet = new PortletImpl(
 			RandomTestUtil.randomLong(), RandomTestUtil.randomString());
