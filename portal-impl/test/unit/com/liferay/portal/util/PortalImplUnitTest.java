@@ -23,6 +23,7 @@ import com.liferay.portal.kernel.servlet.DummyHttpServletResponse;
 import com.liferay.portal.kernel.servlet.DynamicServletRequest;
 import com.liferay.portal.kernel.servlet.PersistentHttpServletRequestWrapper;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
+import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.upgrade.MockPortletPreferences;
 import com.liferay.portal.kernel.util.HashMapBuilder;
@@ -860,15 +861,18 @@ public class PortalImplUnitTest {
 
 		httpServletRequest.setAttribute(WebKeys.THEME_DISPLAY, themeDisplay);
 
-		Portlet portlet = new PortletImpl(100L, "test_portlet");
+		Portlet portlet = new PortletImpl(
+			RandomTestUtil.randomLong(), RandomTestUtil.randomString());
 
-		portlet.setPortletApp(new PortletAppImpl("test_servlet_context"));
+		portlet.setPortletApp(
+			new PortletAppImpl(RandomTestUtil.randomString()));
 
 		return ActionRequestFactory.create(
 			httpServletRequest, portlet,
 			ProxyFactory.newDummyInstance(InvokerPortlet.class),
-			new MockLiferayPortletContext("/path"), WindowState.NORMAL,
-			portletMode, new MockPortletPreferences(), 4000L);
+			new MockLiferayPortletContext(RandomTestUtil.randomString()),
+			WindowState.NORMAL, portletMode, new MockPortletPreferences(),
+			4000L);
 	}
 
 	private ActionResponse _createActionResponse(
