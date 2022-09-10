@@ -48,11 +48,10 @@ import com.liferay.registry.Registry;
 import com.liferay.registry.RegistryUtil;
 import com.liferay.registry.ServiceRegistration;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -98,14 +97,22 @@ public class PortalImplUnitTest {
 	}
 
 	@Test
-	public void testCopyRequestParametersWithoutPassword1Password2()
-		throws PortletException {
+	public void testCopyRequestParameters() throws PortletException {
 
-		Map<String, String[]> params = _createMapParams();
+		// Without password
 
-		Enumeration<String> enumeration = _createEnumerationParams();
+		Map<String, String[]> params = HashMapBuilder.put(
+			"p_u_i_d", new String[] {String.valueOf(4200L)}
+		).put(
+			"passwordReset", new String[] {Boolean.TRUE.toString()}
+		).put(
+			"redirect", new String[] {"http://localhost:8080/test"}
+		).build();
 
-		ActionRequest actionRequest = _createActionRequest(params, enumeration);
+		Enumeration<String> enumeration = Collections.enumeration(
+			Arrays.asList(
+				"p_u_i_d", "password1", "password2", "passwordReset",
+				"redirect"));
 
 		MockedStatic<PortalUtil> portalUtilMockedStatic = Mockito.mockStatic(
 			PortalUtil.class);
@@ -113,33 +120,18 @@ public class PortalImplUnitTest {
 		ActionResponse actionResponse = _createActionResponse(
 			portalUtilMockedStatic);
 
-		_portalImpl.copyRequestParameters(actionRequest, actionResponse);
-
-		portalUtilMockedStatic.close();
+		_portalImpl.copyRequestParameters(
+			_createActionRequest(params, enumeration), actionResponse);
 
 		_assertActionResponse(actionResponse, params);
-	}
 
-	@Test
-	public void testCopyRequestParametersWithPassword1Password2()
-		throws PortletException {
-
-		Map<String, String[]> params = _createMapParams();
+		// With password
 
 		params.put("password1", new String[] {"abc_123"});
 		params.put("password2", new String[] {"def_456"});
 
-		Enumeration<String> enumeration = _createEnumerationParams();
-
-		ActionRequest actionRequest = _createActionRequest(params, enumeration);
-
-		MockedStatic<PortalUtil> portalUtilMockedStatic = Mockito.mockStatic(
-			PortalUtil.class);
-
-		ActionResponse actionResponse = _createActionResponse(
-			portalUtilMockedStatic);
-
-		_portalImpl.copyRequestParameters(actionRequest, actionResponse);
+		_portalImpl.copyRequestParameters(
+			_createActionRequest(params, enumeration), actionResponse);
 
 		portalUtilMockedStatic.close();
 
@@ -912,28 +904,6 @@ public class PortalImplUnitTest {
 		return ActionResponseFactory.create(
 			_createActionRequest(portletMode), httpServletResponse,
 			new UserImpl(), new LayoutImpl());
-	}
-
-	private Enumeration<String> _createEnumerationParams() {
-		List<String> arrayList = new ArrayList<>();
-
-		arrayList.add("redirect");
-		arrayList.add("p_u_i_d");
-		arrayList.add("passwordReset");
-		arrayList.add("password1");
-		arrayList.add("password2");
-
-		return Collections.enumeration(arrayList);
-	}
-
-	private Map<String, String[]> _createMapParams() {
-		return HashMapBuilder.put(
-			"p_u_i_d", new String[] {String.valueOf(4200L)}
-		).put(
-			"passwordReset", new String[] {Boolean.TRUE.toString()}
-		).put(
-			"redirect", new String[] {"http://localhost:8080/test"}
-		).build();
 	}
 
 	private final PortalImpl _portalImpl = new PortalImpl();
