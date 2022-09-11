@@ -61,6 +61,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -437,7 +438,12 @@ public class SegmentsExperienceUtil {
 				layoutStructure.getLayoutStructureItems()) {
 
 			if (!(layoutStructureItem instanceof
-					FragmentStyledLayoutStructureItem)) {
+					FragmentStyledLayoutStructureItem) ||
+				ListUtil.exists(
+					layoutStructure.getDeletedLayoutStructureItems(),
+					deletedLayoutStructureItem -> Objects.equals(
+						deletedLayoutStructureItem.getItemId(),
+						layoutStructureItem.getItemId()))) {
 
 				continue;
 			}
