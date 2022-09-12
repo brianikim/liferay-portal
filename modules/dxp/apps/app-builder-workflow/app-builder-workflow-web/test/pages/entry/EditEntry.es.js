@@ -154,6 +154,14 @@ describe('EditEntry', () => {
 	});
 
 	it('renders on create mode', async () => {
+		global.Liferay = {
+			...global.Liferay,
+			Util: {
+				...global.Liferay.Util,
+				escapeHTML: (title) => title,
+			},
+		};
+
 		const {container, queryAllByRole} = render(
 			<AppContextProviderWrapper appContext={context}>
 				<EditEntry
