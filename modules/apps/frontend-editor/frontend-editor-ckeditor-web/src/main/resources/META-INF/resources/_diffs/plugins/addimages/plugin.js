@@ -154,7 +154,7 @@
 		 * @param {CKEDITOR.editor} editor The current editor instance
 		 * @protected
 		 */
-		_onImageUploaded(image, editor) {
+		_onImageUploaded(image, editor, randomId) {
 			const instance = this;
 
 			const fragment = CKEDITOR.htmlParser.fragment.fromHtml(
@@ -164,7 +164,10 @@
 			const filter = new CKEDITOR.htmlParser.filter({
 				elements: {
 					img(element) {
-						if (image.src === instance._tempImage.src) {
+						if (
+							instance._tempImage[randomId] &&
+							image.src === instance._tempImage[randomId].src
+						) {
 							element.attributes.src = image.src;
 						}
 					},
@@ -368,8 +371,8 @@
 
 				const TPL_PROGRESS_BAR = '<div class="progressbar"></div>';
 
-				const _onUploadError = () => {
-					var image = this._tempImage;
+				const _onUploadError = (randomId) => {
+					var image = this._tempImage[randomId];
 
 					if (image) {
 						image.parentElement.remove();
@@ -395,7 +398,8 @@
 					const data = JSON.parse(event.data);
 
 					if (data.success) {
-						const image = this._tempImage;
+						const randomId = data.file.randomId;
+						const image = this._tempImage[randomId];
 
 						if (image) {
 							image.removeAttribute(ATTR_DATA_RANDOM_ID);
@@ -441,12 +445,14 @@
 							});
 
 							if (!imageFound) {
-								this._onImageUploaded(image, editor);
+								this._onImageUploaded(image, editor, randomId);
 							}
 						}
 					}
 					else {
-						_onUploadError();
+						_onUploadError(
+							event.target._ATTR_E_FACADE.newVal.randomId
+						);
 					}
 				};
 
@@ -493,7 +499,11 @@
 
 					image.classList.add(CSS_UPLOADING_IMAGE);
 
-					this._tempImage = image;
+					if (this._tempImage == undefined) {
+						this._tempImage = {};
+					}
+
+					this._tempImage[randomId] = image;
 
 					let uploader = eventData.uploader;
 
