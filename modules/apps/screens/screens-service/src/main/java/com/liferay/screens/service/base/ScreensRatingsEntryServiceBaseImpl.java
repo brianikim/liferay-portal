@@ -20,6 +20,8 @@ import com.liferay.portal.kernel.dao.db.DBManagerUtil;
 import com.liferay.portal.kernel.dao.jdbc.SqlUpdate;
 import com.liferay.portal.kernel.dao.jdbc.SqlUpdateFactoryUtil;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.module.framework.service.IdentifiableOSGiService;
 import com.liferay.portal.kernel.service.BaseServiceImpl;
 import com.liferay.portal.kernel.util.InfrastructureUtil;
@@ -163,5 +165,8 @@ public abstract class ScreensRatingsEntryServiceBaseImpl
 	@Reference
 	protected com.liferay.ratings.kernel.service.RatingsEntryService
 		ratingsEntryService;
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		ScreensRatingsEntryLocalServiceBaseImpl.class);
 
 }
