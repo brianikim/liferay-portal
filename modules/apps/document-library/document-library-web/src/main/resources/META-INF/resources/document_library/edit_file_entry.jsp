@@ -575,9 +575,22 @@ renderResponse.setTitle(headerTitle);
 	function <portlet:namespace />changeFileEntryType() {
 		var uri = '<%= themeDisplay.getURLCurrent() %>';
 
-		form.<portlet:namespace />cmd.value = '<%= Constants.PREVIEW %>';
+		if (
+			confirm(
+				Liferay.Language.get("changing-the-document-type-will-cause-data-loss")
+			)
+		) {
+			form.<portlet:namespace />cmd.value = '<%= Constants.PREVIEW %>';
 
-		submitForm(form, uri, false, false);
+			submitForm(form, uri, false, false);
+		}
+		else {
+			var formFileEntryType = document.getElementById(
+				'<portlet:namespace />fileEntryTypeId'
+			);
+
+			formFileEntryType.selectedIndex = formFileEntryType.prevValue;
+		}
 	}
 
 	function <portlet:namespace />cancelCheckOut() {
