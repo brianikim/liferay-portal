@@ -26,7 +26,6 @@ import com.liferay.fragment.service.base.FragmentEntryLinkLocalServiceBaseImpl;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.json.JSONException;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
@@ -809,7 +808,9 @@ public class FragmentEntryLinkLocalServiceImpl
 					if (editableFragmentEntryProcessorJSONObject.has(key)) {
 						defaultEditableFragmentEntryProcessorJSONObject.put(
 							key,
-							editableFragmentEntryProcessorJSONObject.get(key));
+							_replaceDefaultValue(
+								editableFragmentEntryProcessorJSONObject.
+									getJSONObject(key)));
 					}
 				}
 
@@ -835,13 +836,68 @@ public class FragmentEntryLinkLocalServiceImpl
 
 			return editableValuesJSONObject.toString();
 		}
-		catch (JSONException jsonException) {
+		catch (PortalException portalException) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(jsonException, jsonException);
+				_log.debug(portalException, portalException);
 			}
 		}
 
 		return editableValues;
+	}
+
+	private JSONObject _replaceDefaultValue(JSONObject jsonObject) {
+		String defaultValue = jsonObject.getString("defaultValue");
+
+		Matcher matcher = _dlDownloadURLPattern.matcher(defaultValue);
+
+		while (matcher.find()) {
+			long groupId = Long.valueOf(matcher.group(1));
+			String uuid = matcher.group(4);
+			FileEntry fileEntry = null;
+
+			try {
+				fileEntry = PortletFileRepositoryUtil.getPortletFileEntry(
+					uuid, groupId);
+			}
+			catch (PortalException portalException) {
+				if (_log.isWarnEnabled()) {
+					_log.warn(
+						"Unable to get file entry with uuid " + uuid,
+						portalException);
+				}
+			}
+
+			if (fileEntry == null) {
+				long folderId = Long.valueOf(matcher.group(2));
+				String title = matcher.group(3);
+
+				fileEntry = PortletFileRepositoryUtil.fetchPortletFileEntry(
+					groupId, folderId, title);
+			}
+
+			if (fileEntry != null) {
+				try {
+					String fileEntryURL = _dlURLHelper.getDownloadURL(
+						fileEntry, fileEntry.getFileVersion(), null,
+						StringPool.BLANK, false, false);
+
+					jsonObject.put(
+						"defaultValue",
+						StringUtil.replace(
+							defaultValue, matcher.group(), fileEntryURL));
+				}
+				catch (PortalException portalException) {
+					if (_log.isWarnEnabled()) {
+						_log.warn(
+							"Unable to get file version for file entry " +
+								fileEntry.getFileEntryId(),
+							portalException);
+					}
+				}
+			}
+		}
+
+		return jsonObject;
 	}
 
 	private String _replaceResources(long fragmentEntryId, String html)
@@ -904,6 +960,9 @@ public class FragmentEntryLinkLocalServiceImpl
 	private static final Log _log = LogFactoryUtil.getLog(
 		FragmentEntryLinkLocalServiceImpl.class);
 
+	private static final Pattern _dlDownloadURLPattern = Pattern.compile(
+		"(?:/?[^\\s]*)/documents/(\\d+)/(\\d+)/([^/?]+)(?:/([-0-9a-fA-F]+))?" +
+			"(?:\\?t=\\d+)?\\&download=true");
 	private static final Pattern _pattern = Pattern.compile(
 		"\\[resources:(.+?)\\]");
 
