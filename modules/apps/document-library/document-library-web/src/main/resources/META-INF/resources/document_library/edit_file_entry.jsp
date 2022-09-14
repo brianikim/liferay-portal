@@ -577,7 +577,7 @@ renderResponse.setTitle(headerTitle);
 
 		if (
 			confirm(
-				Liferay.Language.get("changing-the-document-type-will-cause-data-loss")
+				'<liferay-ui:message key="changing-the-document-type-will-cause-data-loss" />'
 			)
 		) {
 			form.<portlet:namespace />cmd.value = '<%= Constants.PREVIEW %>';
