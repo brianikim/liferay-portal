@@ -261,8 +261,8 @@ public class LayoutLocalServiceHelper implements IdentifiableOSGiService {
 
 	public void validate(
 			long groupId, boolean privateLayout, long layoutId,
-			long parentLayoutId, String name, String type, long classNameId,
-			long classPK, Map<Locale, String> friendlyURLMap,
+			long parentLayoutId, long classNameId, long classPK, String name,
+			String type, Map<Locale, String> friendlyURLMap,
 			ServiceContext serviceContext)
 		throws PortalException {
 
