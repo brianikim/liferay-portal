@@ -201,48 +201,60 @@ renderResponse.setTitle(title);
 					.get('boundingBox')
 					.all('.add-category-toolbar-button');
 
+				var cancelButton, saveAndAddNewButton, submitButton;
+
 				if (controlButtons.size() > 0) {
+					cancelButton = footer
+						.get('boundingBox')
+						.one('#<portlet:namespace />cancelButton')._node;
+					saveAndAddNewButton = footer
+						.get('boundingBox')
+						.one('#<portlet:namespace />saveAndAddNewButton')._node;
+					submitButton = footer
+						.get('boundingBox')
+						.one('#<portlet:namespace />submitButton')._node;
+
+					<portlet:namespace />controlButtonsAddEventListeners();
+
 					controlButtons.show();
 				}
 				else {
-					var cancelButton = document.createElement('button');
+					cancelButton = document.createElement('button');
 					cancelButton.setAttribute(
 						'class',
 						'add-category-toolbar-button btn btn-link ml-3'
 					);
 					cancelButton.setAttribute('type', 'button');
+					cancelButton.setAttribute('id', '<portlet:namespace />cancelButton');
 					cancelButton.innerText = '<liferay-ui:message key="cancel" />';
-					cancelButton.addEventListener('click', function () {
-						footer.get('boundingBox').all('.add-category-toolbar-button').hide();
-						Liferay.Util.navigate('<%= HtmlUtil.escapeJS(redirect) %>');
-					});
 
 					footer.get('boundingBox').append(cancelButton);
 
-					var saveAndAddNewButton = document.createElement('button');
+					saveAndAddNewButton = document.createElement('button');
 					saveAndAddNewButton.setAttribute(
 						'class',
 						'add-category-toolbar-button btn btn-secondary ml-3'
 					);
 					saveAndAddNewButton.setAttribute('type', 'submit');
+					saveAndAddNewButton.setAttribute(
+						'id',
+						'<portlet:namespace />saveAndAddNewButton'
+					);
 					saveAndAddNewButton.innerText =
 						'<liferay-ui:message key="save-and-add-a-new-one" />';
-					saveAndAddNewButton.addEventListener('click', function () {
-						<portlet:namespace />saveAndAddNew();
-					});
 
 					footer.get('boundingBox').append(saveAndAddNewButton);
 
-					var submitButton = document.createElement('button');
+					submitButton = document.createElement('button');
 					submitButton.setAttribute(
 						'class',
 						'add-category-toolbar-button btn btn-primary ml-3'
 					);
 					submitButton.setAttribute('type', 'submit');
+					submitButton.setAttribute('id', '<portlet:namespace />submitButton');
 					submitButton.innerText = '<liferay-ui:message key="save" />';
-					submitButton.addEventListener('click', function () {
-						submitForm(document.querySelector('#<portlet:namespace />fm'));
-					});
+
+					<portlet:namespace />controlButtonsAddEventListeners();
 
 					footer.get('boundingBox').append(submitButton);
 				}
@@ -252,10 +264,40 @@ renderResponse.setTitle(title);
 </liferay-frontend:edit-form>
 
 <aui:script>
+	function <portlet:namespace />controlButtonsAddEventListeners() {
+		cancelButton.addEventListener('click', <portlet:namespace />cancel);
+
+		saveAndAddNewButton.addEventListener(
+			'click',
+			<portlet:namespace />saveAndAddNew
+		);
+
+		submitButton.addEventListener('click', <portlet:namespace />save);
+	}
+
+	function <portlet:namespace />controlButtonsRemoveEventListeners() {
+		cancelButton.removeEventListener('click', <portlet:namespace />cancel);
+		saveAndAddNewButton.removeEventListener(
+			'click',
+			<portlet:namespace />saveAndAddNew
+		);
+		submitButton.removeEventListener('click', <portlet:namespace />save);
+	}
+
+	function <portlet:namespace />cancel() {
+		footer.get('boundingBox').all('.add-category-toolbar-button').hide();
+		<portlet:namespace />controlButtonsRemoveEventListeners();
+		Liferay.Util.navigate('<%= HtmlUtil.escapeJS(redirect) %>');
+	}
+
 	function <portlet:namespace />saveAndAddNew() {
 		document.querySelector('#<portlet:namespace />redirect').value =
 			'<%= assetCategoriesDisplayContext.getAddCategoryRedirect() %>';
 
+		submitForm(document.querySelector('#<portlet:namespace />fm'));
+	}
+
+	function <portlet:namespace />save() {
 		submitForm(document.querySelector('#<portlet:namespace />fm'));
 	}
 </aui:script>
