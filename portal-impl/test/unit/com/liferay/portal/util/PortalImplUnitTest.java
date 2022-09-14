@@ -23,12 +23,14 @@ import com.liferay.portal.kernel.servlet.DummyHttpServletResponse;
 import com.liferay.portal.kernel.servlet.DynamicServletRequest;
 import com.liferay.portal.kernel.servlet.PersistentHttpServletRequestWrapper;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
+import com.liferay.portal.kernel.test.util.PropsTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.upgrade.MockPortletPreferences;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.LayoutTypePortletFactoryUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProxyFactory;
 import com.liferay.portal.kernel.util.ProxyUtil;
@@ -70,15 +72,21 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import org.springframework.mock.web.MockHttpServletRequest;
 
 /**
  * @author Miguel Pastor
  */
+@PrepareForTest(PortalUtil.class)
+@RunWith(PowerMockRunner.class)
 public class PortalImplUnitTest {
 
 	@ClassRule
@@ -115,11 +123,7 @@ public class PortalImplUnitTest {
 				"p_u_i_d", "password1", "password2", "passwordReset",
 				"redirect"));
 
-		MockedStatic<PortalUtil> portalUtilMockedStatic = Mockito.mockStatic(
-			PortalUtil.class);
-
-		ActionResponse actionResponse = _createActionResponse(
-			portalUtilMockedStatic);
+		ActionResponse actionResponse = _createActionResponse();
 
 		_portalImpl.copyRequestParameters(
 			_createActionRequest(params, enumeration), actionResponse);
@@ -133,8 +137,6 @@ public class PortalImplUnitTest {
 
 		_portalImpl.copyRequestParameters(
 			_createActionRequest(params, enumeration), actionResponse);
-
-		portalUtilMockedStatic.close();
 
 		_assertActionResponse(actionResponse, params);
 	}
@@ -851,6 +853,8 @@ public class PortalImplUnitTest {
 	}
 
 	private ActionRequest _createActionRequest(PortletMode portletMode) {
+		PropsTestUtil.setProps(PropsKeys.UNICODE_TEXT_NORMALIZER_FORM, "NFC");
+
 		MockHttpServletRequest mockHttpServletRequest =
 			new MockHttpServletRequest();
 
@@ -874,18 +878,17 @@ public class PortalImplUnitTest {
 			4000L);
 	}
 
-	private ActionResponse _createActionResponse(
-			MockedStatic<PortalUtil> portalUtilMockedStatic)
-		throws PortletException {
-
+	private ActionResponse _createActionResponse() throws PortletException {
 		LayoutTypePortletFactoryUtil layoutTypePortletFactoryUtil =
 			new LayoutTypePortletFactoryUtil();
 
 		layoutTypePortletFactoryUtil.setLayoutTypePortletFactory(
 			new LayoutTypePortletFactoryImpl());
 
-		portalUtilMockedStatic.when(
-			() -> PortalUtil.updateWindowState(
+		PowerMockito.mockStatic(PortalUtil.class);
+
+		PowerMockito.when(
+			PortalUtil.updateWindowState(
 				Mockito.anyString(), Mockito.any(UserImpl.class),
 				Mockito.any(LayoutImpl.class), Mockito.any(WindowState.class),
 				Mockito.any(HttpServletRequest.class))
