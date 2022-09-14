@@ -164,17 +164,14 @@ public class LayoutLocalServiceStagingAdvice implements BeanFactoryAware {
 		parentLayoutId = layoutLocalServiceHelper.getParentLayoutId(
 			groupId, privateLayout, parentLayoutId);
 
+		Layout layout = LayoutUtil.findByG_P_L(
+			groupId, privateLayout, layoutId);
+
 		String name = nameMap.get(LocaleUtil.getSiteDefault());
 
 		Map<Locale, String> layoutFriendlyURLMap =
 			layoutLocalServiceHelper.getFriendlyURLMap(
 				groupId, privateLayout, layoutId, name, friendlyURLMap);
-
-		String friendlyURL = layoutFriendlyURLMap.get(
-			LocaleUtil.getSiteDefault());
-
-		Layout layout = LayoutUtil.findByG_P_L(
-			groupId, privateLayout, layoutId);
 
 		layoutLocalServiceHelper.validate(
 			groupId, privateLayout, layoutId, parentLayoutId,
@@ -220,7 +217,8 @@ public class LayoutLocalServiceStagingAdvice implements BeanFactoryAware {
 		layoutRevision.setRobotsMap(robotsMap);
 		layout.setType(type);
 		layout.setHidden(hidden);
-		layout.setFriendlyURL(friendlyURL);
+		layout.setFriendlyURL(
+			layoutFriendlyURLMap.get(LocaleUtil.getSiteDefault()));
 
 		if (!hasIconImage) {
 			layout.setIconImageId(0);

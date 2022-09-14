@@ -2831,15 +2831,13 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 		parentLayoutId = layoutLocalServiceHelper.getParentLayoutId(
 			groupId, privateLayout, parentLayoutId);
 
+		Layout layout = layoutPersistence.findByG_P_L(
+			groupId, privateLayout, layoutId);
+
 		String name = nameMap.get(LocaleUtil.getSiteDefault());
 
 		friendlyURLMap = layoutLocalServiceHelper.getFriendlyURLMap(
 			groupId, privateLayout, layoutId, name, friendlyURLMap);
-
-		String friendlyURL = friendlyURLMap.get(LocaleUtil.getSiteDefault());
-
-		Layout layout = layoutPersistence.findByG_P_L(
-			groupId, privateLayout, layoutId);
 
 		layoutLocalServiceHelper.validate(
 			groupId, privateLayout, layoutId, parentLayoutId,
@@ -2871,7 +2869,7 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 		layout.setRobotsMap(robotsMap);
 		layout.setType(type);
 		layout.setHidden(hidden);
-		layout.setFriendlyURL(friendlyURL);
+		layout.setFriendlyURL(friendlyURLMap.get(LocaleUtil.getSiteDefault()));
 
 		PortalUtil.updateImageId(
 			layout, hasIconImage, iconBytes, "iconImageId", 0, 0, 0);
