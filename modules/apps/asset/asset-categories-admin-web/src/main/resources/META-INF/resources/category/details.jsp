@@ -19,6 +19,8 @@
 <%
 String redirect = ParamUtil.getString(request, "redirect", assetCategoriesDisplayContext.getEditCategoryRedirect());
 
+String redirectOriginal = ParamUtil.getString(request, "redirectOriginal", redirect);
+
 long categoryId = ParamUtil.getLong(request, "categoryId");
 
 AssetCategory category = AssetCategoryLocalServiceUtil.fetchCategory(categoryId);
@@ -42,6 +44,10 @@ else if (parentCategoryId > 0) {
 }
 
 renderResponse.setTitle(title);
+
+PortletURL addCategoryURL = assetCategoriesDisplayContext.getAddCategoryRedirectPortletURL();
+
+addCategoryURL.setParameter("redirectOriginal", redirectOriginal);
 %>
 
 <portlet:actionURL name="editCategory" var="editCategoryURL">
@@ -55,6 +61,7 @@ renderResponse.setTitle(title);
 	name="fm"
 >
 	<aui:input name="redirect" type="hidden" value="<%= redirect %>" />
+	<aui:input name="redirectOriginal" type="hidden" value="<%= redirectOriginal %>" />
 	<aui:input name="categoryId" type="hidden" value="<%= categoryId %>" />
 
 	<liferay-frontend:edit-form-body>
@@ -287,17 +294,19 @@ renderResponse.setTitle(title);
 	function <portlet:namespace />cancel() {
 		footer.get('boundingBox').all('.add-category-toolbar-button').hide();
 		<portlet:namespace />controlButtonsRemoveEventListeners();
-		Liferay.Util.navigate('<%= HtmlUtil.escapeJS(redirect) %>');
+		Liferay.Util.navigate('<%= HtmlUtil.escapeJS(redirectOriginal) %>');
 	}
 
 	function <portlet:namespace />saveAndAddNew() {
 		document.querySelector('#<portlet:namespace />redirect').value =
-			'<%= assetCategoriesDisplayContext.getAddCategoryRedirect() %>';
+			'<%= addCategoryURL.toString() %>';
 
 		submitForm(document.querySelector('#<portlet:namespace />fm'));
 	}
 
 	function <portlet:namespace />save() {
+		document.querySelector('#<portlet:namespace />redirect').value =
+			'<%= redirectOriginal.toString() %>';
 		submitForm(document.querySelector('#<portlet:namespace />fm'));
 	}
 </aui:script>

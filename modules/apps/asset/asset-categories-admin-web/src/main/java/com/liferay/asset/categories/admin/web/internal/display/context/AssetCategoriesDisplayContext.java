@@ -107,6 +107,12 @@ public class AssetCategoriesDisplayContext {
 	}
 
 	public String getAddCategoryRedirect() throws PortalException {
+		return getAddCategoryRedirect().toString();
+	}
+
+	public PortletURL getAddCategoryRedirectPortletURL()
+		throws PortalException {
+
 		PortletURL addCategoryURL = _renderResponse.createRenderURL();
 
 		addCategoryURL.setParameter("mvcPath", "/edit_category.jsp");
@@ -133,7 +139,7 @@ public class AssetCategoriesDisplayContext {
 				"itemSelectorEventName", itemSelectorEventName);
 		}
 
-		return addCategoryURL.toString();
+		return addCategoryURL;
 	}
 
 	public String getAssetType(AssetVocabulary vocabulary)
