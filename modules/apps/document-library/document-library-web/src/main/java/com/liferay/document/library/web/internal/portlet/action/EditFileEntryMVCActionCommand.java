@@ -445,6 +445,10 @@ public class EditFileEntryMVCActionCommand extends BaseMVCActionCommand {
 			String errorMessage = _getAddMultipleFileEntriesErrorMessage(
 				portletConfig, actionRequest, exception);
 
+			if (_log.isDebugEnabled()) {
+				_log.debug(errorMessage, exception);
+			}
+
 			invalidFileNameKVPs.add(
 				new KeyValuePair(selectedFileName, errorMessage));
 		}
