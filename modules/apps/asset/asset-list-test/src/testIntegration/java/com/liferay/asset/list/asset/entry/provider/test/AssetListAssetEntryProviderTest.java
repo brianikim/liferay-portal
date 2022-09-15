@@ -187,13 +187,13 @@ public class AssetListAssetEntryProviderTest {
 
 		AssetListTestUtil.addAssetListEntrySegmentsEntryRel(
 			_group.getGroupId(), assetListEntry,
-			segmentsEntry1.getSegmentsEntryId(),
-			_getTypeSettings(userTest.getFirstName()));
+			segmentsEntry2.getSegmentsEntryId(),
+			_getTypeSettings(userName));
 
 		AssetListTestUtil.addAssetListEntrySegmentsEntryRel(
 			_group.getGroupId(), assetListEntry,
-			segmentsEntry2.getSegmentsEntryId(),
-			_getTypeSettings(userName));
+			segmentsEntry1.getSegmentsEntryId(),
+			_getTypeSettings(userTest.getFirstName()));
 
 		List<AssetEntry> assetEntries =
 			_assetListAssetEntryProvider.getAssetEntries(
