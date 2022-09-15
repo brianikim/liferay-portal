@@ -10,6 +10,14 @@
 		<priority value="INFO" />
 	</category>
 
+	<category name="com.liferay.portal.search.internal.background.task.ReindexPortalBackgroundTaskExecutor">
+		<priority value="INFO" />
+	</category>
+
+	<category name="com.liferay.portal.search.internal.background.task.ReindexSingleIndexerBackgroundTaskExecutor">
+		<priority value="INFO" />
+	</category>
+
 	<category name="com.liferay.portal.search.internal.index.contributor.helper.ModelIndexerWriterDocumentHelperImpl">
 		<priority value="WARN" />
 	</category>
