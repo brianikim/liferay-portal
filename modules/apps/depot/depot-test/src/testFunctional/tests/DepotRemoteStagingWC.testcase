@@ -299,6 +299,7 @@ definition {
 	@priority = "5"
 	test EditImageInDepot {
 		property portal.acceptance = "true";
+		property portal.upstream = "quarantine";
 		property test.name.skip.portal.instance = "DepotRemoteStagingWC#EditImageInDepot";
 
 		DepotNavigator.openDepotDocumentsAndMediaAdmin(depotName = "Test Depot Name");
