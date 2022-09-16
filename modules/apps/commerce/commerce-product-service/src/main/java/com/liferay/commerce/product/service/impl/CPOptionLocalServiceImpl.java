@@ -82,7 +82,7 @@ public class CPOptionLocalServiceImpl extends CPOptionLocalServiceBaseImpl {
 			externalReferenceCode = null;
 		}
 
-		key = FriendlyURLNormalizerUtil.normalize(key);
+		key = FriendlyURLNormalizerUtil.normalizeWithPeriodsAndSlashes(key);
 
 		validateCPOptionKey(0, user.getCompanyId(), key);
 
@@ -217,7 +217,7 @@ public class CPOptionLocalServiceImpl extends CPOptionLocalServiceBaseImpl {
 
 		CPOption cpOption = cpOptionPersistence.findByPrimaryKey(cpOptionId);
 
-		key = FriendlyURLNormalizerUtil.normalize(key);
+		key = FriendlyURLNormalizerUtil.normalizeWithPeriodsAndSlashes(key);
 
 		validateCPOptionKey(
 			cpOption.getCPOptionId(), cpOption.getCompanyId(), key);
