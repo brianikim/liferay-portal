@@ -848,7 +848,7 @@ public class ServicePreAction extends Action {
 
 		if (companyLogoId > 0) {
 			companyLogo = StringBundler.concat(
-				"?img_id=", company.getLogoId(), "&t=",
+				companyLogo, "?img_id=", company.getLogoId(), "&t=",
 				WebServerServletTokenUtil.getToken(company.getLogoId()));
 		}
 
