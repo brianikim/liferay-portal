@@ -229,6 +229,6 @@ public abstract class AnnouncementsFlagServiceBaseImpl
 		counterLocalService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		AnnouncementsFlagLocalServiceBaseImpl.class);
+		AnnouncementsFlagServiceBaseImpl.class);
 
 }

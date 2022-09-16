@@ -201,6 +201,6 @@ public abstract class KBCommentServiceBaseImpl
 		socialActivityService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		KBCommentLocalServiceBaseImpl.class);
+		KBCommentServiceBaseImpl.class);
 
 }

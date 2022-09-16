@@ -193,6 +193,6 @@ public abstract class KBTemplateServiceBaseImpl
 		socialActivityService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		KBTemplateLocalServiceBaseImpl.class);
+		KBTemplateServiceBaseImpl.class);
 
 }

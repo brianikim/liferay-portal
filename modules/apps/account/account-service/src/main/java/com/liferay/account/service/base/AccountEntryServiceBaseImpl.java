@@ -174,6 +174,6 @@ public abstract class AccountEntryServiceBaseImpl
 		assetEntryService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		AccountEntryLocalServiceBaseImpl.class);
+		AccountEntryServiceBaseImpl.class);
 
 }

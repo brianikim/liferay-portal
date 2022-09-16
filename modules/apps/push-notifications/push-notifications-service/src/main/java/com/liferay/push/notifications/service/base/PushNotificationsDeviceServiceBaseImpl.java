@@ -174,6 +174,6 @@ public abstract class PushNotificationsDeviceServiceBaseImpl
 	protected com.liferay.portal.kernel.service.UserService userService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		PushNotificationsDeviceLocalServiceBaseImpl.class);
+		PushNotificationsDeviceServiceBaseImpl.class);
 
 }

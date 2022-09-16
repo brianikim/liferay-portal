@@ -201,6 +201,6 @@ public abstract class KaleoProcessServiceBaseImpl
 		workflowInstanceLinkLocalService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		KaleoProcessLocalServiceBaseImpl.class);
+		KaleoProcessServiceBaseImpl.class);
 
 }

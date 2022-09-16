@@ -168,6 +168,6 @@ public abstract class AccountEntryOrganizationRelServiceBaseImpl
 		organizationService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		AccountEntryOrganizationRelLocalServiceBaseImpl.class);
+		AccountEntryOrganizationRelServiceBaseImpl.class);
 
 }

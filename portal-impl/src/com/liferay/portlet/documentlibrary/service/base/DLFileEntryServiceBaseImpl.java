@@ -1475,6 +1475,6 @@ public abstract class DLFileEntryServiceBaseImpl
 	protected DLFolderFinder dlFolderFinder;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		DLFileEntryLocalServiceBaseImpl.class);
+		DLFileEntryServiceBaseImpl.class);
 
 }

@@ -3042,6 +3042,6 @@ public abstract class GroupServiceBaseImpl
 		workflowDefinitionLinkPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		GroupLocalServiceBaseImpl.class);
+		GroupServiceBaseImpl.class);
 
 }

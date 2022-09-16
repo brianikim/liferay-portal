@@ -648,6 +648,6 @@ public abstract class TasksEntryServiceBaseImpl
 	protected SocialActivityPersistence socialActivityPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		TasksEntryLocalServiceBaseImpl.class);
+		TasksEntryServiceBaseImpl.class);
 
 }

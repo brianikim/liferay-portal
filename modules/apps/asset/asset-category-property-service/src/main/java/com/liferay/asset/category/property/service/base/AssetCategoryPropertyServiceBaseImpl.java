@@ -162,6 +162,6 @@ public abstract class AssetCategoryPropertyServiceBaseImpl
 	protected com.liferay.portal.kernel.service.UserService userService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		AssetCategoryPropertyLocalServiceBaseImpl.class);
+		AssetCategoryPropertyServiceBaseImpl.class);
 
 }

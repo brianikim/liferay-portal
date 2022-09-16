@@ -152,6 +152,6 @@ public abstract class SharingEntryServiceBaseImpl
 		counterLocalService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		SharingEntryLocalServiceBaseImpl.class);
+		SharingEntryServiceBaseImpl.class);
 
 }

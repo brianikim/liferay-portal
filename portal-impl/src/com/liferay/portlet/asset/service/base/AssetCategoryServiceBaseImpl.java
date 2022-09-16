@@ -565,6 +565,6 @@ public abstract class AssetCategoryServiceBaseImpl
 	protected AssetEntryPersistence assetEntryPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		AssetCategoryLocalServiceBaseImpl.class);
+		AssetCategoryServiceBaseImpl.class);
 
 }

@@ -1089,6 +1089,6 @@ public abstract class CommercePriceListDiscountRelServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommercePriceListDiscountRelLocalServiceBaseImpl.class);
+		CommercePriceListDiscountRelServiceBaseImpl.class);
 
 }

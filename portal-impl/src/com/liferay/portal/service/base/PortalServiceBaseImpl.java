@@ -269,6 +269,6 @@ public abstract class PortalServiceBaseImpl
 	protected ClassNamePersistence classNamePersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		PortalLocalServiceBaseImpl.class);
+		PortalServiceBaseImpl.class);
 
 }

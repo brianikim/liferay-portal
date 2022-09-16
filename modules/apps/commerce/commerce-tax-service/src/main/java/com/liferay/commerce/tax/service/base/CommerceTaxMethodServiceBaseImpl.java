@@ -413,6 +413,6 @@ public abstract class CommerceTaxMethodServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceTaxMethodLocalServiceBaseImpl.class);
+		CommerceTaxMethodServiceBaseImpl.class);
 
 }

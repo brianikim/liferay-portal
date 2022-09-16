@@ -189,6 +189,6 @@ public abstract class CountryServiceBaseImpl
 		counterLocalService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CountryLocalServiceBaseImpl.class);
+		CountryServiceBaseImpl.class);
 
 }

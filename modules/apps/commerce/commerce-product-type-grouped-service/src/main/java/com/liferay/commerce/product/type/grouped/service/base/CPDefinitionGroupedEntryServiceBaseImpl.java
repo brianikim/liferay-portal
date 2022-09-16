@@ -425,6 +425,6 @@ public abstract class CPDefinitionGroupedEntryServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CPDefinitionGroupedEntryLocalServiceBaseImpl.class);
+		CPDefinitionGroupedEntryServiceBaseImpl.class);
 
 }

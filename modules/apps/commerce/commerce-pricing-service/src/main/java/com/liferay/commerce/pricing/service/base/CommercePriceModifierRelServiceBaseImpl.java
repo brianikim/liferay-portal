@@ -797,6 +797,6 @@ public abstract class CommercePriceModifierRelServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommercePriceModifierRelLocalServiceBaseImpl.class);
+		CommercePriceModifierRelServiceBaseImpl.class);
 
 }

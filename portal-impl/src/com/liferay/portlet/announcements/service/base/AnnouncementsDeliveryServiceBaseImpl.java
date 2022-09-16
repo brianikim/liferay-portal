@@ -331,6 +331,6 @@ public abstract class AnnouncementsDeliveryServiceBaseImpl
 	protected UserFinder userFinder;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		AnnouncementsDeliveryLocalServiceBaseImpl.class);
+		AnnouncementsDeliveryServiceBaseImpl.class);
 
 }

@@ -677,6 +677,6 @@ public abstract class CommerceBOMFolderServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceBOMFolderLocalServiceBaseImpl.class);
+		CommerceBOMFolderServiceBaseImpl.class);
 
 }

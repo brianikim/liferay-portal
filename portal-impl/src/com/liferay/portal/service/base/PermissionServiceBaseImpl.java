@@ -457,6 +457,6 @@ public abstract class PermissionServiceBaseImpl
 	protected TeamFinder teamFinder;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		PermissionLocalServiceBaseImpl.class);
+		PermissionServiceBaseImpl.class);
 
 }

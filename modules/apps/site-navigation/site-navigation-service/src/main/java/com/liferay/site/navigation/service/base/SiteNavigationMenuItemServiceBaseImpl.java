@@ -164,6 +164,6 @@ public abstract class SiteNavigationMenuItemServiceBaseImpl
 	protected SiteNavigationMenuPersistence siteNavigationMenuPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		SiteNavigationMenuItemLocalServiceBaseImpl.class);
+		SiteNavigationMenuItemServiceBaseImpl.class);
 
 }

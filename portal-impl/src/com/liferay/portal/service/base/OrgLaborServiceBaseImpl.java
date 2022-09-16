@@ -302,6 +302,6 @@ public abstract class OrgLaborServiceBaseImpl
 	protected ListTypePersistence listTypePersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		OrgLaborLocalServiceBaseImpl.class);
+		OrgLaborServiceBaseImpl.class);
 
 }

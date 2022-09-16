@@ -500,6 +500,6 @@ public abstract class CommerceWishListServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceWishListLocalServiceBaseImpl.class);
+		CommerceWishListServiceBaseImpl.class);
 
 }

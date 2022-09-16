@@ -822,6 +822,6 @@ public abstract class LayoutSetBranchServiceBaseImpl
 	protected UserFinder userFinder;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		LayoutSetBranchLocalServiceBaseImpl.class);
+		LayoutSetBranchServiceBaseImpl.class);
 
 }

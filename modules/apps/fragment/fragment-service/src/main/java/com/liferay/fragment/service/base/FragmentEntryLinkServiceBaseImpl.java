@@ -172,6 +172,6 @@ public abstract class FragmentEntryLinkServiceBaseImpl
 	protected com.liferay.portal.kernel.service.UserService userService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		FragmentEntryLinkLocalServiceBaseImpl.class);
+		FragmentEntryLinkServiceBaseImpl.class);
 
 }

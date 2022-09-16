@@ -197,6 +197,6 @@ public abstract class SegmentsExperimentServiceBaseImpl
 			userNotificationEventLocalService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		SegmentsExperimentLocalServiceBaseImpl.class);
+		SegmentsExperimentServiceBaseImpl.class);
 
 }

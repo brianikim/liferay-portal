@@ -192,6 +192,6 @@ public abstract class MBThreadServiceBaseImpl
 		ratingsStatsLocalService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		MBThreadLocalServiceBaseImpl.class);
+		MBThreadServiceBaseImpl.class);
 
 }

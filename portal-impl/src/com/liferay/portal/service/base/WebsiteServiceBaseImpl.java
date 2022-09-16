@@ -474,6 +474,6 @@ public abstract class WebsiteServiceBaseImpl
 	protected UserFinder userFinder;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		WebsiteLocalServiceBaseImpl.class);
+		WebsiteServiceBaseImpl.class);
 
 }

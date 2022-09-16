@@ -1720,6 +1720,6 @@ public abstract class CommerceAddressServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceAddressLocalServiceBaseImpl.class);
+		CommerceAddressServiceBaseImpl.class);
 
 }

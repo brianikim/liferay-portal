@@ -1727,6 +1727,6 @@ public abstract class CommerceAvailabilityEstimateServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceAvailabilityEstimateLocalServiceBaseImpl.class);
+		CommerceAvailabilityEstimateServiceBaseImpl.class);
 
 }

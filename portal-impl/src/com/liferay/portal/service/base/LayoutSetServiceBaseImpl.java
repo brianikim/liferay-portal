@@ -703,6 +703,6 @@ public abstract class LayoutSetServiceBaseImpl
 	protected VirtualHostPersistence virtualHostPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		LayoutSetLocalServiceBaseImpl.class);
+		LayoutSetServiceBaseImpl.class);
 
 }

@@ -176,6 +176,6 @@ public abstract class TrashEntryServiceBaseImpl
 	protected TrashVersionPersistence trashVersionPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		TrashEntryLocalServiceBaseImpl.class);
+		TrashEntryServiceBaseImpl.class);
 
 }

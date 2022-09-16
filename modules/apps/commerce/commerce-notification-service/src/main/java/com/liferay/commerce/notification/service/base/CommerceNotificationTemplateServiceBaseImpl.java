@@ -738,6 +738,6 @@ public abstract class CommerceNotificationTemplateServiceBaseImpl
 	protected ExpandoRowPersistence expandoRowPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceNotificationTemplateLocalServiceBaseImpl.class);
+		CommerceNotificationTemplateServiceBaseImpl.class);
 
 }

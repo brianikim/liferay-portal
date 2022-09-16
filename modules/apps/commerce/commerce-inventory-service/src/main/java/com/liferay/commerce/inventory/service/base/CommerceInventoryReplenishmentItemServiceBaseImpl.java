@@ -865,6 +865,6 @@ public abstract class CommerceInventoryReplenishmentItemServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceInventoryReplenishmentItemLocalServiceBaseImpl.class);
+		CommerceInventoryReplenishmentItemServiceBaseImpl.class);
 
 }

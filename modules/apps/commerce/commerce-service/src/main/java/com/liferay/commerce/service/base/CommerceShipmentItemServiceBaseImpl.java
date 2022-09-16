@@ -1722,6 +1722,6 @@ public abstract class CommerceShipmentItemServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceShipmentItemLocalServiceBaseImpl.class);
+		CommerceShipmentItemServiceBaseImpl.class);
 
 }

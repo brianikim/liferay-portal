@@ -655,6 +655,6 @@ public abstract class PortletPreferencesServiceBaseImpl
 	protected UserFinder userFinder;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		PortletPreferencesLocalServiceBaseImpl.class);
+		PortletPreferencesServiceBaseImpl.class);
 
 }

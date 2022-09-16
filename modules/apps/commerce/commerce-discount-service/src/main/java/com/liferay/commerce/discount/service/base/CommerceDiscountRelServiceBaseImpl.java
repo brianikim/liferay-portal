@@ -968,6 +968,6 @@ public abstract class CommerceDiscountRelServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceDiscountRelLocalServiceBaseImpl.class);
+		CommerceDiscountRelServiceBaseImpl.class);
 
 }

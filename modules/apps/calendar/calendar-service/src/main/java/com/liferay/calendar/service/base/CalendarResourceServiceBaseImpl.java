@@ -200,6 +200,6 @@ public abstract class CalendarResourceServiceBaseImpl
 		assetEntryService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CalendarResourceLocalServiceBaseImpl.class);
+		CalendarResourceServiceBaseImpl.class);
 
 }

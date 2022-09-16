@@ -167,6 +167,6 @@ public abstract class OAuth2ApplicationServiceBaseImpl
 	protected com.liferay.portal.kernel.service.UserService userService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		OAuth2ApplicationLocalServiceBaseImpl.class);
+		OAuth2ApplicationServiceBaseImpl.class);
 
 }

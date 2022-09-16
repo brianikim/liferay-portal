@@ -694,7 +694,7 @@ public abstract class
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceNotificationTemplateCommerceAccountGroupRelLocalServiceBaseImpl.
+		CommerceNotificationTemplateCommerceAccountGroupRelServiceBaseImpl.
 			class);
 
 }

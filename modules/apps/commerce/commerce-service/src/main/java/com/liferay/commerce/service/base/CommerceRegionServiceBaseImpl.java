@@ -1720,6 +1720,6 @@ public abstract class CommerceRegionServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceRegionLocalServiceBaseImpl.class);
+		CommerceRegionServiceBaseImpl.class);
 
 }

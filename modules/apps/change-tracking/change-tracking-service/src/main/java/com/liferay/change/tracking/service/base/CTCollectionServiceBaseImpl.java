@@ -164,6 +164,6 @@ public abstract class CTCollectionServiceBaseImpl
 	protected CTProcessPersistence ctProcessPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CTCollectionLocalServiceBaseImpl.class);
+		CTCollectionServiceBaseImpl.class);
 
 }

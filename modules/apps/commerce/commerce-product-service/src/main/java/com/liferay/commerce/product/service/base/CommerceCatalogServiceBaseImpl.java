@@ -2238,6 +2238,6 @@ public abstract class CommerceCatalogServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceCatalogLocalServiceBaseImpl.class);
+		CommerceCatalogServiceBaseImpl.class);
 
 }

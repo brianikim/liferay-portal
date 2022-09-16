@@ -449,6 +449,6 @@ public abstract class UserGroupGroupRoleServiceBaseImpl
 	protected UserGroupFinder userGroupFinder;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		UserGroupGroupRoleLocalServiceBaseImpl.class);
+		UserGroupGroupRoleServiceBaseImpl.class);
 
 }

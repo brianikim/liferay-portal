@@ -1122,6 +1122,6 @@ public abstract class AnnouncementsEntryServiceBaseImpl
 	protected AnnouncementsFlagPersistence announcementsFlagPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		AnnouncementsEntryLocalServiceBaseImpl.class);
+		AnnouncementsEntryServiceBaseImpl.class);
 
 }

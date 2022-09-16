@@ -1232,6 +1232,6 @@ public abstract class RoleServiceBaseImpl
 	protected UserGroupRoleFinder userGroupRoleFinder;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		RoleLocalServiceBaseImpl.class);
+		RoleServiceBaseImpl.class);
 
 }

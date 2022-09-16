@@ -496,6 +496,6 @@ public abstract class PluginSettingServiceBaseImpl
 	protected UserFinder userFinder;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		PluginSettingLocalServiceBaseImpl.class);
+		PluginSettingServiceBaseImpl.class);
 
 }

@@ -409,6 +409,6 @@ public abstract class SocialActivitySettingServiceBaseImpl
 	protected GroupFinder groupFinder;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		SocialActivitySettingLocalServiceBaseImpl.class);
+		SocialActivitySettingServiceBaseImpl.class);
 
 }

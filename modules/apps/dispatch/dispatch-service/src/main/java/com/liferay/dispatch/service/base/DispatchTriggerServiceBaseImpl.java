@@ -171,6 +171,6 @@ public abstract class DispatchTriggerServiceBaseImpl
 	protected com.liferay.portal.kernel.service.UserService userService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		DispatchTriggerLocalServiceBaseImpl.class);
+		DispatchTriggerServiceBaseImpl.class);
 
 }

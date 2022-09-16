@@ -152,6 +152,6 @@ public abstract class RedirectEntryServiceBaseImpl
 		resourceLocalService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		RedirectEntryLocalServiceBaseImpl.class);
+		RedirectEntryServiceBaseImpl.class);
 
 }

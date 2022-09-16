@@ -678,6 +678,6 @@ public abstract class CommerceBOMDefinitionServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceBOMDefinitionLocalServiceBaseImpl.class);
+		CommerceBOMDefinitionServiceBaseImpl.class);
 
 }

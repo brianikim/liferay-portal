@@ -146,6 +146,6 @@ public abstract class SXPElementServiceBaseImpl
 		counterLocalService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		SXPElementLocalServiceBaseImpl.class);
+		SXPElementServiceBaseImpl.class);
 
 }

@@ -172,6 +172,6 @@ public abstract class AccountRoleServiceBaseImpl
 		userGroupRoleService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		AccountRoleLocalServiceBaseImpl.class);
+		AccountRoleServiceBaseImpl.class);
 
 }

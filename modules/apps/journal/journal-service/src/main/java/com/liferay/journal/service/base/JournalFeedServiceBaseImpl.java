@@ -177,6 +177,6 @@ public abstract class JournalFeedServiceBaseImpl
 		expandoValueService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		JournalFeedLocalServiceBaseImpl.class);
+		JournalFeedServiceBaseImpl.class);
 
 }

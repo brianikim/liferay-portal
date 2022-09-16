@@ -552,6 +552,6 @@ public abstract class CommerceShippingFixedOptionRelServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceShippingFixedOptionRelLocalServiceBaseImpl.class);
+		CommerceShippingFixedOptionRelServiceBaseImpl.class);
 
 }

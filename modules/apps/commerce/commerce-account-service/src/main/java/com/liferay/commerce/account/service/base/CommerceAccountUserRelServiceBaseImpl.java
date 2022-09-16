@@ -1078,6 +1078,6 @@ public abstract class CommerceAccountUserRelServiceBaseImpl
 	protected UserGroupRolePersistence userGroupRolePersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceAccountUserRelLocalServiceBaseImpl.class);
+		CommerceAccountUserRelServiceBaseImpl.class);
 
 }

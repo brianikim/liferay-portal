@@ -214,6 +214,6 @@ public abstract class BlogsEntryServiceBaseImpl
 		ratingsStatsLocalService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		BlogsEntryLocalServiceBaseImpl.class);
+		BlogsEntryServiceBaseImpl.class);
 
 }

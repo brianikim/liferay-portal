@@ -1275,6 +1275,6 @@ public abstract class CommercePriceListServiceBaseImpl
 	protected ExpandoRowPersistence expandoRowPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommercePriceListLocalServiceBaseImpl.class);
+		CommercePriceListServiceBaseImpl.class);
 
 }

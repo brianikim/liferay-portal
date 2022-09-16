@@ -921,6 +921,6 @@ public abstract class CommerceAccountOrganizationRelServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceAccountOrganizationRelLocalServiceBaseImpl.class);
+		CommerceAccountOrganizationRelServiceBaseImpl.class);
 
 }

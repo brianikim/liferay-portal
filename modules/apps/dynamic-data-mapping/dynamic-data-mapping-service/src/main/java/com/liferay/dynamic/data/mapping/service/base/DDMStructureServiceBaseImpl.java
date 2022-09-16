@@ -200,6 +200,6 @@ public abstract class DDMStructureServiceBaseImpl
 	protected DDMTemplateFinder ddmTemplateFinder;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		DDMStructureLocalServiceBaseImpl.class);
+		DDMStructureServiceBaseImpl.class);
 
 }

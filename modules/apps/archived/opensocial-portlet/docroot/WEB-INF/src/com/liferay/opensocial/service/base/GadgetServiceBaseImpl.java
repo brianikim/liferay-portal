@@ -584,6 +584,6 @@ public abstract class GadgetServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		GadgetLocalServiceBaseImpl.class);
+		GadgetServiceBaseImpl.class);
 
 }

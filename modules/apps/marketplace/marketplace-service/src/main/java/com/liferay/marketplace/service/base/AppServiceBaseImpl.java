@@ -165,6 +165,6 @@ public abstract class AppServiceBaseImpl
 	protected com.liferay.portal.kernel.service.UserService userService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		AppLocalServiceBaseImpl.class);
+		AppServiceBaseImpl.class);
 
 }

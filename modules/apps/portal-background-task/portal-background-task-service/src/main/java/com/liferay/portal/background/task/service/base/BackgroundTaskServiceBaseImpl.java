@@ -160,6 +160,6 @@ public abstract class BackgroundTaskServiceBaseImpl
 	protected com.liferay.portal.kernel.service.UserService userService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		BackgroundTaskLocalServiceBaseImpl.class);
+		BackgroundTaskServiceBaseImpl.class);
 
 }

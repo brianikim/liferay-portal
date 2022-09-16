@@ -169,6 +169,6 @@ public abstract class MBCategoryServiceBaseImpl
 		ratingsStatsLocalService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		MBCategoryLocalServiceBaseImpl.class);
+		MBCategoryServiceBaseImpl.class);
 
 }

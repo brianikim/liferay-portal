@@ -150,6 +150,6 @@ public abstract class DDMStructureVersionServiceBaseImpl
 		counterLocalService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		DDMStructureVersionLocalServiceBaseImpl.class);
+		DDMStructureVersionServiceBaseImpl.class);
 
 }

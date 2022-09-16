@@ -160,6 +160,6 @@ public abstract class MDRRuleServiceBaseImpl
 	protected MDRRuleGroupFinder mdrRuleGroupFinder;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		MDRRuleLocalServiceBaseImpl.class);
+		MDRRuleServiceBaseImpl.class);
 
 }

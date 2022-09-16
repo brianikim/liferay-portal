@@ -1963,6 +1963,6 @@ public abstract class CommerceOrderServiceBaseImpl
 	protected ExpandoRowPersistence expandoRowPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceOrderLocalServiceBaseImpl.class);
+		CommerceOrderServiceBaseImpl.class);
 
 }

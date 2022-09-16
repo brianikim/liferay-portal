@@ -566,6 +566,6 @@ public abstract class CPDefinitionVirtualSettingServiceBaseImpl
 		dlAppService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CPDefinitionVirtualSettingLocalServiceBaseImpl.class);
+		CPDefinitionVirtualSettingServiceBaseImpl.class);
 
 }

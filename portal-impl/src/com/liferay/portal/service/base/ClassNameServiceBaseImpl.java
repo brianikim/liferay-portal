@@ -222,6 +222,6 @@ public abstract class ClassNameServiceBaseImpl
 		counterLocalService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		ClassNameLocalServiceBaseImpl.class);
+		ClassNameServiceBaseImpl.class);
 
 }

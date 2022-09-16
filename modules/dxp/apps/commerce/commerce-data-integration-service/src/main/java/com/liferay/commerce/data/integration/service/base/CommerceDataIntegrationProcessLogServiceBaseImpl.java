@@ -525,6 +525,6 @@ public abstract class CommerceDataIntegrationProcessLogServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceDataIntegrationProcessLogLocalServiceBaseImpl.class);
+		CommerceDataIntegrationProcessLogServiceBaseImpl.class);
 
 }

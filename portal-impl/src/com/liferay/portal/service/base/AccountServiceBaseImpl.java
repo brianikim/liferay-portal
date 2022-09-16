@@ -218,6 +218,6 @@ public abstract class AccountServiceBaseImpl
 		counterLocalService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		AccountLocalServiceBaseImpl.class);
+		AccountServiceBaseImpl.class);
 
 }

@@ -186,6 +186,6 @@ public abstract class MDRRuleGroupInstanceServiceBaseImpl
 	protected com.liferay.portal.kernel.service.UserService userService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		MDRRuleGroupInstanceLocalServiceBaseImpl.class);
+		MDRRuleGroupInstanceServiceBaseImpl.class);
 
 }

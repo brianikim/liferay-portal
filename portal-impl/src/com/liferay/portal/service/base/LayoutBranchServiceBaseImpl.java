@@ -567,6 +567,6 @@ public abstract class LayoutBranchServiceBaseImpl
 	protected UserFinder userFinder;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		LayoutBranchLocalServiceBaseImpl.class);
+		LayoutBranchServiceBaseImpl.class);
 
 }

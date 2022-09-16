@@ -2088,6 +2088,6 @@ public abstract class CPInstanceOptionValueRelServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CPInstanceOptionValueRelLocalServiceBaseImpl.class);
+		CPInstanceOptionValueRelServiceBaseImpl.class);
 
 }

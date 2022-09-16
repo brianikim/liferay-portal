@@ -613,6 +613,6 @@ public abstract class CommerceApplicationBrandServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceApplicationBrandLocalServiceBaseImpl.class);
+		CommerceApplicationBrandServiceBaseImpl.class);
 
 }

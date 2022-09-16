@@ -1049,6 +1049,6 @@ public abstract class CommerceAccountGroupServiceBaseImpl
 	protected ExpandoRowPersistence expandoRowPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceAccountGroupLocalServiceBaseImpl.class);
+		CommerceAccountGroupServiceBaseImpl.class);
 
 }

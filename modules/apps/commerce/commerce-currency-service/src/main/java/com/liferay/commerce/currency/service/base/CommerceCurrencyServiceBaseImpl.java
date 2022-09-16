@@ -436,6 +436,6 @@ public abstract class CommerceCurrencyServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceCurrencyLocalServiceBaseImpl.class);
+		CommerceCurrencyServiceBaseImpl.class);
 
 }

@@ -861,6 +861,6 @@ public abstract class DLFileShortcutServiceBaseImpl
 	protected DLFolderFinder dlFolderFinder;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		DLFileShortcutLocalServiceBaseImpl.class);
+		DLFileShortcutServiceBaseImpl.class);
 
 }

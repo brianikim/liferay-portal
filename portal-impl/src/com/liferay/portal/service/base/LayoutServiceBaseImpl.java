@@ -1749,6 +1749,6 @@ public abstract class LayoutServiceBaseImpl
 		workflowDefinitionLinkPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		LayoutLocalServiceBaseImpl.class);
+		LayoutServiceBaseImpl.class);
 
 }

@@ -159,6 +159,6 @@ public abstract class AssetDisplayPageEntryServiceBaseImpl
 	protected com.liferay.portal.kernel.service.UserService userService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		AssetDisplayPageEntryLocalServiceBaseImpl.class);
+		AssetDisplayPageEntryServiceBaseImpl.class);
 
 }

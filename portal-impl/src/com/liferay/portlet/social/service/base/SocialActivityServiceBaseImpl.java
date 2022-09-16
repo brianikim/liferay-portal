@@ -1051,6 +1051,6 @@ public abstract class SocialActivityServiceBaseImpl
 	protected SocialActivitySettingPersistence socialActivitySettingPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		SocialActivityLocalServiceBaseImpl.class);
+		SocialActivityServiceBaseImpl.class);
 
 }

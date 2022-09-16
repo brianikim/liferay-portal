@@ -168,6 +168,6 @@ public abstract class LayoutPageTemplateCollectionServiceBaseImpl
 	protected com.liferay.portal.kernel.service.UserService userService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		LayoutPageTemplateCollectionLocalServiceBaseImpl.class);
+		LayoutPageTemplateCollectionServiceBaseImpl.class);
 
 }

@@ -160,6 +160,6 @@ public abstract class FragmentCompositionServiceBaseImpl
 	protected com.liferay.portal.kernel.service.UserService userService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		FragmentCompositionLocalServiceBaseImpl.class);
+		FragmentCompositionServiceBaseImpl.class);
 
 }

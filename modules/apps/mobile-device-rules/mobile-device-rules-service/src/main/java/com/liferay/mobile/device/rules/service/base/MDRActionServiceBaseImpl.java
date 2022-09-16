@@ -157,6 +157,6 @@ public abstract class MDRActionServiceBaseImpl
 	protected MDRRuleGroupInstancePersistence mdrRuleGroupInstancePersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		MDRActionLocalServiceBaseImpl.class);
+		MDRActionServiceBaseImpl.class);
 
 }

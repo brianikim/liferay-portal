@@ -436,6 +436,6 @@ public abstract class DLFileVersionServiceBaseImpl
 	protected DLFolderFinder dlFolderFinder;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		DLFileVersionLocalServiceBaseImpl.class);
+		DLFileVersionServiceBaseImpl.class);
 
 }

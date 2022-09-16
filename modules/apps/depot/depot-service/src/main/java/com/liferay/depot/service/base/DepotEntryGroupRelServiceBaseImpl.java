@@ -149,6 +149,6 @@ public abstract class DepotEntryGroupRelServiceBaseImpl
 		counterLocalService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		DepotEntryGroupRelLocalServiceBaseImpl.class);
+		DepotEntryGroupRelServiceBaseImpl.class);
 
 }

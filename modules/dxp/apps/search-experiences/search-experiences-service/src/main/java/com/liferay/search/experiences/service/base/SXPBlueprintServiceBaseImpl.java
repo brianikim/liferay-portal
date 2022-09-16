@@ -148,6 +148,6 @@ public abstract class SXPBlueprintServiceBaseImpl
 		counterLocalService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		SXPBlueprintLocalServiceBaseImpl.class);
+		SXPBlueprintServiceBaseImpl.class);
 
 }

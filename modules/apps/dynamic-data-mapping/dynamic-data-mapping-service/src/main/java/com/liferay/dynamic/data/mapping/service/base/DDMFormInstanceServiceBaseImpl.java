@@ -182,6 +182,6 @@ public abstract class DDMFormInstanceServiceBaseImpl
 		ddmFormInstanceVersionPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		DDMFormInstanceLocalServiceBaseImpl.class);
+		DDMFormInstanceServiceBaseImpl.class);
 
 }

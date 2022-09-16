@@ -157,6 +157,6 @@ public abstract class DDLRecordVersionServiceBaseImpl
 	protected DDLRecordFinder ddlRecordFinder;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		DDLRecordVersionLocalServiceBaseImpl.class);
+		DDLRecordVersionServiceBaseImpl.class);
 
 }

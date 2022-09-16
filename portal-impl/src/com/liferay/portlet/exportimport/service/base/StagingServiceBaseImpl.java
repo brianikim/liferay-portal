@@ -1032,6 +1032,6 @@ public abstract class StagingServiceBaseImpl
 	protected UserFinder userFinder;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		StagingLocalServiceBaseImpl.class);
+		StagingServiceBaseImpl.class);
 
 }

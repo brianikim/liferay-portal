@@ -160,6 +160,6 @@ public abstract class AccountGroupServiceBaseImpl
 		accountGroupAccountEntryRelPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		AccountGroupLocalServiceBaseImpl.class);
+		AccountGroupServiceBaseImpl.class);
 
 }

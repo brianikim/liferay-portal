@@ -616,6 +616,6 @@ public abstract class CommerceApplicationModelCProductRelServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceApplicationModelCProductRelLocalServiceBaseImpl.class);
+		CommerceApplicationModelCProductRelServiceBaseImpl.class);
 
 }

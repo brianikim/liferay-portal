@@ -166,6 +166,6 @@ public abstract class ScreensCommentServiceBaseImpl
 		assetEntryService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		ScreensCommentLocalServiceBaseImpl.class);
+		ScreensCommentServiceBaseImpl.class);
 
 }

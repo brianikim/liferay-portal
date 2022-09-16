@@ -2140,6 +2140,6 @@ public abstract class CPSpecificationOptionServiceBaseImpl
 	protected ExpandoRowPersistence expandoRowPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CPSpecificationOptionLocalServiceBaseImpl.class);
+		CPSpecificationOptionServiceBaseImpl.class);
 
 }

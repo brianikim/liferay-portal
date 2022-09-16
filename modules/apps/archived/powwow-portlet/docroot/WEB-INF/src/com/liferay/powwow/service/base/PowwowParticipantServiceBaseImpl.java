@@ -566,6 +566,6 @@ public abstract class PowwowParticipantServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		PowwowParticipantLocalServiceBaseImpl.class);
+		PowwowParticipantServiceBaseImpl.class);
 
 }

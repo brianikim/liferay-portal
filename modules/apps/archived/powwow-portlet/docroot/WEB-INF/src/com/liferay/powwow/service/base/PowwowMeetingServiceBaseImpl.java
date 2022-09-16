@@ -568,6 +568,6 @@ public abstract class PowwowMeetingServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		PowwowMeetingLocalServiceBaseImpl.class);
+		PowwowMeetingServiceBaseImpl.class);
 
 }

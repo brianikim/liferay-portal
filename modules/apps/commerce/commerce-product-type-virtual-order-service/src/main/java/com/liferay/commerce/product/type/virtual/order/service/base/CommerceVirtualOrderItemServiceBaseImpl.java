@@ -506,6 +506,6 @@ public abstract class CommerceVirtualOrderItemServiceBaseImpl
 		dlAppService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceVirtualOrderItemLocalServiceBaseImpl.class);
+		CommerceVirtualOrderItemServiceBaseImpl.class);
 
 }

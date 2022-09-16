@@ -920,6 +920,6 @@ public abstract class CommerceAccountGroupRelServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceAccountGroupRelLocalServiceBaseImpl.class);
+		CommerceAccountGroupRelServiceBaseImpl.class);
 
 }

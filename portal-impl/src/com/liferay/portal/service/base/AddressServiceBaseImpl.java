@@ -523,6 +523,6 @@ public abstract class AddressServiceBaseImpl
 	protected UserFinder userFinder;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		AddressLocalServiceBaseImpl.class);
+		AddressServiceBaseImpl.class);
 
 }

@@ -148,6 +148,6 @@ public abstract class TranslationEntryServiceBaseImpl
 		counterLocalService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		TranslationEntryLocalServiceBaseImpl.class);
+		TranslationEntryServiceBaseImpl.class);
 
 }

@@ -145,6 +145,6 @@ public abstract class MBBanServiceBaseImpl
 		counterLocalService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		MBBanLocalServiceBaseImpl.class);
+		MBBanServiceBaseImpl.class);
 
 }

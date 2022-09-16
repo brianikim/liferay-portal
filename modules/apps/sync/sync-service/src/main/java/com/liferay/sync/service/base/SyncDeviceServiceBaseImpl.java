@@ -177,6 +177,6 @@ public abstract class SyncDeviceServiceBaseImpl
 	protected com.liferay.portal.kernel.service.UserService userService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		SyncDeviceLocalServiceBaseImpl.class);
+		SyncDeviceServiceBaseImpl.class);
 
 }

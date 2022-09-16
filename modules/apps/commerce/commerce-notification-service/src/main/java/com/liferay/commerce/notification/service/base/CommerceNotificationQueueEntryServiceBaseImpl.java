@@ -684,6 +684,6 @@ public abstract class CommerceNotificationQueueEntryServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceNotificationQueueEntryLocalServiceBaseImpl.class);
+		CommerceNotificationQueueEntryServiceBaseImpl.class);
 
 }

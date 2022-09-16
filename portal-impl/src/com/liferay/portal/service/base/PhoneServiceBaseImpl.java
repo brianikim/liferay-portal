@@ -473,6 +473,6 @@ public abstract class PhoneServiceBaseImpl
 	protected UserFinder userFinder;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		PhoneLocalServiceBaseImpl.class);
+		PhoneServiceBaseImpl.class);
 
 }

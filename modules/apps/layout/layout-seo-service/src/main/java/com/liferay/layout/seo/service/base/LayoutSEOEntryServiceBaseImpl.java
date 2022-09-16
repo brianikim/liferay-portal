@@ -162,6 +162,6 @@ public abstract class LayoutSEOEntryServiceBaseImpl
 	protected com.liferay.portal.kernel.service.LayoutService layoutService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		LayoutSEOEntryLocalServiceBaseImpl.class);
+		LayoutSEOEntryServiceBaseImpl.class);
 
 }

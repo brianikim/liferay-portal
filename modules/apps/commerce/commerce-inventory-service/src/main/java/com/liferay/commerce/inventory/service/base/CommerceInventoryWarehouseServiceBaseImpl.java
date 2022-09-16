@@ -916,6 +916,6 @@ public abstract class CommerceInventoryWarehouseServiceBaseImpl
 	protected ExpandoRowPersistence expandoRowPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceInventoryWarehouseLocalServiceBaseImpl.class);
+		CommerceInventoryWarehouseServiceBaseImpl.class);
 
 }

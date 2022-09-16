@@ -2138,6 +2138,6 @@ public abstract class CPDefinitionLinkServiceBaseImpl
 	protected ExpandoRowPersistence expandoRowPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CPDefinitionLinkLocalServiceBaseImpl.class);
+		CPDefinitionLinkServiceBaseImpl.class);
 
 }

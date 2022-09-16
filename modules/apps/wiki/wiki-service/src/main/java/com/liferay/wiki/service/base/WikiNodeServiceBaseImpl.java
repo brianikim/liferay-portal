@@ -172,6 +172,6 @@ public abstract class WikiNodeServiceBaseImpl
 	protected WikiPageFinder wikiPageFinder;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		WikiNodeLocalServiceBaseImpl.class);
+		WikiNodeServiceBaseImpl.class);
 
 }

@@ -1722,6 +1722,6 @@ public abstract class CPDAvailabilityEstimateServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CPDAvailabilityEstimateLocalServiceBaseImpl.class);
+		CPDAvailabilityEstimateServiceBaseImpl.class);
 
 }

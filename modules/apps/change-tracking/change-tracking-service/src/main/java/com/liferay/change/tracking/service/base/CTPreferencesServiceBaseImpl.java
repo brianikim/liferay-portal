@@ -148,6 +148,6 @@ public abstract class CTPreferencesServiceBaseImpl
 		counterLocalService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CTPreferencesLocalServiceBaseImpl.class);
+		CTPreferencesServiceBaseImpl.class);
 
 }

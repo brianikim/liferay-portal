@@ -155,6 +155,6 @@ public abstract class LayoutSEOSiteServiceBaseImpl
 	protected com.liferay.portal.kernel.service.GroupService groupService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		LayoutSEOSiteLocalServiceBaseImpl.class);
+		LayoutSEOSiteServiceBaseImpl.class);
 
 }

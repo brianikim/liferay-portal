@@ -717,6 +717,6 @@ public abstract class LayoutRevisionServiceBaseImpl
 	protected WorkflowInstanceLinkPersistence workflowInstanceLinkPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		LayoutRevisionLocalServiceBaseImpl.class);
+		LayoutRevisionServiceBaseImpl.class);
 
 }

@@ -212,6 +212,6 @@ public abstract class JournalFolderServiceBaseImpl
 		ratingsStatsLocalService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		JournalFolderLocalServiceBaseImpl.class);
+		JournalFolderServiceBaseImpl.class);
 
 }

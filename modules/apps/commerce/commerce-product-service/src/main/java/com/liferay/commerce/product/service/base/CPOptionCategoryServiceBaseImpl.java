@@ -2085,6 +2085,6 @@ public abstract class CPOptionCategoryServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CPOptionCategoryLocalServiceBaseImpl.class);
+		CPOptionCategoryServiceBaseImpl.class);
 
 }

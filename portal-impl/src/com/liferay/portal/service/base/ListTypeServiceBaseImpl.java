@@ -303,6 +303,6 @@ public abstract class ListTypeServiceBaseImpl
 	protected ClassNamePersistence classNamePersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		ListTypeLocalServiceBaseImpl.class);
+		ListTypeServiceBaseImpl.class);
 
 }

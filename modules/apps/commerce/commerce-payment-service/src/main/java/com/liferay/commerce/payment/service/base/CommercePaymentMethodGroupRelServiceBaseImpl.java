@@ -504,6 +504,6 @@ public abstract class CommercePaymentMethodGroupRelServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommercePaymentMethodGroupRelLocalServiceBaseImpl.class);
+		CommercePaymentMethodGroupRelServiceBaseImpl.class);
 
 }

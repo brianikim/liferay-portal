@@ -167,6 +167,6 @@ public abstract class ScreensRatingsEntryServiceBaseImpl
 		ratingsEntryService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		ScreensRatingsEntryLocalServiceBaseImpl.class);
+		ScreensRatingsEntryServiceBaseImpl.class);
 
 }

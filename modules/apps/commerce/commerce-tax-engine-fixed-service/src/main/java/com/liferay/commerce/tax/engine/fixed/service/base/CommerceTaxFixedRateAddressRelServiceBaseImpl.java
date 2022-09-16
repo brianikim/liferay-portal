@@ -545,6 +545,6 @@ public abstract class CommerceTaxFixedRateAddressRelServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceTaxFixedRateAddressRelLocalServiceBaseImpl.class);
+		CommerceTaxFixedRateAddressRelServiceBaseImpl.class);
 
 }

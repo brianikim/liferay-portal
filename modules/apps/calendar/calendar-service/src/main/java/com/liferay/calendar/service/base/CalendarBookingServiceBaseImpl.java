@@ -239,6 +239,6 @@ public abstract class CalendarBookingServiceBaseImpl
 			socialActivityCounterLocalService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CalendarBookingLocalServiceBaseImpl.class);
+		CalendarBookingServiceBaseImpl.class);
 
 }

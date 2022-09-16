@@ -185,6 +185,6 @@ public abstract class DDLRecordServiceBaseImpl
 	protected DDLRecordVersionPersistence ddlRecordVersionPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		DDLRecordLocalServiceBaseImpl.class);
+		DDLRecordServiceBaseImpl.class);
 
 }

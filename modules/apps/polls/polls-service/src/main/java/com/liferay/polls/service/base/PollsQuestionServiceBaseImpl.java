@@ -171,6 +171,6 @@ public abstract class PollsQuestionServiceBaseImpl
 	protected PollsVotePersistence pollsVotePersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		PollsQuestionLocalServiceBaseImpl.class);
+		PollsQuestionServiceBaseImpl.class);
 
 }

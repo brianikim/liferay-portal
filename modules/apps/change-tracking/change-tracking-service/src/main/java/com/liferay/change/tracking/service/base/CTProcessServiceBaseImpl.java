@@ -157,6 +157,6 @@ public abstract class CTProcessServiceBaseImpl
 	protected com.liferay.portal.kernel.service.CompanyService companyService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CTProcessLocalServiceBaseImpl.class);
+		CTProcessServiceBaseImpl.class);
 
 }

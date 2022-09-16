@@ -159,6 +159,6 @@ public abstract class ScreensDDLRecordServiceBaseImpl
 	protected com.liferay.portal.kernel.service.UserService userService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		ScreensDDLRecordLocalServiceBaseImpl.class);
+		ScreensDDLRecordServiceBaseImpl.class);
 
 }

@@ -2161,6 +2161,6 @@ public abstract class CPDisplayLayoutServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CPDisplayLayoutLocalServiceBaseImpl.class);
+		CPDisplayLayoutServiceBaseImpl.class);
 
 }

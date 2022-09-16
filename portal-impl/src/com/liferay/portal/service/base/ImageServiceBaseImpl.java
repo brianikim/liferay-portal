@@ -217,6 +217,6 @@ public abstract class ImageServiceBaseImpl
 		counterLocalService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		ImageLocalServiceBaseImpl.class);
+		ImageServiceBaseImpl.class);
 
 }

@@ -180,6 +180,6 @@ public abstract class SAPEntryServiceBaseImpl
 	protected com.liferay.portal.kernel.service.UserService userService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		SAPEntryLocalServiceBaseImpl.class);
+		SAPEntryServiceBaseImpl.class);
 
 }

@@ -1721,6 +1721,6 @@ public abstract class CommerceOrderNoteServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceOrderNoteLocalServiceBaseImpl.class);
+		CommerceOrderNoteServiceBaseImpl.class);
 
 }

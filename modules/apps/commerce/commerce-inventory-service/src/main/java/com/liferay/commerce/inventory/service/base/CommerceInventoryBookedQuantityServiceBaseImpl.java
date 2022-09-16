@@ -864,6 +864,6 @@ public abstract class CommerceInventoryBookedQuantityServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceInventoryBookedQuantityLocalServiceBaseImpl.class);
+		CommerceInventoryBookedQuantityServiceBaseImpl.class);
 
 }

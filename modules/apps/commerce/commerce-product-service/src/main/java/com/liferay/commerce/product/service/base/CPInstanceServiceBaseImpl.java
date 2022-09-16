@@ -2190,6 +2190,6 @@ public abstract class CPInstanceServiceBaseImpl
 	protected ExpandoRowPersistence expandoRowPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CPInstanceLocalServiceBaseImpl.class);
+		CPInstanceServiceBaseImpl.class);
 
 }

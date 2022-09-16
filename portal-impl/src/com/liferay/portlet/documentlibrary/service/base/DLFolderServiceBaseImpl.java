@@ -1326,6 +1326,6 @@ public abstract class DLFolderServiceBaseImpl
 	protected RatingsStatsPersistence ratingsStatsPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		DLFolderLocalServiceBaseImpl.class);
+		DLFolderServiceBaseImpl.class);
 
 }

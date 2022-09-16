@@ -969,6 +969,6 @@ public abstract class CommerceDiscountRuleServiceBaseImpl
 	protected UserPersistence userPersistence;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceDiscountRuleLocalServiceBaseImpl.class);
+		CommerceDiscountRuleServiceBaseImpl.class);
 
 }

@@ -198,6 +198,6 @@ public abstract class ScreensAssetEntryServiceBaseImpl
 		dlAppService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		ScreensAssetEntryLocalServiceBaseImpl.class);
+		ScreensAssetEntryServiceBaseImpl.class);
 
 }

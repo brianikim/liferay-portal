@@ -189,6 +189,6 @@ public abstract class KBFolderServiceBaseImpl
 		expandoRowLocalService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		KBFolderLocalServiceBaseImpl.class);
+		KBFolderServiceBaseImpl.class);
 
 }

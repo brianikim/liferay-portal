@@ -150,6 +150,6 @@ public abstract class DepotEntryServiceBaseImpl
 		resourceLocalService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		DepotEntryLocalServiceBaseImpl.class);
+		DepotEntryServiceBaseImpl.class);
 
 }
