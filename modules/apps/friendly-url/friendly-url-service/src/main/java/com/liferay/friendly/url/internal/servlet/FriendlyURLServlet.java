@@ -135,25 +135,6 @@ public class FriendlyURLServlet extends HttpServlet {
 
 		Redirect skippedRedirect = null;
 
-		boolean skipRedirect = false;
-
-		String refererURL = httpServletRequest.getHeader(HttpHeaders.REFERER);
-
-		if (Validator.isNotNull(refererURL)) {
-			int questionPos = refererURL.indexOf(CharPool.QUESTION);
-
-			if (questionPos != -1) {
-				refererURL = refererURL.substring(0, questionPos);
-			}
-
-			if (refererURL.contains(
-					VirtualLayoutConstants.CANONICAL_URL_SEPARATOR +
-						GroupConstants.CONTROL_PANEL_FRIENDLY_URL)) {
-
-				skipRedirect = true;
-			}
-		}
-
 		if ((pos != -1) && ((pos + 1) != path.length())) {
 			layoutFriendlyURL = path.substring(pos);
 
@@ -162,39 +143,14 @@ public class FriendlyURLServlet extends HttpServlet {
 					0, layoutFriendlyURL.length() - 1);
 			}
 
-			RedirectEntryLocalService currentRedirectEntryLocalService =
-				redirectEntryLocalService;
+			skippedRedirect = _getRedirectProviderRedirect(
+				httpServletRequest, group.getGroupId(), layoutFriendlyURL,
+				redirectEntryLocalService);
 
-			if ((currentRedirectEntryLocalService != null) &&
-				!LiferayWindowState.isExclusive(httpServletRequest) &&
-				!LiferayWindowState.isPopUp(httpServletRequest)) {
+			if ((skippedRedirect != null) &&
+				!_isSkipRedirect(httpServletRequest)) {
 
-				HttpServletRequest originalHttpServletRequest =
-					portal.getOriginalServletRequest(httpServletRequest);
-
-				RedirectEntry redirectEntry =
-					currentRedirectEntryLocalService.fetchRedirectEntry(
-						group.getGroupId(),
-						_normalizeFriendlyURL(
-							originalHttpServletRequest.getRequestURI()),
-						false);
-
-				if (redirectEntry == null) {
-					redirectEntry =
-						currentRedirectEntryLocalService.fetchRedirectEntry(
-							group.getGroupId(),
-							_normalizeFriendlyURL(layoutFriendlyURL), true);
-				}
-
-				if (redirectEntry != null) {
-					skippedRedirect = new Redirect(
-						redirectEntry.getDestinationURL(), true,
-						redirectEntry.isPermanent());
-
-					if (!skipRedirect) {
-						return skippedRedirect;
-					}
-				}
+				return skippedRedirect;
 			}
 		}
 		else {
@@ -868,6 +824,59 @@ public class FriendlyURLServlet extends HttpServlet {
 		return group;
 	}
 
+	private Redirect _getRedirectProviderRedirect(
+		HttpServletRequest httpServletRequest, long groupId,
+		String layoutFriendlyURL,
+		RedirectEntryLocalService redirectEntryLocalService) {
+
+		RedirectEntryLocalService currentRedirectEntryLocalService =
+			redirectEntryLocalService;
+
+		if ((currentRedirectEntryLocalService != null) &&
+			!LiferayWindowState.isExclusive(httpServletRequest) &&
+			!LiferayWindowState.isPopUp(httpServletRequest)) {
+
+			HttpServletRequest originalHttpServletRequest =
+				portal.getOriginalServletRequest(httpServletRequest);
+
+			RedirectEntry redirectEntry =
+				currentRedirectEntryLocalService.fetchRedirectEntry(
+					groupId,
+					_normalizeFriendlyURL(
+						originalHttpServletRequest.getRequestURI()),
+					false);
+
+			if (redirectEntry == null) {
+				redirectEntry =
+					currentRedirectEntryLocalService.fetchRedirectEntry(
+						groupId, _normalizeFriendlyURL(layoutFriendlyURL),
+						true);
+			}
+
+			if (redirectEntry != null) {
+				return new Redirect(
+					redirectEntry.getDestinationURL(), true,
+					redirectEntry.isPermanent());
+			}
+		}
+
+		return null;
+	}
+
+	private String _getRefererURL(HttpServletRequest httpServletRequest) {
+		String refererURL = httpServletRequest.getHeader(HttpHeaders.REFERER);
+
+		if (Validator.isNotNull(refererURL)) {
+			int questionPos = refererURL.indexOf(CharPool.QUESTION);
+
+			if (questionPos != -1) {
+				refererURL = refererURL.substring(0, questionPos);
+			}
+		}
+
+		return refererURL;
+	}
+
 	private User _getUser(HttpServletRequest httpServletRequest)
 		throws PortalException {
 
@@ -906,6 +915,18 @@ public class FriendlyURLServlet extends HttpServlet {
 				"permanent")) {
 
 			return true;
+		}
+
+		return false;
+	}
+
+	private boolean _isSkipRedirect(HttpServletRequest httpServletRequest) {
+		String refererURL = _getRefererURL(httpServletRequest);
+
+		if (Validator.isNotNull(refererURL)) {
+			return refererURL.contains(
+				VirtualLayoutConstants.CANONICAL_URL_SEPARATOR +
+					GroupConstants.CONTROL_PANEL_FRIENDLY_URL);
 		}
 
 		return false;
