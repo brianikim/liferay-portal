@@ -287,7 +287,6 @@ definition {
 		// Wrokaround LPS-127348
 
 		property database.types = "hypersonic,mariadb,mysql,oracle,postgresql,sqlserver";
-		property test.assert.warning.exceptions = "true";
 
 		JSONPublications.addPublication(publicationName = "Publication Name");
 
