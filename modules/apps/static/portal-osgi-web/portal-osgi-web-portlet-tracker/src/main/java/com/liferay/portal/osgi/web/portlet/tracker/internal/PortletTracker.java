@@ -673,6 +673,10 @@ public class PortletTracker
 		portletModel.setFooterPortletJavaScript(
 			StringPlus.asList(
 				get(serviceReference, "footer-portlet-javascript")));
+		portletModel.setFriendlyURLMapperClass(
+			GetterUtil.getString(
+				get(serviceReference, "friendly-url-mapper-class"),
+				portletModel.getFriendlyURLMapperClass()));
 		portletModel.setFriendlyURLMapping(
 			GetterUtil.getString(
 				get(serviceReference, "friendly-url-mapping"),
