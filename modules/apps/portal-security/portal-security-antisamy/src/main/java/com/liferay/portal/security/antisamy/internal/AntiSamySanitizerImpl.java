@@ -129,7 +129,7 @@ public class AntiSamySanitizerImpl implements Sanitizer {
 			AntiSamySanitizerImpl.class.getClassLoader());
 
 		try {
-			CleanResults cleanResults; = null
+			CleanResults cleanResults = null;
 
 			AntiSamy antiSamy = new AntiSamy();
 
