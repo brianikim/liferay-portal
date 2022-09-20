@@ -1213,16 +1213,6 @@ AUI.add(
 
 						var value;
 
-						if (dataType === 'html') {
-							var form = instance.getForm();
-
-							if (!instance.getReadOnly()) {
-								form.editorInitializingCount++;
-
-								form._toggleActionButtons(true);
-							}
-						}
-
 						if (instance.get('localizable')) {
 							if (!A.Object.isEmpty(localizationMap)) {
 								value =
@@ -3826,29 +3816,6 @@ AUI.add(
 							) {
 								editor.setHTML(value);
 							}
-
-							var nativeEditor = editor.getNativeEditor();
-
-							var usingCKEditor =
-								CKEDITOR &&
-								CKEDITOR.instances &&
-								CKEDITOR.instances[editorComponentName];
-
-							var usingAlloyEditor =
-								nativeEditor &&
-								nativeEditor._editor &&
-								nativeEditor._editor.window.$.AlloyEditor;
-
-							if (!instance.getReadOnly()) {
-								if (usingCKEditor && !usingAlloyEditor) {
-									nativeEditor.once('dataReady', () => {
-										Liferay.fire('ddmEditorDataReady');
-									});
-								}
-								else {
-									Liferay.fire('ddmEditorDataReady');
-								}
-							}
 						}
 					});
 				},
@@ -4253,16 +4220,6 @@ AUI.add(
 					}
 				},
 
-				_onDDMEditorDataReady() {
-					var instance = this;
-
-					instance.editorInitializingCount--;
-
-					if (instance.editorInitializingCount == 0) {
-						instance._toggleActionButtons(false);
-					}
-				},
-
 				_onDefaultLocaleChanged(event) {
 					var instance = this;
 
@@ -4294,18 +4251,6 @@ AUI.add(
 					var instance = this;
 
 					instance.updateDDMFormInputValue();
-				},
-
-				_toggleActionButtons(disable) {
-					var instance = this;
-
-					var formId = instance.get('formNode').get('id');
-
-					var buttonList = document.querySelectorAll(
-						'#' + formId + ' button'
-					);
-
-					Liferay.Util.toggleDisabled(buttonList, disable);
 				},
 
 				_updateNestedLocalizationMaps(fields) {
@@ -4388,18 +4333,7 @@ AUI.add(
 							Liferay.on(
 								'inputLocalized:defaultLocaleChanged',
 								A.bind('_onDefaultLocaleChanged', instance)
-							),
-							Liferay.on(
-								'ddmEditorDataReady',
-								instance._onDDMEditorDataReady,
-								instance
-							),
-							Liferay.on('submitForm', () => {
-								Liferay.detach(
-									'ddmEditorDataReady',
-									instance._onDDMEditorDataReady
-								);
-							})
+							)
 						);
 
 						if (instance.get('synchronousFormSubmission')) {
@@ -4503,7 +4437,6 @@ AUI.add(
 				initializer() {
 					var instance = this;
 
-					instance.editorInitializingCount = 0;
 					instance.eventHandlers = [];
 					instance.newRepeatableInstances = [];
 					instance.repeatableInstances = {};
