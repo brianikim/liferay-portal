@@ -129,8 +129,9 @@ public class AntiSamySanitizerImpl implements Sanitizer {
 			AntiSamySanitizerImpl.class.getClassLoader());
 
 		try {
+			CleanResults cleanResults; = null
+
 			AntiSamy antiSamy = new AntiSamy();
-			CleanResults cleanResults;
 
 			if (isConfigured(className, classPK)) {
 				Policy policy = _policies.get(className);
@@ -142,8 +143,8 @@ public class AntiSamySanitizerImpl implements Sanitizer {
 			}
 
 			if (_log.isWarnEnabled()) {
-				for (String errorMesagges : cleanResults.getErrorMessages()) {
-					_log.warn(errorMesagges);
+				for (String errorMessage : cleanResults.getErrorMessages()) {
+					_log.warn(errorMessage);
 				}
 			}
 
