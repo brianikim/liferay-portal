@@ -17,6 +17,7 @@ package com.liferay.portal.vulcan.resource;
 import java.util.Set;
 
 import javax.servlet.ServletConfig;
+import javax.servlet.http.HttpServletRequest;
 
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.HttpHeaders;
@@ -36,6 +37,11 @@ public interface OpenAPIResource {
 
 		return getOpenAPI(resourceClasses, type);
 	}
+
+	public Response getOpenAPI(
+			HttpServletRequest httpServletRequest,
+			Set<Class<?>> resourceClasses, String type, UriInfo uriInfo)
+		throws Exception;
 
 	public default Response getOpenAPI(
 			Set<Class<?>> resourceClasses, String type)
