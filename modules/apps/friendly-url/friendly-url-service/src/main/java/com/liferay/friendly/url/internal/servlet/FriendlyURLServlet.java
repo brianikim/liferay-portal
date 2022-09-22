@@ -828,10 +828,7 @@ public class FriendlyURLServlet extends HttpServlet {
 		String layoutFriendlyURL,
 		RedirectEntryLocalService redirectEntryLocalService) {
 
-		RedirectEntryLocalService currentRedirectEntryLocalService =
-			redirectEntryLocalService;
-
-		if ((currentRedirectEntryLocalService != null) &&
+		if ((redirectEntryLocalService != null) &&
 			!LiferayWindowState.isExclusive(httpServletRequest) &&
 			!LiferayWindowState.isPopUp(httpServletRequest)) {
 
@@ -839,7 +836,7 @@ public class FriendlyURLServlet extends HttpServlet {
 				portal.getOriginalServletRequest(httpServletRequest);
 
 			RedirectEntry redirectEntry =
-				currentRedirectEntryLocalService.fetchRedirectEntry(
+				redirectEntryLocalService.fetchRedirectEntry(
 					groupId,
 					_normalizeFriendlyURL(
 						originalHttpServletRequest.getRequestURI()),
@@ -847,7 +844,7 @@ public class FriendlyURLServlet extends HttpServlet {
 
 			if (redirectEntry == null) {
 				redirectEntry =
-					currentRedirectEntryLocalService.fetchRedirectEntry(
+					redirectEntryLocalService.fetchRedirectEntry(
 						groupId, _normalizeFriendlyURL(layoutFriendlyURL),
 						true);
 			}
