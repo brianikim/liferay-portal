@@ -108,7 +108,8 @@ public class DLEditFileEntryTypeDisplayContextTest {
 				_ddm, _ddmStorageLinkLocalService, _ddmStructureLocalService,
 				_language,
 				new MockLiferayPortletRenderRequest(
-					new MockHttpServletRequestBuilder().withAttribute(
+					new MockHttpServletRequestBuilder(
+					).withAttribute(
 						WebKeys.DOCUMENT_LIBRARY_DYNAMIC_DATA_MAPPING_STRUCTURE,
 						_getRandomDDMStructure()
 					).withParameter(
@@ -128,7 +129,8 @@ public class DLEditFileEntryTypeDisplayContextTest {
 				_ddm, _ddmStorageLinkLocalService, _ddmStructureLocalService,
 				_language,
 				new MockLiferayPortletRenderRequest(
-					new MockHttpServletRequestBuilder().withAttribute(
+					new MockHttpServletRequestBuilder(
+					).withAttribute(
 						WebKeys.DOCUMENT_LIBRARY_DYNAMIC_DATA_MAPPING_STRUCTURE,
 						_getRandomDDMStructure()
 					).withParameter(
@@ -147,7 +149,8 @@ public class DLEditFileEntryTypeDisplayContextTest {
 				_ddm, _ddmStorageLinkLocalService, _ddmStructureLocalService,
 				_language,
 				new MockLiferayPortletRenderRequest(
-					new MockHttpServletRequestBuilder().withAttribute(
+					new MockHttpServletRequestBuilder(
+					).withAttribute(
 						WebKeys.DOCUMENT_LIBRARY_DYNAMIC_DATA_MAPPING_STRUCTURE,
 						_getRandomDDMStructure()
 					).build()),
@@ -164,7 +167,8 @@ public class DLEditFileEntryTypeDisplayContextTest {
 				_ddm, _ddmStorageLinkLocalService, _ddmStructureLocalService,
 				_language,
 				new MockLiferayPortletRenderRequest(
-					new MockHttpServletRequestBuilder().withAttribute(
+					new MockHttpServletRequestBuilder(
+					).withAttribute(
 						WebKeys.DOCUMENT_LIBRARY_DYNAMIC_DATA_MAPPING_STRUCTURE,
 						_getRandomDDMStructure()
 					).build()),
@@ -182,7 +186,8 @@ public class DLEditFileEntryTypeDisplayContextTest {
 				_ddm, _ddmStorageLinkLocalService, _ddmStructureLocalService,
 				_language,
 				new MockLiferayPortletRenderRequest(
-					new MockHttpServletRequestBuilder().withAttribute(
+					new MockHttpServletRequestBuilder(
+					).withAttribute(
 						WebKeys.DOCUMENT_LIBRARY_DYNAMIC_DATA_MAPPING_STRUCTURE,
 						_getRandomDDMStructure()
 					).withParameter(
