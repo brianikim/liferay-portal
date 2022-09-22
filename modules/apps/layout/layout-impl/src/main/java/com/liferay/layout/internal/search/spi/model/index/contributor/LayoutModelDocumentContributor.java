@@ -158,7 +158,7 @@ public class LayoutModelDocumentContributor
 		Set<Locale> locales = LanguageUtil.getAvailableLocales(
 			layout.getGroupId());
 
-		if (_useLayoutCrawler(layout)) {
+		if (_isUseLayoutCrawler(layout)) {
 			for (Locale locale : locales) {
 				String content = StringPool.BLANK;
 
@@ -375,7 +375,7 @@ public class LayoutModelDocumentContributor
 		return false;
 	}
 
-	private boolean _useLayoutCrawler(Layout layout) {
+	private boolean _isUseLayoutCrawler(Layout layout) {
 		if (layout.isPrivateLayout()) {
 			return false;
 		}
