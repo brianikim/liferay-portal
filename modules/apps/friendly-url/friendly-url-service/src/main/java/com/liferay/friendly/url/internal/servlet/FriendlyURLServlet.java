@@ -852,13 +852,13 @@ public class FriendlyURLServlet extends HttpServlet {
 					true);
 		}
 
-		if (redirectEntry != null) {
-			return new Redirect(
-				redirectEntry.getDestinationURL(), true,
-				redirectEntry.isPermanent());
+		if (redirectEntry == null) {
+			return null;
 		}
 
-		return null;
+		return new Redirect(
+			redirectEntry.getDestinationURL(), true,
+			redirectEntry.isPermanent());
 	}
 
 	private User _getUser(HttpServletRequest httpServletRequest)
