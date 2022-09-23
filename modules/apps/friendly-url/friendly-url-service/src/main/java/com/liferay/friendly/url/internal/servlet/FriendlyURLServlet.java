@@ -846,10 +846,8 @@ public class FriendlyURLServlet extends HttpServlet {
 				false);
 
 		if (redirectEntry == null) {
-			redirectEntry =
-				redirectEntryLocalService.fetchRedirectEntry(
-					groupId, _normalizeFriendlyURL(layoutFriendlyURL),
-					true);
+			redirectEntry = redirectEntryLocalService.fetchRedirectEntry(
+				groupId, _normalizeFriendlyURL(layoutFriendlyURL), true);
 		}
 
 		if (redirectEntry == null) {
