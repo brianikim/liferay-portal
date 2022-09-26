@@ -19,12 +19,15 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.io.Serializable;
 
 import java.math.BigDecimal;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
@@ -92,7 +95,10 @@ public class FieldConstants {
 		if (isNumericType(type)) {
 			NumberFormat numberFormat = null;
 
-			if (locale.equals(LocaleUtil.ROOT)) {
+			if (StringUtil.equals(locale.getLanguage(), "ar")) {
+				numberFormat = _getArabicDecimalFormat(locale);
+			}
+			else if (locale.equals(LocaleUtil.ROOT)) {
 				numberFormat = NumberFormat.getInstance(defaultLocale);
 			}
 			else {
@@ -219,6 +225,24 @@ public class FieldConstants {
 		}
 
 		return false;
+	}
+
+	private static DecimalFormat _getArabicDecimalFormat(Locale locale) {
+		DecimalFormat decimalFormat = (DecimalFormat)DecimalFormat.getInstance(
+			locale);
+
+		DecimalFormatSymbols decimalFormatSymbols =
+			decimalFormat.getDecimalFormatSymbols();
+
+		decimalFormatSymbols.setZeroDigit('0');
+
+		decimalFormat.setDecimalFormatSymbols(decimalFormatSymbols);
+
+		decimalFormat.setGroupingUsed(false);
+		decimalFormat.setMaximumFractionDigits(Integer.MAX_VALUE);
+		decimalFormat.setParseBigDecimal(true);
+
+		return decimalFormat;
 	}
 
 	private static final String _SCIENTIFIC_NOTATION_PATTERN =
