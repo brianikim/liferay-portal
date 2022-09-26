@@ -80,45 +80,45 @@ public class LayoutPageTemplateStructureUpgradeProcess extends UpgradeProcess {
 
 		List<Long> plids = new ArrayList<>();
 
-		try (PreparedStatement selectPreparedStatement =
+		try (PreparedStatement preparedStatement1 =
 				connection.prepareStatement(
 					SQLTransformer.transform(
 						"select layoutPageTemplateStructureId, classPK from " +
 							"LayoutPageTemplateStructure where classPK in " +
 								"(select plid from Layout where type_ = ?)"));
-			PreparedStatement deletePreparedStatement1 =
+			PreparedStatement preparedStatement2 =
 				AutoBatchPreparedStatementUtil.autoBatch(
 					connection,
 					"delete from LayoutPageTemplateStructure where classPK = " +
 						"?");
-			PreparedStatement deletePreparedStatement2 =
+			PreparedStatement preparedStatement3 =
 				AutoBatchPreparedStatementUtil.concurrentAutoBatch(
 					connection,
 					"delete from LayoutPageTemplateStructureRel where " +
 						"layoutPageTemplateStructureId = ?")) {
 
-			selectPreparedStatement.setString(1, LayoutConstants.TYPE_PORTLET);
+			preparedStatement1.setString(1, LayoutConstants.TYPE_PORTLET);
 
-			ResultSet resultSet = selectPreparedStatement.executeQuery();
+			ResultSet resultSet = preparedStatement1.executeQuery();
 
 			while (resultSet.next()) {
 				long classPK = resultSet.getLong("classPK");
 
 				plids.add(classPK);
 
-				deletePreparedStatement1.setLong(1, classPK);
+				preparedStatement2.setLong(1, classPK);
 
-				deletePreparedStatement1.addBatch();
+				preparedStatement2.addBatch();
 
-				deletePreparedStatement2.setLong(
+				preparedStatement3.setLong(
 					1, resultSet.getLong("layoutPageTemplateStructureId"));
 
-				deletePreparedStatement2.addBatch();
+				preparedStatement3.addBatch();
 			}
 
-			deletePreparedStatement1.executeBatch();
+			preparedStatement2.executeBatch();
 
-			deletePreparedStatement2.executeBatch();
+			preparedStatement3.executeBatch();
 		}
 
 		ServiceContext serviceContext = new ServiceContext();
