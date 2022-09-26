@@ -39,20 +39,6 @@ public class UriInfoUtil {
 		return String.valueOf(uriInfo.getAbsolutePath());
 	}
 
-	public static String getBasePath(
-		String host, String scheme, UriInfo uriInfo) {
-
-		UriBuilder uriBuilder = getBaseUriBuilder(uriInfo);
-
-		uriBuilder.host(
-			host
-		).scheme(
-			scheme
-		);
-
-		return String.valueOf(uriBuilder.build());
-	}
-
 	public static String getBasePath(UriInfo uriInfo) {
 		UriBuilder uriBuilder = getBaseUriBuilder(uriInfo);
 

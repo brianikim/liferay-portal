@@ -38,6 +38,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.osgi.service.component.annotations.Component;
@@ -152,8 +153,15 @@ public class OpenAPIResourceImpl implements OpenAPIResource {
 			scheme = Http.HTTPS;
 		}
 
-		return UriInfoUtil.getBasePath(
-			_portal.getForwardedHost(httpServletRequest), scheme, uriInfo);
+		UriBuilder uriBuilder = UriInfoUtil.getBaseUriBuilder(uriInfo);
+
+		uriBuilder.host(
+			_portal.getForwardedHost(httpServletRequest)
+		).scheme(
+			scheme
+		);
+
+		return String.valueOf(uriBuilder.build());
 	}
 
 	@Reference
