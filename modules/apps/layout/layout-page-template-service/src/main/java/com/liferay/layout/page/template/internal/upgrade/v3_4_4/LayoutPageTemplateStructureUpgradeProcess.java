@@ -117,6 +117,7 @@ public class LayoutPageTemplateStructureUpgradeProcess extends UpgradeProcess {
 			}
 
 			deletePreparedStatement1.executeBatch();
+
 			deletePreparedStatement2.executeBatch();
 		}
 
