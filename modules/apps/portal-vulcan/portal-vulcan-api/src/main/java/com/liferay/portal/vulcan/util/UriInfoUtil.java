@@ -26,6 +26,19 @@ import javax.ws.rs.core.UriInfo;
  */
 public class UriInfoUtil {
 
+	public static String getAbsolutePath(UriInfo uriInfo) {
+		if (_isHttpsEnabled()) {
+			UriBuilder uriBuilder = uriInfo.getAbsolutePathBuilder();
+
+			return String.valueOf(
+				uriBuilder.scheme(
+					"https"
+				).build());
+		}
+
+		return String.valueOf(uriInfo.getAbsolutePath());
+	}
+
 	public static String getBasePath(UriInfo uriInfo) {
 		UriBuilder uriBuilder = getBaseUriBuilder(uriInfo);
 
