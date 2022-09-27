@@ -74,7 +74,7 @@ public abstract class BaseAnalyticsClientImpl {
 				_log.warn(
 					StringBundler.concat(
 						"Disconnecting data source for company ", companyId,
-						". Cause: INVALID_TOKEN"));
+						" because of an invalid token"));
 			}
 
 			_disconnectDataSource(companyId);
