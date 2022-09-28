@@ -16,10 +16,7 @@ package com.liferay.portal.security.sso.openid.connect.internal.session.manager;
 
 import com.liferay.counter.kernel.service.CounterLocalService;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
-import com.liferay.portal.kernel.cluster.ClusterExecutor;
-import com.liferay.portal.kernel.cluster.ClusterNode;
-import com.liferay.portal.kernel.lock.Lock;
-import com.liferay.portal.kernel.lock.LockManager;
+import com.liferay.portal.kernel.cluster.ClusterMasterExecutor;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
@@ -43,6 +40,8 @@ import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.servlet.http.HttpSession;
 
@@ -105,24 +104,25 @@ public class OfflineOpenIdConnectSessionManager {
 			return false;
 		}
 
-		String key = String.valueOf(openIdConnectSessionId);
+		if (_clusterMasterExecutor.isEnabled() &&
+			!_clusterMasterExecutor.isMaster()) {
 
-		String lockOwner = _generateLockOwner();
+			// In cluster, make only master node to handle refresh token.
 
-		Lock lock = _lockManager.lock(
-			OpenIdConnectSession.class.getSimpleName(), key, lockOwner);
-
-		if (!lockOwner.equals(lock.getOwner())) {
 			return false;
 		}
 
-		accessToken = _extendOpenIdConnectSession(openIdConnectSession);
+		// In master node, make only one thread to handle refresh token.
 
-		_lockManager.unlock(
-			OpenIdConnectSession.class.getSimpleName(), key, lockOwner);
-
-		if (accessToken == null) {
-			return true;
+		if (_lock.tryLock()) {
+			try {
+				if (_extendOpenIdConnectSession(openIdConnectSession) == null) {
+					return true;
+				}
+			}
+			finally {
+				_lock.unlock();
+			}
 		}
 
 		return false;
@@ -272,13 +272,12 @@ public class OfflineOpenIdConnectSessionManager {
 		OfflineOpenIdConnectSessionManager.class);
 
 	@Reference
-	private ClusterExecutor _clusterExecutor;
+	private ClusterMasterExecutor _clusterMasterExecutor;
 
 	@Reference
 	private CounterLocalService _counterLocalService;
 
-	@Reference
-	private LockManager _lockManager;
+	private final Lock _lock = new ReentrantLock();
 
 	@Reference
 	private OpenIdConnectProviderRegistry
