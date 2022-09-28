@@ -45,6 +45,15 @@ public class SelectAssetDisplayPageTag extends IncludeTag {
 		return _groupId;
 	}
 
+	/**
+	 * @deprecated As of Cavanaugh (7.4.x), deprecated as of 7.3.0, with no direct replacement
+	 * @return
+	 */
+	@Deprecated
+	public boolean isNew() {
+		return _new;
+	}
+
 	public boolean isShowPortletLayouts() {
 		return _showPortletLayouts;
 	}
@@ -73,6 +82,15 @@ public class SelectAssetDisplayPageTag extends IncludeTag {
 		_groupId = groupId;
 	}
 
+	/**
+	 * @deprecated As of Cavanaugh (7.4.x), deprecated as of 7.3.0, with no direct replacement
+	 * @param isNew
+	 */
+	@Deprecated
+	public void setNew(boolean isNew) {
+		_new = isNew;
+	}
+
 	@Override
 	public void setPageContext(PageContext pageContext) {
 		super.setPageContext(pageContext);
@@ -97,6 +115,7 @@ public class SelectAssetDisplayPageTag extends IncludeTag {
 		_classTypeId = 0;
 		_eventName = null;
 		_groupId = 0;
+		_new = false;
 		_showPortletLayouts = false;
 		_showViewInContextLink = true;
 	}
@@ -123,6 +142,9 @@ public class SelectAssetDisplayPageTag extends IncludeTag {
 			"liferay-asset:select-asset-display-page:groupId",
 			String.valueOf(_groupId));
 		httpServletRequest.setAttribute(
+			"liferay-asset:select-asset-display-page:isNew",
+			String.valueOf(_new));
+		httpServletRequest.setAttribute(
 			"liferay-asset:select-asset-display-page:showPortletLayouts",
 			String.valueOf(_showPortletLayouts));
 		httpServletRequest.setAttribute(
@@ -137,6 +159,7 @@ public class SelectAssetDisplayPageTag extends IncludeTag {
 	private long _classTypeId;
 	private String _eventName;
 	private long _groupId;
+	private boolean _new;
 	private boolean _showPortletLayouts;
 	private boolean _showViewInContextLink = true;
 

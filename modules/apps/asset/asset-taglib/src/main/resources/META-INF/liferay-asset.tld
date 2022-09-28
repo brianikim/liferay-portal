@@ -657,6 +657,12 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
+			<description>Whether the article is being newly created. Deprecated as of 7.3.0, with no direct replacement.</description>
+			<name>new</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
 			<description>Whether to allow page selection for the page's default Asset Publisher.</description>
 			<name>showPortletLayouts</name>
 			<required>false</required>

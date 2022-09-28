@@ -96,6 +96,9 @@ public class SelectAssetDisplayPageDisplayContext {
 		_groupId = GetterUtil.getLong(
 			_httpServletRequest.getAttribute(
 				"liferay-asset:select-asset-display-page:groupId"));
+		_isNew = GetterUtil.getBoolean(
+			_httpServletRequest.getAttribute(
+				"liferay-asset:select-asset-display-page:isNew"));
 		_showPortletLayouts = GetterUtil.getBoolean(
 			_httpServletRequest.getAttribute(
 				"liferay-asset:select-asset-display-page:showPortletLayouts"));
@@ -179,7 +182,7 @@ public class SelectAssetDisplayPageDisplayContext {
 			_getAssetDisplayPageEntry();
 
 		if (assetDisplayPageEntry == null) {
-			if (_classPK != 0) {
+			if (!_isNew) {
 				_displayPageType = AssetDisplayPageConstants.TYPE_NONE;
 			}
 			else if (Validator.isNull(getLayoutUuid())) {
@@ -456,6 +459,7 @@ public class SelectAssetDisplayPageDisplayContext {
 	private final String _eventName;
 	private final long _groupId;
 	private final HttpServletRequest _httpServletRequest;
+	private final boolean _isNew;
 	private final LiferayPortletRequest _liferayPortletRequest;
 	private final LiferayPortletResponse _liferayPortletResponse;
 	private final boolean _showPortletLayouts;
