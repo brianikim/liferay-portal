@@ -47,6 +47,7 @@ import javax.mail.internet.InternetAddress;
 
 import org.junit.Assert;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -88,6 +89,7 @@ public class MailEngineTest {
 		Assert.assertEquals(mailMessages.toString(), 1, mailMessages.size());
 	}
 
+	@Ignore
 	@Test
 	public void testSendMailWithLimit() throws Throwable {
 		MailMessage mailMessage = new MailMessage(
