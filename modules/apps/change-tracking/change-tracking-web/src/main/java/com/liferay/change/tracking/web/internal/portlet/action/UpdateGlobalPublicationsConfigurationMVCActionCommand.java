@@ -123,8 +123,8 @@ public class UpdateGlobalPublicationsConfigurationMVCActionCommand
 				));
 
 			for (Group group : groups) {
-				if (group.hasRemoteStagingGroup() ||
-					group.isStaged() || group.isStagingGroup()) {
+				if (group.hasRemoteStagingGroup() || group.isStaged() ||
+					group.isStagingGroup()) {
 
 					SessionErrors.add(actionRequest, "stagingEnabled");
 
