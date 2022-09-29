@@ -356,8 +356,7 @@ public class RenderLayoutStructureDisplayContext {
 		String portletId = jsonObject.getString("portletId");
 
 		if (Validator.isNotNull(portletId) &&
-			!_checkAccessAllowedToPortlet(portletId) &&
-			!_themeDisplay.isSignedIn()) {
+			!_checkAccessAllowedToPortlet(portletId)) {
 
 			return StringPool.BLANK;
 		}
@@ -596,8 +595,7 @@ public class RenderLayoutStructureDisplayContext {
 		String portletId = jsonObject.getString("portletId");
 
 		if (Validator.isNotNull(portletId) &&
-			!_checkAccessAllowedToPortlet(portletId) &&
-			!_themeDisplay.isSignedIn()) {
+			!_checkAccessAllowedToPortlet(portletId)) {
 
 			return StringPool.BLANK;
 		}
