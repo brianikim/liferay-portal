@@ -95,7 +95,7 @@ if (ListUtil.isNotEmpty(selectedAMImageConfigurationEntries)) {
 							int totalImages = AMImageEntryLocalServiceUtil.getExpectedAMImageEntriesCount(themeDisplay.getCompanyId());
 							%>
 
-							<%= Math.min(adaptedImages, totalImages) + "/" + totalImages %>
+							<%= Math.min(adaptedImages, totalImages) %>/<%= totalImages %>
 						</dd>
 
 						<%

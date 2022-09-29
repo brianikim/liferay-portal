@@ -50,7 +50,7 @@ UADExportProcessDisplayContext uadExportProcessDisplayContext = new UADExportPro
 		<liferay-ui:search-container-column-text
 			cssClass="lfr-create-date-column table-cell-expand"
 		>
-			<%= LanguageUtil.get(request, "create-date") + ": " + dateFormat.format(backgroundTask.getCreateDate()) %>
+			<%= LanguageUtil.get(request, "create-date") %>: <%= dateFormat.format(backgroundTask.getCreateDate()) %>
 
 			<c:if test="<%= backgroundTask.isInProgress() %>">
 
@@ -69,7 +69,7 @@ UADExportProcessDisplayContext uadExportProcessDisplayContext = new UADExportPro
 		>
 			<c:choose>
 				<c:when test="<%= backgroundTask.isCompleted() %>">
-					<%= LanguageUtil.get(request, "completion-date") + ": " + dateFormat.format(backgroundTask.getCompletionDate()) %>
+					<%= LanguageUtil.get(request, "completion-date") %>: <%= dateFormat.format(backgroundTask.getCompletionDate()) %>
 				</c:when>
 				<c:otherwise>
 					<%= LanguageUtil.get(request, "in-progress") %>
