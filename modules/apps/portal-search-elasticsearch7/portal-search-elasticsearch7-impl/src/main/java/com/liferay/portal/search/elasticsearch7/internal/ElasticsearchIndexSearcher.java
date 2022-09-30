@@ -250,6 +250,9 @@ public class ElasticsearchIndexSearcher extends BaseIndexSearcher {
 			countSearchRequest, getSearchRequest(searchContext), query,
 			searchContext);
 
+		countSearchRequest.setTrackTotalHits(
+			_elasticsearchConfigurationWrapper.trackTotalHits());
+
 		return countSearchRequest;
 	}
 
