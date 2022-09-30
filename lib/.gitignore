@@ -236,7 +236,6 @@
 /portal/serializer.jar
 /portal/simplecaptcha.jar
 /portal/slf4j-api.jar
-/portal/soap.jar
 /portal/soap-api.jar
 /portal/sparse-bit-set.jar
 /portal/spring-aop.jar
