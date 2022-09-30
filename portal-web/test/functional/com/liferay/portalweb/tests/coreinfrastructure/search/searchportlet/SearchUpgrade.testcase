@@ -370,6 +370,7 @@ definition {
 		property portal.version = "7.3.10.u6";
 		property test.assert.warning.exceptions = "true";
 		property test.run.environment = "EE";
+		property testray.main.component.name = "Search Experiences";
 
 		Upgrade.viewSXPBlueprintAndElements();
 	}
