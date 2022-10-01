@@ -154,23 +154,21 @@ AssetRenderer<JournalArticle> assetRenderer = assetRendererFactory.getAssetRende
 		}
 	);
 
-	A.one('#<%= refererPortletName %>ddmTemplateTypeDefault').on(
-		'click',
-		function (event) {
-			templateKeyInput.setAttribute('value', '');
-		}
-	);
+	A.one('#<%= refererPortletName %>ddmTemplateTypeDefault').on('click', function (
+		event
+	) {
+		templateKeyInput.setAttribute('value', '');
+	});
 
-	A.one('#<%= refererPortletName %>clearddmTemplateButton').on(
-		'click',
-		function (event) {
-			templateKeyInput.setAttribute('value', '');
+	A.one('#<%= refererPortletName %>clearddmTemplateButton').on('click', function (
+		event
+	) {
+		templateKeyInput.setAttribute('value', '');
 
-			templatePreview.html(
-				'<p class="text-default"><liferay-ui:message key="no-template" /></p>'
-			);
-		}
-	);
+		templatePreview.html(
+			'<p class="text-default"><liferay-ui:message key="no-template" /></p>'
+		);
+	});
 
 	Liferay.Util.toggleRadio(
 		'<%= refererPortletName + "ddmTemplateTypeCustom" %>',
