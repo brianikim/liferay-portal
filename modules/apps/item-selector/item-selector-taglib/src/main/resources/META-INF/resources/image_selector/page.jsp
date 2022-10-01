@@ -141,7 +141,7 @@ if (!draggableImage.equals("none")) {
 
 <aui:script use="<%= modules %>">
 	var imageSelector = new Liferay.ImageSelector({
-		errorNode: '#<%= randomNamespace + "errorAlert" %>',
+		errorNode: '#<%= randomNamespace %>errorAlert',
 		fileEntryImageNode: '#<%= randomNamespace %>image',
 		itemSelectorEventName: '<%= itemSelectorEventName %>',
 		itemSelectorURL: '<%= itemSelectorURL %>',
