@@ -74,7 +74,7 @@ MDRRuleGroupInstance ruleGroupInstance = (MDRRuleGroupInstance)renderRequest.get
 
 					</aui:select>
 
-					<div id="<%= liferayPortletResponse.getNamespace() %>typeSettings">
+					<div id="<portlet:namespace />typeSettings">
 						<c:if test="<%= Validator.isNotNull(editorJSP) %>">
 							<liferay-util:include page="<%= editorJSP %>" servletContext="<%= application %>" />
 						</c:if>

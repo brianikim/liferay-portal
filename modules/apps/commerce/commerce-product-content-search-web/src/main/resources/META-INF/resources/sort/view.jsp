@@ -61,7 +61,7 @@ SearchContainer<CPCatalogEntry> cpCatalogEntrySearchContainer = cpSearchResultsD
 						.querySelector('#<%= liferayPortletResponse.getNamespace() + sortOption %>')
 						.addEventListener('click', function (e) {
 							e.preventDefault();
-							<%= liferayPortletResponse.getNamespace() %>changeOrderBy(
+							<portlet:namespace />changeOrderBy(
 								'<%= sortOption %>'
 							);
 						});
