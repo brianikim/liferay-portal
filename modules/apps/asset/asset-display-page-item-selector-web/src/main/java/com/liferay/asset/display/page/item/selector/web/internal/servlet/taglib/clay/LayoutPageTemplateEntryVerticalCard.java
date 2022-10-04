@@ -50,6 +50,8 @@ public class LayoutPageTemplateEntryVerticalCard implements VerticalCard {
 		).put(
 			"name", _layoutPageTemplateEntry.getName()
 		).put(
+			"data-plid", String.valueOf(_layoutPageTemplateEntry.getPlid())
+		).put(
 			"type", "asset-display-page"
 		).build();
 	}
