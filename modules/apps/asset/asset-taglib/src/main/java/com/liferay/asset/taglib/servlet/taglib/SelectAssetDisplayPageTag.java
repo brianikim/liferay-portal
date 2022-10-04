@@ -46,7 +46,7 @@ public class SelectAssetDisplayPageTag extends IncludeTag {
 	}
 
 	/**
-	 * @deprecated As of Cavanaugh (7.4.x), deprecated as of 7.3.0, with no direct replacement
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
 	 * @return
 	 */
 	@Deprecated
@@ -83,7 +83,7 @@ public class SelectAssetDisplayPageTag extends IncludeTag {
 	}
 
 	/**
-	 * @deprecated As of Cavanaugh (7.4.x), deprecated as of 7.3.0, with no direct replacement
+	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
 	 * @param newValue
 	 */
 	@Deprecated
