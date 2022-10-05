@@ -102,13 +102,13 @@ public class CommerceChannelItemSelectorViewDisplayContext
 
 		_searchContainer.setRowChecker(rowChecker);
 
-		int total = _commerceChannelService.searchCommerceChannelsCount(
+		int total = _commerceChannelService.getCommerceChannelsCount(
 			cpRequestHelper.getCompanyId(), getKeywords());
 
 		List<CommerceChannel> results =
-			_commerceChannelService.searchCommerceChannels(
+			_commerceChannelService.getCommerceChannels(
 				cpRequestHelper.getCompanyId(), getKeywords(),
-				_searchContainer.getStart(), _searchContainer.getEnd(), null);
+				_searchContainer.getStart(), _searchContainer.getEnd());
 
 		_searchContainer.setTotal(total);
 		_searchContainer.setResults(results);
