@@ -17,8 +17,14 @@ package com.liferay.commerce.product.service.impl;
 import com.liferay.commerce.pricing.constants.CommercePricingConstants;
 import com.liferay.commerce.product.exception.DuplicateCommerceChannelSiteGroupIdException;
 import com.liferay.commerce.product.model.CommerceChannel;
+import com.liferay.commerce.product.model.CommerceChannelTable;
 import com.liferay.commerce.product.service.base.CommerceChannelLocalServiceBaseImpl;
+import com.liferay.petra.sql.dsl.DSLFunctionFactoryUtil;
+import com.liferay.petra.sql.dsl.DSLQueryFactoryUtil;
+import com.liferay.petra.sql.dsl.expression.Predicate;
+import com.liferay.petra.sql.dsl.query.DSLQuery;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.dao.orm.custom.sql.CustomSQL;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Group;
@@ -42,6 +48,7 @@ import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.spring.extender.service.ServiceReference;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -248,6 +255,39 @@ public class CommerceChannelLocalServiceImpl
 	}
 
 	@Override
+	public List<CommerceChannel> getCommerceChannels(
+			long companyId, String keywords, int start, int end)
+		throws PortalException {
+
+		DSLQuery dslQuery = DSLQueryFactoryUtil.selectDistinct(
+			CommerceChannelTable.INSTANCE
+		).from(
+			CommerceChannelTable.INSTANCE
+		).where(
+			_getPredicate(companyId, keywords)
+		).limit(
+			start, end
+		);
+
+		return commerceChannelPersistence.dslQuery(dslQuery);
+	}
+
+	@Override
+	public int getCommerceChannelsCount(long companyId, String keywords)
+		throws PortalException {
+
+		DSLQuery dslQuery = DSLQueryFactoryUtil.countDistinct(
+			CommerceChannelTable.INSTANCE.commerceChannelId
+		).from(
+			CommerceChannelTable.INSTANCE
+		).where(
+			_getPredicate(companyId, keywords)
+		);
+
+		return commerceChannelPersistence.dslQuery(dslQuery);
+	}
+
+	@Override
 	public List<CommerceChannel> searchCommerceChannels(long companyId)
 		throws PortalException {
 
@@ -432,8 +472,43 @@ public class CommerceChannelLocalServiceImpl
 		}
 	}
 
+	private Predicate _getPredicate(long companyId, String keywords) {
+		Predicate predicate = CommerceChannelTable.INSTANCE.companyId.eq(
+			companyId);
+
+		Predicate keywordsPredicate = null;
+
+		for (String keyword : _customSQL.keywords(keywords, true)) {
+			if (keyword == null) {
+				continue;
+			}
+
+			Predicate keywordPredicate = DSLFunctionFactoryUtil.lower(
+				CommerceChannelTable.INSTANCE.name
+			).like(
+				keyword
+			);
+
+			if (keywordsPredicate == null) {
+				keywordsPredicate = keywordPredicate;
+			}
+			else {
+				keywordsPredicate = keywordsPredicate.or(keywordPredicate);
+			}
+		}
+
+		if (keywordsPredicate != null) {
+			predicate = predicate.and(keywordsPredicate.withParentheses());
+		}
+
+		return predicate;
+	}
+
 	private static final String[] _SELECTED_FIELD_NAMES = {
 		Field.ENTRY_CLASS_PK, Field.COMPANY_ID
 	};
+
+	@ServiceReference(type = CustomSQL.class)
+	private CustomSQL _customSQL;
 
 }

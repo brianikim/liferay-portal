@@ -140,6 +140,29 @@ public class CommerceChannelServiceImpl extends CommerceChannelServiceBaseImpl {
 	}
 
 	@Override
+	public List<CommerceChannel> getCommerceChannels(
+			long companyId, String keywords, int start, int end)
+		throws PortalException {
+
+		PortalPermissionUtil.check(
+			getPermissionChecker(), CPActionKeys.VIEW_COMMERCE_CHANNELS);
+
+		return commerceChannelLocalService.getCommerceChannels(
+			companyId, keywords, start, end);
+	}
+
+	@Override
+	public int getCommerceChannelsCount(long companyId, String keywords)
+		throws PortalException {
+
+		PortalPermissionUtil.check(
+			getPermissionChecker(), CPActionKeys.VIEW_COMMERCE_CHANNELS);
+
+		return commerceChannelLocalService.getCommerceChannelsCount(
+			companyId, keywords);
+	}
+
+	@Override
 	public List<CommerceChannel> searchCommerceChannels(long companyId)
 		throws PortalException {
 
