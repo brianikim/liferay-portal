@@ -198,6 +198,43 @@ public class CommerceChannelServiceSoap {
 	}
 
 	public static com.liferay.commerce.product.model.CommerceChannelSoap[]
+			getCommerceChannels(
+				long companyId, String keywords, int start, int end)
+		throws RemoteException {
+
+		try {
+			java.util.List<com.liferay.commerce.product.model.CommerceChannel>
+				returnValue = CommerceChannelServiceUtil.getCommerceChannels(
+					companyId, keywords, start, end);
+
+			return com.liferay.commerce.product.model.CommerceChannelSoap.
+				toSoapModels(returnValue);
+		}
+		catch (Exception exception) {
+			_log.error(exception, exception);
+
+			throw new RemoteException(exception.getMessage());
+		}
+	}
+
+	public static int getCommerceChannelsCount(long companyId, String keywords)
+		throws RemoteException {
+
+		try {
+			int returnValue =
+				CommerceChannelServiceUtil.getCommerceChannelsCount(
+					companyId, keywords);
+
+			return returnValue;
+		}
+		catch (Exception exception) {
+			_log.error(exception, exception);
+
+			throw new RemoteException(exception.getMessage());
+		}
+	}
+
+	public static com.liferay.commerce.product.model.CommerceChannelSoap[]
 			searchCommerceChannels(long companyId)
 		throws RemoteException {
 
