@@ -20,10 +20,16 @@ import com.liferay.commerce.product.exception.CPAttachmentFileEntryDisplayDateEx
 import com.liferay.commerce.product.exception.CPAttachmentFileEntryExpirationDateException;
 import com.liferay.commerce.product.exception.DuplicateCPAttachmentFileEntryException;
 import com.liferay.commerce.product.model.CPAttachmentFileEntry;
+import com.liferay.commerce.product.model.CPAttachmentFileEntryTable;
 import com.liferay.commerce.product.model.CPDefinition;
 import com.liferay.commerce.product.service.base.CPAttachmentFileEntryLocalServiceBaseImpl;
 import com.liferay.commerce.product.util.JsonHelper;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
+import com.liferay.petra.sql.dsl.DSLFunctionFactoryUtil;
+import com.liferay.petra.sql.dsl.DSLQueryFactoryUtil;
+import com.liferay.petra.sql.dsl.expression.Predicate;
+import com.liferay.petra.sql.dsl.query.DSLQuery;
+import com.liferay.portal.dao.orm.custom.sql.CustomSQL;
 import com.liferay.portal.kernel.dao.orm.QueryDefinition;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
@@ -396,6 +402,25 @@ public class CPAttachmentFileEntryLocalServiceImpl
 
 	@Override
 	public List<CPAttachmentFileEntry> getCPAttachmentFileEntries(
+			long classNameId, long classPK, String keywords, int type,
+			int status, int start, int end)
+		throws PortalException {
+
+		DSLQuery dslQuery = DSLQueryFactoryUtil.selectDistinct(
+			CPAttachmentFileEntryTable.INSTANCE
+		).from(
+			CPAttachmentFileEntryTable.INSTANCE
+		).where(
+			_getPredicate(classNameId, classPK, keywords, type, status)
+		).limit(
+			start, end
+		);
+
+		return cpAttachmentFileEntryPersistence.dslQuery(dslQuery);
+	}
+
+	@Override
+	public List<CPAttachmentFileEntry> getCPAttachmentFileEntries(
 			long cpDefinitionId, String serializedDDMFormValues, int type,
 			int start, int end)
 		throws Exception {
@@ -505,6 +530,23 @@ public class CPAttachmentFileEntryLocalServiceImpl
 
 		return cpAttachmentFileEntryPersistence.countByC_C_T_ST(
 			classNameId, classPK, type, status);
+	}
+
+	@Override
+	public int getCPAttachmentFileEntriesCount(
+			long classNameId, long classPK, String keywords, int type,
+			int status)
+		throws PortalException {
+
+		DSLQuery dslQuery = DSLQueryFactoryUtil.countDistinct(
+			CPAttachmentFileEntryTable.INSTANCE.CPAttachmentFileEntryId
+		).from(
+			CPAttachmentFileEntryTable.INSTANCE
+		).where(
+			_getPredicate(classNameId, classPK, keywords, type, status)
+		);
+
+		return cpAttachmentFileEntryPersistence.dslQuery(dslQuery);
 	}
 
 	@Indexable(type = IndexableType.REINDEX)
@@ -876,6 +918,56 @@ public class CPAttachmentFileEntryLocalServiceImpl
 		return newFileEntry.getFileEntryId();
 	}
 
+	private Predicate _getPredicate(
+		long classNameId, long classPK, String keywords, int type, int status) {
+
+		Predicate predicate =
+			CPAttachmentFileEntryTable.INSTANCE.classNameId.eq(
+				classNameId
+			).and(
+				CPAttachmentFileEntryTable.INSTANCE.classPK.eq(classPK)
+			).and(
+				CPAttachmentFileEntryTable.INSTANCE.type.eq(type)
+			);
+
+		if (status == WorkflowConstants.STATUS_ANY) {
+			predicate.and(
+				CPAttachmentFileEntryTable.INSTANCE.status.neq(
+					WorkflowConstants.STATUS_IN_TRASH));
+		}
+		else {
+			predicate.and(
+				CPAttachmentFileEntryTable.INSTANCE.status.eq(status));
+		}
+
+		Predicate keywordsPredicate = null;
+
+		for (String keyword : _customSQL.keywords(keywords, true)) {
+			if (keyword == null) {
+				continue;
+			}
+
+			Predicate keywordPredicate = DSLFunctionFactoryUtil.lower(
+				CPAttachmentFileEntryTable.INSTANCE.title
+			).like(
+				keyword
+			);
+
+			if (keywordsPredicate == null) {
+				keywordsPredicate = keywordPredicate;
+			}
+			else {
+				keywordsPredicate = keywordsPredicate.or(keywordPredicate);
+			}
+		}
+
+		if (keywordsPredicate != null) {
+			predicate = predicate.and(keywordsPredicate.withParentheses());
+		}
+
+		return predicate;
+	}
+
 	private Map<Locale, String> _getValidLocalizedMap(
 		Locale defaultLocale, String defaultTitle,
 		Map<Locale, String> titleMap) {
@@ -893,6 +985,9 @@ public class CPAttachmentFileEntryLocalServiceImpl
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		CPAttachmentFileEntryLocalServiceImpl.class);
+
+	@ServiceReference(type = CustomSQL.class)
+	private CustomSQL _customSQL;
 
 	@ServiceReference(type = JSONFactory.class)
 	private JSONFactory _jsonFactory;
