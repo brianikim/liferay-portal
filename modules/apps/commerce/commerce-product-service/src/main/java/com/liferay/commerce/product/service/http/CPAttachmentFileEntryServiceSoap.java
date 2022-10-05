@@ -212,6 +212,31 @@ public class CPAttachmentFileEntryServiceSoap {
 		}
 	}
 
+	public static com.liferay.commerce.product.model.CPAttachmentFileEntrySoap[]
+			getCPAttachmentFileEntries(
+				long classNameId, long classPK, String keywords, int type,
+				int status, int start, int end)
+		throws RemoteException {
+
+		try {
+			java.util.List
+				<com.liferay.commerce.product.model.CPAttachmentFileEntry>
+					returnValue =
+						CPAttachmentFileEntryServiceUtil.
+							getCPAttachmentFileEntries(
+								classNameId, classPK, keywords, type, status,
+								start, end);
+
+			return com.liferay.commerce.product.model.CPAttachmentFileEntrySoap.
+				toSoapModels(returnValue);
+		}
+		catch (Exception exception) {
+			_log.error(exception, exception);
+
+			throw new RemoteException(exception.getMessage());
+		}
+	}
+
 	public static int getCPAttachmentFileEntriesCount(
 			long classNameId, long classPK, int type, int status)
 		throws RemoteException {
@@ -221,6 +246,26 @@ public class CPAttachmentFileEntryServiceSoap {
 				CPAttachmentFileEntryServiceUtil.
 					getCPAttachmentFileEntriesCount(
 						classNameId, classPK, type, status);
+
+			return returnValue;
+		}
+		catch (Exception exception) {
+			_log.error(exception, exception);
+
+			throw new RemoteException(exception.getMessage());
+		}
+	}
+
+	public static int getCPAttachmentFileEntriesCount(
+			long classNameId, long classPK, String keywords, int type,
+			int status)
+		throws RemoteException {
+
+		try {
+			int returnValue =
+				CPAttachmentFileEntryServiceUtil.
+					getCPAttachmentFileEntriesCount(
+						classNameId, classPK, keywords, type, status);
 
 			return returnValue;
 		}
