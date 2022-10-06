@@ -35,6 +35,18 @@ import java.util.Map;
  */
 public class DepotStagingTestUtil {
 
+	public static void disableStaging(DepotEntry depotEntry)
+		throws PortalException {
+
+		disableStaging(depotEntry.getGroup());
+	}
+
+	public static void disableStaging(Group group) throws PortalException {
+		StagingLocalServiceUtil.disableStaging(
+			group,
+			ServiceContextTestUtil.getServiceContext(group.getGroupId()));
+	}
+
 	public static DepotEntry enableLocalStaging(DepotEntry depotEntry)
 		throws Exception {
 
