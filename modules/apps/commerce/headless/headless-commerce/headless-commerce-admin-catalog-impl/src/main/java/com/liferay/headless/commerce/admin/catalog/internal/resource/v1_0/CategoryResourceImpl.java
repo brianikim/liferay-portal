@@ -29,6 +29,7 @@ import com.liferay.portal.kernel.change.tracking.CTAware;
 import com.liferay.portal.kernel.service.ClassNameLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.ArrayUtil;
+import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.vulcan.fields.NestedField;
 import com.liferay.portal.vulcan.fields.NestedFieldId;
 import com.liferay.portal.vulcan.fields.NestedFieldSupport;
@@ -139,6 +140,55 @@ public class CategoryResourceImpl
 		Response.ResponseBuilder responseBuilder = Response.ok();
 
 		return responseBuilder.build();
+	}
+
+	@Override
+	public Category postProductByExternalReferenceCodeCategory(
+		String externalReferenceCode, Category category)
+		throws Exception {
+
+		CPDefinition cpDefinition =
+			_cpDefinitionService.
+				fetchCPDefinitionByCProductExternalReferenceCode(
+					externalReferenceCode, contextCompany.getCompanyId());
+
+		if (cpDefinition == null) {
+			throw new NoSuchCPDefinitionException(
+				"Unable to find product with external reference code " +
+				externalReferenceCode);
+		}
+
+		AssetCategory assetCategory = _assetCategoryService.fetchCategory(
+			category.getId());
+
+		if (assetCategory == null) {
+			throw new NoSuchCategoryException(
+				"Unable to find Category with ID: " + category.getId());
+		}
+
+		List<AssetCategory> categories =
+			_assetCategoryService.getCategories(
+				cpDefinition.getModelClassName(),
+				cpDefinition.getCPDefinitionId());
+
+		categories.add(assetCategory);
+
+		long[] assetCategoryIds = new long[0];
+
+		for (AssetCategory forCategory : categories) {
+			assetCategoryIds = ArrayUtil.append(
+				assetCategoryIds, forCategory.getCategoryId());
+		}
+
+		ServiceContext serviceContext = _serviceContextHelper.getServiceContext(
+			cpDefinition.getGroupId());
+		serviceContext.setAssetCategoryIds(assetCategoryIds);
+
+		_cpDefinitionService.updateCPDefinitionCategorization(
+			cpDefinition.getCPDefinitionId(), serviceContext);
+
+		return _categoryHelper.toProductCategory(
+			assetCategory, contextAcceptLanguage.getPreferredLocale());
 	}
 
 	private void _updateProductCategories(

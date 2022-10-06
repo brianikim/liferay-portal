@@ -83,6 +83,15 @@ public class CategoryHelper {
 		return categories;
 	}
 
+	public Category toProductCategory(
+		AssetCategory assetCategory, Locale locale)
+		throws Exception {
+
+		return _categoryDTOConverter.toDTO(
+			new DefaultDTOConverterContext(
+				assetCategory.getCategoryId(), locale));
+	}
+
 	@Reference
 	private AssetCategoryService _assetCategoryService;
 
