@@ -15,6 +15,7 @@
 package com.liferay.depot.internal.model.listener;
 
 import com.liferay.depot.model.DepotEntry;
+import com.liferay.depot.model.DepotEntryGroupRel;
 import com.liferay.depot.service.DepotEntryGroupRelLocalService;
 import com.liferay.depot.service.DepotEntryLocalService;
 import com.liferay.portal.kernel.exception.ModelListenerException;
@@ -28,6 +29,8 @@ import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.transaction.TransactionCommitCallbackUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 
+import java.util.List;
+
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -36,6 +39,20 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = ModelListener.class)
 public class GroupModelListener extends BaseModelListener<Group> {
+
+	@Override
+	public void onAfterCreate(Group group) throws ModelListenerException {
+		if ((group != null) && group.isDepot() &&
+			_isStaging(ServiceContextThreadLocal.getServiceContext())) {
+
+			TransactionCommitCallbackUtil.registerCallback(
+				() -> {
+					_copyLiveDepotEntryGroupRelsToStaging(group);
+
+					return null;
+				});
+		}
+	}
 
 	@Override
 	public void onAfterRemove(Group group) throws ModelListenerException {
@@ -87,6 +104,52 @@ public class GroupModelListener extends BaseModelListener<Group> {
 
 		_depotEntryGroupRelLocalService.deleteToGroupDepotEntryGroupRels(
 			group.getGroupId());
+	}
+
+	private void _copyLiveDepotEntryGroupRelsToStaging(Group group)
+		throws PortalException {
+
+		Group liveGroup = group.getLiveGroup();
+
+		if (liveGroup == null) {
+			return;
+		}
+
+		DepotEntry liveDepotEntry =
+			_depotEntryLocalService.fetchGroupDepotEntry(
+				liveGroup.getGroupId());
+
+		if (liveDepotEntry == null) {
+			return;
+		}
+
+		List<DepotEntryGroupRel> depotEntryGroupRels =
+			_depotEntryGroupRelLocalService.getDepotEntryGroupRels(
+				liveDepotEntry);
+
+		for (DepotEntryGroupRel depotEntryGroupRel : depotEntryGroupRels) {
+			Group groupRel = _groupLocalService.getGroup(
+				depotEntryGroupRel.getGroupId());
+
+			if (groupRel.isStagingGroup()) {
+				DepotEntry depotEntry =
+					_depotEntryLocalService.fetchGroupDepotEntry(
+						group.getGroupId());
+
+				DepotEntryGroupRel stagedDepotEntryGroupRel =
+					_depotEntryGroupRelLocalService.addDepotEntryGroupRel(
+						depotEntry.getDepotEntryId(),
+						depotEntryGroupRel.getGroupId());
+
+				stagedDepotEntryGroupRel.setDdmStructuresAvailable(
+					depotEntryGroupRel.getDdmStructuresAvailable());
+				stagedDepotEntryGroupRel.setSearchable(
+					depotEntryGroupRel.getSearchable());
+
+				_depotEntryGroupRelLocalService.updateDepotEntryGroupRel(
+					stagedDepotEntryGroupRel);
+			}
+		}
 	}
 
 	private boolean _isStaging(ServiceContext serviceContext) {
