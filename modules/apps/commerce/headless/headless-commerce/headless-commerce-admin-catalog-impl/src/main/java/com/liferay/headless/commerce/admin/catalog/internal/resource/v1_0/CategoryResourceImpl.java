@@ -22,6 +22,7 @@ import com.liferay.commerce.product.model.CPDefinition;
 import com.liferay.commerce.product.service.CPDefinitionService;
 import com.liferay.headless.commerce.admin.catalog.dto.v1_0.Category;
 import com.liferay.headless.commerce.admin.catalog.dto.v1_0.Product;
+import com.liferay.headless.commerce.admin.catalog.internal.dto.v1_0.converter.CategoryDTOConverter;
 import com.liferay.headless.commerce.admin.catalog.internal.helper.v1_0.CategoryHelper;
 import com.liferay.headless.commerce.admin.catalog.resource.v1_0.CategoryResource;
 import com.liferay.headless.commerce.core.util.ServiceContextHelper;
@@ -141,6 +142,39 @@ public class CategoryResourceImpl
 		return responseBuilder.build();
 	}
 
+	@Override
+	public Category postProductByExternalReferenceCodeCategory(
+			String externalReferenceCode, Category category)
+		throws Exception {
+
+		CPDefinition cpDefinition =
+			_cpDefinitionService.
+				fetchCPDefinitionByCProductExternalReferenceCode(
+					externalReferenceCode, contextCompany.getCompanyId());
+
+		if (cpDefinition == null) {
+			throw new NoSuchCPDefinitionException(
+				"Unable to find product with external reference code " +
+					externalReferenceCode);
+		}
+
+		List<AssetCategory> productAssetCategories =
+			_assetCategoryService.getCategories(
+				cpDefinition.getModelClassName(),
+				cpDefinition.getCPDefinitionId());
+
+		Category[] productCategories = _categoryHelper.toCategoryArray(
+			productAssetCategories, contextAcceptLanguage.getPreferredLocale());
+		productCategories = ArrayUtil.append(productCategories, category);
+
+		_updateProductCategories(cpDefinition, productCategories);
+
+		AssetCategory assetCategory = _assetCategoryService.fetchCategory(
+			category.getId());
+
+		return _categoryDTOConverter.toDTO(assetCategory);
+	}
+
 	private void _updateProductCategories(
 			CPDefinition cpDefinition, Category[] categories)
 		throws Exception {
@@ -171,6 +205,9 @@ public class CategoryResourceImpl
 
 	@Reference
 	private AssetCategoryService _assetCategoryService;
+
+	@Reference
+	private CategoryDTOConverter _categoryDTOConverter;
 
 	@Reference
 	private CategoryHelper _categoryHelper;
