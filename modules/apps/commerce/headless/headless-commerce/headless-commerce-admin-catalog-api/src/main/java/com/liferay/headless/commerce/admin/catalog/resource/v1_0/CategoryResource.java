@@ -66,11 +66,22 @@ public interface CategoryResource {
 			String externalReferenceCode, Category[] categories)
 		throws Exception;
 
+	public Category postProductByExternalReferenceCodeCategory(
+			String externalReferenceCode, Category category)
+		throws Exception;
+
 	public Page<Category> getProductIdCategoriesPage(
 			Long id, Pagination pagination)
 		throws Exception;
 
 	public Response patchProductIdCategory(Long id, Category[] categories)
+		throws Exception;
+
+	public Category postProductIdCategory(Long id, Category category)
+		throws Exception;
+
+	public Response postProductIdCategoryBatch(
+			Long id, String callbackURL, Object object)
 		throws Exception;
 
 	public default void setContextAcceptLanguage(

@@ -325,6 +325,29 @@ public abstract class BaseCategoryResourceTestCase {
 	}
 
 	@Test
+	public void testPostProductByExternalReferenceCodeCategory()
+		throws Exception {
+
+		Category randomCategory = randomCategory();
+
+		Category postCategory =
+			testPostProductByExternalReferenceCodeCategory_addCategory(
+				randomCategory);
+
+		assertEquals(randomCategory, postCategory);
+		assertValid(postCategory);
+	}
+
+	protected Category
+			testPostProductByExternalReferenceCodeCategory_addCategory(
+				Category category)
+		throws Exception {
+
+		throw new UnsupportedOperationException(
+			"This method needs to be implemented");
+	}
+
+	@Test
 	public void testGetProductIdCategoriesPage() throws Exception {
 		Long id = testGetProductIdCategoriesPage_getId();
 		Long irrelevantId = testGetProductIdCategoriesPage_getIrrelevantId();
@@ -428,6 +451,24 @@ public abstract class BaseCategoryResourceTestCase {
 	@Test
 	public void testPatchProductIdCategory() throws Exception {
 		Assert.assertTrue(false);
+	}
+
+	@Test
+	public void testPostProductIdCategory() throws Exception {
+		Category randomCategory = randomCategory();
+
+		Category postCategory = testPostProductIdCategory_addCategory(
+			randomCategory);
+
+		assertEquals(randomCategory, postCategory);
+		assertValid(postCategory);
+	}
+
+	protected Category testPostProductIdCategory_addCategory(Category category)
+		throws Exception {
+
+		throw new UnsupportedOperationException(
+			"This method needs to be implemented");
 	}
 
 	protected Category testGraphQLCategory_addCategory() throws Exception {

@@ -567,6 +567,20 @@ public class Mutation {
 	}
 
 	@GraphQLField
+	public Category createProductByExternalReferenceCodeCategory(
+			@GraphQLName("externalReferenceCode") String externalReferenceCode,
+			@GraphQLName("category") Category category)
+		throws Exception {
+
+		return _applyComponentServiceObjects(
+			_categoryResourceComponentServiceObjects,
+			this::_populateResourceContext,
+			categoryResource ->
+				categoryResource.postProductByExternalReferenceCodeCategory(
+					externalReferenceCode, category));
+	}
+
+	@GraphQLField
 	public Response patchProductIdCategory(
 			@GraphQLName("id") Long id,
 			@GraphQLName("categories") Category[] categories)
@@ -577,6 +591,33 @@ public class Mutation {
 			this::_populateResourceContext,
 			categoryResource -> categoryResource.patchProductIdCategory(
 				id, categories));
+	}
+
+	@GraphQLField
+	public Category createProductIdCategory(
+			@GraphQLName("id") Long id,
+			@GraphQLName("category") Category category)
+		throws Exception {
+
+		return _applyComponentServiceObjects(
+			_categoryResourceComponentServiceObjects,
+			this::_populateResourceContext,
+			categoryResource -> categoryResource.postProductIdCategory(
+				id, category));
+	}
+
+	@GraphQLField
+	public Response createProductIdCategoryBatch(
+			@GraphQLName("id") Long id,
+			@GraphQLName("callbackURL") String callbackURL,
+			@GraphQLName("object") Object object)
+		throws Exception {
+
+		return _applyComponentServiceObjects(
+			_categoryResourceComponentServiceObjects,
+			this::_populateResourceContext,
+			categoryResource -> categoryResource.postProductIdCategoryBatch(
+				id, callbackURL, object));
 	}
 
 	@GraphQLField
