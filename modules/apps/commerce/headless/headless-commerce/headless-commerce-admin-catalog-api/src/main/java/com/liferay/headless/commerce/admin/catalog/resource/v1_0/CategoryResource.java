@@ -66,6 +66,10 @@ public interface CategoryResource {
 			String externalReferenceCode, Category[] categories)
 		throws Exception;
 
+	public Category postProductByExternalReferenceCodeCategory(
+			String externalReferenceCode, Category category)
+		throws Exception;
+
 	public Page<Category> getProductIdCategoriesPage(
 			Long id, Pagination pagination)
 		throws Exception;

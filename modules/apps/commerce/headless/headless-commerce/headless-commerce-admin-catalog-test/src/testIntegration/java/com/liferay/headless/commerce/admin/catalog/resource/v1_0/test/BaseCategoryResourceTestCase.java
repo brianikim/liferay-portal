@@ -325,6 +325,29 @@ public abstract class BaseCategoryResourceTestCase {
 	}
 
 	@Test
+	public void testPostProductByExternalReferenceCodeCategory()
+		throws Exception {
+
+		Category randomCategory = randomCategory();
+
+		Category postCategory =
+			testPostProductByExternalReferenceCodeCategory_addCategory(
+				randomCategory);
+
+		assertEquals(randomCategory, postCategory);
+		assertValid(postCategory);
+	}
+
+	protected Category
+			testPostProductByExternalReferenceCodeCategory_addCategory(
+				Category category)
+		throws Exception {
+
+		throw new UnsupportedOperationException(
+			"This method needs to be implemented");
+	}
+
+	@Test
 	public void testGetProductIdCategoriesPage() throws Exception {
 		Long id = testGetProductIdCategoriesPage_getId();
 		Long irrelevantId = testGetProductIdCategoriesPage_getIrrelevantId();

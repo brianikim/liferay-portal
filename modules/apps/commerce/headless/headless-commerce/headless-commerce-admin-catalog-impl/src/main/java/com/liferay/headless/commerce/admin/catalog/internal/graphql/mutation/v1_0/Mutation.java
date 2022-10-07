@@ -567,6 +567,20 @@ public class Mutation {
 	}
 
 	@GraphQLField
+	public Category createProductByExternalReferenceCodeCategory(
+			@GraphQLName("externalReferenceCode") String externalReferenceCode,
+			@GraphQLName("category") Category category)
+		throws Exception {
+
+		return _applyComponentServiceObjects(
+			_categoryResourceComponentServiceObjects,
+			this::_populateResourceContext,
+			categoryResource ->
+				categoryResource.postProductByExternalReferenceCodeCategory(
+					externalReferenceCode, category));
+	}
+
+	@GraphQLField
 	public Response patchProductIdCategory(
 			@GraphQLName("id") Long id,
 			@GraphQLName("categories") Category[] categories)
