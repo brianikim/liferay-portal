@@ -22,6 +22,7 @@ import com.liferay.commerce.product.service.CPDefinitionService;
 import com.liferay.headless.commerce.admin.catalog.dto.v1_0.Category;
 import com.liferay.headless.commerce.admin.catalog.internal.dto.v1_0.converter.CategoryDTOConverter;
 import com.liferay.portal.kernel.service.ClassNameLocalService;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.vulcan.dto.converter.DefaultDTOConverterContext;
 import com.liferay.portal.vulcan.pagination.Page;
 import com.liferay.portal.vulcan.pagination.Pagination;
@@ -65,6 +66,23 @@ public class CategoryHelper {
 		return Page.of(
 			toProductCategories(assetCategories, locale), pagination,
 			totalItems);
+	}
+
+	public Category[] toCategoryArray(
+			List<AssetCategory> assetCategories, Locale locale)
+		throws Exception {
+
+		Category[] categories = new Category[0];
+
+		for (AssetCategory assetCategory : assetCategories) {
+			Category category = _categoryDTOConverter.toDTO(
+				new DefaultDTOConverterContext(
+					assetCategory.getCategoryId(), locale));
+
+			categories = ArrayUtil.append(categories, category);
+		}
+
+		return categories;
 	}
 
 	public List<Category> toProductCategories(
