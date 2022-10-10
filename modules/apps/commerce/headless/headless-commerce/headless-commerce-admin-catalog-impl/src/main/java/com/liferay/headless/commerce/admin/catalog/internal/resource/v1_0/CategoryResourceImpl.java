@@ -175,6 +175,34 @@ public class CategoryResourceImpl
 		return _categoryDTOConverter.toDTO(assetCategory);
 	}
 
+	public Category postProductIdCategory(Long id, Category category)
+		throws Exception {
+
+		CPDefinition cpDefinition =
+			_cpDefinitionService.fetchCPDefinitionByCProductId(id);
+
+		if (cpDefinition == null) {
+			throw new NoSuchCPDefinitionException(
+				"Unable to find Product with ID: " + id);
+		}
+
+		List<AssetCategory> productAssetCategories =
+			_assetCategoryService.getCategories(
+				cpDefinition.getModelClassName(),
+				cpDefinition.getCPDefinitionId());
+
+		Category[] productCategories = _categoryHelper.toCategoryArray(
+			productAssetCategories, contextAcceptLanguage.getPreferredLocale());
+		productCategories = ArrayUtil.append(productCategories, category);
+
+		_updateProductCategories(cpDefinition, productCategories);
+
+		AssetCategory assetCategory = _assetCategoryService.fetchCategory(
+			category.getId());
+
+		return _categoryDTOConverter.toDTO(assetCategory);
+	}
+
 	private void _updateProductCategories(
 			CPDefinition cpDefinition, Category[] categories)
 		throws Exception {
