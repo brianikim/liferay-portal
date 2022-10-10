@@ -1,6 +1,6 @@
 Bundle-Name: Liferay Document Library Opener OneDrive Web
 Bundle-SymbolicName: com.liferay.document.library.opener.onedrive.web
-Bundle-Version: 2.0.47
+Bundle-Version: 2.0.48
 Import-Package:\
 	!android.os,\
 	\
