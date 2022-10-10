@@ -63,7 +63,9 @@ import org.osgi.service.component.annotations.ReferenceScope;
  * @generated
  */
 @Component(
-	immediate = true, service = PriceModifierCategoryResource.Factory.class
+	immediate = true,
+	property = "resource.locator.key=/headless-commerce-admin-pricing/v2.0/PriceModifierCategory",
+	service = PriceModifierCategoryResource.Factory.class
 )
 @Generated("")
 public class PriceModifierCategoryResourceFactoryImpl

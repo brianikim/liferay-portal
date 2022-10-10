@@ -62,7 +62,11 @@ import org.osgi.service.component.annotations.ReferenceScope;
  * @author Rafael Praxedes
  * @generated
  */
-@Component(immediate = true, service = AppWorkflowResource.Factory.class)
+@Component(
+	immediate = true,
+	property = "resource.locator.key=/app-builder-workflow/v1.0/AppWorkflow",
+	service = AppWorkflowResource.Factory.class
+)
 @Generated("")
 public class AppWorkflowResourceFactoryImpl
 	implements AppWorkflowResource.Factory {

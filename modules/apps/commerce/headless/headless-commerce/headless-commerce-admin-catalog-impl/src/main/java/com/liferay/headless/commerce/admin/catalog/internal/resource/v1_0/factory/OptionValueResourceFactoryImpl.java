@@ -62,7 +62,11 @@ import org.osgi.service.component.annotations.ReferenceScope;
  * @author Zoltán Takács
  * @generated
  */
-@Component(immediate = true, service = OptionValueResource.Factory.class)
+@Component(
+	immediate = true,
+	property = "resource.locator.key=/headless-commerce-admin-catalog/v1.0/OptionValue",
+	service = OptionValueResource.Factory.class
+)
 @Generated("")
 public class OptionValueResourceFactoryImpl
 	implements OptionValueResource.Factory {

@@ -62,7 +62,11 @@ import org.osgi.service.component.annotations.ReferenceScope;
  * @author Zoltán Takács
  * @generated
  */
-@Component(immediate = true, service = AccountGroupResource.Factory.class)
+@Component(
+	immediate = true,
+	property = "resource.locator.key=/headless-commerce-admin-pricing/v2.0/AccountGroup",
+	service = AccountGroupResource.Factory.class
+)
 @Generated("")
 public class AccountGroupResourceFactoryImpl
 	implements AccountGroupResource.Factory {

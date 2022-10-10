@@ -62,7 +62,11 @@ import org.osgi.service.component.annotations.ReferenceScope;
  * @author Zoltán Takács
  * @generated
  */
-@Component(immediate = true, service = TierPriceResource.Factory.class)
+@Component(
+	immediate = true,
+	property = "resource.locator.key=/headless-commerce-admin-pricing/v1.0/TierPrice",
+	service = TierPriceResource.Factory.class
+)
 @Generated("")
 public class TierPriceResourceFactoryImpl implements TierPriceResource.Factory {
 

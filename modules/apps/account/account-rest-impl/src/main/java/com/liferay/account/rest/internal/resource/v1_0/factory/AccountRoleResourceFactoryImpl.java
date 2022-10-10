@@ -62,7 +62,11 @@ import org.osgi.service.component.annotations.ReferenceScope;
  * @author Drew Brokke
  * @generated
  */
-@Component(immediate = true, service = AccountRoleResource.Factory.class)
+@Component(
+	immediate = true,
+	property = "resource.locator.key=/account-rest/v1.0/AccountRole",
+	service = AccountRoleResource.Factory.class
+)
 @Generated("")
 public class AccountRoleResourceFactoryImpl
 	implements AccountRoleResource.Factory {

@@ -62,7 +62,11 @@ import org.osgi.service.component.annotations.ReferenceScope;
  * @author Zoltán Takács
  * @generated
  */
-@Component(immediate = true, service = DiscountCategoryResource.Factory.class)
+@Component(
+	immediate = true,
+	property = "resource.locator.key=/headless-commerce-admin-pricing/v2.0/DiscountCategory",
+	service = DiscountCategoryResource.Factory.class
+)
 @Generated("")
 public class DiscountCategoryResourceFactoryImpl
 	implements DiscountCategoryResource.Factory {

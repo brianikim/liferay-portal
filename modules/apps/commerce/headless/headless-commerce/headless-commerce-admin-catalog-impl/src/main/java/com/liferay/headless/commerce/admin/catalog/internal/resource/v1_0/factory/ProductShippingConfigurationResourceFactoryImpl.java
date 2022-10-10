@@ -64,6 +64,7 @@ import org.osgi.service.component.annotations.ReferenceScope;
  */
 @Component(
 	immediate = true,
+	property = "resource.locator.key=/headless-commerce-admin-catalog/v1.0/ProductShippingConfiguration",
 	service = ProductShippingConfigurationResource.Factory.class
 )
 @Generated("")

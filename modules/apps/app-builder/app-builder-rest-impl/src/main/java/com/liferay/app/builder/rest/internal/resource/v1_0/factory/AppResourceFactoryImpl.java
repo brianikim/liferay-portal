@@ -62,7 +62,10 @@ import org.osgi.service.component.annotations.ReferenceScope;
  * @author Gabriel Albuquerque
  * @generated
  */
-@Component(immediate = true, service = AppResource.Factory.class)
+@Component(
+	immediate = true, property = "resource.locator.key=/app-builder/v1.0/App",
+	service = AppResource.Factory.class
+)
 @Generated("")
 public class AppResourceFactoryImpl implements AppResource.Factory {
 

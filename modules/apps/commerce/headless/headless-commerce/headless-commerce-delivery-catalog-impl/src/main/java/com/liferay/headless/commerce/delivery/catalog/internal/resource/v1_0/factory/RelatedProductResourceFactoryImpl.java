@@ -62,7 +62,11 @@ import org.osgi.service.component.annotations.ReferenceScope;
  * @author Andrea Sbarra
  * @generated
  */
-@Component(immediate = true, service = RelatedProductResource.Factory.class)
+@Component(
+	immediate = true,
+	property = "resource.locator.key=/headless-commerce-delivery-catalog/v1.0/RelatedProduct",
+	service = RelatedProductResource.Factory.class
+)
 @Generated("")
 public class RelatedProductResourceFactoryImpl
 	implements RelatedProductResource.Factory {

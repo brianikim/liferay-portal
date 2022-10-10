@@ -62,7 +62,11 @@ import org.osgi.service.component.annotations.ReferenceScope;
  * @author Riccardo Ferrari
  * @generated
  */
-@Component(immediate = true, service = AccountForecastResource.Factory.class)
+@Component(
+	immediate = true,
+	property = "resource.locator.key=/headless-commerce-machine-learning/v1.0/AccountForecast",
+	service = AccountForecastResource.Factory.class
+)
 @Generated("")
 public class AccountForecastResourceFactoryImpl
 	implements AccountForecastResource.Factory {

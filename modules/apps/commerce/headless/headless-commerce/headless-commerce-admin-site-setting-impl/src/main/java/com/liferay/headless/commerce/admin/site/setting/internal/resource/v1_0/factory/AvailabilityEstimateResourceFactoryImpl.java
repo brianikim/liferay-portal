@@ -63,7 +63,9 @@ import org.osgi.service.component.annotations.ReferenceScope;
  * @generated
  */
 @Component(
-	immediate = true, service = AvailabilityEstimateResource.Factory.class
+	immediate = true,
+	property = "resource.locator.key=/headless-commerce-admin-site-setting/v1.0/AvailabilityEstimate",
+	service = AvailabilityEstimateResource.Factory.class
 )
 @Generated("")
 public class AvailabilityEstimateResourceFactoryImpl

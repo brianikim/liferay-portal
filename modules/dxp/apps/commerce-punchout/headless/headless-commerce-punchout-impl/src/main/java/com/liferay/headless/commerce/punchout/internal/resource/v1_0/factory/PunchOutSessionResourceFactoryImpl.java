@@ -62,7 +62,11 @@ import org.osgi.service.component.annotations.ReferenceScope;
  * @author Jaclyn Ong
  * @generated
  */
-@Component(immediate = true, service = PunchOutSessionResource.Factory.class)
+@Component(
+	immediate = true,
+	property = "resource.locator.key=/headless-commerce-punchout/v1.0/PunchOutSession",
+	service = PunchOutSessionResource.Factory.class
+)
 @Generated("")
 public class PunchOutSessionResourceFactoryImpl
 	implements PunchOutSessionResource.Factory {

@@ -62,7 +62,11 @@ import org.osgi.service.component.annotations.ReferenceScope;
  * @author Alessio Antonio Rendina
  * @generated
  */
-@Component(immediate = true, service = FolderResource.Factory.class)
+@Component(
+	immediate = true,
+	property = "resource.locator.key=/commerce-bom/1.0/Folder",
+	service = FolderResource.Factory.class
+)
 @Generated("")
 public class FolderResourceFactoryImpl implements FolderResource.Factory {
 

@@ -63,7 +63,9 @@ import org.osgi.service.component.annotations.ReferenceScope;
  * @generated
  */
 @Component(
-	immediate = true, service = AppWorkflowDataRecordLinkResource.Factory.class
+	immediate = true,
+	property = "resource.locator.key=/app-builder-workflow/v1.0/AppWorkflowDataRecordLink",
+	service = AppWorkflowDataRecordLinkResource.Factory.class
 )
 @Generated("")
 public class AppWorkflowDataRecordLinkResourceFactoryImpl

@@ -62,7 +62,11 @@ import org.osgi.service.component.annotations.ReferenceScope;
  * @author Zoltán Takács
  * @generated
  */
-@Component(immediate = true, service = TaxCategoryResource.Factory.class)
+@Component(
+	immediate = true,
+	property = "resource.locator.key=/headless-commerce-admin-site-setting/v1.0/TaxCategory",
+	service = TaxCategoryResource.Factory.class
+)
 @Generated("")
 public class TaxCategoryResourceFactoryImpl
 	implements TaxCategoryResource.Factory {

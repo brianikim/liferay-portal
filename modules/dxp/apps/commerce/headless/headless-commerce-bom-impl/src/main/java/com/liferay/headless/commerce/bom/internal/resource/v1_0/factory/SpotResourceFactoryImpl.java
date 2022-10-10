@@ -62,7 +62,10 @@ import org.osgi.service.component.annotations.ReferenceScope;
  * @author Alessio Antonio Rendina
  * @generated
  */
-@Component(immediate = true, service = SpotResource.Factory.class)
+@Component(
+	immediate = true, property = "resource.locator.key=/commerce-bom/1.0/Spot",
+	service = SpotResource.Factory.class
+)
 @Generated("")
 public class SpotResourceFactoryImpl implements SpotResource.Factory {
 
