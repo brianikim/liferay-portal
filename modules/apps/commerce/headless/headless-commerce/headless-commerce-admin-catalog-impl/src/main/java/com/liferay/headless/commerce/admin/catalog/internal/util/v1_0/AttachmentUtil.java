@@ -18,6 +18,7 @@ import com.liferay.commerce.product.exception.CPAttachmentFileEntryProtocolExcep
 import com.liferay.commerce.product.model.CPAttachmentFileEntry;
 import com.liferay.commerce.product.service.CPAttachmentFileEntryService;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
+import com.liferay.document.library.kernel.model.DLVersionNumberIncrease;
 import com.liferay.document.library.kernel.service.DLAppServiceUtil;
 import com.liferay.headless.commerce.admin.catalog.dto.v1_0.Attachment;
 import com.liferay.headless.commerce.admin.catalog.dto.v1_0.AttachmentBase64;
@@ -82,7 +83,8 @@ public class AttachmentUtil {
 			File file = FileUtil.createTempFile(urlConnection.getInputStream());
 
 			return _addFileEntry(
-				file, attachment.getContentType(), uniqueFileNameProvider,
+				file, attachment.getContentType(),
+				attachment.getExternalReferenceCode(), uniqueFileNameProvider,
 				serviceContext);
 		}
 
@@ -105,7 +107,8 @@ public class AttachmentUtil {
 			Base64.decode(base64EncodedContent));
 
 		return _addFileEntry(
-			file, attachmentBase64.getContentType(), uniqueFileNameProvider,
+			file, attachmentBase64.getContentType(),
+			attachmentBase64.getExternalReferenceCode(), uniqueFileNameProvider,
 			serviceContext);
 	}
 
@@ -123,7 +126,8 @@ public class AttachmentUtil {
 			HttpUtil.URLtoInputStream(attachmentUrl.getSrc()));
 
 		return _addFileEntry(
-			file, attachmentUrl.getContentType(), uniqueFileNameProvider,
+			file, attachmentUrl.getContentType(),
+			attachmentUrl.getExternalReferenceCode(), uniqueFileNameProvider,
 			serviceContext);
 	}
 
@@ -308,10 +312,12 @@ public class AttachmentUtil {
 	}
 
 	private static FileEntry _addFileEntry(
-			File file, String contentType,
+			File file, String contentType, String externalReferenceCode,
 			UniqueFileNameProvider uniqueFileNameProvider,
 			ServiceContext serviceContext)
 		throws Exception {
+
+		FileEntry fileEntry = null;
 
 		String uniqueFileName = uniqueFileNameProvider.provide(
 			file.getName(),
@@ -323,8 +329,22 @@ public class AttachmentUtil {
 			contentType = MimeTypesUtil.getContentType(file);
 		}
 
-		FileEntry fileEntry = DLAppServiceUtil.addFileEntry(
-			null, serviceContext.getScopeGroupId(),
+		if (Validator.isNotNull(externalReferenceCode)) {
+			fileEntry = _getFileEntryByExternalReferenceCode(
+				serviceContext.getScopeGroupId(), externalReferenceCode);
+
+			if (fileEntry != null) {
+				return DLAppServiceUtil.updateFileEntry(
+					fileEntry.getFileEntryId(), uniqueFileName, contentType,
+					uniqueFileName, null, fileEntry.getDescription(),
+					StringPool.BLANK, DLVersionNumberIncrease.AUTOMATIC, file,
+					fileEntry.getExpirationDate(), fileEntry.getReviewDate(),
+					serviceContext);
+			}
+		}
+
+		fileEntry = DLAppServiceUtil.addFileEntry(
+			externalReferenceCode, serviceContext.getScopeGroupId(),
 			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID, uniqueFileName,
 			contentType, uniqueFileName, StringPool.BLANK, null,
 			StringPool.BLANK, file, null, null, serviceContext);
@@ -353,6 +373,29 @@ public class AttachmentUtil {
 			}
 
 			return false;
+		}
+	}
+
+	private static FileEntry _getFileEntryByExternalReferenceCode(
+		long groupId, String externalReferenceCode) {
+
+		try {
+			FileEntry fileEntry =
+				DLAppServiceUtil.getFileEntryByExternalReferenceCode(
+					groupId, externalReferenceCode);
+
+			if (fileEntry != null) {
+				return fileEntry;
+			}
+
+			return null;
+		}
+		catch (PortalException portalException) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(portalException);
+			}
+
+			return null;
 		}
 	}
 
