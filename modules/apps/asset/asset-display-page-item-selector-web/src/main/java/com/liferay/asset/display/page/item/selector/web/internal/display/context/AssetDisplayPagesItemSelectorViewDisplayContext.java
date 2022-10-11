@@ -159,7 +159,7 @@ public class AssetDisplayPagesItemSelectorViewDisplayContext {
 	}
 
 	private long _getGroupId() {
-		if (Validator.isNotNull(_groupId)) {
+		if (_groupId != null) {
 			return _groupId;
 		}
 
