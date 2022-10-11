@@ -141,10 +141,10 @@ public class AddFormInstanceRecordMVCActionCommand
 			formInstanceId);
 		portletSession.setAttribute(DDMFormWebKeys.GROUP_ID, groupId);
 
-		String redirectURL = ParamUtil.getString(
-			actionRequest, "redirect", ddmFormInstanceSettingsRedirectURL);
-
-		sendRedirect(actionRequest, actionResponse, redirectURL);
+		sendRedirect(
+			actionRequest, actionResponse,
+			ParamUtil.getString(
+				actionRequest, "redirect", ddmFormInstanceSettingsRedirectURL));
 	}
 
 	protected DDMForm getDDMForm(DDMFormInstance ddmFormInstance)
