@@ -54,10 +54,6 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public interface MeasurementUnitResource {
 
-	public static Builder builder() {
-		return FactoryHolder.factory.create();
-	}
-
 	public Page<MeasurementUnit>
 			getCommerceAdminSiteSettingGroupMeasurementUnitPage(
 				Long groupId, Integer type, Pagination pagination)
@@ -132,12 +128,6 @@ public interface MeasurementUnitResource {
 		String filterString, Map<String, List<String>> multivaluedMap) {
 
 		return null;
-	}
-
-	public static class FactoryHolder {
-
-		public static volatile Factory factory;
-
 	}
 
 	@ProviderType

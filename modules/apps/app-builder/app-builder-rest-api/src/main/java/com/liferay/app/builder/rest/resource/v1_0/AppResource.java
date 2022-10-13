@@ -55,10 +55,6 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public interface AppResource {
 
-	public static Builder builder() {
-		return FactoryHolder.factory.create();
-	}
-
 	public Page<App> getAppsPage(
 			Boolean active, String[] deploymentTypes, String keywords,
 			String scope, Long[] userIds, Pagination pagination, Sort[] sorts)
@@ -143,12 +139,6 @@ public interface AppResource {
 		String filterString, Map<String, List<String>> multivaluedMap) {
 
 		return null;
-	}
-
-	public static class FactoryHolder {
-
-		public static volatile Factory factory;
-
 	}
 
 	@ProviderType

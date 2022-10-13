@@ -55,10 +55,6 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public interface StructuredContentFolderResource {
 
-	public static Builder builder() {
-		return FactoryHolder.factory.create();
-	}
-
 	public Page<StructuredContentFolder>
 			getAssetLibraryStructuredContentFoldersPage(
 				Long assetLibraryId, Boolean flatten, String search,
@@ -185,12 +181,6 @@ public interface StructuredContentFolderResource {
 		String filterString, Map<String, List<String>> multivaluedMap) {
 
 		return null;
-	}
-
-	public static class FactoryHolder {
-
-		public static volatile Factory factory;
-
 	}
 
 	@ProviderType

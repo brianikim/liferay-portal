@@ -52,10 +52,6 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public interface AppWorkflowDataRecordLinkResource {
 
-	public static Builder builder() {
-		return FactoryHolder.factory.create();
-	}
-
 	public Page<AppWorkflowDataRecordLink>
 			postAppAppWorkflowDataRecordLinksPage(
 				Long appId, DataRecordIds dataRecordIds)
@@ -107,12 +103,6 @@ public interface AppWorkflowDataRecordLinkResource {
 		String filterString, Map<String, List<String>> multivaluedMap) {
 
 		return null;
-	}
-
-	public static class FactoryHolder {
-
-		public static volatile Factory factory;
-
 	}
 
 	@ProviderType

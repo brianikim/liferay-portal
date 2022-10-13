@@ -52,9 +52,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.osgi.service.component.ComponentServiceObjects;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceScope;
 
@@ -63,7 +61,7 @@ import org.osgi.service.component.annotations.ReferenceScope;
  * @generated
  */
 @Component(
-	immediate = true, property = "resource.locator.key=/app-builder/v1.0/App",
+	property = "resource.locator.key=/app-builder/v1.0/App",
 	service = AppResource.Factory.class
 )
 @Generated("")
@@ -134,16 +132,6 @@ public class AppResourceFactoryImpl implements AppResource.Factory {
 			private User _user;
 
 		};
-	}
-
-	@Activate
-	protected void activate() {
-		AppResource.FactoryHolder.factory = this;
-	}
-
-	@Deactivate
-	protected void deactivate() {
-		AppResource.FactoryHolder.factory = null;
 	}
 
 	private static Function<InvocationHandler, AppResource>

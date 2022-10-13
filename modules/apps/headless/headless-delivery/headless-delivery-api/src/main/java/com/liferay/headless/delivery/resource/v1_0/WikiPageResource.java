@@ -55,10 +55,6 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public interface WikiPageResource {
 
-	public static Builder builder() {
-		return FactoryHolder.factory.create();
-	}
-
 	public Page<WikiPage> getWikiNodeWikiPagesPage(
 			Long wikiNodeId, String search,
 			com.liferay.portal.vulcan.aggregation.Aggregation aggregation,
@@ -146,12 +142,6 @@ public interface WikiPageResource {
 		String filterString, Map<String, List<String>> multivaluedMap) {
 
 		return null;
-	}
-
-	public static class FactoryHolder {
-
-		public static volatile Factory factory;
-
 	}
 
 	@ProviderType

@@ -55,10 +55,6 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public interface TaxonomyCategoryResource {
 
-	public static Builder builder() {
-		return FactoryHolder.factory.create();
-	}
-
 	public Page<TaxonomyCategory> getTaxonomyCategoryRankedPage(
 			Long siteId, Pagination pagination)
 		throws Exception;
@@ -156,12 +152,6 @@ public interface TaxonomyCategoryResource {
 		String filterString, Map<String, List<String>> multivaluedMap) {
 
 		return null;
-	}
-
-	public static class FactoryHolder {
-
-		public static volatile Factory factory;
-
 	}
 
 	@ProviderType
