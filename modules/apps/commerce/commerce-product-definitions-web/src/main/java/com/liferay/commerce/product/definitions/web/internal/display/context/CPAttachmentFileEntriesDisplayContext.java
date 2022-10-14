@@ -17,6 +17,7 @@ package com.liferay.commerce.product.definitions.web.internal.display.context;
 import com.liferay.commerce.product.configuration.AttachmentsConfiguration;
 import com.liferay.commerce.product.constants.CPAttachmentFileEntryConstants;
 import com.liferay.commerce.product.ddm.DDMHelper;
+import com.liferay.commerce.product.definitions.web.internal.security.permission.resource.CommerceCatalogPermission;
 import com.liferay.commerce.product.display.context.BaseCPDefinitionsDisplayContext;
 import com.liferay.commerce.product.model.CPAttachmentFileEntry;
 import com.liferay.commerce.product.model.CPDefinition;
@@ -29,7 +30,6 @@ import com.liferay.commerce.product.servlet.taglib.ui.constants.CPDefinitionScre
 import com.liferay.commerce.product.util.CPInstanceHelper;
 import com.liferay.document.library.display.context.DLMimeTypeDisplayContext;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.CreationMenu;
-import com.liferay.frontend.taglib.clay.servlet.taglib.util.CreationMenuBuilder;
 import com.liferay.item.selector.ItemSelector;
 import com.liferay.item.selector.ItemSelectorReturnType;
 import com.liferay.item.selector.criteria.FileEntryItemSelectorReturnType;
@@ -42,6 +42,7 @@ import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactory;
 import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactoryUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.taglib.util.CustomAttributesUtil;
 
 import java.util.Collections;
@@ -139,24 +140,32 @@ public class CPAttachmentFileEntriesDisplayContext
 	}
 
 	public CreationMenu getCreationMenu(int type) throws Exception {
-		RenderURL portletURL = liferayPortletResponse.createRenderURL();
+		CreationMenu creationMenu = new CreationMenu();
 
-		portletURL.setParameter(
-			"mvcRenderCommandName",
-			"/cp_definitions/edit_cp_attachment_file_entry");
-		portletURL.setParameter(
-			"cpDefinitionId", String.valueOf(getCPDefinitionId()));
-		portletURL.setParameter("type", String.valueOf(type));
+		if (CommerceCatalogPermission.contains(
+				cpRequestHelper.getPermissionChecker(), getCPDefinition(),
+				ActionKeys.UPDATE)) {
 
-		portletURL.setWindowState(LiferayWindowState.POP_UP);
+			RenderURL portletURL = liferayPortletResponse.createRenderURL();
 
-		return CreationMenuBuilder.addDropdownItem(
-			dropdownItem -> {
-				dropdownItem.setHref(portletURL.toString());
-				dropdownItem.setLabel(_getTypeLabel(type));
-				dropdownItem.setTarget("sidePanel");
-			}
-		).build();
+			portletURL.setParameter(
+				"mvcRenderCommandName",
+				"/cp_definitions/edit_cp_attachment_file_entry");
+			portletURL.setParameter(
+				"cpDefinitionId", String.valueOf(getCPDefinitionId()));
+			portletURL.setParameter("type", String.valueOf(type));
+
+			portletURL.setWindowState(LiferayWindowState.POP_UP);
+
+			creationMenu = creationMenu.addDropdownItem(
+				dropdownItem -> {
+					dropdownItem.setHref(portletURL.toString());
+					dropdownItem.setLabel(_getTypeLabel(type));
+					dropdownItem.setTarget("sidePanel");
+				});
+		}
+
+		return creationMenu;
 	}
 
 	public String getCssClassFileMimeType(FileEntry fileEntry) {
