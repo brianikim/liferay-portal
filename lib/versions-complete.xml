@@ -602,6 +602,17 @@
 				<latest-version-publish-date>2018-04-16 02:39:42</latest-version-publish-date>
 			</library>
 			<library>
+				<file-name>com.liferay.commerce.report.impl.jar!com.lowagie.itext.jar</file-name>
+				<version>2.1.7.js10.LIFERAY-PATCHED-1</version>
+				<project-name>com.lowagie.itext</project-name>
+				<licenses>
+					<license>
+						<license-name>LGPL 2.1</license-name>
+						<license-url>http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt</license-url>
+					</license>
+				</licenses>
+			</library>
+			<library>
 				<file-name>com.liferay.commerce.report.impl.jar!commons-codec.jar</file-name>
 				<version>1.15</version>
 				<project-name>Apache Commons Codec</project-name>
@@ -781,20 +792,6 @@
 				</licenses>
 				<current-version-publish-date>2016-03-22 13:33:05</current-version-publish-date>
 				<latest-version-publish-date>2022-04-07 09:28:45</latest-version-publish-date>
-			</library>
-			<library>
-				<file-name>com.liferay.commerce.report.impl.jar!itext.jar</file-name>
-				<version>2.1.7</version>
-				<project-name>iText, a Free Java-PDF library</project-name>
-				<project-url>http://www.lowagie.com/iText/</project-url>
-				<licenses>
-					<license>
-						<license-name>Mozilla Public License</license-name>
-						<license-url>http://www.mozilla.org/MPL/MPL-1.1.html</license-url>
-					</license>
-				</licenses>
-				<current-version-publish-date>2009-07-08 15:39:10</current-version-publish-date>
-				<latest-version-publish-date>2015-07-10 01:18:23</latest-version-publish-date>
 			</library>
 			<library>
 				<file-name>com.liferay.commerce.report.impl.jar!jasperreports-fonts.jar</file-name>
