@@ -34,6 +34,7 @@ import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.odata.filter.ExpressionConvert;
 import com.liferay.portal.odata.filter.FilterParserProvider;
+import com.liferay.portal.odata.sort.SortParserProvider;
 import com.liferay.portal.vulcan.accept.language.AcceptLanguage;
 
 import java.lang.reflect.Constructor;
@@ -212,6 +213,7 @@ public class ContentSetElementResourceFactoryImpl
 		contentSetElementResource.setResourcePermissionLocalService(
 			_resourcePermissionLocalService);
 		contentSetElementResource.setRoleLocalService(_roleLocalService);
+		contentSetElementResource.setSortParserProvider(_sortParserProvider);
 
 		try {
 			return method.invoke(contentSetElementResource, arguments);
@@ -261,6 +263,9 @@ public class ContentSetElementResourceFactoryImpl
 
 	@Reference
 	private RoleLocalService _roleLocalService;
+
+	@Reference
+	private SortParserProvider _sortParserProvider;
 
 	@Reference
 	private UserLocalService _userLocalService;
