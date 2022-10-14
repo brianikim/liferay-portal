@@ -45,6 +45,8 @@
 				<action-key>MANAGE_COMMERCE_PRODUCT_ATTACHMENTS</action-key>
 				<action-key>MANAGE_COMMERCE_PRODUCT_IMAGES</action-key>
 				<action-key>PERMISSIONS</action-key>
+				<action-key>VIEW_COMMERCE_PRODUCT_ATTACHMENTS</action-key>
+				<action-key>VIEW_COMMERCE_PRODUCT_IMAGES</action-key>
 				<action-key>VIEW_COMMERCE_PRODUCT_RULES</action-key>
 				<action-key>VIEW_PRICE</action-key>
 			</supports>
@@ -59,6 +61,8 @@
 				<action-key>MANAGE_COMMERCE_PRODUCT_ATTACHMENTS</action-key>
 				<action-key>MANAGE_COMMERCE_PRODUCT_IMAGES</action-key>
 				<action-key>PERMISSIONS</action-key>
+				<action-key>VIEW_COMMERCE_PRODUCT_ATTACHMENTS</action-key>
+				<action-key>VIEW_COMMERCE_PRODUCT_IMAGES</action-key>
 			</guest-unsupported>
 		</permissions>
 	</model-resource>
