@@ -55,6 +55,8 @@ public class DataEngineExpandoBridgeImpl implements ExpandoBridge {
 
 	public DataEngineExpandoBridgeImpl(
 			String className, long classPK, long companyId,
+			DataDefinitionResource.Factory dataDefinitionResourceFactory,
+			DataRecordResource.Factory dataRecordResourceFactory,
 			GroupLocalService groupLocalService)
 		throws Exception {
 
@@ -70,15 +72,20 @@ public class DataEngineExpandoBridgeImpl implements ExpandoBridge {
 
 		_companyGroupId = group.getGroupId();
 
-		_dataDefinitionResource = DataDefinitionResource.builder(
-		).checkPermissions(
-			false
-		).user(
-			GuestOrUserUtil.getGuestOrUser(_companyId)
-		).build();
+		DataDefinitionResource.Builder dataDefinitionResourceBuilder =
+			dataDefinitionResourceFactory.create();
 
-		_dataRecordResource = DataRecordResource.builder(
-		).checkPermissions(
+		_dataDefinitionResource =
+			dataDefinitionResourceBuilder.checkPermissions(
+				false
+			).user(
+				GuestOrUserUtil.getGuestOrUser(_companyId)
+			).build();
+
+		DataRecordResource.Builder dataRecordResourceBuilder =
+			dataRecordResourceFactory.create();
+
+		_dataRecordResource = dataRecordResourceBuilder.checkPermissions(
 			false
 		).user(
 			GuestOrUserUtil.getGuestOrUser(_companyId)

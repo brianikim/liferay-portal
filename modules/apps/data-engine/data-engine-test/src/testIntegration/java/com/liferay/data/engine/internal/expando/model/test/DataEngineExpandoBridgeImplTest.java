@@ -119,9 +119,25 @@ public class DataEngineExpandoBridgeImplTest {
 
 	@AfterClass
 	public static void tearDownClass() throws Exception {
+		Bundle bundle = FrameworkUtil.getBundle(
+			DataEngineExpandoBridgeImplTest.class);
+
+		BundleContext bundleContext = bundle.getBundleContext();
+
+		ServiceReference<DataDefinitionResource.Factory>
+			dataDefinitionResourceFactoryServiceReference =
+				bundleContext.getServiceReference(
+					DataDefinitionResource.Factory.class);
+
+		DataDefinitionResource.Factory dataDefinitionResourceFactory =
+			bundleContext.getService(
+				dataDefinitionResourceFactoryServiceReference);
+
+		DataDefinitionResource.Builder dataDefinitionResourceBuilder =
+			dataDefinitionResourceFactory.create();
+
 		DataDefinitionResource dataDefinitionResource =
-			DataDefinitionResource.builder(
-			).checkPermissions(
+			dataDefinitionResourceBuilder.checkPermissions(
 				false
 			).user(
 				_company.getDefaultUser()
@@ -134,6 +150,9 @@ public class DataEngineExpandoBridgeImplTest {
 					DataDefinition.class.getName());
 
 		dataDefinitionResource.deleteDataDefinition(dataDefinition.getId());
+
+		bundleContext.ungetService(
+			dataDefinitionResourceFactoryServiceReference);
 	}
 
 	@Test
