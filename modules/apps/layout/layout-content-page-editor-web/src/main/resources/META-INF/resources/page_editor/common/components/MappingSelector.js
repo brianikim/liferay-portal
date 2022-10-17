@@ -12,6 +12,7 @@
  * details.
  */
 
+import ClayButton from '@clayui/button';
 import ClayForm, {ClaySelect, ClaySelectWithOption} from '@clayui/form';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
@@ -329,13 +330,36 @@ function MappingSelector({fieldType, mappedItem, onMappingSelect}) {
 			)}
 
 			{selectedSourceTypeId === MAPPING_SOURCE_TYPE_IDS.content && (
-				<ClayForm.Group small>
-					<ItemSelector
-						label={Liferay.Language.get('content')}
-						onItemSelect={onInfoItemSelect}
-						selectedItemTitle={selectedItem.title}
-					/>
-				</ClayForm.Group>
+				<>
+					<ClayForm.Group small>
+						<ItemSelector
+							label={Liferay.Language.get('content')}
+							onItemSelect={onInfoItemSelect}
+							selectedItemTitle={selectedItem.title}
+						/>
+					</ClayForm.Group>
+
+					{selectedItem.title && (
+						<ClayButton
+							className="mt-2"
+							displayType="secondary"
+							onClick={() => {
+								setSelectedItem({});
+
+								if (isMapped(mappedItem)) {
+									onMappingSelect({
+										classNameId: '',
+										classPK: '',
+										fieldId: '',
+										mappedField: '',
+									});
+								}
+							}}
+						>
+							{Liferay.Language.get('clear')}
+						</ClayButton>
+					)}
+				</>
 			)}
 
 			<ClayForm.Group small>

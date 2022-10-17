@@ -12,6 +12,7 @@
  * details.
  */
 
+import ClayButton from '@clayui/button';
 import ClayForm from '@clayui/form';
 import {useIsMounted} from 'frontend-js-react-web';
 import PropTypes from 'prop-types';
@@ -62,6 +63,18 @@ export const ItemSelectorField = ({field, onValueSelect, value}) => {
 					showAddButton={!isWithinCollection}
 				/>
 			</ClayForm.Group>
+
+			{value && Object.keys(value).length > 0 && (
+				<ClayButton
+					className="mt-2"
+					displayType="secondary"
+					onClick={() => {
+						onValueSelect(field.name, {});
+					}}
+				>
+					{Liferay.Language.get('clear')}
+				</ClayButton>
+			)}
 
 			{typeOptions.enableSelectTemplate && className && (
 				<ClayForm.Group small>
