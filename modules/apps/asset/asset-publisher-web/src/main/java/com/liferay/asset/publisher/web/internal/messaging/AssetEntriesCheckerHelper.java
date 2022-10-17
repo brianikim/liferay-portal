@@ -15,6 +15,7 @@
 package com.liferay.asset.publisher.web.internal.messaging;
 
 import com.liferay.asset.kernel.model.AssetEntry;
+import com.liferay.asset.kernel.service.AssetEntryLocalService;
 import com.liferay.asset.kernel.service.persistence.AssetEntryQuery;
 import com.liferay.asset.kernel.util.NotifiedAssetEntryThreadLocal;
 import com.liferay.asset.publisher.constants.AssetPublisherPortletKeys;
@@ -28,6 +29,9 @@ import com.liferay.portal.kernel.dao.orm.Property;
 import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.module.configuration.ConfigurationProvider;
@@ -39,6 +43,7 @@ import com.liferay.portal.kernel.search.SearchContextFactory;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
+import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.service.PortletPreferencesLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
@@ -50,6 +55,9 @@ import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.SubscriptionSender;
 import com.liferay.portal.kernel.util.TimeZoneThreadLocal;
+import com.liferay.portal.kernel.xml.Document;
+import com.liferay.portal.kernel.xml.Element;
+import com.liferay.portal.kernel.xml.SAXReaderUtil;
 import com.liferay.portlet.asset.service.permission.AssetEntryPermission;
 import com.liferay.portlet.configuration.kernel.util.PortletConfigurationUtil;
 import com.liferay.subscription.model.Subscription;
@@ -64,6 +72,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -230,6 +239,14 @@ public class AssetEntriesCheckerHelper {
 			PortletPreferences portletPreferences, Layout layout)
 		throws PortalException {
 
+		String selectionStyle = GetterUtil.getString(
+			portletPreferences.getValue("selectionStyle", null), "dynamic");
+
+		if (Objects.equals(selectionStyle, "manual")) {
+			return _getManuallySelectedAssetEntries(
+				portletPreferences, layout.getGroupId());
+		}
+
 		AssetPublisherWebConfiguration assetPublisherWebConfiguration =
 			_configurationProvider.getCompanyConfiguration(
 				AssetPublisherWebConfiguration.class, layout.getCompanyId());
@@ -265,6 +282,48 @@ public class AssetEntriesCheckerHelper {
 		catch (Exception exception) {
 			return Collections.emptyList();
 		}
+	}
+
+	private List<AssetEntry> _getManuallySelectedAssetEntries(
+		PortletPreferences portletPreferences, long groupId) {
+
+		String[] assetEntryXmls = portletPreferences.getValues(
+			"assetEntryXml", new String[0]);
+
+		List<AssetEntry> assetEntries = new ArrayList<>();
+
+		for (String assetEntryXml : assetEntryXmls) {
+			try {
+				Document document = SAXReaderUtil.read(assetEntryXml);
+
+				Element rootElement = document.getRootElement();
+
+				String assetEntryUuid = rootElement.elementText(
+					"asset-entry-uuid");
+
+				Group group = _groupLocalService.fetchGroup(groupId);
+
+				if (group.isStagingGroup()) {
+					groupId = group.getLiveGroupId();
+				}
+
+				AssetEntry assetEntry = _assetEntryLocalService.fetchEntry(
+					groupId, assetEntryUuid);
+
+				if ((assetEntry == null) || !assetEntry.isVisible()) {
+					continue;
+				}
+
+				assetEntries.add(assetEntry);
+			}
+			catch (Exception exception) {
+				if (_log.isDebugEnabled()) {
+					_log.debug(exception);
+				}
+			}
+		}
+
+		return assetEntries;
 	}
 
 	private SubscriptionSender _getSubscriptionSender(
@@ -371,6 +430,12 @@ public class AssetEntriesCheckerHelper {
 		}
 	}
 
+	private static final Log _log = LogFactoryUtil.getLog(
+		AssetEntriesCheckerHelper.class);
+
+	@Reference
+	private AssetEntryLocalService _assetEntryLocalService;
+
 	@Reference
 	private AssetHelper _assetHelper;
 
@@ -382,6 +447,9 @@ public class AssetEntriesCheckerHelper {
 
 	@Reference
 	private ConfigurationProvider _configurationProvider;
+
+	@Reference
+	private GroupLocalService _groupLocalService;
 
 	@Reference
 	private LayoutLocalService _layoutLocalService;
