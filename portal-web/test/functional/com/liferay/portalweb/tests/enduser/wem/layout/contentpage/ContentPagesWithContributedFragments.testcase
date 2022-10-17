@@ -1784,7 +1784,7 @@ definition {
 
 			AssertTextEquals(
 				locator1 = "//div[contains(@class,'fragment_wc')]",
-				value1 = "Web Content Title Web Content Description Web Content Content");
+				value1 = "Web Content Title Web Content Description");
 		}
 	}
 
