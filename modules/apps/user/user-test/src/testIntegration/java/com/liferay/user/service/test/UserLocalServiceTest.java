@@ -26,9 +26,9 @@ import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Organization;
+import com.liferay.portal.kernel.model.PasswordPolicy;
 import com.liferay.portal.kernel.model.PortalPreferences;
 import com.liferay.portal.kernel.model.PortletPreferences;
-import com.liferay.portal.kernel.model.PasswordPolicy;
 import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.Ticket;
 import com.liferay.portal.kernel.model.User;
@@ -100,9 +100,7 @@ public class UserLocalServiceTest {
 		new LiferayIntegrationTestRule();
 
 	@Test
-	public void testAuthenticateByEmailAddressWithPasswordPolicy()
-		throws Exception {
-
+	public void testAuthenticateByEmailAddress() throws Exception {
 		User user = UserTestUtil.addUser();
 
 		String password = "password";
@@ -598,8 +596,7 @@ public class UserLocalServiceTest {
 
 		Date passwordModifiedDate = user.getPasswordModifiedDate();
 
-		Assert.assertTrue(
-			passwordModifiedDate.after(oldPasswordModifiedDate));
+		Assert.assertTrue(passwordModifiedDate.after(oldPasswordModifiedDate));
 	}
 
 	@Test
