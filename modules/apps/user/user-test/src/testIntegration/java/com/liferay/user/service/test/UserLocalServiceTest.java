@@ -103,9 +103,9 @@ public class UserLocalServiceTest {
 	public void testAuthenticateByEmailAddressWithPasswordPolicy()
 		throws Exception {
 
-		String password = "password";
-
 		User user = UserTestUtil.addUser();
+
+		String password = "password";
 
 		user = _userLocalService.updatePassword(
 			user.getUserId(), password, password, false, true);
