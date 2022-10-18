@@ -287,25 +287,25 @@ public class AssetEntriesCheckerHelper {
 	private List<AssetEntry> _getManuallySelectedAssetEntries(
 		PortletPreferences portletPreferences, long groupId) {
 
+		List<AssetEntry> assetEntries = new ArrayList<>();
+
 		String[] assetEntryXmls = portletPreferences.getValues(
 			"assetEntryXml", new String[0]);
 
-		List<AssetEntry> assetEntries = new ArrayList<>();
-
 		for (String assetEntryXml : assetEntryXmls) {
 			try {
+				Group group = _groupLocalService.fetchGroup(groupId);
+
+				if (group.isStagingGroup()) {
+					groupId = group.getLiveGroupId();
+				}
+
 				Document document = SAXReaderUtil.read(assetEntryXml);
 
 				Element rootElement = document.getRootElement();
 
 				String assetEntryUuid = rootElement.elementText(
 					"asset-entry-uuid");
-
-				Group group = _groupLocalService.fetchGroup(groupId);
-
-				if (group.isStagingGroup()) {
-					groupId = group.getLiveGroupId();
-				}
 
 				AssetEntry assetEntry = _assetEntryLocalService.fetchEntry(
 					groupId, assetEntryUuid);
