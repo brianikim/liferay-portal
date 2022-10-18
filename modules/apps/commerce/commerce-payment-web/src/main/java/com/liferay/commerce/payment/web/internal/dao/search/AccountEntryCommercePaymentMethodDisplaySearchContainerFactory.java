@@ -17,7 +17,10 @@ package com.liferay.commerce.payment.web.internal.dao.search;
 import com.liferay.account.constants.AccountPortletKeys;
 import com.liferay.commerce.payment.method.CommercePaymentMethod;
 import com.liferay.commerce.payment.method.CommercePaymentMethodRegistry;
+import com.liferay.commerce.payment.model.CommercePaymentMethodGroupRel;
+import com.liferay.commerce.payment.service.CommercePaymentMethodGroupRelServiceUtil;
 import com.liferay.commerce.payment.web.internal.display.CommercePaymentMethodDisplay;
+import com.liferay.commerce.product.service.CommerceChannelLocalServiceUtil;
 import com.liferay.portal.kernel.dao.search.EmptyOnClickRowChecker;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -59,14 +62,34 @@ public class AccountEntryCommercePaymentMethodDisplaySearchContainerFactory {
 			(ThemeDisplay)liferayPortletRequest.getAttribute(
 				WebKeys.THEME_DISPLAY);
 
+		long commerceChannelGroupId =
+			CommerceChannelLocalServiceUtil.
+				getCommerceChannelGroupIdBySiteGroupId(
+					themeDisplay.getScopeGroupId());
+
 		Map<String, CommercePaymentMethod> commercePaymentMethods =
 			commercePaymentMethodRegistry.getCommercePaymentMethods();
 
 		searchContainer.setResultsAndTotal(
 			() -> TransformUtil.transform(
 				commercePaymentMethods.values(),
-				commercePaymentMethod -> new CommercePaymentMethodDisplay(
-					commercePaymentMethod, themeDisplay.getLocale())),
+				commercePaymentMethod -> {
+					CommercePaymentMethodGroupRel
+						commercePaymentMethodGroupRel =
+							CommercePaymentMethodGroupRelServiceUtil.
+								fetchCommercePaymentMethodGroupRel(
+									commerceChannelGroupId,
+									commercePaymentMethod.getKey());
+
+					if ((commercePaymentMethodGroupRel != null) &&
+						commercePaymentMethodGroupRel.isActive()) {
+
+						return new CommercePaymentMethodDisplay(
+							commercePaymentMethod, themeDisplay.getLocale());
+					}
+
+					return null;
+				}),
 			commercePaymentMethods.size());
 
 		searchContainer.setRowChecker(
