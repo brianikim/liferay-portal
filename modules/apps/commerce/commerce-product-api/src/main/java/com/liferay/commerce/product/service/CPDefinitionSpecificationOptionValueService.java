@@ -75,6 +75,9 @@ public interface CPDefinitionSpecificationOptionValueService
 			long cpDefinitionSpecificationOptionValueId)
 		throws PortalException;
 
+	public void deleteCPDefinitionSpecificationOptionValues(long cpDefinitionId)
+		throws PortalException;
+
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public CPDefinitionSpecificationOptionValue
 			fetchCPDefinitionSpecificationOptionValue(

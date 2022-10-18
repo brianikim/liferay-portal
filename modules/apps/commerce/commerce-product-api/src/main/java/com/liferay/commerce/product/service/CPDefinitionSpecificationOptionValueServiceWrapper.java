@@ -64,6 +64,14 @@ public class CPDefinitionSpecificationOptionValueServiceWrapper
 	}
 
 	@Override
+	public void deleteCPDefinitionSpecificationOptionValues(long cpDefinitionId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		_cpDefinitionSpecificationOptionValueService.
+			deleteCPDefinitionSpecificationOptionValues(cpDefinitionId);
+	}
+
+	@Override
 	public
 		com.liferay.commerce.product.model.CPDefinitionSpecificationOptionValue
 				fetchCPDefinitionSpecificationOptionValue(
