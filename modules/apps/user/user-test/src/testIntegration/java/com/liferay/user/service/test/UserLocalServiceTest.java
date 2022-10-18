@@ -103,12 +103,12 @@ public class UserLocalServiceTest {
 	public void testAuthenticateByEmailAddressWithPasswordPolicy()
 		throws Exception {
 
-		String newPassword = "password";
+		String password = "password";
 
 		User user = UserTestUtil.addUser();
 
 		user = _userLocalService.updatePassword(
-			user.getUserId(), newPassword, newPassword, false, true);
+			user.getUserId(), password, password, false, true);
 
 		PasswordPolicy passwordPolicy = user.getPasswordPolicy();
 
@@ -127,7 +127,7 @@ public class UserLocalServiceTest {
 
 		try {
 			_userLocalService.authenticateByEmailAddress(
-				user.getCompanyId(), user.getEmailAddress(), newPassword, null,
+				user.getCompanyId(), user.getEmailAddress(), password, null,
 				null, null);
 		}
 		catch (PortalException portalException) {
@@ -148,7 +148,7 @@ public class UserLocalServiceTest {
 		Assert.assertEquals(
 			Authenticator.SUCCESS,
 			_userLocalService.authenticateByEmailAddress(
-				user.getCompanyId(), user.getEmailAddress(), newPassword, null,
+				user.getCompanyId(), user.getEmailAddress(), password, null,
 				null, null));
 	}
 
@@ -596,10 +596,10 @@ public class UserLocalServiceTest {
 
 		user = _userLocalService.getUser(user.getUserId());
 
-		Date newPasswordModifiedDate = user.getPasswordModifiedDate();
+		Date passwordModifiedDate = user.getPasswordModifiedDate();
 
 		Assert.assertTrue(
-			newPasswordModifiedDate.after(oldPasswordModifiedDate));
+			passwordModifiedDate.after(oldPasswordModifiedDate));
 	}
 
 	@Test
