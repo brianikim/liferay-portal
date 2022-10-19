@@ -271,7 +271,7 @@ public class CommercePriceListDisplayContext
 					dropdownItem.setHref(getAddCommercePriceListRenderURL());
 					dropdownItem.setLabel(
 						LanguageUtil.get(
-							httpServletRequest, "create-new-price-list"));
+							httpServletRequest, "create-new-promotion"));
 					dropdownItem.setTarget("modal-lg");
 				});
 		}
