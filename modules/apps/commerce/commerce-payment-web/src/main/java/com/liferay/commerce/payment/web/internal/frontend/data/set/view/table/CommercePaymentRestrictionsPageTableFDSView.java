@@ -28,7 +28,6 @@ import com.liferay.frontend.data.set.provider.search.FDSKeywords;
 import com.liferay.frontend.data.set.provider.search.FDSPagination;
 import com.liferay.frontend.data.set.view.FDSView;
 import com.liferay.frontend.data.set.view.table.selectable.BaseSelectableTableFDSView;
-import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.bean.BeanProperties;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.Language;
@@ -104,7 +103,7 @@ public class CommercePaymentRestrictionsPageTableFDSView
 					commerceChannel.getGroupId(), true);
 
 		String orderByFieldName = _beanProperties.getString(
-			sort, "fieldName", StringPool.BLANK);
+			sort, "fieldName", "name");
 
 		String orderByType = "asc";
 
