@@ -3,7 +3,7 @@ definition {
 
 	property custom.properties = "default.layout.template.id=1_column";
 	property osgi.module.configuration.file.names = "com.liferay.rss.web.internal.configuration.RSSWebCacheConfiguration.config";
-	property osgi.module.configurations = "com.liferay.portlet.display-category=&quot;category.cms&quot;";
+	property osgi.module.configurations = "com.liferay.portlet.display-category=\"category.cms\"";
 	property portal.release = "true";
 	property portal.upstream = "true";
 	property testray.main.component.name = "Content and Application Templates";

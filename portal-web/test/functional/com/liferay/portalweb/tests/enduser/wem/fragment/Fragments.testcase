@@ -1105,7 +1105,7 @@ NO CSS
 	@priority = "5"
 	test PropagateGlobalFragmentChanges {
 		property osgi.module.configuration.file.names = "com.liferay.fragment.web.internal.configuration.FragmentGlobalPanelAppConfiguration.config";
-		property osgi.module.configurations = "enabled=B&quot;true&quot;";
+		property osgi.module.configurations = "enabled=B\"true\"";
 		property portal.acceptance = "true";
 
 		task ("Add a fragment collection in Global site") {
@@ -1511,7 +1511,7 @@ NO CSS
 	@priority = "5"
 	test ViewGlobalFragments {
 		property osgi.module.configuration.file.names = "com.liferay.fragment.web.internal.configuration.FragmentGlobalPanelAppConfiguration.config";
-		property osgi.module.configurations = "enabled=B&quot;true&quot;";
+		property osgi.module.configurations = "enabled=B\"true\"";
 		property portal.acceptance = "true";
 
 		task ("Add a fragment collection in Global site") {
@@ -1577,7 +1577,7 @@ NO CSS
 	@priority = "5"
 	test ViewGlobalFragmentsSiteUsages {
 		property osgi.module.configuration.file.names = "com.liferay.fragment.web.internal.configuration.FragmentGlobalPanelAppConfiguration.config";
-		property osgi.module.configurations = "enabled=B&quot;true&quot;";
+		property osgi.module.configurations = "enabled=B\"true\"";
 		property portal.acceptance = "true";
 
 		task ("Add a fragment collection in Global site") {

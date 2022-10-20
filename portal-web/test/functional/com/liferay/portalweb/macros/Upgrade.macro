@@ -1014,9 +1014,9 @@ definition {
 		Publications.revertPublication(publicationName = "Publication 1 Name");
 
 		AssertTextPresent(
-			key_publicationName = "Revert &quot;Publication 1 Name&quot;",
+			key_publicationName = "Revert \"Publication 1 Name\"",
 			locator1 = "Publications#PUBLICATIONS_INDICATOR_TITLE",
-			value1 = "Revert &quot;Publication 1 Name&quot;");
+			value1 = "Revert \"Publication 1 Name\"");
 
 		Publications.selectPublication(publicationName = "Publication 2 Name");
 

@@ -2,7 +2,7 @@
 definition {
 
 	property osgi.module.configuration.file.names = "com.liferay.questions.web.internal.configuration.QuestionsConfiguration.config";
-	property osgi.module.configurations = "com.liferay.portlet.display-category=&quot;category.collaboration&quot;\nenableRedirectToLogin=&quot;true&quot;";
+	property osgi.module.configurations = "com.liferay.portlet.display-category=\"category.collaboration\"\nenableRedirectToLogin=\"true\"";
 	property portal.release = "true";
 	property portal.upstream = "true";
 	property testray.main.component.name = "Questions";

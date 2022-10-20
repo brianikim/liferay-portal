@@ -506,7 +506,7 @@ definition {
 			content = "Blogs Entry Title GMB1",
 			recipient = "userfn1 userln1",
 			sender = "Joe Bloggs",
-			subject = "Test Test Published &quot;Blogs Entry Title GMB1&quot; on ${siteName} Blogs");
+			subject = "Test Test Published \"Blogs Entry Title GMB1\" on ${siteName} Blogs");
 
 		MockMock.clickBodyLink(
 			asset = "Blogs Entry Title GMB1",
@@ -649,7 +649,7 @@ definition {
 			content = "Blogs Entry Title GMB2",
 			recipient = "userfn1 userln1",
 			sender = "Joe Bloggs",
-			subject = "Test Test Published &quot;Blogs Entry Title GMB2&quot; on ${siteName} Blogs");
+			subject = "Test Test Published \"Blogs Entry Title GMB2\" on ${siteName} Blogs");
 
 		MockMock.clickBodyLink(
 			asset = "Blogs Entry Title GMB2",
@@ -796,7 +796,7 @@ definition {
 			content = "Blogs Entry Title GMB3",
 			recipient = "userfn1 userln1",
 			sender = "Joe Bloggs",
-			subject = "Test Test Published &quot;Blogs Entry Title GMB3&quot; on ${siteName} Blogs");
+			subject = "Test Test Published \"Blogs Entry Title GMB3\" on ${siteName} Blogs");
 
 		MockMock.clickBodyLink(
 			asset = "Blogs Entry Title GMB3",

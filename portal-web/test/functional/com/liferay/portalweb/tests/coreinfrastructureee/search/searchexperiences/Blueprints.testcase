@@ -2909,7 +2909,7 @@ definition {
 
 		Blueprints.searchBlueprintsPreview(searchTerm = "test");
 
-		Alert.viewErrorMessage(errorMessage = "The property &quot;elementDefinitionnnnnnn&quot; is not defined in SXPElement.");
+		Alert.viewErrorMessage(errorMessage = "The property \"elementDefinitionnnnnnn\" is not defined in SXPElement.");
 
 		AssertElementNotPresent(
 			locator1 = "Blueprints#BLUEPRINTS_PREVIEW_SEARCH_RESULT_TITLE",

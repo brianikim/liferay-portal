@@ -350,7 +350,7 @@ definition {
 
 			Type(
 				locator1 = "CKEditor#BODY",
-				value1 = "[$COMMENT_CREATE_DATE$] <a href=&quot;[$ARTICLE_URL$]&quot;>View your received suggestion here</a>");
+				value1 = "[$COMMENT_CREATE_DATE$] <a href=\"[$ARTICLE_URL$]\">View your received suggestion here</a>");
 
 			SelectFrame(value1 = "relative=top");
 
@@ -368,7 +368,7 @@ definition {
 
 			Type(
 				locator1 = "CKEditor#BODY",
-				value1 = "[$COMMENT_CREATE_DATE$] <a href=&quot;[$ARTICLE_URL$]&quot;>View your suggestion that is in progress here</a>");
+				value1 = "[$COMMENT_CREATE_DATE$] <a href=\"[$ARTICLE_URL$]\">View your suggestion that is in progress here</a>");
 
 			SelectFrame(value1 = "relative=top");
 
@@ -386,7 +386,7 @@ definition {
 
 			Type(
 				locator1 = "CKEditor#BODY",
-				value1 = "[$COMMENT_CREATE_DATE$] <a href=&quot;[$ARTICLE_URL$]&quot;>View your resolved suggestion here</a>");
+				value1 = "[$COMMENT_CREATE_DATE$] <a href=\"[$ARTICLE_URL$]\">View your resolved suggestion here</a>");
 
 			SelectFrame(value1 = "relative=top");
 

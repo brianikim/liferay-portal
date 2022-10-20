@@ -262,7 +262,7 @@ definition {
 					AssetListsAdmin.editAssetList(assetListTitle = "Dynamic Asset List ${queryContains} ${queryAndOperator}");
 
 					AssetListsAdmin.addKeywordsFilter(
-						keyWords = "&quot;2 3&quot; &quot;3 4&quot;",
+						keyWords = "\"2 3\" \"3 4\"",
 						queryAndOperator = "${queryAndOperator}",
 						queryContains = "${queryContains}");
 				}
@@ -320,7 +320,7 @@ definition {
 					AssetListsAdmin.editAssetList(assetListTitle = "Dynamic Asset List ${queryContains} ${queryAndOperator}");
 
 					AssetListsAdmin.addKeywordsFilter(
-						keyWords = "&quot;2 3&quot; &quot;3 4&quot;",
+						keyWords = "\"2 3\" \"3 4\"",
 						queryAndOperator = "${queryAndOperator}",
 						queryContains = "${queryContains}");
 				}
@@ -378,7 +378,7 @@ definition {
 					AssetListsAdmin.editAssetList(assetListTitle = "Dynamic Asset List ${queryContains} ${queryAndOperator}");
 
 					AssetListsAdmin.addKeywordsFilter(
-						keyWords = "&quot;2 3&quot; &quot;3 4&quot;",
+						keyWords = "\"2 3\" \"3 4\"",
 						queryAndOperator = "${queryAndOperator}",
 						queryContains = "${queryContains}");
 				}
@@ -436,7 +436,7 @@ definition {
 					AssetListsAdmin.editAssetList(assetListTitle = "Dynamic Asset List ${queryContains} ${queryAndOperator}");
 
 					AssetListsAdmin.addKeywordsFilter(
-						keyWords = "&quot;2 3&quot; &quot;3 4&quot;",
+						keyWords = "\"2 3\" \"3 4\"",
 						queryAndOperator = "${queryAndOperator}",
 						queryContains = "${queryContains}");
 				}
