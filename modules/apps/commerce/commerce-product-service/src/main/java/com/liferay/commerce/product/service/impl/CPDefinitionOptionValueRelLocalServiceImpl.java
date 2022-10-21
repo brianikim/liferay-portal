@@ -619,11 +619,9 @@ public class CPDefinitionOptionValueRelLocalServiceImpl
 			cpDefinitionOptionValueRelPersistence.update(
 				cpDefinitionOptionValueRel);
 
-		if (preselected) {
-			cpDefinitionOptionValueRel =
-				_updateCPDefinitionOptionValueRelPreselected(
-					cpDefinitionOptionValueRel, preselected);
-		}
+		cpDefinitionOptionValueRel =
+			_updateCPDefinitionOptionValueRelPreselected(
+				cpDefinitionOptionValueRel, preselected);
 
 		// Commerce product definition
 
