@@ -120,7 +120,7 @@ public class FragmentEntryFragmentRendererTest {
 			(PortalCache<String, String>)_multiVMPool.getPortalCache(
 				FragmentEntryLink.class.getName());
 
-		String content = portalCache.get(_getCacheKey(fragmentEntryLink));
+		String content = portalCache.get(_getPortalCacheKey(fragmentEntryLink));
 
 		Assert.assertTrue(content.contains(fragmentEntry.getHtml()));
 	}
@@ -154,7 +154,7 @@ public class FragmentEntryFragmentRendererTest {
 			(PortalCache<String, String>)_multiVMPool.getPortalCache(
 				FragmentEntryLink.class.getName());
 
-		Assert.assertNull(portalCache.get(_getCacheKey(fragmentEntryLink)));
+		Assert.assertNull(portalCache.get(_getPortalCacheKey(fragmentEntryLink)));
 	}
 
 	@Test
@@ -207,21 +207,21 @@ public class FragmentEntryFragmentRendererTest {
 			(PortalCache<String, String>)_multiVMPool.getPortalCache(
 				FragmentEntryLink.class.getName());
 
-		String content = portalCache.get(_getCacheKey(fragmentEntryLink));
+		String content = portalCache.get(_getPortalCacheKey(fragmentEntryLink));
 
 		Assert.assertTrue(content.contains(fragmentEntry.getHtml()));
 	}
 
-	private String _getCacheKey(FragmentEntryLink fragmentEntryLink) {
-		StringBundler cacheKeySB = new StringBundler(5);
+	private String _getPortalCacheKey(FragmentEntryLink fragmentEntryLink) {
+		StringBundler sb = new StringBundler(5);
 
-		cacheKeySB.append(fragmentEntryLink.getFragmentEntryLinkId());
-		cacheKeySB.append(StringPool.DASH);
-		cacheKeySB.append(LocaleUtil.US);
-		cacheKeySB.append(StringPool.DASH);
-		cacheKeySB.append(fragmentEntryLink.getSegmentsExperienceId());
+		sb.append(fragmentEntryLink.getFragmentEntryLinkId());
+		sb.append(StringPool.DASH);
+		sb.append(LocaleUtil.US);
+		sb.append(StringPool.DASH);
+		sb.append(fragmentEntryLink.getSegmentsExperienceId());
 
-		return cacheKeySB.toString();
+		return sb.toString();
 	}
 
 	private FragmentEntry _getFragmentEntry(boolean cacheable)
