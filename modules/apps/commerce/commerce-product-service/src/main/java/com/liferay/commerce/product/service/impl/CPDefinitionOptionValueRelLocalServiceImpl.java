@@ -164,6 +164,7 @@ public class CPDefinitionOptionValueRelLocalServiceImpl
 		_validateLinkedCPDefinitionOptionValueRel(cpDefinitionOptionValueRel);
 		_validatePriceableCPDefinitionOptionValue(
 			cpDefinitionOptionValueRel, cpDefinitionOptionRel.getPriceType());
+		_validatePriorityCPDefinitionOptionValue(cpDefinitionOptionValueRel);
 
 		cpDefinitionOptionValueRel =
 			cpDefinitionOptionValueRelPersistence.update(
@@ -614,6 +615,7 @@ public class CPDefinitionOptionValueRelLocalServiceImpl
 		_validateLinkedCPDefinitionOptionValueRel(cpDefinitionOptionValueRel);
 		_validatePriceableCPDefinitionOptionValue(
 			cpDefinitionOptionValueRel, cpDefinitionOptionRel.getPriceType());
+		_validatePriorityCPDefinitionOptionValue(cpDefinitionOptionValueRel);
 
 		cpDefinitionOptionValueRel =
 			cpDefinitionOptionValueRelPersistence.update(
@@ -976,6 +978,15 @@ public class CPDefinitionOptionValueRelLocalServiceImpl
 
 		if (!cpInstance.isApproved()) {
 			throw new CPDefinitionOptionValueRelCPInstanceException();
+		}
+	}
+
+	private void _validatePriorityCPDefinitionOptionValue(
+			CPDefinitionOptionValueRel cpDefinitionOptionValueRel)
+		throws PortalException {
+
+		if (cpDefinitionOptionValueRel.getPriority() >= Integer.MAX_VALUE) {
+			throw new CPDefinitionOptionValueRelQuantityException();
 		}
 	}
 

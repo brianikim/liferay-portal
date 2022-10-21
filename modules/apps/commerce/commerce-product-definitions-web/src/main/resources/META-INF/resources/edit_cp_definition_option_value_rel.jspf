@@ -36,7 +36,9 @@ long cpDefinitionOptionValueRelId = cpDefinitionOptionValueRelDisplayContext.get
 
 <aui:input defaultLanguageId="<%= cpDefinitionOptionValueRelDisplayContext.getCatalogDefaultLanguageId() %>" id="optionValueName" name="name" />
 
-<aui:input label="position" name="priority" />
+<aui:input label="position" name="priority">
+	<aui:validator name="max"><%= Integer.MAX_VALUE %></aui:validator>
+</aui:input>
 
 <aui:input helpMessage="key-help" name="key" />
 
