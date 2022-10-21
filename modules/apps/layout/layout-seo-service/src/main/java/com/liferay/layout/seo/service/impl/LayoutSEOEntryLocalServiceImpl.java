@@ -28,7 +28,6 @@ import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.service.ClassNameLocalService;
-import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.DateUtil;
 import com.liferay.portal.kernel.util.ListUtil;
@@ -132,7 +131,7 @@ public class LayoutSEOEntryLocalServiceImpl
 		layoutSEOEntry.setModifiedDate(DateUtil.newDate());
 
 		DDMStructure ddmStructure = _getDDMStructure(
-			_groupLocalService.getGroup(groupId));
+			groupLocalService.getGroup(groupId));
 
 		long ddmStorageId = _updateDDMStorage(
 			layoutSEOEntry.getCompanyId(), layoutSEOEntry.getDDMStorageId(), 0,
@@ -248,7 +247,7 @@ public class LayoutSEOEntryLocalServiceImpl
 		layoutSEOEntry.setCanonicalURLMap(canonicalURLMap);
 
 		DDMStructure ddmStructure = _getDDMStructure(
-			_groupLocalService.getGroup(groupId));
+			groupLocalService.getGroup(groupId));
 
 		long ddmStorageId = _updateDDMStorage(
 			layoutSEOEntry.getCompanyId(), layoutSEOEntry.getDDMStorageId(),
@@ -334,7 +333,7 @@ public class LayoutSEOEntryLocalServiceImpl
 	}
 
 	private DDMStructure _getDDMStructure(Group group) throws PortalException {
-		Group companyGroup = _groupLocalService.getCompanyGroup(
+		Group companyGroup = groupLocalService.getCompanyGroup(
 			group.getCompanyId());
 
 		return _ddmStructureLocalService.getStructure(
@@ -378,9 +377,6 @@ public class LayoutSEOEntryLocalServiceImpl
 
 	@Reference
 	private DDMStructureLocalService _ddmStructureLocalService;
-
-	@Reference
-	private GroupLocalService _groupLocalService;
 
 	@Reference
 	private StorageEngine _storageEngine;
