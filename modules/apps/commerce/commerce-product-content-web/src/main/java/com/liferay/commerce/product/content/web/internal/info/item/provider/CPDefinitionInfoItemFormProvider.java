@@ -200,13 +200,13 @@ public class CPDefinitionInfoItemFormProvider
 		).infoFieldSetEntry(
 			CPDefinitionInfoItemFields.statusDateInfoField
 		).infoFieldSetEntry(
-			CPDefinitionInfoItemFields.subscriptionEnabledInfoField
+			CPDefinitionInfoItemFields.paymentSubscriptionEnabledInfoField
 		).infoFieldSetEntry(
-			CPDefinitionInfoItemFields.subscriptionLengthInfoField
+			CPDefinitionInfoItemFields.paymentSubscriptionLengthInfoField
 		).infoFieldSetEntry(
-			CPDefinitionInfoItemFields.subscriptionTypeInfoField
+			CPDefinitionInfoItemFields.paymentSubscriptionTypeInfoField
 		).infoFieldSetEntry(
-			CPDefinitionInfoItemFields.subscriptionTypeSettingsInfoField
+			CPDefinitionInfoItemFields.paymentSubscriptionTypeSettingsInfoField
 		).infoFieldSetEntry(
 			CPDefinitionInfoItemFields.taxExemptInfoField
 		).infoFieldSetEntry(

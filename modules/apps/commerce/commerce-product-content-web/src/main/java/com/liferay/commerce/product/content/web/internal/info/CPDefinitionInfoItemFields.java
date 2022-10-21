@@ -409,6 +409,48 @@ public class CPDefinitionInfoItemFields {
 			InfoLocalizedValue.localize(
 				CPDefinitionInfoItemFields.class, "name")
 		).build();
+	public static final InfoField<BooleanInfoFieldType>
+		paymentSubscriptionEnabledInfoField =
+			BuilderHolder._builder.infoFieldType(
+				BooleanInfoFieldType.INSTANCE
+			).name(
+				"paymentSubscriptionEnabled"
+			).labelInfoLocalizedValue(
+				InfoLocalizedValue.localize(
+					CPDefinitionInfoItemFields.class,
+					"payment-subscription-enabled")
+			).build();
+	public static final InfoField<NumberInfoFieldType>
+		paymentSubscriptionLengthInfoField =
+			BuilderHolder._builder.infoFieldType(
+				NumberInfoFieldType.INSTANCE
+			).name(
+				"paymentSubscriptionLength"
+			).labelInfoLocalizedValue(
+				InfoLocalizedValue.localize(
+					CPDefinitionInfoItemFields.class,
+					"payment-subscription-length")
+			).build();
+	public static final InfoField<TextInfoFieldType>
+		paymentSubscriptionTypeInfoField = BuilderHolder._builder.infoFieldType(
+			TextInfoFieldType.INSTANCE
+		).name(
+			"paymentSubscriptionType"
+		).labelInfoLocalizedValue(
+			InfoLocalizedValue.localize(
+				CPDefinitionInfoItemFields.class, "payment-subscription-type")
+		).build();
+	public static final InfoField<TextInfoFieldType>
+		paymentSubscriptionTypeSettingsInfoField =
+			BuilderHolder._builder.infoFieldType(
+				TextInfoFieldType.INSTANCE
+			).name(
+				"paymentSubscriptionTypeSettings"
+			).labelInfoLocalizedValue(
+				InfoLocalizedValue.localize(
+					CPDefinitionInfoItemFields.class,
+					"payment-subscription-type-settings")
+			).build();
 	public static final InfoField<BooleanInfoFieldType> pendingInfoField =
 		BuilderHolder._builder.infoFieldType(
 			BooleanInfoFieldType.INSTANCE
@@ -543,44 +585,6 @@ public class CPDefinitionInfoItemFields {
 			InfoLocalizedValue.localize(
 				CPDefinitionInfoItemFields.class, "status")
 		).build();
-	public static final InfoField<BooleanInfoFieldType>
-		subscriptionEnabledInfoField = BuilderHolder._builder.infoFieldType(
-			BooleanInfoFieldType.INSTANCE
-		).name(
-			"subscriptionEnabled"
-		).labelInfoLocalizedValue(
-			InfoLocalizedValue.localize(
-				CPDefinitionInfoItemFields.class, "subscription-enabled")
-		).build();
-	public static final InfoField<NumberInfoFieldType>
-		subscriptionLengthInfoField = BuilderHolder._builder.infoFieldType(
-			NumberInfoFieldType.INSTANCE
-		).name(
-			"subscriptionLength"
-		).labelInfoLocalizedValue(
-			InfoLocalizedValue.localize(
-				CPDefinitionInfoItemFields.class, "subscription-length")
-		).build();
-	public static final InfoField<TextInfoFieldType> subscriptionTypeInfoField =
-		BuilderHolder._builder.infoFieldType(
-			TextInfoFieldType.INSTANCE
-		).name(
-			"subscriptionType"
-		).labelInfoLocalizedValue(
-			InfoLocalizedValue.localize(
-				CPDefinitionInfoItemFields.class, "subscription-type")
-		).build();
-	public static final InfoField<TextInfoFieldType>
-		subscriptionTypeSettingsInfoField =
-			BuilderHolder._builder.infoFieldType(
-				TextInfoFieldType.INSTANCE
-			).name(
-				"subscriptionTypeSettings"
-			).labelInfoLocalizedValue(
-				InfoLocalizedValue.localize(
-					CPDefinitionInfoItemFields.class,
-					"subscription-type-settings")
-			).build();
 	public static final InfoField<BooleanInfoFieldType> taxExemptInfoField =
 		BuilderHolder._builder.infoFieldType(
 			BooleanInfoFieldType.INSTANCE

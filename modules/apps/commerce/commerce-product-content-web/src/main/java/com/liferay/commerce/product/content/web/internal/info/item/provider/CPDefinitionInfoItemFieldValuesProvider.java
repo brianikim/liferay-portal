@@ -467,20 +467,22 @@ public class CPDefinitionInfoItemFieldValuesProvider
 					cpDefinition.getStatusDate()));
 			cpDefinitionInfoFieldValues.add(
 				new InfoFieldValue<>(
-					CPDefinitionInfoItemFields.subscriptionEnabledInfoField,
+					CPDefinitionInfoItemFields.
+						paymentSubscriptionEnabledInfoField,
 					cpDefinition.isSubscriptionEnabled()));
 			cpDefinitionInfoFieldValues.add(
 				new InfoFieldValue<>(
-					CPDefinitionInfoItemFields.subscriptionLengthInfoField,
+					CPDefinitionInfoItemFields.
+						paymentSubscriptionLengthInfoField,
 					cpDefinition.getSubscriptionLength()));
 			cpDefinitionInfoFieldValues.add(
 				new InfoFieldValue<>(
-					CPDefinitionInfoItemFields.subscriptionTypeInfoField,
+					CPDefinitionInfoItemFields.paymentSubscriptionTypeInfoField,
 					cpDefinition.getSubscriptionType()));
 			cpDefinitionInfoFieldValues.add(
 				new InfoFieldValue<>(
 					CPDefinitionInfoItemFields.
-						subscriptionTypeSettingsInfoField,
+						paymentSubscriptionTypeSettingsInfoField,
 					cpDefinition.getSubscriptionTypeSettings()));
 			cpDefinitionInfoFieldValues.add(
 				new InfoFieldValue<>(
