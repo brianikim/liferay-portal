@@ -94,7 +94,7 @@ public class FragmentEntryFragmentRendererTest {
 	}
 
 	@Test
-	public void testCacheableFragmentEntryLinkPortalCache() throws Exception {
+	public void testCacheableFragmentEntryLink() throws Exception {
 		FragmentEntry fragmentEntry = _getFragmentEntry(true);
 
 		FragmentEntryLink fragmentEntryLink =
@@ -126,7 +126,7 @@ public class FragmentEntryFragmentRendererTest {
 	}
 
 	@Test
-	public void testNoncacheableFragmentEntryLinkPortalCache()
+	public void testNoncacheableFragmentEntryLink()
 		throws Exception {
 
 		FragmentEntry fragmentEntry = _getFragmentEntry(false);
@@ -158,9 +158,7 @@ public class FragmentEntryFragmentRendererTest {
 	}
 
 	@Test
-	public void testUpdateCacheableFragmentEntryLinkPortalCache()
-		throws Exception {
-
+	public void testUpdateCacheableFragmentEntryLink() throws Exception {
 		FragmentEntry fragmentEntry = _getFragmentEntry(true);
 
 		FragmentEntryLink fragmentEntryLink =
