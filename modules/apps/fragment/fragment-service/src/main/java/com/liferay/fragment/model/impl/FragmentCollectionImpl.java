@@ -33,6 +33,7 @@ import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portletfilerepository.PortletFileRepositoryUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.Folder;
+import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.kernel.service.CompanyLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalServiceUtil;
@@ -110,8 +111,8 @@ public class FragmentCollectionImpl extends FragmentCollectionBaseImpl {
 				serviceContext.setAddGuestPermissions(true);
 
 				folder = PortletFileRepositoryUtil.addPortletFolder(
-					getUserId(), repository.getRepositoryId(),
-					repository.getDlFolderId(),
+					PrincipalThreadLocal.getUserId(),
+					repository.getRepositoryId(), repository.getDlFolderId(),
 					String.valueOf(getFragmentCollectionId()), serviceContext);
 			}
 			else {
