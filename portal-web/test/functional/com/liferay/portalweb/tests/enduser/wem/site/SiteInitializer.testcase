@@ -93,31 +93,9 @@ definition {
 			LexiconCard.viewMarkAsDefault(card = "Blank");
 		}
 
-		task ("View the Raylife display page templates") {
-			DisplayPageTemplatesAdmin.openDisplayPagesAdmin(siteURLKey = "test-site-name");
-
-			for (var displayPageName : list "Claim,Policy") {
-				DisplayPageTemplatesAdmin.viewDisplayPagePresent(displayPageName = "${displayPageName}");
-
-				LexiconCard.viewCardThumbnail(card = "${displayPageName}");
-
-				LexiconCard.viewMarkAsDefault(card = "${displayPageName}");
-
-				DisplayPageTemplatesAdmin.gotoDisplayPage(displayPageName = "${displayPageName}");
-
-				PageEditor.gotoTab(tabName = "Page Design Options");
-
-				Click(locator1 = "PageEditor#MORE_LINK");
-
-				AssertChecked(
-					key_toggleSwitchLabel = "Use the same look and feel of the Public Pages",
-					locator1 = "ToggleSwitch#ANY_TOGGLE_SWITCH");
-
-				DisplayPageTemplatesAdmin.openDisplayPagesAdmin(siteURLKey = "test-site-name");
-			}
-		}
-
 		task ("View the public and private pages") {
+			ApplicationsMenu.gotoSite(site = "Test Site Name");
+
 			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
 
 			for (var pageName : list "Home,Product,News,Contact,Sign In,Search") {
