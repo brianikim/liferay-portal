@@ -107,7 +107,7 @@ public class SaveFormInstanceMVCCommandHelper {
 				portletRequest, formInstanceId, validateDDMFormFieldSettings);
 		}
 		catch (PortalException portalException) {
-			_log.error("The CSRF token is missing or invalid", portalException);
+			_log.error("The CSRF token is invalid", portalException);
 		}
 
 		return null;
