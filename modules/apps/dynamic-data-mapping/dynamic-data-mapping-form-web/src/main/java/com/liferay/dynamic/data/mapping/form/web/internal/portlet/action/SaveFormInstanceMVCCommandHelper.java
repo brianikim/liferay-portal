@@ -35,6 +35,7 @@ import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.security.auth.AuthTokenUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextFactory;
 import com.liferay.portal.kernel.util.InetAddressUtil;
@@ -86,16 +87,30 @@ public class SaveFormInstanceMVCCommandHelper {
 			boolean validateDDMFormFieldSettings)
 		throws Exception {
 
-		long formInstanceId = ParamUtil.getLong(
-			portletRequest, "formInstanceId");
+		HttpServletRequest httpServletRequest = _portal.getHttpServletRequest(
+			portletRequest);
 
-		if (formInstanceId == 0) {
-			return addFormInstance(
-				portletRequest, validateDDMFormFieldSettings);
+		try {
+			AuthTokenUtil.checkCSRFToken(
+				httpServletRequest,
+				SaveFormInstanceMVCCommandHelper.class.getName());
+
+			long formInstanceId = ParamUtil.getLong(
+				portletRequest, "formInstanceId");
+
+			if (formInstanceId == 0) {
+				return addFormInstance(
+					portletRequest, validateDDMFormFieldSettings);
+			}
+
+			return updateFormInstance(
+				portletRequest, formInstanceId, validateDDMFormFieldSettings);
+		}
+		catch (PortalException portalException) {
+			_log.error("The CSRF token is missing or invalid", portalException);
 		}
 
-		return updateFormInstance(
-			portletRequest, formInstanceId, validateDDMFormFieldSettings);
+		return null;
 	}
 
 	protected DDMFormInstance addFormInstance(
