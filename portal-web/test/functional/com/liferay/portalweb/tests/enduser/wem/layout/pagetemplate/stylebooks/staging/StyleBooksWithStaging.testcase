@@ -151,7 +151,7 @@ definition {
 				key_content = "Banner Title Example",
 				key_element = "h1",
 				key_id = "title",
-				key_type = "rich-text",
+				key_type = "text",
 				locator1 = "StyleBookEditor#CONTRIBUTED_FRAGMENT_INLINE_CONTENT",
 				locator2 = "font-size",
 				value1 = "32px");
@@ -222,7 +222,7 @@ definition {
 				key_content = "Banner Title Example",
 				key_element = "h1",
 				key_id = "title",
-				key_type = "rich-text",
+				key_type = "text",
 				locator1 = "StyleBookEditor#CONTRIBUTED_FRAGMENT_INLINE_CONTENT",
 				locator2 = "font-size",
 				value1 = "26px");
@@ -321,7 +321,7 @@ definition {
 				key_content = "Banner Title Example",
 				key_element = "h1",
 				key_id = "title",
-				key_type = "rich-text",
+				key_type = "text",
 				locator1 = "StyleBookEditor#CONTRIBUTED_FRAGMENT_INLINE_CONTENT",
 				locator2 = "font-size",
 				value1 = "32px");
@@ -375,7 +375,7 @@ definition {
 				key_content = "Banner Title Example",
 				key_element = "h1",
 				key_id = "title",
-				key_type = "rich-text",
+				key_type = "text",
 				locator1 = "StyleBookEditor#CONTRIBUTED_FRAGMENT_INLINE_CONTENT",
 				locator2 = "font-size",
 				value1 = "26px");
@@ -613,7 +613,7 @@ definition {
 				key_content = "Banner Title Example",
 				key_element = "h1",
 				key_id = "title",
-				key_type = "rich-text",
+				key_type = "text",
 				locator1 = "StyleBookEditor#CONTRIBUTED_FRAGMENT_INLINE_CONTENT",
 				locator2 = "font-size",
 				value1 = "32px");
@@ -724,7 +724,7 @@ definition {
 				key_content = "Banner Title Example",
 				key_element = "h1",
 				key_id = "title",
-				key_type = "rich-text",
+				key_type = "text",
 				locator1 = "StyleBookEditor#CONTRIBUTED_FRAGMENT_INLINE_CONTENT",
 				locator2 = "font-size",
 				value1 = "32px");
@@ -754,7 +754,7 @@ definition {
 				key_content = "Banner Title Example",
 				key_element = "h1",
 				key_id = "title",
-				key_type = "rich-text",
+				key_type = "text",
 				locator1 = "StyleBookEditor#CONTRIBUTED_FRAGMENT_INLINE_CONTENT",
 				locator2 = "font-size",
 				value1 = "32px");
@@ -813,7 +813,7 @@ definition {
 				key_content = "Banner Title Example",
 				key_element = "h1",
 				key_id = "title",
-				key_type = "rich-text",
+				key_type = "text",
 				locator1 = "StyleBookEditor#CONTRIBUTED_FRAGMENT_INLINE_CONTENT",
 				locator2 = "font-size",
 				value1 = "24px");
