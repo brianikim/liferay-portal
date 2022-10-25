@@ -57,7 +57,7 @@ int childPanelCategoriesSize = GetterUtil.getInteger(request.getAttribute("produ
 								<liferay-ui:message key='<%= group.isDepot() ? "asset-library" : "site" %>' />
 							</div>
 
-							<div class="lfr-portal-tooltip site-name text-truncate" title="<%= HtmlUtil.escape(HtmlUtil.escape(siteAdministrationPanelCategoryDisplayContext.getGroupName())) %>">
+							<div class="lfr-portal-tooltip site-name text-truncate" title="<%= HtmlUtil.escape(siteAdministrationPanelCategoryDisplayContext.getGroupName()) %>">
 								<%= HtmlUtil.escape(siteAdministrationPanelCategoryDisplayContext.getGroupName()) %>
 
 								<c:if test="<%= siteAdministrationPanelCategoryDisplayContext.isShowStagingInfo() && !group.isStagedRemotely() %>">
