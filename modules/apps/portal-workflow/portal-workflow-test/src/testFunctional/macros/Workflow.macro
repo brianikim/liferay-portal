@@ -1455,7 +1455,7 @@ definition {
 
 	macro viewTaskHeaderTitle {
 		AssertTextEquals(
-			locator1 = "//li/span[@data-qa-id='headerTitle']",
+			locator1 = "Portlet#HEADER",
 			value1 = "${workflowTask}: ${kfProcessName}");
 	}
 
