@@ -55,6 +55,7 @@ import com.liferay.portal.kernel.service.RoleService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextFactory;
 import com.liferay.portal.kernel.service.UserService;
+import com.liferay.portal.kernel.service.permission.RolePermission;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
@@ -87,6 +88,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.portlet.ActionRequest;
@@ -538,6 +540,26 @@ public class RolesAdminPortlet extends MVCPortlet {
 				bundleContext, PanelCategoryRoleTypeMapper.class);
 	}
 
+	@Override
+	protected void checkPermissions(PortletRequest portletRequest)
+		throws Exception {
+
+		String mvcPath = ParamUtil.getString(portletRequest, "mvcPath");
+
+		if (Objects.equals(mvcPath, "/edit_role_assignments.jsp")) {
+			ThemeDisplay themeDisplay =
+				(ThemeDisplay)portletRequest.getAttribute(
+					WebKeys.THEME_DISPLAY);
+
+			_rolePermission.check(
+				themeDisplay.getPermissionChecker(),
+				ParamUtil.getLong(portletRequest, "roleId"),
+				ActionKeys.ASSIGN_MEMBERS);
+		}
+
+		super.checkPermissions(portletRequest);
+	}
+
 	@Deactivate
 	protected void deactivate() {
 		_personalMenuEntryServiceTrackerList.close();
@@ -548,6 +570,13 @@ public class RolesAdminPortlet extends MVCPortlet {
 	protected void doDispatch(
 			RenderRequest renderRequest, RenderResponse renderResponse)
 		throws IOException, PortletException {
+
+		try {
+			checkPermissions(renderRequest);
+		}
+		catch (Exception exception) {
+			SessionErrors.add(renderRequest, exception.getClass(), exception);
+		}
 
 		setAttributes(renderRequest);
 
@@ -873,6 +902,11 @@ public class RolesAdminPortlet extends MVCPortlet {
 
 	private ResourcePermissionService _resourcePermissionService;
 	private RoleLocalService _roleLocalService;
+
+	@Reference
+	private RolePermission _rolePermission;
+
+	@Reference
 	private RoleService _roleService;
 
 	@Reference
