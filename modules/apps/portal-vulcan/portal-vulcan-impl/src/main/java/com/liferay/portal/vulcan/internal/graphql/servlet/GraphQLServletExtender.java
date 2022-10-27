@@ -26,6 +26,7 @@ import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.HashMapDictionary;
+import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -38,6 +39,7 @@ import com.liferay.portal.vulcan.internal.graphql.data.fetcher.LiferayMethodData
 import com.liferay.portal.vulcan.internal.graphql.data.processor.LiferayMethodDataFetchingProcessor;
 import com.liferay.portal.vulcan.internal.graphql.util.GraphQLUtil;
 import com.liferay.portal.vulcan.multipart.MultipartBody;
+import com.liferay.portal.vulcan.util.TransformUtil;
 
 import graphql.ExceptionWhileDataFetching;
 import graphql.GraphQLError;
@@ -958,6 +960,26 @@ public class GraphQLServletExtender {
 				continue;
 			}
 
+			Object query = function.apply(servletData);
+
+			Class<?> clazz = query.getClass();
+
+			List<Method> methods = TransformUtil.transformToList(
+				clazz.getMethods(),
+				method -> {
+					if (_isMethodEnabled(
+							configurations, method, servletData.getPath())) {
+
+						return method;
+					}
+
+					return null;
+				});
+
+			if (ListUtil.isEmpty(methods)) {
+				continue;
+			}
+
 			GraphQLObjectType.Builder builder = new GraphQLObjectType.Builder();
 
 			String prefix = "";
@@ -972,19 +994,7 @@ public class GraphQLServletExtender {
 			GraphQLCodeRegistry.Builder graphQLCodeRegistryBuilder =
 				processingElementsContainer.getCodeRegistryBuilder();
 
-			Object query = function.apply(servletData);
-
-			Class<?> clazz = query.getClass();
-
-			Method[] methods = clazz.getMethods();
-
 			for (Method method : methods) {
-				if (!_isMethodEnabled(
-						configurations, method, servletData.getPath())) {
-
-					continue;
-				}
-
 				builder.field(
 					_graphQLFieldRetriever.getField(
 						clazz.getSimpleName(), method,
