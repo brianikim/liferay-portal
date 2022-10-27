@@ -52,9 +52,7 @@ import com.liferay.portal.kernel.model.GroupConstants;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.portlet.LiferayPortletURL;
-import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.portlet.PortletURLFactoryUtil;
-import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactory;
 import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactoryUtil;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.service.GroupServiceUtil;
@@ -568,18 +566,6 @@ public class JournalEditArticleDisplayContext {
 		return _defaultArticleLanguageId;
 	}
 
-	public String getEditArticleURL() {
-		PortletURL editArticleURL = _liferayPortletResponse.createRenderURL();
-
-		editArticleURL.setParameter("redirect", getRedirect());
-		editArticleURL.setParameter("mvcPath", "/edit_article.jsp");
-		editArticleURL.setParameter("groupId", String.valueOf(getGroupId()));
-		editArticleURL.setParameter("articleId", getArticleId());
-		editArticleURL.setParameter("version", String.valueOf(getVersion()));
-
-		return editArticleURL.toString();
-	}
-
 	public long getFolderId() {
 		if (_folderId != null) {
 			return _folderId;
@@ -782,14 +768,6 @@ public class JournalEditArticleDisplayContext {
 		return JournalFolderPermission.contains(
 			_themeDisplay.getPermissionChecker(), getGroupId(), getFolderId(),
 			ActionKeys.ADD_ARTICLE);
-	}
-
-	public boolean isApproved() {
-		if ((_article != null) && (getVersion() > 0)) {
-			return _article.isApproved();
-		}
-
-		return false;
 	}
 
 	public boolean isChangeStructure() {
