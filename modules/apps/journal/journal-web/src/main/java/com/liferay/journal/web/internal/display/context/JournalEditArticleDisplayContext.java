@@ -64,7 +64,7 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
-import com.liferay.portal.kernel.util.HttpComponentsUtil;
+import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
@@ -430,7 +430,7 @@ public class JournalEditArticleDisplayContext {
 						"version", String.valueOf(_article.getVersion()));
 				}
 
-				return HttpComponentsUtil.addParameter(
+				return HttpUtil.addParameter(
 					getPagePreviewURL.toString(), "p_l_mode",
 					Constants.PREVIEW);
 			}
