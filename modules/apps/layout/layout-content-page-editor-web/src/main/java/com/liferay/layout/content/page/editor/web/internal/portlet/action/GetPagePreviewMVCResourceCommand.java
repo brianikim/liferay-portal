@@ -46,7 +46,6 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.segments.constants.SegmentsExperienceConstants;
 import com.liferay.segments.constants.SegmentsWebKeys;
-import com.liferay.segments.service.SegmentsExperienceLocalService;
 import com.liferay.taglib.util.ThemeUtil;
 
 import javax.portlet.ResourceRequest;
@@ -127,8 +126,7 @@ public class GetPagePreviewMVCResourceCommand extends BaseMVCResourceCommand {
 		try {
 			long segmentsExperienceId = ParamUtil.getLong(
 				resourceRequest, "segmentsExperienceId",
-				_segmentsExperienceLocalService.
-					fetchDefaultSegmentsExperienceId(selPlid));
+				SegmentsExperienceConstants.ID_DEFAULT);
 
 			resourceRequest.setAttribute(
 				SegmentsWebKeys.SEGMENTS_EXPERIENCE_IDS,
@@ -248,9 +246,6 @@ public class GetPagePreviewMVCResourceCommand extends BaseMVCResourceCommand {
 
 	@Reference
 	private Portal _portal;
-
-	@Reference
-	private SegmentsExperienceLocalService _segmentsExperienceLocalService;
 
 	@Reference
 	private UserLocalService _userLocalService;
