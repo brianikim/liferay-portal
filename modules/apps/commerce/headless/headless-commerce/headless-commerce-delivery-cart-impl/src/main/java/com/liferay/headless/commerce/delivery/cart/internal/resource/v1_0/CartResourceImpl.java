@@ -14,6 +14,7 @@
 
 package com.liferay.headless.commerce.delivery.cart.internal.resource.v1_0;
 
+import com.liferay.account.model.AccountEntry;
 import com.liferay.commerce.account.model.CommerceAccount;
 import com.liferay.commerce.account.service.CommerceAccountService;
 import com.liferay.commerce.constants.CommerceAddressConstants;
@@ -310,8 +311,8 @@ public class CartResourceImpl extends BaseCartResourceImpl {
 			commerceOrder.getCompanyId(), address.getCountryISOCode());
 
 		return _commerceAddressService.addCommerceAddress(
-			commerceOrder.getModelClassName(),
-			commerceOrder.getCommerceOrderId(), address.getName(),
+			AccountEntry.class.getName(),
+			commerceOrder.getCommerceAccountId(), address.getName(),
 			address.getDescription(), address.getStreet1(),
 			address.getStreet2(), address.getStreet3(), address.getCity(),
 			address.getZip(), _getRegionId(null, country, address),
