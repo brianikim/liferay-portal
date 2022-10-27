@@ -2446,7 +2446,9 @@ public class JournalArticleLocalServiceImpl
 		JournalArticle article = journalArticlePersistence.findByG_A_V(
 			groupId, articleId, version);
 
-		if (article.isExpired()) {
+		boolean previewMode = Objects.equals(viewMode, Constants.PREVIEW);
+
+		if (article.isExpired() && !previewMode) {
 			Date expirationDate = article.getExpirationDate();
 
 			if ((expirationDate != null) && expirationDate.before(now)) {
@@ -2456,9 +2458,7 @@ public class JournalArticleLocalServiceImpl
 
 		Date displayDate = article.getDisplayDate();
 
-		if ((displayDate != null) && displayDate.after(now) &&
-			!Objects.equals(viewMode, Constants.PREVIEW)) {
-
+		if ((displayDate != null) && displayDate.after(now) && !previewMode) {
 			return null;
 		}
 
