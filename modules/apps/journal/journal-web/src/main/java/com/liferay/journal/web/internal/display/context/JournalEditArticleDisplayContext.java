@@ -87,6 +87,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import javax.portlet.ActionRequest;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletURL;
 import javax.portlet.RenderResponse;
@@ -436,11 +437,16 @@ public class JournalEditArticleDisplayContext {
 			}
 		).put(
 			"saveAsDraftURL",
-			PortletURLBuilder.createActionURL(
-				_liferayPortletResponse
-			).setActionName(
-				"/journal/save_as_draft_article"
-			).buildString()
+			() -> {
+				PortletURL saveAsDraftURL =
+					_liferayPortletResponse.createActionURL();
+
+				saveAsDraftURL.setParameter(
+					ActionRequest.ACTION_NAME,
+					"/journal/save_as_draft_article");
+
+				return saveAsDraftURL.toString();
+			}
 		).put(
 			"selectDisplayPageEventName", selectDisplayPageEventName
 		).put(
@@ -458,13 +464,14 @@ public class JournalEditArticleDisplayContext {
 					setDesiredItemSelectorReturnTypes(
 						new UUIDItemSelectorReturnType());
 
-				return PortletURLBuilder.create(
+				PortletURL selectDisplayPageURL =
 					_itemSelector.getItemSelectorURL(
 						RequestBackedPortletURLFactoryUtil.create(
 							_httpServletRequest),
 						selectDisplayPageEventName,
-						assetDisplayPageSelectorCriterion)
-				).buildString();
+						assetDisplayPageSelectorCriterion);
+
+				return selectDisplayPageURL.toString();
 			}
 		).put(
 			"selectSiteEventName", selectSiteEventName
