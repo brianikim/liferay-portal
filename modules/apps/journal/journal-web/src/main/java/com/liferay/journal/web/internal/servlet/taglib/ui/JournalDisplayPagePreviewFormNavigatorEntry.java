@@ -46,11 +46,6 @@ public class JournalDisplayPagePreviewFormNavigatorEntry
 	}
 
 	@Override
-	public ServletContext getServletContext() {
-		return _servletContext;
-	}
-
-	@Override
 	public boolean isVisible(User user, JournalArticle article) {
 		if (GetterUtil.getBoolean(PropsUtil.get("feature.flag.LPS-163074")) &&
 			(_isDepotArticle(article) || isGlobalScopeArticle(article))) {
@@ -59,6 +54,14 @@ public class JournalDisplayPagePreviewFormNavigatorEntry
 		}
 
 		return false;
+	}
+
+	@Override
+	@Reference(
+		target = "(osgi.web.symbolicname=com.liferay.journal.web)", unbind = "-"
+	)
+	public void setServletContext(ServletContext servletContext) {
+		super.setServletContext(servletContext);
 	}
 
 	@Override
@@ -91,8 +94,5 @@ public class JournalDisplayPagePreviewFormNavigatorEntry
 
 	@Reference
 	private GroupLocalService _groupLocalService;
-
-	@Reference(target = "(osgi.web.symbolicname=com.liferay.journal.web)")
-	private ServletContext _servletContext;
 
 }
