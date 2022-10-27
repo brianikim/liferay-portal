@@ -193,6 +193,8 @@ public class JournalPortlet extends MVCPortlet {
 			JournalDDMEditorConfiguration.class.getName(),
 			_journalDDMEditorConfiguration);
 		resourceRequest.setAttribute(
+			JournalWebKeys.ITEM_SELECTOR, _itemSelector);
+		resourceRequest.setAttribute(
 			JournalWebConfiguration.class.getName(), _journalWebConfiguration);
 		resourceRequest.setAttribute(TrashWebKeys.TRASH_HELPER, _trashHelper);
 
