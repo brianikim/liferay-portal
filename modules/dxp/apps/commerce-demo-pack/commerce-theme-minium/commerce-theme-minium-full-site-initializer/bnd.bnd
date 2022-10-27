@@ -2,12 +2,12 @@ Bundle-Name: Liferay Commerce Theme Minium Full Site Initializer
 Bundle-SymbolicName: com.liferay.commerce.theme.minium.full.site.initializer
 Bundle-Version: 3.0.17
 Import-Package:\
-	com.liferay.asset.kernel.service;version="[2.0.0,99.0.0)",\
-	com.liferay.commerce.account.service;version="[3.0.0,99.0.0)",\
-	com.liferay.commerce.product.service;version="[12.0.0,99.0.0)",\
-	com.liferay.portal.kernel.security.auth;version="[2.0.0,99.0.0)",\
-	com.liferay.portal.kernel.service;version="[4.0.0,99.0.0)",\
-	com.liferay.portal.kernel.util;version="[10.0.0,99.0.0)",\
+	com.liferay.asset.kernel.service;version="[2.0.0,9999.0.0)",\
+	com.liferay.commerce.account.service;version="[3.0.0,9999.0.0)",\
+	com.liferay.commerce.product.service;version="[12.0.0,9999.0.0)",\
+	com.liferay.portal.kernel.security.auth;version="[2.0.0,9999.0.0)",\
+	com.liferay.portal.kernel.service;version="[4.0.0,9999.0.0)",\
+	com.liferay.portal.kernel.util;version="[10.0.0,9999.0.0)",\
 	\
 	*
 Liferay-Enterprise-App: dxp.only=true;product.id=9a473157-06a6-44b6-b017-a360ffaf5f38
