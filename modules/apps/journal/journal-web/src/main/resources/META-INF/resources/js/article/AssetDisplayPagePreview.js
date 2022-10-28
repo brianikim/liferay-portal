@@ -22,7 +22,6 @@ import {
 	openModal,
 	openSelectionModal,
 	openToast,
-	sub,
 } from 'frontend-js-web';
 import React, {useMemo, useState} from 'react';
 
@@ -88,7 +87,7 @@ export default function AssetDisplayPagePreview({
 				{sitesCount > sites.length && (
 					<>
 						<ClayDropDown.Caption>
-							{sub(
+							{Liferay.Util.sub(
 								Liferay.Language.get('showing-x-of-x-items'),
 								sites.length,
 								sitesCount
@@ -177,7 +176,7 @@ function AssetDisplayPageSelector({
 				});
 			},
 			selectEventName: selectAssetDisplayPageEventName,
-			title: sub(
+			title: Liferay.Util.sub(
 				Liferay.Language.get('select-x'),
 				Liferay.Language.get('display-page')
 			),
@@ -197,7 +196,7 @@ function AssetDisplayPageSelector({
 						<ClayInput
 							disabled={!selectedSite?.groupId}
 							onClick={() => openAssetDisplayPageSelector()}
-							placeholder={sub(
+							placeholder={Liferay.Util.sub(
 								Liferay.Language.get('select-x'),
 								Liferay.Language.get('display-page')
 							)}
@@ -214,7 +213,7 @@ function AssetDisplayPageSelector({
 							monospaced
 							onClick={() => openAssetDisplayPageSelector()}
 							small
-							title={sub(
+							title={Liferay.Util.sub(
 								assetDisplayPageSelected
 									? Liferay.Language.get('change-x')
 									: Liferay.Language.get('select-x'),
