@@ -23,6 +23,8 @@ import com.liferay.fragment.processor.DefaultFragmentEntryProcessorContext;
 import com.liferay.fragment.processor.FragmentEntryProcessorContext;
 import com.liferay.fragment.processor.FragmentEntryProcessorRegistry;
 import com.liferay.fragment.service.base.FragmentEntryLinkLocalServiceBaseImpl;
+import com.liferay.layout.content.page.editor.listener.ContentPageEditorListener;
+import com.liferay.layout.content.page.editor.listener.ContentPageEditorListenerTracker;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -743,6 +745,16 @@ public class FragmentEntryLinkLocalServiceImpl
 			fragmentEntryLink);
 
 		_updateFragmentEntryLinkLayout(fragmentEntryLink);
+
+		List<ContentPageEditorListener> contentPageEditorListeners =
+			_contentPageEditorListenerTracker.getContentPageEditorListeners();
+
+		for (ContentPageEditorListener contentPageEditorListener :
+				contentPageEditorListeners) {
+
+			contentPageEditorListener.onUpdateFragmentEntryLink(
+				fragmentEntryLink);
+		}
 	}
 
 	private String _getProcessedHTML(
@@ -968,6 +980,9 @@ public class FragmentEntryLinkLocalServiceImpl
 
 	@Reference
 	private ClassNameLocalService _classNameLocalService;
+
+	@Reference
+	private ContentPageEditorListenerTracker _contentPageEditorListenerTracker;
 
 	@Reference
 	private DLURLHelper _dlURLHelper;
