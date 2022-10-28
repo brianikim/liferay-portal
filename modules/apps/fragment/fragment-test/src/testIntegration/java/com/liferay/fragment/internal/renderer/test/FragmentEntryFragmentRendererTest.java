@@ -33,6 +33,8 @@ import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutSet;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
+import com.liferay.portal.kernel.service.ClassNameLocalService;
+import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
@@ -49,6 +51,7 @@ import com.liferay.portal.struts.TilesUtil;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
+import com.liferay.segments.constants.SegmentsExperienceConstants;
 import com.liferay.segments.service.SegmentsExperienceLocalService;
 
 import java.util.HashMap;
@@ -85,10 +88,6 @@ public class FragmentEntryFragmentRendererTest {
 
 		_layout = LayoutTestUtil.addTypeContentLayout(_group);
 
-		_defaultSegmentsExperienceId =
-			_segmentsExperienceLocalService.fetchDefaultSegmentsExperienceId(
-				_layout.getPlid());
-
 		_serviceContext = ServiceContextTestUtil.getServiceContext(
 			_group.getGroupId());
 	}
@@ -101,11 +100,10 @@ public class FragmentEntryFragmentRendererTest {
 			_fragmentEntryLinkLocalService.addFragmentEntryLink(
 				TestPropsValues.getUserId(), _group.getGroupId(), 0,
 				fragmentEntry.getFragmentEntryId(),
-				_defaultSegmentsExperienceId, _layout.getPlid(),
+				SegmentsExperienceConstants.ID_DEFAULT, _layout.getPlid(),
 				fragmentEntry.getCss(), fragmentEntry.getHtml(),
 				fragmentEntry.getJs(), fragmentEntry.getConfiguration(), null,
-				StringPool.BLANK, 0, null, fragmentEntry.getType(),
-				_serviceContext);
+				StringPool.BLANK, 0, null, _serviceContext);
 
 		DefaultFragmentRendererContext defaultFragmentRendererContext =
 			new DefaultFragmentRendererContext(fragmentEntryLink);
@@ -133,11 +131,10 @@ public class FragmentEntryFragmentRendererTest {
 			_fragmentEntryLinkLocalService.addFragmentEntryLink(
 				TestPropsValues.getUserId(), _group.getGroupId(), 0,
 				fragmentEntry.getFragmentEntryId(),
-				_defaultSegmentsExperienceId, _layout.getPlid(),
+				SegmentsExperienceConstants.ID_DEFAULT, _layout.getPlid(),
 				fragmentEntry.getCss(), fragmentEntry.getHtml(),
 				fragmentEntry.getJs(), fragmentEntry.getConfiguration(), null,
-				StringPool.BLANK, 0, null, fragmentEntry.getType(),
-				_serviceContext);
+				StringPool.BLANK, 0, null, _serviceContext);
 
 		DefaultFragmentRendererContext defaultFragmentRendererContext =
 			new DefaultFragmentRendererContext(fragmentEntryLink);
@@ -164,11 +161,10 @@ public class FragmentEntryFragmentRendererTest {
 			_fragmentEntryLinkLocalService.addFragmentEntryLink(
 				TestPropsValues.getUserId(), _group.getGroupId(), 0,
 				fragmentEntry.getFragmentEntryId(),
-				_defaultSegmentsExperienceId, _layout.getPlid(),
+				SegmentsExperienceConstants.ID_DEFAULT, _layout.getPlid(),
 				fragmentEntry.getCss(), fragmentEntry.getHtml(),
 				fragmentEntry.getJs(), fragmentEntry.getConfiguration(), null,
-				StringPool.BLANK, 0, null, fragmentEntry.getType(),
-				_serviceContext);
+				StringPool.BLANK, 0, null, _serviceContext);
 
 		DefaultFragmentRendererContext defaultFragmentRendererContext =
 			new DefaultFragmentRendererContext(fragmentEntryLink);
@@ -184,8 +180,9 @@ public class FragmentEntryFragmentRendererTest {
 			fragmentEntry.getFragmentCollectionId(), fragmentEntry.getName(),
 			fragmentEntry.getCss(), "Updated Fragment Entry HTML",
 			fragmentEntry.getJs(), fragmentEntry.isCacheable(),
-			fragmentEntry.getConfiguration(), fragmentEntry.getIcon(),
-			fragmentEntry.getStatus(), WorkflowConstants.STATUS_APPROVED);
+			fragmentEntry.getConfiguration(),
+			fragmentEntry.getPreviewFileEntryId(),
+			WorkflowConstants.STATUS_APPROVED);
 
 		_fragmentEntryLinkLocalService.updateLatestChanges(
 			fragmentEntryLink.getFragmentEntryLinkId());
@@ -219,9 +216,9 @@ public class FragmentEntryFragmentRendererTest {
 			TestPropsValues.getUserId(), _group.getGroupId(),
 			fragmentCollection.getFragmentCollectionId(), null,
 			RandomTestUtil.randomString(), StringPool.BLANK,
-			"Fragment Entry HTML", StringPool.BLANK, cacheable, null, null, 0,
-			FragmentConstants.TYPE_COMPONENT, null,
-			WorkflowConstants.STATUS_APPROVED, _serviceContext);
+			"Fragment Entry HTML", StringPool.BLANK, cacheable, null, 0,
+			FragmentConstants.TYPE_COMPONENT, WorkflowConstants.STATUS_APPROVED,
+			_serviceContext);
 	}
 
 	private HttpServletRequest _getMockHttpServletRequest() throws Exception {
@@ -254,6 +251,9 @@ public class FragmentEntryFragmentRendererTest {
 
 		ThemeDisplay themeDisplay = new ThemeDisplay();
 
+		themeDisplay.setCompany(
+			_companyLocalService.getCompany(TestPropsValues.getCompanyId()));
+
 		LayoutSet layoutSet = _group.getPublicLayoutSet();
 
 		themeDisplay.setLookAndFeel(
@@ -271,7 +271,11 @@ public class FragmentEntryFragmentRendererTest {
 		return themeDisplay;
 	}
 
-	private long _defaultSegmentsExperienceId;
+	@Inject
+	private ClassNameLocalService _classNameLocalService;
+
+	@Inject
+	private CompanyLocalService _companyLocalService;
 
 	@Inject
 	private FragmentEntryLinkLocalService _fragmentEntryLinkLocalService;
