@@ -1483,7 +1483,7 @@ public class PortletDataContextImpl implements PortletDataContext {
 	public void importPortletPermissions(String resourceName)
 		throws PortalException {
 
-		if (getScopeGroupId() != getGroupId()) {
+		if (getGroupId() != getScopeGroupId()) {
 			return;
 		}
 
