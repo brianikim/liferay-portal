@@ -71,6 +71,12 @@ definition {
 				value1 = "${paginationDelta}");
 		}
 
+		if ("${disableHighlighting}" == "true") {
+			Uncheck(
+				checkboxName = "Enable Highlighting",
+				locator1 = "Checkbox#ANY_CHECKBOX");
+		}
+
 		PortletEntry.save();
 
 		IFrame.closeFrame();
