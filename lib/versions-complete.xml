@@ -4843,7 +4843,7 @@
 			</library>
 			<library>
 				<file-name>com.liferay.portal.template.velocity.jar!org.apache.velocity.jar</file-name>
-				<version>1.6.4.LIFERAY-PATCHED-1</version>
+				<version>1.6.4.LIFERAY-PATCHED-2</version>
 				<project-name>org.apache.velocity</project-name>
 				<licenses>
 					<license>
