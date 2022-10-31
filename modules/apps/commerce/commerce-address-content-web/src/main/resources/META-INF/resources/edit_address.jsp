@@ -107,7 +107,7 @@ CommerceAccount commerceAccount = commerceAddressDisplayContext.getCommerceAccou
 
 				<aui:input checked="<%= (commerceAddress.getType() == CommerceAddressConstants.ADDRESS_TYPE_BILLING) || (commerceAddress.getType() == CommerceAddressConstants.ADDRESS_TYPE_BILLING_AND_SHIPPING) %>" name="defaultBilling" type="checkbox" />
 
-				<aui:input checked="<%= (commerceAddress.getType() == CommerceAddressConstants.ADDRESS_TYPE_SHIPPING) || (commerceAddress.getType() == CommerceAddressConstants.ADDRESS_TYPE_BILLING_AND_SHIPPING) %>" name="defaultShipping" type="checkbox" />
+				<aui:input checked="<%= (commerceAddress.getType() == CommerceAddressConstants.ADDRESS_TYPE_BILLING_AND_SHIPPING) || (commerceAddress.getType() == CommerceAddressConstants.ADDRESS_TYPE_SHIPPING) %>" name="defaultShipping" type="checkbox" />
 			</div>
 		</aui:fieldset>
 
