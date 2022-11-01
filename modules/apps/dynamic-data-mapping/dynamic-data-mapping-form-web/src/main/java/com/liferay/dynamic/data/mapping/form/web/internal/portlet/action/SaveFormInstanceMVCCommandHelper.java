@@ -79,6 +79,10 @@ public class SaveFormInstanceMVCCommandHelper {
 			PortletRequest portletRequest, PortletResponse portletResponse)
 		throws Exception {
 
+		AuthTokenUtil.checkCSRFToken(
+			_portal.getHttpServletRequest(portletRequest),
+			SaveFormInstanceMVCCommandHelper.class.getName());
+
 		return saveFormInstance(portletRequest, portletResponse, false);
 	}
 
@@ -86,10 +90,6 @@ public class SaveFormInstanceMVCCommandHelper {
 			PortletRequest portletRequest, PortletResponse portletResponse,
 			boolean validateDDMFormFieldSettings)
 		throws Exception {
-
-		AuthTokenUtil.checkCSRFToken(
-			_portal.getHttpServletRequest(portletRequest),
-			SaveFormInstanceMVCCommandHelper.class.getName());
 
 		long formInstanceId = ParamUtil.getLong(
 			portletRequest, "formInstanceId");
