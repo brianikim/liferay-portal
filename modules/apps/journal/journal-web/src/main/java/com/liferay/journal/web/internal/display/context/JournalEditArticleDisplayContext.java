@@ -144,7 +144,7 @@ public class JournalEditArticleDisplayContext {
 						PortletRequest.RESOURCE_PHASE);
 
 				getPagePreviewURL.setResourceID(
-					"/layout_content_page_editor/get_page_preview");
+					"/content_layout/get_page_preview");
 
 				getPagePreviewURL.setParameter(
 					"className", JournalArticle.class.getName());
