@@ -52,6 +52,7 @@
 			&:not(:focus) {
 				~ .alloy-editor-placeholder {
 					border-left-color: #dbdde1;
+					border-width: 0 !important;
 					color: #b0b4bb;
 				}
 
