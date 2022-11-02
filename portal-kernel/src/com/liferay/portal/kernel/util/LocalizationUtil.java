@@ -400,6 +400,14 @@ public class LocalizationUtil {
 	}
 
 	public static String updateLocalization(
+		Map<Locale, String> localizationMap, String xml, String key,
+		String defaultLanguageId, boolean cdata) {
+
+		return getLocalization().updateLocalization(
+			localizationMap, xml, key, defaultLanguageId, cdata);
+	}
+
+	public static String updateLocalization(
 		String xml, String key, String value) {
 
 		return getLocalization().updateLocalization(xml, key, value);

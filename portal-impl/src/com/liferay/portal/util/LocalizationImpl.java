@@ -1122,6 +1122,15 @@ public class LocalizationImpl implements Localization {
 		Map<Locale, String> localizationMap, String xml, String key,
 		String defaultLanguageId) {
 
+		return updateLocalization(
+			localizationMap, xml, key, defaultLanguageId, false);
+	}
+
+	@Override
+	public String updateLocalization(
+		Map<Locale, String> localizationMap, String xml, String key,
+		String defaultLanguageId, boolean cdata) {
+
 		Set<Locale> availableLocales = LanguageUtil.getAvailableLocales();
 
 		if (Validator.isBlank(xml)) {
@@ -1142,7 +1151,7 @@ public class LocalizationImpl implements Localization {
 				return StringPool.BLANK;
 			}
 
-			return getXml(map, defaultLanguageId, key);
+			return getXml(map, defaultLanguageId, key, cdata);
 		}
 
 		for (Locale locale : availableLocales) {
