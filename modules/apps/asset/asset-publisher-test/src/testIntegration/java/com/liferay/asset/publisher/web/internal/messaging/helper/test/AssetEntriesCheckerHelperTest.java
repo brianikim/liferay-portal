@@ -88,9 +88,7 @@ public class AssetEntriesCheckerHelperTest {
 	public void testGetAssetEntries() throws Exception {
 		String portletId = LayoutTestUtil.addPortletToLayout(
 			_layout, AssetPublisherPortletKeys.ASSET_PUBLISHER);
-
 		AssetEntry assetEntry1 = _addAssetEntry();
-
 		AssetEntry assetEntry2 = _addAssetEntry();
 
 		_setPortletManualSelectionStylePreference(
@@ -216,18 +214,14 @@ public class AssetEntriesCheckerHelperTest {
 		ReflectionTestUtil.setFieldValue(
 			_assetEntriesCheckerHelper, "_assetEntryLocalService",
 			_assetEntryLocalService);
-
 		ReflectionTestUtil.setFieldValue(
 			_assetEntriesCheckerHelper, "_assetHelper", _assetHelper);
-
 		ReflectionTestUtil.setFieldValue(
 			_assetEntriesCheckerHelper, "_assetPublisherHelper",
 			_assetPublisherHelper);
-
 		ReflectionTestUtil.setFieldValue(
 			_assetEntriesCheckerHelper, "_configurationProvider",
 			_configurationProvider);
-
 		ReflectionTestUtil.setFieldValue(
 			_assetEntriesCheckerHelper, "_groupLocalService",
 			_groupLocalService);
