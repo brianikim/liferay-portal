@@ -550,7 +550,7 @@ public class CPDefinitionInfoItemFields {
 			"subscriptionEnabled"
 		).labelInfoLocalizedValue(
 			InfoLocalizedValue.localize(
-				CPDefinitionInfoItemFields.class, "subscription-enabled")
+				CPDefinitionInfoItemFields.class, "payment-subscription-enabled")
 		).build();
 	public static final InfoField<NumberInfoFieldType>
 		subscriptionLengthInfoField = BuilderHolder._builder.infoFieldType(
@@ -559,7 +559,7 @@ public class CPDefinitionInfoItemFields {
 			"subscriptionLength"
 		).labelInfoLocalizedValue(
 			InfoLocalizedValue.localize(
-				CPDefinitionInfoItemFields.class, "subscription-length")
+				CPDefinitionInfoItemFields.class, "payment-subscription-length")
 		).build();
 	public static final InfoField<TextInfoFieldType> subscriptionTypeInfoField =
 		BuilderHolder._builder.infoFieldType(
@@ -568,7 +568,7 @@ public class CPDefinitionInfoItemFields {
 			"subscriptionType"
 		).labelInfoLocalizedValue(
 			InfoLocalizedValue.localize(
-				CPDefinitionInfoItemFields.class, "subscription-type")
+				CPDefinitionInfoItemFields.class, "payment-subscription-type")
 		).build();
 	public static final InfoField<TextInfoFieldType>
 		subscriptionTypeSettingsInfoField =
@@ -579,7 +579,7 @@ public class CPDefinitionInfoItemFields {
 			).labelInfoLocalizedValue(
 				InfoLocalizedValue.localize(
 					CPDefinitionInfoItemFields.class,
-					"subscription-type-settings")
+					"payment-subscription-type-settings")
 			).build();
 	public static final InfoField<BooleanInfoFieldType> taxExemptInfoField =
 		BuilderHolder._builder.infoFieldType(
