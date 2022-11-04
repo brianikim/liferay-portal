@@ -791,23 +791,21 @@ public class RoleFinderImpl extends RoleFinderBaseImpl implements RoleFinder {
 			return 0;
 		}
 
-		FromStep fromStep = DSLQueryFactoryUtil.select(
-			DSLFunctionFactoryUtil.count(
-				RoleTable.INSTANCE.roleId
-			).as(
-				COUNT_COLUMN_NAME
-			));
-
-		DSLQuery dslQuery = _getOrderByStep(
-			fromStep, companyId, keywords, excludedNames, types,
-			excludedTeamRoleId, teamGroupId, inlineSQLHelper);
-
 		Session session = null;
 
 		try {
 			session = openSession();
 
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(dslQuery);
+			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(
+				_getOrderByStep(
+					DSLQueryFactoryUtil.select(
+						DSLFunctionFactoryUtil.count(
+							RoleTable.INSTANCE.roleId
+						).as(
+							COUNT_COLUMN_NAME
+						)),
+					companyId, keywords, excludedNames, types,
+					excludedTeamRoleId, teamGroupId, inlineSQLHelper));
 
 			sqlQuery.addScalar(COUNT_COLUMN_NAME, Type.LONG);
 
@@ -921,20 +919,18 @@ public class RoleFinderImpl extends RoleFinderBaseImpl implements RoleFinder {
 			return Collections.emptyList();
 		}
 
-		OrderByStep orderByStep = _getOrderByStep(
-			DSLQueryFactoryUtil.select(RoleTable.INSTANCE), companyId, keywords,
-			excludedNames, types, excludedTeamRoleId, teamGroupId,
-			inlineSQLHelper);
-
-		DSLQuery dslQuery = orderByStep.orderBy(
-			RoleTable.INSTANCE.name.ascending());
-
 		Session session = null;
 
 		try {
 			session = openSession();
 
-			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(dslQuery);
+			OrderByStep orderByStep = _getOrderByStep(
+				DSLQueryFactoryUtil.select(RoleTable.INSTANCE), companyId,
+				keywords, excludedNames, types, excludedTeamRoleId, teamGroupId,
+				inlineSQLHelper);
+
+			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(
+				orderByStep.orderBy(RoleTable.INSTANCE.name.ascending()));
 
 			sqlQuery.addEntity("Role_", RoleImpl.class);
 
