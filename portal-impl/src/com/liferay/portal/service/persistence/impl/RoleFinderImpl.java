@@ -1244,11 +1244,10 @@ public class RoleFinderImpl extends RoleFinderBaseImpl implements RoleFinder {
 		Predicate wherePredicate = RoleTable.INSTANCE.companyId.eq(companyId);
 
 		if (inlineSQLHelper && InlineSQLHelperUtil.isEnabled()) {
-			wherePredicate = Predicate.withParentheses(
-				wherePredicate.and(
-					InlineSQLHelperUtil.getPermissionWherePredicate(
-						Role.class, RoleTable.INSTANCE.roleId,
-						new long[] {0})));
+			wherePredicate = wherePredicate.and(
+				InlineSQLHelperUtil.getPermissionWherePredicate(
+					Role.class, RoleTable.INSTANCE.roleId, new long[] {0})
+			).withParentheses();
 		}
 
 		Predicate rolesWherePredicate = null;
@@ -1258,25 +1257,22 @@ public class RoleFinderImpl extends RoleFinderBaseImpl implements RoleFinder {
 		if (Validator.isNotNull(keywords)) {
 			String[] keywordsArray = CustomSQLUtil.keywords(keywords, true);
 
-			rolesWherePredicate = Predicate.withParentheses(
+			rolesWherePredicate = _getKeywordsPredicate(
+				RoleTable.INSTANCE.name, keywordsArray
+			).or(
+				_getKeywordsPredicate(RoleTable.INSTANCE.title, keywordsArray)
+			).or(
 				_getKeywordsPredicate(
-					RoleTable.INSTANCE.name, keywordsArray
-				).or(
-					_getKeywordsPredicate(
-						RoleTable.INSTANCE.title, keywordsArray)
-				).or(
-					_getKeywordsPredicate(
-						RoleTable.INSTANCE.description, keywordsArray)
-				));
+					RoleTable.INSTANCE.description, keywordsArray)
+			).withParentheses();
 
 			teamsSubqueryPredicate = teamsSubqueryPredicate.and(
-				Predicate.withParentheses(
+				_getKeywordsPredicate(
+					TeamTable.INSTANCE.name, keywordsArray
+				).or(
 					_getKeywordsPredicate(
-						TeamTable.INSTANCE.name, keywordsArray
-					).or(
-						_getKeywordsPredicate(
-							TeamTable.INSTANCE.description, keywordsArray)
-					)));
+						TeamTable.INSTANCE.description, keywordsArray)
+				).withParentheses());
 		}
 
 		if (ListUtil.isNotEmpty(excludedNames)) {
@@ -1289,12 +1285,12 @@ public class RoleFinderImpl extends RoleFinderBaseImpl implements RoleFinder {
 			}
 
 			if (rolesWherePredicate == null) {
-				rolesWherePredicate = Predicate.withParentheses(
-					excludedNamesWherePredicate);
+				rolesWherePredicate =
+					excludedNamesWherePredicate.withParentheses();
 			}
 			else {
 				rolesWherePredicate = rolesWherePredicate.and(
-					Predicate.withParentheses(excludedNamesWherePredicate));
+					excludedNamesWherePredicate.withParentheses());
 			}
 		}
 
@@ -1306,17 +1302,16 @@ public class RoleFinderImpl extends RoleFinderBaseImpl implements RoleFinder {
 		}
 
 		if (rolesWherePredicate == null) {
-			rolesWherePredicate = Predicate.withParentheses(
-				typesWherePredicate);
+			rolesWherePredicate = typesWherePredicate.withParentheses();
 		}
 		else {
 			rolesWherePredicate = rolesWherePredicate.and(
-				Predicate.withParentheses(typesWherePredicate));
+				typesWherePredicate.withParentheses());
 		}
 
 		if (rolesWherePredicate != null) {
 			wherePredicate = wherePredicate.and(
-				Predicate.withParentheses(rolesWherePredicate));
+				rolesWherePredicate.withParentheses());
 		}
 
 		DSLQuery teamsSubquery = DSLQueryFactoryUtil.select(
@@ -1338,7 +1333,7 @@ public class RoleFinderImpl extends RoleFinderBaseImpl implements RoleFinder {
 		return fromStep.from(
 			RoleTable.INSTANCE
 		).where(
-			wherePredicate.or(Predicate.withParentheses(teamsWherePredicate))
+			wherePredicate.or(teamsWherePredicate.withParentheses())
 		);
 	}
 
