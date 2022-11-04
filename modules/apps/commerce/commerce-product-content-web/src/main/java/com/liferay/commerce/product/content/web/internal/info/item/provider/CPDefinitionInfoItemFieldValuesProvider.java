@@ -401,6 +401,25 @@ public class CPDefinitionInfoItemFieldValuesProvider
 					).build()));
 			cpDefinitionInfoFieldValues.add(
 				new InfoFieldValue<>(
+					CPDefinitionInfoItemFields.
+						paymentSubscriptionEnabledInfoField,
+					cpDefinition.isSubscriptionEnabled()));
+			cpDefinitionInfoFieldValues.add(
+				new InfoFieldValue<>(
+					CPDefinitionInfoItemFields.
+						paymentSubscriptionLengthInfoField,
+					cpDefinition.getSubscriptionLength()));
+			cpDefinitionInfoFieldValues.add(
+				new InfoFieldValue<>(
+					CPDefinitionInfoItemFields.paymentSubscriptionTypeInfoField,
+					cpDefinition.getSubscriptionType()));
+			cpDefinitionInfoFieldValues.add(
+				new InfoFieldValue<>(
+					CPDefinitionInfoItemFields.
+						paymentSubscriptionTypeSettingsInfoField,
+					cpDefinition.getSubscriptionTypeSettings()));
+			cpDefinitionInfoFieldValues.add(
+				new InfoFieldValue<>(
 					CPDefinitionInfoItemFields.pendingInfoField,
 					cpDefinition.isPending()));
 			cpDefinitionInfoFieldValues.add(
@@ -465,23 +484,6 @@ public class CPDefinitionInfoItemFieldValuesProvider
 				new InfoFieldValue<>(
 					CPDefinitionInfoItemFields.statusDateInfoField,
 					cpDefinition.getStatusDate()));
-			cpDefinitionInfoFieldValues.add(
-				new InfoFieldValue<>(
-					CPDefinitionInfoItemFields.subscriptionEnabledInfoField,
-					cpDefinition.isSubscriptionEnabled()));
-			cpDefinitionInfoFieldValues.add(
-				new InfoFieldValue<>(
-					CPDefinitionInfoItemFields.subscriptionLengthInfoField,
-					cpDefinition.getSubscriptionLength()));
-			cpDefinitionInfoFieldValues.add(
-				new InfoFieldValue<>(
-					CPDefinitionInfoItemFields.subscriptionTypeInfoField,
-					cpDefinition.getSubscriptionType()));
-			cpDefinitionInfoFieldValues.add(
-				new InfoFieldValue<>(
-					CPDefinitionInfoItemFields.
-						subscriptionTypeSettingsInfoField,
-					cpDefinition.getSubscriptionTypeSettings()));
 			cpDefinitionInfoFieldValues.add(
 				new InfoFieldValue<>(
 					CPDefinitionInfoItemFields.taxExemptInfoField,

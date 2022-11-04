@@ -176,6 +176,14 @@ public class CPDefinitionInfoItemFormProvider
 		).infoFieldSetEntry(
 			CPDefinitionInfoItemFields.incompleteInfoField
 		).infoFieldSetEntry(
+			CPDefinitionInfoItemFields.paymentSubscriptionEnabledInfoField
+		).infoFieldSetEntry(
+			CPDefinitionInfoItemFields.paymentSubscriptionLengthInfoField
+		).infoFieldSetEntry(
+			CPDefinitionInfoItemFields.paymentSubscriptionTypeInfoField
+		).infoFieldSetEntry(
+			CPDefinitionInfoItemFields.paymentSubscriptionTypeSettingsInfoField
+		).infoFieldSetEntry(
 			CPDefinitionInfoItemFields.pendingInfoField
 		).infoFieldSetEntry(
 			CPDefinitionInfoItemFields.publishedInfoField
@@ -199,14 +207,6 @@ public class CPDefinitionInfoItemFormProvider
 			CPDefinitionInfoItemFields.statusByUserUuidInfoField
 		).infoFieldSetEntry(
 			CPDefinitionInfoItemFields.statusDateInfoField
-		).infoFieldSetEntry(
-			CPDefinitionInfoItemFields.subscriptionEnabledInfoField
-		).infoFieldSetEntry(
-			CPDefinitionInfoItemFields.subscriptionLengthInfoField
-		).infoFieldSetEntry(
-			CPDefinitionInfoItemFields.subscriptionTypeInfoField
-		).infoFieldSetEntry(
-			CPDefinitionInfoItemFields.subscriptionTypeSettingsInfoField
 		).infoFieldSetEntry(
 			CPDefinitionInfoItemFields.taxExemptInfoField
 		).infoFieldSetEntry(
