@@ -187,6 +187,7 @@
 					initialChildren: <%= PropsValues.LAYOUT_MANAGE_PAGES_INITIAL_CHILDREN %>,
 					mode: '<%= HtmlUtil.escapeJS(mode) %>',
 					p_l_id: <%= themeDisplay.getPlid() %>,
+					portletId: '<%= themeDisplay.getPpid() %>',
 					portletNamespace: '<portlet:namespace />',
 					repeatable: <%= repeatable %>,
 					requestedLocale:
