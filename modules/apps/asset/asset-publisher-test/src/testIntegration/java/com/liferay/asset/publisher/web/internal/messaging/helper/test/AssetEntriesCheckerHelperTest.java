@@ -79,7 +79,7 @@ public class AssetEntriesCheckerHelperTest {
 	public void setUp() throws Exception {
 		_group = GroupTestUtil.addGroup();
 
-		_layout = LayoutTestUtil.addTypePortletLayout(_group.getGroupId());
+		_layout = LayoutTestUtil.addLayout(_group.getGroupId());
 
 		_setUpAssetEntriesCheckerHelper();
 	}
@@ -204,7 +204,7 @@ public class AssetEntriesCheckerHelperTest {
 			assetPublisherWebBundle);
 
 		Class<?> clazz = assetPublisherWebBundle.loadClass(
-			"com.liferay.asset.publisher.web.internal.messaging.helper." +
+			"com.liferay.asset.publisher.web.internal.messaging." +
 				"AssetEntriesCheckerHelper");
 
 		Constructor<?> constructor = clazz.getConstructor();
