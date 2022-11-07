@@ -20,7 +20,7 @@
 		"dynamic-data-mapping-form-renderer": "*",
 		"frontend-js-react-web": "*",
 		"frontend-js-web": "*",
-		"moment": "^2.24.0",
+		"moment": "2.29.4",
 		"path-to-regexp": "3.0.0",
 		"prop-types": "15.7.2",
 		"qs": "6.7.0",
