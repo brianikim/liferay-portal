@@ -532,6 +532,44 @@ definition {
 		Elasticsearch.viewClusterStatus(clusterStatus = "\"cluster_name\" : \"LiferayElasticsearchCluster1\"");
 	}
 
+	@description = "LPS-167308 - Assure that search is still functional after ElasticSearch is redeployed"
+	@priority = "3"
+	test SearchAfterRedeployElasticSearchConnector {
+		property test.assert.warning.exceptions = "true";
+		property test.name.skip.portal.instance = "Elasticsearch7#SearchAfterRedeployElasticSearchConnector";
+
+		GogoShell.openGogoShellAdmin();
+
+		var moduleID = GogoShell.getModuleID(moduleName = "com.liferay.portal.search.elasticsearch7.impl");
+
+		GogoShell.stopModule(moduleID = "${moduleID}");
+
+		GogoShell.viewModuleStatus(
+			moduleName = "com.liferay.portal.search.elasticsearch7.impl",
+			moduleStatus = "Resolved");
+
+		GogoShell.startModule(moduleID = "${moduleID}");
+
+		GogoShell.viewModuleStatus(
+			moduleName = "com.liferay.portal.search.elasticsearch7.impl",
+			moduleStatus = "Active");
+
+		ApplicationsMenu.gotoPortlet( 
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Search");
+
+		SearchAdministration.executeSearchActions(actionsDescription = "Reindex all search indexes.");
+
+		Navigator.gotoPage(pageName = "Home");
+
+		SearchPortlets.searchEmbedded(searchTerm = "test");
+
+		AssertElementPresent(
+			key_searchAssetTitle = "Test Test",
+			locator1 = "SearchResults#ASSET_ENTRY_TABLE_TITLE");
+	}
+
 	test SearchWithNonLiferayIndex {
 		property embedded.elasticsearch.only = "true";
 		property test.name.skip.portal.instance = "Elasticsearch7#SearchWithNonLiferayIndex";
