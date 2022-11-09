@@ -1707,9 +1707,8 @@ public class ExpandoValueLocalServiceImpl
 
 		if (value == null) {
 			if (row == null) {
-				long rowId = counterLocalService.increment();
-
-				row = expandoRowPersistence.create(rowId);
+				row = expandoRowPersistence.create(
+					counterLocalService.increment());
 
 				row.setCompanyId(companyId);
 				row.setModifiedDate(new Date());
@@ -1719,9 +1718,8 @@ public class ExpandoValueLocalServiceImpl
 				row = expandoRowPersistence.update(row);
 			}
 
-			long valueId = counterLocalService.increment();
-
-			value = expandoValuePersistence.create(valueId);
+			value = expandoValuePersistence.create(
+				counterLocalService.increment());
 
 			value.setCompanyId(companyId);
 			value.setTableId(tableId);
