@@ -92,8 +92,8 @@ public class AssetListAssetEntryProviderTest {
 		AssetListEntry assetListEntry =
 			_assetListEntryLocalService.addAssetListEntry(
 				TestPropsValues.getUserId(), _group.getGroupId(),
-				"Dynamic title", AssetListEntryTypeConstants.TYPE_DYNAMIC,
-				null, _serviceContext);
+				"Dynamic title", AssetListEntryTypeConstants.TYPE_DYNAMIC, null,
+				_serviceContext);
 
 		User userTest = TestPropsValues.getUser();
 
@@ -102,9 +102,8 @@ public class AssetListAssetEntryProviderTest {
 		User user = UserTestUtil.addUser(
 			TestPropsValues.getCompanyId(), TestPropsValues.getUserId(),
 			StringPool.BLANK, userName + "@liferay.com", userName,
-			LocaleUtil.getDefault(), userName,
-			RandomTestUtil.randomString(), null,
-			ServiceContextTestUtil.getServiceContext());
+			LocaleUtil.getDefault(), userName, RandomTestUtil.randomString(),
+			null, ServiceContextTestUtil.getServiceContext());
 
 		SegmentsEntry segmentsEntry1 = _addSegmentsEntryByFirstName(
 			_group.getGroupId(), userTest);
@@ -129,15 +128,13 @@ public class AssetListAssetEntryProviderTest {
 
 		AssetListTestUtil.addAssetListEntrySegmentsEntryRel(
 			_group.getGroupId(), assetListEntry,
-			segmentsEntry2.getSegmentsEntryId(),
-			_getTypeSettings(userName));
+			segmentsEntry2.getSegmentsEntryId(), _getTypeSettings(userName));
 
 		List<AssetEntry> assetEntries =
 			_assetListAssetEntryProvider.getAssetEntries(
 				assetListEntry, segmentsEntryIds);
 
-		Assert.assertEquals(
-			assetEntries.toString(), 3, assetEntries.size());
+		Assert.assertEquals(assetEntries.toString(), 3, assetEntries.size());
 
 		AssetEntry firstAssetEntry = assetEntries.get(0);
 
@@ -155,8 +152,8 @@ public class AssetListAssetEntryProviderTest {
 		AssetListEntry assetListEntry =
 			_assetListEntryLocalService.addAssetListEntry(
 				TestPropsValues.getUserId(), _group.getGroupId(),
-				"Dynamic title", AssetListEntryTypeConstants.TYPE_DYNAMIC,
-				null, _serviceContext);
+				"Dynamic title", AssetListEntryTypeConstants.TYPE_DYNAMIC, null,
+				_serviceContext);
 
 		User userTest = TestPropsValues.getUser();
 
@@ -190,8 +187,7 @@ public class AssetListAssetEntryProviderTest {
 			_assetListAssetEntryProvider.getAssetEntries(
 				assetListEntry, segmentsEntryIds);
 
-		Assert.assertEquals(
-			assetEntries.toString(), 3, assetEntries.size());
+		Assert.assertEquals(assetEntries.toString(), 3, assetEntries.size());
 
 		AssetEntry firstAssetEntry = assetEntries.get(0);
 
@@ -207,8 +203,8 @@ public class AssetListAssetEntryProviderTest {
 		AssetListEntry assetListEntry =
 			_assetListEntryLocalService.addAssetListEntry(
 				TestPropsValues.getUserId(), _group.getGroupId(),
-				"Dynamic title", AssetListEntryTypeConstants.TYPE_DYNAMIC,
-				null, _serviceContext);
+				"Dynamic title", AssetListEntryTypeConstants.TYPE_DYNAMIC, null,
+				_serviceContext);
 
 		User userTest = TestPropsValues.getUser();
 
@@ -217,9 +213,8 @@ public class AssetListAssetEntryProviderTest {
 		User user = UserTestUtil.addUser(
 			TestPropsValues.getCompanyId(), TestPropsValues.getUserId(),
 			StringPool.BLANK, userName + "@liferay.com", userName,
-			LocaleUtil.getDefault(), userName,
-			RandomTestUtil.randomString(), null,
-			ServiceContextTestUtil.getServiceContext());
+			LocaleUtil.getDefault(), userName, RandomTestUtil.randomString(),
+			null, ServiceContextTestUtil.getServiceContext());
 
 		SegmentsEntry segmentsEntry1 = _addSegmentsEntryByFirstName(
 			_group.getGroupId(), userTest);
@@ -239,8 +234,7 @@ public class AssetListAssetEntryProviderTest {
 
 		AssetListTestUtil.addAssetListEntrySegmentsEntryRel(
 			_group.getGroupId(), assetListEntry,
-			segmentsEntry2.getSegmentsEntryId(),
-			_getTypeSettings(userName));
+			segmentsEntry2.getSegmentsEntryId(), _getTypeSettings(userName));
 
 		AssetListTestUtil.addAssetListEntrySegmentsEntryRel(
 			_group.getGroupId(), assetListEntry,
@@ -251,8 +245,7 @@ public class AssetListAssetEntryProviderTest {
 			_assetListAssetEntryProvider.getAssetEntries(
 				assetListEntry, segmentsEntryIds);
 
-		Assert.assertEquals(
-			assetEntries.toString(), 2, assetEntries.size());
+		Assert.assertEquals(assetEntries.toString(), 2, assetEntries.size());
 
 		AssetEntry firstAssetEntry = assetEntries.get(0);
 
@@ -262,7 +255,7 @@ public class AssetListAssetEntryProviderTest {
 	}
 
 	private JournalArticle _addJournalArticle(
-		long[] assetCategories, long userId)
+			long[] assetCategories, long userId)
 		throws Exception {
 
 		ServiceContext serviceContext =
