@@ -254,6 +254,7 @@ boolean hasDirectReplacement = cpContentHelper.hasDirectReplacement(cpSku);
 String navCommentsId = liferayPortletResponse.getNamespace() + "navComments";
 String navCPMediaId = liferayPortletResponse.getNamespace() + "navCPMedia";
 String navDescriptionId = liferayPortletResponse.getNamespace() + "navDescription";
+String navRatingsId = liferayPortletResponse.getNamespace() + "navRatings";
 String navReplacementsId = liferayPortletResponse.getNamespace() + "navReplacements";
 String navSpecificationsId = liferayPortletResponse.getNamespace() + "navSpecifications";
 %>
@@ -278,6 +279,8 @@ String navSpecificationsId = liferayPortletResponse.getNamespace() + "navSpecifi
 				"navCPMediaId", navCPMediaId
 			).put(
 				"navDescriptionId", navDescriptionId
+			).put(
+				"navRatingsId", navRatingsId
 			).put(
 				"navReplacementsId", navReplacementsId
 			).put(
@@ -430,6 +433,15 @@ String navSpecificationsId = liferayPortletResponse.getNamespace() + "navSpecifi
 			formName="fm"
 			redirect="<%= cpContentHelper.getFriendlyURL(cpCatalogEntry, themeDisplay) %>"
 			userId="<%= themeDisplay.getUserId() %>"
+		/>
+	</div>
+
+	<div aria-labelledby="navRatingsTab" class="fade <portlet:namespace />tab-element tab-pane" id="<%= navRatingsId %>" role="tabpanel">
+		<liferay-ratings:ratings
+			className="<%= CPDefinition.class.getName() %>"
+			classPK="<%= cpCatalogEntry.getCPDefinitionId() %>"
+			type="stars"
+			numberOfStars="<%= 5 %>"
 		/>
 	</div>
 </div>
