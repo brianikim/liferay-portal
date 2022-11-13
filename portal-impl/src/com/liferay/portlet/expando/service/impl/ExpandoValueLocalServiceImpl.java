@@ -1703,9 +1703,9 @@ public class ExpandoValueLocalServiceImpl
 		ExpandoValue value = expandoValuePersistence.fetchByT_C_C(
 			tableId, columnId, classPK);
 
-		ExpandoRow row = expandoRowPersistence.fetchByT_C(tableId, classPK);
-
 		if (value == null) {
+			ExpandoRow row = expandoRowPersistence.fetchByT_C(tableId, classPK);
+
 			if (row == null) {
 				row = expandoRowPersistence.create(
 					counterLocalService.increment());
@@ -1736,6 +1736,8 @@ public class ExpandoValueLocalServiceImpl
 			value.setData(data);
 
 			value = expandoValuePersistence.update(value);
+
+			ExpandoRow row = expandoRowPersistence.fetchByT_C(tableId, classPK);
 
 			row.setModifiedDate(new Date());
 
