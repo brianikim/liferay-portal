@@ -26,6 +26,7 @@ definition {
 
 	@priority = "5"
 	test AddPortalInstance {
+		property portal.acceptance = "true";
 		property test.name.skip.portal.instance = "PortalconfigurationUsecase#AddPortalInstance";
 
 		ApplicationsMenu.gotoPortlet(
@@ -43,6 +44,7 @@ definition {
 
 	@priority = "5"
 	test DeletePortalInstance {
+		property portal.acceptance = "true";
 		property test.name.skip.portal.instance = "PortalconfigurationUsecase#DeletePortalInstance";
 
 		ApplicationsMenu.gotoPortlet(
