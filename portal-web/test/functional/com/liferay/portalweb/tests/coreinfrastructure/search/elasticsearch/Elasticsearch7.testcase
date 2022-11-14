@@ -554,7 +554,7 @@ definition {
 			moduleName = "com.liferay.portal.search.elasticsearch7.impl",
 			moduleStatus = "Active");
 
-		ApplicationsMenu.gotoPortlet( 
+		ApplicationsMenu.gotoPortlet(
 			category = "Configuration",
 			panel = "Control Panel",
 			portlet = "Search");
