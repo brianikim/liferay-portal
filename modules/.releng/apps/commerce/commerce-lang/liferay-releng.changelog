@@ -427,3 +427,8 @@ af4b821900b0cb366da5f02e9f81ead48584748b^..680d49b5bec4faf9103659390c3fd18fcab56
 # Bundle Version 3.0.92
 #
 5d9cc081f78f89623a42bf52aa688ab7d822bf78^..99c72468ddbff44e7884f1e4c48da1d1a220bfd8=LPS-77699
+
+#
+# Bundle Version 3.0.93
+#
+99c72468ddbff44e7884f1e4c48da1d1a220bfd8^..0feadc198c9cfba0ab1a758f46ac521f3fedd8fd=COMMERCE-7904 LPS-77699
