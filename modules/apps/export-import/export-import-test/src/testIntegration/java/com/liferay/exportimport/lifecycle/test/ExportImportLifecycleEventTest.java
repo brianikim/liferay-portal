@@ -63,6 +63,7 @@ import org.apache.log4j.spi.ThrowableInformation;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -168,6 +169,7 @@ public class ExportImportLifecycleEventTest {
 				ExportImportLifecycleConstants.EVENT_LAYOUT_IMPORT_FAILED));
 	}
 
+	@Ignore
 	@Test
 	public void testFailedLayoutLocalPublishing() throws Exception {
 		try (CaptureAppender captureAppender =
