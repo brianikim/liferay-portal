@@ -921,6 +921,7 @@ public class LayoutsAdminDisplayContext {
 
 		portletURL.setParameter(
 			"mvcRenderCommandName", "/layout_admin/edit_layout");
+		portletURL.setParameter("backURL", getBackURL());
 		portletURL.setParameter(
 			"portletResource",
 			ParamUtil.getString(httpServletRequest, "portletResource"));
