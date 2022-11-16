@@ -237,19 +237,25 @@ AUI.add(
 					A.each(item1, (item2, index2) => {
 						if (isNotEmptyValue(item2)) {
 							if (index2 === 'recipients') {
-								if (item2[0] && item2[0].receptionType) {
-									_put(
-										notifications,
-										'receptionType',
-										item2[0].receptionType
+								for (const item2Index in item2) {
+									if (
+										item2[item2Index] &&
+										item2[item2Index].receptionType
+									) {
+										_put(
+											notifications,
+											'receptionType',
+											item2[item2Index].receptionType
+										);
+									}
+
+									item2[
+										item2Index
+									] = FieldNormalizer.normalizeToAssignments(
+										new Array(item2[item2Index])
 									);
 								}
-
-								item2 = FieldNormalizer.normalizeToAssignments(
-									item2
-								);
 							}
-
 							_put(notifications, index2, item2, index1);
 						}
 					});

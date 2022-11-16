@@ -440,29 +440,19 @@ AUI.add(
 						});
 					}
 
-					var recipientsAttrs = {};
-
 					if (
-						recipients[index].receptionType &&
-						AArray.some(
-							recipients[index].receptionType,
-							isNotEmptyValue
-						)
+						Array.isArray(recipients) &&
+						Array.isArray(recipients[index])
 					) {
-						recipientsAttrs.receptionType =
-							recipients[index].receptionType;
+						for (const recipientsIndex in recipients[index]) {
+							appendXMLRecipients(
+								buffer,
+								recipients[index][recipientsIndex]
+							);
+						}
 					}
-
-					if (
-						isObject(recipients[index]) &&
-						!AObject.isEmpty(recipients[index])
-					) {
-						appendXMLAssignments(
-							buffer,
-							recipients[index],
-							'recipients',
-							recipientsAttrs
-						);
+					else {
+						appendXMLRecipients(buffer, recipients[index]);
 					}
 
 					if (executionType) {
@@ -476,6 +466,26 @@ AUI.add(
 
 					buffer.push(xmlNotification.close);
 				});
+			}
+		}
+
+		function appendXMLRecipients(buffer, recipients) {
+			var recipientsAttrs = {};
+
+			if (
+				recipients.receptionType &&
+				AArray.some(recipients.receptionType, isNotEmptyValue)
+			) {
+				recipientsAttrs.receptionType = recipients.receptionType;
+			}
+
+			if (isObject(recipients) && !AObject.isEmpty(recipients)) {
+				appendXMLAssignments(
+					buffer,
+					recipients,
+					'recipients',
+					recipientsAttrs
+				);
 			}
 		}
 
