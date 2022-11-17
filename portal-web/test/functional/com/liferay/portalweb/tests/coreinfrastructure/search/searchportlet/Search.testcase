@@ -440,6 +440,48 @@ definition {
 		}
 	}
 
+	test CanDownloadDocumentsThroughTheSearchPreview {
+		task ("Upload a PDF and a DOCX file") {
+			JSONDocument.addFileWithUploadedFile(
+				dmDocumentTitle = "DOCXFile",
+				groupName = "Guest",
+				mimeType = "application/docx",
+				sourceFileName = "Document_2.docx");
+
+			JSONDocument.addFileWithUploadedFile(
+				dmDocumentTitle = "PDFFile",
+				groupName = "Guest",
+				mimeType = "application/pdf",
+				sourceFileName = "Document_2.pdf");
+		}
+
+		task ("Search for the DOCX and PDF files and Assert 'Download' Button is Present") {
+			SearchPortlets.searchEmbedded(searchTerm = "DOCXFile");
+
+			Search.gotoResultAssetViaTitle(searchAssetTitle = "DOCXFile");
+
+			Button.clickInfoButton();
+
+			Button.viewPresent(button = "Download");
+
+			Button.click(button = "Download");
+
+			DMDocument.assertDownloadedFileName(downloadedFile = "DOCXFile.docx");
+
+			SearchPortlets.searchEmbedded(searchTerm = "PDFFile");
+
+			Search.gotoResultAssetViaTitle(searchAssetTitle = "PDFFile");
+
+			Button.clickInfoButton();
+
+			Button.viewPresent(button = "Download");
+
+			Button.click(button = "Download");
+
+			DMDocument.assertDownloadedFileName(downloadedFile = "PDFFile.pdf");
+		}
+	}
+
 	@priority = "4"
 	test EmptyDDMFieldNotDisplayedWithCustomFacet {
 		ProductMenu.gotoPortlet(
@@ -3135,37 +3177,4 @@ definition {
 			searchAssetType = "Web Content Article");
 	}
 
-	test CanDownloadDocumentsThroughTheSearchPreview {
-		task("Upload a PDF and a DOCX file") {
-			JSONDocument.addFileWithUploadedFile(
-				dmDocumentTitle = "DOCXFile",
-				groupName = "Guest",
-				mimeType = "application/docx",
-				sourceFileName = "Document_2.docx");
-
-			JSONDocument.addFileWithUploadedFile(
-				dmDocumentTitle = "PDFFile",
-				groupName = "Guest",
-				mimeType = "application/pdf",
-				sourceFileName = "Document_2.pdf");
-		}
-
-		task("Search for the DOCX and PDF files and Assert 'Download' Button is Present") {
-			SearchPortlets.searchEmbedded(searchTerm = "DOCXFile");
-			Search.gotoResultAssetViaTitle(searchAssetTitle = "DOCXFile");
-			Button.clickInfoButton();
-			Button.viewPresent(button = "Download");
-			Button.click(button = "Download");
-
-			DMDocument.assertDownloadedFileName(downloadedFile = "DOCXFile.docx");
-
-			SearchPortlets.searchEmbedded(searchTerm = "PDFFile");
-			Search.gotoResultAssetViaTitle(searchAssetTitle = "PDFFile");
-			Button.clickInfoButton();
-			Button.viewPresent(button = "Download");
-			Button.click(button = "Download");
-			
-			DMDocument.assertDownloadedFileName(downloadedFile = "PDFFile.pdf");
-		}
-	}
 }

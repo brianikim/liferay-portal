@@ -54,6 +54,10 @@ definition {
 		Button.click(button = "Import");
 	}
 
+	macro clickInfoButton {
+		Click(locator1 = "Button#INFO");
+	}
+
 	macro clickInstall {
 		Button.click(button = "Install");
 	}
@@ -124,10 +128,6 @@ definition {
 
 	macro clickVerifyButton {
 		Click(locator1 = "Button#VERIFY");
-	}
-
-	macro clickInfoButton {
-		Click(locator1 = "Button#INFO");
 	}
 
 	macro viewNotPresent {

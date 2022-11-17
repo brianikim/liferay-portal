@@ -543,6 +543,19 @@ definition {
 		DMDocument.viewCardTitle(dmDocumentTitle = "${dmDocumentTitle}");
 	}
 
+	macro assertDownloadedFileName {
+		var downloadedFileName = TestCase.getDownloadedTempFileName(fileNamePattern = "${downloadedFile}");
+
+		echo("## downloadedFileName: ${downloadedFileName}");
+
+		if (contains("${downloadedFileName}", "${downloadedFile}")) {
+			echo("This is a correct file.");
+		}
+		else {
+			fail("FAIL!");
+		}
+	}
+
 	macro cancelCheckoutCP {
 		var key_dmDocumentTitle = "${dmDocumentTitle}";
 
@@ -2563,17 +2576,4 @@ definition {
 		}
 	}
 
-	macro assertDownloadedFileName {
-		var downloadedFileName = TestCase.getDownloadedTempFileName(fileNamePattern = "${downloadedFile}");
-
-		echo("## downloadedFileName: ${downloadedFileName}");
-
-		if (contains("${downloadedFileName}", "${downloadedFile}")) {
-			echo("This is a correct file.");
-		}
-		else {
-			fail("FAIL!");
-		}
-	}
-	
 }
