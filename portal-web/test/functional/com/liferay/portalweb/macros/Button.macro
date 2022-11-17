@@ -126,6 +126,10 @@ definition {
 		Click(locator1 = "Button#VERIFY");
 	}
 
+	macro clickInfoButton {
+		Click(locator1 = "Button#INFO");
+	}
+
 	macro viewNotPresent {
 		AssertElementNotPresent(
 			key_text = "${button}",
