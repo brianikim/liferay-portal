@@ -181,9 +181,13 @@ definition {
 				value1 = "\COMMAND");
 		}
 		else {
-			SelectFieldText(locator1 = "//body");
+			Type.sendKeys(
+				locator1 = "//body",
+				value1 = "keys=CONTROL,a");
 
-			RobotType.robotTypeShortcut(locator1 = "Ctrl + c");
+			Type.sendKeys(
+				locator1 = "//body",
+				value1 = "keys=CONTROL,c");
 		}
 
 		Navigator.openURL();
@@ -219,7 +223,9 @@ definition {
 				value1 = "\COMMAND");
 		}
 		else {
-			RobotType.robotTypeShortcut(locator1 = "Ctrl + v");
+			Type.sendKeys(
+				locator1 = "CKEditor#BODY",
+				value1 = "keys=CONTROL,v");
 		}
 
 		Pause(locator1 = "5000");
@@ -309,7 +315,13 @@ definition {
 
 		SelectFieldText(locator1 = "//body");
 
-		RobotType.robotTypeShortcut(locator1 = "Ctrl + c");
+		Type.sendKeys(
+			locator1 = "//body",
+			value1 = "keys=CONTROL,a");
+
+		Type.sendKeys(
+			locator1 = "//body",
+			value1 = "keys=CONTROL,c");
 
 		Navigator.openURL();
 
@@ -325,7 +337,9 @@ definition {
 
 		Click(locator1 = "CKEditor#BODY");
 
-		RobotType.robotTypeShortcut(locator1 = "Ctrl + v");
+		Type.sendKeys(
+			locator1 = "//body",
+			value1 = "keys=CONTROL,v");
 
 		SelectFrame(value1 = "relative=top");
 
