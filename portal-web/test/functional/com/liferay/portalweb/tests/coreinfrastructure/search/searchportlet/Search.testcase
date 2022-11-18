@@ -460,7 +460,7 @@ definition {
 
 			Search.gotoResultAssetViaTitle(searchAssetTitle = "DOCXFile");
 
-			Button.clickInfoButton();
+			Click(locator1 = "Button#INFO");
 
 			Button.viewPresent(button = "Download");
 
@@ -472,7 +472,7 @@ definition {
 
 			Search.gotoResultAssetViaTitle(searchAssetTitle = "PDFFile");
 
-			Button.clickInfoButton();
+			Click(locator1 = "Button#INFO");
 
 			Button.viewPresent(button = "Download");
 
