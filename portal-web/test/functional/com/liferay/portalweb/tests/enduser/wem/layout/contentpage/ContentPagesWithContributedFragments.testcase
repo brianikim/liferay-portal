@@ -203,6 +203,7 @@ definition {
 	test AddFragmentToOneCellOfCollectionDisplay {
 		property osgi.modules.includes = "bookmarks,document-library-google-docs";
 		property portal.acceptance = "true";
+		property portal.upstream = "quarantine";
 
 		task ("Add three Web Content Articles based on Basic Web Content") {
 			for (var entryTitle : list "First Web Content,Second Web Content,Third Web Content") {
@@ -1962,6 +1963,7 @@ definition {
 	test ShowTitleOfCollectionItemsInCollectionDisplay {
 		property osgi.modules.includes = "bookmarks,document-library-google-docs";
 		property portal.acceptance = "true";
+		property portal.upstream = "quarantine";
 
 		task ("Add three Web Content Articles based on Basic Web Content") {
 			for (var entryTitle : list "First Web Content,Second Web Content,Third Web Content") {
@@ -2772,6 +2774,7 @@ definition {
 	test ViewFlagsViaContentFlagsInCollectionDisplay {
 		property osgi.modules.includes = "bookmarks,document-library-google-docs";
 		property portal.acceptance = "true";
+		property portal.upstream = "quarantine";
 
 		for (var i : list "1,2,3") {
 			JSONWebcontent.addWebContent(
@@ -3390,6 +3393,7 @@ definition {
 	test ViewRatingsViaContentRatingsInCollectionDisplay {
 		property osgi.modules.includes = "bookmarks,document-library-google-docs";
 		property portal.acceptance = "true";
+		property portal.upstream = "quarantine";
 
 		for (var i : list "1,2,3") {
 			JSONWebcontent.addWebContent(
@@ -3714,6 +3718,7 @@ definition {
 	test ViewWebContentViaContentInCollectionDisplay {
 		property osgi.modules.includes = "bookmarks,document-library-google-docs";
 		property portal.acceptance = "true";
+		property portal.upstream = "quarantine";
 
 		for (var i : list "1,2,3") {
 			JSONWebcontent.addWebContent(
@@ -3792,6 +3797,7 @@ definition {
 	test ViewWebContentWithCustomTemplateViaContentDisplayInCollectionDisplay {
 		property osgi.modules.includes = "bookmarks,document-library-google-docs";
 		property portal.acceptance = "true";
+		property portal.upstream = "quarantine";
 
 		WebContentNavigator.openWebContentAdmin(siteURLKey = "test-site-name");
 
