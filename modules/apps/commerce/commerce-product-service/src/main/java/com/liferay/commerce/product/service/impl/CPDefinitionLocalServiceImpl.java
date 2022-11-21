@@ -590,7 +590,8 @@ public class CPDefinitionLocalServiceImpl
 		CPDefinition cpDefinition = cpDefinitionLocalService.getCPDefinition(
 			cpDefinitionId);
 
-		return copyCPDefinition(cpDefinitionId, cpDefinition.getGroupId());
+		return cpDefinitionLocalService.copyCPDefinition(
+			cpDefinitionId, cpDefinition.getGroupId());
 	}
 
 	@Indexable(type = IndexableType.REINDEX)
@@ -749,7 +750,8 @@ public class CPDefinitionLocalServiceImpl
 
 			newCPDefinitionOptionRel.setCPDefinitionId(newCPDefinitionId);
 
-			cpDefinitionOptionRelPersistence.update(newCPDefinitionOptionRel);
+			newCPDefinitionOptionRel = cpDefinitionOptionRelPersistence.update(
+				newCPDefinitionOptionRel);
 
 			List<CPDefinitionOptionValueRel> cpDefinitionOptionValueRels =
 				cpDefinitionOptionValueRelPersistence.
@@ -774,7 +776,13 @@ public class CPDefinitionLocalServiceImpl
 				cpDefinitionOptionValueRelPersistence.update(
 					newCPDefinitionOptionValueRel);
 			}
+
+			reindexCPDefinitionOptionValueRels(newCPDefinitionOptionRel);
 		}
+
+		reindexCPDefinitionOptionRels(newCPDefinition);
+
+		// CPDefinitionSpecificationOptionValue
 
 		List<CPDefinitionSpecificationOptionValue>
 			cpDefinitionSpecificationOptionValues =
@@ -2346,6 +2354,26 @@ public class CPDefinitionLocalServiceImpl
 		}
 
 		return cpDefinitions;
+	}
+
+	protected void reindexCPDefinitionOptionRels(CPDefinition cpDefinition)
+		throws PortalException {
+
+		Indexer<CPDefinitionOptionRel> indexer =
+			IndexerRegistryUtil.nullSafeGetIndexer(CPDefinitionOptionRel.class);
+
+		indexer.reindex(cpDefinition.getCPDefinitionOptionRels());
+	}
+
+	protected void reindexCPDefinitionOptionValueRels(
+			CPDefinitionOptionRel cpDefinitionOptionRel)
+		throws PortalException {
+
+		Indexer<CPDefinitionOptionValueRel> indexer =
+			IndexerRegistryUtil.nullSafeGetIndexer(
+				CPDefinitionOptionValueRel.class);
+
+		indexer.reindex(cpDefinitionOptionRel.getCPDefinitionOptionValueRels());
 	}
 
 	protected void reindexCPInstances(CPDefinition cpDefinition)
