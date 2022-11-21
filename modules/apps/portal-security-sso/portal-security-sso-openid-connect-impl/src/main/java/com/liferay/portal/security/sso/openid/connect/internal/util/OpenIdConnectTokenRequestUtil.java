@@ -18,13 +18,10 @@ import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.security.sso.openid.connect.OpenIdConnectProvider;
 import com.liferay.portal.security.sso.openid.connect.OpenIdConnectServiceException;
 
-import com.nimbusds.jose.Algorithm;
-import com.nimbusds.jose.Header;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.jose.util.DefaultResourceRetriever;
-import com.nimbusds.jwt.JWT;
 import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
 import com.nimbusds.oauth2.sdk.AuthorizationGrant;
 import com.nimbusds.oauth2.sdk.ErrorObject;
@@ -53,8 +50,6 @@ import java.io.IOException;
 
 import java.net.MalformedURLException;
 import java.net.URI;
-
-import java.util.Objects;
 
 import net.minidev.json.JSONObject;
 
