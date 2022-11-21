@@ -59,7 +59,7 @@ boolean hasPermission = commercePricingClassCPDefinitionDisplayContext.hasPermis
 							});
 						})
 						.catch(function (error) {
-							return Promise.reject(error);
+							return Promise.reject(error.errorDescription);
 						});
 				}
 
