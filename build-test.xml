@@ -8681,6 +8681,10 @@ go</echo>
 		</if>
 	</target>
 
+	<target name="create-symbolic-link">
+		<symlink link="${symbolic.link}" resource="${symbolic.link.resource}" />
+	</target>
+
 	<target name="curl-execute">
 		<fail message="Please set the property ${curl.args}." unless="curl.args" />
 
