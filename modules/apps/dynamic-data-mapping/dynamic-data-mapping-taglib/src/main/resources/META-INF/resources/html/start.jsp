@@ -76,21 +76,21 @@
 
 							Locale curLocale = LocaleUtil.fromLanguageId(curLanguageId);
 
-							String translationStatus = LanguageUtil.get(request, "untranslated");
 							String translationStatusCssClass = "warning";
+							String translationStatusMessage = LanguageUtil.get(request, "untranslated");
 
 							if (ddmFormValues != null) {
 								Set<Locale> ddmFormValuesAvailableLocales = ddmFormValues.getAvailableLocales();
 
 								if (ddmFormValuesAvailableLocales.contains(curLocale)) {
-									translationStatus = LanguageUtil.get(request, "translated");
 									translationStatusCssClass = "success";
+									translationStatusMessage = LanguageUtil.get(request, "translated");
 								}
 							}
 
 							if (curLanguageId.equals(defaultLanguageId)) {
-								translationStatus = LanguageUtil.get(request, "default");
 								translationStatusCssClass = "info";
+								translationStatusMessage = LanguageUtil.get(request, "default");
 								linkCssClass += " active";
 							}
 						%>
@@ -100,7 +100,7 @@
 						>
 							<%= StringUtil.replace(curLanguageId, '_', '-') %>
 
-							<span class="label label-<%= translationStatusCssClass %>"><%= translationStatus %></span>
+							<span class="label label-<%= translationStatusCssClass %>"><%= translationStatusMessage %></span>
 						</liferay-util:buffer>
 
 							<c:if test="<%= showLanguageSelector %>">
