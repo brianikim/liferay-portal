@@ -96,7 +96,7 @@
 						%>
 
 						<liferay-util:buffer
-							var="linkContent"
+							var="messageBuffer"
 						>
 							<%= StringUtil.replace(curLanguageId, '_', '-') %>
 
@@ -119,7 +119,7 @@
 									iconCssClass="inline-item inline-item-before"
 									linkCssClass="<%= linkCssClass %>"
 									markupView="lexicon"
-									message="<%= linkContent %>"
+									message="<%= messageBuffer %>"
 									onClick="event.preventDefault(); fireLocaleChanged(event);"
 									url="javascript:;"
 								>
