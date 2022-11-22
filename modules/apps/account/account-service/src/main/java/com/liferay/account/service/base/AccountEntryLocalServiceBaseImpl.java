@@ -249,13 +249,7 @@ public abstract class AccountEntryLocalServiceBaseImpl
 		return accountEntryPersistence.fetchByPrimaryKey(accountEntryId);
 	}
 
-	/**
-	 * Returns the account entry with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the account entry's external reference code
-	 * @return the matching account entry, or <code>null</code> if a matching account entry could not be found
-	 */
+	@Deprecated
 	@Override
 	public AccountEntry fetchAccountEntryByExternalReferenceCode(
 		long companyId, String externalReferenceCode) {
@@ -264,9 +258,6 @@ public abstract class AccountEntryLocalServiceBaseImpl
 			companyId, externalReferenceCode);
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchAccountEntryByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	@Override
 	public AccountEntry fetchAccountEntryByReferenceCode(
@@ -276,14 +267,7 @@ public abstract class AccountEntryLocalServiceBaseImpl
 			companyId, externalReferenceCode);
 	}
 
-	/**
-	 * Returns the account entry with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the account entry's external reference code
-	 * @return the matching account entry
-	 * @throws PortalException if a matching account entry could not be found
-	 */
+	@Deprecated
 	@Override
 	public AccountEntry getAccountEntryByExternalReferenceCode(
 			long companyId, String externalReferenceCode)

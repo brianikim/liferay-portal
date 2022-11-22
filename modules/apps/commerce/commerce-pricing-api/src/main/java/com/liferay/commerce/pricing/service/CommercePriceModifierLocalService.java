@@ -260,21 +260,12 @@ public interface CommercePriceModifierLocalService
 	public CommercePriceModifier fetchCommercePriceModifier(
 		long commercePriceModifierId);
 
-	/**
-	 * Returns the commerce price modifier with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce price modifier's external reference code
-	 * @return the matching commerce price modifier, or <code>null</code> if a matching commerce price modifier could not be found
-	 */
+	@Deprecated
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public CommercePriceModifier
 		fetchCommercePriceModifierByExternalReferenceCode(
 			long companyId, String externalReferenceCode);
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchCommercePriceModifierByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public CommercePriceModifier fetchCommercePriceModifierByReferenceCode(
@@ -306,14 +297,7 @@ public interface CommercePriceModifierLocalService
 			long commercePriceModifierId)
 		throws PortalException;
 
-	/**
-	 * Returns the commerce price modifier with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce price modifier's external reference code
-	 * @return the matching commerce price modifier
-	 * @throws PortalException if a matching commerce price modifier could not be found
-	 */
+	@Deprecated
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public CommercePriceModifier
 			getCommercePriceModifierByExternalReferenceCode(

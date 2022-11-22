@@ -22,6 +22,7 @@ import com.liferay.portal.kernel.dao.orm.ProjectionFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
+import com.liferay.portal.kernel.exception.DuplicateUserExternalReferenceCodeException;
 import com.liferay.portal.kernel.exception.NoSuchUserException;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.UserLocalServiceUtil;
@@ -303,6 +304,25 @@ public class UserPersistenceTest {
 			existingUser.isEmailAddressVerified(),
 			newUser.isEmailAddressVerified());
 		Assert.assertEquals(existingUser.getStatus(), newUser.getStatus());
+	}
+
+	@Test(expected = DuplicateUserExternalReferenceCodeException.class)
+	public void testUpdateWithExistingExternalReferenceCode() throws Exception {
+		User user = addUser();
+
+		User newUser = addUser();
+
+		newUser.setCompanyId(user.getCompanyId());
+
+		newUser = _persistence.update(newUser);
+
+		Session session = _persistence.getCurrentSession();
+
+		session.evict(newUser);
+
+		newUser.setExternalReferenceCode(user.getExternalReferenceCode());
+
+		_persistence.update(newUser);
 	}
 
 	@Test

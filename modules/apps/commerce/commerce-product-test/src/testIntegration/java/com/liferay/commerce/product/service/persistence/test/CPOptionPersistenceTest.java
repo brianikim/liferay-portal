@@ -15,6 +15,7 @@
 package com.liferay.commerce.product.service.persistence.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.commerce.product.exception.DuplicateCPOptionExternalReferenceCodeException;
 import com.liferay.commerce.product.exception.NoSuchCPOptionException;
 import com.liferay.commerce.product.model.CPOption;
 import com.liferay.commerce.product.service.CPOptionLocalServiceUtil;
@@ -194,6 +195,26 @@ public class CPOptionPersistenceTest {
 		Assert.assertEquals(
 			Time.getShortTimestamp(existingCPOption.getLastPublishDate()),
 			Time.getShortTimestamp(newCPOption.getLastPublishDate()));
+	}
+
+	@Test(expected = DuplicateCPOptionExternalReferenceCodeException.class)
+	public void testUpdateWithExistingExternalReferenceCode() throws Exception {
+		CPOption cpOption = addCPOption();
+
+		CPOption newCPOption = addCPOption();
+
+		newCPOption.setCompanyId(cpOption.getCompanyId());
+
+		newCPOption = _persistence.update(newCPOption);
+
+		Session session = _persistence.getCurrentSession();
+
+		session.evict(newCPOption);
+
+		newCPOption.setExternalReferenceCode(
+			cpOption.getExternalReferenceCode());
+
+		_persistence.update(newCPOption);
 	}
 
 	@Test

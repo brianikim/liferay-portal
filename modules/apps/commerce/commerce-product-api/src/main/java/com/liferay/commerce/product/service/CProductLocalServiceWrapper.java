@@ -241,13 +241,7 @@ public class CProductLocalServiceWrapper
 		return _cProductLocalService.fetchCProduct(CProductId);
 	}
 
-	/**
-	 * Returns the c product with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the c product's external reference code
-	 * @return the matching c product, or <code>null</code> if a matching c product could not be found
-	 */
+	@Deprecated
 	@Override
 	public com.liferay.commerce.product.model.CProduct
 		fetchCProductByExternalReferenceCode(
@@ -257,9 +251,6 @@ public class CProductLocalServiceWrapper
 			companyId, externalReferenceCode);
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchCProductByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	@Override
 	public com.liferay.commerce.product.model.CProduct
@@ -316,14 +307,7 @@ public class CProductLocalServiceWrapper
 			cpInstanceUuid);
 	}
 
-	/**
-	 * Returns the c product with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the c product's external reference code
-	 * @return the matching c product
-	 * @throws PortalException if a matching c product could not be found
-	 */
+	@Deprecated
 	@Override
 	public com.liferay.commerce.product.model.CProduct
 			getCProductByExternalReferenceCode(

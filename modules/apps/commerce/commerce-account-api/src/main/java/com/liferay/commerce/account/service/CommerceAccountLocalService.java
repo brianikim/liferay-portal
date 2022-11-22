@@ -236,20 +236,11 @@ public interface CommerceAccountLocalService
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public CommerceAccount fetchCommerceAccount(long commerceAccountId);
 
-	/**
-	 * Returns the commerce account with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce account's external reference code
-	 * @return the matching commerce account, or <code>null</code> if a matching commerce account could not be found
-	 */
+	@Deprecated
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public CommerceAccount fetchCommerceAccountByExternalReferenceCode(
 		long companyId, String externalReferenceCode);
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchCommerceAccountByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public CommerceAccount fetchCommerceAccountByReferenceCode(
@@ -278,14 +269,7 @@ public interface CommerceAccountLocalService
 			long userId, long commerceAccountId)
 		throws PortalException;
 
-	/**
-	 * Returns the commerce account with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce account's external reference code
-	 * @return the matching commerce account
-	 * @throws PortalException if a matching commerce account could not be found
-	 */
+	@Deprecated
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public CommerceAccount getCommerceAccountByExternalReferenceCode(
 			long companyId, String externalReferenceCode)

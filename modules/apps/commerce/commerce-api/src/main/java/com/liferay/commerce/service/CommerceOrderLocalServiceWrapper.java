@@ -394,13 +394,7 @@ public class CommerceOrderLocalServiceWrapper
 			commerceAccountId, groupId, userId, orderStatus);
 	}
 
-	/**
-	 * Returns the commerce order with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce order's external reference code
-	 * @return the matching commerce order, or <code>null</code> if a matching commerce order could not be found
-	 */
+	@Deprecated
 	@Override
 	public com.liferay.commerce.model.CommerceOrder
 		fetchCommerceOrderByExternalReferenceCode(
@@ -411,9 +405,6 @@ public class CommerceOrderLocalServiceWrapper
 				companyId, externalReferenceCode);
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchCommerceOrderByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	@Override
 	public com.liferay.commerce.model.CommerceOrder
@@ -461,14 +452,7 @@ public class CommerceOrderLocalServiceWrapper
 		return _commerceOrderLocalService.getCommerceOrder(commerceOrderId);
 	}
 
-	/**
-	 * Returns the commerce order with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce order's external reference code
-	 * @return the matching commerce order
-	 * @throws PortalException if a matching commerce order could not be found
-	 */
+	@Deprecated
 	@Override
 	public com.liferay.commerce.model.CommerceOrder
 			getCommerceOrderByExternalReferenceCode(

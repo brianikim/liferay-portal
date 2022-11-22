@@ -249,13 +249,7 @@ public class CommerceOrderNoteLocalServiceUtil {
 		return getService().fetchCommerceOrderNote(commerceOrderNoteId);
 	}
 
-	/**
-	 * Returns the commerce order note with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce order note's external reference code
-	 * @return the matching commerce order note, or <code>null</code> if a matching commerce order note could not be found
-	 */
+	@Deprecated
 	public static CommerceOrderNote
 		fetchCommerceOrderNoteByExternalReferenceCode(
 			long companyId, String externalReferenceCode) {
@@ -264,9 +258,6 @@ public class CommerceOrderNoteLocalServiceUtil {
 			companyId, externalReferenceCode);
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchCommerceOrderNoteByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	public static CommerceOrderNote fetchCommerceOrderNoteByReferenceCode(
 		long companyId, String externalReferenceCode) {
@@ -295,14 +286,7 @@ public class CommerceOrderNoteLocalServiceUtil {
 		return getService().getCommerceOrderNote(commerceOrderNoteId);
 	}
 
-	/**
-	 * Returns the commerce order note with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce order note's external reference code
-	 * @return the matching commerce order note
-	 * @throws PortalException if a matching commerce order note could not be found
-	 */
+	@Deprecated
 	public static CommerceOrderNote getCommerceOrderNoteByExternalReferenceCode(
 			long companyId, String externalReferenceCode)
 		throws PortalException {

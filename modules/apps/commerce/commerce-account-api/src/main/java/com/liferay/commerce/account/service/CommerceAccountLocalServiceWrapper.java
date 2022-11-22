@@ -304,13 +304,7 @@ public class CommerceAccountLocalServiceWrapper
 			commerceAccountId);
 	}
 
-	/**
-	 * Returns the commerce account with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce account's external reference code
-	 * @return the matching commerce account, or <code>null</code> if a matching commerce account could not be found
-	 */
+	@Deprecated
 	@Override
 	public com.liferay.commerce.account.model.CommerceAccount
 		fetchCommerceAccountByExternalReferenceCode(
@@ -321,9 +315,6 @@ public class CommerceAccountLocalServiceWrapper
 				companyId, externalReferenceCode);
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchCommerceAccountByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	@Override
 	public com.liferay.commerce.account.model.CommerceAccount
@@ -375,14 +366,7 @@ public class CommerceAccountLocalServiceWrapper
 			userId, commerceAccountId);
 	}
 
-	/**
-	 * Returns the commerce account with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce account's external reference code
-	 * @return the matching commerce account
-	 * @throws PortalException if a matching commerce account could not be found
-	 */
+	@Deprecated
 	@Override
 	public com.liferay.commerce.account.model.CommerceAccount
 			getCommerceAccountByExternalReferenceCode(

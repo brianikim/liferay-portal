@@ -390,13 +390,7 @@ public class CommerceTierPriceEntryLocalServiceWrapper
 			commerceTierPriceEntryId);
 	}
 
-	/**
-	 * Returns the commerce tier price entry with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce tier price entry's external reference code
-	 * @return the matching commerce tier price entry, or <code>null</code> if a matching commerce tier price entry could not be found
-	 */
+	@Deprecated
 	@Override
 	public com.liferay.commerce.price.list.model.CommerceTierPriceEntry
 		fetchCommerceTierPriceEntryByExternalReferenceCode(
@@ -407,9 +401,6 @@ public class CommerceTierPriceEntryLocalServiceWrapper
 				companyId, externalReferenceCode);
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchCommerceTierPriceEntryByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	@Override
 	public com.liferay.commerce.price.list.model.CommerceTierPriceEntry
@@ -545,14 +536,7 @@ public class CommerceTierPriceEntryLocalServiceWrapper
 			commerceTierPriceEntryId);
 	}
 
-	/**
-	 * Returns the commerce tier price entry with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce tier price entry's external reference code
-	 * @return the matching commerce tier price entry
-	 * @throws PortalException if a matching commerce tier price entry could not be found
-	 */
+	@Deprecated
 	@Override
 	public com.liferay.commerce.price.list.model.CommerceTierPriceEntry
 			getCommerceTierPriceEntryByExternalReferenceCode(

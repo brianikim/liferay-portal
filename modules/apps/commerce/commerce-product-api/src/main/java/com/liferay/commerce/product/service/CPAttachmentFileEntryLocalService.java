@@ -256,21 +256,12 @@ public interface CPAttachmentFileEntryLocalService
 	public CPAttachmentFileEntry fetchCPAttachmentFileEntry(
 		long CPAttachmentFileEntryId);
 
-	/**
-	 * Returns the cp attachment file entry with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the cp attachment file entry's external reference code
-	 * @return the matching cp attachment file entry, or <code>null</code> if a matching cp attachment file entry could not be found
-	 */
+	@Deprecated
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public CPAttachmentFileEntry
 		fetchCPAttachmentFileEntryByExternalReferenceCode(
 			long companyId, String externalReferenceCode);
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchCPAttachmentFileEntryByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public CPAttachmentFileEntry fetchCPAttachmentFileEntryByReferenceCode(
@@ -392,14 +383,7 @@ public interface CPAttachmentFileEntryLocalService
 			long CPAttachmentFileEntryId)
 		throws PortalException;
 
-	/**
-	 * Returns the cp attachment file entry with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the cp attachment file entry's external reference code
-	 * @return the matching cp attachment file entry
-	 * @throws PortalException if a matching cp attachment file entry could not be found
-	 */
+	@Deprecated
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public CPAttachmentFileEntry
 			getCPAttachmentFileEntryByExternalReferenceCode(

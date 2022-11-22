@@ -294,13 +294,7 @@ public abstract class CommerceDiscountLocalServiceBaseImpl
 			uuid, companyId, null);
 	}
 
-	/**
-	 * Returns the commerce discount with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce discount's external reference code
-	 * @return the matching commerce discount, or <code>null</code> if a matching commerce discount could not be found
-	 */
+	@Deprecated
 	@Override
 	public CommerceDiscount fetchCommerceDiscountByExternalReferenceCode(
 		long companyId, String externalReferenceCode) {
@@ -309,9 +303,6 @@ public abstract class CommerceDiscountLocalServiceBaseImpl
 			companyId, externalReferenceCode);
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchCommerceDiscountByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	@Override
 	public CommerceDiscount fetchCommerceDiscountByReferenceCode(
@@ -321,14 +312,7 @@ public abstract class CommerceDiscountLocalServiceBaseImpl
 			companyId, externalReferenceCode);
 	}
 
-	/**
-	 * Returns the commerce discount with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce discount's external reference code
-	 * @return the matching commerce discount
-	 * @throws PortalException if a matching commerce discount could not be found
-	 */
+	@Deprecated
 	@Override
 	public CommerceDiscount getCommerceDiscountByExternalReferenceCode(
 			long companyId, String externalReferenceCode)

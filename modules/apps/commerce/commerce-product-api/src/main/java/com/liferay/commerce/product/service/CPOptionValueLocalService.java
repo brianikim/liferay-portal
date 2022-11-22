@@ -233,20 +233,11 @@ public interface CPOptionValueLocalService
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public CPOptionValue fetchCPOptionValue(long CPOptionValueId);
 
-	/**
-	 * Returns the cp option value with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the cp option value's external reference code
-	 * @return the matching cp option value, or <code>null</code> if a matching cp option value could not be found
-	 */
+	@Deprecated
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public CPOptionValue fetchCPOptionValueByExternalReferenceCode(
 		long companyId, String externalReferenceCode);
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchCPOptionValueByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public CPOptionValue fetchCPOptionValueByReferenceCode(
@@ -281,14 +272,7 @@ public interface CPOptionValueLocalService
 	public CPOptionValue getCPOptionValue(long cpOptionId, String key)
 		throws PortalException;
 
-	/**
-	 * Returns the cp option value with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the cp option value's external reference code
-	 * @return the matching cp option value
-	 * @throws PortalException if a matching cp option value could not be found
-	 */
+	@Deprecated
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public CPOptionValue getCPOptionValueByExternalReferenceCode(
 			long companyId, String externalReferenceCode)

@@ -302,13 +302,7 @@ public abstract class UserLocalServiceBaseImpl
 		return userPersistence.fetchByUuid_C_First(uuid, companyId, null);
 	}
 
-	/**
-	 * Returns the user with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the user's external reference code
-	 * @return the matching user, or <code>null</code> if a matching user could not be found
-	 */
+	@Deprecated
 	@Override
 	public User fetchUserByExternalReferenceCode(
 		long companyId, String externalReferenceCode) {
@@ -316,9 +310,6 @@ public abstract class UserLocalServiceBaseImpl
 		return userPersistence.fetchByC_ERC(companyId, externalReferenceCode);
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchUserByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	@Override
 	public User fetchUserByReferenceCode(
@@ -328,14 +319,7 @@ public abstract class UserLocalServiceBaseImpl
 			companyId, externalReferenceCode);
 	}
 
-	/**
-	 * Returns the user with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the user's external reference code
-	 * @return the matching user
-	 * @throws PortalException if a matching user could not be found
-	 */
+	@Deprecated
 	@Override
 	public User getUserByExternalReferenceCode(
 			long companyId, String externalReferenceCode)

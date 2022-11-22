@@ -305,13 +305,7 @@ public abstract class CPInstanceLocalServiceBaseImpl
 		return cpInstancePersistence.fetchByUUID_G(uuid, groupId);
 	}
 
-	/**
-	 * Returns the cp instance with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the cp instance's external reference code
-	 * @return the matching cp instance, or <code>null</code> if a matching cp instance could not be found
-	 */
+	@Deprecated
 	@Override
 	public CPInstance fetchCPInstanceByExternalReferenceCode(
 		long companyId, String externalReferenceCode) {
@@ -320,9 +314,6 @@ public abstract class CPInstanceLocalServiceBaseImpl
 			companyId, externalReferenceCode);
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchCPInstanceByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	@Override
 	public CPInstance fetchCPInstanceByReferenceCode(
@@ -332,14 +323,7 @@ public abstract class CPInstanceLocalServiceBaseImpl
 			companyId, externalReferenceCode);
 	}
 
-	/**
-	 * Returns the cp instance with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the cp instance's external reference code
-	 * @return the matching cp instance
-	 * @throws PortalException if a matching cp instance could not be found
-	 */
+	@Deprecated
 	@Override
 	public CPInstance getCPInstanceByExternalReferenceCode(
 			long companyId, String externalReferenceCode)

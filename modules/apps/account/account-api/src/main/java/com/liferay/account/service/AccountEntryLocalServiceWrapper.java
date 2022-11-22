@@ -336,13 +336,7 @@ public class AccountEntryLocalServiceWrapper
 		return _accountEntryLocalService.fetchAccountEntry(accountEntryId);
 	}
 
-	/**
-	 * Returns the account entry with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the account entry's external reference code
-	 * @return the matching account entry, or <code>null</code> if a matching account entry could not be found
-	 */
+	@Deprecated
 	@Override
 	public com.liferay.account.model.AccountEntry
 		fetchAccountEntryByExternalReferenceCode(
@@ -353,9 +347,6 @@ public class AccountEntryLocalServiceWrapper
 				companyId, externalReferenceCode);
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchAccountEntryByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	@Override
 	public com.liferay.account.model.AccountEntry
@@ -426,14 +417,7 @@ public class AccountEntryLocalServiceWrapper
 		return _accountEntryLocalService.getAccountEntry(accountEntryId);
 	}
 
-	/**
-	 * Returns the account entry with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the account entry's external reference code
-	 * @return the matching account entry
-	 * @throws PortalException if a matching account entry could not be found
-	 */
+	@Deprecated
 	@Override
 	public com.liferay.account.model.AccountEntry
 			getAccountEntryByExternalReferenceCode(

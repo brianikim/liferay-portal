@@ -211,20 +211,11 @@ public interface CProductLocalService
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public CProduct fetchCProduct(long CProductId);
 
-	/**
-	 * Returns the c product with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the c product's external reference code
-	 * @return the matching c product, or <code>null</code> if a matching c product could not be found
-	 */
+	@Deprecated
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public CProduct fetchCProductByExternalReferenceCode(
 		long companyId, String externalReferenceCode);
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchCProductByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public CProduct fetchCProductByReferenceCode(
@@ -257,14 +248,7 @@ public interface CProductLocalService
 	public CProduct getCProductByCPInstanceUuid(String cpInstanceUuid)
 		throws PortalException;
 
-	/**
-	 * Returns the c product with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the c product's external reference code
-	 * @return the matching c product
-	 * @throws PortalException if a matching c product could not be found
-	 */
+	@Deprecated
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public CProduct getCProductByExternalReferenceCode(
 			long companyId, String externalReferenceCode)

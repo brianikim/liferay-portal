@@ -344,13 +344,7 @@ public class AssetVocabularyLocalServiceWrapper
 		return _assetVocabularyLocalService.fetchAssetVocabulary(vocabularyId);
 	}
 
-	/**
-	 * Returns the asset vocabulary with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the asset vocabulary's external reference code
-	 * @return the matching asset vocabulary, or <code>null</code> if a matching asset vocabulary could not be found
-	 */
+	@Deprecated
 	@Override
 	public AssetVocabulary fetchAssetVocabularyByExternalReferenceCode(
 		long companyId, String externalReferenceCode) {
@@ -360,9 +354,6 @@ public class AssetVocabularyLocalServiceWrapper
 				companyId, externalReferenceCode);
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchAssetVocabularyByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	@Override
 	public AssetVocabulary fetchAssetVocabularyByReferenceCode(
@@ -478,14 +469,7 @@ public class AssetVocabularyLocalServiceWrapper
 		return _assetVocabularyLocalService.getAssetVocabulary(vocabularyId);
 	}
 
-	/**
-	 * Returns the asset vocabulary with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the asset vocabulary's external reference code
-	 * @return the matching asset vocabulary
-	 * @throws PortalException if a matching asset vocabulary could not be found
-	 */
+	@Deprecated
 	@Override
 	public AssetVocabulary getAssetVocabularyByExternalReferenceCode(
 			long companyId, String externalReferenceCode)

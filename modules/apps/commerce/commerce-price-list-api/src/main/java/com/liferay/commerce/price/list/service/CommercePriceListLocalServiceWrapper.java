@@ -542,13 +542,7 @@ public class CommercePriceListLocalServiceWrapper
 			commercePriceListId);
 	}
 
-	/**
-	 * Returns the commerce price list with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce price list's external reference code
-	 * @return the matching commerce price list, or <code>null</code> if a matching commerce price list could not be found
-	 */
+	@Deprecated
 	@Override
 	public com.liferay.commerce.price.list.model.CommercePriceList
 		fetchCommercePriceListByExternalReferenceCode(
@@ -559,9 +553,6 @@ public class CommercePriceListLocalServiceWrapper
 				companyId, externalReferenceCode);
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchCommercePriceListByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	@Override
 	public com.liferay.commerce.price.list.model.CommercePriceList
@@ -717,14 +708,7 @@ public class CommercePriceListLocalServiceWrapper
 			groupId, type, commerceChannelId);
 	}
 
-	/**
-	 * Returns the commerce price list with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce price list's external reference code
-	 * @return the matching commerce price list
-	 * @throws PortalException if a matching commerce price list could not be found
-	 */
+	@Deprecated
 	@Override
 	public com.liferay.commerce.price.list.model.CommercePriceList
 			getCommercePriceListByExternalReferenceCode(

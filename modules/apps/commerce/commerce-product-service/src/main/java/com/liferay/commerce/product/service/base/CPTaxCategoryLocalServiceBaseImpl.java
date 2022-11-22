@@ -274,13 +274,7 @@ public abstract class CPTaxCategoryLocalServiceBaseImpl
 		return cpTaxCategoryPersistence.fetchByPrimaryKey(CPTaxCategoryId);
 	}
 
-	/**
-	 * Returns the cp tax category with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the cp tax category's external reference code
-	 * @return the matching cp tax category, or <code>null</code> if a matching cp tax category could not be found
-	 */
+	@Deprecated
 	@Override
 	public CPTaxCategory fetchCPTaxCategoryByExternalReferenceCode(
 		long companyId, String externalReferenceCode) {
@@ -289,9 +283,6 @@ public abstract class CPTaxCategoryLocalServiceBaseImpl
 			companyId, externalReferenceCode);
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchCPTaxCategoryByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	@Override
 	public CPTaxCategory fetchCPTaxCategoryByReferenceCode(
@@ -301,14 +292,7 @@ public abstract class CPTaxCategoryLocalServiceBaseImpl
 			companyId, externalReferenceCode);
 	}
 
-	/**
-	 * Returns the cp tax category with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the cp tax category's external reference code
-	 * @return the matching cp tax category
-	 * @throws PortalException if a matching cp tax category could not be found
-	 */
+	@Deprecated
 	@Override
 	public CPTaxCategory getCPTaxCategoryByExternalReferenceCode(
 			long companyId, String externalReferenceCode)

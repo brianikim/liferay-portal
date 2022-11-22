@@ -1299,13 +1299,7 @@ public class UserLocalServiceWrapper
 			companyId, emailAddress);
 	}
 
-	/**
-	 * Returns the user with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the user's external reference code
-	 * @return the matching user, or <code>null</code> if a matching user could not be found
-	 */
+	@Deprecated
 	@Override
 	public User fetchUserByExternalReferenceCode(
 		long companyId, String externalReferenceCode) {
@@ -1382,9 +1376,6 @@ public class UserLocalServiceWrapper
 		return _userLocalService.fetchUserByPortraitId(portraitId);
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchUserByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	@Override
 	public User fetchUserByReferenceCode(
@@ -2061,14 +2052,7 @@ public class UserLocalServiceWrapper
 		return _userLocalService.getUserByEmailAddress(companyId, emailAddress);
 	}
 
-	/**
-	 * Returns the user with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the user's external reference code
-	 * @return the matching user
-	 * @throws PortalException if a matching user could not be found
-	 */
+	@Deprecated
 	@Override
 	public User getUserByExternalReferenceCode(
 			long companyId, String externalReferenceCode)

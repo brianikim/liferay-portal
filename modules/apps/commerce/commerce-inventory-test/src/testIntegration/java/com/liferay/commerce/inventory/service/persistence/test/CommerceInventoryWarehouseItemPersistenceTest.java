@@ -15,6 +15,7 @@
 package com.liferay.commerce.inventory.service.persistence.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.commerce.inventory.exception.DuplicateCommerceInventoryWarehouseItemExternalReferenceCodeException;
 import com.liferay.commerce.inventory.exception.NoSuchInventoryWarehouseItemException;
 import com.liferay.commerce.inventory.model.CommerceInventoryWarehouseItem;
 import com.liferay.commerce.inventory.service.CommerceInventoryWarehouseItemLocalServiceUtil;
@@ -211,6 +212,32 @@ public class CommerceInventoryWarehouseItemPersistenceTest {
 		Assert.assertEquals(
 			existingCommerceInventoryWarehouseItem.getReservedQuantity(),
 			newCommerceInventoryWarehouseItem.getReservedQuantity());
+	}
+
+	@Test(
+		expected = DuplicateCommerceInventoryWarehouseItemExternalReferenceCodeException.class
+	)
+	public void testUpdateWithExistingExternalReferenceCode() throws Exception {
+		CommerceInventoryWarehouseItem commerceInventoryWarehouseItem =
+			addCommerceInventoryWarehouseItem();
+
+		CommerceInventoryWarehouseItem newCommerceInventoryWarehouseItem =
+			addCommerceInventoryWarehouseItem();
+
+		newCommerceInventoryWarehouseItem.setCompanyId(
+			commerceInventoryWarehouseItem.getCompanyId());
+
+		newCommerceInventoryWarehouseItem = _persistence.update(
+			newCommerceInventoryWarehouseItem);
+
+		Session session = _persistence.getCurrentSession();
+
+		session.evict(newCommerceInventoryWarehouseItem);
+
+		newCommerceInventoryWarehouseItem.setExternalReferenceCode(
+			commerceInventoryWarehouseItem.getExternalReferenceCode());
+
+		_persistence.update(newCommerceInventoryWarehouseItem);
 	}
 
 	@Test

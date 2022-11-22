@@ -15,6 +15,7 @@
 package com.liferay.commerce.product.service.persistence.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.commerce.product.exception.DuplicateCPTaxCategoryExternalReferenceCodeException;
 import com.liferay.commerce.product.exception.NoSuchCPTaxCategoryException;
 import com.liferay.commerce.product.model.CPTaxCategory;
 import com.liferay.commerce.product.service.CPTaxCategoryLocalServiceUtil;
@@ -171,6 +172,26 @@ public class CPTaxCategoryPersistenceTest {
 		Assert.assertEquals(
 			existingCPTaxCategory.getDescription(),
 			newCPTaxCategory.getDescription());
+	}
+
+	@Test(expected = DuplicateCPTaxCategoryExternalReferenceCodeException.class)
+	public void testUpdateWithExistingExternalReferenceCode() throws Exception {
+		CPTaxCategory cpTaxCategory = addCPTaxCategory();
+
+		CPTaxCategory newCPTaxCategory = addCPTaxCategory();
+
+		newCPTaxCategory.setCompanyId(cpTaxCategory.getCompanyId());
+
+		newCPTaxCategory = _persistence.update(newCPTaxCategory);
+
+		Session session = _persistence.getCurrentSession();
+
+		session.evict(newCPTaxCategory);
+
+		newCPTaxCategory.setExternalReferenceCode(
+			cpTaxCategory.getExternalReferenceCode());
+
+		_persistence.update(newCPTaxCategory);
 	}
 
 	@Test

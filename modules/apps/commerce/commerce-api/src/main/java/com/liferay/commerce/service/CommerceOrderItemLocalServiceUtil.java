@@ -274,13 +274,7 @@ public class CommerceOrderItemLocalServiceUtil {
 			bookedQuantityId);
 	}
 
-	/**
-	 * Returns the commerce order item with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce order item's external reference code
-	 * @return the matching commerce order item, or <code>null</code> if a matching commerce order item could not be found
-	 */
+	@Deprecated
 	public static CommerceOrderItem
 		fetchCommerceOrderItemByExternalReferenceCode(
 			long companyId, String externalReferenceCode) {
@@ -289,9 +283,6 @@ public class CommerceOrderItemLocalServiceUtil {
 			companyId, externalReferenceCode);
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchCommerceOrderItemByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	public static CommerceOrderItem fetchCommerceOrderItemByReferenceCode(
 		long companyId, String externalReferenceCode) {
@@ -342,14 +333,7 @@ public class CommerceOrderItemLocalServiceUtil {
 		return getService().getCommerceOrderItem(commerceOrderItemId);
 	}
 
-	/**
-	 * Returns the commerce order item with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce order item's external reference code
-	 * @return the matching commerce order item
-	 * @throws PortalException if a matching commerce order item could not be found
-	 */
+	@Deprecated
 	public static CommerceOrderItem getCommerceOrderItemByExternalReferenceCode(
 			long companyId, String externalReferenceCode)
 		throws PortalException {

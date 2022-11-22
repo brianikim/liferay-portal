@@ -272,13 +272,7 @@ public class CPOptionValueLocalServiceWrapper
 		return _cpOptionValueLocalService.fetchCPOptionValue(CPOptionValueId);
 	}
 
-	/**
-	 * Returns the cp option value with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the cp option value's external reference code
-	 * @return the matching cp option value, or <code>null</code> if a matching cp option value could not be found
-	 */
+	@Deprecated
 	@Override
 	public com.liferay.commerce.product.model.CPOptionValue
 		fetchCPOptionValueByExternalReferenceCode(
@@ -289,9 +283,6 @@ public class CPOptionValueLocalServiceWrapper
 				companyId, externalReferenceCode);
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchCPOptionValueByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	@Override
 	public com.liferay.commerce.product.model.CPOptionValue
@@ -347,14 +338,7 @@ public class CPOptionValueLocalServiceWrapper
 		return _cpOptionValueLocalService.getCPOptionValue(cpOptionId, key);
 	}
 
-	/**
-	 * Returns the cp option value with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the cp option value's external reference code
-	 * @return the matching cp option value
-	 * @throws PortalException if a matching cp option value could not be found
-	 */
+	@Deprecated
 	@Override
 	public com.liferay.commerce.product.model.CPOptionValue
 			getCPOptionValueByExternalReferenceCode(

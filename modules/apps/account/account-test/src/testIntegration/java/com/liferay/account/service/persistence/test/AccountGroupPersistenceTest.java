@@ -14,6 +14,7 @@
 
 package com.liferay.account.service.persistence.test;
 
+import com.liferay.account.exception.DuplicateAccountGroupExternalReferenceCodeException;
 import com.liferay.account.exception.NoSuchGroupException;
 import com.liferay.account.model.AccountGroup;
 import com.liferay.account.service.AccountGroupLocalServiceUtil;
@@ -174,6 +175,26 @@ public class AccountGroupPersistenceTest {
 		Assert.assertEquals(
 			existingAccountGroup.getDescription(),
 			newAccountGroup.getDescription());
+	}
+
+	@Test(expected = DuplicateAccountGroupExternalReferenceCodeException.class)
+	public void testUpdateWithExistingExternalReferenceCode() throws Exception {
+		AccountGroup accountGroup = addAccountGroup();
+
+		AccountGroup newAccountGroup = addAccountGroup();
+
+		newAccountGroup.setCompanyId(accountGroup.getCompanyId());
+
+		newAccountGroup = _persistence.update(newAccountGroup);
+
+		Session session = _persistence.getCurrentSession();
+
+		session.evict(newAccountGroup);
+
+		newAccountGroup.setExternalReferenceCode(
+			accountGroup.getExternalReferenceCode());
+
+		_persistence.update(newAccountGroup);
 	}
 
 	@Test

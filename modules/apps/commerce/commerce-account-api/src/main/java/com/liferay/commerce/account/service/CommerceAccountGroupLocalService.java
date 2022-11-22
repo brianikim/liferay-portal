@@ -225,21 +225,12 @@ public interface CommerceAccountGroupLocalService
 	public CommerceAccountGroup fetchCommerceAccountGroup(
 		long commerceAccountGroupId);
 
-	/**
-	 * Returns the commerce account group with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce account group's external reference code
-	 * @return the matching commerce account group, or <code>null</code> if a matching commerce account group could not be found
-	 */
+	@Deprecated
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public CommerceAccountGroup
 		fetchCommerceAccountGroupByExternalReferenceCode(
 			long companyId, String externalReferenceCode);
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchCommerceAccountGroupByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public CommerceAccountGroup fetchCommerceAccountGroupByReferenceCode(
@@ -260,14 +251,7 @@ public interface CommerceAccountGroupLocalService
 			long commerceAccountGroupId)
 		throws PortalException;
 
-	/**
-	 * Returns the commerce account group with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce account group's external reference code
-	 * @return the matching commerce account group
-	 * @throws PortalException if a matching commerce account group could not be found
-	 */
+	@Deprecated
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public CommerceAccountGroup getCommerceAccountGroupByExternalReferenceCode(
 			long companyId, String externalReferenceCode)

@@ -22,6 +22,7 @@ import com.liferay.portal.kernel.dao.orm.ProjectionFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
+import com.liferay.portal.kernel.exception.DuplicateUserGroupExternalReferenceCodeException;
 import com.liferay.portal.kernel.exception.NoSuchUserGroupException;
 import com.liferay.portal.kernel.model.UserGroup;
 import com.liferay.portal.kernel.service.UserGroupLocalServiceUtil;
@@ -188,6 +189,26 @@ public class UserGroupPersistenceTest {
 		Assert.assertEquals(
 			existingUserGroup.isAddedByLDAPImport(),
 			newUserGroup.isAddedByLDAPImport());
+	}
+
+	@Test(expected = DuplicateUserGroupExternalReferenceCodeException.class)
+	public void testUpdateWithExistingExternalReferenceCode() throws Exception {
+		UserGroup userGroup = addUserGroup();
+
+		UserGroup newUserGroup = addUserGroup();
+
+		newUserGroup.setCompanyId(userGroup.getCompanyId());
+
+		newUserGroup = _persistence.update(newUserGroup);
+
+		Session session = _persistence.getCurrentSession();
+
+		session.evict(newUserGroup);
+
+		newUserGroup.setExternalReferenceCode(
+			userGroup.getExternalReferenceCode());
+
+		_persistence.update(newUserGroup);
 	}
 
 	@Test

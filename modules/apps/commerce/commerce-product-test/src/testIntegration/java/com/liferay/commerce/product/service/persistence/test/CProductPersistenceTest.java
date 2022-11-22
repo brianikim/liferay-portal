@@ -15,6 +15,7 @@
 package com.liferay.commerce.product.service.persistence.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.commerce.product.exception.DuplicateCProductExternalReferenceCodeException;
 import com.liferay.commerce.product.exception.NoSuchCProductException;
 import com.liferay.commerce.product.model.CProduct;
 import com.liferay.commerce.product.service.CProductLocalServiceUtil;
@@ -175,6 +176,26 @@ public class CProductPersistenceTest {
 		Assert.assertEquals(
 			existingCProduct.getLatestVersion(),
 			newCProduct.getLatestVersion());
+	}
+
+	@Test(expected = DuplicateCProductExternalReferenceCodeException.class)
+	public void testUpdateWithExistingExternalReferenceCode() throws Exception {
+		CProduct cProduct = addCProduct();
+
+		CProduct newCProduct = addCProduct();
+
+		newCProduct.setCompanyId(cProduct.getCompanyId());
+
+		newCProduct = _persistence.update(newCProduct);
+
+		Session session = _persistence.getCurrentSession();
+
+		session.evict(newCProduct);
+
+		newCProduct.setExternalReferenceCode(
+			cProduct.getExternalReferenceCode());
+
+		_persistence.update(newCProduct);
 	}
 
 	@Test

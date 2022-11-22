@@ -323,13 +323,7 @@ public class CommerceAccountGroupCommerceAccountRelLocalServiceWrapper
 				commerceAccountGroupId, commerceAccountId);
 	}
 
-	/**
-	 * Returns the commerce account group commerce account rel with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce account group commerce account rel's external reference code
-	 * @return the matching commerce account group commerce account rel, or <code>null</code> if a matching commerce account group commerce account rel could not be found
-	 */
+	@Deprecated
 	@Override
 	public
 		com.liferay.commerce.account.model.
@@ -342,9 +336,6 @@ public class CommerceAccountGroupCommerceAccountRelLocalServiceWrapper
 				companyId, externalReferenceCode);
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchCommerceAccountGroupCommerceAccountRelByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	@Override
 	public
@@ -399,14 +390,7 @@ public class CommerceAccountGroupCommerceAccountRelLocalServiceWrapper
 				commerceAccountGroupId, commerceAccountId);
 	}
 
-	/**
-	 * Returns the commerce account group commerce account rel with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce account group commerce account rel's external reference code
-	 * @return the matching commerce account group commerce account rel
-	 * @throws PortalException if a matching commerce account group commerce account rel could not be found
-	 */
+	@Deprecated
 	@Override
 	public
 		com.liferay.commerce.account.model.

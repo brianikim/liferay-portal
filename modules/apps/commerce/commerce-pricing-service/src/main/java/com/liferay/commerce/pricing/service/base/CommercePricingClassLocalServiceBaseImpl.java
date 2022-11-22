@@ -289,13 +289,7 @@ public abstract class CommercePricingClassLocalServiceBaseImpl
 			uuid, companyId, null);
 	}
 
-	/**
-	 * Returns the commerce pricing class with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce pricing class's external reference code
-	 * @return the matching commerce pricing class, or <code>null</code> if a matching commerce pricing class could not be found
-	 */
+	@Deprecated
 	@Override
 	public CommercePricingClass
 		fetchCommercePricingClassByExternalReferenceCode(
@@ -305,9 +299,6 @@ public abstract class CommercePricingClassLocalServiceBaseImpl
 			companyId, externalReferenceCode);
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchCommercePricingClassByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	@Override
 	public CommercePricingClass fetchCommercePricingClassByReferenceCode(
@@ -317,14 +308,7 @@ public abstract class CommercePricingClassLocalServiceBaseImpl
 			companyId, externalReferenceCode);
 	}
 
-	/**
-	 * Returns the commerce pricing class with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce pricing class's external reference code
-	 * @return the matching commerce pricing class
-	 * @throws PortalException if a matching commerce pricing class could not be found
-	 */
+	@Deprecated
 	@Override
 	public CommercePricingClass getCommercePricingClassByExternalReferenceCode(
 			long companyId, String externalReferenceCode)

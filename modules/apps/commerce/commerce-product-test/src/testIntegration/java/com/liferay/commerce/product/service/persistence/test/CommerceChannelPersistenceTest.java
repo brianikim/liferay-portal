@@ -15,6 +15,7 @@
 package com.liferay.commerce.product.service.persistence.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.commerce.product.exception.DuplicateCommerceChannelExternalReferenceCodeException;
 import com.liferay.commerce.product.exception.NoSuchChannelException;
 import com.liferay.commerce.product.model.CommerceChannel;
 import com.liferay.commerce.product.service.CommerceChannelLocalServiceUtil;
@@ -198,6 +199,28 @@ public class CommerceChannelPersistenceTest {
 		Assert.assertEquals(
 			existingCommerceChannel.isDiscountsTargetNetPrice(),
 			newCommerceChannel.isDiscountsTargetNetPrice());
+	}
+
+	@Test(
+		expected = DuplicateCommerceChannelExternalReferenceCodeException.class
+	)
+	public void testUpdateWithExistingExternalReferenceCode() throws Exception {
+		CommerceChannel commerceChannel = addCommerceChannel();
+
+		CommerceChannel newCommerceChannel = addCommerceChannel();
+
+		newCommerceChannel.setCompanyId(commerceChannel.getCompanyId());
+
+		newCommerceChannel = _persistence.update(newCommerceChannel);
+
+		Session session = _persistence.getCurrentSession();
+
+		session.evict(newCommerceChannel);
+
+		newCommerceChannel.setExternalReferenceCode(
+			commerceChannel.getExternalReferenceCode());
+
+		_persistence.update(newCommerceChannel);
 	}
 
 	@Test

@@ -247,13 +247,7 @@ public abstract class AccountGroupLocalServiceBaseImpl
 		return accountGroupPersistence.fetchByPrimaryKey(accountGroupId);
 	}
 
-	/**
-	 * Returns the account group with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the account group's external reference code
-	 * @return the matching account group, or <code>null</code> if a matching account group could not be found
-	 */
+	@Deprecated
 	@Override
 	public AccountGroup fetchAccountGroupByExternalReferenceCode(
 		long companyId, String externalReferenceCode) {
@@ -262,9 +256,6 @@ public abstract class AccountGroupLocalServiceBaseImpl
 			companyId, externalReferenceCode);
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchAccountGroupByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	@Override
 	public AccountGroup fetchAccountGroupByReferenceCode(
@@ -274,14 +265,7 @@ public abstract class AccountGroupLocalServiceBaseImpl
 			companyId, externalReferenceCode);
 	}
 
-	/**
-	 * Returns the account group with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the account group's external reference code
-	 * @return the matching account group
-	 * @throws PortalException if a matching account group could not be found
-	 */
+	@Deprecated
 	@Override
 	public AccountGroup getAccountGroupByExternalReferenceCode(
 			long companyId, String externalReferenceCode)

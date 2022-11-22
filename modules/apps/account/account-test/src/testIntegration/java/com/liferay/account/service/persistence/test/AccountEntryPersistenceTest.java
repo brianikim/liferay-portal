@@ -14,6 +14,7 @@
 
 package com.liferay.account.service.persistence.test;
 
+import com.liferay.account.exception.DuplicateAccountEntryExternalReferenceCodeException;
 import com.liferay.account.exception.NoSuchEntryException;
 import com.liferay.account.model.AccountEntry;
 import com.liferay.account.service.AccountEntryLocalServiceUtil;
@@ -200,6 +201,26 @@ public class AccountEntryPersistenceTest {
 			existingAccountEntry.getType(), newAccountEntry.getType());
 		Assert.assertEquals(
 			existingAccountEntry.getStatus(), newAccountEntry.getStatus());
+	}
+
+	@Test(expected = DuplicateAccountEntryExternalReferenceCodeException.class)
+	public void testUpdateWithExistingExternalReferenceCode() throws Exception {
+		AccountEntry accountEntry = addAccountEntry();
+
+		AccountEntry newAccountEntry = addAccountEntry();
+
+		newAccountEntry.setCompanyId(accountEntry.getCompanyId());
+
+		newAccountEntry = _persistence.update(newAccountEntry);
+
+		Session session = _persistence.getCurrentSession();
+
+		session.evict(newAccountEntry);
+
+		newAccountEntry.setExternalReferenceCode(
+			accountEntry.getExternalReferenceCode());
+
+		_persistence.update(newAccountEntry);
 	}
 
 	@Test

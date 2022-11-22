@@ -15,6 +15,7 @@
 package com.liferay.commerce.service.persistence.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.commerce.exception.DuplicateCommerceAddressExternalReferenceCodeException;
 import com.liferay.commerce.exception.NoSuchAddressException;
 import com.liferay.commerce.model.CommerceAddress;
 import com.liferay.commerce.service.CommerceAddressLocalServiceUtil;
@@ -250,6 +251,28 @@ public class CommerceAddressPersistenceTest {
 			newCommerceAddress.isDefaultShipping());
 		Assert.assertEquals(
 			existingCommerceAddress.getType(), newCommerceAddress.getType());
+	}
+
+	@Test(
+		expected = DuplicateCommerceAddressExternalReferenceCodeException.class
+	)
+	public void testUpdateWithExistingExternalReferenceCode() throws Exception {
+		CommerceAddress commerceAddress = addCommerceAddress();
+
+		CommerceAddress newCommerceAddress = addCommerceAddress();
+
+		newCommerceAddress.setCompanyId(commerceAddress.getCompanyId());
+
+		newCommerceAddress = _persistence.update(newCommerceAddress);
+
+		Session session = _persistence.getCurrentSession();
+
+		session.evict(newCommerceAddress);
+
+		newCommerceAddress.setExternalReferenceCode(
+			commerceAddress.getExternalReferenceCode());
+
+		_persistence.update(newCommerceAddress);
 	}
 
 	@Test

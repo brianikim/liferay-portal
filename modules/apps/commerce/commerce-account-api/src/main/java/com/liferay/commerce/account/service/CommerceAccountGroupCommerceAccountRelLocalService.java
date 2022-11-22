@@ -233,21 +233,12 @@ public interface CommerceAccountGroupCommerceAccountRelLocalService
 		fetchCommerceAccountGroupCommerceAccountRel(
 			long commerceAccountGroupId, long commerceAccountId);
 
-	/**
-	 * Returns the commerce account group commerce account rel with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce account group commerce account rel's external reference code
-	 * @return the matching commerce account group commerce account rel, or <code>null</code> if a matching commerce account group commerce account rel could not be found
-	 */
+	@Deprecated
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public CommerceAccountGroupCommerceAccountRel
 		fetchCommerceAccountGroupCommerceAccountRelByExternalReferenceCode(
 			long companyId, String externalReferenceCode);
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchCommerceAccountGroupCommerceAccountRelByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public CommerceAccountGroupCommerceAccountRel
@@ -276,14 +267,7 @@ public interface CommerceAccountGroupCommerceAccountRelLocalService
 				long commerceAccountGroupId, long commerceAccountId)
 		throws PortalException;
 
-	/**
-	 * Returns the commerce account group commerce account rel with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce account group commerce account rel's external reference code
-	 * @return the matching commerce account group commerce account rel
-	 * @throws PortalException if a matching commerce account group commerce account rel could not be found
-	 */
+	@Deprecated
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public CommerceAccountGroupCommerceAccountRel
 			getCommerceAccountGroupCommerceAccountRelByExternalReferenceCode(

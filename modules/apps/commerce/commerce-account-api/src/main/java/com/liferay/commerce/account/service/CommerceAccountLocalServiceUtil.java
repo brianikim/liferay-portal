@@ -269,13 +269,7 @@ public class CommerceAccountLocalServiceUtil {
 		return getService().fetchCommerceAccount(commerceAccountId);
 	}
 
-	/**
-	 * Returns the commerce account with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce account's external reference code
-	 * @return the matching commerce account, or <code>null</code> if a matching commerce account could not be found
-	 */
+	@Deprecated
 	public static CommerceAccount fetchCommerceAccountByExternalReferenceCode(
 		long companyId, String externalReferenceCode) {
 
@@ -283,9 +277,6 @@ public class CommerceAccountLocalServiceUtil {
 			companyId, externalReferenceCode);
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchCommerceAccountByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	public static CommerceAccount fetchCommerceAccountByReferenceCode(
 		long companyId, String externalReferenceCode) {
@@ -327,14 +318,7 @@ public class CommerceAccountLocalServiceUtil {
 		return getService().getCommerceAccount(userId, commerceAccountId);
 	}
 
-	/**
-	 * Returns the commerce account with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce account's external reference code
-	 * @return the matching commerce account
-	 * @throws PortalException if a matching commerce account could not be found
-	 */
+	@Deprecated
 	public static CommerceAccount getCommerceAccountByExternalReferenceCode(
 			long companyId, String externalReferenceCode)
 		throws PortalException {

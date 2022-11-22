@@ -294,13 +294,7 @@ public class CommerceCatalogLocalServiceWrapper
 			commerceCatalogId);
 	}
 
-	/**
-	 * Returns the commerce catalog with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce catalog's external reference code
-	 * @return the matching commerce catalog, or <code>null</code> if a matching commerce catalog could not be found
-	 */
+	@Deprecated
 	@Override
 	public com.liferay.commerce.product.model.CommerceCatalog
 		fetchCommerceCatalogByExternalReferenceCode(
@@ -319,9 +313,6 @@ public class CommerceCatalogLocalServiceWrapper
 			groupId);
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchCommerceCatalogByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	@Override
 	public com.liferay.commerce.product.model.CommerceCatalog
@@ -366,14 +357,7 @@ public class CommerceCatalogLocalServiceWrapper
 			commerceCatalogId);
 	}
 
-	/**
-	 * Returns the commerce catalog with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce catalog's external reference code
-	 * @return the matching commerce catalog
-	 * @throws PortalException if a matching commerce catalog could not be found
-	 */
+	@Deprecated
 	@Override
 	public com.liferay.commerce.product.model.CommerceCatalog
 			getCommerceCatalogByExternalReferenceCode(

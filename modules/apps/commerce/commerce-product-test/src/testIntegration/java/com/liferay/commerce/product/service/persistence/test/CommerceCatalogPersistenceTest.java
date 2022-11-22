@@ -15,6 +15,7 @@
 package com.liferay.commerce.product.service.persistence.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.commerce.product.exception.DuplicateCommerceCatalogExternalReferenceCodeException;
 import com.liferay.commerce.product.exception.NoSuchCatalogException;
 import com.liferay.commerce.product.model.CommerceCatalog;
 import com.liferay.commerce.product.service.CommerceCatalogLocalServiceUtil;
@@ -183,6 +184,28 @@ public class CommerceCatalogPersistenceTest {
 			newCommerceCatalog.getCatalogDefaultLanguageId());
 		Assert.assertEquals(
 			existingCommerceCatalog.isSystem(), newCommerceCatalog.isSystem());
+	}
+
+	@Test(
+		expected = DuplicateCommerceCatalogExternalReferenceCodeException.class
+	)
+	public void testUpdateWithExistingExternalReferenceCode() throws Exception {
+		CommerceCatalog commerceCatalog = addCommerceCatalog();
+
+		CommerceCatalog newCommerceCatalog = addCommerceCatalog();
+
+		newCommerceCatalog.setCompanyId(commerceCatalog.getCompanyId());
+
+		newCommerceCatalog = _persistence.update(newCommerceCatalog);
+
+		Session session = _persistence.getCurrentSession();
+
+		session.evict(newCommerceCatalog);
+
+		newCommerceCatalog.setExternalReferenceCode(
+			commerceCatalog.getExternalReferenceCode());
+
+		_persistence.update(newCommerceCatalog);
 	}
 
 	@Test

@@ -248,13 +248,7 @@ public class CPTaxCategoryLocalServiceUtil {
 		return getService().fetchCPTaxCategory(CPTaxCategoryId);
 	}
 
-	/**
-	 * Returns the cp tax category with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the cp tax category's external reference code
-	 * @return the matching cp tax category, or <code>null</code> if a matching cp tax category could not be found
-	 */
+	@Deprecated
 	public static CPTaxCategory fetchCPTaxCategoryByExternalReferenceCode(
 		long companyId, String externalReferenceCode) {
 
@@ -262,9 +256,6 @@ public class CPTaxCategoryLocalServiceUtil {
 			companyId, externalReferenceCode);
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchCPTaxCategoryByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	public static CPTaxCategory fetchCPTaxCategoryByReferenceCode(
 		long companyId, String externalReferenceCode) {
@@ -339,14 +330,7 @@ public class CPTaxCategoryLocalServiceUtil {
 		return getService().getCPTaxCategory(CPTaxCategoryId);
 	}
 
-	/**
-	 * Returns the cp tax category with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the cp tax category's external reference code
-	 * @return the matching cp tax category
-	 * @throws PortalException if a matching cp tax category could not be found
-	 */
+	@Deprecated
 	public static CPTaxCategory getCPTaxCategoryByExternalReferenceCode(
 			long companyId, String externalReferenceCode)
 		throws PortalException {

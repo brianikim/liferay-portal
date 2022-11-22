@@ -262,13 +262,7 @@ public abstract class CommerceAccountLocalServiceBaseImpl
 		return commerceAccountPersistence.fetchByPrimaryKey(commerceAccountId);
 	}
 
-	/**
-	 * Returns the commerce account with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce account's external reference code
-	 * @return the matching commerce account, or <code>null</code> if a matching commerce account could not be found
-	 */
+	@Deprecated
 	@Override
 	public CommerceAccount fetchCommerceAccountByExternalReferenceCode(
 		long companyId, String externalReferenceCode) {
@@ -277,9 +271,6 @@ public abstract class CommerceAccountLocalServiceBaseImpl
 			companyId, externalReferenceCode);
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchCommerceAccountByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	@Override
 	public CommerceAccount fetchCommerceAccountByReferenceCode(
@@ -289,14 +280,7 @@ public abstract class CommerceAccountLocalServiceBaseImpl
 			companyId, externalReferenceCode);
 	}
 
-	/**
-	 * Returns the commerce account with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the commerce account's external reference code
-	 * @return the matching commerce account
-	 * @throws PortalException if a matching commerce account could not be found
-	 */
+	@Deprecated
 	@Override
 	public CommerceAccount getCommerceAccountByExternalReferenceCode(
 			long companyId, String externalReferenceCode)

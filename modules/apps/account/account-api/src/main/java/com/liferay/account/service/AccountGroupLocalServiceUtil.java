@@ -216,13 +216,7 @@ public class AccountGroupLocalServiceUtil {
 		return getService().fetchAccountGroup(accountGroupId);
 	}
 
-	/**
-	 * Returns the account group with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the account group's external reference code
-	 * @return the matching account group, or <code>null</code> if a matching account group could not be found
-	 */
+	@Deprecated
 	public static AccountGroup fetchAccountGroupByExternalReferenceCode(
 		long companyId, String externalReferenceCode) {
 
@@ -230,9 +224,6 @@ public class AccountGroupLocalServiceUtil {
 			companyId, externalReferenceCode);
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchAccountGroupByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	public static AccountGroup fetchAccountGroupByReferenceCode(
 		long companyId, String externalReferenceCode) {
@@ -254,14 +245,7 @@ public class AccountGroupLocalServiceUtil {
 		return getService().getAccountGroup(accountGroupId);
 	}
 
-	/**
-	 * Returns the account group with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the account group's external reference code
-	 * @return the matching account group
-	 * @throws PortalException if a matching account group could not be found
-	 */
+	@Deprecated
 	public static AccountGroup getAccountGroupByExternalReferenceCode(
 			long companyId, String externalReferenceCode)
 		throws PortalException {
