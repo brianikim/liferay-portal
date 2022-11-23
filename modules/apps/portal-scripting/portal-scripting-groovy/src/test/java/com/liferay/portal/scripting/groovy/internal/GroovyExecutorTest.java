@@ -47,13 +47,13 @@ public class GroovyExecutorTest {
 	}
 
 	@Test
-	public void testGroovyRuntimeExceptionSerialization() throws Exception {
+	public void testMissingMethod() throws Exception {
 		try {
 			_execute(
 				Collections.emptyMap(), Collections.emptySet(),
-				"missing-method-exception");
+				"missing-method");
 
-			Assert.fail("Should throw GroovyRuntimeException");
+			Assert.fail();
 		}
 		catch (ScriptingException scriptingException) {
 			Assert.assertEquals(
@@ -72,7 +72,7 @@ public class GroovyExecutorTest {
 				Collections.emptyMap(), Collections.emptySet(),
 				"runtime-error");
 
-			Assert.fail("Should throw RuntimeException");
+			Assert.fail();
 		}
 		catch (RuntimeException runtimeException) {
 		}
@@ -89,7 +89,7 @@ public class GroovyExecutorTest {
 			_execute(
 				Collections.emptyMap(), Collections.emptySet(), "syntax-error");
 
-			Assert.fail("Should throw UnsupportedOperationException");
+			Assert.fail();
 		}
 		catch (UnsupportedOperationException unsupportedOperationException) {
 		}
