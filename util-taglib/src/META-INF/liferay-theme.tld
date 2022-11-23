@@ -42,7 +42,7 @@
 		<name>meta-tags</name>
 		<tag-class>com.liferay.taglib.theme.MetaTagsTag</tag-class>
 		<body-content>JSP</body-content>
-		<description>Adds a <![CDATA[&lt;meta&gt;]]> tag to the page.</description>
+		<description>Adds a &lt;meta&gt; tag to the page.</description>
 	</tag>
 	<tag>
 		<name>param</name>
