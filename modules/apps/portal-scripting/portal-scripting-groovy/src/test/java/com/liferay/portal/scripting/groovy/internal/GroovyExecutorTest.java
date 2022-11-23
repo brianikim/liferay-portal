@@ -40,7 +40,7 @@ public class GroovyExecutorTest {
 		LiferayUnitTestRule.INSTANCE;
 
 	@Test
-	public void testBindingInputVariables() throws Exception {
+	public void testBindingInput() throws Exception {
 		_execute(
 			Collections.singletonMap("variable", "string"),
 			Collections.emptySet(), "binding-input");
@@ -79,7 +79,7 @@ public class GroovyExecutorTest {
 	}
 
 	@Test
-	public void testSimpleScript() throws Exception {
+	public void testSimple() throws Exception {
 		_execute(Collections.emptyMap(), Collections.emptySet(), "simple");
 	}
 
