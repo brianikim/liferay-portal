@@ -206,7 +206,15 @@
 					'#<portlet:namespace /><%= fieldsNamespace %>PaletteContentBox a'
 				);
 
-				childrenItems.each((item) => {
+				var triggerMenu = A.one('#<portlet:namespace /><%= fieldsNamespace %>Menu');
+
+				var listContainer = triggerMenu.getData('menuListContainer');
+
+				if (childrenItems._nodes && !childrenItems._nodes.length && listContainer) {
+					childrenItems = listContainer.all(childrenItems._query);
+				}
+
+				childrenItems.each(function (item) {
 					if (item.hasClass('active')) {
 						item.removeClass('active');
 					}
@@ -228,9 +236,8 @@
 					}
 				);
 
-				var trigger = A.one('#<portlet:namespace /><%= fieldsNamespace %>Menu');
-
-				trigger.setHTML(triggerContent);
+				triggerMenu.setHTML(triggerContent);
+				triggerMenu.setData('menuListContainer', listContainer);
 			};
 
 			Liferay.on('inputLocalized:localeChanged', onLocaleChange);
