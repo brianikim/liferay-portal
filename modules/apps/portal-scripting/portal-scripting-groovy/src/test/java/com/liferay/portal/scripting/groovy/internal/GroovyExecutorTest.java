@@ -61,7 +61,7 @@ public class GroovyExecutorTest {
 					"applicable for argument types: () values: []",
 				scriptingException.getMessage());
 
-			_checkExceptionSerialization(scriptingException);
+			_writeAndReadObject(scriptingException);
 		}
 	}
 
@@ -95,7 +95,7 @@ public class GroovyExecutorTest {
 		}
 	}
 
-	private void _checkExceptionSerialization(Exception exception)
+	private void _writeAndReadObject(Exception exception)
 		throws Exception {
 
 		Serializer serializer = new Serializer();
