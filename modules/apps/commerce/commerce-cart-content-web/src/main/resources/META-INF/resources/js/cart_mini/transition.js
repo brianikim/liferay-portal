@@ -19,19 +19,34 @@ export default function ({namespace}) {
 		(event) => {
 			const link = event.target.closest('.transition-link');
 
-			const workflowTaskId = parseInt(link.dataset.workflowtaskid, 10);
+			const workflowTaskId = document.getElementById(
+				`${namespace}workflowTaskId`
+			);
 
 			const form = document.getElementById(`${namespace}transitionFm`);
 
-			document.getElementById(
+			const commerceOrderId = document.getElementById(
 				`${namespace}transitionCommerceOrderId`
-			).value = link.dataset.commerceorderid;
+			);
 
-			document.getElementById(
-				`${namespace}workflowTaskId`
-			).value = workflowTaskId;
-			document.getElementById(`${namespace}transitionName`).value =
-				link.dataset.transitionname;
+			if (commerceOrderId) {
+				commerceOrderId.value = link.dataset.commerceorderid;
+			}
+
+			const transitionName = document.getElementById(
+				`${namespace}transitionName`
+			);
+
+			if (transitionName) {
+				transitionName.value = link.dataset.transitionname;
+			}
+
+			if (workflowTaskId) {
+				workflowTaskId.value = parseInt(
+					link.dataset.workflowtaskid,
+					10
+				);
+			}
 
 			if (workflowTaskId <= 0) {
 				submitForm(form);
