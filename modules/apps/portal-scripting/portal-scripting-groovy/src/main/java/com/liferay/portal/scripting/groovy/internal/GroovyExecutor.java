@@ -77,15 +77,10 @@ public class GroovyExecutor extends BaseScriptingExecutor {
 
 			return outputObjects;
 		}
-		catch (GroovyRuntimeException groovyRuntimeException1) {
-			GroovyRuntimeException groovyRuntimeException2 =
-				new GroovyRuntimeException(
-					groovyRuntimeException1.getMessage());
-
-			groovyRuntimeException2.setStackTrace(
-				groovyRuntimeException1.getStackTrace());
-
-			throw groovyRuntimeException2;
+		catch (GroovyRuntimeException groovyRuntimeException) {
+			throw new ScriptingException(
+				groovyRuntimeException.getMessage(),
+				groovyRuntimeException.getCause());
 		}
 	}
 
