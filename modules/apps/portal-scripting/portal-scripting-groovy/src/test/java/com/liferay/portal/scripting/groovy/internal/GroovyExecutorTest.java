@@ -95,18 +95,6 @@ public class GroovyExecutorTest {
 		}
 	}
 
-	private void _writeAndReadObject(Exception exception)
-		throws Exception {
-
-		Serializer serializer = new Serializer();
-
-		serializer.writeObject(exception);
-
-		Deserializer deserializer = new Deserializer(serializer.toByteBuffer());
-
-		deserializer.readObject();
-	}
-
 	private Map<String, Object> _execute(
 			Map<String, Object> inputObjects, Set<String> outputNames,
 			String fileName)
@@ -119,6 +107,16 @@ public class GroovyExecutorTest {
 			StringUtil.read(
 				getClass().getResourceAsStream(
 					"dependencies/" + fileName + ".groovy")));
+	}
+
+	private void _writeAndReadObject(Exception exception) throws Exception {
+		Serializer serializer = new Serializer();
+
+		serializer.writeObject(exception);
+
+		Deserializer deserializer = new Deserializer(serializer.toByteBuffer());
+
+		deserializer.readObject();
 	}
 
 }
