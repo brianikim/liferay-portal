@@ -580,13 +580,6 @@ public class ContentPageLayoutEditorDisplayContext
 				httpServletRequest,
 				"this-page-is-associated-to-the-following-collection")
 		).put(
-			"type",
-			HashMapBuilder.<String, Object>put(
-				"groupTypeTitle", LanguageUtil.get(httpServletRequest, "type")
-			).put(
-				"label", typeLabel
-			).build()
-		).put(
 			"subtype",
 			HashMapBuilder.<String, Object>put(
 				"groupSubtypeTitle",
@@ -595,6 +588,13 @@ public class ContentPageLayoutEditorDisplayContext
 				"label", subtypeLabel
 			).put(
 				"url", subtypeURL
+			).build()
+		).put(
+			"type",
+			HashMapBuilder.<String, Object>put(
+				"groupTypeTitle", LanguageUtil.get(httpServletRequest, "type")
+			).put(
+				"label", typeLabel
 			).build()
 		).build();
 	}
