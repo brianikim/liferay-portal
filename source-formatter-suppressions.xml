@@ -73,6 +73,7 @@
 	<source-check>
 		<suppress checks="CDNCheck" files="test\.properties" />
 		<suppress checks="GetterUtilCheck" files="portal-kernel/test/unit/com/liferay/portal/kernel/util/GetterUtilTest\.java" />
+		<suppress checks="IllegalImportsCheck" files="util-slf4j/src/com/liferay/util/slf4j/LiferayLoggerFactory\.java" />
 		<suppress checks="JavaAbstractMethodCheck" files="portal-impl/test/unit/com/liferay/portal/nio/intraband/proxy/IntrabandProxyUtilTest\.java" />
 		<suppress checks="JavaCleanUpMethodVariablesCheck" files="util-taglib/src/com/liferay/taglib/util/IncludeTag\.java" />
 		<suppress checks="JavaDeserializationSecurityCheck" files="portal-impl/src/com/liferay/portal/bean/BeanPropertiesImpl\.java" />
@@ -89,7 +90,6 @@
 		<suppress checks="JavaHelperUtilCheck" files="portal-kernel/src/com/liferay/portal/kernel/audit/AuditMessageFactoryUtil\.java" />
 		<suppress checks="JavaHelperUtilCheck" files="portal-kernel/src/com/liferay/portal/kernel/security/pwd/PasswordEncryptorUtil\.java" />
 		<suppress checks="JavaHelperUtilCheck" files="portal-kernel/src/com/liferay/portal/kernel/settings/SettingsLocatorHelperUtil\.java" />
-		<suppress checks="JavaIllegalImportsCheck" files="util-slf4j/src/com/liferay/util/slf4j/LiferayLoggerFactory\.java" />
 		<suppress checks="JavaMetaAnnotationsCheck" files="modules/apps/portal-configuration/portal-configuration-metatype-definitions-test/src/testIntegration/java/com/liferay/portal/configuration/metatype/definitions/test/MetatypeAttributeDefinitionTest\.java" />
 		<suppress checks="JavaServiceUtilCheck" files="portal-impl/src/com/liferay/portal/service/impl/GroupLocalServiceImpl\.java" />
 		<suppress checks="JavaStaticMethodCheck" files="portal-impl/src/com/liferay/portal/struts/FindStrutsAction\.java" />
