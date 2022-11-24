@@ -28,8 +28,8 @@ import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.HashMapDictionary;
 import com.liferay.portal.kernel.util.LocaleThreadLocal;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
+import com.liferay.portal.security.pwd.PwdToolkitUtil;
 import com.liferay.user.associated.data.web.internal.configuration.AnonymousUserConfiguration;
 import com.liferay.user.associated.data.web.internal.configuration.AnonymousUserConfigurationRetriever;
 
@@ -78,8 +78,7 @@ public class UADAnonymizerHelper {
 		PasswordPolicy passwordPolicy =
 			_passwordPolicyLocalService.getDefaultPasswordPolicy(companyId);
 
-		String randomString = StringUtil.randomString(
-			passwordPolicy.getMinLength());
+		String randomString = PwdToolkitUtil.generate(passwordPolicy);
 
 		boolean autoPassword = false;
 		String password1 = randomString;
