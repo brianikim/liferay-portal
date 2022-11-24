@@ -84,9 +84,9 @@ JSONArray relevantIdpConnectionsJSONArray = samlSsoLoginContext.getJSONArray("re
 		var redirect = form.querySelector('#<portlet:namespace />redirect');
 
 		if (redirect) {
-		var redirectVal = redirect.getAttribute('value');
+			var redirectVal = redirect.getAttribute('value');
 
-		redirect.setAttribute('value', redirectVal + window.location.hash);
+			redirect.setAttribute('value', redirectVal + window.location.hash);
 		}
 	</aui:script>
 </c:if>
