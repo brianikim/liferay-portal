@@ -116,13 +116,11 @@ public class UpgradePortletPreferencesTest {
 		_assertUpgradePortletPreferences(
 			expectedScopedPreferenceMap, journalArticle, layout, locale,
 			expectedScopedPreferenceMap);
-
 		_assertUpgradePortletPreferences(
 			expectedScopedPreferenceMap, journalArticle, layout, locale,
 			HashMapBuilder.put(
 				"portletSetupTitle", "Web Content Display"
 			).build());
-
 		_assertUpgradePortletPreferences(
 			expectedScopedPreferenceMap, journalArticle, layout, locale,
 			HashMapBuilder.put(
@@ -176,7 +174,11 @@ locale
 		_assertUpgradePortletPreferences(
 			expectedScopedPreferenceMap, journalArticle, layout, locale,
 			expectedScopedPreferenceMap);
-
+		_assertUpgradePortletPreferences(
+			expectedScopedPreferenceMap, journalArticle, layout, locale,
+			HashMapBuilder.put(
+				"portletSetupTitle", "Web Content Display"
+			).build());
 		_assertUpgradePortletPreferences(
 			expectedScopedPreferenceMap, journalArticle, layout, locale,
 			HashMapBuilder.put(
@@ -185,12 +187,6 @@ locale
 					"Web Content Display", _language.get(locale, "global"))
 			).put(
 				"scopeType", "company"
-			).build());
-
-		_assertUpgradePortletPreferences(
-			expectedScopedPreferenceMap, journalArticle, layout, locale,
-			HashMapBuilder.put(
-				"portletSetupTitle", "Web Content Display"
 			).build());
 	}
 
@@ -257,7 +253,6 @@ locale
 		_assertUpgradePortletPreferences(
 			expectedScopedPreferenceMap, journalArticle, layout, locale,
 			expectedScopedPreferenceMap);
-
 		_assertUpgradePortletPreferences(
 			expectedScopedPreferenceMap, journalArticle, layout, locale,
 			HashMapBuilder.put(
@@ -267,7 +262,6 @@ locale
 			).put(
 				"scopeType", "company"
 			).build());
-
 		_assertUpgradePortletPreferences(
 			expectedScopedPreferenceMap, journalArticle, layout, locale,
 			HashMapBuilder.put(
