@@ -95,7 +95,7 @@ public class UpgradePortletPreferencesTest {
 
 		Locale locale = _portal.getSiteDefaultLocale(_group);
 
-		HashMap<String, String> expectedScopedPreferenceMap =
+		Map<String, String> expectedScopedPreferenceMap =
 			HashMapBuilder.put(
 				"portletSetupTitle",
 				StringUtil.appendParentheticalSuffix(
@@ -139,7 +139,7 @@ public class UpgradePortletPreferencesTest {
 	@Test
 	public void testUpgradePortletPreferencesLayoutScopedJournalArticle()
 		throws Exception {
-
+locale
 		Layout layout = LayoutTestUtil.addTypePortletLayout(_group);
 
 		Group layoutGroup = GroupTestUtil.addGroup(
@@ -147,7 +147,7 @@ public class UpgradePortletPreferencesTest {
 
 		Locale locale = _portal.getSiteDefaultLocale(_group);
 
-		HashMap<String, String> expectedScopedPreferenceMap =
+		Map<String, String> expectedScopedPreferenceMap =
 			HashMapBuilder.put(
 				"portletSetupTitle",
 				StringUtil.appendParentheticalSuffix(
@@ -200,7 +200,7 @@ public class UpgradePortletPreferencesTest {
 
 		Locale locale = _portal.getSiteDefaultLocale(_group);
 
-		HashMap<String, String> globalScopedPreferenceMap = HashMapBuilder.put(
+		Map<String, String> globalScopedPreferenceMap = HashMapBuilder.put(
 			"portletSetupTitle",
 			StringUtil.appendParentheticalSuffix(
 				"Web Content Display", _language.get(locale, "global"))
@@ -214,7 +214,7 @@ public class UpgradePortletPreferencesTest {
 			globalScopedPreferenceMap, null, layout, locale,
 			globalScopedPreferenceMap);
 
-		HashMap<String, String> layoutScopedPreferenceMap = HashMapBuilder.put(
+		Map<String, String> layoutScopedPreferenceMap = HashMapBuilder.put(
 			"portletSetupTitle",
 			StringUtil.appendParentheticalSuffix(
 				"Web Content Display", layout.getName(locale))
@@ -228,7 +228,7 @@ public class UpgradePortletPreferencesTest {
 			layoutScopedPreferenceMap, null, layout, locale,
 			layoutScopedPreferenceMap);
 
-		HashMap<String, String> siteScopedPreferenceMap = HashMapBuilder.put(
+		Map<String, String> siteScopedPreferenceMap = HashMapBuilder.put(
 			"portletSetupTitle", "Web Content Display"
 		).build();
 
@@ -241,7 +241,7 @@ public class UpgradePortletPreferencesTest {
 	public void testUpgradePortletPreferencesSiteScopedJournalArticle()
 		throws Exception {
 
-		HashMap<String, String> expectedScopedPreferenceMap =
+		Map<String, String> expectedScopedPreferenceMap =
 			HashMapBuilder.put(
 				"portletSetupTitle", "Web Content Display"
 			).build();
