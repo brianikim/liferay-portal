@@ -50,7 +50,6 @@ import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
 import java.lang.reflect.Constructor;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -95,14 +94,13 @@ public class UpgradePortletPreferencesTest {
 
 		Locale locale = _portal.getSiteDefaultLocale(_group);
 
-		Map<String, String> expectedScopedPreferenceMap =
-			HashMapBuilder.put(
-				"portletSetupTitle",
-				StringUtil.appendParentheticalSuffix(
-					"Web Content Display", _language.get(locale, "global"))
-			).put(
-				"scopeType", "company"
-			).build();
+		Map<String, String> expectedScopedPreferenceMap = HashMapBuilder.put(
+			"portletSetupTitle",
+			StringUtil.appendParentheticalSuffix(
+				"Web Content Display", _language.get(locale, "global"))
+		).put(
+			"scopeType", "company"
+		).build();
 
 		Group companyGroup = _groupLocalService.getCompanyGroup(
 			_group.getCompanyId());
@@ -137,7 +135,7 @@ public class UpgradePortletPreferencesTest {
 	@Test
 	public void testUpgradePortletPreferencesLayoutScopedJournalArticle()
 		throws Exception {
-locale
+
 		Layout layout = LayoutTestUtil.addTypePortletLayout(_group);
 
 		Group layoutGroup = GroupTestUtil.addGroup(
@@ -145,16 +143,15 @@ locale
 
 		Locale locale = _portal.getSiteDefaultLocale(_group);
 
-		Map<String, String> expectedScopedPreferenceMap =
-			HashMapBuilder.put(
-				"portletSetupTitle",
-				StringUtil.appendParentheticalSuffix(
-					"Web Content Display", layout.getName(locale))
-			).put(
-				"scopeLayoutUuid", layout.getUuid()
-			).put(
-				"scopeType", "layout"
-			).build();
+		Map<String, String> expectedScopedPreferenceMap = HashMapBuilder.put(
+			"portletSetupTitle",
+			StringUtil.appendParentheticalSuffix(
+				"Web Content Display", layout.getName(locale))
+		).put(
+			"scopeLayoutUuid", layout.getUuid()
+		).put(
+			"scopeType", "layout"
+		).build();
 
 		JournalArticle journalArticle = _journalArticleLocalService.addArticle(
 			null, TestPropsValues.getUserId(), layoutGroup.getGroupId(),
@@ -237,10 +234,9 @@ locale
 	public void testUpgradePortletPreferencesSiteScopedJournalArticle()
 		throws Exception {
 
-		Map<String, String> expectedScopedPreferenceMap =
-			HashMapBuilder.put(
-				"portletSetupTitle", "Web Content Display"
-			).build();
+		Map<String, String> expectedScopedPreferenceMap = HashMapBuilder.put(
+			"portletSetupTitle", "Web Content Display"
+		).build();
 
 		Layout layout = LayoutTestUtil.addTypePortletLayout(_group);
 
