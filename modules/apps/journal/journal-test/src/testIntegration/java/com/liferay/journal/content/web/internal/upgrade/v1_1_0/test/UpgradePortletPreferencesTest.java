@@ -369,6 +369,12 @@ locale
 
 		Assert.assertEquals(
 			expectedScopedPreferencesMap.getOrDefault(
+				"portletSetupTitle", StringPool.BLANK),
+			portletPreferences.getValue(
+				"portletSetupTitle_" + LocaleUtil.toLanguageId(locale), null));
+
+		Assert.assertEquals(
+			expectedScopedPreferencesMap.getOrDefault(
 				"scopeLayoutUuid", StringPool.BLANK),
 			portletPreferences.getValue("lfrScopeLayoutUuid", null));
 
@@ -376,12 +382,6 @@ locale
 			expectedScopedPreferencesMap.getOrDefault(
 				"scopeType", StringPool.BLANK),
 			portletPreferences.getValue("lfrScopeType", null));
-
-		Assert.assertEquals(
-			expectedScopedPreferencesMap.getOrDefault(
-				"portletSetupTitle", StringPool.BLANK),
-			portletPreferences.getValue(
-				"portletSetupTitle_" + LocaleUtil.toLanguageId(locale), null));
 	}
 
 	private void _setUpUpgradePortletPreferences() throws Exception {
