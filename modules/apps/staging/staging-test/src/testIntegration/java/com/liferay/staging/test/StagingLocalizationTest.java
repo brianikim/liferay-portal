@@ -66,6 +66,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -141,6 +142,7 @@ public class StagingLocalizationTest {
 		testUpdateLocales("es_ES", "de_DE,es_ES", "en_US");
 	}
 
+	@Ignore
 	@Test
 	public void testUpdateDefaultLocale() throws Exception {
 		testUpdateLocales("es_ES", "de_DE,en_US,es_ES", "en_US");
