@@ -361,23 +361,19 @@ locale
 			(journalArticle == null) ? StringPool.BLANK :
 				journalArticle.getArticleId(),
 			portletPreferences.getValue("articleId", null));
-
 		Assert.assertEquals(
 			(journalArticle == null) ? StringPool.BLANK :
 				String.valueOf(journalArticle.getGroupId()),
 			portletPreferences.getValue("groupId", null));
-
 		Assert.assertEquals(
 			expectedScopedPreferencesMap.getOrDefault(
 				"portletSetupTitle", StringPool.BLANK),
 			portletPreferences.getValue(
 				"portletSetupTitle_" + LocaleUtil.toLanguageId(locale), null));
-
 		Assert.assertEquals(
 			expectedScopedPreferencesMap.getOrDefault(
 				"scopeLayoutUuid", StringPool.BLANK),
 			portletPreferences.getValue("lfrScopeLayoutUuid", null));
-
 		Assert.assertEquals(
 			expectedScopedPreferencesMap.getOrDefault(
 				"scopeType", StringPool.BLANK),
