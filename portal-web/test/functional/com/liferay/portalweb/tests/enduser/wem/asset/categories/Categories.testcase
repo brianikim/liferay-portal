@@ -88,6 +88,8 @@ definition {
 
 	@priority = "3"
 	test AddCategoryProperties {
+		property testray.component.names = "AUI,Categories";
+
 		JSONCategory.addCategory(
 			groupName = "Test Site Name",
 			title = "Category Name 1",
