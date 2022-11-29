@@ -299,10 +299,6 @@ public class SaveAsDraftArticleMVCActionCommand extends BaseMVCActionCommand {
 		String articleURL = ParamUtil.getString(
 			uploadPortletRequest, "articleURL");
 
-		serviceContext.setAttribute(
-			"updateAutoTags",
-			ParamUtil.getBoolean(actionRequest, "updateAutoTags"));
-
 		JournalArticle article = null;
 
 		if (Objects.equals(cmd, Constants.ADD)) {
