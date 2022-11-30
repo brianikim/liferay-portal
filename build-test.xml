@@ -14701,6 +14701,10 @@ url=${short.hostname}:8080</echo>
 		/>
 	</target>
 
+	<target name="start-docker-browser">
+		<start-docker-browser />
+	</target>
+
 	<target name="start-docker-containers">
 		<get-database-property property.name="database.docker.image" />
 
@@ -14756,6 +14760,10 @@ url=${short.hostname}:8080</echo>
 		<start-lcs-app-server />
 	</target>
 
+	<target name="start-docker-os">
+		<start-docker-os />
+	</target>
+
 	<target name="start-test-smtp-server">
 		<start-test-smtp-server />
 	</target>
@@ -14804,8 +14812,16 @@ url=${short.hostname}:8080</echo>
 		</if>
 	</target>
 
+	<target name="stop-docker-browser">
+		<stop-docker-browser />
+	</target>
+
 	<target name="stop-docker-database">
 		<stop-docker-database />
+	</target>
+
+	<target name="stop-docker-os">
+		<stop-docker-os />
 	</target>
 
 	<target name="stop-lcs-server">
