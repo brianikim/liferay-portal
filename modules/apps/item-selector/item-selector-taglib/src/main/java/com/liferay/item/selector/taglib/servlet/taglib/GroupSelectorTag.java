@@ -22,7 +22,6 @@ import com.liferay.portal.kernel.dao.search.SearchPaginationUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.taglib.util.IncludeTag;
 
@@ -127,34 +126,24 @@ public class GroupSelectorTag extends IncludeTag {
 	}
 
 	private int _getGroupsCount(HttpServletRequest httpServletRequest) {
-		String scopeGroupType = ParamUtil.getString(
-			httpServletRequest, "scopeGroupType");
+		Optional<GroupItemSelectorProvider> groupSelectorProviderOptional =
+			GroupItemSelectorTrackerUtil.getGroupItemSelectorProviderOptional(
+				_getGroupType(httpServletRequest));
 
-		if (Validator.isNotNull(scopeGroupType)) {
-			_groupsCount = 1;
-		}
-		else {
-			Optional<GroupItemSelectorProvider> groupSelectorProviderOptional =
-				GroupItemSelectorTrackerUtil.
-					getGroupItemSelectorProviderOptional(
-						_getGroupType(httpServletRequest));
+		ThemeDisplay themeDisplay =
+			(ThemeDisplay)httpServletRequest.getAttribute(
+				WebKeys.THEME_DISPLAY);
 
-			ThemeDisplay themeDisplay =
-				(ThemeDisplay)httpServletRequest.getAttribute(
-					WebKeys.THEME_DISPLAY);
+		Group group = _getGroup(themeDisplay);
 
-			Group group = _getGroup(themeDisplay);
+		String keywords = ParamUtil.getString(httpServletRequest, "keywords");
 
-			String keywords = ParamUtil.getString(
-				httpServletRequest, "keywords");
-
-			_groupsCount = groupSelectorProviderOptional.map(
-				groupSelectorProvider -> groupSelectorProvider.getGroupsCount(
-					group.getCompanyId(), group.getGroupId(), keywords)
-			).orElse(
-				0
-			);
-		}
+		_groupsCount = groupSelectorProviderOptional.map(
+			groupSelectorProvider -> groupSelectorProvider.getGroupsCount(
+				group.getCompanyId(), group.getGroupId(), keywords)
+		).orElse(
+			0
+		);
 
 		return _groupsCount;
 	}
