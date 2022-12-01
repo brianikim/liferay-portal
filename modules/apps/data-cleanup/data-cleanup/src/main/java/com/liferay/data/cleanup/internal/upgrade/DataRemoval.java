@@ -14,6 +14,8 @@
 
 package com.liferay.data.cleanup.internal.upgrade;
 
+import com.liferay.change.tracking.service.CTCollectionLocalService;
+import com.liferay.change.tracking.service.CTEntryLocalService;
 import com.liferay.change.tracking.store.service.CTSContentLocalService;
 import com.liferay.data.cleanup.internal.configuration.DataRemovalConfiguration;
 import com.liferay.petra.reflect.ReflectionUtil;
@@ -45,6 +47,12 @@ public class DataRemoval implements UpgradeStepRegistrator {
 	@Override
 	public void register(Registry registry) {
 		try {
+			_removeModuleData(
+				_dataRemovalConfiguration::removeDLPreviewCTSContentData,
+				"com.liferay.change.tracking.service",
+				() -> new UpgradeDLPreviewCTSContentData(
+					_ctCollectionLocalService, _ctEntryLocalService, _portal));
+
 			_removeModuleData(
 				_dataRemovalConfiguration::removePublishedCTSContentData,
 				"com.liferay.change.tracking.store.service",
@@ -80,6 +88,12 @@ public class DataRemoval implements UpgradeStepRegistrator {
 			}
 		}
 	}
+
+	@Reference
+	private CTCollectionLocalService _ctCollectionLocalService;
+
+	@Reference
+	private CTEntryLocalService _ctEntryLocalService;
 
 	@Reference
 	private CTSContentLocalService _ctsContentLocalService;

@@ -29,6 +29,12 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 public interface DataRemovalConfiguration {
 
 	@Meta.AD(
+		deflt = "false", name = "remove-dl-preview-cts-content-data",
+		required = false
+	)
+	public boolean removeDLPreviewCTSContentData();
+
+	@Meta.AD(
 		deflt = "false", name = "remove-published-cts-content-data",
 		required = false
 	)
