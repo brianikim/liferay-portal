@@ -11,6 +11,7 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
+
 package com.liferay.commerce.pricing.exception;
 
 import com.liferay.portal.kernel.exception.SystemException;
@@ -18,20 +19,27 @@ import com.liferay.portal.kernel.exception.SystemException;
 /**
  * @author Riccardo Alberti
  */
-public class DuplicateCommercePriceModifierExternalReferenceCodeException extends SystemException {
+public class DuplicateCommercePriceModifierExternalReferenceCodeException
+	extends SystemException {
 
 	public DuplicateCommercePriceModifierExternalReferenceCodeException() {
 	}
 
-	public DuplicateCommercePriceModifierExternalReferenceCodeException(String msg) {
+	public DuplicateCommercePriceModifierExternalReferenceCodeException(
+		String msg) {
+
 		super(msg);
 	}
 
-	public DuplicateCommercePriceModifierExternalReferenceCodeException(String msg, Throwable throwable) {
+	public DuplicateCommercePriceModifierExternalReferenceCodeException(
+		String msg, Throwable throwable) {
+
 		super(msg, throwable);
 	}
 
-	public DuplicateCommercePriceModifierExternalReferenceCodeException(Throwable throwable) {
+	public DuplicateCommercePriceModifierExternalReferenceCodeException(
+		Throwable throwable) {
+
 		super(throwable);
 	}
 

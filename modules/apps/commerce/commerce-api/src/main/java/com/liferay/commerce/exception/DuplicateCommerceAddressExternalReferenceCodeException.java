@@ -11,6 +11,7 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
+
 package com.liferay.commerce.exception;
 
 import com.liferay.portal.kernel.exception.SystemException;
@@ -18,7 +19,8 @@ import com.liferay.portal.kernel.exception.SystemException;
 /**
  * @author Alessio Antonio Rendina
  */
-public class DuplicateCommerceAddressExternalReferenceCodeException extends SystemException {
+public class DuplicateCommerceAddressExternalReferenceCodeException
+	extends SystemException {
 
 	public DuplicateCommerceAddressExternalReferenceCodeException() {
 	}
@@ -27,11 +29,15 @@ public class DuplicateCommerceAddressExternalReferenceCodeException extends Syst
 		super(msg);
 	}
 
-	public DuplicateCommerceAddressExternalReferenceCodeException(String msg, Throwable throwable) {
+	public DuplicateCommerceAddressExternalReferenceCodeException(
+		String msg, Throwable throwable) {
+
 		super(msg, throwable);
 	}
 
-	public DuplicateCommerceAddressExternalReferenceCodeException(Throwable throwable) {
+	public DuplicateCommerceAddressExternalReferenceCodeException(
+		Throwable throwable) {
+
 		super(throwable);
 	}
 
