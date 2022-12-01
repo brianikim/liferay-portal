@@ -269,13 +269,7 @@ public abstract class SXPElementLocalServiceBaseImpl
 		return sxpElementPersistence.fetchByUuid_C_First(uuid, companyId, null);
 	}
 
-	/**
-	 * Returns the sxp element with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the sxp element's external reference code
-	 * @return the matching sxp element, or <code>null</code> if a matching sxp element could not be found
-	 */
+	@Deprecated
 	@Override
 	public SXPElement fetchSXPElementByExternalReferenceCode(
 		long companyId, String externalReferenceCode) {
@@ -284,9 +278,6 @@ public abstract class SXPElementLocalServiceBaseImpl
 			companyId, externalReferenceCode);
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchSXPElementByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	@Override
 	public SXPElement fetchSXPElementByReferenceCode(
@@ -296,14 +287,7 @@ public abstract class SXPElementLocalServiceBaseImpl
 			companyId, externalReferenceCode);
 	}
 
-	/**
-	 * Returns the sxp element with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the sxp element's external reference code
-	 * @return the matching sxp element
-	 * @throws PortalException if a matching sxp element could not be found
-	 */
+	@Deprecated
 	@Override
 	public SXPElement getSXPElementByExternalReferenceCode(
 			long companyId, String externalReferenceCode)

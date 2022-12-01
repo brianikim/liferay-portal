@@ -33,6 +33,7 @@ import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
 import com.liferay.portal.test.rule.TransactionalTestRule;
+import com.liferay.search.experiences.exception.DuplicateSXPElementExternalReferenceCodeException;
 import com.liferay.search.experiences.exception.NoSuchSXPElementException;
 import com.liferay.search.experiences.model.SXPElement;
 import com.liferay.search.experiences.service.SXPElementLocalServiceUtil;
@@ -208,6 +209,26 @@ public class SXPElementPersistenceTest {
 			existingSXPElement.getVersion(), newSXPElement.getVersion());
 		Assert.assertEquals(
 			existingSXPElement.getStatus(), newSXPElement.getStatus());
+	}
+
+	@Test(expected = DuplicateSXPElementExternalReferenceCodeException.class)
+	public void testUpdateWithExistingExternalReferenceCode() throws Exception {
+		SXPElement sxpElement = addSXPElement();
+
+		SXPElement newSXPElement = addSXPElement();
+
+		newSXPElement.setCompanyId(sxpElement.getCompanyId());
+
+		newSXPElement = _persistence.update(newSXPElement);
+
+		Session session = _persistence.getCurrentSession();
+
+		session.evict(newSXPElement);
+
+		newSXPElement.setExternalReferenceCode(
+			sxpElement.getExternalReferenceCode());
+
+		_persistence.update(newSXPElement);
 	}
 
 	@Test

@@ -254,13 +254,7 @@ public class SXPElementLocalServiceWrapper
 		return _sxpElementLocalService.fetchSXPElement(sxpElementId);
 	}
 
-	/**
-	 * Returns the sxp element with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the sxp element's external reference code
-	 * @return the matching sxp element, or <code>null</code> if a matching sxp element could not be found
-	 */
+	@Deprecated
 	@Override
 	public com.liferay.search.experiences.model.SXPElement
 		fetchSXPElementByExternalReferenceCode(
@@ -270,9 +264,6 @@ public class SXPElementLocalServiceWrapper
 			companyId, externalReferenceCode);
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchSXPElementByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	@Override
 	public com.liferay.search.experiences.model.SXPElement
@@ -358,14 +349,7 @@ public class SXPElementLocalServiceWrapper
 		return _sxpElementLocalService.getSXPElement(sxpElementId);
 	}
 
-	/**
-	 * Returns the sxp element with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the sxp element's external reference code
-	 * @return the matching sxp element
-	 * @throws PortalException if a matching sxp element could not be found
-	 */
+	@Deprecated
 	@Override
 	public com.liferay.search.experiences.model.SXPElement
 			getSXPElementByExternalReferenceCode(

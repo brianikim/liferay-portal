@@ -253,13 +253,7 @@ public class SXPBlueprintLocalServiceWrapper
 		return _sxpBlueprintLocalService.fetchSXPBlueprint(sxpBlueprintId);
 	}
 
-	/**
-	 * Returns the sxp blueprint with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the sxp blueprint's external reference code
-	 * @return the matching sxp blueprint, or <code>null</code> if a matching sxp blueprint could not be found
-	 */
+	@Deprecated
 	@Override
 	public com.liferay.search.experiences.model.SXPBlueprint
 		fetchSXPBlueprintByExternalReferenceCode(
@@ -270,9 +264,6 @@ public class SXPBlueprintLocalServiceWrapper
 				companyId, externalReferenceCode);
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link #fetchSXPBlueprintByExternalReferenceCode(long, String)}
-	 */
 	@Deprecated
 	@Override
 	public com.liferay.search.experiences.model.SXPBlueprint
@@ -358,14 +349,7 @@ public class SXPBlueprintLocalServiceWrapper
 		return _sxpBlueprintLocalService.getSXPBlueprint(sxpBlueprintId);
 	}
 
-	/**
-	 * Returns the sxp blueprint with the matching external reference code and company.
-	 *
-	 * @param companyId the primary key of the company
-	 * @param externalReferenceCode the sxp blueprint's external reference code
-	 * @return the matching sxp blueprint
-	 * @throws PortalException if a matching sxp blueprint could not be found
-	 */
+	@Deprecated
 	@Override
 	public com.liferay.search.experiences.model.SXPBlueprint
 			getSXPBlueprintByExternalReferenceCode(

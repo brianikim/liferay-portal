@@ -33,6 +33,7 @@ import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
 import com.liferay.portal.test.rule.TransactionalTestRule;
+import com.liferay.search.experiences.exception.DuplicateSXPBlueprintExternalReferenceCodeException;
 import com.liferay.search.experiences.exception.NoSuchSXPBlueprintException;
 import com.liferay.search.experiences.model.SXPBlueprint;
 import com.liferay.search.experiences.service.SXPBlueprintLocalServiceUtil;
@@ -217,6 +218,26 @@ public class SXPBlueprintPersistenceTest {
 		Assert.assertEquals(
 			Time.getShortTimestamp(existingSXPBlueprint.getStatusDate()),
 			Time.getShortTimestamp(newSXPBlueprint.getStatusDate()));
+	}
+
+	@Test(expected = DuplicateSXPBlueprintExternalReferenceCodeException.class)
+	public void testUpdateWithExistingExternalReferenceCode() throws Exception {
+		SXPBlueprint sxpBlueprint = addSXPBlueprint();
+
+		SXPBlueprint newSXPBlueprint = addSXPBlueprint();
+
+		newSXPBlueprint.setCompanyId(sxpBlueprint.getCompanyId());
+
+		newSXPBlueprint = _persistence.update(newSXPBlueprint);
+
+		Session session = _persistence.getCurrentSession();
+
+		session.evict(newSXPBlueprint);
+
+		newSXPBlueprint.setExternalReferenceCode(
+			sxpBlueprint.getExternalReferenceCode());
+
+		_persistence.update(newSXPBlueprint);
 	}
 
 	@Test
