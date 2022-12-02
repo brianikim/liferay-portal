@@ -28,6 +28,28 @@ definition {
 		}
 	}
 
+	@description = "This test covers LPS-164469. It ensures that the Not Found message is shown when a guest user access the manage URL."
+	@priority = "3"
+	test CanViewNotFoundWhenGuestAccessManageURL {
+		var portalURL = PropsUtil.get("portal.url");
+
+		task ("Given: Logout the user via personal menu") {
+			UserBar.signOut();
+		}
+
+		task ("When: Access the manage URL by a guest user") {
+			Navigator.openSpecificURL(url = "${portalURL}/manage");
+		}
+
+		task ("Then: Assert the Not Found message displays") {
+			AssertTextPresent(value1 = "The requested resource could not be found.");
+
+			AssertTextEquals(
+				locator1 = "Home#ERROR_MESSAGE_ALERT_ERROR",
+				value1 = "Not Found");
+		}
+	}
+
 	@priority = "4"
 	test ConfigureLookAndFeelCurrentSiteAndMyDashboard {
 		PortalSettings.gotoConfiguration(
