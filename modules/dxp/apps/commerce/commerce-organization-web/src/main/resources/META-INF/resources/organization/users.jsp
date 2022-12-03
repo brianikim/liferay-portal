@@ -25,7 +25,11 @@ portletURL.setParameter(PortletQName.PUBLIC_RENDER_PARAMETER_NAMESPACE + "backUR
 %>
 
 <clay:data-set-display
-	contextParams='<%= HashMapBuilder.<String, String>put("organizationId", String.valueOf(commerceOrganizationDisplayContext.getOrganizationId())).build() %>'
+	contextParams='<%=
+		HashMapBuilder.<String, String>put(
+			"organizationId", String.valueOf(commerceOrganizationDisplayContext.getOrganizationId())
+		).build()
+	%>'
 	dataProviderKey="<%= CommerceOrganizationUserClayTableDataSetDisplayView.NAME %>"
 	id="<%= CommerceOrganizationUserClayTableDataSetDisplayView.NAME %>"
 	itemsPerPage="<%= 10 %>"

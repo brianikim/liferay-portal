@@ -23,7 +23,11 @@ CommerceAccount commerceAccount = commerceAccountDisplayContext.getCurrentCommer
 %>
 
 <clay:data-set-display
-	contextParams='<%= HashMapBuilder.<String, String>put("commerceAccountId", String.valueOf(commerceAccount.getCommerceAccountId())).build() %>'
+	contextParams='<%=
+		HashMapBuilder.<String, String>put(
+			"commerceAccountId", String.valueOf(commerceAccount.getCommerceAccountId())
+		).build()
+	%>'
 	dataProviderKey="<%= CommerceAccountOrganizationClayDataSetDataSetDisplayView.NAME %>"
 	id="<%= CommerceAccountOrganizationClayDataSetDataSetDisplayView.NAME %>"
 	itemsPerPage="<%= 10 %>"
