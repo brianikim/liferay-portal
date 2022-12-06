@@ -17,8 +17,8 @@ package com.liferay.journal.content.web.internal.upgrade.v1_1_0.test;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.dynamic.data.mapping.test.util.DDMStructureTestUtil;
 import com.liferay.journal.constants.JournalContentPortletKeys;
-import com.liferay.journal.constants.JournalFolderConstants;
 import com.liferay.journal.model.JournalArticle;
+import com.liferay.journal.model.JournalFolderConstants;
 import com.liferay.journal.service.JournalArticleLocalService;
 import com.liferay.journal.test.util.JournalTestUtil;
 import com.liferay.layout.test.util.LayoutTestUtil;
@@ -109,7 +109,7 @@ public class UpgradePortletPreferencesTest {
 			companyGroup.getGroupId(),
 			JournalFolderConstants.DEFAULT_PARENT_FOLDER_ID);
 
-		Layout layout = LayoutTestUtil.addTypePortletLayout(_group);
+		Layout layout = LayoutTestUtil.addLayout(_group);
 
 		_assertUpgradePortletPreferences(
 			expectedScopedPreferenceMap, journalArticle, layout, locale,
@@ -136,7 +136,7 @@ public class UpgradePortletPreferencesTest {
 	public void testUpgradePortletPreferencesLayoutScopedJournalArticle()
 		throws Exception {
 
-		Layout layout = LayoutTestUtil.addTypePortletLayout(_group);
+		Layout layout = LayoutTestUtil.addLayout(_group);
 
 		Group layoutGroup = GroupTestUtil.addGroup(
 			TestPropsValues.getUserId(), layout.getGroupId(), layout);
@@ -154,7 +154,7 @@ public class UpgradePortletPreferencesTest {
 		).build();
 
 		JournalArticle journalArticle = _journalArticleLocalService.addArticle(
-			null, TestPropsValues.getUserId(), layoutGroup.getGroupId(),
+			TestPropsValues.getUserId(), layoutGroup.getGroupId(),
 			JournalFolderConstants.DEFAULT_PARENT_FOLDER_ID,
 			HashMapBuilder.put(
 				LocaleUtil.US, RandomTestUtil.randomString()
@@ -201,7 +201,7 @@ public class UpgradePortletPreferencesTest {
 			"scopeType", "company"
 		).build();
 
-		Layout layout = LayoutTestUtil.addTypePortletLayout(_group);
+		Layout layout = LayoutTestUtil.addLayout(_group);
 
 		_assertUpgradePortletPreferences(
 			globalScopedPreferenceMap, null, layout, locale,
@@ -238,7 +238,7 @@ public class UpgradePortletPreferencesTest {
 			"portletSetupTitle", "Web Content Display"
 		).build();
 
-		Layout layout = LayoutTestUtil.addTypePortletLayout(_group);
+		Layout layout = LayoutTestUtil.addLayout(_group);
 
 		JournalArticle journalArticle = JournalTestUtil.addArticle(
 			layout.getGroupId(),
