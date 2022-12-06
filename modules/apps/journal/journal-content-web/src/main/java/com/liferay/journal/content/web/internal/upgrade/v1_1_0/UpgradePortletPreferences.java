@@ -22,8 +22,10 @@ import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portal.kernel.service.GroupLocalService;
+import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.upgrade.BaseUpgradePortletPreferences;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.MapUtil;
@@ -40,10 +42,12 @@ public class UpgradePortletPreferences extends BaseUpgradePortletPreferences {
 
 	public UpgradePortletPreferences(
 		GroupLocalService groupLocalService,
-		JournalArticleLocalService journalArticleLocalService) {
+		JournalArticleLocalService journalArticleLocalService,
+		LayoutLocalService layoutLocalService) {
 
 		_groupLocalService = groupLocalService;
 		_journalArticleLocalService = journalArticleLocalService;
+		_layoutLocalService = layoutLocalService;
 	}
 
 	@Override
@@ -95,6 +99,7 @@ public class UpgradePortletPreferences extends BaseUpgradePortletPreferences {
 
 			Group group = _groupLocalService.getGroup(groupId);
 
+			String scopeLayoutUuid = StringPool.BLANK;
 			String scopeType = StringPool.BLANK;
 
 			if (group.isCompany()) {
@@ -102,15 +107,27 @@ public class UpgradePortletPreferences extends BaseUpgradePortletPreferences {
 			}
 			else if (group.isLayout()) {
 				scopeType = "layout";
+
+				Layout layout = _layoutLocalService.fetchLayout(
+					group.getClassPK());
+
+				if (layout != null) {
+					scopeLayoutUuid = layout.getUuid();
+				}
 			}
 
+			String lfrScopeLayoutUuid = portletPreferences.getValue(
+				"lfrScopeLayoutUuid", StringPool.BLANK);
 			String lfrScopeType = portletPreferences.getValue(
 				"lfrScopeType", StringPool.BLANK);
 
-			if (Objects.equals(lfrScopeType, scopeType)) {
+			if (Objects.equals(lfrScopeLayoutUuid, scopeLayoutUuid) &&
+				Objects.equals(lfrScopeType, scopeType)) {
+
 				return PortletPreferencesFactoryUtil.toXML(portletPreferences);
 			}
 
+			portletPreferences.setValue("lfrScopeLayoutUuid", scopeLayoutUuid);
 			portletPreferences.setValue("lfrScopeType", scopeType);
 		}
 		catch (Exception exception) {
@@ -129,5 +146,6 @@ public class UpgradePortletPreferences extends BaseUpgradePortletPreferences {
 
 	private final GroupLocalService _groupLocalService;
 	private final JournalArticleLocalService _journalArticleLocalService;
+	private final LayoutLocalService _layoutLocalService;
 
 }
