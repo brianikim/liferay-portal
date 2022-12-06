@@ -16,9 +16,15 @@ package com.liferay.headless.commerce.machine.learning.internal.graphql.servlet.
 
 import com.liferay.headless.commerce.machine.learning.internal.graphql.mutation.v1_0.Mutation;
 import com.liferay.headless.commerce.machine.learning.internal.graphql.query.v1_0.Query;
+import com.liferay.headless.commerce.machine.learning.internal.resource.v1_0.AccountCategoryForecastResourceImpl;
+import com.liferay.headless.commerce.machine.learning.internal.resource.v1_0.AccountForecastResourceImpl;
 import com.liferay.headless.commerce.machine.learning.resource.v1_0.AccountCategoryForecastResource;
 import com.liferay.headless.commerce.machine.learning.resource.v1_0.AccountForecastResource;
+import com.liferay.portal.kernel.util.ObjectValuePair;
 import com.liferay.portal.vulcan.graphql.servlet.ServletData;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.annotation.Generated;
 
@@ -45,6 +51,10 @@ public class ServletDataImpl implements ServletData {
 			_accountForecastResourceComponentServiceObjects);
 	}
 
+	public String getApplicationName() {
+		return "Liferay.Headless.Commerce.Machine.Learning";
+	}
+
 	@Override
 	public Mutation getMutation() {
 		return new Mutation();
@@ -59,6 +69,34 @@ public class ServletDataImpl implements ServletData {
 	public Query getQuery() {
 		return new Query();
 	}
+
+	public ObjectValuePair<Class<?>, String> getResourceMethodObjectValuePair(
+		String methodName, boolean mutation) {
+
+		if (mutation) {
+			return _resourceMethodObjectValuePairs.get(
+				"mutation#" + methodName);
+		}
+
+		return _resourceMethodObjectValuePairs.get("query#" + methodName);
+	}
+
+	private static final Map<String, ObjectValuePair<Class<?>, String>>
+		_resourceMethodObjectValuePairs =
+			new HashMap<String, ObjectValuePair<Class<?>, String>>() {
+				{
+					put(
+						"query#accountCategoryForecastsByMonthlyRevenue",
+						new ObjectValuePair<>(
+							AccountCategoryForecastResourceImpl.class,
+							"getAccountCategoryForecastsByMonthlyRevenuePage"));
+					put(
+						"query#accountForecastsByMonthlyRevenue",
+						new ObjectValuePair<>(
+							AccountForecastResourceImpl.class,
+							"getAccountForecastsByMonthlyRevenuePage"));
+				}
+			};
 
 	@Reference(scope = ReferenceScope.PROTOTYPE_REQUIRED)
 	private ComponentServiceObjects<AccountCategoryForecastResource>

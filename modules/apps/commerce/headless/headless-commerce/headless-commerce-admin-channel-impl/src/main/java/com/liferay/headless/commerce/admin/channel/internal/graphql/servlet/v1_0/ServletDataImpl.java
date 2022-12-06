@@ -16,9 +16,15 @@ package com.liferay.headless.commerce.admin.channel.internal.graphql.servlet.v1_
 
 import com.liferay.headless.commerce.admin.channel.internal.graphql.mutation.v1_0.Mutation;
 import com.liferay.headless.commerce.admin.channel.internal.graphql.query.v1_0.Query;
+import com.liferay.headless.commerce.admin.channel.internal.resource.v1_0.ChannelResourceImpl;
+import com.liferay.headless.commerce.admin.channel.internal.resource.v1_0.TaxCategoryResourceImpl;
 import com.liferay.headless.commerce.admin.channel.resource.v1_0.ChannelResource;
 import com.liferay.headless.commerce.admin.channel.resource.v1_0.TaxCategoryResource;
+import com.liferay.portal.kernel.util.ObjectValuePair;
 import com.liferay.portal.vulcan.graphql.servlet.ServletData;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.annotation.Generated;
 
@@ -48,6 +54,10 @@ public class ServletDataImpl implements ServletData {
 			_taxCategoryResourceComponentServiceObjects);
 	}
 
+	public String getApplicationName() {
+		return "Liferay.Headless.Commerce.Admin.Channel";
+	}
+
 	@Override
 	public Mutation getMutation() {
 		return new Mutation();
@@ -62,6 +72,70 @@ public class ServletDataImpl implements ServletData {
 	public Query getQuery() {
 		return new Query();
 	}
+
+	public ObjectValuePair<Class<?>, String> getResourceMethodObjectValuePair(
+		String methodName, boolean mutation) {
+
+		if (mutation) {
+			return _resourceMethodObjectValuePairs.get(
+				"mutation#" + methodName);
+		}
+
+		return _resourceMethodObjectValuePairs.get("query#" + methodName);
+	}
+
+	private static final Map<String, ObjectValuePair<Class<?>, String>>
+		_resourceMethodObjectValuePairs =
+			new HashMap<String, ObjectValuePair<Class<?>, String>>() {
+				{
+					put(
+						"mutation#createChannel",
+						new ObjectValuePair<>(
+							ChannelResourceImpl.class, "postChannel"));
+					put(
+						"mutation#createChannelBatch",
+						new ObjectValuePair<>(
+							ChannelResourceImpl.class, "postChannelBatch"));
+					put(
+						"mutation#deleteChannel",
+						new ObjectValuePair<>(
+							ChannelResourceImpl.class, "deleteChannel"));
+					put(
+						"mutation#deleteChannelBatch",
+						new ObjectValuePair<>(
+							ChannelResourceImpl.class, "deleteChannelBatch"));
+					put(
+						"mutation#patchChannel",
+						new ObjectValuePair<>(
+							ChannelResourceImpl.class, "patchChannel"));
+					put(
+						"mutation#updateChannel",
+						new ObjectValuePair<>(
+							ChannelResourceImpl.class, "putChannel"));
+					put(
+						"mutation#updateChannelBatch",
+						new ObjectValuePair<>(
+							ChannelResourceImpl.class, "putChannelBatch"));
+
+					put(
+						"query#channels",
+						new ObjectValuePair<>(
+							ChannelResourceImpl.class, "getChannelsPage"));
+					put(
+						"query#channel",
+						new ObjectValuePair<>(
+							ChannelResourceImpl.class, "getChannel"));
+					put(
+						"query#taxCategories",
+						new ObjectValuePair<>(
+							TaxCategoryResourceImpl.class,
+							"getTaxCategoriesPage"));
+					put(
+						"query#taxCategory",
+						new ObjectValuePair<>(
+							TaxCategoryResourceImpl.class, "getTaxCategory"));
+				}
+			};
 
 	@Reference(scope = ReferenceScope.PROTOTYPE_REQUIRED)
 	private ComponentServiceObjects<ChannelResource>

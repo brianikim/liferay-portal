@@ -16,9 +16,15 @@ package com.liferay.app.builder.workflow.rest.internal.graphql.servlet.v1_0;
 
 import com.liferay.app.builder.workflow.rest.internal.graphql.mutation.v1_0.Mutation;
 import com.liferay.app.builder.workflow.rest.internal.graphql.query.v1_0.Query;
+import com.liferay.app.builder.workflow.rest.internal.resource.v1_0.AppWorkflowDataRecordLinkResourceImpl;
+import com.liferay.app.builder.workflow.rest.internal.resource.v1_0.AppWorkflowResourceImpl;
 import com.liferay.app.builder.workflow.rest.resource.v1_0.AppWorkflowDataRecordLinkResource;
 import com.liferay.app.builder.workflow.rest.resource.v1_0.AppWorkflowResource;
+import com.liferay.portal.kernel.util.ObjectValuePair;
 import com.liferay.portal.vulcan.graphql.servlet.ServletData;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.annotation.Generated;
 
@@ -48,6 +54,10 @@ public class ServletDataImpl implements ServletData {
 			_appWorkflowResourceComponentServiceObjects);
 	}
 
+	public String getApplicationName() {
+		return "Liferay.App.Builder.Workflow.REST";
+	}
+
 	@Override
 	public Mutation getMutation() {
 		return new Mutation();
@@ -62,6 +72,47 @@ public class ServletDataImpl implements ServletData {
 	public Query getQuery() {
 		return new Query();
 	}
+
+	public ObjectValuePair<Class<?>, String> getResourceMethodObjectValuePair(
+		String methodName, boolean mutation) {
+
+		if (mutation) {
+			return _resourceMethodObjectValuePairs.get(
+				"mutation#" + methodName);
+		}
+
+		return _resourceMethodObjectValuePairs.get("query#" + methodName);
+	}
+
+	private static final Map<String, ObjectValuePair<Class<?>, String>>
+		_resourceMethodObjectValuePairs =
+			new HashMap<String, ObjectValuePair<Class<?>, String>>() {
+				{
+					put(
+						"mutation#deleteAppWorkflow",
+						new ObjectValuePair<>(
+							AppWorkflowResourceImpl.class,
+							"deleteAppWorkflow"));
+					put(
+						"mutation#createAppWorkflow",
+						new ObjectValuePair<>(
+							AppWorkflowResourceImpl.class, "postAppWorkflow"));
+					put(
+						"mutation#updateAppWorkflow",
+						new ObjectValuePair<>(
+							AppWorkflowResourceImpl.class, "putAppWorkflow"));
+					put(
+						"mutation#createAppAppWorkflowDataRecordLinksPage",
+						new ObjectValuePair<>(
+							AppWorkflowDataRecordLinkResourceImpl.class,
+							"postAppAppWorkflowDataRecordLinksPage"));
+
+					put(
+						"query#appWorkflow",
+						new ObjectValuePair<>(
+							AppWorkflowResourceImpl.class, "getAppWorkflow"));
+				}
+			};
 
 	@Reference(scope = ReferenceScope.PROTOTYPE_REQUIRED)
 	private ComponentServiceObjects<AppWorkflowResource>

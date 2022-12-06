@@ -16,6 +16,29 @@ package com.liferay.headless.delivery.internal.graphql.servlet.v1_0;
 
 import com.liferay.headless.delivery.internal.graphql.mutation.v1_0.Mutation;
 import com.liferay.headless.delivery.internal.graphql.query.v1_0.Query;
+import com.liferay.headless.delivery.internal.resource.v1_0.BlogPostingImageResourceImpl;
+import com.liferay.headless.delivery.internal.resource.v1_0.BlogPostingResourceImpl;
+import com.liferay.headless.delivery.internal.resource.v1_0.CommentResourceImpl;
+import com.liferay.headless.delivery.internal.resource.v1_0.ContentElementResourceImpl;
+import com.liferay.headless.delivery.internal.resource.v1_0.ContentSetElementResourceImpl;
+import com.liferay.headless.delivery.internal.resource.v1_0.ContentStructureResourceImpl;
+import com.liferay.headless.delivery.internal.resource.v1_0.ContentTemplateResourceImpl;
+import com.liferay.headless.delivery.internal.resource.v1_0.DocumentFolderResourceImpl;
+import com.liferay.headless.delivery.internal.resource.v1_0.DocumentResourceImpl;
+import com.liferay.headless.delivery.internal.resource.v1_0.KnowledgeBaseArticleResourceImpl;
+import com.liferay.headless.delivery.internal.resource.v1_0.KnowledgeBaseAttachmentResourceImpl;
+import com.liferay.headless.delivery.internal.resource.v1_0.KnowledgeBaseFolderResourceImpl;
+import com.liferay.headless.delivery.internal.resource.v1_0.LanguageResourceImpl;
+import com.liferay.headless.delivery.internal.resource.v1_0.MessageBoardAttachmentResourceImpl;
+import com.liferay.headless.delivery.internal.resource.v1_0.MessageBoardMessageResourceImpl;
+import com.liferay.headless.delivery.internal.resource.v1_0.MessageBoardSectionResourceImpl;
+import com.liferay.headless.delivery.internal.resource.v1_0.MessageBoardThreadResourceImpl;
+import com.liferay.headless.delivery.internal.resource.v1_0.NavigationMenuResourceImpl;
+import com.liferay.headless.delivery.internal.resource.v1_0.StructuredContentFolderResourceImpl;
+import com.liferay.headless.delivery.internal.resource.v1_0.StructuredContentResourceImpl;
+import com.liferay.headless.delivery.internal.resource.v1_0.WikiNodeResourceImpl;
+import com.liferay.headless.delivery.internal.resource.v1_0.WikiPageAttachmentResourceImpl;
+import com.liferay.headless.delivery.internal.resource.v1_0.WikiPageResourceImpl;
 import com.liferay.headless.delivery.resource.v1_0.BlogPostingImageResource;
 import com.liferay.headless.delivery.resource.v1_0.BlogPostingResource;
 import com.liferay.headless.delivery.resource.v1_0.CommentResource;
@@ -39,7 +62,11 @@ import com.liferay.headless.delivery.resource.v1_0.StructuredContentResource;
 import com.liferay.headless.delivery.resource.v1_0.WikiNodeResource;
 import com.liferay.headless.delivery.resource.v1_0.WikiPageAttachmentResource;
 import com.liferay.headless.delivery.resource.v1_0.WikiPageResource;
+import com.liferay.portal.kernel.util.ObjectValuePair;
 import com.liferay.portal.vulcan.graphql.servlet.ServletData;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.annotation.Generated;
 
@@ -145,6 +172,10 @@ public class ServletDataImpl implements ServletData {
 			_wikiPageAttachmentResourceComponentServiceObjects);
 	}
 
+	public String getApplicationName() {
+		return "Liferay.Headless.Delivery";
+	}
+
 	@Override
 	public Mutation getMutation() {
 		return new Mutation();
@@ -159,6 +190,1335 @@ public class ServletDataImpl implements ServletData {
 	public Query getQuery() {
 		return new Query();
 	}
+
+	public ObjectValuePair<Class<?>, String> getResourceMethodObjectValuePair(
+		String methodName, boolean mutation) {
+
+		if (mutation) {
+			return _resourceMethodObjectValuePairs.get(
+				"mutation#" + methodName);
+		}
+
+		return _resourceMethodObjectValuePairs.get("query#" + methodName);
+	}
+
+	private static final Map<String, ObjectValuePair<Class<?>, String>>
+		_resourceMethodObjectValuePairs =
+			new HashMap<String, ObjectValuePair<Class<?>, String>>() {
+				{
+					put(
+						"mutation#deleteBlogPosting",
+						new ObjectValuePair<>(
+							BlogPostingResourceImpl.class,
+							"deleteBlogPosting"));
+					put(
+						"mutation#deleteBlogPostingBatch",
+						new ObjectValuePair<>(
+							BlogPostingResourceImpl.class,
+							"deleteBlogPostingBatch"));
+					put(
+						"mutation#patchBlogPosting",
+						new ObjectValuePair<>(
+							BlogPostingResourceImpl.class, "patchBlogPosting"));
+					put(
+						"mutation#updateBlogPosting",
+						new ObjectValuePair<>(
+							BlogPostingResourceImpl.class, "putBlogPosting"));
+					put(
+						"mutation#updateBlogPostingBatch",
+						new ObjectValuePair<>(
+							BlogPostingResourceImpl.class,
+							"putBlogPostingBatch"));
+					put(
+						"mutation#deleteBlogPostingMyRating",
+						new ObjectValuePair<>(
+							BlogPostingResourceImpl.class,
+							"deleteBlogPostingMyRating"));
+					put(
+						"mutation#createBlogPostingMyRating",
+						new ObjectValuePair<>(
+							BlogPostingResourceImpl.class,
+							"postBlogPostingMyRating"));
+					put(
+						"mutation#updateBlogPostingMyRating",
+						new ObjectValuePair<>(
+							BlogPostingResourceImpl.class,
+							"putBlogPostingMyRating"));
+					put(
+						"mutation#createSiteBlogPosting",
+						new ObjectValuePair<>(
+							BlogPostingResourceImpl.class,
+							"postSiteBlogPosting"));
+					put(
+						"mutation#createSiteBlogPostingBatch",
+						new ObjectValuePair<>(
+							BlogPostingResourceImpl.class,
+							"postSiteBlogPostingBatch"));
+					put(
+						"mutation#updateSiteBlogPostingSubscribe",
+						new ObjectValuePair<>(
+							BlogPostingResourceImpl.class,
+							"putSiteBlogPostingSubscribe"));
+					put(
+						"mutation#updateSiteBlogPostingUnsubscribe",
+						new ObjectValuePair<>(
+							BlogPostingResourceImpl.class,
+							"putSiteBlogPostingUnsubscribe"));
+					put(
+						"mutation#deleteBlogPostingImage",
+						new ObjectValuePair<>(
+							BlogPostingImageResourceImpl.class,
+							"deleteBlogPostingImage"));
+					put(
+						"mutation#deleteBlogPostingImageBatch",
+						new ObjectValuePair<>(
+							BlogPostingImageResourceImpl.class,
+							"deleteBlogPostingImageBatch"));
+					put(
+						"mutation#createSiteBlogPostingImage",
+						new ObjectValuePair<>(
+							BlogPostingImageResourceImpl.class,
+							"postSiteBlogPostingImage"));
+					put(
+						"mutation#createSiteBlogPostingImageBatch",
+						new ObjectValuePair<>(
+							BlogPostingImageResourceImpl.class,
+							"postSiteBlogPostingImageBatch"));
+					put(
+						"mutation#createBlogPostingComment",
+						new ObjectValuePair<>(
+							CommentResourceImpl.class,
+							"postBlogPostingComment"));
+					put(
+						"mutation#createBlogPostingCommentBatch",
+						new ObjectValuePair<>(
+							CommentResourceImpl.class,
+							"postBlogPostingCommentBatch"));
+					put(
+						"mutation#deleteComment",
+						new ObjectValuePair<>(
+							CommentResourceImpl.class, "deleteComment"));
+					put(
+						"mutation#deleteCommentBatch",
+						new ObjectValuePair<>(
+							CommentResourceImpl.class, "deleteCommentBatch"));
+					put(
+						"mutation#updateComment",
+						new ObjectValuePair<>(
+							CommentResourceImpl.class, "putComment"));
+					put(
+						"mutation#updateCommentBatch",
+						new ObjectValuePair<>(
+							CommentResourceImpl.class, "putCommentBatch"));
+					put(
+						"mutation#createCommentComment",
+						new ObjectValuePair<>(
+							CommentResourceImpl.class, "postCommentComment"));
+					put(
+						"mutation#createDocumentComment",
+						new ObjectValuePair<>(
+							CommentResourceImpl.class, "postDocumentComment"));
+					put(
+						"mutation#createDocumentCommentBatch",
+						new ObjectValuePair<>(
+							CommentResourceImpl.class,
+							"postDocumentCommentBatch"));
+					put(
+						"mutation#createStructuredContentComment",
+						new ObjectValuePair<>(
+							CommentResourceImpl.class,
+							"postStructuredContentComment"));
+					put(
+						"mutation#createStructuredContentCommentBatch",
+						new ObjectValuePair<>(
+							CommentResourceImpl.class,
+							"postStructuredContentCommentBatch"));
+					put(
+						"mutation#createAssetLibraryDocument",
+						new ObjectValuePair<>(
+							DocumentResourceImpl.class,
+							"postAssetLibraryDocument"));
+					put(
+						"mutation#createAssetLibraryDocumentBatch",
+						new ObjectValuePair<>(
+							DocumentResourceImpl.class,
+							"postAssetLibraryDocumentBatch"));
+					put(
+						"mutation#createDocumentFolderDocument",
+						new ObjectValuePair<>(
+							DocumentResourceImpl.class,
+							"postDocumentFolderDocument"));
+					put(
+						"mutation#createDocumentFolderDocumentBatch",
+						new ObjectValuePair<>(
+							DocumentResourceImpl.class,
+							"postDocumentFolderDocumentBatch"));
+					put(
+						"mutation#deleteDocument",
+						new ObjectValuePair<>(
+							DocumentResourceImpl.class, "deleteDocument"));
+					put(
+						"mutation#deleteDocumentBatch",
+						new ObjectValuePair<>(
+							DocumentResourceImpl.class, "deleteDocumentBatch"));
+					put(
+						"mutation#patchDocument",
+						new ObjectValuePair<>(
+							DocumentResourceImpl.class, "patchDocument"));
+					put(
+						"mutation#updateDocument",
+						new ObjectValuePair<>(
+							DocumentResourceImpl.class, "putDocument"));
+					put(
+						"mutation#updateDocumentBatch",
+						new ObjectValuePair<>(
+							DocumentResourceImpl.class, "putDocumentBatch"));
+					put(
+						"mutation#deleteDocumentMyRating",
+						new ObjectValuePair<>(
+							DocumentResourceImpl.class,
+							"deleteDocumentMyRating"));
+					put(
+						"mutation#createDocumentMyRating",
+						new ObjectValuePair<>(
+							DocumentResourceImpl.class,
+							"postDocumentMyRating"));
+					put(
+						"mutation#updateDocumentMyRating",
+						new ObjectValuePair<>(
+							DocumentResourceImpl.class, "putDocumentMyRating"));
+					put(
+						"mutation#createSiteDocument",
+						new ObjectValuePair<>(
+							DocumentResourceImpl.class, "postSiteDocument"));
+					put(
+						"mutation#createSiteDocumentBatch",
+						new ObjectValuePair<>(
+							DocumentResourceImpl.class,
+							"postSiteDocumentBatch"));
+					put(
+						"mutation#createAssetLibraryDocumentFolder",
+						new ObjectValuePair<>(
+							DocumentFolderResourceImpl.class,
+							"postAssetLibraryDocumentFolder"));
+					put(
+						"mutation#createAssetLibraryDocumentFolderBatch",
+						new ObjectValuePair<>(
+							DocumentFolderResourceImpl.class,
+							"postAssetLibraryDocumentFolderBatch"));
+					put(
+						"mutation#deleteDocumentFolder",
+						new ObjectValuePair<>(
+							DocumentFolderResourceImpl.class,
+							"deleteDocumentFolder"));
+					put(
+						"mutation#deleteDocumentFolderBatch",
+						new ObjectValuePair<>(
+							DocumentFolderResourceImpl.class,
+							"deleteDocumentFolderBatch"));
+					put(
+						"mutation#patchDocumentFolder",
+						new ObjectValuePair<>(
+							DocumentFolderResourceImpl.class,
+							"patchDocumentFolder"));
+					put(
+						"mutation#updateDocumentFolder",
+						new ObjectValuePair<>(
+							DocumentFolderResourceImpl.class,
+							"putDocumentFolder"));
+					put(
+						"mutation#updateDocumentFolderBatch",
+						new ObjectValuePair<>(
+							DocumentFolderResourceImpl.class,
+							"putDocumentFolderBatch"));
+					put(
+						"mutation#updateDocumentFolderSubscribe",
+						new ObjectValuePair<>(
+							DocumentFolderResourceImpl.class,
+							"putDocumentFolderSubscribe"));
+					put(
+						"mutation#updateDocumentFolderUnsubscribe",
+						new ObjectValuePair<>(
+							DocumentFolderResourceImpl.class,
+							"putDocumentFolderUnsubscribe"));
+					put(
+						"mutation#createDocumentFolderDocumentFolder",
+						new ObjectValuePair<>(
+							DocumentFolderResourceImpl.class,
+							"postDocumentFolderDocumentFolder"));
+					put(
+						"mutation#createSiteDocumentFolder",
+						new ObjectValuePair<>(
+							DocumentFolderResourceImpl.class,
+							"postSiteDocumentFolder"));
+					put(
+						"mutation#createSiteDocumentFolderBatch",
+						new ObjectValuePair<>(
+							DocumentFolderResourceImpl.class,
+							"postSiteDocumentFolderBatch"));
+					put(
+						"mutation#deleteKnowledgeBaseArticle",
+						new ObjectValuePair<>(
+							KnowledgeBaseArticleResourceImpl.class,
+							"deleteKnowledgeBaseArticle"));
+					put(
+						"mutation#deleteKnowledgeBaseArticleBatch",
+						new ObjectValuePair<>(
+							KnowledgeBaseArticleResourceImpl.class,
+							"deleteKnowledgeBaseArticleBatch"));
+					put(
+						"mutation#patchKnowledgeBaseArticle",
+						new ObjectValuePair<>(
+							KnowledgeBaseArticleResourceImpl.class,
+							"patchKnowledgeBaseArticle"));
+					put(
+						"mutation#updateKnowledgeBaseArticle",
+						new ObjectValuePair<>(
+							KnowledgeBaseArticleResourceImpl.class,
+							"putKnowledgeBaseArticle"));
+					put(
+						"mutation#updateKnowledgeBaseArticleBatch",
+						new ObjectValuePair<>(
+							KnowledgeBaseArticleResourceImpl.class,
+							"putKnowledgeBaseArticleBatch"));
+					put(
+						"mutation#deleteKnowledgeBaseArticleMyRating",
+						new ObjectValuePair<>(
+							KnowledgeBaseArticleResourceImpl.class,
+							"deleteKnowledgeBaseArticleMyRating"));
+					put(
+						"mutation#createKnowledgeBaseArticleMyRating",
+						new ObjectValuePair<>(
+							KnowledgeBaseArticleResourceImpl.class,
+							"postKnowledgeBaseArticleMyRating"));
+					put(
+						"mutation#updateKnowledgeBaseArticleMyRating",
+						new ObjectValuePair<>(
+							KnowledgeBaseArticleResourceImpl.class,
+							"putKnowledgeBaseArticleMyRating"));
+					put(
+						"mutation#updateKnowledgeBaseArticleSubscribe",
+						new ObjectValuePair<>(
+							KnowledgeBaseArticleResourceImpl.class,
+							"putKnowledgeBaseArticleSubscribe"));
+					put(
+						"mutation#updateKnowledgeBaseArticleUnsubscribe",
+						new ObjectValuePair<>(
+							KnowledgeBaseArticleResourceImpl.class,
+							"putKnowledgeBaseArticleUnsubscribe"));
+					put(
+						"mutation#createKnowledgeBaseArticleKnowledgeBaseArticle",
+						new ObjectValuePair<>(
+							KnowledgeBaseArticleResourceImpl.class,
+							"postKnowledgeBaseArticleKnowledgeBaseArticle"));
+					put(
+						"mutation#createKnowledgeBaseFolderKnowledgeBaseArticle",
+						new ObjectValuePair<>(
+							KnowledgeBaseArticleResourceImpl.class,
+							"postKnowledgeBaseFolderKnowledgeBaseArticle"));
+					put(
+						"mutation#createKnowledgeBaseFolderKnowledgeBaseArticleBatch",
+						new ObjectValuePair<>(
+							KnowledgeBaseArticleResourceImpl.class,
+							"postKnowledgeBaseFolderKnowledgeBaseArticleBatch"));
+					put(
+						"mutation#createSiteKnowledgeBaseArticle",
+						new ObjectValuePair<>(
+							KnowledgeBaseArticleResourceImpl.class,
+							"postSiteKnowledgeBaseArticle"));
+					put(
+						"mutation#createSiteKnowledgeBaseArticleBatch",
+						new ObjectValuePair<>(
+							KnowledgeBaseArticleResourceImpl.class,
+							"postSiteKnowledgeBaseArticleBatch"));
+					put(
+						"mutation#updateSiteKnowledgeBaseArticleSubscribe",
+						new ObjectValuePair<>(
+							KnowledgeBaseArticleResourceImpl.class,
+							"putSiteKnowledgeBaseArticleSubscribe"));
+					put(
+						"mutation#updateSiteKnowledgeBaseArticleUnsubscribe",
+						new ObjectValuePair<>(
+							KnowledgeBaseArticleResourceImpl.class,
+							"putSiteKnowledgeBaseArticleUnsubscribe"));
+					put(
+						"mutation#createKnowledgeBaseArticleKnowledgeBaseAttachment",
+						new ObjectValuePair<>(
+							KnowledgeBaseAttachmentResourceImpl.class,
+							"postKnowledgeBaseArticleKnowledgeBaseAttachment"));
+					put(
+						"mutation#createKnowledgeBaseArticleKnowledgeBaseAttachmentBatch",
+						new ObjectValuePair<>(
+							KnowledgeBaseAttachmentResourceImpl.class,
+							"postKnowledgeBaseArticleKnowledgeBaseAttachmentBatch"));
+					put(
+						"mutation#deleteKnowledgeBaseAttachment",
+						new ObjectValuePair<>(
+							KnowledgeBaseAttachmentResourceImpl.class,
+							"deleteKnowledgeBaseAttachment"));
+					put(
+						"mutation#deleteKnowledgeBaseAttachmentBatch",
+						new ObjectValuePair<>(
+							KnowledgeBaseAttachmentResourceImpl.class,
+							"deleteKnowledgeBaseAttachmentBatch"));
+					put(
+						"mutation#deleteKnowledgeBaseFolder",
+						new ObjectValuePair<>(
+							KnowledgeBaseFolderResourceImpl.class,
+							"deleteKnowledgeBaseFolder"));
+					put(
+						"mutation#deleteKnowledgeBaseFolderBatch",
+						new ObjectValuePair<>(
+							KnowledgeBaseFolderResourceImpl.class,
+							"deleteKnowledgeBaseFolderBatch"));
+					put(
+						"mutation#patchKnowledgeBaseFolder",
+						new ObjectValuePair<>(
+							KnowledgeBaseFolderResourceImpl.class,
+							"patchKnowledgeBaseFolder"));
+					put(
+						"mutation#updateKnowledgeBaseFolder",
+						new ObjectValuePair<>(
+							KnowledgeBaseFolderResourceImpl.class,
+							"putKnowledgeBaseFolder"));
+					put(
+						"mutation#updateKnowledgeBaseFolderBatch",
+						new ObjectValuePair<>(
+							KnowledgeBaseFolderResourceImpl.class,
+							"putKnowledgeBaseFolderBatch"));
+					put(
+						"mutation#createKnowledgeBaseFolderKnowledgeBaseFolder",
+						new ObjectValuePair<>(
+							KnowledgeBaseFolderResourceImpl.class,
+							"postKnowledgeBaseFolderKnowledgeBaseFolder"));
+					put(
+						"mutation#createSiteKnowledgeBaseFolder",
+						new ObjectValuePair<>(
+							KnowledgeBaseFolderResourceImpl.class,
+							"postSiteKnowledgeBaseFolder"));
+					put(
+						"mutation#createSiteKnowledgeBaseFolderBatch",
+						new ObjectValuePair<>(
+							KnowledgeBaseFolderResourceImpl.class,
+							"postSiteKnowledgeBaseFolderBatch"));
+					put(
+						"mutation#deleteMessageBoardAttachment",
+						new ObjectValuePair<>(
+							MessageBoardAttachmentResourceImpl.class,
+							"deleteMessageBoardAttachment"));
+					put(
+						"mutation#deleteMessageBoardAttachmentBatch",
+						new ObjectValuePair<>(
+							MessageBoardAttachmentResourceImpl.class,
+							"deleteMessageBoardAttachmentBatch"));
+					put(
+						"mutation#createMessageBoardMessageMessageBoardAttachment",
+						new ObjectValuePair<>(
+							MessageBoardAttachmentResourceImpl.class,
+							"postMessageBoardMessageMessageBoardAttachment"));
+					put(
+						"mutation#createMessageBoardMessageMessageBoardAttachmentBatch",
+						new ObjectValuePair<>(
+							MessageBoardAttachmentResourceImpl.class,
+							"postMessageBoardMessageMessageBoardAttachmentBatch"));
+					put(
+						"mutation#createMessageBoardThreadMessageBoardAttachment",
+						new ObjectValuePair<>(
+							MessageBoardAttachmentResourceImpl.class,
+							"postMessageBoardThreadMessageBoardAttachment"));
+					put(
+						"mutation#createMessageBoardThreadMessageBoardAttachmentBatch",
+						new ObjectValuePair<>(
+							MessageBoardAttachmentResourceImpl.class,
+							"postMessageBoardThreadMessageBoardAttachmentBatch"));
+					put(
+						"mutation#deleteMessageBoardMessage",
+						new ObjectValuePair<>(
+							MessageBoardMessageResourceImpl.class,
+							"deleteMessageBoardMessage"));
+					put(
+						"mutation#deleteMessageBoardMessageBatch",
+						new ObjectValuePair<>(
+							MessageBoardMessageResourceImpl.class,
+							"deleteMessageBoardMessageBatch"));
+					put(
+						"mutation#patchMessageBoardMessage",
+						new ObjectValuePair<>(
+							MessageBoardMessageResourceImpl.class,
+							"patchMessageBoardMessage"));
+					put(
+						"mutation#updateMessageBoardMessage",
+						new ObjectValuePair<>(
+							MessageBoardMessageResourceImpl.class,
+							"putMessageBoardMessage"));
+					put(
+						"mutation#updateMessageBoardMessageBatch",
+						new ObjectValuePair<>(
+							MessageBoardMessageResourceImpl.class,
+							"putMessageBoardMessageBatch"));
+					put(
+						"mutation#deleteMessageBoardMessageMyRating",
+						new ObjectValuePair<>(
+							MessageBoardMessageResourceImpl.class,
+							"deleteMessageBoardMessageMyRating"));
+					put(
+						"mutation#createMessageBoardMessageMyRating",
+						new ObjectValuePair<>(
+							MessageBoardMessageResourceImpl.class,
+							"postMessageBoardMessageMyRating"));
+					put(
+						"mutation#updateMessageBoardMessageMyRating",
+						new ObjectValuePair<>(
+							MessageBoardMessageResourceImpl.class,
+							"putMessageBoardMessageMyRating"));
+					put(
+						"mutation#updateMessageBoardMessageSubscribe",
+						new ObjectValuePair<>(
+							MessageBoardMessageResourceImpl.class,
+							"putMessageBoardMessageSubscribe"));
+					put(
+						"mutation#updateMessageBoardMessageUnsubscribe",
+						new ObjectValuePair<>(
+							MessageBoardMessageResourceImpl.class,
+							"putMessageBoardMessageUnsubscribe"));
+					put(
+						"mutation#createMessageBoardMessageMessageBoardMessage",
+						new ObjectValuePair<>(
+							MessageBoardMessageResourceImpl.class,
+							"postMessageBoardMessageMessageBoardMessage"));
+					put(
+						"mutation#createMessageBoardThreadMessageBoardMessage",
+						new ObjectValuePair<>(
+							MessageBoardMessageResourceImpl.class,
+							"postMessageBoardThreadMessageBoardMessage"));
+					put(
+						"mutation#createMessageBoardThreadMessageBoardMessageBatch",
+						new ObjectValuePair<>(
+							MessageBoardMessageResourceImpl.class,
+							"postMessageBoardThreadMessageBoardMessageBatch"));
+					put(
+						"mutation#deleteMessageBoardSection",
+						new ObjectValuePair<>(
+							MessageBoardSectionResourceImpl.class,
+							"deleteMessageBoardSection"));
+					put(
+						"mutation#deleteMessageBoardSectionBatch",
+						new ObjectValuePair<>(
+							MessageBoardSectionResourceImpl.class,
+							"deleteMessageBoardSectionBatch"));
+					put(
+						"mutation#patchMessageBoardSection",
+						new ObjectValuePair<>(
+							MessageBoardSectionResourceImpl.class,
+							"patchMessageBoardSection"));
+					put(
+						"mutation#updateMessageBoardSection",
+						new ObjectValuePair<>(
+							MessageBoardSectionResourceImpl.class,
+							"putMessageBoardSection"));
+					put(
+						"mutation#updateMessageBoardSectionBatch",
+						new ObjectValuePair<>(
+							MessageBoardSectionResourceImpl.class,
+							"putMessageBoardSectionBatch"));
+					put(
+						"mutation#updateMessageBoardSectionSubscribe",
+						new ObjectValuePair<>(
+							MessageBoardSectionResourceImpl.class,
+							"putMessageBoardSectionSubscribe"));
+					put(
+						"mutation#updateMessageBoardSectionUnsubscribe",
+						new ObjectValuePair<>(
+							MessageBoardSectionResourceImpl.class,
+							"putMessageBoardSectionUnsubscribe"));
+					put(
+						"mutation#createMessageBoardSectionMessageBoardSection",
+						new ObjectValuePair<>(
+							MessageBoardSectionResourceImpl.class,
+							"postMessageBoardSectionMessageBoardSection"));
+					put(
+						"mutation#createSiteMessageBoardSection",
+						new ObjectValuePair<>(
+							MessageBoardSectionResourceImpl.class,
+							"postSiteMessageBoardSection"));
+					put(
+						"mutation#createSiteMessageBoardSectionBatch",
+						new ObjectValuePair<>(
+							MessageBoardSectionResourceImpl.class,
+							"postSiteMessageBoardSectionBatch"));
+					put(
+						"mutation#createMessageBoardSectionMessageBoardThread",
+						new ObjectValuePair<>(
+							MessageBoardThreadResourceImpl.class,
+							"postMessageBoardSectionMessageBoardThread"));
+					put(
+						"mutation#createMessageBoardSectionMessageBoardThreadBatch",
+						new ObjectValuePair<>(
+							MessageBoardThreadResourceImpl.class,
+							"postMessageBoardSectionMessageBoardThreadBatch"));
+					put(
+						"mutation#deleteMessageBoardThread",
+						new ObjectValuePair<>(
+							MessageBoardThreadResourceImpl.class,
+							"deleteMessageBoardThread"));
+					put(
+						"mutation#deleteMessageBoardThreadBatch",
+						new ObjectValuePair<>(
+							MessageBoardThreadResourceImpl.class,
+							"deleteMessageBoardThreadBatch"));
+					put(
+						"mutation#patchMessageBoardThread",
+						new ObjectValuePair<>(
+							MessageBoardThreadResourceImpl.class,
+							"patchMessageBoardThread"));
+					put(
+						"mutation#updateMessageBoardThread",
+						new ObjectValuePair<>(
+							MessageBoardThreadResourceImpl.class,
+							"putMessageBoardThread"));
+					put(
+						"mutation#updateMessageBoardThreadBatch",
+						new ObjectValuePair<>(
+							MessageBoardThreadResourceImpl.class,
+							"putMessageBoardThreadBatch"));
+					put(
+						"mutation#deleteMessageBoardThreadMyRating",
+						new ObjectValuePair<>(
+							MessageBoardThreadResourceImpl.class,
+							"deleteMessageBoardThreadMyRating"));
+					put(
+						"mutation#createMessageBoardThreadMyRating",
+						new ObjectValuePair<>(
+							MessageBoardThreadResourceImpl.class,
+							"postMessageBoardThreadMyRating"));
+					put(
+						"mutation#updateMessageBoardThreadMyRating",
+						new ObjectValuePair<>(
+							MessageBoardThreadResourceImpl.class,
+							"putMessageBoardThreadMyRating"));
+					put(
+						"mutation#updateMessageBoardThreadSubscribe",
+						new ObjectValuePair<>(
+							MessageBoardThreadResourceImpl.class,
+							"putMessageBoardThreadSubscribe"));
+					put(
+						"mutation#updateMessageBoardThreadUnsubscribe",
+						new ObjectValuePair<>(
+							MessageBoardThreadResourceImpl.class,
+							"putMessageBoardThreadUnsubscribe"));
+					put(
+						"mutation#createSiteMessageBoardThread",
+						new ObjectValuePair<>(
+							MessageBoardThreadResourceImpl.class,
+							"postSiteMessageBoardThread"));
+					put(
+						"mutation#createSiteMessageBoardThreadBatch",
+						new ObjectValuePair<>(
+							MessageBoardThreadResourceImpl.class,
+							"postSiteMessageBoardThreadBatch"));
+					put(
+						"mutation#deleteNavigationMenu",
+						new ObjectValuePair<>(
+							NavigationMenuResourceImpl.class,
+							"deleteNavigationMenu"));
+					put(
+						"mutation#deleteNavigationMenuBatch",
+						new ObjectValuePair<>(
+							NavigationMenuResourceImpl.class,
+							"deleteNavigationMenuBatch"));
+					put(
+						"mutation#updateNavigationMenu",
+						new ObjectValuePair<>(
+							NavigationMenuResourceImpl.class,
+							"putNavigationMenu"));
+					put(
+						"mutation#updateNavigationMenuBatch",
+						new ObjectValuePair<>(
+							NavigationMenuResourceImpl.class,
+							"putNavigationMenuBatch"));
+					put(
+						"mutation#createSiteNavigationMenu",
+						new ObjectValuePair<>(
+							NavigationMenuResourceImpl.class,
+							"postSiteNavigationMenu"));
+					put(
+						"mutation#createSiteNavigationMenuBatch",
+						new ObjectValuePair<>(
+							NavigationMenuResourceImpl.class,
+							"postSiteNavigationMenuBatch"));
+					put(
+						"mutation#createAssetLibraryStructuredContent",
+						new ObjectValuePair<>(
+							StructuredContentResourceImpl.class,
+							"postAssetLibraryStructuredContent"));
+					put(
+						"mutation#createAssetLibraryStructuredContentBatch",
+						new ObjectValuePair<>(
+							StructuredContentResourceImpl.class,
+							"postAssetLibraryStructuredContentBatch"));
+					put(
+						"mutation#createSiteStructuredContent",
+						new ObjectValuePair<>(
+							StructuredContentResourceImpl.class,
+							"postSiteStructuredContent"));
+					put(
+						"mutation#createSiteStructuredContentBatch",
+						new ObjectValuePair<>(
+							StructuredContentResourceImpl.class,
+							"postSiteStructuredContentBatch"));
+					put(
+						"mutation#updateSiteStructuredContentPermissionsPage",
+						new ObjectValuePair<>(
+							StructuredContentResourceImpl.class,
+							"putSiteStructuredContentPermissionsPage"));
+					put(
+						"mutation#createStructuredContentFolderStructuredContent",
+						new ObjectValuePair<>(
+							StructuredContentResourceImpl.class,
+							"postStructuredContentFolderStructuredContent"));
+					put(
+						"mutation#createStructuredContentFolderStructuredContentBatch",
+						new ObjectValuePair<>(
+							StructuredContentResourceImpl.class,
+							"postStructuredContentFolderStructuredContentBatch"));
+					put(
+						"mutation#deleteStructuredContent",
+						new ObjectValuePair<>(
+							StructuredContentResourceImpl.class,
+							"deleteStructuredContent"));
+					put(
+						"mutation#deleteStructuredContentBatch",
+						new ObjectValuePair<>(
+							StructuredContentResourceImpl.class,
+							"deleteStructuredContentBatch"));
+					put(
+						"mutation#patchStructuredContent",
+						new ObjectValuePair<>(
+							StructuredContentResourceImpl.class,
+							"patchStructuredContent"));
+					put(
+						"mutation#updateStructuredContent",
+						new ObjectValuePair<>(
+							StructuredContentResourceImpl.class,
+							"putStructuredContent"));
+					put(
+						"mutation#updateStructuredContentBatch",
+						new ObjectValuePair<>(
+							StructuredContentResourceImpl.class,
+							"putStructuredContentBatch"));
+					put(
+						"mutation#deleteStructuredContentMyRating",
+						new ObjectValuePair<>(
+							StructuredContentResourceImpl.class,
+							"deleteStructuredContentMyRating"));
+					put(
+						"mutation#createStructuredContentMyRating",
+						new ObjectValuePair<>(
+							StructuredContentResourceImpl.class,
+							"postStructuredContentMyRating"));
+					put(
+						"mutation#updateStructuredContentMyRating",
+						new ObjectValuePair<>(
+							StructuredContentResourceImpl.class,
+							"putStructuredContentMyRating"));
+					put(
+						"mutation#updateStructuredContentPermissionsPage",
+						new ObjectValuePair<>(
+							StructuredContentResourceImpl.class,
+							"putStructuredContentPermissionsPage"));
+					put(
+						"mutation#updateStructuredContentSubscribe",
+						new ObjectValuePair<>(
+							StructuredContentResourceImpl.class,
+							"putStructuredContentSubscribe"));
+					put(
+						"mutation#updateStructuredContentUnsubscribe",
+						new ObjectValuePair<>(
+							StructuredContentResourceImpl.class,
+							"putStructuredContentUnsubscribe"));
+					put(
+						"mutation#createAssetLibraryStructuredContentFolder",
+						new ObjectValuePair<>(
+							StructuredContentFolderResourceImpl.class,
+							"postAssetLibraryStructuredContentFolder"));
+					put(
+						"mutation#createAssetLibraryStructuredContentFolderBatch",
+						new ObjectValuePair<>(
+							StructuredContentFolderResourceImpl.class,
+							"postAssetLibraryStructuredContentFolderBatch"));
+					put(
+						"mutation#createSiteStructuredContentFolder",
+						new ObjectValuePair<>(
+							StructuredContentFolderResourceImpl.class,
+							"postSiteStructuredContentFolder"));
+					put(
+						"mutation#createSiteStructuredContentFolderBatch",
+						new ObjectValuePair<>(
+							StructuredContentFolderResourceImpl.class,
+							"postSiteStructuredContentFolderBatch"));
+					put(
+						"mutation#createStructuredContentFolderStructuredContentFolder",
+						new ObjectValuePair<>(
+							StructuredContentFolderResourceImpl.class,
+							"postStructuredContentFolderStructuredContentFolder"));
+					put(
+						"mutation#deleteStructuredContentFolder",
+						new ObjectValuePair<>(
+							StructuredContentFolderResourceImpl.class,
+							"deleteStructuredContentFolder"));
+					put(
+						"mutation#deleteStructuredContentFolderBatch",
+						new ObjectValuePair<>(
+							StructuredContentFolderResourceImpl.class,
+							"deleteStructuredContentFolderBatch"));
+					put(
+						"mutation#patchStructuredContentFolder",
+						new ObjectValuePair<>(
+							StructuredContentFolderResourceImpl.class,
+							"patchStructuredContentFolder"));
+					put(
+						"mutation#updateStructuredContentFolder",
+						new ObjectValuePair<>(
+							StructuredContentFolderResourceImpl.class,
+							"putStructuredContentFolder"));
+					put(
+						"mutation#updateStructuredContentFolderBatch",
+						new ObjectValuePair<>(
+							StructuredContentFolderResourceImpl.class,
+							"putStructuredContentFolderBatch"));
+					put(
+						"mutation#updateStructuredContentFolderSubscribe",
+						new ObjectValuePair<>(
+							StructuredContentFolderResourceImpl.class,
+							"putStructuredContentFolderSubscribe"));
+					put(
+						"mutation#updateStructuredContentFolderUnsubscribe",
+						new ObjectValuePair<>(
+							StructuredContentFolderResourceImpl.class,
+							"putStructuredContentFolderUnsubscribe"));
+					put(
+						"mutation#createSiteWikiNode",
+						new ObjectValuePair<>(
+							WikiNodeResourceImpl.class, "postSiteWikiNode"));
+					put(
+						"mutation#createSiteWikiNodeBatch",
+						new ObjectValuePair<>(
+							WikiNodeResourceImpl.class,
+							"postSiteWikiNodeBatch"));
+					put(
+						"mutation#deleteWikiNode",
+						new ObjectValuePair<>(
+							WikiNodeResourceImpl.class, "deleteWikiNode"));
+					put(
+						"mutation#deleteWikiNodeBatch",
+						new ObjectValuePair<>(
+							WikiNodeResourceImpl.class, "deleteWikiNodeBatch"));
+					put(
+						"mutation#updateWikiNode",
+						new ObjectValuePair<>(
+							WikiNodeResourceImpl.class, "putWikiNode"));
+					put(
+						"mutation#updateWikiNodeBatch",
+						new ObjectValuePair<>(
+							WikiNodeResourceImpl.class, "putWikiNodeBatch"));
+					put(
+						"mutation#updateWikiNodeSubscribe",
+						new ObjectValuePair<>(
+							WikiNodeResourceImpl.class,
+							"putWikiNodeSubscribe"));
+					put(
+						"mutation#updateWikiNodeUnsubscribe",
+						new ObjectValuePair<>(
+							WikiNodeResourceImpl.class,
+							"putWikiNodeUnsubscribe"));
+					put(
+						"mutation#createWikiNodeWikiPage",
+						new ObjectValuePair<>(
+							WikiPageResourceImpl.class,
+							"postWikiNodeWikiPage"));
+					put(
+						"mutation#createWikiNodeWikiPageBatch",
+						new ObjectValuePair<>(
+							WikiPageResourceImpl.class,
+							"postWikiNodeWikiPageBatch"));
+					put(
+						"mutation#createWikiPageWikiPage",
+						new ObjectValuePair<>(
+							WikiPageResourceImpl.class,
+							"postWikiPageWikiPage"));
+					put(
+						"mutation#deleteWikiPage",
+						new ObjectValuePair<>(
+							WikiPageResourceImpl.class, "deleteWikiPage"));
+					put(
+						"mutation#deleteWikiPageBatch",
+						new ObjectValuePair<>(
+							WikiPageResourceImpl.class, "deleteWikiPageBatch"));
+					put(
+						"mutation#updateWikiPage",
+						new ObjectValuePair<>(
+							WikiPageResourceImpl.class, "putWikiPage"));
+					put(
+						"mutation#updateWikiPageBatch",
+						new ObjectValuePair<>(
+							WikiPageResourceImpl.class, "putWikiPageBatch"));
+					put(
+						"mutation#updateWikiPageSubscribe",
+						new ObjectValuePair<>(
+							WikiPageResourceImpl.class,
+							"putWikiPageSubscribe"));
+					put(
+						"mutation#updateWikiPageUnsubscribe",
+						new ObjectValuePair<>(
+							WikiPageResourceImpl.class,
+							"putWikiPageUnsubscribe"));
+					put(
+						"mutation#deleteWikiPageAttachment",
+						new ObjectValuePair<>(
+							WikiPageAttachmentResourceImpl.class,
+							"deleteWikiPageAttachment"));
+					put(
+						"mutation#deleteWikiPageAttachmentBatch",
+						new ObjectValuePair<>(
+							WikiPageAttachmentResourceImpl.class,
+							"deleteWikiPageAttachmentBatch"));
+					put(
+						"mutation#createWikiPageWikiPageAttachment",
+						new ObjectValuePair<>(
+							WikiPageAttachmentResourceImpl.class,
+							"postWikiPageWikiPageAttachment"));
+					put(
+						"mutation#createWikiPageWikiPageAttachmentBatch",
+						new ObjectValuePair<>(
+							WikiPageAttachmentResourceImpl.class,
+							"postWikiPageWikiPageAttachmentBatch"));
+
+					put(
+						"query#blogPosting",
+						new ObjectValuePair<>(
+							BlogPostingResourceImpl.class, "getBlogPosting"));
+					put(
+						"query#blogPostingMyRating",
+						new ObjectValuePair<>(
+							BlogPostingResourceImpl.class,
+							"getBlogPostingMyRating"));
+					put(
+						"query#blogPostings",
+						new ObjectValuePair<>(
+							BlogPostingResourceImpl.class,
+							"getSiteBlogPostingsPage"));
+					put(
+						"query#blogPostingImage",
+						new ObjectValuePair<>(
+							BlogPostingImageResourceImpl.class,
+							"getBlogPostingImage"));
+					put(
+						"query#blogPostingImages",
+						new ObjectValuePair<>(
+							BlogPostingImageResourceImpl.class,
+							"getSiteBlogPostingImagesPage"));
+					put(
+						"query#blogPostingComments",
+						new ObjectValuePair<>(
+							CommentResourceImpl.class,
+							"getBlogPostingCommentsPage"));
+					put(
+						"query#comment",
+						new ObjectValuePair<>(
+							CommentResourceImpl.class, "getComment"));
+					put(
+						"query#commentComments",
+						new ObjectValuePair<>(
+							CommentResourceImpl.class,
+							"getCommentCommentsPage"));
+					put(
+						"query#documentComments",
+						new ObjectValuePair<>(
+							CommentResourceImpl.class,
+							"getDocumentCommentsPage"));
+					put(
+						"query#structuredContentComments",
+						new ObjectValuePair<>(
+							CommentResourceImpl.class,
+							"getStructuredContentCommentsPage"));
+					put(
+						"query#assetLibraryContentElements",
+						new ObjectValuePair<>(
+							ContentElementResourceImpl.class,
+							"getAssetLibraryContentElementsPage"));
+					put(
+						"query#contentElements",
+						new ObjectValuePair<>(
+							ContentElementResourceImpl.class,
+							"getSiteContentElementsPage"));
+					put(
+						"query#assetLibraryContentSetByKeyContentSetElements",
+						new ObjectValuePair<>(
+							ContentSetElementResourceImpl.class,
+							"getAssetLibraryContentSetByKeyContentSetElementsPage"));
+					put(
+						"query#assetLibraryContentSetByUuidContentSetElements",
+						new ObjectValuePair<>(
+							ContentSetElementResourceImpl.class,
+							"getAssetLibraryContentSetByUuidContentSetElementsPage"));
+					put(
+						"query#contentSetContentSetElements",
+						new ObjectValuePair<>(
+							ContentSetElementResourceImpl.class,
+							"getContentSetContentSetElementsPage"));
+					put(
+						"query#contentSetByKeyContentSetElements",
+						new ObjectValuePair<>(
+							ContentSetElementResourceImpl.class,
+							"getSiteContentSetByKeyContentSetElementsPage"));
+					put(
+						"query#contentSetByUuidContentSetElements",
+						new ObjectValuePair<>(
+							ContentSetElementResourceImpl.class,
+							"getSiteContentSetByUuidContentSetElementsPage"));
+					put(
+						"query#assetLibraryContentStructures",
+						new ObjectValuePair<>(
+							ContentStructureResourceImpl.class,
+							"getAssetLibraryContentStructuresPage"));
+					put(
+						"query#contentStructure",
+						new ObjectValuePair<>(
+							ContentStructureResourceImpl.class,
+							"getContentStructure"));
+					put(
+						"query#contentStructures",
+						new ObjectValuePair<>(
+							ContentStructureResourceImpl.class,
+							"getSiteContentStructuresPage"));
+					put(
+						"query#assetLibraryContentTemplates",
+						new ObjectValuePair<>(
+							ContentTemplateResourceImpl.class,
+							"getAssetLibraryContentTemplatesPage"));
+					put(
+						"query#contentTemplates",
+						new ObjectValuePair<>(
+							ContentTemplateResourceImpl.class,
+							"getSiteContentTemplatesPage"));
+					put(
+						"query#contentTemplate",
+						new ObjectValuePair<>(
+							ContentTemplateResourceImpl.class,
+							"getSiteContentTemplate"));
+					put(
+						"query#assetLibraryDocuments",
+						new ObjectValuePair<>(
+							DocumentResourceImpl.class,
+							"getAssetLibraryDocumentsPage"));
+					put(
+						"query#documentFolderDocuments",
+						new ObjectValuePair<>(
+							DocumentResourceImpl.class,
+							"getDocumentFolderDocumentsPage"));
+					put(
+						"query#document",
+						new ObjectValuePair<>(
+							DocumentResourceImpl.class, "getDocument"));
+					put(
+						"query#documentMyRating",
+						new ObjectValuePair<>(
+							DocumentResourceImpl.class, "getDocumentMyRating"));
+					put(
+						"query#documents",
+						new ObjectValuePair<>(
+							DocumentResourceImpl.class,
+							"getSiteDocumentsPage"));
+					put(
+						"query#assetLibraryDocumentFolders",
+						new ObjectValuePair<>(
+							DocumentFolderResourceImpl.class,
+							"getAssetLibraryDocumentFoldersPage"));
+					put(
+						"query#documentFolder",
+						new ObjectValuePair<>(
+							DocumentFolderResourceImpl.class,
+							"getDocumentFolder"));
+					put(
+						"query#documentFolderDocumentFolders",
+						new ObjectValuePair<>(
+							DocumentFolderResourceImpl.class,
+							"getDocumentFolderDocumentFoldersPage"));
+					put(
+						"query#documentFolders",
+						new ObjectValuePair<>(
+							DocumentFolderResourceImpl.class,
+							"getSiteDocumentFoldersPage"));
+					put(
+						"query#knowledgeBaseArticle",
+						new ObjectValuePair<>(
+							KnowledgeBaseArticleResourceImpl.class,
+							"getKnowledgeBaseArticle"));
+					put(
+						"query#knowledgeBaseArticleMyRating",
+						new ObjectValuePair<>(
+							KnowledgeBaseArticleResourceImpl.class,
+							"getKnowledgeBaseArticleMyRating"));
+					put(
+						"query#knowledgeBaseArticleKnowledgeBaseArticles",
+						new ObjectValuePair<>(
+							KnowledgeBaseArticleResourceImpl.class,
+							"getKnowledgeBaseArticleKnowledgeBaseArticlesPage"));
+					put(
+						"query#knowledgeBaseFolderKnowledgeBaseArticles",
+						new ObjectValuePair<>(
+							KnowledgeBaseArticleResourceImpl.class,
+							"getKnowledgeBaseFolderKnowledgeBaseArticlesPage"));
+					put(
+						"query#knowledgeBaseArticles",
+						new ObjectValuePair<>(
+							KnowledgeBaseArticleResourceImpl.class,
+							"getSiteKnowledgeBaseArticlesPage"));
+					put(
+						"query#knowledgeBaseArticleKnowledgeBaseAttachments",
+						new ObjectValuePair<>(
+							KnowledgeBaseAttachmentResourceImpl.class,
+							"getKnowledgeBaseArticleKnowledgeBaseAttachmentsPage"));
+					put(
+						"query#knowledgeBaseAttachment",
+						new ObjectValuePair<>(
+							KnowledgeBaseAttachmentResourceImpl.class,
+							"getKnowledgeBaseAttachment"));
+					put(
+						"query#knowledgeBaseFolder",
+						new ObjectValuePair<>(
+							KnowledgeBaseFolderResourceImpl.class,
+							"getKnowledgeBaseFolder"));
+					put(
+						"query#knowledgeBaseFolderKnowledgeBaseFolders",
+						new ObjectValuePair<>(
+							KnowledgeBaseFolderResourceImpl.class,
+							"getKnowledgeBaseFolderKnowledgeBaseFoldersPage"));
+					put(
+						"query#knowledgeBaseFolders",
+						new ObjectValuePair<>(
+							KnowledgeBaseFolderResourceImpl.class,
+							"getSiteKnowledgeBaseFoldersPage"));
+					put(
+						"query#assetLibraryLanguages",
+						new ObjectValuePair<>(
+							LanguageResourceImpl.class,
+							"getAssetLibraryLanguagesPage"));
+					put(
+						"query#languages",
+						new ObjectValuePair<>(
+							LanguageResourceImpl.class,
+							"getSiteLanguagesPage"));
+					put(
+						"query#messageBoardAttachment",
+						new ObjectValuePair<>(
+							MessageBoardAttachmentResourceImpl.class,
+							"getMessageBoardAttachment"));
+					put(
+						"query#messageBoardMessageMessageBoardAttachments",
+						new ObjectValuePair<>(
+							MessageBoardAttachmentResourceImpl.class,
+							"getMessageBoardMessageMessageBoardAttachmentsPage"));
+					put(
+						"query#messageBoardThreadMessageBoardAttachments",
+						new ObjectValuePair<>(
+							MessageBoardAttachmentResourceImpl.class,
+							"getMessageBoardThreadMessageBoardAttachmentsPage"));
+					put(
+						"query#messageBoardMessage",
+						new ObjectValuePair<>(
+							MessageBoardMessageResourceImpl.class,
+							"getMessageBoardMessage"));
+					put(
+						"query#messageBoardMessageMyRating",
+						new ObjectValuePair<>(
+							MessageBoardMessageResourceImpl.class,
+							"getMessageBoardMessageMyRating"));
+					put(
+						"query#messageBoardMessageMessageBoardMessages",
+						new ObjectValuePair<>(
+							MessageBoardMessageResourceImpl.class,
+							"getMessageBoardMessageMessageBoardMessagesPage"));
+					put(
+						"query#messageBoardThreadMessageBoardMessages",
+						new ObjectValuePair<>(
+							MessageBoardMessageResourceImpl.class,
+							"getMessageBoardThreadMessageBoardMessagesPage"));
+					put(
+						"query#messageBoardMessages",
+						new ObjectValuePair<>(
+							MessageBoardMessageResourceImpl.class,
+							"getSiteMessageBoardMessagesPage"));
+					put(
+						"query#messageBoardMessageByFriendlyUrlPath",
+						new ObjectValuePair<>(
+							MessageBoardMessageResourceImpl.class,
+							"getSiteMessageBoardMessageByFriendlyUrlPath"));
+					put(
+						"query#messageBoardSection",
+						new ObjectValuePair<>(
+							MessageBoardSectionResourceImpl.class,
+							"getMessageBoardSection"));
+					put(
+						"query#messageBoardSectionMessageBoardSections",
+						new ObjectValuePair<>(
+							MessageBoardSectionResourceImpl.class,
+							"getMessageBoardSectionMessageBoardSectionsPage"));
+					put(
+						"query#messageBoardSections",
+						new ObjectValuePair<>(
+							MessageBoardSectionResourceImpl.class,
+							"getSiteMessageBoardSectionsPage"));
+					put(
+						"query#messageBoardSectionMessageBoardThreads",
+						new ObjectValuePair<>(
+							MessageBoardThreadResourceImpl.class,
+							"getMessageBoardSectionMessageBoardThreadsPage"));
+					put(
+						"query#messageBoardThreadsRanked",
+						new ObjectValuePair<>(
+							MessageBoardThreadResourceImpl.class,
+							"getMessageBoardThreadsRankedPage"));
+					put(
+						"query#messageBoardThread",
+						new ObjectValuePair<>(
+							MessageBoardThreadResourceImpl.class,
+							"getMessageBoardThread"));
+					put(
+						"query#messageBoardThreadMyRating",
+						new ObjectValuePair<>(
+							MessageBoardThreadResourceImpl.class,
+							"getMessageBoardThreadMyRating"));
+					put(
+						"query#messageBoardThreads",
+						new ObjectValuePair<>(
+							MessageBoardThreadResourceImpl.class,
+							"getSiteMessageBoardThreadsPage"));
+					put(
+						"query#messageBoardThreadByFriendlyUrlPath",
+						new ObjectValuePair<>(
+							MessageBoardThreadResourceImpl.class,
+							"getSiteMessageBoardThreadByFriendlyUrlPath"));
+					put(
+						"query#navigationMenu",
+						new ObjectValuePair<>(
+							NavigationMenuResourceImpl.class,
+							"getNavigationMenu"));
+					put(
+						"query#navigationMenus",
+						new ObjectValuePair<>(
+							NavigationMenuResourceImpl.class,
+							"getSiteNavigationMenusPage"));
+					put(
+						"query#assetLibraryStructuredContents",
+						new ObjectValuePair<>(
+							StructuredContentResourceImpl.class,
+							"getAssetLibraryStructuredContentsPage"));
+					put(
+						"query#contentStructureStructuredContents",
+						new ObjectValuePair<>(
+							StructuredContentResourceImpl.class,
+							"getContentStructureStructuredContentsPage"));
+					put(
+						"query#structuredContents",
+						new ObjectValuePair<>(
+							StructuredContentResourceImpl.class,
+							"getSiteStructuredContentsPage"));
+					put(
+						"query#structuredContentByKey",
+						new ObjectValuePair<>(
+							StructuredContentResourceImpl.class,
+							"getSiteStructuredContentByKey"));
+					put(
+						"query#structuredContentByUuid",
+						new ObjectValuePair<>(
+							StructuredContentResourceImpl.class,
+							"getSiteStructuredContentByUuid"));
+					put(
+						"query#siteStructuredContentPermissions",
+						new ObjectValuePair<>(
+							StructuredContentResourceImpl.class,
+							"getSiteStructuredContentPermissionsPage"));
+					put(
+						"query#structuredContentFolderStructuredContents",
+						new ObjectValuePair<>(
+							StructuredContentResourceImpl.class,
+							"getStructuredContentFolderStructuredContentsPage"));
+					put(
+						"query#structuredContent",
+						new ObjectValuePair<>(
+							StructuredContentResourceImpl.class,
+							"getStructuredContent"));
+					put(
+						"query#structuredContentMyRating",
+						new ObjectValuePair<>(
+							StructuredContentResourceImpl.class,
+							"getStructuredContentMyRating"));
+					put(
+						"query#structuredContentPermissions",
+						new ObjectValuePair<>(
+							StructuredContentResourceImpl.class,
+							"getStructuredContentPermissionsPage"));
+					put(
+						"query#structuredContentRenderedContentContentTemplate",
+						new ObjectValuePair<>(
+							StructuredContentResourceImpl.class,
+							"getStructuredContentRenderedContentContentTemplate"));
+					put(
+						"query#assetLibraryStructuredContentFolders",
+						new ObjectValuePair<>(
+							StructuredContentFolderResourceImpl.class,
+							"getAssetLibraryStructuredContentFoldersPage"));
+					put(
+						"query#structuredContentFolders",
+						new ObjectValuePair<>(
+							StructuredContentFolderResourceImpl.class,
+							"getSiteStructuredContentFoldersPage"));
+					put(
+						"query#structuredContentFolderStructuredContentFolders",
+						new ObjectValuePair<>(
+							StructuredContentFolderResourceImpl.class,
+							"getStructuredContentFolderStructuredContentFoldersPage"));
+					put(
+						"query#structuredContentFolder",
+						new ObjectValuePair<>(
+							StructuredContentFolderResourceImpl.class,
+							"getStructuredContentFolder"));
+					put(
+						"query#wikiNodes",
+						new ObjectValuePair<>(
+							WikiNodeResourceImpl.class,
+							"getSiteWikiNodesPage"));
+					put(
+						"query#wikiNode",
+						new ObjectValuePair<>(
+							WikiNodeResourceImpl.class, "getWikiNode"));
+					put(
+						"query#wikiNodeWikiPages",
+						new ObjectValuePair<>(
+							WikiPageResourceImpl.class,
+							"getWikiNodeWikiPagesPage"));
+					put(
+						"query#wikiPageWikiPages",
+						new ObjectValuePair<>(
+							WikiPageResourceImpl.class,
+							"getWikiPageWikiPagesPage"));
+					put(
+						"query#wikiPage",
+						new ObjectValuePair<>(
+							WikiPageResourceImpl.class, "getWikiPage"));
+					put(
+						"query#wikiPageAttachment",
+						new ObjectValuePair<>(
+							WikiPageAttachmentResourceImpl.class,
+							"getWikiPageAttachment"));
+					put(
+						"query#wikiPageWikiPageAttachments",
+						new ObjectValuePair<>(
+							WikiPageAttachmentResourceImpl.class,
+							"getWikiPageWikiPageAttachmentsPage"));
+				}
+			};
 
 	@Reference(scope = ReferenceScope.PROTOTYPE_REQUIRED)
 	private ComponentServiceObjects<BlogPostingResource>

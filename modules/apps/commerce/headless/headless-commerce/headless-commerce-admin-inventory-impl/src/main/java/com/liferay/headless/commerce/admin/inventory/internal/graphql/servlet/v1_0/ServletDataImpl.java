@@ -16,9 +16,15 @@ package com.liferay.headless.commerce.admin.inventory.internal.graphql.servlet.v
 
 import com.liferay.headless.commerce.admin.inventory.internal.graphql.mutation.v1_0.Mutation;
 import com.liferay.headless.commerce.admin.inventory.internal.graphql.query.v1_0.Query;
+import com.liferay.headless.commerce.admin.inventory.internal.resource.v1_0.WarehouseItemResourceImpl;
+import com.liferay.headless.commerce.admin.inventory.internal.resource.v1_0.WarehouseResourceImpl;
 import com.liferay.headless.commerce.admin.inventory.resource.v1_0.WarehouseItemResource;
 import com.liferay.headless.commerce.admin.inventory.resource.v1_0.WarehouseResource;
+import com.liferay.portal.kernel.util.ObjectValuePair;
 import com.liferay.portal.vulcan.graphql.servlet.ServletData;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.annotation.Generated;
 
@@ -50,6 +56,10 @@ public class ServletDataImpl implements ServletData {
 			_warehouseItemResourceComponentServiceObjects);
 	}
 
+	public String getApplicationName() {
+		return "Liferay.Headless.Commerce.Admin.Inventory";
+	}
+
 	@Override
 	public Mutation getMutation() {
 		return new Mutation();
@@ -64,6 +74,125 @@ public class ServletDataImpl implements ServletData {
 	public Query getQuery() {
 		return new Query();
 	}
+
+	public ObjectValuePair<Class<?>, String> getResourceMethodObjectValuePair(
+		String methodName, boolean mutation) {
+
+		if (mutation) {
+			return _resourceMethodObjectValuePairs.get(
+				"mutation#" + methodName);
+		}
+
+		return _resourceMethodObjectValuePairs.get("query#" + methodName);
+	}
+
+	private static final Map<String, ObjectValuePair<Class<?>, String>>
+		_resourceMethodObjectValuePairs =
+			new HashMap<String, ObjectValuePair<Class<?>, String>>() {
+				{
+					put(
+						"mutation#deleteWarehousByExternalReferenceCode",
+						new ObjectValuePair<>(
+							WarehouseResourceImpl.class,
+							"deleteWarehousByExternalReferenceCode"));
+					put(
+						"mutation#patchWarehousByExternalReferenceCode",
+						new ObjectValuePair<>(
+							WarehouseResourceImpl.class,
+							"patchWarehousByExternalReferenceCode"));
+					put(
+						"mutation#deleteWarehousId",
+						new ObjectValuePair<>(
+							WarehouseResourceImpl.class, "deleteWarehousId"));
+					put(
+						"mutation#patchWarehousId",
+						new ObjectValuePair<>(
+							WarehouseResourceImpl.class, "patchWarehousId"));
+					put(
+						"mutation#createWarehous",
+						new ObjectValuePair<>(
+							WarehouseResourceImpl.class, "postWarehous"));
+					put(
+						"mutation#deleteWarehouseItemByExternalReferenceCode",
+						new ObjectValuePair<>(
+							WarehouseItemResourceImpl.class,
+							"deleteWarehouseItemByExternalReferenceCode"));
+					put(
+						"mutation#patchWarehouseItemByExternalReferenceCode",
+						new ObjectValuePair<>(
+							WarehouseItemResourceImpl.class,
+							"patchWarehouseItemByExternalReferenceCode"));
+					put(
+						"mutation#createWarehouseItemByExternalReferenceCode",
+						new ObjectValuePair<>(
+							WarehouseItemResourceImpl.class,
+							"postWarehouseItemByExternalReferenceCode"));
+					put(
+						"mutation#deleteWarehouseItem",
+						new ObjectValuePair<>(
+							WarehouseItemResourceImpl.class,
+							"deleteWarehouseItem"));
+					put(
+						"mutation#deleteWarehouseItemBatch",
+						new ObjectValuePair<>(
+							WarehouseItemResourceImpl.class,
+							"deleteWarehouseItemBatch"));
+					put(
+						"mutation#patchWarehouseItem",
+						new ObjectValuePair<>(
+							WarehouseItemResourceImpl.class,
+							"patchWarehouseItem"));
+					put(
+						"mutation#createWarehousByExternalReferenceCodeWarehouseItem",
+						new ObjectValuePair<>(
+							WarehouseItemResourceImpl.class,
+							"postWarehousByExternalReferenceCodeWarehouseItem"));
+					put(
+						"mutation#createWarehousIdWarehouseItem",
+						new ObjectValuePair<>(
+							WarehouseItemResourceImpl.class,
+							"postWarehousIdWarehouseItem"));
+
+					put(
+						"query#warehousByExternalReferenceCode",
+						new ObjectValuePair<>(
+							WarehouseResourceImpl.class,
+							"getWarehousByExternalReferenceCode"));
+					put(
+						"query#warehousId",
+						new ObjectValuePair<>(
+							WarehouseResourceImpl.class, "getWarehousId"));
+					put(
+						"query#warehouses",
+						new ObjectValuePair<>(
+							WarehouseResourceImpl.class, "getWarehousesPage"));
+					put(
+						"query#warehouseItemByExternalReferenceCode",
+						new ObjectValuePair<>(
+							WarehouseItemResourceImpl.class,
+							"getWarehouseItemByExternalReferenceCode"));
+					put(
+						"query#warehouseItem",
+						new ObjectValuePair<>(
+							WarehouseItemResourceImpl.class,
+							"getWarehouseItem"));
+					put(
+						"query#warehousByExternalReferenceCodeWarehouseItems",
+						new ObjectValuePair<>(
+							WarehouseItemResourceImpl.class,
+							"getWarehousByExternalReferenceCodeWarehouseItemsPage"));
+					put(
+						"query#warehousIdWarehouseItems",
+						new ObjectValuePair<>(
+							WarehouseItemResourceImpl.class,
+							"getWarehousIdWarehouseItemsPage"));
+					put(
+						"query#warehouseItemsUpdated",
+						new ObjectValuePair<>(
+							WarehouseItemResourceImpl.class,
+							"getWarehouseItemsUpdatedPage"));
+				}
+			};
 
 	@Reference(scope = ReferenceScope.PROTOTYPE_REQUIRED)
 	private ComponentServiceObjects<WarehouseResource>
