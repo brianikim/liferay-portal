@@ -319,7 +319,30 @@ public class ConfigurationPersistenceManager
 
 			try (ResultSet resultSet = preparedStatement.executeQuery()) {
 				if (resultSet.next()) {
-					return toDictionary(resultSet.getString(1));
+					String dictionaryString = resultSet.getString(1);
+
+					if (dictionaryString == null) {
+						return new HashMapDictionary<>();
+					}
+
+					Dictionary<Object, Object> dictionary =
+						ConfigurationHandler.read(
+							new UnsyncByteArrayInputStream(
+								dictionaryString.getBytes(StringPool.UTF8)));
+
+					String fileName = (String)dictionary.get(
+						_FELIX_FILE_INSTALL_FILENAME);
+
+					if (fileName != null) {
+						File file = _getCanonicalConfigFile(fileName);
+
+						URI uri = file.toURI();
+
+						dictionary.put(
+							_FELIX_FILE_INSTALL_FILENAME, uri.toString());
+					}
+
+					return dictionary;
 				}
 			}
 
@@ -411,31 +434,6 @@ public class ConfigurationPersistenceManager
 		catch (SQLException sqlException) {
 			ReflectionUtil.throwException(sqlException);
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	protected Dictionary<Object, Object> toDictionary(String dictionaryString)
-		throws IOException {
-
-		if (dictionaryString == null) {
-			return new HashMapDictionary<>();
-		}
-
-		Dictionary<Object, Object> dictionary = ConfigurationHandler.read(
-			new UnsyncByteArrayInputStream(
-				dictionaryString.getBytes(StringPool.UTF8)));
-
-		String fileName = (String)dictionary.get(_FELIX_FILE_INSTALL_FILENAME);
-
-		if (fileName != null) {
-			File file = _getCanonicalConfigFile(fileName);
-
-			URI uri = file.toURI();
-
-			dictionary.put(_FELIX_FILE_INSTALL_FILENAME, uri.toString());
-		}
-
-		return dictionary;
 	}
 
 	private Dictionary<Object, Object> _copyDictionary(
