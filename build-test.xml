@@ -14744,6 +14744,10 @@ url=${short.hostname}:8080</echo>
 		<start-docker-database />
 	</target>
 
+	<target name="start-docker-os">
+		<start-docker-os />
+	</target>
+
 	<target name="start-lcs-server">
 		<start-lcs-app-server
 			app.server.bin.dir="${app.server.parent.dir}/gateway/tomcat-${app.server.tomcat.version}/bin"
@@ -14758,10 +14762,6 @@ url=${short.hostname}:8080</echo>
 		/>
 
 		<start-lcs-app-server />
-	</target>
-
-	<target name="start-docker-os">
-		<start-docker-os />
 	</target>
 
 	<target name="start-test-smtp-server">
