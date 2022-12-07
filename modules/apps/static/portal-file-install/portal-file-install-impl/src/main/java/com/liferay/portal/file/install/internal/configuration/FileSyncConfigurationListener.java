@@ -21,6 +21,7 @@ import com.liferay.portal.file.install.internal.properties.ConfigurationProperti
 import com.liferay.portal.file.install.internal.properties.ConfigurationPropertiesFactory;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.util.PropsValues;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -28,8 +29,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-
-import java.net.URI;
 
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -193,7 +192,7 @@ public class FileSyncConfigurationListener implements ConfigurationListener {
 	}
 
 	private File _fromConfigKey(String key) {
-		return new File(URI.create(key));
+		return new File(PropsValues.MODULE_FRAMEWORK_CONFIGS_DIR, key);
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
