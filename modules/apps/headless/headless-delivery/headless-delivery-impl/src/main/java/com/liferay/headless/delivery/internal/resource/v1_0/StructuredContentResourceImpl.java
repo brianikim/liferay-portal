@@ -428,7 +428,8 @@ public class StructuredContentResourceImpl
 				localDateTime.getHour(), localDateTime.getMinute(), 0, 0, 0, 0,
 				0, true, 0, 0, 0, 0, 0, true, true, false, null, null, null,
 				null,
-				_createServiceContext(structuredContentId, structuredContent)));
+				_createServiceContext(
+					structuredContentId, structuredContent, 0L)));
 	}
 
 	@Override
@@ -533,7 +534,8 @@ public class StructuredContentResourceImpl
 				localDateTime.getHour(), localDateTime.getMinute(), 0, 0, 0, 0,
 				0, true, 0, 0, 0, 0, 0, true, true, false, null, null, null,
 				null,
-				_createServiceContext(structuredContentId, structuredContent)));
+				_createServiceContext(
+					structuredContentId, structuredContent, 0L)));
 	}
 
 	@Override
@@ -641,7 +643,7 @@ public class StructuredContentResourceImpl
 				localDateTime.getDayOfMonth(), localDateTime.getYear(),
 				localDateTime.getHour(), localDateTime.getMinute(), 0, 0, 0, 0,
 				0, true, 0, 0, 0, 0, 0, true, true, false, null, null, null,
-				null, _createServiceContext(0L, structuredContent)));
+				null, _createServiceContext(0L, structuredContent, siteId)));
 	}
 
 	private DDMStructure _checkDDMStructurePermission(
@@ -701,29 +703,39 @@ public class StructuredContentResourceImpl
 	}
 
 	private ServiceContext _createServiceContext(
-			Long structuredContentId, StructuredContent structuredContent)
+			Long structuredContentId, StructuredContent structuredContent,
+			Long siteId)
 		throws Exception {
 
-		JournalArticle journalArticle = _journalArticleService.getLatestArticle(
-			structuredContentId);
+		ServiceContext serviceContext = null;
 
-		ServiceContext serviceContext =
-			ServiceContextRequestUtil.createServiceContext(
+		if (structuredContentId > 0L) {
+			JournalArticle journalArticle =
+				_journalArticleService.getLatestArticle(structuredContentId);
+
+			serviceContext = ServiceContextRequestUtil.createServiceContext(
 				structuredContent.getTaxonomyCategoryIds(),
 				structuredContent.getKeywords(),
 				_getExpandoBridgeAttributes(structuredContent),
 				journalArticle.getGroupId(), contextHttpServletRequest,
 				structuredContent.getViewableByAsString());
 
-		if (structuredContentId > 0L) {
 			ClassName className = _classNameLocalService.fetchClassName(
-				"com.liferay.journal.model.JournalArticle");
+				JournalArticle.class.getName());
 
 			AssetEntry assetEntry = _assetEntryLocalService.fetchEntry(
 				className.getClassNameId(),
 				journalArticle.getResourcePrimKey());
 
 			serviceContext.setAssetPriority(assetEntry.getPriority());
+		}
+		else {
+			serviceContext = ServiceContextRequestUtil.createServiceContext(
+				structuredContent.getTaxonomyCategoryIds(),
+				structuredContent.getKeywords(),
+				_getExpandoBridgeAttributes(structuredContent), siteId,
+				contextHttpServletRequest,
+				structuredContent.getViewableByAsString());
 		}
 
 		return serviceContext;
