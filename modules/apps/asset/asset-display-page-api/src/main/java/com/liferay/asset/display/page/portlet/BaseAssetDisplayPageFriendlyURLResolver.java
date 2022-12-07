@@ -49,6 +49,7 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutFriendlyURLComposite;
+import com.liferay.portal.kernel.model.LayoutQueryStringComposite;
 import com.liferay.portal.kernel.module.configuration.ConfigurationProviderUtil;
 import com.liferay.portal.kernel.portlet.FriendlyURLResolver;
 import com.liferay.portal.kernel.repository.model.FileEntry;
@@ -59,6 +60,7 @@ import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -396,7 +398,21 @@ public abstract class BaseAssetDisplayPageFriendlyURLResolver
 	private String _getUrlTitle(String friendlyURL) {
 		String urlSeparator = _getURLSeparator(friendlyURL);
 
-		return friendlyURL.substring(urlSeparator.length());
+		LayoutQueryStringComposite layoutQueryStringComposite =
+			portal.getPortletFriendlyURLMapperLayoutQueryStringComposite(
+				friendlyURL, new HashMap<>(), new HashMap<>());
+
+		String newFriendlyURL = layoutQueryStringComposite.getFriendlyURL();
+
+		if (newFriendlyURL.startsWith(urlSeparator)) {
+			return newFriendlyURL.substring(urlSeparator.length());
+		}
+
+		if (friendlyURL.startsWith(urlSeparator)) {
+			return friendlyURL.substring(urlSeparator.length());
+		}
+
+		return StringPool.BLANK;
 	}
 
 	private String _getVersion(Map<String, String[]> params) {
