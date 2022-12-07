@@ -147,10 +147,12 @@ public class LayoutCrawlerImpl implements LayoutCrawler {
 		return false;
 	}
 
+	private static final int _DEFAULT_TIMEOUT = 5000;
+
 	private static final int _TIMEOUT = GetterUtil.getInteger(
 		com.liferay.portal.util.PropsUtil.get(
 			HttpImpl.class.getName() + ".timeout"),
-		5000);
+		_DEFAULT_TIMEOUT);
 
 	private static final String _USER_AGENT = "Liferay Page Crawler";
 
