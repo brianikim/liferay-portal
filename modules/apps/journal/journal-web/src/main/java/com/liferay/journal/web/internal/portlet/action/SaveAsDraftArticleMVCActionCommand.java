@@ -22,14 +22,17 @@ import com.liferay.dynamic.data.mapping.service.DDMStructureLocalService;
 import com.liferay.dynamic.data.mapping.storage.DDMFormValues;
 import com.liferay.dynamic.data.mapping.storage.Fields;
 import com.liferay.dynamic.data.mapping.util.DDMFormValuesToFieldsConverter;
+import com.liferay.dynamic.data.mapping.util.DDMUtil;
 import com.liferay.journal.constants.JournalPortletKeys;
 import com.liferay.journal.exception.ArticleContentSizeException;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.service.JournalArticleService;
 import com.liferay.journal.util.JournalConverter;
 import com.liferay.journal.util.JournalHelper;
+import com.liferay.journal.web.internal.configuration.JournalDDMEditorConfiguration;
 import com.liferay.journal.web.internal.util.JournalUtil;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.log.Log;
@@ -62,14 +65,18 @@ import java.util.Objects;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Eudaldo Alonso
  */
 @Component(
-	immediate = true,
+	configurationPid = "com.liferay.journal.web.internal.configuration.JournalDDMEditorConfiguration",
+	configurationPolicy = ConfigurationPolicy.OPTIONAL, immediate = true,
 	property = {
 		"javax.portlet.name=" + JournalPortletKeys.JOURNAL,
 		"mvc.command.name=/journal/save_as_draft_article"
@@ -77,6 +84,13 @@ import org.osgi.service.component.annotations.Reference;
 	service = MVCActionCommand.class
 )
 public class SaveAsDraftArticleMVCActionCommand extends BaseMVCActionCommand {
+
+	@Activate
+	@Modified
+	protected void activate(Map<String, Object> properties) {
+		_journalDDMEditorConfiguration = ConfigurableUtil.createConfigurable(
+			JournalDDMEditorConfiguration.class, properties);
+	}
 
 	@Override
 	protected void doProcessAction(
@@ -158,11 +172,19 @@ public class SaveAsDraftArticleMVCActionCommand extends BaseMVCActionCommand {
 		ServiceContext serviceContext = ServiceContextFactory.getInstance(
 			JournalArticle.class.getName(), uploadPortletRequest);
 
-		DDMFormValues ddmFormValues = _ddmFormValuesFactory.create(
-			actionRequest, ddmStructure.getDDMForm());
+		Fields fields = null;
 
-		Fields fields = _ddmFormValuesToFieldsConverter.convert(
-			ddmStructure, ddmFormValues);
+		if (_journalDDMEditorConfiguration.useDataEngineEditor()) {
+			DDMFormValues ddmFormValues = _ddmFormValuesFactory.create(
+				actionRequest, ddmStructure.getDDMForm());
+
+			fields = _ddmFormValuesToFieldsConverter.convert(
+				ddmStructure, ddmFormValues);
+		}
+		else {
+			fields = DDMUtil.getFields(
+				ddmStructure.getStructureId(), serviceContext);
+		}
 
 		String content = _journalConverter.getContent(
 			ddmStructure, fields, groupId);
@@ -382,6 +404,9 @@ public class SaveAsDraftArticleMVCActionCommand extends BaseMVCActionCommand {
 
 	@Reference
 	private JournalConverter _journalConverter;
+
+	private volatile JournalDDMEditorConfiguration
+		_journalDDMEditorConfiguration;
 
 	@Reference
 	private JournalHelper _journalHelper;
