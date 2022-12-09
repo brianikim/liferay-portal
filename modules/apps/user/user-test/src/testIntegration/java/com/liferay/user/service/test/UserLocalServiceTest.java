@@ -435,7 +435,7 @@ public class UserLocalServiceTest {
 	}
 
 	@Test
-	public void testLockoutUser() throws Exception {
+	public void testLockout() throws Exception {
 		User user = UserTestUtil.addUser();
 
 		String password = "password";
