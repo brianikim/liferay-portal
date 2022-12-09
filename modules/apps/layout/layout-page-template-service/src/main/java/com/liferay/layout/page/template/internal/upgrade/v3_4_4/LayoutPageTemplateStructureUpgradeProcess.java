@@ -87,9 +87,9 @@ public class LayoutPageTemplateStructureUpgradeProcess extends UpgradeProcess {
 							"(select plid from Layout where type_ = ?)"));
 			PreparedStatement preparedStatement2 =
 				AutoBatchPreparedStatementUtil.autoBatch(
-					connection,
-					"delete from LayoutPageTemplateStructure where classPK = " +
-						"?");
+					connection.prepareStatement(
+						"delete from LayoutPageTemplateStructure where " +
+							"classPK = ?"));
 			PreparedStatement preparedStatement3 =
 				AutoBatchPreparedStatementUtil.concurrentAutoBatch(
 					connection,
