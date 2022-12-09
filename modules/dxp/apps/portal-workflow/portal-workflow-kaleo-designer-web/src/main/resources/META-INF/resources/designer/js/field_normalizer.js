@@ -249,11 +249,18 @@ AUI.add(
 										);
 									}
 
-									item2[
-										item2Index
-									] = FieldNormalizer.normalizeToAssignments(
-										new Array(item2[item2Index])
-									);
+									if (item2.length == 1) {
+										item2 = FieldNormalizer.normalizeToAssignments(
+											item2
+										);
+									}
+									else {
+										item2[
+											item2Index
+										] = FieldNormalizer.normalizeToAssignments(
+											new Array(item2[item2Index])
+										);
+									}
 								}
 							}
 							_put(notifications, index2, item2, index1);
