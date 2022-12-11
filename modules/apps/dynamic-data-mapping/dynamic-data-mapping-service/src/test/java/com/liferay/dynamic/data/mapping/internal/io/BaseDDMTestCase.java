@@ -59,7 +59,6 @@ public abstract class BaseDDMTestCase extends PowerMockito {
 	public void setUp() throws Exception {
 		setUpJSONFactoryUtil();
 		setUpLanguageUtil();
-		setUpLocaleUtil();
 		setUpPortalClassLoaderUtil();
 		setUpResourceBundleUtil();
 	}

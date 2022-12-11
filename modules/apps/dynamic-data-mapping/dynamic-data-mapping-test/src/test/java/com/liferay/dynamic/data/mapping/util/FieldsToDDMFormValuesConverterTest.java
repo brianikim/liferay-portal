@@ -73,7 +73,6 @@ public class FieldsToDDMFormValuesConverterTest extends BaseDDMTestCase {
 		setUpHtmlUtil();
 		setUpJSONFactoryUtil();
 		setUpLanguageUtil();
-		setUpLocaleUtil();
 		setUpPortalUtil();
 		setUpPropsValues();
 		setUpSAXReaderUtil();

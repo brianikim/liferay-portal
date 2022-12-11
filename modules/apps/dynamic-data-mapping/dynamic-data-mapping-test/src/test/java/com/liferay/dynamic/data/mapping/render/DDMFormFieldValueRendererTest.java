@@ -86,7 +86,6 @@ public class DDMFormFieldValueRendererTest extends BaseDDMTestCase {
 		setUpJSONFactoryUtil();
 		setUpLanguageUtil();
 		setUpLayoutServiceUtil();
-		setUpLocaleUtil();
 	}
 
 	@Test

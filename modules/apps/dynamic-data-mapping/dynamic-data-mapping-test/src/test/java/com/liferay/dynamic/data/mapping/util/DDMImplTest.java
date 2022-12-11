@@ -94,7 +94,6 @@ public class DDMImplTest extends BaseDDMTestCase {
 		setUpJSONFactoryUtil();
 		setUpHtmlUtil();
 		setUpLanguageUtil();
-		setUpLocaleUtil();
 		setUpPortalUtil();
 		setUpPropsValues();
 		setUpSAXReaderUtil();

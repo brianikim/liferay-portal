@@ -78,7 +78,6 @@ public class DDMFormTemplateSynchonizerTest extends BaseDDMTestCase {
 		setUpDDMFormJSONDeserializer();
 		setUpJSONFactoryUtil();
 		setUpLanguageUtil();
-		setUpLocaleUtil();
 		setUpHtmlUtil();
 		setUpPortalUtil();
 		setUpPropsValues();
