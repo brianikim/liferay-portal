@@ -33,6 +33,7 @@ import {
 	UNEXPECTED_ERROR,
 } from './util/constants';
 import {generateProductPageURL, parseOptions} from './util/index';
+import {showErrorNotification} from '../../utilities/notifications';
 
 const CartResource = ServiceProvider.DeliveryCartAPI('v1');
 
@@ -44,8 +45,27 @@ const deboncedUpdateItemQuantity = debouncePromise(
 
 		return CartResource.updateItemById(cartItemId, {
 			quantity,
-		}).catch(() => {
-			throw UNEXPECTED_ERROR;
+		}).catch((error) => {
+			let errorMessage;
+
+			if (error.message) {
+				errorMessage = error.message;
+			}
+			else if (error.detail) {
+				errorMessage = error.detail;
+			}
+			else {
+				errorMessage =
+					cpInstances.length > 1
+						? Liferay.Language.get(
+								'unable-to-add-products-to-the-cart'
+						  )
+						: Liferay.Language.get(
+								'unable-to-add-product-to-the-cart'
+						  );
+			}
+
+			throw errorMessage;
 		});
 	},
 	1000
