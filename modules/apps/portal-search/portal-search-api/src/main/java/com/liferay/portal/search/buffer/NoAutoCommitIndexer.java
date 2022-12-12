@@ -91,7 +91,6 @@ public class NoAutoCommitIndexer<T> implements Indexer<T> {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
 	public String getSearchEngineId() {
 		throw new UnsupportedOperationException();
 	}
