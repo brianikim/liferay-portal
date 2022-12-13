@@ -546,7 +546,7 @@ public class CPAttachmentFileEntryLocalServiceImpl
 			_getPredicate(classNameId, classPK, keywords, type, status)
 		);
 
-		return cpAttachmentFileEntryPersistence.dslQuery(dslQuery);
+		return dslQueryCount(dslQuery);
 	}
 
 	@Indexable(type = IndexableType.REINDEX)
