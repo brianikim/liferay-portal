@@ -1466,6 +1466,10 @@
 				"store": true,
 				"type": "keyword"
 			},
+			"userGroupRoleIds": {
+				"store": true,
+				"type": "keyword"
+			},
 			"userId": {
 				"store": true,
 				"type": "keyword"
