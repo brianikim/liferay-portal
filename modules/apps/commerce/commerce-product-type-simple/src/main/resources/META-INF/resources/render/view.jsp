@@ -38,8 +38,8 @@ long cpDefinitionId = cpCatalogEntry.getCPDefinitionId();
 							for (CPMedia cpMedia : cpContentHelper.getImages(cpDefinitionId, themeDisplay)) {
 							%>
 
-								<div class="card thumb" data-url="<%= cpMedia.getUrl() %>">
-									<img class="center-block img-responsive" src="<%= cpMedia.getUrl() %>" />
+								<div class="card thumb" data-url="<%= HtmlUtil.escapeAttribute(cpMedia.getUrl()) %>">
+									<img class="center-block img-responsive" src="<%= HtmlUtil.escapeAttribute(cpMedia.getUrl()) %>" />
 								</div>
 
 							<%
@@ -51,7 +51,7 @@ long cpDefinitionId = cpCatalogEntry.getCPDefinitionId();
 
 					<div class="col-lg-10 col-md-9 col-xs-10 full-image">
 						<c:if test="<%= Validator.isNotNull(cpCatalogEntry.getDefaultImageFileUrl()) %>">
-							<img class="center-block img-responsive" id="<portlet:namespace />full-image" src="<%= cpCatalogEntry.getDefaultImageFileUrl() %>" />
+							<img class="center-block img-responsive" id="<portlet:namespace />full-image" src="<%= HtmlUtil.escapeAttribute(cpCatalogEntry.getDefaultImageFileUrl()) %>" />
 						</c:if>
 					</div>
 				</div>
@@ -68,11 +68,11 @@ long cpDefinitionId = cpCatalogEntry.getCPDefinitionId();
 
 						<div class="subscription-info"><commerce-ui:product-subscription-info CPInstanceId="<%= cpSku.getCPInstanceId() %>" /></div>
 
-						<div class="availability"><%= cpContentHelper.getAvailabilityLabel(request) %></div>
+						<div class="availability"><%= HtmlUtil.escape(cpContentHelper.getAvailabilityLabel(request)) %></div>
 
-						<div class="availabilityEstimate"><%= cpContentHelper.getAvailabilityEstimateLabel(request) %></div>
+						<div class="availabilityEstimate"><%= HtmlUtil.escape(cpContentHelper.getAvailabilityEstimateLabel(request)) %></div>
 
-						<div class="stockQuantity"><%= cpContentHelper.getStockQuantityLabel(request) %></div>
+						<div class="stockQuantity"><%= HtmlUtil.escape(cpContentHelper.getStockQuantityLabel(request)) %></div>
 					</c:when>
 					<c:otherwise>
 						<h4 class="sku" data-text-cp-instance-sku=""></h4>
@@ -151,7 +151,7 @@ long cpDefinitionId = cpCatalogEntry.getCPDefinitionId();
 
 				<div class="tab-content">
 					<div class="active tab-pane" id="<portlet:namespace />description">
-						<p><%= cpCatalogEntry.getDescription() %></p>
+						<p><%= HtmlUtil.escape(cpCatalogEntry.getDescription()) %></p>
 					</div>
 
 					<c:if test="<%= cpContentHelper.hasCPDefinitionSpecificationOptionValues(cpDefinitionId) %>">
@@ -187,7 +187,7 @@ long cpDefinitionId = cpCatalogEntry.getCPDefinitionId();
 									<div class="table-responsive">
 										<table class="table table-bordered table-striped">
 											<tr>
-												<th><%= cpOptionCategory.getTitle(languageId) %></th>
+												<th><%= HtmlUtil.escape(cpOptionCategory.getTitle(languageId)) %></th>
 												<th></th>
 											</tr>
 
@@ -227,7 +227,7 @@ long cpDefinitionId = cpCatalogEntry.getCPDefinitionId();
 
 										<tr>
 											<td>
-												<span><%= curCPMedia.getTitle() %></span>
+												<span><%= HtmlUtil.escape(curCPMedia.getTitle()) %></span>
 
 												<span>
 													<aui:icon cssClass="icon-monospaced" image="download" markupView="lexicon" target="_blank" url="<%= curCPMedia.getDownloadUrl() %>" />
