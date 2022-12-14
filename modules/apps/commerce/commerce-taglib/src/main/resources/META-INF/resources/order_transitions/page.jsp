@@ -28,11 +28,10 @@ List<ObjectValuePair<Long, String>> commerceOrderTransitionOVPs = (List<ObjectVa
 		for (int i = 0; i < commerceOrderTransitionOVPs.size(); i++) {
 			ObjectValuePair<Long, String> transitionOVP = commerceOrderTransitionOVPs.get(i);
 
-			Long workflowTaskId = transitionOVP.getKey();
 			String transitionName = transitionOVP.getValue();
 		%>
 
-			<button class="<%= (String)request.getAttribute("liferay-commerce:order-transitions:cssClass") %> transition-link" data-commerceOrderId="<%= commerceOrder.getCommerceOrderId() %>" data-transitionName="<%= HtmlUtil.escapeAttribute(transitionName) %>" data-workflowTaskId="<%= workflowTaskId %>" type="button">
+			<button class="<%= (String)request.getAttribute("liferay-commerce:order-transitions:cssClass") %> transition-link" data-commerceOrderId="<%= commerceOrder.getCommerceOrderId() %>" data-transitionName="<%= HtmlUtil.escapeAttribute(transitionName) %>" data-workflowTaskId="<%= transitionOVP.getKey() %>" type="button">
 				<%= LanguageUtil.get(request, HtmlUtil.escape(transitionName)) %>
 			</button>
 

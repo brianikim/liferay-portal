@@ -213,7 +213,7 @@ String sampleURL = virtualCPTypeHelper.getSampleURL(cpDefinitionId, cpInstanceId
 									<div class="table-responsive">
 										<table class="table table-bordered table-striped">
 											<tr>
-												<th><%= cHtmlUtil.escape(cpOptionCategory.getTitle(languageId)) %></th>
+												<th><%= HtmlUtil.escape(cpOptionCategory.getTitle(languageId)) %></th>
 												<th></th>
 											</tr>
 

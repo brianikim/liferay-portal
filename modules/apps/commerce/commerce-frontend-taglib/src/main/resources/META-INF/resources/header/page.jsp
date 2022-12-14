@@ -39,7 +39,7 @@ String myWorkflowTasksPortletNamespace = PortalUtil.getPortletNamespace(PortletK
 						<div class="col-auto">
 							<span class="sticker sticker-primary sticker-xl">
 								<span class="sticker-overlay">
-									<img alt="thumbnail" class="img-fluid" src="<%=  HtmlUtil.escapeAttribute(thumbnailUrl) %>" />
+									<img alt="thumbnail" class="img-fluid" src="<%= HtmlUtil.escapeAttribute(thumbnailUrl) %>" />
 								</span>
 							</span>
 						</div>
@@ -70,7 +70,7 @@ String myWorkflowTasksPortletNamespace = PortalUtil.getPortletNamespace(PortletK
 								<c:if test="<%= Validator.isNotNull(beanIdLabel) %>">
 									<small class="d-block">
 										<span class="header-info-title">
-											<liferay-ui:message key="<%=  HtmlUtil.escape(beanIdLabel) %>" />:
+											<liferay-ui:message key="<%= HtmlUtil.escape(beanIdLabel) %>" />:
 										</span>
 
 										<strong class="header-info-value">
@@ -210,7 +210,7 @@ String myWorkflowTasksPortletNamespace = PortalUtil.getPortletNamespace(PortletK
 														},
 														id: '<%= myWorkflowTasksPortletNamespace %>assignToDialog',
 														title: '<liferay-ui:message key="assign-to-me" />',
-														uri: '<%=  HtmlUtil.escapeJS(assignToMeURL) %>',
+														uri: '<%= HtmlUtil.escapeJS(assignToMeURL) %>',
 													});
 												});
 										</aui:script>
@@ -246,7 +246,7 @@ String myWorkflowTasksPortletNamespace = PortalUtil.getPortletNamespace(PortletK
 													},
 													id: '<%= myWorkflowTasksPortletNamespace %>assignToDialog',
 													title: '<liferay-ui:message key="assign-to-..." />',
-													uri: '<%=  HtmlUtil.escapeJS(assignToURL) %>',
+													uri: '<%= HtmlUtil.escapeJS(assignToURL) %>',
 												});
 											});
 
@@ -294,7 +294,7 @@ String myWorkflowTasksPortletNamespace = PortalUtil.getPortletNamespace(PortletK
 							%>
 
 								<clay:link
-									elementClasses="<%=  HtmlUtil.escape(buttonClasses) 	%>"
+									elementClasses="<%= HtmlUtil.escape(buttonClasses) %>"
 									href="<%= Validator.isNotNull(action.getHref()) ? action.getHref() : StringPool.POUND %>"
 									id="<%= HtmlUtil.escape(actionId) %>"
 									label="<%= LanguageUtil.get(request, HtmlUtil.escape(action.getLabel())) %>"
@@ -306,10 +306,14 @@ String myWorkflowTasksPortletNamespace = PortalUtil.getPortletNamespace(PortletK
 											.getElementById('<%= HtmlUtil.escapeJS(actionId) %>')
 											.addEventListener('click', function (e) {
 												e.preventDefault();
-												var form = document.getElementById('<%= HtmlUtil.escapeJS(action.getFormId()) %>');
+												var form = document.getElementById(
+													'<%= HtmlUtil.escapeJS(action.getFormId()) %>'
+												);
 												if (!form) {
 													throw new Error(
-														'Form with id: ' + <%= HtmlUtil.escapeJS(action.getFormId()) %> + ' not found!'
+														'Form with id: ' +
+															<%= HtmlUtil.escapeJS(action.getFormId()) %> +
+															' not found!'
 													);
 												}
 												submitForm(form);

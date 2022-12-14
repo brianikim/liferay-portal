@@ -39,7 +39,8 @@
 			dataProviderKey: '<%= dataProviderKey %>',
 			formId: '<%= HtmlUtil.escapeJS(GetterUtil.getString(formId)) %>',
 			id: '<%= id %>',
-			nestedItemsKey: '<%= HtmlUtil.escapeJS(GetterUtil.getString(nestedItemsKey)) %>',
+			nestedItemsKey:
+				'<%= HtmlUtil.escapeJS(GetterUtil.getString(nestedItemsKey)) %>',
 			nestedItemsReferenceKey:
 				'<%= HtmlUtil.escapeJS(GetterUtil.getString(nestedItemsReferenceKey)) %>',
 			pagination: {
