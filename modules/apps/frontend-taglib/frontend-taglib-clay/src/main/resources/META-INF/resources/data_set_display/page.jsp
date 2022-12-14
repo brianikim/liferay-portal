@@ -27,20 +27,21 @@
 
 	dataSetDisplay.default(
 		{
-			actionParameterName: '<%= GetterUtil.getString(actionParameterName) %>',
+			actionParameterName:
+				'<%= HtmlUtil.escapeJS(GetterUtil.getString(actionParameterName)) %>',
 			activeViewSettings: <%= activeViewSettingsJSON %>,
-			apiURL: '<%= apiURL %>',
-			appURL: '<%= appURL %>',
+			apiURL: '<%= HtmlUtil.escapeJS(apiURL) %>',
+			appURL: '<%= HtmlUtil.escapeJS(appURL) %>',
 			bulkActions: <%= jsonSerializer.serializeDeep(bulkActionDropdownItems) %>,
-			componentId: '<%= containerId %>',
+			componentId: '<%= HtmlUtil.escapeJS(containerId) %>',
 			creationMenu: <%= jsonSerializer.serializeDeep(creationMenu) %>,
 			currentURL: '<%= PortalUtil.getCurrentURL(request) %>',
 			dataProviderKey: '<%= dataProviderKey %>',
-			formId: '<%= GetterUtil.getString(formId) %>',
+			formId: '<%= HtmlUtil.escapeJS(GetterUtil.getString(formId)) %>',
 			id: '<%= id %>',
-			nestedItemsKey: '<%= GetterUtil.getString(nestedItemsKey) %>',
+			nestedItemsKey: '<%= HtmlUtil.escapeJS(GetterUtil.getString(nestedItemsKey)) %>',
 			nestedItemsReferenceKey:
-				'<%= GetterUtil.getString(nestedItemsReferenceKey) %>',
+				'<%= HtmlUtil.escapeJS(GetterUtil.getString(nestedItemsReferenceKey)) %>',
 			pagination: {
 				deltas: <%= jsonSerializer.serializeDeep(clayPaginationEntries) %>,
 				initialDelta: <%= itemsPerPage %>,
@@ -51,7 +52,7 @@
 			showSearch: <%= showSearch %>,
 			namespace: '<%= namespace %>',
 			portletId: '<%= portletDisplay.getRootPortletId() %>',
-			portletURL: '<%= portletURL %>',
+			portletURL: '<%= HtmlUtil.escapeJS(portletURL.toString()) %>',
 			selectedItems: <%= jsonSerializer.serializeDeep(selectedItems) %>,
 			selectedItemsKey: '<%= GetterUtil.getString(selectedItemsKey) %>',
 			selectionType: '<%= GetterUtil.getString(selectionType) %>',

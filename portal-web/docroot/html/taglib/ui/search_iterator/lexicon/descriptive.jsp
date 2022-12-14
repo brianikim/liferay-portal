@@ -48,7 +48,7 @@ for (ResultRowSplitterEntry resultRowSplitterEntry : resultRowSplitterEntries) {
 				</c:if>
 
 				<c:if test="<%= (headerNames != null) && Validator.isNotNull(headerNames.get(0)) %>">
-					<dt class="list-group-heading"><liferay-ui:message key="<%= headerNames.get(0) %>" /></dt>
+					<dt class="list-group-heading"><liferay-ui:message key="<%= HtmlUtil.escape(headerNames.get(0)) %>" /></dt>
 				</c:if>
 			</c:when>
 			<c:otherwise>
