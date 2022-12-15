@@ -10,6 +10,16 @@ definition {
 		}
 	}
 
+	macro addFieldFromSidebarToFieldsGroup {
+		Form._addField();
+
+		DragAndDrop.dragAndDropWithMouseMove(
+			key_fieldLabel = "${key_fieldLabel}",
+			key_fieldType = "${key_fieldType}",
+			locator1 = "Form#ADD_FIELD_TYPE",
+			locator2 = "FormFields#LABEL");
+	}
+
 	macro addPage {
 		var key_formAddNewPageNumber = "${formAddNewPageNumber}";
 
