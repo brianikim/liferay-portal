@@ -55,6 +55,8 @@
 	}
 
 	.image-link {
+		display: flex;
+		min-width: 0;
 		text-align: center;
 		text-decoration: none;
 	}
