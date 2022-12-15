@@ -2437,6 +2437,68 @@ definition {
 		}
 	}
 
+	@description = "LPS-115196 Verify that an entry using a group field can be viewed in forms details"
+	@priority = "5"
+	test EntryWithGroupFieldCanBeViewedInFormsDetails {
+		property portal.acceptance = "true";
+
+		task ("Given add a form with two fields, and these two fields belong to one group field") {
+			FormsAdmin.openFormsAdmin(siteURLKey = "guest");
+
+			FormsAdminNavigator.gotoAddForm();
+
+			Form.editName(formName = "Form 1");
+
+			Form.addTextField(fieldPositionNumber = "1");
+
+			var fieldNameTextField = FormFields.getFieldName();
+
+			Form.editFieldLabelMetal(fieldValue = "Text");
+
+			Form.closeSidebar();
+
+			Form.addFieldFromSidebarToFieldsGroup(
+				key_fieldLabel = "Text",
+				key_fieldType = "Numeric");
+
+			var fieldNameNumericField = FormFields.getFieldName();
+
+			Form.save();
+
+			Form.publishForm();
+		}
+
+		task ("When go to the publish form page and publish the form after filling in the fields") {
+			FormsAdminNavigator.gotoPublishedForm();
+
+			FormPortlet.waitFormRenderer(text = "Submit");
+
+			FormFields.editText(
+				fieldName = "${fieldNameTextField}",
+				fieldValue = "Test");
+
+			FormFields.editText(
+				fieldName = "${fieldNameNumericField}",
+				fieldValue = "123");
+
+			FormPortlet.submitSuccessfully();
+		}
+
+		task ("Then assert the entry fields are shown after clicking the form creates before via the view entry action") {
+			FormsAdmin.openFormsAdmin(siteURLKey = "guest");
+
+			FormsAdminNavigator.gotoViewEntries();
+
+			FormsAdmin.viewFormTableEntry(
+				fieldLabel = "Text",
+				fieldValue = "Test");
+
+			FormsAdmin.viewFormTableEntry(
+				fieldLabel = "Numeric",
+				fieldValue = "123");
+		}
+	}
+
 	@description = "This is a use case for LPS-81578"
 	@priority = "4"
 	test GuestUserCanNotSeeFormAfterPermissionRemoved {
