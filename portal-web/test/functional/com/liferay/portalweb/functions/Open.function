@@ -23,11 +23,9 @@ definition {
 	function openInTheNewTab {
 		WaitForSPARefresh();
 
-		var javascript = '''
-window.open("${locator1}","_blank");
-		''';
+		selenium.executeJavaScript("window.open()");
 
-		selenium.runScript("${javascript}");
+		SelectWindow.selectPopUp(locator1 = "null");
 	}
 
 	function openNoError {
