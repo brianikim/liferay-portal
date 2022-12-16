@@ -16,13 +16,12 @@ definition {
 			value1 = "${feedTitle}");
 
 		if ("${feedType}" == "file") {
+			var projectDir = PropsUtil.get("project.dir");
+			var dependencyFilePath = TestCase.getDependenciesDirPath(fileName = "${feedUrlLink}");
+
 			Type(
 				locator1 = "RSSFeed#FEEDS_URL_NAME_FIELD",
-				value1 = "file:////");
-
-			UploadCommonFile(
-				locator1 = "RSSFeed#FEEDS_URL_NAME_FIELD",
-				value1 = "${feedUrlLink}");
+				value1 = "file:////${projectDir}/portal-web/${dependencyFilePath}");
 		}
 		else {
 			Type(
