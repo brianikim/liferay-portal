@@ -17,6 +17,8 @@ package com.liferay.account.admin.web.internal.frontend.taglib.servlet.taglib;
 import com.liferay.account.admin.web.internal.constants.AccountScreenNavigationEntryConstants;
 import com.liferay.account.admin.web.internal.display.AccountGroupDisplay;
 import com.liferay.account.admin.web.internal.security.permission.resource.AccountGroupPermission;
+import com.liferay.account.constants.AccountActionKeys;
+import com.liferay.account.constants.AccountConstants;
 import com.liferay.frontend.taglib.servlet.taglib.ScreenNavigationCategory;
 import com.liferay.frontend.taglib.servlet.taglib.ScreenNavigationEntry;
 import com.liferay.frontend.taglib.servlet.taglib.util.JSPRenderer;
@@ -24,6 +26,7 @@ import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
+import com.liferay.portal.kernel.service.permission.PortalPermission;
 
 import java.io.IOException;
 
@@ -47,7 +50,7 @@ import org.osgi.service.component.annotations.Reference;
 )
 public class AccountGroupDetailsScreenNavigationCategory
 	implements ScreenNavigationCategory,
-			   ScreenNavigationEntry<AccountGroupDisplay> {
+	ScreenNavigationEntry<AccountGroupDisplay> {
 
 	@Override
 	public String getCategoryKey() {
@@ -74,6 +77,12 @@ public class AccountGroupDetailsScreenNavigationCategory
 	public boolean isVisible(
 		User user, AccountGroupDisplay accountGroupDisplay) {
 
+		if (accountGroupDisplay.getAccountGroupId() == AccountConstants.ACCOUNT_ENTRY_ID_DEFAULT) {
+
+			return portalPermission.contains(PermissionCheckerFactoryUtil.create(user),
+				AccountActionKeys.ADD_ACCOUNT_GROUP);
+		}
+
 		return AccountGroupPermission.contains(
 			PermissionCheckerFactoryUtil.create(user),
 			accountGroupDisplay.getAccountGroupId(), ActionKeys.UPDATE);
@@ -81,8 +90,8 @@ public class AccountGroupDetailsScreenNavigationCategory
 
 	@Override
 	public void render(
-			HttpServletRequest httpServletRequest,
-			HttpServletResponse httpServletResponse)
+		HttpServletRequest httpServletRequest,
+		HttpServletResponse httpServletResponse)
 		throws IOException {
 
 		jspRenderer.renderJSP(
@@ -92,5 +101,8 @@ public class AccountGroupDetailsScreenNavigationCategory
 
 	@Reference
 	protected JSPRenderer jspRenderer;
+
+	@Reference
+	protected PortalPermission portalPermission;
 
 }
