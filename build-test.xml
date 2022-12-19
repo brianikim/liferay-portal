@@ -14300,6 +14300,15 @@ module.framework.properties.blacklist.portal.profile.names=${blacklist.portal.pr
 			</then>
 		</if>
 
+		<get-browser-property property.name="browser.docker.image" />
+
+		<if>
+			<isset property="browser.docker.image" />
+			<then>
+				<echo append="true" file="${liferay.home}/osgi/configs/com.liferay.portal.search.elasticsearch7.configuration.ElasticsearchConfiguration.config">${line.separator}additionalConfigurations="http.host:\ _local_,_site_"</echo>
+			</then>
+		</if>
+
 		<remake-dir dir="${selenium.output.dir.name}" />
 
 		<prepare-portal-licenses />
