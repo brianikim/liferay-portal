@@ -20,6 +20,7 @@ import com.liferay.asset.kernel.exception.DuplicateQueryRuleException;
 import com.liferay.asset.kernel.model.AssetRendererFactory;
 import com.liferay.asset.kernel.service.AssetTagLocalService;
 import com.liferay.asset.list.asset.entry.provider.AssetListAssetEntryProvider;
+import com.liferay.asset.list.service.AssetListEntrySegmentsEntryRelLocalService;
 import com.liferay.asset.publisher.constants.AssetPublisherPortletKeys;
 import com.liferay.asset.publisher.constants.AssetPublisherWebKeys;
 import com.liferay.asset.publisher.util.AssetPublisherHelper;
@@ -148,10 +149,12 @@ public class AssetPublisherConfigurationAction
 		AssetPublisherDisplayContext assetPublisherDisplayContext =
 			new AssetPublisherDisplayContext(
 				assetEntryActionRegistry, assetHelper,
-				assetListAssetEntryProvider, assetPublisherCustomizer,
-				assetPublisherHelper, assetPublisherWebConfiguration,
-				assetPublisherWebHelper, infoListProviderTracker, itemSelector,
-				renderRequest, renderResponse, renderRequest.getPreferences(),
+				assetListAssetEntryProvider,
+				assetListEntrySegmentsEntryRelLocalService,
+				assetPublisherCustomizer, assetPublisherHelper,
+				assetPublisherWebConfiguration, assetPublisherWebHelper,
+				infoListProviderTracker, itemSelector, renderRequest,
+				renderResponse, renderRequest.getPreferences(),
 				requestContextMapper, segmentsEntryRetriever);
 
 		httpServletRequest.setAttribute(
@@ -827,6 +830,10 @@ public class AssetPublisherConfigurationAction
 
 	@Reference
 	protected AssetListAssetEntryProvider assetListAssetEntryProvider;
+
+	@Reference
+	protected AssetListEntrySegmentsEntryRelLocalService
+		assetListEntrySegmentsEntryRelLocalService;
 
 	@Reference
 	protected AssetPublisherCustomizerRegistry assetPublisherCustomizerRegistry;

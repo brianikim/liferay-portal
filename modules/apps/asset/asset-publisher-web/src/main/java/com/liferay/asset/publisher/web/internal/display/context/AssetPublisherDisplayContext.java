@@ -33,6 +33,8 @@ import com.liferay.asset.kernel.service.persistence.AssetEntryQuery;
 import com.liferay.asset.list.asset.entry.provider.AssetListAssetEntryProvider;
 import com.liferay.asset.list.constants.AssetListEntryTypeConstants;
 import com.liferay.asset.list.model.AssetListEntry;
+import com.liferay.asset.list.model.AssetListEntrySegmentsEntryRel;
+import com.liferay.asset.list.service.AssetListEntrySegmentsEntryRelLocalService;
 import com.liferay.asset.list.service.AssetListEntryServiceUtil;
 import com.liferay.asset.publisher.constants.AssetPublisherPortletKeys;
 import com.liferay.asset.publisher.util.AssetEntryResult;
@@ -58,6 +60,7 @@ import com.liferay.layout.page.template.model.LayoutPageTemplateEntry;
 import com.liferay.layout.page.template.service.LayoutPageTemplateEntryLocalServiceUtil;
 import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
@@ -141,6 +144,8 @@ public class AssetPublisherDisplayContext {
 			AssetEntryActionRegistry assetEntryActionRegistry,
 			AssetHelper assetHelper,
 			AssetListAssetEntryProvider assetListAssetEntryProvider,
+			AssetListEntrySegmentsEntryRelLocalService
+				assetListEntrySegmentsEntryRelLocalService,
 			AssetPublisherCustomizer assetPublisherCustomizer,
 			AssetPublisherHelper assetPublisherHelper,
 			AssetPublisherWebConfiguration assetPublisherWebConfiguration,
@@ -156,6 +161,8 @@ public class AssetPublisherDisplayContext {
 		_assetEntryActionRegistry = assetEntryActionRegistry;
 		_assetHelper = assetHelper;
 		_assetListAssetEntryProvider = assetListAssetEntryProvider;
+		_assetListEntrySegmentsEntryRelLocalService =
+			assetListEntrySegmentsEntryRelLocalService;
 		_assetPublisherCustomizer = assetPublisherCustomizer;
 		_assetPublisherHelper = assetPublisherHelper;
 		_assetPublisherWebConfiguration = assetPublisherWebConfiguration;
@@ -321,7 +328,7 @@ public class AssetPublisherDisplayContext {
 
 			if (isSelectionStyleAssetList() && (assetListEntry != null)) {
 				assetEntries = _assetListAssetEntryProvider.getAssetEntries(
-					assetListEntry, _getSegmentsEntryIds(),
+					assetListEntry, _getSegmentsEntryIds(assetListEntry),
 					_getSegmentsAnonymousUserId());
 			}
 			else if (isSelectionStyleAssetListProvider()) {
@@ -412,7 +419,7 @@ public class AssetPublisherDisplayContext {
 
 		if (isSelectionStyleAssetList() && (assetListEntry != null)) {
 			_assetEntryQuery = _assetListAssetEntryProvider.getAssetEntryQuery(
-				assetListEntry, _getSegmentsEntryIds(),
+				assetListEntry, _getSegmentsEntryIds(assetListEntry),
 				_getSegmentsAnonymousUserId());
 		}
 		else {
@@ -2153,12 +2160,28 @@ public class AssetPublisherDisplayContext {
 				SegmentsWebKeys.SEGMENTS_ANONYMOUS_USER_ID));
 	}
 
-	private long[] _getSegmentsEntryIds() {
+	private long[] _getSegmentsEntryIds(AssetListEntry assetListEntry) {
+		List<AssetListEntrySegmentsEntryRel> assetListEntrySegmentsEntryRels =
+			_assetListEntrySegmentsEntryRelLocalService.
+				getAssetListEntrySegmentsEntryRels(
+					assetListEntry.getAssetListEntryId(), QueryUtil.ALL_POS,
+					QueryUtil.ALL_POS);
+
+		List<Long> segmentEntryIds = new ArrayList<>();
+
+		for (AssetListEntrySegmentsEntryRel assetListEntrySegmentsEntryRel :
+				assetListEntrySegmentsEntryRels) {
+
+			segmentEntryIds.add(
+				assetListEntrySegmentsEntryRel.getSegmentsEntryId());
+		}
+
 		return _segmentsEntryRetriever.getSegmentsEntryIds(
 			_themeDisplay.getScopeGroupId(), _themeDisplay.getUserId(),
 			_requestContextMapper.map(
 				PortalUtil.getOriginalServletRequest(
-					PortalUtil.getHttpServletRequest(_portletRequest))));
+					PortalUtil.getHttpServletRequest(_portletRequest))),
+			ArrayUtil.toLongArray(segmentEntryIds));
 	}
 
 	private boolean _isShowRelatedAssets() {
@@ -2198,6 +2221,8 @@ public class AssetPublisherDisplayContext {
 	private String _assetLinkBehavior;
 	private final AssetListAssetEntryProvider _assetListAssetEntryProvider;
 	private AssetListEntry _assetListEntry;
+	private final AssetListEntrySegmentsEntryRelLocalService
+		_assetListEntrySegmentsEntryRelLocalService;
 	private final AssetPublisherCustomizer _assetPublisherCustomizer;
 	private final AssetPublisherHelper _assetPublisherHelper;
 	private final AssetPublisherPortletInstanceConfiguration
