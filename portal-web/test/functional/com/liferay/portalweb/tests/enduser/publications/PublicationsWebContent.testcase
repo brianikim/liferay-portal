@@ -30,8 +30,9 @@ definition {
 		}
 	}
 
+	@description = "This is the use case for LPS-165437."
 	@priority = "3"
-	test DeleteWCFolderWithinPublication {
+	test CanPublishPublicationWithDeletedWCFolder {
 		JSONWebcontent.addFolder(
 			folderName = "WC Folder Name",
 			groupName = "Global");
@@ -47,10 +48,6 @@ definition {
 			webContentTitle = "WC Folder Name");
 
 		Publications.gotoPublish(publicationName = "Publication Name");
-
-		AssertTextEquals.assertPartialText(
-			locator1 = "Message#SUCCESS",
-			value1 = "No unresolved conflicts, ready to publish.");
 
 		Publications.publishPublication(publicationName = "Publication Name");
 
