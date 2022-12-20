@@ -91,7 +91,7 @@ import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.PrefsParamUtil;
 import com.liferay.portal.kernel.util.StringComparator;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -152,7 +152,7 @@ public class AssetPublisherDisplayContext {
 			AssetPublisherWebHelper assetPublisherWebHelper,
 			InfoListProviderTracker infoListProviderTracker,
 			ItemSelector itemSelector, PortletRequest portletRequest,
-			PortletResponse portletResponse,
+			Portal portal, PortletResponse portletResponse,
 			PortletPreferences portletPreferences,
 			RequestContextMapper requestContextMapper,
 			SegmentsEntryRetriever segmentsEntryRetriever)
@@ -170,6 +170,7 @@ public class AssetPublisherDisplayContext {
 		_infoListProviderTracker = infoListProviderTracker;
 		_itemSelector = itemSelector;
 		_portletRequest = portletRequest;
+		_portal = portal;
 		_portletResponse = portletResponse;
 		_portletPreferences = portletPreferences;
 		_requestContextMapper = requestContextMapper;
@@ -184,7 +185,7 @@ public class AssetPublisherDisplayContext {
 			portletDisplay.getPortletInstanceConfiguration(
 				AssetPublisherPortletInstanceConfiguration.class);
 
-		_httpServletRequest = PortalUtil.getHttpServletRequest(portletRequest);
+		_httpServletRequest = _portal.getHttpServletRequest(portletRequest);
 	}
 
 	public AssetListEntry fetchAssetListEntry() throws PortalException {
@@ -718,7 +719,7 @@ public class AssetPublisherDisplayContext {
 			availableClassNameIds,
 			availableClassNameId -> {
 				Indexer<?> indexer = IndexerRegistryUtil.getIndexer(
-					PortalUtil.getClassName(availableClassNameId));
+					_portal.getClassName(availableClassNameId));
 
 				return indexer != null;
 			});
@@ -1025,7 +1026,7 @@ public class AssetPublisherDisplayContext {
 
 	public PortletURL getPortletURL() {
 		LiferayPortletResponse liferayPortletResponse =
-			PortalUtil.getLiferayPortletResponse(_portletResponse);
+			_portal.getLiferayPortletResponse(_portletResponse);
 
 		PortletURL portletURL = liferayPortletResponse.createRenderURL();
 
@@ -1038,7 +1039,7 @@ public class AssetPublisherDisplayContext {
 			String redirect = ParamUtil.getString(_portletRequest, "redirect");
 
 			if (Validator.isNull(redirect)) {
-				redirect = PortalUtil.getCurrentURL(_portletRequest);
+				redirect = _portal.getCurrentURL(_portletRequest);
 			}
 
 			if (Validator.isNotNull(redirect)) {
@@ -1059,8 +1060,8 @@ public class AssetPublisherDisplayContext {
 			return _referencedModelsGroupIds;
 		}
 
-		_referencedModelsGroupIds =
-			PortalUtil.getCurrentAndAncestorSiteGroupIds(getGroupIds(), true);
+		_referencedModelsGroupIds = _portal.getCurrentAndAncestorSiteGroupIds(
+			getGroupIds(), true);
 
 		return _referencedModelsGroupIds;
 	}
@@ -1126,9 +1127,9 @@ public class AssetPublisherDisplayContext {
 			scopeAssetPublisherAddItemHolders = new HashMap<>();
 
 		LiferayPortletRequest liferayPortletRequest =
-			PortalUtil.getLiferayPortletRequest(_portletRequest);
+			_portal.getLiferayPortletRequest(_portletRequest);
 		LiferayPortletResponse liferayPortletResponse =
-			PortalUtil.getLiferayPortletResponse(_portletResponse);
+			_portal.getLiferayPortletResponse(_portletResponse);
 
 		for (long groupId : groupIds) {
 			List<AssetPublisherAddItemHolder> assetPublisherAddItemHolders =
@@ -1231,7 +1232,7 @@ public class AssetPublisherDisplayContext {
 	}
 
 	public List<Long> getVocabularyIds() throws PortalException {
-		long[] groupIds = PortalUtil.getCurrentAndAncestorSiteGroupIds(
+		long[] groupIds = _portal.getCurrentAndAncestorSiteGroupIds(
 			getReferencedModelsGroupIds());
 
 		List<AssetVocabulary> vocabularies =
@@ -1667,7 +1668,7 @@ public class AssetPublisherDisplayContext {
 		_showContextLink = isShowContextLink();
 
 		if (_showContextLink &&
-			(PortalUtil.getPlidFromPortletId(groupId, portletId) == 0)) {
+			(_portal.getPlidFromPortletId(groupId, portletId) == 0)) {
 
 			_showContextLink = false;
 		}
@@ -1937,7 +1938,7 @@ public class AssetPublisherDisplayContext {
 					getAssetCategoryId());
 
 			if (assetCategory != null) {
-				PortalUtil.setPageKeywords(
+				_portal.setPageKeywords(
 					HtmlUtil.escape(
 						assetCategory.getTitle(_themeDisplay.getLocale())),
 					_httpServletRequest);
@@ -1945,7 +1946,7 @@ public class AssetPublisherDisplayContext {
 		}
 
 		if (Validator.isNotNull(getAssetTagName())) {
-			PortalUtil.setPageKeywords(getAssetTagName(), _httpServletRequest);
+			_portal.setPageKeywords(getAssetTagName(), _httpServletRequest);
 		}
 	}
 
@@ -2179,8 +2180,8 @@ public class AssetPublisherDisplayContext {
 		return _segmentsEntryRetriever.getSegmentsEntryIds(
 			_themeDisplay.getScopeGroupId(), _themeDisplay.getUserId(),
 			_requestContextMapper.map(
-				PortalUtil.getOriginalServletRequest(
-					PortalUtil.getHttpServletRequest(_portletRequest))),
+				_portal.getOriginalServletRequest(
+					_portal.getHttpServletRequest(_portletRequest))),
 			ArrayUtil.toLongArray(segmentEntryIds));
 	}
 
@@ -2267,6 +2268,7 @@ public class AssetPublisherDisplayContext {
 	private String _orderByType1;
 	private String _orderByType2;
 	private String _paginationType;
+	private final Portal _portal;
 	private final PortletPreferences _portletPreferences;
 	private final PortletRequest _portletRequest;
 	private String _portletResource;

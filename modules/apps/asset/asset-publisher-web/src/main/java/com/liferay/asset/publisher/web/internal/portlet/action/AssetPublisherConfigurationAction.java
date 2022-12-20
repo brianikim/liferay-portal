@@ -153,7 +153,7 @@ public class AssetPublisherConfigurationAction
 				assetListEntrySegmentsEntryRelLocalService,
 				assetPublisherCustomizer, assetPublisherHelper,
 				assetPublisherWebConfiguration, assetPublisherWebHelper,
-				infoListProviderTracker, itemSelector, renderRequest,
+				infoListProviderTracker, itemSelector, renderRequest, portal,
 				renderResponse, renderRequest.getPreferences(),
 				requestContextMapper, segmentsEntryRetriever);
 
