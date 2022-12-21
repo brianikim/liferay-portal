@@ -140,15 +140,15 @@
 			display: block;
 			height: 16px;
 			position: absolute;
-			top: 4px;
+			top: -10px;
 			width: 16px;
 
 			&.lfr-ddm-repeatable-add-button {
-				right: 4px;
+				right: 10px;
 			}
 
 			&.lfr-ddm-repeatable-delete-button {
-				right: 24px;
+				right: 34px;
 			}
 		}
 
