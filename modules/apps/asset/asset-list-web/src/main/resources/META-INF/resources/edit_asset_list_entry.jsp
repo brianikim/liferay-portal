@@ -50,11 +50,11 @@ renderResponse.setTitle(assetListDisplayContext.getAssetListEntryTitle());
 						<%
 						List<SegmentsEntry> availableSegmentsEntries = editAssetListDisplayContext.getAvailableSegmentsEntries();
 
-						List<AssetListEntrySegmentsEntryRel> assetEntryListSegmentsEntryRels = editAssetListDisplayContext.getAssetListEntrySegmentsEntryRels();
+						List<AssetListEntrySegmentsEntryRel> assetListEntrySegmentsEntryRels = editAssetListDisplayContext.getAssetListEntrySegmentsEntryRels();
 						%>
 
 						<c:choose>
-							<c:when test="<%= assetEntryListSegmentsEntryRels.size() > 1 %>">
+							<c:when test="<%= assetListEntrySegmentsEntryRels.size() > 1 %>">
 								<clay:content-row
 									verticalAlign="center"
 								>
@@ -92,7 +92,7 @@ renderResponse.setTitle(assetListDisplayContext.getAssetListEntryTitle());
 								<ul class="nav nav-stacked">
 
 									<%
-									for (AssetListEntrySegmentsEntryRel assetListEntrySegmentsEntryRel : assetEntryListSegmentsEntryRels) {
+									for (AssetListEntrySegmentsEntryRel assetListEntrySegmentsEntryRel : assetListEntrySegmentsEntryRels) {
 									%>
 
 										<li class="nav-item">

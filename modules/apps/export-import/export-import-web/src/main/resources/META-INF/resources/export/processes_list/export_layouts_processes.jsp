@@ -347,12 +347,12 @@ portletURL.setParameter("searchContainerId", searchContainerId);
 </aui:form>
 
 <%
-int incompleteBackgroundTaskCount = BackgroundTaskManagerUtil.getBackgroundTasksCount(groupId, BackgroundTaskExecutorNames.LAYOUT_EXPORT_BACKGROUND_TASK_EXECUTOR, false);
+int incompleteBackgroundTasksCount = BackgroundTaskManagerUtil.getBackgroundTasksCount(groupId, BackgroundTaskExecutorNames.LAYOUT_EXPORT_BACKGROUND_TASK_EXECUTOR, false);
 %>
 
 <div class="hide incomplete-process-message">
 	<liferay-util:include page="/incomplete_processes_message.jsp" servletContext="<%= application %>">
-		<liferay-util:param name="incompleteBackgroundTaskCount" value="<%= String.valueOf(incompleteBackgroundTaskCount) %>" />
+		<liferay-util:param name="incompleteBackgroundTasksCount" value="<%= String.valueOf(incompleteBackgroundTasksCount) %>" />
 	</liferay-util:include>
 </div>
 

@@ -30,10 +30,10 @@ if (site != null) {
 CommerceChannel commerceChannel = siteCommerceChannelTypeDisplayContext.getCommerceChannel();
 long commerceChannelId = siteCommerceChannelTypeDisplayContext.getCommerceChannelId();
 
-boolean isViewOnly = false;
+boolean viewOnly = false;
 
 if (commerceChannel != null) {
-	isViewOnly = !siteCommerceChannelTypeDisplayContext.hasPermission(commerceChannel.getCommerceChannelId(), ActionKeys.UPDATE);
+	viewOnly = !siteCommerceChannelTypeDisplayContext.hasPermission(commerceChannel.getCommerceChannelId(), ActionKeys.UPDATE);
 }
 %>
 
@@ -90,7 +90,7 @@ if (commerceChannel != null) {
 							value="<%= HtmlUtil.escape(group.getName(locale)) %>"
 						/>
 
-						<c:if test="<%= !isViewOnly %>">
+						<c:if test="<%= !viewOnly %>">
 							<liferay-ui:search-container-column-text>
 								<a class="float-right modify-link" data-rowId="<%= group.getGroupId() %>" href="javascript:;"><%= removeCommerceChannelSiteIcon %></a>
 							</liferay-ui:search-container-column-text>
@@ -102,7 +102,7 @@ if (commerceChannel != null) {
 					/>
 				</liferay-ui:search-container>
 
-				<c:if test="<%= !isViewOnly %>">
+				<c:if test="<%= !viewOnly %>">
 					<aui:button cssClass="mb-4" name="selectSite" value='<%= LanguageUtil.format(locale, "select-x", "site") %>' />
 				</c:if>
 			</commerce-ui:panel>

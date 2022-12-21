@@ -46,8 +46,8 @@ name = namespace + name;
 				'<%= protocol %>' +
 				'://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&callback=Liferay.Maps.onGMapsReady';
 
-			<c:if test="<%= Validator.isNotNull(googleMapDisplayContext.getGoogleMapsAPIKey()) %>">
-				apiURL += '&key=' + '<%= googleMapDisplayContext.getGoogleMapsAPIKey() %>';
+			<c:if test="<%= Validator.isNotNull(googleMapsDisplayContext.getGoogleMapsAPIKey()) %>">
+				apiURL += '&key=' + '<%= googleMapsDisplayContext.getGoogleMapsAPIKey() %>';
 			</c:if>
 
 			var script = document.createElement('script');

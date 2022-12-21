@@ -23,9 +23,9 @@
 	<ul class="tasks-entries">
 
 		<%
-		List<TasksEntry> taskEntries = TasksEntryLocalServiceUtil.getTasksEntries(0, user.getUserId(), 0, 0, TasksEntryConstants.STATUS_OPEN, new long[0], new long[0], 0, 10);
+		List<TasksEntry> tasksEntries = TasksEntryLocalServiceUtil.getTasksEntries(0, user.getUserId(), 0, 0, TasksEntryConstants.STATUS_OPEN, new long[0], new long[0], 0, 10);
 
-		for (TasksEntry tasksEntry : taskEntries) {
+		for (TasksEntry tasksEntry : tasksEntries) {
 			String taskHREF = null;
 
 			if (TasksEntryPermission.contains(permissionChecker, tasksEntry, ActionKeys.UPDATE)) {
