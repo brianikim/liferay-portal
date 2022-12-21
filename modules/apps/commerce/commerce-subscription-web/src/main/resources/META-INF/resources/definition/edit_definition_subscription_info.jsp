@@ -41,7 +41,7 @@ int deliverySubscriptionLength = BeanParamUtil.getInteger(cpDefinition, request,
 String deliverySubscriptionType = BeanParamUtil.getString(cpDefinition, request, "deliverySubscriptionType", defaultCPSubscriptionType);
 long deliveryMaxSubscriptionCycles = BeanParamUtil.getLong(cpDefinition, request, "deliveryMaxSubscriptionCycles");
 
-String defaultCPSubscriptionTypeLabel = StringPool.BLANK;
+String defaultCPSubscriptionTypeLabel = LanguageUtil.get(request, "day");
 String defaultDeliveryCPSubscriptionTypeLabel = StringPool.BLANK;
 
 CPSubscriptionType cpSubscriptionType = cpDefinitionSubscriptionInfoDisplayContext.getCPSubscriptionType(subscriptionType);
