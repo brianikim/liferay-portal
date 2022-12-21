@@ -58,6 +58,7 @@ import com.liferay.portal.kernel.upload.UploadException;
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
 import com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil;
 import com.liferay.portal.kernel.util.Http;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
@@ -473,7 +474,8 @@ public class UpdateArticleMVCActionCommand extends BaseMVCActionCommand {
 		String referringPortletResource = ParamUtil.getString(
 			actionRequest, "referringPortletResource");
 
-		String languageId = ParamUtil.getString(actionRequest, "languageId");
+		String languageId = _getValidLanguageId(
+			ParamUtil.getString(actionRequest, "languageId"));
 
 		PortletURL portletURL = PortletURLFactoryUtil.create(
 			actionRequest, JournalPortletKeys.JOURNAL,
@@ -625,6 +627,20 @@ public class UpdateArticleMVCActionCommand extends BaseMVCActionCommand {
 		}
 
 		return StringUtil.merge(messages, "<br />");
+	}
+
+	private String _getValidLanguageId(String languageId) {
+		if (Validator.isNull(languageId)) {
+			return null;
+		}
+
+		Locale locale = LocaleUtil.fromLanguageId(languageId, true, false);
+
+		if (locale == null) {
+			return null;
+		}
+
+		return languageId;
 	}
 
 	private void _updateLayoutClassedModelUsage(
