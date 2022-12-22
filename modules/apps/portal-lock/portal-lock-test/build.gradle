@@ -1,6 +1,6 @@
 dependencies {
 	testIntegrationCompile group: "com.liferay", name: "com.liferay.arquillian.extension.junit.bridge", version: "1.0.19"
-	testIntegrationCompile group: "com.liferay", name: "org.hibernate.core", version: "3.6.10.LIFERAY-PATCHED-6"
+	testIntegrationCompile group: "com.liferay", name: "org.hibernate.core", version: "3.6.10.LIFERAY-PATCHED-7"
 	testIntegrationCompile group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "default"
 	testIntegrationCompile project(":apps:portal-lock:portal-lock-api")
 	testIntegrationCompile project(":apps:portal-lock:portal-lock-service")
