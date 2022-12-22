@@ -241,6 +241,8 @@ function AssetDisplayPageSelector({
 						value: Date.now().toString(),
 					});
 
+					Liferay.fire('updateDDMFormInputValue');
+
 					const form = document.getElementById(`${namespace}fm1`);
 
 					const formData = new FormData(form);

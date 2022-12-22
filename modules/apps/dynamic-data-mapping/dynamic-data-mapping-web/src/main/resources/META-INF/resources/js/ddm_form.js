@@ -4414,6 +4414,11 @@ AUI.add(
 									'submitForm',
 									instance._onLiferaySubmitForm,
 									instance
+								),
+								Liferay.on(
+									'updateDDMFormInputValue',
+									instance._onSubmitForm,
+									instance
 								)
 							);
 						}
