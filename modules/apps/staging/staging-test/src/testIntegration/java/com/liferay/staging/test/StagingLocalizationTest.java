@@ -137,12 +137,12 @@ public class StagingLocalizationTest {
 			nameMap, LocaleUtil.US, LocaleUtil.SPAIN);
 	}
 
+	@Ignore
 	@Test(expected = LocaleException.class)
 	public void testRemoveSupportedLocale() throws Exception {
 		testUpdateLocales("es_ES", "de_DE,es_ES", "en_US");
 	}
 
-	@Ignore
 	@Test
 	public void testUpdateDefaultLocale() throws Exception {
 		testUpdateLocales("es_ES", "de_DE,en_US,es_ES", "en_US");
