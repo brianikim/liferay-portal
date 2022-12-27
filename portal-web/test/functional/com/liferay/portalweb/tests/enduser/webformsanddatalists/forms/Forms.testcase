@@ -2437,7 +2437,7 @@ definition {
 		}
 	}
 
-	@description = "LPS-115196 Verify that an entry using a group field can be viewed in forms details"
+	@description = "This is a test case for LPS-115196 and LPS-115198. Verify that an entry using a group field can be viewed in forms details"
 	@priority = "5"
 	test EntryWithGroupFieldCanBeViewedInFormsDetails {
 		property portal.acceptance = "true";
@@ -2496,6 +2496,36 @@ definition {
 			FormsAdmin.viewFormTableEntry(
 				fieldLabel = "Numeric",
 				fieldValue = "123");
+		}
+
+		task ("And assert the entry fields also can be shown via both view and Edit actions") {
+			FormsAdminNavigator.gotoView();
+
+			FormsAdmin.viewTextEntry(
+				fieldLabel = "Text",
+				fieldName = "${fieldNameTextField}",
+				fieldValue = "Test");
+
+			FormsAdmin.viewTextEntry(
+				fieldLabel = "Numeric",
+				fieldName = "${fieldNameNumericField}",
+				fieldValue = "123");
+
+			Navigator.gotoBack();
+
+			LexiconEntry.gotoEllipsisMenuItem(menuItem = "Edit");
+
+			FormsAdmin.viewTextEntry(
+				fieldLabel = "Text",
+				fieldName = "${fieldNameTextField}",
+				fieldValue = "Test",
+				onSitePage = "true");
+
+			FormsAdmin.viewTextEntry(
+				fieldLabel = "Numeric",
+				fieldName = "${fieldNameNumericField}",
+				fieldValue = "123",
+				onSitePage = "true");
 		}
 	}
 
