@@ -11,11 +11,11 @@ definition {
 
 		var curl = '''
 			${portalURL}/api/jsonws/mb.mbcategory/add-category \
-			-u test@liferay.com:test \
-			-d userId=${userId} \
-			-d parentCategoryId=${parentCategoryId} \
-			-d name=${categoryName} \
-			-d description=${categoryDescription}
+				-u test@liferay.com:test \
+				-d userId=${userId} \
+				-d parentCategoryId=${parentCategoryId} \
+				-d name=${categoryName} \
+				-d description=${categoryDescription}
 		''';
 
 		echo("## Adding a 'Category' with the following info using JSONWS:");
@@ -62,17 +62,17 @@ definition {
 
 		var curl = '''
 			${portalURL}/api/jsonws/mb.mbmessage/add-message \
-			-u ${userEmailAddress}:${userPassword} \
-			-d groupId=${groupId} \
-			-d categoryId=${categoryId} \
-			-d subject=${threadSubject} \
-			-d body=${threadBody} \
-			-d format='bbcode' \
-			-d inputStreamOVPs= \
-			-d anonymous=false \
-			-d priority=0 \
-			-d allowPingbacks=true \
-			-d serviceContext=${serviceContext}
+				-u ${userEmailAddress}:${userPassword} \
+				-d groupId=${groupId} \
+				-d categoryId=${categoryId} \
+				-d subject=${threadSubject} \
+				-d body=${threadBody} \
+				-d format='bbcode' \
+				-d inputStreamOVPs= \
+				-d anonymous=false \
+				-d priority=0 \
+				-d allowPingbacks=true \
+				-d serviceContext=${serviceContext}
 		''';
 
 		echo("## Adding a 'Message' with the following info using JSONWS:");
@@ -138,8 +138,8 @@ definition {
 
 		var curl = '''
 			${portalURL}/api/jsonws/mb.mbcategory/get-categories \
-			-u test@liferay.com:test \
-			-d groupId=${groupId}
+				-u test@liferay.com:test \
+				-d groupId=${groupId}
 		''';
 
 		var categoryId = JSONCurlUtil.post("${curl}", "$.[?(@['name'] == '${categoryName}')]['categoryId']");
@@ -177,13 +177,13 @@ definition {
 
 		var curl = '''
 			${portalURL}/api/jsonws/mb.mbthread/get-threads \
-			-u test@liferay.com:test \
-			-d groupId=${groupId} \
-			-d categoryId=${categoryId} \
-			-d status=0 \
-			-d "start=-1" \
-			-d "end=-1"
-
+				-u test@liferay.com:test \
+				-d groupId=${groupId} \
+				-d categoryId=${categoryId} \
+				-d status=0 \
+				-d "start=-1" \
+				-d "end=-1"
+				
 		''';
 
 		var messageId = JSONCurlUtil.post("${curl}", "$.[?(@['title'] == '${threadSubject}')]['rootMessageId']");

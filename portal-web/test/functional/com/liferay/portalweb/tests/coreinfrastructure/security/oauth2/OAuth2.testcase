@@ -308,7 +308,7 @@ definition {
 
 		var curl = '''
 			http://localhost:9080/o/oauth2/token \
-				 --data client_id=abc123&client_secret=abc123&grant_type=authorization_code&code=${authorizationCode}
+				--data client_id=abc123&client_secret=abc123&grant_type=authorization_code&code=${authorizationCode}
 		''';
 
 		var reponse = JSONCurlUtil.post("${curl}");

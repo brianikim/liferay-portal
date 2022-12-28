@@ -6,9 +6,9 @@ definition {
 
 		var curl = '''
 			${portalURL}/api/jsonws/depot.depotentry/add-depot-entry \
-			-u test@liferay.com:test \
-			-d nameMap={"en_US": "${depotName}"} \
-			-d descriptionMap={"en_US": "${depotDescription}"}
+				-u test@liferay.com:test \
+				-d nameMap={"en_US": "${depotName}"} \
+				-d descriptionMap={"en_US": "${depotDescription}"}
 		''';
 
 		echo("## Adding a 'Depot' with the following info using JSONWS:");
@@ -26,8 +26,8 @@ definition {
 
 		var curl = '''
 			${portalURL}/api/jsonws/depot.depotentry/delete-depot-entry \
-			-u test@liferay.com:test \
-			-d nameMap={"en_US": "${depotId}"} \
+				-u test@liferay.com:test \
+				-d nameMap={"en_US": "${depotId}"} \
 		''';
 
 		echo("## Deleting a 'Depot' with the following info using JSONWS:");

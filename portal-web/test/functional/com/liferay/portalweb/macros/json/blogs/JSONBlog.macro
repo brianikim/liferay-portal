@@ -39,23 +39,23 @@ definition {
 
 		var curl = '''
 			${portalURL}/api/jsonws/blogs.blogsentry/add-entry \
-			-u ${userEmailAddress}:${userPassword} \
-			-d title=${entryTitle} \
-			-d subtitle=${entrySubtitle} \
-			-d description= \
-			-d content=${contentXML} \
-			-d displayDateMonth=01 \
-			-d displayDateDay=01 \
-			-d displayDateYear=2004 \
-			-d displayDateHour=01 \
-			-d displayDateMinute=01 \
-			-d allowPingbacks=true \
-			-d allowTrackbacks=true \
-			-d trackbacks= \
-			-d coverImageCaption='' \
-			-d -coverImageImageSelector= \
-			-d -smallImageImageSelector= \
-			-d serviceContext=${serviceContext}
+				-u ${userEmailAddress}:${userPassword} \
+				-d title=${entryTitle} \
+				-d subtitle=${entrySubtitle} \
+				-d description= \
+				-d content=${contentXML} \
+				-d displayDateMonth=01 \
+				-d displayDateDay=01 \
+				-d displayDateYear=2004 \
+				-d displayDateHour=01 \
+				-d displayDateMinute=01 \
+				-d allowPingbacks=true \
+				-d allowTrackbacks=true \
+				-d trackbacks= \
+				-d coverImageCaption='' \
+				-d -coverImageImageSelector= \
+				-d -smallImageImageSelector= \
+				-d serviceContext=${serviceContext}
 		''';
 
 		echo("## Adding a 'Blog' with the following info using JSONWS:");
@@ -80,17 +80,17 @@ definition {
 		if (isSet(friendlyURL)) {
 			var curl = '''
 				${portalURL}/api/jsonws/blogs.blogsentry/get-entry \
-			 	-u test@liferay.com:test \
-			 	-d groupId=${groupId} \
-			  	-d urlTitle=${friendlyURL}
-				''';
+					-u test@liferay.com:test \
+					-d groupId=${groupId} \
+					-d urlTitle=${friendlyURL}
+			''';
 		}
 		else {
 			var curl = '''
 				${portalURL}/api/jsonws/blogs.blogsentry/get-entry \
-			  	-u test@liferay.com:test \
-			  	-d groupId=${groupId} \
-			  	-d urlTitle=${entryTitle}
+					-u test@liferay.com:test \
+					-d groupId=${groupId} \
+					-d urlTitle=${entryTitle}
 			''';
 		}
 
@@ -120,8 +120,8 @@ definition {
 
 		var curl = '''
 			${portalURL}/api/jsonws/blogs.blogsentry/move-entry-to-trash \
-			-u ${userEmailAddress}:${userPassword} \
-			-d entryId=${entryId} \
+				-u ${userEmailAddress}:${userPassword} \
+				-d entryId=${entryId} \
 		''';
 
 		var messageId = JSONCurlUtil.post("${curl}");

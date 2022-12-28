@@ -8,7 +8,7 @@ definition {
 
 		var curl = '''
 			${portalURL}/api/jsonws/assetcategory/add-category \
-			-u test@liferay.com:test \
+				-u test@liferay.com:test \
 				-d groupId=${groupId} \
 				-d parentCategoryId=${parentCategoryId} \
 				-d titleMap=${titleMap} \

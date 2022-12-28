@@ -24,12 +24,12 @@ definition {
 
 		var curl = '''
 			${portalURL}/api/jsonws/redirect.redirectentry/add-redirect-entry \
-			-u test@liferay.com:test \
-			-d groupId=${groupId} \
-			-d destinationURL=${destinationURL} \
-			-d expirationDate=${expirationDate} \
-			-d permanent=${permanent} \
-			-d sourceURL=${sourceURL}
+				-u test@liferay.com:test \
+				-d groupId=${groupId} \
+				-d destinationURL=${destinationURL} \
+				-d expirationDate=${expirationDate} \
+				-d permanent=${permanent} \
+				-d sourceURL=${sourceURL}
 		''';
 
 		echo("## Adding a 'Redirection' with the following info using JSONWS:");

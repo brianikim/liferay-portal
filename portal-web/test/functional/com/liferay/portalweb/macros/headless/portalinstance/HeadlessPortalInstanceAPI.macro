@@ -6,8 +6,8 @@ definition {
 
 		var curl = '''
 			${portalURL}/o/headless-portal-instances/v1.0/portal-instances \
-			-u test@liferay.com:test \
-			-H Content-Type: application/json
+				-u test@liferay.com:test \
+				-H Content-Type: application/json
 		''';
 
 		var JSON = JSONCurlUtil.get("${curl}");
@@ -37,9 +37,9 @@ definition {
 
 		var curl = '''
 			${portalURL}/o/headless-portal-instances/v1.0/portal-instances \
-			-u test@liferay.com:test \
-			-d ${parameters} \
-			-H Content-Type: application/json
+				-u test@liferay.com:test \
+				-d ${parameters} \
+				-H Content-Type: application/json
 		''';
 
 		JSONCurlUtil.post("${curl}");
@@ -67,8 +67,8 @@ definition {
 
 		var curl = '''
 			${portalURL}/o/headless-portal-instances/v1.0/portal-instances/${portalInstanceId} \
-			-u test@liferay.com:test \
-			-H Content-Type: application/json
+				-u test@liferay.com:test \
+				-H Content-Type: application/json
 		''';
 
 		JSONCurlUtil.delete("${curl}");

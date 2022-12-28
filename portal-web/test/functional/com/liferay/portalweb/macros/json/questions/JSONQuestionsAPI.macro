@@ -8,15 +8,15 @@ definition {
 
 		var curl = '''
 			${portalURL}/o/headless-delivery/v1.0/message-board-sections/${categoryId}/message-board-threads \
-			-H 'Content-Type: application/json' \
-			-u 'test@liferay.com:test' \
-			-d '{
-				"keywords": [
-					"${tagField}"
-				],
-				"headline": "${titleField}",
-				"articleBody": "${bodyField}"
-			}'
+				-H 'Content-Type: application/json' \
+				-u 'test@liferay.com:test' \
+				-d '{
+					"keywords": [
+						"${tagField}"
+					],
+					"headline": "${titleField}",
+					"articleBody": "${bodyField}"
+				}'
 		''';
 
 		echo("## Adding a 'Question' with the following info using JSONWS:");
@@ -40,12 +40,12 @@ definition {
 
 		var curl = '''
 			${portalURL}/o/headless-delivery/v1.0/message-board-sections/${categoryId}/message-board-threads \
-			-H 'Content-Type: application/json' \
-			-u 'test@liferay.com:test' \
-			-d '{
-				"headline": "${titleField}",
-				"articleBody": "${bodyField}"
-			}'
+				-H 'Content-Type: application/json' \
+				-u 'test@liferay.com:test' \
+				-d '{
+					"headline": "${titleField}",
+					"articleBody": "${bodyField}"
+				}'
 		''';
 
 		echo("## Adding a 'Question' with the following info using JSONWS:");
