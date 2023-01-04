@@ -46,6 +46,7 @@ definition {
 		property custom.properties = "xuggler.enabled=true";
 		property dummy.socket.proxy.disabled = "true";
 		property environment.acceptance = "true";
+		property operating.system.types = "alpine,amazonlinux,centos,debian,fedora,orcllinux,osx,redhat,solaris,suse,ubuntu,windows";
 		property portal.acceptance = "true";
 		property test.name.skip.portal.instance = "WebContentDisplay#AddAudioViaWebContent";
 		property testray.component.names = "Training,Web Content Administration";
@@ -247,6 +248,7 @@ definition {
 		property custom.properties = "xuggler.enabled=true";
 		property dummy.socket.proxy.disabled = "true";
 		property environment.acceptance = "true";
+		property operating.system.types = "alpine,amazonlinux,centos,debian,fedora,orcllinux,osx,redhat,solaris,suse,ubuntu,windows";
 		property test.name.skip.portal.instance = "WebContentDisplay#AddVideoViaWebContent";
 		property testray.component.names = "Web Content Administration";
 
@@ -464,6 +466,7 @@ definition {
 		property app.server.types = "jboss,tcserver,tomcat,weblogic,websphere,wildfly";
 		property database.types = "db2,hypersonic,mariadb,mysql,oracle,postgresql,sqlserver,sybase";
 		property environment.acceptance = "true";
+		property operating.system.types = "alpine,amazonlinux,centos,debian,fedora,orcllinux,osx,redhat,solaris,suse,ubuntu,windows";
 		property portal.acceptance = "quarantine";
 		property portal.upstream = "quarantine";
 		property testray.component.names = "Web Content Display,Training";

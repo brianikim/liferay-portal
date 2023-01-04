@@ -13,6 +13,7 @@ definition {
 	@priority = "4"
 	test ViewGlobalLibDirectory {
 		property environment.acceptance = "true";
+		property operating.system.types = "alpine,amazonlinux,centos,debian,fedora,orcllinux,osx,redhat,solaris,suse,ubuntu,windows";
 
 		ServerAdministration.openServerAdmin();
 

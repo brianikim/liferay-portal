@@ -298,6 +298,7 @@ definition {
 	@priority = "5"
 	test OpenNLPSmoke {
 		property environment.acceptance = "true";
+		property operating.system.types = "alpine,amazonlinux,centos,debian,fedora,orcllinux,osx,redhat,solaris,suse,ubuntu,windows";
 		property portal.acceptance = "true";
 		property test.name.skip.portal.instance = "DMAutoTagging#OpenNLPSmoke";
 

@@ -3471,6 +3471,7 @@ definition {
 	@priority = "5"
 	test ViewTitleListItemStyleInDifferentListStyles {
 		property environment.acceptance = "true";
+		property operating.system.types = "alpine,amazonlinux,centos,debian,fedora,orcllinux,osx,redhat,solaris,suse,ubuntu,windows";
 		property osgi.modules.includes = "bookmarks,document-library-google-docs";
 		property portal.acceptance = "true";
 
