@@ -346,6 +346,33 @@ definition {
 		SitePages.viewCheckboxChecked(pageName = "Test Content Page");
 	}
 
+	@description = "This is for LPS-150849."
+	@priority = "5"
+	test ChooseColumnTypeAndViewSelectedIcon {
+		ProductMenu.gotoPortlet(
+			category = "Site Builder",
+			portlet = "Pages");
+
+		SitePages.addPublicPage(
+			pageName = "Test Widget Page",
+			sitePageType = "Widget Page");
+
+		Click(
+			key_columnName = "1 Column",
+			locator1 = "SitePagesEditPage#LAYOUT_CARD");
+
+		var backgroundColorStyle = Css.getPseudoElementCssValue(
+			attribute = "background-color",
+			element = "//div[contains(@class,'card') and contains(@class,'card-type-template active')]",
+			pseudo = "::after");
+
+		echo("background color: ${backgroundColorStyle} ");
+
+		if ("${backgroundColorStyle}" != "rgb(11, 95, 255)") {
+			fail("Select icon is not shown");
+		}
+	}
+
 	@description = "This is a test for LPS-110183. Can access to display page in Collection Items modal when the collection item has associated display page template."
 	@priority = "5"
 	test GoToCollectionItemDisplayPage {
