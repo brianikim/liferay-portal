@@ -106,8 +106,8 @@ public class DataDefinitionUtilTest extends PowerMockito {
 								"pt_BR", "rótulo2"
 							).build(),
 							defaultLocale));
-					setName("name2");
 					setLocalizable(false);
+					setName("name2");
 					setPredefinedValue(
 						LocalizedValueUtil.toLocalizedValue(
 							HashMapBuilder.<String, Object>put(
@@ -187,8 +187,8 @@ public class DataDefinitionUtilTest extends PowerMockito {
 											).put(
 												"pt_BR", "rótulo2"
 											).build());
-										setName("name2");
 										setLocalizable(false);
+										setName("name2");
 										setReadOnly(false);
 										setRepeatable(false);
 										setRequired(false);

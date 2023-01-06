@@ -62,10 +62,10 @@ public class StatsClusterRequestExecutorTest {
 		StatsClusterRequestExecutorImpl statsClusterRequestExecutorImpl =
 			new StatsClusterRequestExecutorImpl() {
 				{
-					setElasticsearchClientResolver(
-						_elasticsearchConnectionFixture);
 					setClusterHealthStatusTranslator(
 						new ClusterHealthStatusTranslatorImpl());
+					setElasticsearchClientResolver(
+						_elasticsearchConnectionFixture);
 				}
 			};
 

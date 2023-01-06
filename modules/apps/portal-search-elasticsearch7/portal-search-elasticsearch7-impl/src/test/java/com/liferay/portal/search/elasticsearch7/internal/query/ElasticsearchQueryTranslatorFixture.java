@@ -46,10 +46,10 @@ public class ElasticsearchQueryTranslatorFixture {
 				setGeoShapeQueryTranslator(new GeoShapeQueryTranslatorImpl());
 				setIdsQueryTranslator(new IdsQueryTranslatorImpl());
 				setMatchAllQueryTranslator(new MatchAllQueryTranslatorImpl());
-				setMatchPhraseQueryTranslator(
-					new MatchPhraseQueryTranslatorImpl());
 				setMatchPhrasePrefixQueryTranslator(
 					new MatchPhrasePrefixQueryTranslatorImpl());
+				setMatchPhraseQueryTranslator(
+					new MatchPhraseQueryTranslatorImpl());
 				setMatchQueryTranslator(new MatchQueryTranslatorImpl());
 				setMoreLikeThisQueryTranslator(
 					new MoreLikeThisQueryTranslatorImpl());

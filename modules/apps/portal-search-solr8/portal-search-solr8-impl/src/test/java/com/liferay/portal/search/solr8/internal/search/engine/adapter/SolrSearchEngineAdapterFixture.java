@@ -96,10 +96,10 @@ public class SolrSearchEngineAdapterFixture {
 				setDocumentRequestExecutor(
 					documentRequestExecutorFixture.
 						getDocumentRequestExecutor());
-				setSearchRequestExecutor(
-					searchRequestExecutorFixture.getSearchRequestExecutor());
 				setIndexRequestExecutor(
 					indexRequestExecutorFixture.getIndexRequestExecutor());
+				setSearchRequestExecutor(
+					searchRequestExecutorFixture.getSearchRequestExecutor());
 				setThrowOriginalExceptions(true);
 			}
 		};

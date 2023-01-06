@@ -80,10 +80,10 @@ public class SearchRequestExecutorFixture {
 
 		return new BaseSolrQueryAssemblerImpl() {
 			{
+				setFacetProcessor(facetProcessor);
+				setFilterTranslator(createSolrFilterTranslator());
 				setQueryTranslator(queryTranslator);
 				setStatsTranslator(createStatsTranslator());
-				setFilterTranslator(createSolrFilterTranslator());
-				setFacetProcessor(facetProcessor);
 			}
 		};
 	}
@@ -165,8 +165,8 @@ public class SearchRequestExecutorFixture {
 				setGroupByResponseFactory(new GroupByResponseFactoryImpl());
 				setSearchHitBuilderFactory(new SearchHitBuilderFactoryImpl());
 				setSearchHitsBuilderFactory(new SearchHitsBuilderFactoryImpl());
-				setStatsTranslator(createStatsTranslator());
 				setStatsResultsTranslator(new StatsResultsTranslatorImpl());
+				setStatsTranslator(createStatsTranslator());
 			}
 		};
 	}

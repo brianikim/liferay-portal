@@ -210,11 +210,11 @@ public class SolrIndexingFixture implements IndexingFixture {
 				setFacetProcessor(_facetProcessor);
 				setProps(createProps());
 				setQuerySuggester(createSolrQuerySuggester(solrClientManager));
+				setSearchEngineAdapter(searchEngineAdapter);
 				setSearchRequestBuilderFactory(
 					new SearchRequestBuilderFactoryImpl());
 				setSearchResponseBuilderFactory(
 					new SearchResponseBuilderFactoryImpl());
-				setSearchEngineAdapter(searchEngineAdapter);
 
 				activate(_properties);
 			}
