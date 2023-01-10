@@ -45,6 +45,10 @@ public class BaseCPDefinitionSubscriptionInfoDisplayContext
 	}
 
 	public CPSubscriptionType getCPSubscriptionType(String subscriptionType) {
+		if (subscriptionType.isEmpty()) {
+			return getCPSubscriptionTypes().get(0);
+		}
+
 		return _cpSubscriptionTypeRegistry.getCPSubscriptionType(
 			subscriptionType);
 	}
