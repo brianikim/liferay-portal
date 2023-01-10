@@ -43,7 +43,7 @@ function move(movement, index = null) {
 
 	const activeItem = fragmentElement.querySelector('.carousel-item.active');
 	const indexActiveItem = items.indexOf(activeItem);
-	
+
 	this.nextItemIndex = index;
 
 	if (index === null) {
@@ -92,7 +92,6 @@ function createInterval() {
 		activateItem(activeItem, nextItem);
 	}
 
-	
 	indicators.forEach(function (indicator, index) {
 		indicator.addEventListener('click', function () {
 			const indexActiveIndicator = indicators.indexOf(
