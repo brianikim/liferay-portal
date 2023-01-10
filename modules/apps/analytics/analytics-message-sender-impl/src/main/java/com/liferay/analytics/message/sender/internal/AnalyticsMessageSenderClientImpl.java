@@ -228,14 +228,19 @@ public class AnalyticsMessageSenderClientImpl
 
 			StatusLine statusLine = closeableHttpResponse.getStatusLine();
 
-			JSONObject responseJSONObject = JSONFactoryUtil.createJSONObject(
-				EntityUtils.toString(
-					closeableHttpResponse.getEntity(),
-					Charset.defaultCharset()));
+			boolean disconnected = false;
+			JSONObject responseJSONObject = JSONFactoryUtil.createJSONObject();
 
-			boolean disconnected = StringUtil.equals(
-				GetterUtil.getString(responseJSONObject.getString("state")),
-				"DISCONNECTED");
+			String response = EntityUtils.toString(
+				closeableHttpResponse.getEntity(), Charset.defaultCharset());
+
+			if ((response != null) && response.startsWith("{")) {
+				responseJSONObject = JSONFactoryUtil.createJSONObject(response);
+
+				disconnected = StringUtil.equals(
+					GetterUtil.getString(responseJSONObject.getString("state")),
+					"DISCONNECTED");
+			}
 
 			if ((statusLine.getStatusCode() != HttpStatus.SC_FORBIDDEN) &&
 				!disconnected) {
