@@ -119,7 +119,7 @@ public class PortletServlet extends HttpServlet {
 		catch (PortletException portletException) {
 			_log.error(
 				StringBundler.concat(
-					"Unable to process portlet ", portletId, ", ",
+					"Unable to process portlet ", portletId, ": ",
 					portletException.getMessage()),
 				portletException);
 
