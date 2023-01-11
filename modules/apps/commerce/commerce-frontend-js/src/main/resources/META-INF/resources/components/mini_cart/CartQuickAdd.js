@@ -152,6 +152,9 @@ export default function CartQuickAdd() {
 
 							setSelectedProducts(newItems);
 						}}
+						onPaste={() => {
+							setSelectedProducts(item);
+						}}
 						placeholder={Liferay.Language.get('search-products')}
 						size="sm"
 						sourceItems={formattedProducts.filter((product) => {
