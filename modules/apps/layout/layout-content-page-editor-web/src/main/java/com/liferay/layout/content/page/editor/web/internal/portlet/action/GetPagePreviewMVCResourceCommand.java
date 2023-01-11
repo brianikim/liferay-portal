@@ -218,17 +218,17 @@ public class GetPagePreviewMVCResourceCommand extends BaseMVCResourceCommand {
 			_infoItemServiceTracker.getFirstInfoItemService(
 				InfoItemObjectProvider.class, className);
 
-		ClassPKInfoItemIdentifier infoItemIdentifier =
+		ClassPKInfoItemIdentifier classPKInfoItemIdentifier =
 			new ClassPKInfoItemIdentifier(classPK);
 
 		String version = ParamUtil.getString(httpServletRequest, "version");
 
 		if (Validator.isNotNull(version)) {
-			infoItemIdentifier.setVersion(version);
+			classPKInfoItemIdentifier.setVersion(version);
 		}
 
 		Object infoItem = infoItemObjectProvider.getInfoItem(
-			infoItemIdentifier);
+			classPKInfoItemIdentifier);
 
 		httpServletRequest.setAttribute(InfoDisplayWebKeys.INFO_ITEM, infoItem);
 
