@@ -344,7 +344,7 @@ public class SkuResourceImpl
 		DateConfig expirationDateConfig = new DateConfig(expirationCalendar);
 
 		cpInstance = _cpInstanceService.updateCPInstance(
-			cpInstance.getExternalReferenceCode(), cpInstance.getCPInstanceId(),
+			sku.getExternalReferenceCode(), cpInstance.getCPInstanceId(),
 			sku.getSku(), sku.getGtin(), sku.getManufacturerPartNumber(),
 			GetterUtil.get(sku.getPurchasable(), cpInstance.isPurchasable()),
 			GetterUtil.get(sku.getWidth(), cpInstance.getWidth()),
