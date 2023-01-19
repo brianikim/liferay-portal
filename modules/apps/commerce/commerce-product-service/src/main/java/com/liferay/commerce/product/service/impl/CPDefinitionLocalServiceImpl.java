@@ -323,7 +323,7 @@ public class CPDefinitionLocalServiceImpl
 				displayDateYear, displayDateHour, displayDateMinute,
 				expirationDateMonth, expirationDateDay, expirationDateYear,
 				expirationDateHour, expirationDateMinute, neverExpire, false,
-				false, 1, StringPool.BLANK, null, 0, false, 1, null, null, 0,
+				false, 1, StringPool.BLANK, null, 1, false, 1, null, null, 1,
 				null, false, null, 0, 0, 0, 0, cpInstanceServiceContext);
 		}
 
@@ -407,7 +407,7 @@ public class CPDefinitionLocalServiceImpl
 			expirationDateYear, expirationDateHour, expirationDateMinute,
 			neverExpire, defaultSku, subscriptionEnabled, subscriptionLength,
 			subscriptionType, subscriptionTypeSettingsUnicodeProperties,
-			maxSubscriptionCycles, false, 1, null, null, 0, status,
+			maxSubscriptionCycles, false, 1, null, null, 1, status,
 			serviceContext);
 	}
 
@@ -531,7 +531,7 @@ public class CPDefinitionLocalServiceImpl
 			expirationDateYear, expirationDateHour, expirationDateMinute,
 			neverExpire, defaultSku, subscriptionEnabled, subscriptionLength,
 			subscriptionType, subscriptionTypeSettingsUnicodeProperties,
-			maxSubscriptionCycles, false, 1, null, null, 0, status,
+			maxSubscriptionCycles, false, 1, null, null, 1, status,
 			serviceContext);
 	}
 
