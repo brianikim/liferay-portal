@@ -608,7 +608,8 @@ public class ProductResourceImpl extends BaseProductResourceImpl {
 			GetterUtil.getString(
 				subscriptionConfiguration.getSubscriptionTypeAsString()),
 			null,
-			GetterUtil.getLong(subscriptionConfiguration.getNumberOfLength()),
+			GetterUtil.getLong(
+				subscriptionConfiguration.getNumberOfLength(), 1),
 			productStatus, serviceContext);
 
 		if ((product.getActive() != null) && !product.getActive()) {
