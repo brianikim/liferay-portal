@@ -32,6 +32,7 @@ import com.liferay.commerce.util.CommerceUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.taglib.util.IncludeTag;
 
@@ -85,8 +86,21 @@ public class AddToCartTag extends IncludeTag {
 
 				hasChildCPDefinitions = _cpContentHelper.hasChildCPDefinitions(
 					cpDefinitionId);
+
 				_productSettingsModel = _productHelper.getProductSettingsModel(
 					cpDefinitionId);
+
+				int multipleQuantity =
+					_productSettingsModel.getMultipleQuantity();
+
+				int[] allowedQuantities = ArrayUtil.filter(
+					_productSettingsModel.getAllowedQuantities(),
+					quantity ->
+						(quantity >= _productSettingsModel.getMinQuantity()) &&
+						(quantity <= _productSettingsModel.getMaxQuantity()) &&
+						((quantity % multipleQuantity) == 0));
+
+				_productSettingsModel.setAllowedQuantities(allowedQuantities);
 			}
 
 			String sku = null;
