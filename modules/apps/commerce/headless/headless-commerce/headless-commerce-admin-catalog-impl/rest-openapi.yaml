@@ -818,8 +818,6 @@ components:
                     items:
                         $ref: "#/components/schemas/Category"
                     type: array
-                configuration:
-                    $ref: "#/components/schemas/ProductConfiguration"
                 createDate:
                     example: 2017-07-21
                     format: date
