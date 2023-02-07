@@ -35,6 +35,7 @@ import com.liferay.commerce.product.exception.CPDefinitionMetaDescriptionExcepti
 import com.liferay.commerce.product.exception.CPDefinitionMetaKeywordsException;
 import com.liferay.commerce.product.exception.CPDefinitionMetaTitleException;
 import com.liferay.commerce.product.exception.CPDefinitionProductTypeNameException;
+import com.liferay.commerce.product.exception.CPSubscriptionDateException;
 import com.liferay.commerce.product.model.CPAttachmentFileEntry;
 import com.liferay.commerce.product.model.CPDefinition;
 import com.liferay.commerce.product.model.CPDefinitionLink;
@@ -204,6 +205,10 @@ public class CPDefinitionLocalServiceImpl
 		throws PortalException {
 
 		// Commerce product definition
+
+		_isValidSubscriptionInfo(
+			subscriptionLength, deliverySubscriptionLength,
+			maxSubscriptionCycles, deliveryMaxSubscriptionCycles);
 
 		User user = _userLocalService.getUser(userId);
 
@@ -2576,6 +2581,10 @@ public class CPDefinitionLocalServiceImpl
 				cpDefinitionId);
 		}
 
+		_isValidSubscriptionInfo(
+			subscriptionLength, deliverySubscriptionLength,
+			maxSubscriptionCycles, deliveryMaxSubscriptionCycles);
+
 		cpDefinition.setSubscriptionEnabled(subscriptionEnabled);
 		cpDefinition.setSubscriptionLength(subscriptionLength);
 		cpDefinition.setSubscriptionType(subscriptionType);
@@ -2979,6 +2988,24 @@ public class CPDefinitionLocalServiceImpl
 		}
 
 		return newURLTitleMap;
+	}
+
+	private void _isValidSubscriptionInfo(
+			int subscriptionLength, int deliverySubscriptionLength,
+			long maxSubscriptionCycles, long deliveryMaxSubscriptionCycles)
+		throws CPSubscriptionDateException {
+
+		if ((subscriptionLength < 1) || (deliverySubscriptionLength < 1)) {
+			throw new CPSubscriptionDateException(
+				"Subscription length must be greater than or equal to 1");
+		}
+
+		if ((maxSubscriptionCycles < 0) ||
+			(deliveryMaxSubscriptionCycles < 0)) {
+
+			throw new CPSubscriptionDateException(
+				"Subscription cycles must be greater than or equal to 0");
+		}
 	}
 
 	private boolean _isVersioningEnabled() {
