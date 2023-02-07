@@ -1155,6 +1155,7 @@
 		<exception>CPOptionValueKey</exception>
 		<exception>CPSpecificationOptionKey</exception>
 		<exception>CPSpecificationOptionTitle</exception>
+		<exception>CPSubscriptionDate</exception>
 		<exception>CPTaxCategoryName</exception>
 		<exception>DuplicateCommerceChannel</exception>
 		<exception>DuplicateCommerceChannelAccountEntryRel</exception>
