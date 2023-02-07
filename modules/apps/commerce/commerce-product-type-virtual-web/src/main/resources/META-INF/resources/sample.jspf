@@ -135,7 +135,7 @@
 				);
 
 				if (sampleUrl) {
-					sampleUrl.setAttribute('disabled', false);
+					sampleUrl.removeAttribute('disabled');
 				}
 			}
 
