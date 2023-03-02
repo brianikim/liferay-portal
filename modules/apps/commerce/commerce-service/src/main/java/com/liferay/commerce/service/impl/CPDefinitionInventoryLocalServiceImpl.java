@@ -14,18 +14,26 @@
 
 package com.liferay.commerce.service.impl;
 
+import com.liferay.commerce.inventory.exception.CommerceInventoryWarehouseItemQuantityException;
+import com.liferay.commerce.inventory.service.CommerceInventoryWarehouseItemLocalService;
 import com.liferay.commerce.model.CPDefinitionInventory;
 import com.liferay.commerce.product.model.CPDefinition;
+import com.liferay.commerce.product.model.CPInstance;
 import com.liferay.commerce.product.service.CPDefinitionLocalService;
+import com.liferay.commerce.product.service.CommerceChannelLocalService;
 import com.liferay.commerce.service.base.CPDefinitionInventoryLocalServiceBaseImpl;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.model.SystemEventConstants;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.uuid.PortalUUID;
+
+import java.util.List;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -182,6 +190,40 @@ public class CPDefinitionInventoryLocalServiceImpl
 			cpDefinitionInventoryPersistence.findByPrimaryKey(
 				cpDefinitionInventoryId);
 
+		CPDefinition cpDefinition = _cpDefinitionLocalService.getCPDefinition(
+			cpDefinitionInventory.getCPDefinitionId());
+
+		ServiceContext serviceContext =
+			ServiceContextThreadLocal.getServiceContext();
+
+		long siteGroupId = serviceContext.getScopeGroupId();
+
+		long channelGroupId =
+			_commerceChannelLocalService.getCommerceChannelGroupIdBySiteGroupId(
+				siteGroupId);
+
+		List<CPInstance> cpInstances = cpDefinition.getCPInstances();
+
+		boolean hasStock = false;
+
+		for (CPInstance cpInstance : cpInstances) {
+			int stockQuantity =
+				_commerceInventoryWarehouseItemLocalService.getStockQuantity(
+					cpInstance.getCompanyId(), channelGroupId,
+					cpInstance.getSku());
+
+			if (stockQuantity != 0) {
+				hasStock = true;
+
+				break;
+			}
+		}
+
+		if (!backOrders && !hasStock) {
+			throw new CommerceInventoryWarehouseItemQuantityException(
+				"There are no product units in inventory");
+		}
+
 		if (_cpDefinitionLocalService.isVersionable(
 				cpDefinitionInventory.getCPDefinitionId())) {
 
@@ -208,6 +250,13 @@ public class CPDefinitionInventoryLocalServiceImpl
 
 		return cpDefinitionInventoryPersistence.update(cpDefinitionInventory);
 	}
+
+	@Reference
+	private CommerceChannelLocalService _commerceChannelLocalService;
+
+	@Reference
+	private CommerceInventoryWarehouseItemLocalService
+		_commerceInventoryWarehouseItemLocalService;
 
 	@Reference
 	private CPDefinitionLocalService _cpDefinitionLocalService;
