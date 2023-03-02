@@ -1348,9 +1348,9 @@
 			}
 		],
 		"taxCategory": "Normal Product",
-		"warehouse1": 0,
-		"warehouse2": 0,
-		"warehouse3": 0,
+		"warehouse1": 20,
+		"warehouse2": 20,
+		"warehouse3": 20,
 		"weight": 4.7,
 		"width": 7.3
 	},
@@ -1864,9 +1864,9 @@
 			}
 		],
 		"taxCategory": "Normal Product",
-		"warehouse1": 0,
-		"warehouse2": 0,
-		"warehouse3": 0,
+		"warehouse1": 20,
+		"warehouse2": 20,
+		"warehouse3": 20,
 		"weight": 4.76,
 		"width": 2.1
 	},
