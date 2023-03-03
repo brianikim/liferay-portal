@@ -39,6 +39,7 @@ page import="com.liferay.commerce.constants.CommerceWebKeys" %><%@
 page import="com.liferay.commerce.context.CommerceContext" %><%@
 page import="com.liferay.commerce.currency.model.CommerceCurrency" %><%@
 page import="com.liferay.commerce.inventory.CPDefinitionInventoryEngine" %><%@
+page import="com.liferay.commerce.inventory.exception.CommerceInventoryWarehouseItemQuantityException" %><%@
 page import="com.liferay.commerce.model.CPDAvailabilityEstimate" %><%@
 page import="com.liferay.commerce.model.CPDefinitionInventory" %><%@
 page import="com.liferay.commerce.model.CommerceAvailabilityEstimate" %><%@

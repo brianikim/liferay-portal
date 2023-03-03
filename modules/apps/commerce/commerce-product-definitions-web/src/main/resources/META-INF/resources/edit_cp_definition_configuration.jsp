@@ -133,6 +133,7 @@ boolean shippable = BeanParamUtil.getBoolean(cpDefinition, request, "shippable",
 
 						</aui:select>
 
+						<liferay-ui:error exception="<%= CommerceInventoryWarehouseItemQuantityException.class %>" message="cannot-disable-back-orders-with-empty-stock-quantity" />
 						<liferay-ui:error exception="<%= NumberFormatException.class %>" message="there-was-an-error-processing-one-or-more-of-the-quantities-entered" />
 
 						<aui:input label="low-stock-threshold" name="minStockQuantity">

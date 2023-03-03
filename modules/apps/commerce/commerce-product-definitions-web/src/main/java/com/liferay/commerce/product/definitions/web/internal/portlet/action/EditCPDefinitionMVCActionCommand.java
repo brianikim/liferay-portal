@@ -19,6 +19,7 @@ import com.liferay.asset.kernel.exception.AssetTagException;
 import com.liferay.commerce.account.model.CommerceAccountGroupRel;
 import com.liferay.commerce.account.service.CommerceAccountGroupRelService;
 import com.liferay.commerce.exception.NoSuchCPDefinitionInventoryException;
+import com.liferay.commerce.inventory.exception.CommerceInventoryWarehouseItemQuantityException;
 import com.liferay.commerce.model.CPDefinitionInventory;
 import com.liferay.commerce.product.configuration.CProductVersionConfiguration;
 import com.liferay.commerce.product.constants.CPInstanceConstants;
@@ -211,6 +212,8 @@ public class EditCPDefinitionMVCActionCommand extends BaseMVCActionCommand {
 			}
 			else if (throwable instanceof AssetCategoryException ||
 					 throwable instanceof AssetTagException ||
+					 throwable instanceof
+						 CommerceInventoryWarehouseItemQuantityException ||
 					 throwable instanceof CPDefinitionExpirationDateException ||
 					 throwable instanceof
 						 CPDefinitionMetaDescriptionException ||
