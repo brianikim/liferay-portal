@@ -15,6 +15,7 @@
 package com.liferay.commerce.internal.product.content.contributor;
 
 import com.liferay.commerce.product.constants.CPContentContributorConstants;
+import com.liferay.commerce.product.model.CPDefinition;
 import com.liferay.commerce.product.model.CPInstance;
 import com.liferay.commerce.product.model.CPSubscriptionInfo;
 import com.liferay.commerce.product.model.CommerceChannel;
@@ -72,10 +73,14 @@ public class SubscriptionInfoCPContentContributor
 			return jsonObject;
 		}
 
-		jsonObject.put(
-			CPContentContributorConstants.SUBSCRIPTION_INFO,
-			_getSubscriptionInfo(
-				cpInstance.getCPSubscriptionInfo(), httpServletRequest));
+		CPDefinition cpDefinition = cpInstance.getCPDefinition();
+
+		if (cpDefinition.isSubscriptionEnabled()) {
+			jsonObject.put(
+				CPContentContributorConstants.SUBSCRIPTION_INFO,
+				_getSubscriptionInfo(
+					cpInstance.getCPSubscriptionInfo(), httpServletRequest));
+		}
 
 		return jsonObject;
 	}
