@@ -43,6 +43,9 @@ import com.liferay.portal.kernel.portlet.PortletProviderUtil;
 import com.liferay.portal.kernel.portlet.PortletQName;
 import com.liferay.portal.kernel.portlet.url.builder.PortletURLBuilder;
 import com.liferay.portal.kernel.search.Sort;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
@@ -113,7 +116,17 @@ public class CommercePaymentMethodTableFDSView
 				fetchCommercePaymentMethodGroupRel(
 					commerceChannel.getGroupId(), paymentMethod.getKey());
 
-		if (commercePaymentMethodGroupRel != null) {
+		PermissionChecker permissionChecker =
+			PermissionThreadLocal.getPermissionChecker();
+
+		if ((commercePaymentMethodGroupRel != null) &&
+			permissionChecker.hasPermission(
+				commercePaymentMethodGroupRel.getGroupId(),
+				CommercePaymentMethodGroupRel.class.getName(),
+				commercePaymentMethodGroupRel.
+					getCommercePaymentMethodGroupRelId(),
+				ActionKeys.PERMISSIONS)) {
+
 			dropdownItemList.add(
 				dropdownItem -> {
 					dropdownItem.setHref(
