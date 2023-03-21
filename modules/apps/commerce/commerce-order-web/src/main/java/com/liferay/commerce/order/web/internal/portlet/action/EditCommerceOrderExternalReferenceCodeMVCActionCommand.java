@@ -16,6 +16,7 @@ package com.liferay.commerce.order.web.internal.portlet.action;
 
 import com.liferay.commerce.constants.CommercePortletKeys;
 import com.liferay.commerce.exception.CommerceOrderNoteContentException;
+import com.liferay.commerce.exception.DuplicateCommerceOrderExternalReferenceCodeException;
 import com.liferay.commerce.exception.NoSuchOrderException;
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.service.CommerceOrderService;
@@ -62,6 +63,19 @@ public class EditCommerceOrderExternalReferenceCodeMVCActionCommand
 			}
 			else if (exception instanceof CommerceOrderNoteContentException) {
 				SessionErrors.add(actionRequest, exception.getClass());
+			}
+			else if (exception instanceof
+						DuplicateCommerceOrderExternalReferenceCodeException) {
+
+				hideDefaultErrorMessage(actionRequest);
+				hideDefaultSuccessMessage(actionRequest);
+
+				SessionErrors.add(actionRequest, exception.getClass());
+
+				String redirect = ParamUtil.getString(
+					actionRequest, "redirect");
+
+				sendRedirect(actionRequest, actionResponse, redirect);
 			}
 			else {
 				throw exception;

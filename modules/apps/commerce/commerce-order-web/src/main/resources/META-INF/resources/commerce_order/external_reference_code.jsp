@@ -29,6 +29,8 @@ CommerceOrderEditDisplayContext commerceOrderEditDisplayContext = (CommerceOrder
 		<aui:input name="redirect" type="hidden" value="<%= currentURL %>" />
 		<aui:input name="commerceOrderId" type="hidden" />
 
+		<liferay-ui:error exception="<%= DuplicateCommerceOrderExternalReferenceCodeException.class %>" message="please-enter-a-unique-external-reference-code" />
+
 		<aui:input name="externalReferenceCode" type="text" wrapperCssClass="form-group-item" />
 	</aui:form>
 </commerce-ui:modal-content>
