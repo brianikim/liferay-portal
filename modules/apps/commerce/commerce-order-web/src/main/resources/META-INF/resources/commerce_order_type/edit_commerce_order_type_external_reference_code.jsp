@@ -31,6 +31,8 @@ CommerceOrderType commerceOrderType = commerceOrderTypeDisplayContext.getCommerc
 
 		<aui:model-context bean="<%= commerceOrderType %>" model="<%= CommerceOrderType.class %>" />
 
+		<liferay-ui:error exception="<%= DuplicateCommerceOrderTypeExternalReferenceCodeException.class %>" message="please-enter-a-unique-external-reference-code" />
+
 		<aui:input name="externalReferenceCode" type="text" value="<%= commerceOrderType.getExternalReferenceCode() %>" wrapperCssClass="form-group-item" />
 	</aui:form>
 </commerce-ui:modal-content>
