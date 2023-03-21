@@ -189,8 +189,12 @@ public class CommerceShipmentFDSDataProvider
 					CommerceAccountConstants.SITE_TYPE_B2X, StringPool.BLANK,
 					QueryUtil.ALL_POS, QueryUtil.ALL_POS);
 
-			return ListUtil.toLongArray(
+			long[] commerceAccountsArray = ListUtil.toLongArray(
 				commerceAccounts, CommerceAccountModel::getCommerceAccountId);
+
+			if (commerceAccountsArray.length != 0) {
+				return commerceAccountsArray;
+			}
 		}
 
 		return null;
