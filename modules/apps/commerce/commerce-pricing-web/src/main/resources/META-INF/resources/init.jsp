@@ -55,6 +55,7 @@ page import="com.liferay.commerce.price.list.model.CommercePriceList" %><%@
 page import="com.liferay.commerce.price.list.model.CommerceTierPriceEntry" %><%@
 page import="com.liferay.commerce.pricing.constants.CommercePriceModifierConstants" %><%@
 page import="com.liferay.commerce.pricing.exception.CommercePriceModifierExpirationDateException" %><%@
+page import="com.liferay.commerce.pricing.exception.DuplicateCommercePricingClassExternalReferenceCodeException" %><%@
 page import="com.liferay.commerce.pricing.exception.NoSuchPricingClassException" %><%@
 page import="com.liferay.commerce.pricing.model.CommercePriceModifier" %><%@
 page import="com.liferay.commerce.pricing.model.CommercePricingClass" %><%@

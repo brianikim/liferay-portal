@@ -31,6 +31,8 @@ CommercePricingClass commercePricingClass = commercePricingClassDisplayContext.g
 
 		<aui:model-context bean="<%= commercePricingClass %>" model="<%= CommercePricingClass.class %>" />
 
+		<liferay-ui:error exception="<%= DuplicateCommercePricingClassExternalReferenceCodeException.class %>" message="please-enter-a-unique-external-reference-code" />
+
 		<aui:input name="externalReferenceCode" type="text" value="<%= commercePricingClass.getExternalReferenceCode() %>" wrapperCssClass="form-group-item" />
 	</aui:form>
 </commerce-ui:modal-content>
