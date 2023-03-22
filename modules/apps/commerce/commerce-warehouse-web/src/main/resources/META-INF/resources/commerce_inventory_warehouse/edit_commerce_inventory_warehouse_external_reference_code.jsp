@@ -31,6 +31,8 @@ CommerceInventoryWarehouse commerceInventoryWarehouse = commerceInventoryWarehou
 
 		<aui:model-context bean="<%= commerceInventoryWarehouse %>" model="<%= CommerceInventoryWarehouse.class %>" />
 
+		<liferay-ui:error exception="<%= DuplicateCommerceInventoryWarehouseExternalReferenceCodeException.class %>" message="please-enter-a-unique-external-reference-code" />
+
 		<aui:input name="externalReferenceCode" type="text" value="<%= commerceInventoryWarehouse.getExternalReferenceCode() %>" wrapperCssClass="form-group-item" />
 	</aui:form>
 </commerce-ui:modal-content>
