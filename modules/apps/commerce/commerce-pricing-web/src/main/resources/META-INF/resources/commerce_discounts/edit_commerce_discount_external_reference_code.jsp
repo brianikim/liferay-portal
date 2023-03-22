@@ -31,6 +31,8 @@ CommerceDiscount commerceDiscount = commerceDiscountDisplayContext.getCommerceDi
 
 		<aui:model-context bean="<%= commerceDiscount %>" model="<%= CommerceDiscount.class %>" />
 
+		<liferay-ui:error exception="<%= DuplicateCommerceDiscountExternalReferenceCodeException.class %>" message="please-enter-a-unique-external-reference-code" />
+
 		<aui:input name="externalReferenceCode" type="text" value="<%= commerceDiscount.getExternalReferenceCode() %>" wrapperCssClass="form-group-item" />
 	</aui:form>
 </commerce-ui:modal-content>

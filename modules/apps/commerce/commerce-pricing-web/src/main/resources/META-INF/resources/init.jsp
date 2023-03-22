@@ -36,6 +36,7 @@ page import="com.liferay.commerce.discount.exception.CommerceDiscountCouponCodeE
 page import="com.liferay.commerce.discount.exception.CommerceDiscountExpirationDateException" %><%@
 page import="com.liferay.commerce.discount.exception.CommerceDiscountMaxPriceValueException" %><%@
 page import="com.liferay.commerce.discount.exception.DuplicateCommerceDiscountException" %><%@
+page import="com.liferay.commerce.discount.exception.DuplicateCommerceDiscountExternalReferenceCodeException" %><%@
 page import="com.liferay.commerce.discount.model.CommerceDiscount" %><%@
 page import="com.liferay.commerce.discount.model.CommerceDiscountRule" %><%@
 page import="com.liferay.commerce.discount.rule.type.CommerceDiscountRuleType" %><%@
