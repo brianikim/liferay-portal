@@ -31,6 +31,8 @@ CProduct cProduct = cpDefinitionsDisplayContext.getCProduct();
 
 		<aui:model-context bean="<%= cProduct %>" model="<%= CProduct.class %>" />
 
+		<liferay-ui:error exception="<%= DuplicateCProductExternalReferenceCodeException.class %>" message="please-enter-a-unique-external-reference-code" />
+
 		<aui:input name="externalReferenceCode" type="text" value="<%= cProduct.getExternalReferenceCode() %>" wrapperCssClass="form-group-item" />
 	</aui:form>
 </commerce-ui:modal-content>

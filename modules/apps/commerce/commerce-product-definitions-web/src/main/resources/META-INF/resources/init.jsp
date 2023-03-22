@@ -82,6 +82,7 @@ page import="com.liferay.commerce.product.exception.CPInstanceReplacementCPInsta
 page import="com.liferay.commerce.product.exception.CPInstanceSkuException" %><%@
 page import="com.liferay.commerce.product.exception.DuplicateCPAttachmentFileEntryException" %><%@
 page import="com.liferay.commerce.product.exception.DuplicateCPInstanceException" %><%@
+page import="com.liferay.commerce.product.exception.DuplicateCProductExternalReferenceCodeException" %><%@
 page import="com.liferay.commerce.product.exception.NoSuchCPAttachmentFileEntryException" %><%@
 page import="com.liferay.commerce.product.exception.NoSuchCPDefinitionException" %><%@
 page import="com.liferay.commerce.product.exception.NoSuchCPDefinitionLinkException" %><%@
