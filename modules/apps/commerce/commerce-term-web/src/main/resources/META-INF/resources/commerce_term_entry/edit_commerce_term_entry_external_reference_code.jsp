@@ -31,6 +31,8 @@ CommerceTermEntry commerceTermEntry = commerceTermEntryDisplayContext.getCommerc
 
 		<aui:model-context bean="<%= commerceTermEntry %>" model="<%= CommerceTermEntry.class %>" />
 
+		<liferay-ui:error exception="<%= DuplicateCommerceTermEntryExternalReferenceCodeException.class %>" message="please-enter-a-unique-external-reference-code" />
+
 		<aui:input name="externalReferenceCode" type="text" value="<%= commerceTermEntry.getExternalReferenceCode() %>" wrapperCssClass="form-group-item" />
 	</aui:form>
 </commerce-ui:modal-content>
