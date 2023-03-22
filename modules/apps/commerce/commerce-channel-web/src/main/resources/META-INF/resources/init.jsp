@@ -36,6 +36,7 @@ page import="com.liferay.commerce.constants.CommerceOrderConstants" %><%@
 page import="com.liferay.commerce.currency.model.CommerceCurrency" %><%@
 page import="com.liferay.commerce.pricing.constants.CommercePricingConstants" %><%@
 page import="com.liferay.commerce.product.channel.CommerceChannelType" %><%@
+page import="com.liferay.commerce.product.exception.DuplicateCommerceChannelExternalReferenceCodeException" %><%@
 page import="com.liferay.commerce.product.exception.NoSuchChannelException" %><%@
 page import="com.liferay.commerce.product.model.CPTaxCategory" %><%@
 page import="com.liferay.commerce.product.model.CommerceChannel" %><%@

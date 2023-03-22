@@ -30,6 +30,8 @@ CommerceChannelDisplayContext commerceChannelDisplayContext = (CommerceChannelDi
 
 		<aui:input name="commerceChannelId" type="hidden" />
 
+		<liferay-ui:error exception="<%= DuplicateCommerceChannelExternalReferenceCodeException.class %>" message="please-enter-a-unique-external-reference-code" />
+
 		<aui:input name="externalReferenceCode" type="text" wrapperCssClass="form-group-item" />
 	</aui:form>
 </commerce-ui:modal-content>
