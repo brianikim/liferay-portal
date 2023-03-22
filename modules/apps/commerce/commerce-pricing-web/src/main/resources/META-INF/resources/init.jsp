@@ -47,6 +47,7 @@ page import="com.liferay.commerce.price.list.exception.CommercePriceListExpirati
 page import="com.liferay.commerce.price.list.exception.CommercePriceListMaxPriceValueException" %><%@
 page import="com.liferay.commerce.price.list.exception.CommercePriceListParentPriceListGroupIdException" %><%@
 page import="com.liferay.commerce.price.list.exception.DuplicateCommercePriceEntryException" %><%@
+page import="com.liferay.commerce.price.list.exception.DuplicateCommercePriceListExternalReferenceCodeException" %><%@
 page import="com.liferay.commerce.price.list.exception.DuplicateCommerceTierPriceEntryException" %><%@
 page import="com.liferay.commerce.price.list.model.CommercePriceEntry" %><%@
 page import="com.liferay.commerce.price.list.model.CommercePriceList" %><%@
