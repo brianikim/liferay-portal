@@ -15,6 +15,7 @@
 package com.liferay.commerce.catalog.web.internal.portlet.action;
 
 import com.liferay.commerce.product.constants.CPPortletKeys;
+import com.liferay.commerce.product.exception.DuplicateCommerceCatalogExternalReferenceCodeException;
 import com.liferay.commerce.product.exception.NoSuchCatalogException;
 import com.liferay.commerce.product.service.CommerceCatalogService;
 import com.liferay.portal.kernel.log.Log;
@@ -59,6 +60,19 @@ public class EditCommerceCatalogExternalReferenceCodeMVCActionCommand
 				SessionErrors.add(actionRequest, exception.getClass());
 
 				actionResponse.setRenderParameter("mvcPath", "/error.jsp");
+			}
+			else if (exception instanceof
+						DuplicateCommerceCatalogExternalReferenceCodeException) {
+
+				hideDefaultErrorMessage(actionRequest);
+				hideDefaultSuccessMessage(actionRequest);
+
+				SessionErrors.add(actionRequest, exception.getClass());
+
+				String redirect = ParamUtil.getString(
+					actionRequest, "redirect");
+
+				sendRedirect(actionRequest, actionResponse, redirect);
 			}
 			else {
 				_log.error(exception);

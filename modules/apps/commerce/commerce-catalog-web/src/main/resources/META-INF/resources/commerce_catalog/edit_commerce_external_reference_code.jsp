@@ -31,6 +31,8 @@ CommerceCatalog commerceCatalog = commerceCatalogDisplayContext.getCommerceCatal
 
 		<aui:model-context bean="<%= commerceCatalog %>" model="<%= CommerceCatalog.class %>" />
 
+		<liferay-ui:error exception="<%= DuplicateCommerceCatalogExternalReferenceCodeException.class %>" message="please-enter-a-unique-external-reference-code" />
+
 		<aui:input name="externalReferenceCode" type="text" value="<%= HtmlUtil.escape(commerceCatalog.getExternalReferenceCode()) %>" wrapperCssClass="form-group-item" />
 	</aui:form>
 </commerce-ui:modal-content>
