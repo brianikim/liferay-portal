@@ -14,9 +14,9 @@
 
 package com.liferay.headless.commerce.admin.pricing.internal.dto.v2_0.converter;
 
-import com.liferay.commerce.account.model.CommerceAccountGroup;
-import com.liferay.commerce.account.service.CommerceAccountGroupService;
-import com.liferay.headless.commerce.admin.pricing.dto.v2_0.AccountGroup;
+import com.liferay.account.model.AccountGroup;
+import com.liferay.account.service.AccountGroupService;
+import com.liferay.headless.commerce.admin.pricing.dto.v2_0.PriceListAccountGroup;
 import com.liferay.portal.vulcan.dto.converter.DTOConverter;
 import com.liferay.portal.vulcan.dto.converter.DTOConverterContext;
 
@@ -27,11 +27,11 @@ import org.osgi.service.component.annotations.Reference;
  * @author Alessio Antonio Rendina
  */
 @Component(
-	property = "dto.class.name=com.liferay.commerce.account.model.CommerceAccountGroup",
+	property = "dto.class.name=com.liferay.account.model.AccountGroup",
 	service = {AccountGroupDTOConverter.class, DTOConverter.class}
 )
 public class AccountGroupDTOConverter
-	implements DTOConverter<CommerceAccountGroup, AccountGroup> {
+	implements DTOConverter<AccountGroup, PriceListAccountGroup> {
 
 	@Override
 	public String getContentType() {
@@ -39,22 +39,21 @@ public class AccountGroupDTOConverter
 	}
 
 	@Override
-	public AccountGroup toDTO(DTOConverterContext dtoConverterContext)
+	public PriceListAccountGroup toDTO(DTOConverterContext dtoConverterContext)
 		throws Exception {
 
-		CommerceAccountGroup commerceAccountGroup =
-			_commerceAccountGroupService.getCommerceAccountGroup(
-				(Long)dtoConverterContext.getId());
+		AccountGroup accountGroup = _accountGroupService.getAccountGroup(
+			(Long)dtoConverterContext.getId());
 
-		return new AccountGroup() {
+		return new PriceListAccountGroup() {
 			{
-				id = commerceAccountGroup.getCommerceAccountGroupId();
-				name = commerceAccountGroup.getName();
+				id = accountGroup.getAccountGroupId();
+				name = accountGroup.getName();
 			}
 		};
 	}
 
 	@Reference
-	private CommerceAccountGroupService _commerceAccountGroupService;
+	private AccountGroupService _accountGroupService;
 
 }
