@@ -14,12 +14,12 @@
 
 package com.liferay.headless.commerce.admin.catalog.internal.resource.v1_0;
 
+import com.liferay.account.model.AccountGroup;
+import com.liferay.account.service.AccountGroupRelService;
+import com.liferay.account.service.AccountGroupService;
 import com.liferay.asset.kernel.model.AssetTag;
 import com.liferay.asset.kernel.service.AssetCategoryLocalService;
 import com.liferay.asset.kernel.service.AssetTagService;
-import com.liferay.commerce.account.model.CommerceAccountGroup;
-import com.liferay.commerce.account.service.CommerceAccountGroupRelService;
-import com.liferay.commerce.account.service.CommerceAccountGroupService;
 import com.liferay.commerce.price.list.service.CommercePriceEntryLocalService;
 import com.liferay.commerce.price.list.service.CommercePriceListLocalService;
 import com.liferay.commerce.product.configuration.CProductVersionConfiguration;
@@ -1045,7 +1045,7 @@ public class ProductResourceImpl extends BaseProductResourceImpl {
 			product.getProductAccountGroups();
 
 		if (productAccountGroups != null) {
-			_commerceAccountGroupRelService.deleteCommerceAccountGroupRels(
+			_accountGroupRelService.deleteAccountGroupRels(
 				CPDefinition.class.getName(), cpDefinition.getCPDefinitionId());
 
 			Stream<ProductAccountGroup> productAccountGroupStream =
@@ -1059,15 +1059,13 @@ public class ProductResourceImpl extends BaseProductResourceImpl {
 						return productAccountGroup.getAccountGroupId();
 					}
 
-					CommerceAccountGroup commerceAccountGroup = null;
+					AccountGroup accountGroup = null;
 
 					try {
-						commerceAccountGroup =
-							_commerceAccountGroupService.
-								fetchByExternalReferenceCode(
-									contextCompany.getCompanyId(),
-									productAccountGroup.
-										getExternalReferenceCode());
+						accountGroup =
+							_accountGroupService.fetchByExternalReferenceCode(
+								contextCompany.getCompanyId(),
+								productAccountGroup.getExternalReferenceCode());
 					}
 					catch (PortalException portalException) {
 						if (_log.isDebugEnabled()) {
@@ -1075,11 +1073,11 @@ public class ProductResourceImpl extends BaseProductResourceImpl {
 						}
 					}
 
-					if (commerceAccountGroup == null) {
+					if (accountGroup == null) {
 						return null;
 					}
 
-					return commerceAccountGroup.getCommerceAccountGroupId();
+					return accountGroup.getAccountGroupId();
 				}
 			).collect(
 				Collectors.toList()
@@ -1090,7 +1088,7 @@ public class ProductResourceImpl extends BaseProductResourceImpl {
 					continue;
 				}
 
-				_commerceAccountGroupRelService.addCommerceAccountGroupRel(
+				_accountGroupRelService.addAccountGroupRel(
 					CPDefinition.class.getName(),
 					cpDefinition.getCPDefinitionId(), accountGroupId,
 					serviceContext);
@@ -1309,6 +1307,12 @@ public class ProductResourceImpl extends BaseProductResourceImpl {
 		ProductResourceImpl.class);
 
 	@Reference
+	private AccountGroupRelService _accountGroupRelService;
+
+	@Reference
+	private AccountGroupService _accountGroupService;
+
+	@Reference
 	private AssetCategoryLocalService _assetCategoryLocalService;
 
 	@Reference
@@ -1316,12 +1320,6 @@ public class ProductResourceImpl extends BaseProductResourceImpl {
 
 	@Reference
 	private ClassNameLocalService _classNameLocalService;
-
-	@Reference
-	private CommerceAccountGroupRelService _commerceAccountGroupRelService;
-
-	@Reference
-	private CommerceAccountGroupService _commerceAccountGroupService;
 
 	@Reference
 	private CommerceCatalogLocalService _commerceCatalogLocalService;
