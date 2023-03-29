@@ -40,7 +40,7 @@ import org.osgi.service.component.annotations.Reference;
 	service = DTOConverter.class
 )
 public class AccountDTOConverter
-	implements DTOConverter<AccountEntry, Account> {
+	implements DTOConverter<AccountEntry, OrderAccount> {
 
 	@Override
 	public String getContentType() {
