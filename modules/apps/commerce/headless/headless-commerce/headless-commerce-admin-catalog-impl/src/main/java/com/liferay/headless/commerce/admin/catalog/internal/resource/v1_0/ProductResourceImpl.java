@@ -15,6 +15,7 @@
 package com.liferay.headless.commerce.admin.catalog.internal.resource.v1_0;
 
 import com.liferay.account.model.AccountGroup;
+import com.liferay.account.service.AccountGroupRelLocalService;
 import com.liferay.account.service.AccountGroupRelService;
 import com.liferay.account.service.AccountGroupService;
 import com.liferay.asset.kernel.model.AssetTag;
@@ -1045,8 +1046,9 @@ public class ProductResourceImpl extends BaseProductResourceImpl {
 			product.getProductAccountGroups();
 
 		if (productAccountGroups != null) {
-			_accountGroupRelService.deleteAccountGroupRels(
-				CPDefinition.class.getName(), cpDefinition.getCPDefinitionId());
+			_accountGroupRelLocalService.deleteAccountGroupRels(
+				CPDefinition.class.getName(),
+				new long[] {cpDefinition.getCPDefinitionId()});
 
 			Stream<ProductAccountGroup> productAccountGroupStream =
 				Arrays.stream(productAccountGroups);
@@ -1063,9 +1065,11 @@ public class ProductResourceImpl extends BaseProductResourceImpl {
 
 					try {
 						accountGroup =
-							_accountGroupService.fetchByExternalReferenceCode(
-								contextCompany.getCompanyId(),
-								productAccountGroup.getExternalReferenceCode());
+							_accountGroupService.
+								fetchAccountGroupByExternalReferenceCode(
+									productAccountGroup.
+										getExternalReferenceCode(),
+									contextCompany.getCompanyId());
 					}
 					catch (PortalException portalException) {
 						if (_log.isDebugEnabled()) {
@@ -1089,9 +1093,8 @@ public class ProductResourceImpl extends BaseProductResourceImpl {
 				}
 
 				_accountGroupRelService.addAccountGroupRel(
-					CPDefinition.class.getName(),
-					cpDefinition.getCPDefinitionId(), accountGroupId,
-					serviceContext);
+					accountGroupId, CPDefinition.class.getName(),
+					cpDefinition.getCPDefinitionId());
 			}
 		}
 
@@ -1305,6 +1308,9 @@ public class ProductResourceImpl extends BaseProductResourceImpl {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		ProductResourceImpl.class);
+
+	@Reference
+	private AccountGroupRelLocalService _accountGroupRelLocalService;
 
 	@Reference
 	private AccountGroupRelService _accountGroupRelService;
