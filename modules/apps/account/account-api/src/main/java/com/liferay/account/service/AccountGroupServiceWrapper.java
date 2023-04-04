@@ -59,6 +59,16 @@ public class AccountGroupServiceWrapper
 		_accountGroupService.deleteAccountGroups(accountGroupIds);
 	}
 
+	@Override
+	public com.liferay.account.model.AccountGroup
+			fetchAccountGroupByExternalReferenceCode(
+				String externalReferenceCode, long companyId)
+		throws com.liferay.portal.kernel.security.auth.PrincipalException {
+
+		return _accountGroupService.fetchAccountGroupByExternalReferenceCode(
+			externalReferenceCode, companyId);
+	}
+
 	/**
 	 * Returns the OSGi service identifier.
 	 *
