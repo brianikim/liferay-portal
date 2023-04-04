@@ -79,7 +79,7 @@ public class AccountGroupServiceImpl extends AccountGroupServiceBaseImpl {
 	@Override
 	public AccountGroup fetchAccountGroupByExternalReferenceCode(
 			String externalReferenceCode, long companyId)
-		throws PrincipalException {
+		throws PortalException {
 
 		AccountGroup accountGroup =
 			accountGroupLocalService.fetchAccountGroupByExternalReferenceCode(
@@ -91,6 +91,16 @@ public class AccountGroupServiceImpl extends AccountGroupServiceBaseImpl {
 		}
 
 		return accountGroup;
+	}
+
+	@Override
+	public AccountGroup getAccountGroup(long accountGroupId)
+		throws PortalException {
+
+		_accountGroupModelResourcePermission.check(
+			getPermissionChecker(), accountGroupId, ActionKeys.VIEW);
+
+		return accountGroupLocalService.getAccountGroup(accountGroupId);
 	}
 
 	@Override
