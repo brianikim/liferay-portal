@@ -20,6 +20,7 @@ import com.liferay.account.service.base.AccountGroupServiceBaseImpl;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.search.BaseModelSearchResult;
+import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
@@ -73,6 +74,23 @@ public class AccountGroupServiceImpl extends AccountGroupServiceBaseImpl {
 		for (long accountGroupId : accountGroupIds) {
 			deleteAccountGroup(accountGroupId);
 		}
+	}
+
+	@Override
+	public AccountGroup fetchAccountGroupByExternalReferenceCode(
+			String externalReferenceCode, long companyId)
+		throws PrincipalException {
+
+		AccountGroup accountGroup =
+			accountGroupLocalService.fetchAccountGroupByExternalReferenceCode(
+				externalReferenceCode, companyId);
+
+		if (accountGroup != null) {
+			_accountGroupModelResourcePermission.check(
+				getPermissionChecker(), accountGroup, ActionKeys.VIEW);
+		}
+
+		return accountGroup;
 	}
 
 	@Override

@@ -27,6 +27,8 @@ public class AccountConstants {
 
 	public static final String ACCOUNT_ENTRY_TYPE_BUSINESS = "business";
 
+	public static final long ACCOUNT_ID_ADMIN = Long.MIN_VALUE;
+
 	public static final String ACCOUNT_ENTRY_TYPE_GUEST = "guest";
 
 	public static final String ACCOUNT_ENTRY_TYPE_PERSON = "person";
