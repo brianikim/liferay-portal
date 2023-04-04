@@ -40,7 +40,7 @@ import org.osgi.service.component.annotations.ServiceScope;
 	service = {NestedFieldSupport.class, PricingAccountGroupResource.class}
 )
 public class PricingAccountGroupResourceImpl
-	extends BasePricingAccountGroupResourceImpl {
+	extends BasePricingAccountGroupResourceImpl implements NestedFieldSupport {
 
 	@NestedField(
 		parentClass = DiscountAccountGroup.class, value = "accountGroup"
