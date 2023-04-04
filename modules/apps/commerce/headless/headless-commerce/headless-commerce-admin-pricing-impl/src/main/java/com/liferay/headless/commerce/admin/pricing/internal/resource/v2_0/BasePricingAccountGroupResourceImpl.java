@@ -14,8 +14,8 @@
 
 package com.liferay.headless.commerce.admin.pricing.internal.resource.v2_0;
 
-import com.liferay.headless.commerce.admin.pricing.dto.v2_0.AccountGroup;
-import com.liferay.headless.commerce.admin.pricing.resource.v2_0.AccountGroupResource;
+import com.liferay.headless.commerce.admin.pricing.dto.v2_0.PricingAccountGroup;
+import com.liferay.headless.commerce.admin.pricing.resource.v2_0.PricingAccountGroupResource;
 import com.liferay.petra.function.UnsafeFunction;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.GroupedModel;
@@ -49,8 +49,8 @@ import javax.ws.rs.core.UriInfo;
  */
 @Generated("")
 @javax.ws.rs.Path("/v2.0")
-public abstract class BaseAccountGroupResourceImpl
-	implements AccountGroupResource {
+public abstract class BasePricingAccountGroupResourceImpl
+	implements PricingAccountGroupResource {
 
 	/**
 	 * Invoke this method with the command line:
@@ -66,7 +66,11 @@ public abstract class BaseAccountGroupResourceImpl
 		}
 	)
 	@io.swagger.v3.oas.annotations.tags.Tags(
-		value = {@io.swagger.v3.oas.annotations.tags.Tag(name = "AccountGroup")}
+		value = {
+			@io.swagger.v3.oas.annotations.tags.Tag(
+				name = "PricingAccountGroup"
+			)
+		}
 	)
 	@javax.ws.rs.GET
 	@javax.ws.rs.Path(
@@ -74,14 +78,14 @@ public abstract class BaseAccountGroupResourceImpl
 	)
 	@javax.ws.rs.Produces({"application/json", "application/xml"})
 	@Override
-	public AccountGroup getDiscountAccountGroupAccountGroup(
+	public PricingAccountGroup getDiscountAccountGroupAccountGroup(
 			@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 			@javax.validation.constraints.NotNull
 			@javax.ws.rs.PathParam("discountAccountGroupId")
 			Long discountAccountGroupId)
 		throws Exception {
 
-		return new AccountGroup();
+		return new PricingAccountGroup();
 	}
 
 	/**
@@ -98,7 +102,11 @@ public abstract class BaseAccountGroupResourceImpl
 		}
 	)
 	@io.swagger.v3.oas.annotations.tags.Tags(
-		value = {@io.swagger.v3.oas.annotations.tags.Tag(name = "AccountGroup")}
+		value = {
+			@io.swagger.v3.oas.annotations.tags.Tag(
+				name = "PricingAccountGroup"
+			)
+		}
 	)
 	@javax.ws.rs.GET
 	@javax.ws.rs.Path(
@@ -106,14 +114,14 @@ public abstract class BaseAccountGroupResourceImpl
 	)
 	@javax.ws.rs.Produces({"application/json", "application/xml"})
 	@Override
-	public AccountGroup getPriceListAccountGroupAccountGroup(
+	public PricingAccountGroup getPriceListAccountGroupAccountGroup(
 			@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 			@javax.validation.constraints.NotNull
 			@javax.ws.rs.PathParam("priceListAccountGroupId")
 			Long priceListAccountGroupId)
 		throws Exception {
 
-		return new AccountGroup();
+		return new PricingAccountGroup();
 	}
 
 	public void setContextAcceptLanguage(AcceptLanguage contextAcceptLanguage) {
@@ -290,6 +298,6 @@ public abstract class BaseAccountGroupResourceImpl
 	protected SortParserProvider sortParserProvider;
 
 	private static final com.liferay.portal.kernel.log.Log _log =
-		LogFactoryUtil.getLog(BaseAccountGroupResourceImpl.class);
+		LogFactoryUtil.getLog(BasePricingAccountGroupResourceImpl.class);
 
 }
