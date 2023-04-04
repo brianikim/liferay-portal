@@ -58,6 +58,14 @@ public class AccountGroupServiceUtil {
 		getService().deleteAccountGroups(accountGroupIds);
 	}
 
+	public static AccountGroup fetchAccountGroupByExternalReferenceCode(
+			String externalReferenceCode, long companyId)
+		throws com.liferay.portal.kernel.security.auth.PrincipalException {
+
+		return getService().fetchAccountGroupByExternalReferenceCode(
+			externalReferenceCode, companyId);
+	}
+
 	/**
 	 * Returns the OSGi service identifier.
 	 *
