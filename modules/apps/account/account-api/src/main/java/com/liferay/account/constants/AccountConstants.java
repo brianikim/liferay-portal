@@ -52,6 +52,8 @@ public class AccountConstants {
 		ACCOUNT_GROUP_TYPE_STATIC, ACCOUNT_GROUP_TYPE_DYNAMIC
 	};
 
+	public static final long ACCOUNT_ID_ADMIN = Long.MIN_VALUE;
+
 	public static final long PARENT_ACCOUNT_ENTRY_ID_DEFAULT = 0;
 
 	public static final String RESOURCE_NAME = "com.liferay.account";
