@@ -436,9 +436,7 @@ public class DiscountAccountGroupResourceTest
 		throws Exception {
 
 		AccountGroup discountAccountGroup =
-			AccountGroupLocalServiceUtil.getAccountGroup(
-				commerceDiscountCommerceAccountGroupRel.
-					getCommerceAccountGroupId());
+			commerceDiscountCommerceAccountGroupRel.getAccountGroup();
 		CommerceDiscount commerceDiscount =
 			commerceDiscountCommerceAccountGroupRel.getCommerceDiscount();
 
