@@ -487,6 +487,9 @@ public class PunchOutSessionResourceImpl
 	private AccountEntryUserRelLocalService _accountEntryUserRelLocalService;
 
 	@Reference
+	private CommerceAccountHelper _commerceAccountHelper;
+
+	@Reference
 	private CommerceChannelLocalService _commerceChannelLocalService;
 
 	@Reference
