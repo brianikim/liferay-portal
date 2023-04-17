@@ -31,6 +31,8 @@ CPOption cpOption = cpOptionDisplayContext.getCPOption();
 
 		<aui:model-context bean="<%= cpOption %>" model="<%= CPOption.class %>" />
 
+		<liferay-ui:error exception="<%= DuplicateCPOptionExternalReferenceCodeException.class %>" message="please-enter-a-unique-external-reference-code" />
+
 		<aui:input name="externalReferenceCode" type="text" value="<%= cpOption.getExternalReferenceCode() %>" wrapperCssClass="form-group-item" />
 	</aui:form>
 </commerce-ui:modal-content>
