@@ -29,8 +29,6 @@ import com.liferay.headless.commerce.delivery.catalog.dto.v1_0.Product;
 import com.liferay.headless.commerce.delivery.catalog.dto.v1_0.ProductConfiguration;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.portal.kernel.language.Language;
-import com.liferay.portal.kernel.model.Company;
-import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.vulcan.dto.converter.DTOConverter;
 import com.liferay.portal.vulcan.dto.converter.DTOConverterContext;
@@ -98,19 +96,10 @@ public class ProductDTOConverter
 						return cProduct.getExternalReferenceCode();
 					});
 				setUrlImage(
-					() -> {
-						Company company = _companyLocalService.getCompany(
-							cpDefinition.getCompanyId());
-
-						String defaultImageFileURL =
-							_cpDefinitionHelper.getDefaultImageFileURL(
-								CommerceUtil.getCommerceAccountId(
-									productDTOConverterContext.
-										getCommerceContext()),
-								cpDefinition.getCPDefinitionId());
-
-						return company.getPortalURL(0) + defaultImageFileURL;
-					});
+					() -> _cpDefinitionHelper.getDefaultImageFileURL(
+						CommerceUtil.getCommerceAccountId(
+							productDTOConverterContext.getCommerceContext()),
+						cpDefinition.getCPDefinitionId()));
 			}
 		};
 
@@ -147,9 +136,6 @@ public class ProductDTOConverter
 
 	@Reference
 	private AssetTagLocalService _assetTagLocalService;
-
-	@Reference
-	private CompanyLocalService _companyLocalService;
 
 	@Reference
 	private CPDefinitionHelper _cpDefinitionHelper;
