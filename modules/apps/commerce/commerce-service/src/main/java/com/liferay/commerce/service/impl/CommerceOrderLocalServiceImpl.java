@@ -48,8 +48,11 @@ import com.liferay.commerce.model.attributes.provider.CommerceModelAttributesPro
 import com.liferay.commerce.order.CommerceOrderThreadLocal;
 import com.liferay.commerce.price.CommerceOrderPrice;
 import com.liferay.commerce.price.CommerceOrderPriceCalculation;
+import com.liferay.commerce.product.model.CPDefinition;
 import com.liferay.commerce.product.model.CommerceChannel;
+import com.liferay.commerce.product.model.CommerceChannelRel;
 import com.liferay.commerce.product.service.CommerceChannelLocalService;
+import com.liferay.commerce.product.service.CommerceChannelRelService;
 import com.liferay.commerce.product.util.JsonHelper;
 import com.liferay.commerce.service.CommerceAddressLocalService;
 import com.liferay.commerce.service.CommerceOrderItemLocalService;
@@ -1011,7 +1014,25 @@ public class CommerceOrderLocalServiceImpl
 				commerceOrder.getCommerceOrderId(), QueryUtil.ALL_POS,
 				QueryUtil.ALL_POS);
 
+		CommerceChannel commerceChannel =
+			_commerceChannelLocalService.getCommerceChannelByGroupId(
+				commerceOrder.getGroupId());
+
 		for (CommerceOrderItem commerceOrderItem : commerceOrderItems) {
+			CPDefinition cpDefinition = commerceOrderItem.getCPDefinition();
+
+			if (cpDefinition.isChannelFilterEnabled()) {
+				CommerceChannelRel commerceChannelRel =
+					_commerceChannelRelService.fetchCommerceChannelRel(
+						CPDefinition.class.getName(),
+						cpDefinition.getCPDefinitionId(),
+						commerceChannel.getCommerceChannelId());
+
+				if (commerceChannelRel == null) {
+					continue;
+				}
+			}
+
 			if (commerceOrderItem.getParentCommerceOrderItemId() != 0) {
 				continue;
 			}
@@ -2299,6 +2320,9 @@ public class CommerceOrderLocalServiceImpl
 
 	@Reference
 	private CommerceChannelLocalService _commerceChannelLocalService;
+
+	@Reference
+	private CommerceChannelRelService _commerceChannelRelService;
 
 	@Reference
 	private CommerceCurrencyLocalService _commerceCurrencyLocalService;
