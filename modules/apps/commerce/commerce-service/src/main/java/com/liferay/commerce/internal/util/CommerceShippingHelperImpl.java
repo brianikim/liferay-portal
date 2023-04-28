@@ -17,13 +17,19 @@ package com.liferay.commerce.internal.util;
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.model.CommerceOrderItem;
 import com.liferay.commerce.model.Dimensions;
+import com.liferay.commerce.product.model.CPDefinition;
 import com.liferay.commerce.product.model.CPInstance;
+import com.liferay.commerce.product.model.CommerceChannel;
+import com.liferay.commerce.product.model.CommerceChannelRel;
+import com.liferay.commerce.product.service.CommerceChannelRelService;
+import com.liferay.commerce.product.service.CommerceChannelService;
 import com.liferay.commerce.util.CommerceShippingHelper;
 import com.liferay.portal.kernel.exception.PortalException;
 
 import java.util.List;
 
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Andrea Di Giorgi
@@ -143,6 +149,35 @@ public class CommerceShippingHelperImpl implements CommerceShippingHelper {
 	}
 
 	@Override
+	public boolean isAvailable(CommerceOrder commerceOrder)
+		throws PortalException {
+
+		CommerceChannel commerceChannel =
+			_commerceChannelService.getCommerceChannelByOrderGroupId(
+				commerceOrder.getGroupId());
+
+		for (CommerceOrderItem commerceOrderItem :
+				commerceOrder.getCommerceOrderItems()) {
+
+			CPDefinition cpDefinition = commerceOrderItem.getCPDefinition();
+
+			if (cpDefinition.isChannelFilterEnabled()) {
+				CommerceChannelRel commerceChannelRel =
+					_commerceChannelRelService.fetchCommerceChannelRel(
+						CPDefinition.class.getName(),
+						cpDefinition.getCPDefinitionId(),
+						commerceChannel.getCommerceChannelId());
+
+				if (commerceChannelRel == null) {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	@Override
 	public boolean isFreeShipping(CommerceOrder commerceOrder)
 		throws PortalException {
 
@@ -171,5 +206,11 @@ public class CommerceShippingHelperImpl implements CommerceShippingHelper {
 
 		return false;
 	}
+
+	@Reference
+	private CommerceChannelRelService _commerceChannelRelService;
+
+	@Reference
+	private CommerceChannelService _commerceChannelService;
 
 }

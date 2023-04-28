@@ -44,6 +44,9 @@ public interface CommerceShippingHelper {
 	public double getWeight(List<CommerceOrderItem> commerceOrderItems)
 		throws PortalException;
 
+	public boolean isAvailable(CommerceOrder commerceOrder)
+		throws PortalException;
+
 	public boolean isFreeShipping(CommerceOrder commerceOrder)
 		throws PortalException;
 

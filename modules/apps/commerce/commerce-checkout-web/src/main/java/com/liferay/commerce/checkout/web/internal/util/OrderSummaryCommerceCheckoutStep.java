@@ -27,6 +27,7 @@ import com.liferay.commerce.exception.CommerceOrderGuestCheckoutException;
 import com.liferay.commerce.exception.CommerceOrderPaymentMethodException;
 import com.liferay.commerce.exception.CommerceOrderShippingAddressException;
 import com.liferay.commerce.exception.CommerceOrderShippingMethodException;
+import com.liferay.commerce.exception.RequiredCommerceChannelRelException;
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.order.CommerceOrderHttpHelper;
 import com.liferay.commerce.order.CommerceOrderValidatorRegistry;
@@ -317,6 +318,10 @@ public class OrderSummaryCommerceCheckoutStep extends BaseCommerceCheckoutStep {
 		CommerceOrder commerceOrder =
 			_commerceOrderService.getCommerceOrderByUuidAndGroupId(
 				commerceOrderUuid, groupId);
+
+		if (!_commerceShippingHelper.isAvailable(commerceOrder)) {
+			throw new RequiredCommerceChannelRelException();
+		}
 
 		if ((commerceOrder.getShippingAddressId() <= 0) &&
 			_commerceShippingHelper.isShippable(commerceOrder)) {
