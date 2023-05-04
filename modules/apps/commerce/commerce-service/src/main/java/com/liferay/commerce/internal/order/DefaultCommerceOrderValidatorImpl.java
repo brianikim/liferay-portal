@@ -14,6 +14,8 @@
 
 package com.liferay.commerce.internal.order;
 
+import com.liferay.account.service.AccountGroupRelLocalService;
+import com.liferay.commerce.account.service.CommerceAccountService;
 import com.liferay.commerce.inventory.CPDefinitionInventoryEngine;
 import com.liferay.commerce.inventory.CPDefinitionInventoryEngineRegistry;
 import com.liferay.commerce.model.CPDefinitionInventory;
@@ -21,13 +23,19 @@ import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.model.CommerceOrderItem;
 import com.liferay.commerce.order.CommerceOrderValidator;
 import com.liferay.commerce.order.CommerceOrderValidatorResult;
+import com.liferay.commerce.product.model.CPDefinition;
 import com.liferay.commerce.product.model.CPInstance;
+import com.liferay.commerce.product.model.CommerceChannel;
+import com.liferay.commerce.product.model.CommerceChannelRel;
+import com.liferay.commerce.product.service.CommerceChannelRelService;
+import com.liferay.commerce.product.service.CommerceChannelService;
 import com.liferay.commerce.service.CPDefinitionInventoryLocalService;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -119,6 +127,34 @@ public class DefaultCommerceOrderValidatorImpl
 					new Object[] {multipleOrderQuantity}));
 		}
 
+		List<CommerceOrderItem> commerceOrderItems =
+			commerceOrder.getCommerceOrderItems();
+
+		for (CommerceOrderItem commerceOrderItem : commerceOrderItems) {
+			CPDefinition cpDefinition = commerceOrderItem.getCPDefinition();
+
+			if (cpDefinition.isChannelFilterEnabled()) {
+				CommerceChannel commerceChannel =
+					_commerceChannelService.getCommerceChannelByOrderGroupId(
+						commerceOrder.getGroupId());
+
+				CommerceChannelRel commerceChannelRel =
+					_commerceChannelRelService.fetchCommerceChannelRel(
+						CPDefinition.class.getName(),
+						cpDefinition.getCPDefinitionId(),
+						commerceChannel.getCommerceChannelId());
+
+				if (commerceChannelRel == null) {
+					return new CommerceOrderValidatorResult(
+						commerceOrderItem.getCommerceOrderItemId(), false,
+						_getLocalizedMessage(
+							locale,
+							"one-or-more-products-is-no-longer-available",
+							null));
+				}
+			}
+		}
+
 		return new CommerceOrderValidatorResult(true);
 	}
 
@@ -191,6 +227,30 @@ public class DefaultCommerceOrderValidatorImpl
 					new Object[] {multipleOrderQuantity}));
 		}
 
+		CPDefinition cpDefinition = commerceOrderItem.getCPDefinition();
+
+		if (cpDefinition.isChannelFilterEnabled()) {
+			CommerceOrder commerceOrder = commerceOrderItem.getCommerceOrder();
+
+			CommerceChannel commerceChannel =
+				_commerceChannelService.getCommerceChannelByOrderGroupId(
+					commerceOrder.getGroupId());
+
+			CommerceChannelRel commerceChannelRel =
+				_commerceChannelRelService.fetchCommerceChannelRel(
+					CPDefinition.class.getName(),
+					cpDefinition.getCPDefinitionId(),
+					commerceChannel.getCommerceChannelId());
+
+			if (commerceChannelRel == null) {
+				return new CommerceOrderValidatorResult(
+					commerceOrderItem.getCommerceOrderItemId(), false,
+					_getLocalizedMessage(
+						locale, "one-or-more-products-is-no-longer-available",
+						null));
+			}
+		}
+
 		return new CommerceOrderValidatorResult(true);
 	}
 
@@ -210,6 +270,18 @@ public class DefaultCommerceOrderValidatorImpl
 
 		return _language.format(resourceBundle, key, arguments);
 	}
+
+	@Reference
+	private AccountGroupRelLocalService _accountGroupRelLocalService;
+
+	@Reference
+	private CommerceAccountService _commerceAccountService;
+
+	@Reference
+	private CommerceChannelRelService _commerceChannelRelService;
+
+	@Reference
+	private CommerceChannelService _commerceChannelService;
 
 	@Reference
 	private CPDefinitionInventoryEngineRegistry
