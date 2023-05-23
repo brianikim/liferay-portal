@@ -14,15 +14,16 @@
 
 package com.liferay.commerce.internal.order.status;
 
+import com.liferay.commerce.constants.CommerceOrderActionKeys;
 import com.liferay.commerce.constants.CommerceOrderConstants;
 import com.liferay.commerce.model.CommerceOrder;
-import com.liferay.commerce.model.CommerceOrderItem;
-import com.liferay.commerce.order.engine.CommerceOrderEngine;
 import com.liferay.commerce.order.status.CommerceOrderStatus;
-import com.liferay.commerce.service.CommerceOrderService;
-import com.liferay.commerce.util.CommerceShippingHelper;
+import com.liferay.commerce.order.status.CommerceOrderStatusRegistry;
+import com.liferay.commerce.service.CommerceOrderLocalService;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.Language;
+import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
+import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermission;
 
 import java.util.Locale;
 
@@ -32,20 +33,22 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 /**
- * @author Alec Sloan
+ * @author Brian I. Kim
  */
 @Component(
 	property = {
-		"commerce.order.status.key=" + ShippedCommerceOrderStatusImpl.KEY,
-		"commerce.order.status.priority:Integer=" + ShippedCommerceOrderStatusImpl.PRIORITY
+		"commerce.order.status.key=" + QuoteProcessedCommerceOrderStatusImpl.KEY,
+		"commerce.order.status.priority:Integer=" + QuoteProcessedCommerceOrderStatusImpl.PRIORITY
 	},
 	service = CommerceOrderStatus.class
 )
-public class ShippedCommerceOrderStatusImpl implements CommerceOrderStatus {
+public class QuoteProcessedCommerceOrderStatusImpl
+	implements CommerceOrderStatus {
 
-	public static final int KEY = CommerceOrderConstants.ORDER_STATUS_SHIPPED;
+	public static final int KEY =
+		CommerceOrderConstants.ORDER_STATUS_QUOTE_PROCESSED;
 
-	public static final int PRIORITY = 60;
+	public static final int PRIORITY = 50;
 
 	@Override
 	public CommerceOrder doTransition(CommerceOrder commerceOrder, long userId)
@@ -53,13 +56,10 @@ public class ShippedCommerceOrderStatusImpl implements CommerceOrderStatus {
 
 		commerceOrder.setOrderStatus(KEY);
 
-		if (!_commerceShippingHelper.isShippable(commerceOrder)) {
-			commerceOrder = _commerceOrderEngine.transitionCommerceOrder(
-				commerceOrder, CommerceOrderConstants.ORDER_STATUS_COMPLETED,
-				userId);
-		}
+		commerceOrder = _commerceOrderLocalService.updateCommerceOrder(
+			commerceOrder);
 
-		return _commerceOrderService.updateCommerceOrder(commerceOrder);
+		return _commerceOrderLocalService.updateCommerceOrder(commerceOrder);
 	}
 
 	@Override
@@ -80,10 +80,8 @@ public class ShippedCommerceOrderStatusImpl implements CommerceOrderStatus {
 
 	@Override
 	public boolean isComplete(CommerceOrder commerceOrder) {
-		if ((commerceOrder.getOrderStatus() ==
-				CommerceOrderConstants.ORDER_STATUS_SHIPPED) ||
-			(commerceOrder.getOrderStatus() ==
-				CommerceOrderConstants.ORDER_STATUS_COMPLETED)) {
+		if (commerceOrder.getOrderStatus() ==
+				CommerceOrderConstants.ORDER_STATUS_QUOTE_PROCESSED) {
 
 			return true;
 		}
@@ -95,31 +93,21 @@ public class ShippedCommerceOrderStatusImpl implements CommerceOrderStatus {
 	public boolean isEnabled(CommerceOrder commerceOrder)
 		throws PortalException {
 
-		return !commerceOrder.isQuote();
+		return commerceOrder.isQuote();
 	}
 
 	@Override
 	public boolean isTransitionCriteriaMet(CommerceOrder commerceOrder)
 		throws PortalException {
 
-		boolean allOrderItemsShipped = true;
-
-		for (CommerceOrderItem shippedCommerceOrderItem :
-				commerceOrder.getCommerceOrderItems()) {
-
-			if ((shippedCommerceOrderItem.getShippedQuantity() <
-					shippedCommerceOrderItem.getQuantity()) &&
-				shippedCommerceOrderItem.isShippable()) {
-
-				allOrderItemsShipped = false;
-			}
-		}
-
 		if (((commerceOrder.getOrderStatus() ==
-				CommerceOrderConstants.ORDER_STATUS_PROCESSING) ||
+				CommerceOrderConstants.ORDER_STATUS_QUOTE_REQUESTED) ||
 			 (commerceOrder.getOrderStatus() ==
-				 CommerceOrderConstants.ORDER_STATUS_PARTIALLY_SHIPPED)) &&
-			allOrderItemsShipped) {
+				 CommerceOrderConstants.ORDER_STATUS_ON_HOLD)) &&
+			_portletResourcePermission.contains(
+				PermissionThreadLocal.getPermissionChecker(),
+				commerceOrder.getGroupId(),
+				CommerceOrderActionKeys.MANAGE_QUOTES)) {
 
 			return true;
 		}
@@ -127,30 +115,21 @@ public class ShippedCommerceOrderStatusImpl implements CommerceOrderStatus {
 		return false;
 	}
 
-	@Override
-	public boolean isValidForOrder(CommerceOrder commerceOrder)
-		throws PortalException {
-
-		if (!_commerceShippingHelper.isShippable(commerceOrder)) {
-			return false;
-		}
-
-		return true;
-	}
-
-	@Reference
-	private CommerceOrderEngine _commerceOrderEngine;
-
 	@Reference(
 		policy = ReferencePolicy.DYNAMIC,
 		policyOption = ReferencePolicyOption.GREEDY
 	)
-	private volatile CommerceOrderService _commerceOrderService;
+	private volatile CommerceOrderLocalService _commerceOrderLocalService;
 
 	@Reference
-	private CommerceShippingHelper _commerceShippingHelper;
+	private CommerceOrderStatusRegistry _commerceOrderStatusRegistry;
 
 	@Reference
 	private Language _language;
+
+	@Reference(
+		target = "(resource.name=" + CommerceOrderConstants.RESOURCE_NAME + ")"
+	)
+	private PortletResourcePermission _portletResourcePermission;
 
 }
