@@ -143,6 +143,13 @@ public class AvailabilityLabelInfoItemRenderer
 							"default"));
 				}
 			}
+			else {
+				httpServletRequest.setAttribute(
+					"liferay-commerce:availability-label:label",
+					StringPool.BLANK);
+				httpServletRequest.setAttribute(
+					"liferay-commerce:availability-label:labelType", "default");
+			}
 
 			requestDispatcher.include(httpServletRequest, httpServletResponse);
 		}
