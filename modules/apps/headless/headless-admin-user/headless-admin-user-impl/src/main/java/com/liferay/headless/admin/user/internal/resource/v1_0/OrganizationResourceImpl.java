@@ -14,7 +14,11 @@
 
 package com.liferay.headless.admin.user.internal.resource.v1_0;
 
+import com.liferay.account.model.AccountEntry;
+import com.liferay.account.model.AccountEntryOrganizationRel;
 import com.liferay.account.service.AccountEntryOrganizationRelLocalService;
+import com.liferay.account.service.AccountEntryOrganizationRelService;
+import com.liferay.account.service.AccountEntryService;
 import com.liferay.headless.admin.user.dto.v1_0.CustomField;
 import com.liferay.headless.admin.user.dto.v1_0.EmailAddress;
 import com.liferay.headless.admin.user.dto.v1_0.HoursAvailable;
@@ -167,6 +171,25 @@ public class OrganizationResourceImpl
 	}
 
 	@Override
+	public Organization getAccountByExternalReferenceCodeOrganization(
+			String externalReferenceCode, String organizationId)
+		throws Exception {
+
+		AccountEntry accountEntry =
+			_accountEntryService.fetchAccountEntryByExternalReferenceCode(
+				contextCompany.getCompanyId(), externalReferenceCode);
+
+		AccountEntryOrganizationRel accountEntryOrganizationRel =
+			_accountEntryOrganizationRelService.
+				fetchAccountEntryOrganizationRel(
+					accountEntry.getAccountEntryId(),
+					Long.valueOf(organizationId));
+
+		return _toOrganization(
+			String.valueOf(accountEntryOrganizationRel.getOrganizationId()));
+	}
+
+	@Override
 	public Page<Organization>
 			getAccountByExternalReferenceCodeOrganizationsPage(
 				String externalReferenceCode, String search, Filter filter,
@@ -177,6 +200,19 @@ public class OrganizationResourceImpl
 			_accountResourceDTOConverter.getAccountEntryId(
 				externalReferenceCode),
 			search, filter, pagination, sorts);
+	}
+
+	@Override
+	public Organization getAccountOrganization(
+			Long accountId, String organizationId)
+		throws Exception {
+
+		AccountEntryOrganizationRel accountEntryOrganizationRel =
+			_accountEntryOrganizationRelService.getAccountEntryOrganizationRel(
+				accountId, Long.valueOf(organizationId));
+
+		return _toOrganization(
+			String.valueOf(accountEntryOrganizationRel.getOrganizationId()));
 	}
 
 	@Override
@@ -948,6 +984,13 @@ public class OrganizationResourceImpl
 	@Reference
 	private AccountEntryOrganizationRelLocalService
 		_accountEntryOrganizationRelLocalService;
+
+	@Reference
+	private AccountEntryOrganizationRelService
+		_accountEntryOrganizationRelService;
+
+	@Reference
+	private AccountEntryService _accountEntryService;
 
 	@Reference
 	private AccountResourceDTOConverter _accountResourceDTOConverter;
