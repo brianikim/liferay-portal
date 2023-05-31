@@ -733,10 +733,20 @@ public class ServletDataImpl implements ServletData {
 							OrganizationResourceImpl.class,
 							"getAccountByExternalReferenceCodeOrganizationsPage"));
 					put(
+						"query#accountByExternalReferenceCodeOrganization",
+						new ObjectValuePair<>(
+							OrganizationResourceImpl.class,
+							"getAccountByExternalReferenceCodeOrganization"));
+					put(
 						"query#accountOrganizations",
 						new ObjectValuePair<>(
 							OrganizationResourceImpl.class,
 							"getAccountOrganizationsPage"));
+					put(
+						"query#accountOrganization",
+						new ObjectValuePair<>(
+							OrganizationResourceImpl.class,
+							"getAccountOrganization"));
 					put(
 						"query#organizations",
 						new ObjectValuePair<>(
@@ -982,6 +992,11 @@ public class ServletDataImpl implements ServletData {
 							OrganizationResourceImpl.class,
 							"getAccountByExternalReferenceCodeOrganizationsPage"));
 					put(
+						"query#Account.organization",
+						new ObjectValuePair<>(
+							OrganizationResourceImpl.class,
+							"getAccountOrganization"));
+					put(
 						"query#AccountRole.account",
 						new ObjectValuePair<>(
 							AccountResourceImpl.class, "getAccount"));
@@ -1019,6 +1034,11 @@ public class ServletDataImpl implements ServletData {
 						new ObjectValuePair<>(
 							OrganizationResourceImpl.class,
 							"getAccountOrganizationsPage"));
+					put(
+						"query#Account.byExternalReferenceCodeOrganization",
+						new ObjectValuePair<>(
+							OrganizationResourceImpl.class,
+							"getAccountByExternalReferenceCodeOrganization"));
 					put(
 						"query#Account.byExternalReferenceCodeUserAccountByEmailAddressAccountRoles",
 						new ObjectValuePair<>(
