@@ -1011,6 +1011,31 @@ public class Query {
 	/**
 	 * Invoke this method with the command line:
 	 *
+	 * curl -H 'Content-Type: text/plain; charset=utf-8' -X 'POST' 'http://localhost:8080/o/graphql' -d $'{"query": "query {accountByExternalReferenceCodeUserAccountByExternalReferenceCode(accountExternalReferenceCode: ___, externalReferenceCode: ___){accountBriefs, actions, additionalName, alternateName, birthDate, currentPassword, customFields, dashboardURL, dateCreated, dateModified, emailAddress, externalReferenceCode, familyName, givenName, honorificPrefix, honorificSuffix, id, image, jobTitle, keywords, lastLoginDate, name, organizationBriefs, password, profileURL, roleBriefs, siteBriefs, userAccountContactInformation, userGroupBriefs}}"}' -u 'test@liferay.com:test'
+	 */
+	@GraphQLField(
+		description = "Gets a user by their external reference code to an account by external reference code"
+	)
+	public UserAccount
+			accountByExternalReferenceCodeUserAccountByExternalReferenceCode(
+				@GraphQLName("accountExternalReferenceCode") String
+					accountExternalReferenceCode,
+				@GraphQLName("externalReferenceCode") String
+					externalReferenceCode)
+		throws Exception {
+
+		return _applyComponentServiceObjects(
+			_userAccountResourceComponentServiceObjects,
+			this::_populateResourceContext,
+			userAccountResource ->
+				userAccountResource.
+					getAccountByExternalReferenceCodeUserAccountByExternalReferenceCode(
+						accountExternalReferenceCode, externalReferenceCode));
+	}
+
+	/**
+	 * Invoke this method with the command line:
+	 *
 	 * curl -H 'Content-Type: text/plain; charset=utf-8' -X 'POST' 'http://localhost:8080/o/graphql' -d $'{"query": "query {accountUserAccountsByExternalReferenceCode(externalReferenceCode: ___, filter: ___, page: ___, pageSize: ___, search: ___, sorts: ___){items {__}, page, pageSize, totalCount}}"}' -u 'test@liferay.com:test'
 	 */
 	@GraphQLField(description = "Gets the users assigned to an account")
@@ -1061,6 +1086,24 @@ public class Query {
 					_filterBiFunction.apply(userAccountResource, filterString),
 					Pagination.of(page, pageSize),
 					_sortsBiFunction.apply(userAccountResource, sortsString))));
+	}
+
+	/**
+	 * Invoke this method with the command line:
+	 *
+	 * curl -H 'Content-Type: text/plain; charset=utf-8' -X 'POST' 'http://localhost:8080/o/graphql' -d $'{"query": "query {accountUserAccount(accountId: ___, userAccountId: ___){accountBriefs, actions, additionalName, alternateName, birthDate, currentPassword, customFields, dashboardURL, dateCreated, dateModified, emailAddress, externalReferenceCode, familyName, givenName, honorificPrefix, honorificSuffix, id, image, jobTitle, keywords, lastLoginDate, name, organizationBriefs, password, profileURL, roleBriefs, siteBriefs, userAccountContactInformation, userGroupBriefs}}"}' -u 'test@liferay.com:test'
+	 */
+	@GraphQLField(description = "Gets a user assigned to an account")
+	public UserAccount accountUserAccount(
+			@GraphQLName("accountId") Long accountId,
+			@GraphQLName("userAccountId") Long userAccountId)
+		throws Exception {
+
+		return _applyComponentServiceObjects(
+			_userAccountResourceComponentServiceObjects,
+			this::_populateResourceContext,
+			userAccountResource -> userAccountResource.getAccountUserAccount(
+				accountId, userAccountId));
 	}
 
 	/**
@@ -1944,6 +1987,30 @@ public class Query {
 		}
 
 		private Account _account;
+
+	}
+
+	@GraphQLTypeExtension(AccountRole.class)
+	public class GetAccountUserAccountTypeExtension {
+
+		public GetAccountUserAccountTypeExtension(AccountRole accountRole) {
+			_accountRole = accountRole;
+		}
+
+		@GraphQLField(description = "Gets a user assigned to an account")
+		public UserAccount accountUserAccount(
+				@GraphQLName("userAccountId") Long userAccountId)
+			throws Exception {
+
+			return _applyComponentServiceObjects(
+				_userAccountResourceComponentServiceObjects,
+				Query.this::_populateResourceContext,
+				userAccountResource ->
+					userAccountResource.getAccountUserAccount(
+						_accountRole.getAccountId(), userAccountId));
+		}
+
+		private AccountRole _accountRole;
 
 	}
 
