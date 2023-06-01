@@ -55,6 +55,26 @@ public class AccountSerDes {
 
 		sb.append("{");
 
+		if (account.getAccountIds() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"accountIds\": ");
+
+			sb.append("[");
+
+			for (int i = 0; i < account.getAccountIds().length; i++) {
+				sb.append(account.getAccountIds()[i]);
+
+				if ((i + 1) < account.getAccountIds().length) {
+					sb.append(", ");
+				}
+			}
+
+			sb.append("]");
+		}
+
 		if (account.getAccountUserAccounts() != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -85,6 +105,26 @@ public class AccountSerDes {
 			sb.append(_toJSON(account.getActions()));
 		}
 
+		if (account.getAddressIds() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"addressIds\": ");
+
+			sb.append("[");
+
+			for (int i = 0; i < account.getAddressIds().length; i++) {
+				sb.append(account.getAddressIds()[i]);
+
+				if ((i + 1) < account.getAddressIds().length) {
+					sb.append(", ");
+				}
+			}
+
+			sb.append("]");
+		}
+
 		if (account.getCustomFields() != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -103,6 +143,26 @@ public class AccountSerDes {
 			}
 
 			sb.append("]");
+		}
+
+		if (account.getDefaultBillingAddressId() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"defaultBillingAddressId\": ");
+
+			sb.append(account.getDefaultBillingAddressId());
+		}
+
+		if (account.getDefaultShippingAddressId() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"defaultShippingAddressId\": ");
+
+			sb.append(account.getDefaultShippingAddressId());
 		}
 
 		if (account.getDescription() != null) {
@@ -165,6 +225,30 @@ public class AccountSerDes {
 			sb.append("\"id\": ");
 
 			sb.append(account.getId());
+		}
+
+		if (account.getLogoId() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"logoId\": ");
+
+			sb.append(account.getLogoId());
+		}
+
+		if (account.getLogoURL() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"logoURL\": ");
+
+			sb.append("\"");
+
+			sb.append(_escape(account.getLogoURL()));
+
+			sb.append("\"");
 		}
 
 		if (account.getName() != null) {
@@ -231,6 +315,20 @@ public class AccountSerDes {
 			sb.append(account.getStatus());
 		}
 
+		if (account.getTaxId() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"taxId\": ");
+
+			sb.append("\"");
+
+			sb.append(_escape(account.getTaxId()));
+
+			sb.append("\"");
+		}
+
 		if (account.getType() != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -263,6 +361,13 @@ public class AccountSerDes {
 
 		Map<String, String> map = new TreeMap<>();
 
+		if (account.getAccountIds() == null) {
+			map.put("accountIds", null);
+		}
+		else {
+			map.put("accountIds", String.valueOf(account.getAccountIds()));
+		}
+
 		if (account.getAccountUserAccounts() == null) {
 			map.put("accountUserAccounts", null);
 		}
@@ -279,11 +384,36 @@ public class AccountSerDes {
 			map.put("actions", String.valueOf(account.getActions()));
 		}
 
+		if (account.getAddressIds() == null) {
+			map.put("addressIds", null);
+		}
+		else {
+			map.put("addressIds", String.valueOf(account.getAddressIds()));
+		}
+
 		if (account.getCustomFields() == null) {
 			map.put("customFields", null);
 		}
 		else {
 			map.put("customFields", String.valueOf(account.getCustomFields()));
+		}
+
+		if (account.getDefaultBillingAddressId() == null) {
+			map.put("defaultBillingAddressId", null);
+		}
+		else {
+			map.put(
+				"defaultBillingAddressId",
+				String.valueOf(account.getDefaultBillingAddressId()));
+		}
+
+		if (account.getDefaultShippingAddressId() == null) {
+			map.put("defaultShippingAddressId", null);
+		}
+		else {
+			map.put(
+				"defaultShippingAddressId",
+				String.valueOf(account.getDefaultShippingAddressId()));
 		}
 
 		if (account.getDescription() == null) {
@@ -314,6 +444,20 @@ public class AccountSerDes {
 		}
 		else {
 			map.put("id", String.valueOf(account.getId()));
+		}
+
+		if (account.getLogoId() == null) {
+			map.put("logoId", null);
+		}
+		else {
+			map.put("logoId", String.valueOf(account.getLogoId()));
+		}
+
+		if (account.getLogoURL() == null) {
+			map.put("logoURL", null);
+		}
+		else {
+			map.put("logoURL", String.valueOf(account.getLogoURL()));
 		}
 
 		if (account.getName() == null) {
@@ -356,6 +500,13 @@ public class AccountSerDes {
 			map.put("status", String.valueOf(account.getStatus()));
 		}
 
+		if (account.getTaxId() == null) {
+			map.put("taxId", null);
+		}
+		else {
+			map.put("taxId", String.valueOf(account.getTaxId()));
+		}
+
 		if (account.getType() == null) {
 			map.put("type", null);
 		}
@@ -383,7 +534,15 @@ public class AccountSerDes {
 			Account account, String jsonParserFieldName,
 			Object jsonParserFieldValue) {
 
-			if (Objects.equals(jsonParserFieldName, "accountUserAccounts")) {
+			if (Objects.equals(jsonParserFieldName, "accountIds")) {
+				if (jsonParserFieldValue != null) {
+					account.setAccountIds(
+						toLongs((Object[])jsonParserFieldValue));
+				}
+			}
+			else if (Objects.equals(
+						jsonParserFieldName, "accountUserAccounts")) {
+
 				if (jsonParserFieldValue != null) {
 					Object[] jsonParserFieldValues =
 						(Object[])jsonParserFieldValue;
@@ -405,6 +564,12 @@ public class AccountSerDes {
 						(Map)AccountSerDes.toMap((String)jsonParserFieldValue));
 				}
 			}
+			else if (Objects.equals(jsonParserFieldName, "addressIds")) {
+				if (jsonParserFieldValue != null) {
+					account.setAddressIds(
+						toLongs((Object[])jsonParserFieldValue));
+				}
+			}
 			else if (Objects.equals(jsonParserFieldName, "customFields")) {
 				if (jsonParserFieldValue != null) {
 					Object[] jsonParserFieldValues =
@@ -419,6 +584,22 @@ public class AccountSerDes {
 					}
 
 					account.setCustomFields(customFieldsArray);
+				}
+			}
+			else if (Objects.equals(
+						jsonParserFieldName, "defaultBillingAddressId")) {
+
+				if (jsonParserFieldValue != null) {
+					account.setDefaultBillingAddressId(
+						Long.valueOf((String)jsonParserFieldValue));
+				}
+			}
+			else if (Objects.equals(
+						jsonParserFieldName, "defaultShippingAddressId")) {
+
+				if (jsonParserFieldValue != null) {
+					account.setDefaultShippingAddressId(
+						Long.valueOf((String)jsonParserFieldValue));
 				}
 			}
 			else if (Objects.equals(jsonParserFieldName, "description")) {
@@ -443,6 +624,17 @@ public class AccountSerDes {
 			else if (Objects.equals(jsonParserFieldName, "id")) {
 				if (jsonParserFieldValue != null) {
 					account.setId(Long.valueOf((String)jsonParserFieldValue));
+				}
+			}
+			else if (Objects.equals(jsonParserFieldName, "logoId")) {
+				if (jsonParserFieldValue != null) {
+					account.setLogoId(
+						Long.valueOf((String)jsonParserFieldValue));
+				}
+			}
+			else if (Objects.equals(jsonParserFieldName, "logoURL")) {
+				if (jsonParserFieldValue != null) {
+					account.setLogoURL((String)jsonParserFieldValue);
 				}
 			}
 			else if (Objects.equals(jsonParserFieldName, "name")) {
@@ -472,6 +664,11 @@ public class AccountSerDes {
 				if (jsonParserFieldValue != null) {
 					account.setStatus(
 						Integer.valueOf((String)jsonParserFieldValue));
+				}
+			}
+			else if (Objects.equals(jsonParserFieldName, "taxId")) {
+				if (jsonParserFieldValue != null) {
+					account.setTaxId((String)jsonParserFieldValue);
 				}
 			}
 			else if (Objects.equals(jsonParserFieldName, "type")) {

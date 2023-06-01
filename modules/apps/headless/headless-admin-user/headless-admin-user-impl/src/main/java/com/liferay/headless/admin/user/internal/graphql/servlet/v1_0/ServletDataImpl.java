@@ -197,6 +197,11 @@ public class ServletDataImpl implements ServletData {
 							AccountResourceImpl.class,
 							"putAccountByExternalReferenceCode"));
 					put(
+						"mutation#createAccountByExternalReferenceCodeLogo",
+						new ObjectValuePair<>(
+							AccountResourceImpl.class,
+							"postAccountByExternalReferenceCodeLogo"));
+					put(
 						"mutation#deleteAccount",
 						new ObjectValuePair<>(
 							AccountResourceImpl.class, "deleteAccount"));
@@ -216,6 +221,10 @@ public class ServletDataImpl implements ServletData {
 						"mutation#updateAccountBatch",
 						new ObjectValuePair<>(
 							AccountResourceImpl.class, "putAccountBatch"));
+					put(
+						"mutation#createAccountLogo",
+						new ObjectValuePair<>(
+							AccountResourceImpl.class, "postAccountLogo"));
 					put(
 						"mutation#patchOrganizationMoveAccounts",
 						new ObjectValuePair<>(

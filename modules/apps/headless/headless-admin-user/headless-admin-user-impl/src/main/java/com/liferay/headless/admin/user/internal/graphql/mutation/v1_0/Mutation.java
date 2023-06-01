@@ -261,6 +261,24 @@ public class Mutation {
 					externalReferenceCode, account));
 	}
 
+	@GraphQLField
+	@GraphQLName(
+		description = "null",
+		value = "postAccountByExternalReferenceCodeLogoExternalReferenceCodeMultipartBody"
+	)
+	public Response createAccountByExternalReferenceCodeLogo(
+			@GraphQLName("externalReferenceCode") String externalReferenceCode,
+			@GraphQLName("multipartBody") MultipartBody multipartBody)
+		throws Exception {
+
+		return _applyComponentServiceObjects(
+			_accountResourceComponentServiceObjects,
+			this::_populateResourceContext,
+			accountResource ->
+				accountResource.postAccountByExternalReferenceCodeLogo(
+					externalReferenceCode, multipartBody));
+	}
+
 	@GraphQLField(description = "Deletes an account.")
 	public boolean deleteAccount(@GraphQLName("accountId") Long accountId)
 		throws Exception {
@@ -326,6 +344,22 @@ public class Mutation {
 			this::_populateResourceContext,
 			accountResource -> accountResource.putAccountBatch(
 				callbackURL, object));
+	}
+
+	@GraphQLField
+	@GraphQLName(
+		description = "null", value = "postAccountLogoAccountIdMultipartBody"
+	)
+	public Response createAccountLogo(
+			@GraphQLName("accountId") Long accountId,
+			@GraphQLName("multipartBody") MultipartBody multipartBody)
+		throws Exception {
+
+		return _applyComponentServiceObjects(
+			_accountResourceComponentServiceObjects,
+			this::_populateResourceContext,
+			accountResource -> accountResource.postAccountLogo(
+				accountId, multipartBody));
 	}
 
 	@GraphQLField

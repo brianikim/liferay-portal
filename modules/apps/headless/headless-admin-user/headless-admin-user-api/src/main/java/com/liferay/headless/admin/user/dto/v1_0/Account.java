@@ -68,6 +68,34 @@ public class Account implements Serializable {
 		return ObjectMapperUtil.unsafeReadValue(Account.class, json);
 	}
 
+	@Schema
+	public Long[] getAccountIds() {
+		return accountIds;
+	}
+
+	public void setAccountIds(Long[] accountIds) {
+		this.accountIds = accountIds;
+	}
+
+	@JsonIgnore
+	public void setAccountIds(
+		UnsafeSupplier<Long[], Exception> accountIdsUnsafeSupplier) {
+
+		try {
+			accountIds = accountIdsUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected Long[] accountIds;
+
 	@Schema(description = "The users linked to the account")
 	@Valid
 	public UserAccount[] getAccountUserAccounts() {
@@ -133,6 +161,34 @@ public class Account implements Serializable {
 	protected Map<String, Map<String, String>> actions;
 
 	@Schema
+	public Long[] getAddressIds() {
+		return addressIds;
+	}
+
+	public void setAddressIds(Long[] addressIds) {
+		this.addressIds = addressIds;
+	}
+
+	@JsonIgnore
+	public void setAddressIds(
+		UnsafeSupplier<Long[], Exception> addressIdsUnsafeSupplier) {
+
+		try {
+			addressIds = addressIdsUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected Long[] addressIds;
+
+	@Schema
 	@Valid
 	public CustomField[] getCustomFields() {
 		return customFields;
@@ -160,6 +216,65 @@ public class Account implements Serializable {
 	@GraphQLField
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected CustomField[] customFields;
+
+	@Schema
+	public Long getDefaultBillingAddressId() {
+		return defaultBillingAddressId;
+	}
+
+	public void setDefaultBillingAddressId(Long defaultBillingAddressId) {
+		this.defaultBillingAddressId = defaultBillingAddressId;
+	}
+
+	@JsonIgnore
+	public void setDefaultBillingAddressId(
+		UnsafeSupplier<Long, Exception> defaultBillingAddressIdUnsafeSupplier) {
+
+		try {
+			defaultBillingAddressId =
+				defaultBillingAddressIdUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected Long defaultBillingAddressId;
+
+	@Schema
+	public Long getDefaultShippingAddressId() {
+		return defaultShippingAddressId;
+	}
+
+	public void setDefaultShippingAddressId(Long defaultShippingAddressId) {
+		this.defaultShippingAddressId = defaultShippingAddressId;
+	}
+
+	@JsonIgnore
+	public void setDefaultShippingAddressId(
+		UnsafeSupplier<Long, Exception>
+			defaultShippingAddressIdUnsafeSupplier) {
+
+		try {
+			defaultShippingAddressId =
+				defaultShippingAddressIdUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected Long defaultShippingAddressId;
 
 	@Schema
 	public String getDescription() {
@@ -274,6 +389,62 @@ public class Account implements Serializable {
 	@GraphQLField
 	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	protected Long id;
+
+	@Schema
+	public Long getLogoId() {
+		return logoId;
+	}
+
+	public void setLogoId(Long logoId) {
+		this.logoId = logoId;
+	}
+
+	@JsonIgnore
+	public void setLogoId(
+		UnsafeSupplier<Long, Exception> logoIdUnsafeSupplier) {
+
+		try {
+			logoId = logoIdUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected Long logoId;
+
+	@Schema
+	public String getLogoURL() {
+		return logoURL;
+	}
+
+	public void setLogoURL(String logoURL) {
+		this.logoURL = logoURL;
+	}
+
+	@JsonIgnore
+	public void setLogoURL(
+		UnsafeSupplier<String, Exception> logoURLUnsafeSupplier) {
+
+		try {
+			logoURL = logoURLUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected String logoURL;
 
 	@Schema
 	public String getName() {
@@ -416,6 +587,34 @@ public class Account implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected Integer status;
 
+	@Schema(example = "Abcd1234")
+	public String getTaxId() {
+		return taxId;
+	}
+
+	public void setTaxId(String taxId) {
+		this.taxId = taxId;
+	}
+
+	@JsonIgnore
+	public void setTaxId(
+		UnsafeSupplier<String, Exception> taxIdUnsafeSupplier) {
+
+		try {
+			taxId = taxIdUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected String taxId;
+
 	@Schema
 	@Valid
 	public Type getType() {
@@ -479,6 +678,26 @@ public class Account implements Serializable {
 
 		sb.append("{");
 
+		if (accountIds != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"accountIds\": ");
+
+			sb.append("[");
+
+			for (int i = 0; i < accountIds.length; i++) {
+				sb.append(accountIds[i]);
+
+				if ((i + 1) < accountIds.length) {
+					sb.append(", ");
+				}
+			}
+
+			sb.append("]");
+		}
+
 		if (accountUserAccounts != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -509,6 +728,26 @@ public class Account implements Serializable {
 			sb.append(_toJSON(actions));
 		}
 
+		if (addressIds != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"addressIds\": ");
+
+			sb.append("[");
+
+			for (int i = 0; i < addressIds.length; i++) {
+				sb.append(addressIds[i]);
+
+				if ((i + 1) < addressIds.length) {
+					sb.append(", ");
+				}
+			}
+
+			sb.append("]");
+		}
+
 		if (customFields != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -527,6 +766,26 @@ public class Account implements Serializable {
 			}
 
 			sb.append("]");
+		}
+
+		if (defaultBillingAddressId != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"defaultBillingAddressId\": ");
+
+			sb.append(defaultBillingAddressId);
+		}
+
+		if (defaultShippingAddressId != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"defaultShippingAddressId\": ");
+
+			sb.append(defaultShippingAddressId);
 		}
 
 		if (description != null) {
@@ -591,6 +850,30 @@ public class Account implements Serializable {
 			sb.append(id);
 		}
 
+		if (logoId != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"logoId\": ");
+
+			sb.append(logoId);
+		}
+
+		if (logoURL != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"logoURL\": ");
+
+			sb.append("\"");
+
+			sb.append(_escape(logoURL));
+
+			sb.append("\"");
+		}
+
 		if (name != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -653,6 +936,20 @@ public class Account implements Serializable {
 			sb.append("\"status\": ");
 
 			sb.append(status);
+		}
+
+		if (taxId != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"taxId\": ");
+
+			sb.append("\"");
+
+			sb.append(_escape(taxId));
+
+			sb.append("\"");
 		}
 
 		if (type != null) {

@@ -35,6 +35,27 @@ public class Account implements Cloneable, Serializable {
 		return AccountSerDes.toDTO(json);
 	}
 
+	public Long[] getAccountIds() {
+		return accountIds;
+	}
+
+	public void setAccountIds(Long[] accountIds) {
+		this.accountIds = accountIds;
+	}
+
+	public void setAccountIds(
+		UnsafeSupplier<Long[], Exception> accountIdsUnsafeSupplier) {
+
+		try {
+			accountIds = accountIdsUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected Long[] accountIds;
+
 	public UserAccount[] getAccountUserAccounts() {
 		return accountUserAccounts;
 	}
@@ -79,6 +100,27 @@ public class Account implements Cloneable, Serializable {
 
 	protected Map<String, Map<String, String>> actions;
 
+	public Long[] getAddressIds() {
+		return addressIds;
+	}
+
+	public void setAddressIds(Long[] addressIds) {
+		this.addressIds = addressIds;
+	}
+
+	public void setAddressIds(
+		UnsafeSupplier<Long[], Exception> addressIdsUnsafeSupplier) {
+
+		try {
+			addressIds = addressIdsUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected Long[] addressIds;
+
 	public CustomField[] getCustomFields() {
 		return customFields;
 	}
@@ -99,6 +141,51 @@ public class Account implements Cloneable, Serializable {
 	}
 
 	protected CustomField[] customFields;
+
+	public Long getDefaultBillingAddressId() {
+		return defaultBillingAddressId;
+	}
+
+	public void setDefaultBillingAddressId(Long defaultBillingAddressId) {
+		this.defaultBillingAddressId = defaultBillingAddressId;
+	}
+
+	public void setDefaultBillingAddressId(
+		UnsafeSupplier<Long, Exception> defaultBillingAddressIdUnsafeSupplier) {
+
+		try {
+			defaultBillingAddressId =
+				defaultBillingAddressIdUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected Long defaultBillingAddressId;
+
+	public Long getDefaultShippingAddressId() {
+		return defaultShippingAddressId;
+	}
+
+	public void setDefaultShippingAddressId(Long defaultShippingAddressId) {
+		this.defaultShippingAddressId = defaultShippingAddressId;
+	}
+
+	public void setDefaultShippingAddressId(
+		UnsafeSupplier<Long, Exception>
+			defaultShippingAddressIdUnsafeSupplier) {
+
+		try {
+			defaultShippingAddressId =
+				defaultShippingAddressIdUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected Long defaultShippingAddressId;
 
 	public String getDescription() {
 		return description;
@@ -181,6 +268,48 @@ public class Account implements Cloneable, Serializable {
 	}
 
 	protected Long id;
+
+	public Long getLogoId() {
+		return logoId;
+	}
+
+	public void setLogoId(Long logoId) {
+		this.logoId = logoId;
+	}
+
+	public void setLogoId(
+		UnsafeSupplier<Long, Exception> logoIdUnsafeSupplier) {
+
+		try {
+			logoId = logoIdUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected Long logoId;
+
+	public String getLogoURL() {
+		return logoURL;
+	}
+
+	public void setLogoURL(String logoURL) {
+		this.logoURL = logoURL;
+	}
+
+	public void setLogoURL(
+		UnsafeSupplier<String, Exception> logoURLUnsafeSupplier) {
+
+		try {
+			logoURL = logoURLUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected String logoURL;
 
 	public String getName() {
 		return name;
@@ -284,6 +413,27 @@ public class Account implements Cloneable, Serializable {
 	}
 
 	protected Integer status;
+
+	public String getTaxId() {
+		return taxId;
+	}
+
+	public void setTaxId(String taxId) {
+		this.taxId = taxId;
+	}
+
+	public void setTaxId(
+		UnsafeSupplier<String, Exception> taxIdUnsafeSupplier) {
+
+		try {
+			taxId = taxIdUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected String taxId;
 
 	public Type getType() {
 		return type;
