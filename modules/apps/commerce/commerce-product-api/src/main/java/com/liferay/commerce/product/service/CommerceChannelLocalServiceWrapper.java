@@ -287,6 +287,14 @@ public class CommerceChannelLocalServiceWrapper
 	}
 
 	@Override
+	public CommerceChannel fetchCommerceChannelByAccountEntryId(
+		long accountEntryId) {
+
+		return _commerceChannelLocalService.
+			fetchCommerceChannelByAccountEntryId(accountEntryId);
+	}
+
+	@Override
 	public CommerceChannel fetchCommerceChannelByExternalReferenceCode(
 		String externalReferenceCode, long companyId) {
 

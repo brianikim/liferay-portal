@@ -260,6 +260,13 @@ public class CommerceChannelLocalServiceUtil {
 		return getService().fetchCommerceChannel(commerceChannelId);
 	}
 
+	public static CommerceChannel fetchCommerceChannelByAccountEntryId(
+		long accountEntryId) {
+
+		return getService().fetchCommerceChannelByAccountEntryId(
+			accountEntryId);
+	}
+
 	public static CommerceChannel fetchCommerceChannelByExternalReferenceCode(
 		String externalReferenceCode, long companyId) {
 

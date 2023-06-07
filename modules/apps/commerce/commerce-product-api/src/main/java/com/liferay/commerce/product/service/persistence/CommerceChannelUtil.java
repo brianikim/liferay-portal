@@ -879,6 +879,65 @@ public class CommerceChannelUtil {
 	}
 
 	/**
+	 * Returns the commerce channel where accountEntryId = &#63; or throws a <code>NoSuchChannelException</code> if it could not be found.
+	 *
+	 * @param accountEntryId the account entry ID
+	 * @return the matching commerce channel
+	 * @throws NoSuchChannelException if a matching commerce channel could not be found
+	 */
+	public static CommerceChannel findByAccountEntryId(long accountEntryId)
+		throws com.liferay.commerce.product.exception.NoSuchChannelException {
+
+		return getPersistence().findByAccountEntryId(accountEntryId);
+	}
+
+	/**
+	 * Returns the commerce channel where accountEntryId = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
+	 *
+	 * @param accountEntryId the account entry ID
+	 * @return the matching commerce channel, or <code>null</code> if a matching commerce channel could not be found
+	 */
+	public static CommerceChannel fetchByAccountEntryId(long accountEntryId) {
+		return getPersistence().fetchByAccountEntryId(accountEntryId);
+	}
+
+	/**
+	 * Returns the commerce channel where accountEntryId = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
+	 *
+	 * @param accountEntryId the account entry ID
+	 * @param useFinderCache whether to use the finder cache
+	 * @return the matching commerce channel, or <code>null</code> if a matching commerce channel could not be found
+	 */
+	public static CommerceChannel fetchByAccountEntryId(
+		long accountEntryId, boolean useFinderCache) {
+
+		return getPersistence().fetchByAccountEntryId(
+			accountEntryId, useFinderCache);
+	}
+
+	/**
+	 * Removes the commerce channel where accountEntryId = &#63; from the database.
+	 *
+	 * @param accountEntryId the account entry ID
+	 * @return the commerce channel that was removed
+	 */
+	public static CommerceChannel removeByAccountEntryId(long accountEntryId)
+		throws com.liferay.commerce.product.exception.NoSuchChannelException {
+
+		return getPersistence().removeByAccountEntryId(accountEntryId);
+	}
+
+	/**
+	 * Returns the number of commerce channels where accountEntryId = &#63;.
+	 *
+	 * @param accountEntryId the account entry ID
+	 * @return the number of matching commerce channels
+	 */
+	public static int countByAccountEntryId(long accountEntryId) {
+		return getPersistence().countByAccountEntryId(accountEntryId);
+	}
+
+	/**
 	 * Returns the commerce channel where siteGroupId = &#63; or throws a <code>NoSuchChannelException</code> if it could not be found.
 	 *
 	 * @param siteGroupId the site group ID
