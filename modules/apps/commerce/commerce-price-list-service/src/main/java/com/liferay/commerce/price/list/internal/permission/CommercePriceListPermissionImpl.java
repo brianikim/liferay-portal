@@ -15,6 +15,7 @@
 package com.liferay.commerce.price.list.internal.permission;
 
 import com.liferay.account.constants.AccountConstants;
+import com.liferay.account.constants.AccountRoleConstants;
 import com.liferay.account.model.AccountEntry;
 import com.liferay.account.service.AccountEntryLocalService;
 import com.liferay.commerce.price.list.model.CommercePriceList;
@@ -26,8 +27,8 @@ import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
-import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.util.ArrayUtil;
 
 import java.util.List;
@@ -132,42 +133,68 @@ public class CommercePriceListPermissionImpl
 				commercePriceList.getCompanyId(),
 				CommercePriceList.class.getName(),
 				commercePriceList.getCommercePriceListId(),
-				commercePriceList.getUserId(), actionId)) {
+				commercePriceList.getUserId(), actionId) ||
+			_hasSupplierPermission(permissionChecker, commercePriceList)) {
 
 			return true;
-		}
-
-		if (actionId.equals(ActionKeys.UPDATE) ||
-			actionId.equals(ActionKeys.VIEW)) {
-
-			CommerceCatalog commerceCatalog =
-				_commerceCatalogLocalService.fetchCommerceCatalogByGroupId(
-					commercePriceList.getGroupId());
-
-			if ((commerceCatalog != null) &&
-				(commerceCatalog.getAccountEntryId() > 0)) {
-
-				List<AccountEntry> accountEntries =
-					_accountEntryLocalService.getUserAccountEntries(
-						permissionChecker.getUserId(), 0L, StringPool.BLANK,
-						new String[] {
-							AccountConstants.ACCOUNT_ENTRY_TYPE_SUPPLIER
-						},
-						QueryUtil.ALL_POS, QueryUtil.ALL_POS);
-
-				for (AccountEntry accountEntry : accountEntries) {
-					if (commerceCatalog.getAccountEntryId() ==
-							accountEntry.getAccountEntryId()) {
-
-						return true;
-					}
-				}
-			}
 		}
 
 		return permissionChecker.hasPermission(
 			commercePriceList.getGroupId(), CommercePriceList.class.getName(),
 			commercePriceList.getCommercePriceListId(), actionId);
+	}
+
+	private boolean _hasSupplierAccount(
+			PermissionChecker permissionChecker,
+			CommerceCatalog commerceCatalog)
+		throws PortalException {
+
+		List<AccountEntry> accountEntries =
+			_accountEntryLocalService.getUserAccountEntries(
+				permissionChecker.getUserId(), 0L, StringPool.BLANK,
+				new String[] {AccountConstants.ACCOUNT_ENTRY_TYPE_SUPPLIER},
+				QueryUtil.ALL_POS, QueryUtil.ALL_POS);
+
+		for (AccountEntry accountEntry : accountEntries) {
+			if (commerceCatalog.getAccountEntryId() ==
+					accountEntry.getAccountEntryId()) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private boolean _hasSupplierPermission(
+			PermissionChecker permissionChecker,
+			CommercePriceList commercePriceList)
+		throws PortalException {
+
+		if (!_hasSupplierRole(permissionChecker)) {
+			return false;
+		}
+
+		CommerceCatalog commerceCatalog =
+			_commerceCatalogLocalService.fetchCommerceCatalogByGroupId(
+				commercePriceList.getGroupId());
+
+		if ((commerceCatalog != null) &&
+			(commerceCatalog.getAccountEntryId() > 0) &&
+			_hasSupplierAccount(permissionChecker, commerceCatalog)) {
+
+			return true;
+		}
+
+		return false;
+	}
+
+	private boolean _hasSupplierRole(PermissionChecker permissionChecker)
+		throws PortalException {
+
+		return _roleLocalService.hasUserRole(
+			permissionChecker.getUserId(), permissionChecker.getCompanyId(),
+			AccountRoleConstants.ROLE_NAME_SUPPLIER, true);
 	}
 
 	@Reference
@@ -178,5 +205,8 @@ public class CommercePriceListPermissionImpl
 
 	@Reference
 	private CommercePriceListLocalService _commercePriceListLocalService;
+
+	@Reference
+	private RoleLocalService _roleLocalService;
 
 }
