@@ -501,20 +501,29 @@ public class CommerceOrderModelResourcePermissionLogic
 			PermissionChecker permissionChecker, CommerceOrder commerceOrder)
 		throws PortalException {
 
+		if (!_hasSupplierRole(permissionChecker)) {
+			return false;
+		}
+
 		CommerceChannel commerceChannel =
-			_commerceChannelLocalService.getCommerceChannelByGroupId(
+			_commerceChannelLocalService.fetchCommerceChannelByGroupClassPK(
 				commerceOrder.getGroupId());
 
 		if ((commerceChannel != null) &&
-			(commerceChannel.getAccountEntryId() > 0) &&
-			_hasSupplierAccount(permissionChecker, commerceChannel)) {
+			(commerceChannel.getAccountEntryId() > 0)) {
 
-			return _roleLocalService.hasUserRole(
-				permissionChecker.getUserId(), permissionChecker.getCompanyId(),
-				AccountRoleConstants.ROLE_NAME_SUPPLIER, true);
+			return _hasSupplierAccount(permissionChecker, commerceChannel);
 		}
 
 		return false;
+	}
+
+	private boolean _hasSupplierRole(PermissionChecker permissionChecker)
+		throws PortalException {
+
+		return _roleLocalService.hasUserRole(
+			permissionChecker.getUserId(), permissionChecker.getCompanyId(),
+			AccountRoleConstants.ROLE_NAME_SUPPLIER, true);
 	}
 
 	private final AccountEntryLocalService _accountEntryLocalService;
