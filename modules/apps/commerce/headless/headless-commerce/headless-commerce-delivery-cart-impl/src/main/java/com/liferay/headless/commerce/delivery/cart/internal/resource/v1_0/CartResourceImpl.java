@@ -755,6 +755,9 @@ public class CartResourceImpl extends BaseCartResourceImpl {
 			commerceOrder.getTotalDiscountAmount(),
 			commerceOrder.getTotalWithTaxAmount(), commerceContext, true);
 
+		_commerceOrderService.updatePrintedNote(
+			commerceOrder.getCommerceOrderId(), cart.getPrintedNote());
+
 		// Expando
 
 		Map<String, ?> customFields = cart.getCustomFields();
