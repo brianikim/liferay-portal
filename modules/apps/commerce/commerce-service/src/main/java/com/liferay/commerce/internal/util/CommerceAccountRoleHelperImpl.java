@@ -230,6 +230,18 @@ public class CommerceAccountRoleHelperImpl
 				});
 
 			companyResourceActionIds.put(
+				"com.liferay.account.model.AccountGroup",
+				new String[] {
+					ActionKeys.VIEW
+				});
+
+			companyResourceActionIds.put(
+				"com.liferay.commerce.pricing.model.CommercePricingClass",
+				new String[] {
+					ActionKeys.VIEW
+				});
+
+			companyResourceActionIds.put(
 				"com.liferay.commerce.currency",
 				new String[] {
 					CommerceCurrencyActionKeys.MANAGE_COMMERCE_CURRENCIES
