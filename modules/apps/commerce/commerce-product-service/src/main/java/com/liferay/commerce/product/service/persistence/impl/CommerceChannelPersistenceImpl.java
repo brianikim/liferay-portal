@@ -3019,6 +3019,234 @@ public class CommerceChannelPersistenceImpl
 	private static final String _FINDER_COLUMN_COMPANYID_COMPANYID_2 =
 		"commerceChannel.companyId = ?";
 
+	private FinderPath _finderPathFetchByAccountEntryId;
+	private FinderPath _finderPathCountByAccountEntryId;
+
+	/**
+	 * Returns the commerce channel where accountEntryId = &#63; or throws a <code>NoSuchChannelException</code> if it could not be found.
+	 *
+	 * @param accountEntryId the account entry ID
+	 * @return the matching commerce channel
+	 * @throws NoSuchChannelException if a matching commerce channel could not be found
+	 */
+	@Override
+	public CommerceChannel findByAccountEntryId(long accountEntryId)
+		throws NoSuchChannelException {
+
+		CommerceChannel commerceChannel = fetchByAccountEntryId(accountEntryId);
+
+		if (commerceChannel == null) {
+			StringBundler sb = new StringBundler(4);
+
+			sb.append(_NO_SUCH_ENTITY_WITH_KEY);
+
+			sb.append("accountEntryId=");
+			sb.append(accountEntryId);
+
+			sb.append("}");
+
+			if (_log.isDebugEnabled()) {
+				_log.debug(sb.toString());
+			}
+
+			throw new NoSuchChannelException(sb.toString());
+		}
+
+		return commerceChannel;
+	}
+
+	/**
+	 * Returns the commerce channel where accountEntryId = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
+	 *
+	 * @param accountEntryId the account entry ID
+	 * @return the matching commerce channel, or <code>null</code> if a matching commerce channel could not be found
+	 */
+	@Override
+	public CommerceChannel fetchByAccountEntryId(long accountEntryId) {
+		return fetchByAccountEntryId(accountEntryId, true);
+	}
+
+	/**
+	 * Returns the commerce channel where accountEntryId = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
+	 *
+	 * @param accountEntryId the account entry ID
+	 * @param useFinderCache whether to use the finder cache
+	 * @return the matching commerce channel, or <code>null</code> if a matching commerce channel could not be found
+	 */
+	@Override
+	public CommerceChannel fetchByAccountEntryId(
+		long accountEntryId, boolean useFinderCache) {
+
+		boolean productionMode = ctPersistenceHelper.isProductionMode(
+			CommerceChannel.class);
+
+		Object[] finderArgs = null;
+
+		if (useFinderCache && productionMode) {
+			finderArgs = new Object[] {accountEntryId};
+		}
+
+		Object result = null;
+
+		if (useFinderCache && productionMode) {
+			result = finderCache.getResult(
+				_finderPathFetchByAccountEntryId, finderArgs, this);
+		}
+
+		if (result instanceof CommerceChannel) {
+			CommerceChannel commerceChannel = (CommerceChannel)result;
+
+			if (accountEntryId != commerceChannel.getAccountEntryId()) {
+				result = null;
+			}
+		}
+
+		if (result == null) {
+			StringBundler sb = new StringBundler(3);
+
+			sb.append(_SQL_SELECT_COMMERCECHANNEL_WHERE);
+
+			sb.append(_FINDER_COLUMN_ACCOUNTENTRYID_ACCOUNTENTRYID_2);
+
+			String sql = sb.toString();
+
+			Session session = null;
+
+			try {
+				session = openSession();
+
+				Query query = session.createQuery(sql);
+
+				QueryPos queryPos = QueryPos.getInstance(query);
+
+				queryPos.add(accountEntryId);
+
+				List<CommerceChannel> list = query.list();
+
+				if (list.isEmpty()) {
+					if (useFinderCache && productionMode) {
+						finderCache.putResult(
+							_finderPathFetchByAccountEntryId, finderArgs, list);
+					}
+				}
+				else {
+					if (list.size() > 1) {
+						Collections.sort(list, Collections.reverseOrder());
+
+						if (_log.isWarnEnabled()) {
+							if (!productionMode || !useFinderCache) {
+								finderArgs = new Object[] {accountEntryId};
+							}
+
+							_log.warn(
+								"CommerceChannelPersistenceImpl.fetchByAccountEntryId(long, boolean) with parameters (" +
+									StringUtil.merge(finderArgs) +
+										") yields a result set with more than 1 result. This violates the logical unique restriction. There is no order guarantee on which result is returned by this finder.");
+						}
+					}
+
+					CommerceChannel commerceChannel = list.get(0);
+
+					result = commerceChannel;
+
+					cacheResult(commerceChannel);
+				}
+			}
+			catch (Exception exception) {
+				throw processException(exception);
+			}
+			finally {
+				closeSession(session);
+			}
+		}
+
+		if (result instanceof List<?>) {
+			return null;
+		}
+		else {
+			return (CommerceChannel)result;
+		}
+	}
+
+	/**
+	 * Removes the commerce channel where accountEntryId = &#63; from the database.
+	 *
+	 * @param accountEntryId the account entry ID
+	 * @return the commerce channel that was removed
+	 */
+	@Override
+	public CommerceChannel removeByAccountEntryId(long accountEntryId)
+		throws NoSuchChannelException {
+
+		CommerceChannel commerceChannel = findByAccountEntryId(accountEntryId);
+
+		return remove(commerceChannel);
+	}
+
+	/**
+	 * Returns the number of commerce channels where accountEntryId = &#63;.
+	 *
+	 * @param accountEntryId the account entry ID
+	 * @return the number of matching commerce channels
+	 */
+	@Override
+	public int countByAccountEntryId(long accountEntryId) {
+		boolean productionMode = ctPersistenceHelper.isProductionMode(
+			CommerceChannel.class);
+
+		FinderPath finderPath = null;
+		Object[] finderArgs = null;
+
+		Long count = null;
+
+		if (productionMode) {
+			finderPath = _finderPathCountByAccountEntryId;
+
+			finderArgs = new Object[] {accountEntryId};
+
+			count = (Long)finderCache.getResult(finderPath, finderArgs, this);
+		}
+
+		if (count == null) {
+			StringBundler sb = new StringBundler(2);
+
+			sb.append(_SQL_COUNT_COMMERCECHANNEL_WHERE);
+
+			sb.append(_FINDER_COLUMN_ACCOUNTENTRYID_ACCOUNTENTRYID_2);
+
+			String sql = sb.toString();
+
+			Session session = null;
+
+			try {
+				session = openSession();
+
+				Query query = session.createQuery(sql);
+
+				QueryPos queryPos = QueryPos.getInstance(query);
+
+				queryPos.add(accountEntryId);
+
+				count = (Long)query.uniqueResult();
+
+				if (productionMode) {
+					finderCache.putResult(finderPath, finderArgs, count);
+				}
+			}
+			catch (Exception exception) {
+				throw processException(exception);
+			}
+			finally {
+				closeSession(session);
+			}
+		}
+
+		return count.intValue();
+	}
+
+	private static final String _FINDER_COLUMN_ACCOUNTENTRYID_ACCOUNTENTRYID_2 =
+		"commerceChannel.accountEntryId = ?";
+
 	private FinderPath _finderPathFetchBySiteGroupId;
 	private FinderPath _finderPathCountBySiteGroupId;
 
@@ -3550,6 +3778,11 @@ public class CommerceChannelPersistenceImpl
 			commerceChannel);
 
 		finderCache.putResult(
+			_finderPathFetchByAccountEntryId,
+			new Object[] {commerceChannel.getAccountEntryId()},
+			commerceChannel);
+
+		finderCache.putResult(
 			_finderPathFetchBySiteGroupId,
 			new Object[] {commerceChannel.getSiteGroupId()}, commerceChannel);
 
@@ -3640,8 +3873,15 @@ public class CommerceChannelPersistenceImpl
 		CommerceChannelModelImpl commerceChannelModelImpl) {
 
 		Object[] args = new Object[] {
-			commerceChannelModelImpl.getSiteGroupId()
+			commerceChannelModelImpl.getAccountEntryId()
 		};
+
+		finderCache.putResult(
+			_finderPathCountByAccountEntryId, args, Long.valueOf(1));
+		finderCache.putResult(
+			_finderPathFetchByAccountEntryId, args, commerceChannelModelImpl);
+
+		args = new Object[] {commerceChannelModelImpl.getSiteGroupId()};
 
 		finderCache.putResult(
 			_finderPathCountBySiteGroupId, args, Long.valueOf(1));
@@ -4445,6 +4685,16 @@ public class CommerceChannelPersistenceImpl
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByCompanyId",
 			new String[] {Long.class.getName()}, new String[] {"companyId"},
 			false);
+
+		_finderPathFetchByAccountEntryId = new FinderPath(
+			FINDER_CLASS_NAME_ENTITY, "fetchByAccountEntryId",
+			new String[] {Long.class.getName()},
+			new String[] {"accountEntryId"}, true);
+
+		_finderPathCountByAccountEntryId = new FinderPath(
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByAccountEntryId",
+			new String[] {Long.class.getName()},
+			new String[] {"accountEntryId"}, false);
 
 		_finderPathFetchBySiteGroupId = new FinderPath(
 			FINDER_CLASS_NAME_ENTITY, "fetchBySiteGroupId",

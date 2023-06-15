@@ -241,6 +241,10 @@ public interface CommerceChannelLocalService
 	public CommerceChannel fetchCommerceChannel(long commerceChannelId);
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public CommerceChannel fetchCommerceChannelByAccountEntryId(
+		long accountEntryId);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public CommerceChannel fetchCommerceChannelByExternalReferenceCode(
 		String externalReferenceCode, long companyId);
 

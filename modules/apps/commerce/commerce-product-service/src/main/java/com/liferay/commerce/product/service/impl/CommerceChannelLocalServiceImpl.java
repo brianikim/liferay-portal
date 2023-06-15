@@ -263,6 +263,13 @@ public class CommerceChannelLocalServiceImpl
 	}
 
 	@Override
+	public CommerceChannel fetchCommerceChannelByAccountEntryId(
+		long accountEntryId) {
+
+		return commerceChannelPersistence.fetchByAccountEntryId(accountEntryId);
+	}
+
+	@Override
 	public CommerceChannel fetchCommerceChannelByGroupClassPK(long groupId)
 		throws PortalException {
 

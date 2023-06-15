@@ -78,6 +78,9 @@
 		<finder name="CompanyId" return-type="Collection">
 			<finder-column name="companyId" />
 		</finder>
+		<finder name="AccountEntryId" return-type="CommerceChannel">
+			<finder-column name="accountEntryId" />
+		</finder>
 		<finder name="SiteGroupId" return-type="CommerceChannel">
 			<finder-column name="siteGroupId" />
 		</finder>
