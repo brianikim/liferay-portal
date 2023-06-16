@@ -27,8 +27,9 @@ import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
-import com.liferay.portal.kernel.service.RoleLocalService;
+import com.liferay.portal.kernel.service.UserGroupRoleLocalService;
 import com.liferay.portal.kernel.util.ArrayUtil;
 
 import java.util.List;
@@ -133,7 +134,13 @@ public class CommercePriceListPermissionImpl
 				commercePriceList.getCompanyId(),
 				CommercePriceList.class.getName(),
 				commercePriceList.getCommercePriceListId(),
-				commercePriceList.getUserId(), actionId) ||
+				commercePriceList.getUserId(), actionId)) {
+
+			return true;
+		}
+
+		if ((actionId.equals(ActionKeys.UPDATE) ||
+			 actionId.equals(ActionKeys.VIEW)) &&
 			_hasSupplierPermission(permissionChecker, commercePriceList)) {
 
 			return true;
@@ -159,7 +166,10 @@ public class CommercePriceListPermissionImpl
 			if (commerceCatalog.getAccountEntryId() ==
 					accountEntry.getAccountEntryId()) {
 
-				return true;
+				return _userGroupRoleLocalService.hasUserGroupRole(
+					permissionChecker.getUserId(),
+					accountEntry.getAccountEntryGroupId(),
+					AccountRoleConstants.ROLE_NAME_ACCOUNT_SUPPLIER);
 			}
 		}
 
@@ -170,10 +180,6 @@ public class CommercePriceListPermissionImpl
 			PermissionChecker permissionChecker,
 			CommercePriceList commercePriceList)
 		throws PortalException {
-
-		if (!_hasSupplierRole(permissionChecker)) {
-			return false;
-		}
 
 		CommerceCatalog commerceCatalog =
 			_commerceCatalogLocalService.fetchCommerceCatalogByGroupId(
@@ -189,14 +195,6 @@ public class CommercePriceListPermissionImpl
 		return false;
 	}
 
-	private boolean _hasSupplierRole(PermissionChecker permissionChecker)
-		throws PortalException {
-
-		return _roleLocalService.hasUserRole(
-			permissionChecker.getUserId(), permissionChecker.getCompanyId(),
-			AccountRoleConstants.ROLE_NAME_SUPPLIER, true);
-	}
-
 	@Reference
 	private AccountEntryLocalService _accountEntryLocalService;
 
@@ -207,6 +205,6 @@ public class CommercePriceListPermissionImpl
 	private CommercePriceListLocalService _commercePriceListLocalService;
 
 	@Reference
-	private RoleLocalService _roleLocalService;
+	private UserGroupRoleLocalService _userGroupRoleLocalService;
 
 }
