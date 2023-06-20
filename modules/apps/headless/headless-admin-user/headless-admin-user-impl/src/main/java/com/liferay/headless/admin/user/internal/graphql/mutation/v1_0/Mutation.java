@@ -1239,6 +1239,30 @@ public class Mutation {
 	}
 
 	@GraphQLField(
+		description = "Updates a user by their external reference code to an account by external reference code"
+	)
+	public boolean
+			patchAccountByExternalReferenceCodeUserAccountByExternalReferenceCode(
+				@GraphQLName("accountExternalReferenceCode") String
+					accountExternalReferenceCode,
+				@GraphQLName("externalReferenceCode") String
+					externalReferenceCode,
+				@GraphQLName("userAccount") UserAccount userAccount)
+		throws Exception {
+
+		_applyVoidComponentServiceObjects(
+			_userAccountResourceComponentServiceObjects,
+			this::_populateResourceContext,
+			userAccountResource ->
+				userAccountResource.
+					patchAccountByExternalReferenceCodeUserAccountByExternalReferenceCode(
+						accountExternalReferenceCode, externalReferenceCode,
+						userAccount));
+
+		return true;
+	}
+
+	@GraphQLField(
 		description = "Assigns a user by their external reference code to an account by external reference code"
 	)
 	public boolean
@@ -1485,6 +1509,37 @@ public class Mutation {
 			userAccountResource ->
 				userAccountResource.postAccountUserAccountByEmailAddress(
 					accountId, emailAddress));
+	}
+
+	@GraphQLField(description = "Removes a user assigned to an account")
+	public boolean deleteAccountUserAccount(
+			@GraphQLName("accountId") Long accountId,
+			@GraphQLName("userAccountId") Long userAccountId)
+		throws Exception {
+
+		_applyVoidComponentServiceObjects(
+			_userAccountResourceComponentServiceObjects,
+			this::_populateResourceContext,
+			userAccountResource -> userAccountResource.deleteAccountUserAccount(
+				accountId, userAccountId));
+
+		return true;
+	}
+
+	@GraphQLField(description = "Updates a user assigned to an account")
+	public boolean patchAccountUserAccount(
+			@GraphQLName("accountId") Long accountId,
+			@GraphQLName("userAccountId") Long userAccountId,
+			@GraphQLName("userAccount") UserAccount userAccount)
+		throws Exception {
+
+		_applyVoidComponentServiceObjects(
+			_userAccountResourceComponentServiceObjects,
+			this::_populateResourceContext,
+			userAccountResource -> userAccountResource.patchAccountUserAccount(
+				accountId, userAccountId, userAccount));
+
+		return true;
 	}
 
 	@GraphQLField
