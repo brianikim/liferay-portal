@@ -156,7 +156,7 @@ public class CommerceInventoryWarehouseItemServiceImpl
 
 		_commerceInventoryWarehouseModelResourcePermission.check(
 			getPermissionChecker(), commerceInventoryWarehouseId,
-			ActionKeys.UPDATE);
+			ActionKeys.VIEW);
 
 		return commerceInventoryWarehouseItemLocalService.
 			fetchCommerceInventoryWarehouseItem(
@@ -169,17 +169,17 @@ public class CommerceInventoryWarehouseItemServiceImpl
 				String externalReferenceCode, long companyId)
 		throws PortalException {
 
-		PortletResourcePermission portletResourcePermission =
-			_commerceInventoryWarehouseModelResourcePermission.
-				getPortletResourcePermission();
+		CommerceInventoryWarehouseItem commerceInventoryWarehouseItem =
+			commerceInventoryWarehouseItemLocalService.
+				fetchCommerceInventoryWarehouseItemByExternalReferenceCode(
+					externalReferenceCode, companyId);
 
-		portletResourcePermission.check(
-			getPermissionChecker(), null,
-			CommerceInventoryActionKeys.MANAGE_INVENTORY);
+		_commerceInventoryWarehouseModelResourcePermission.check(
+			getPermissionChecker(),
+			commerceInventoryWarehouseItem.getCommerceInventoryWarehouseId(),
+			ActionKeys.VIEW);
 
-		return commerceInventoryWarehouseItemLocalService.
-			fetchCommerceInventoryWarehouseItemByExternalReferenceCode(
-				externalReferenceCode, companyId);
+		return commerceInventoryWarehouseItem;
 	}
 
 	@Override
@@ -189,20 +189,15 @@ public class CommerceInventoryWarehouseItemServiceImpl
 
 		CommerceInventoryWarehouseItem commerceInventoryWarehouseItem =
 			commerceInventoryWarehouseItemLocalService.
-				fetchCommerceInventoryWarehouseItem(
+				getCommerceInventoryWarehouseItem(
 					commerceInventoryWarehouseItemId);
 
-		if (commerceInventoryWarehouseItem != null) {
-			_commerceInventoryWarehouseModelResourcePermission.check(
-				getPermissionChecker(),
-				commerceInventoryWarehouseItem.
-					getCommerceInventoryWarehouseId(),
-				ActionKeys.VIEW);
-		}
+		_commerceInventoryWarehouseModelResourcePermission.check(
+			getPermissionChecker(),
+			commerceInventoryWarehouseItem.getCommerceInventoryWarehouseId(),
+			ActionKeys.VIEW);
 
-		return commerceInventoryWarehouseItemLocalService.
-			fetchCommerceInventoryWarehouseItem(
-				commerceInventoryWarehouseItemId);
+		return commerceInventoryWarehouseItem;
 	}
 
 	@Override
@@ -225,17 +220,17 @@ public class CommerceInventoryWarehouseItemServiceImpl
 				String externalReferenceCode, long companyId)
 		throws PortalException {
 
-		PortletResourcePermission portletResourcePermission =
-			_commerceInventoryWarehouseModelResourcePermission.
-				getPortletResourcePermission();
+		CommerceInventoryWarehouseItem commerceInventoryWarehouseItem =
+			commerceInventoryWarehouseItemLocalService.
+				getCommerceInventoryWarehouseItemByReferenceCode(
+					externalReferenceCode, companyId);
 
-		portletResourcePermission.check(
-			getPermissionChecker(), null,
-			CommerceInventoryActionKeys.MANAGE_INVENTORY);
+		_commerceInventoryWarehouseModelResourcePermission.check(
+			getPermissionChecker(),
+			commerceInventoryWarehouseItem.getCommerceInventoryWarehouseId(),
+			ActionKeys.VIEW);
 
-		return commerceInventoryWarehouseItemLocalService.
-			getCommerceInventoryWarehouseItemByReferenceCode(
-				externalReferenceCode, companyId);
+		return commerceInventoryWarehouseItem;
 	}
 
 	@Override
@@ -251,24 +246,6 @@ public class CommerceInventoryWarehouseItemServiceImpl
 		return commerceInventoryWarehouseItemLocalService.
 			getCommerceInventoryWarehouseItems(
 				commerceInventoryWarehouseId, start, end);
-	}
-
-	@Override
-	public List<CommerceInventoryWarehouseItem>
-			getCommerceInventoryWarehouseItems(
-				long companyId, String sku, int start, int end)
-		throws PortalException {
-
-		PortletResourcePermission portletResourcePermission =
-			_commerceInventoryWarehouseModelResourcePermission.
-				getPortletResourcePermission();
-
-		portletResourcePermission.check(
-			getPermissionChecker(), null,
-			CommerceInventoryActionKeys.MANAGE_INVENTORY);
-
-		return commerceInventoryWarehouseItemLocalService.
-			getCommerceInventoryWarehouseItems(companyId, sku, start, end);
 	}
 
 	@Override
@@ -426,13 +403,13 @@ public class CommerceInventoryWarehouseItemServiceImpl
 	@Override
 	public int getStockQuantity(long companyId, long groupId, String sku) {
 		return commerceInventoryWarehouseItemFinder.countStockQuantityByC_G_S(
-			companyId, groupId, sku, true);
+			companyId, groupId, sku, false);
 	}
 
 	@Override
 	public int getStockQuantity(long companyId, String sku) {
 		return commerceInventoryWarehouseItemFinder.countStockQuantityByC_S(
-			companyId, sku, true);
+			companyId, sku, false);
 	}
 
 	@Override
