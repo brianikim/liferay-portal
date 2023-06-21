@@ -20,6 +20,7 @@ import com.liferay.account.constants.AccountRoleConstants;
 import com.liferay.account.model.AccountEntry;
 import com.liferay.account.model.AccountRole;
 import com.liferay.account.service.AccountRoleLocalService;
+import com.liferay.commerce.constants.CommerceActionKeys;
 import com.liferay.commerce.constants.CommercePortletKeys;
 import com.liferay.commerce.notification.constants.CommerceNotificationActionKeys;
 import com.liferay.commerce.price.list.constants.CommercePriceListActionKeys;
@@ -223,6 +224,32 @@ public class CommerceAccountRoleHelperImpl
 					portletId,
 					new String[] {ActionKeys.ACCESS_IN_CONTROL_PANEL});
 			}
+
+			companyResourceActionIds.put(
+				"com.liferay.commerce.model.CommerceOrderType",
+				new String[] {ActionKeys.VIEW});
+
+			companyResourceActionIds.put(
+				"com.liferay.commerce.order",
+				new String[] {
+					"MANAGE_COMMERCE_ORDER_DELIVERY_TERMS",
+					"MANAGE_COMMERCE_ORDER_NOTES",
+					"MANAGE_COMMERCE_ORDER_PAYMENT_METHODS",
+					"MANAGE_COMMERCE_ORDER_PAYMENT_TERMS",
+					"MANAGE_COMMERCE_ORDER_PRICES",
+					"MANAGE_COMMERCE_ORDER_RESTRICTED_NOTES",
+					"MANAGE_COMMERCE_ORDER_SHIPPING_OPTIONS"
+				});
+
+			companyResourceActionIds.put(
+				"com.liferay.commerce.product",
+				new String[] {
+					CPActionKeys.MANAGE_COMMERCE_PRODUCT_MEASUREMENT_UNITS
+				});
+
+			companyResourceActionIds.put(
+				"com.liferay.commerce.shipment",
+				new String[] {CommerceActionKeys.MANAGE_COMMERCE_SHIPMENTS});
 
 			companyResourceActionIds.put(
 				PortletKeys.PORTAL,
