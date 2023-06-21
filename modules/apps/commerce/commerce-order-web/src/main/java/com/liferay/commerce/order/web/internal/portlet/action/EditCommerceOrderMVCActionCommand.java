@@ -30,6 +30,7 @@ import com.liferay.commerce.order.CommerceOrderHttpHelper;
 import com.liferay.commerce.order.engine.CommerceOrderEngine;
 import com.liferay.commerce.payment.engine.CommercePaymentEngine;
 import com.liferay.commerce.service.CommerceAddressService;
+import com.liferay.commerce.service.CommerceOrderLocalService;
 import com.liferay.commerce.service.CommerceOrderService;
 import com.liferay.commerce.service.CommerceShipmentService;
 import com.liferay.petra.string.StringPool;
@@ -489,7 +490,7 @@ public class EditCommerceOrderMVCActionCommand extends BaseMVCActionCommand {
 		String paymentMethodKey = ParamUtil.getString(
 			actionRequest, "paymentMethodKey");
 
-		_commerceOrderService.updateCommercePaymentMethodKey(
+		_commerceOrderLocalService.updateCommercePaymentMethodKey(
 			commerceOrderId, paymentMethodKey);
 	}
 
@@ -671,6 +672,9 @@ public class EditCommerceOrderMVCActionCommand extends BaseMVCActionCommand {
 
 	@Reference
 	private CommerceOrderService _commerceOrderService;
+
+	@Reference
+	private CommerceOrderLocalService _commerceOrderLocalService;
 
 	@Reference
 	private CommercePaymentEngine _commercePaymentEngine;
