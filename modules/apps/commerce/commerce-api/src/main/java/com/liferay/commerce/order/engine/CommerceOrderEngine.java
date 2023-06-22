@@ -32,6 +32,10 @@ public interface CommerceOrderEngine {
 			CommerceOrder commerceOrder)
 		throws PortalException;
 
+	public CommerceOrder checkCommerceOrderShipmentStatus(
+			CommerceOrder commerceOrder, boolean secure)
+		throws PortalException;
+
 	public CommerceOrder checkoutCommerceOrder(
 			CommerceOrder commerceOrder, long userId)
 		throws PortalException;
@@ -45,6 +49,11 @@ public interface CommerceOrderEngine {
 
 	public CommerceOrder transitionCommerceOrder(
 			CommerceOrder commerceOrder, int orderStatus, long userId)
+		throws PortalException;
+
+	public CommerceOrder transitionCommerceOrder(
+			CommerceOrder commerceOrder, int orderStatus, long userId,
+			boolean secure)
 		throws PortalException;
 
 	public CommerceOrder updateCommerceOrder(

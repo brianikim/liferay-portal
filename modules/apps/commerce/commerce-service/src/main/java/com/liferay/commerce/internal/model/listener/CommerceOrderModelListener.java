@@ -151,14 +151,14 @@ public class CommerceOrderModelListener
 
 		if (originalOrderStatus != newOrderStatus) {
 			_commerceOrderEngine.checkCommerceOrderShipmentStatus(
-				customerCommerceOrder);
+				customerCommerceOrder, false);
 
 			if ((newOrderStatus ==
 					CommerceOrderConstants.ORDER_STATUS_COMPLETED) &&
 				_transitionOrderStatusCompleted(customerCommerceOrder)) {
 
 				_commerceOrderEngine.transitionCommerceOrder(
-					customerCommerceOrder, newOrderStatus, 0);
+					customerCommerceOrder, newOrderStatus, 0, false);
 			}
 		}
 	}
