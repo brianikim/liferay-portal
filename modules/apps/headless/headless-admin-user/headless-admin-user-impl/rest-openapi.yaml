@@ -992,7 +992,6 @@ components:
                     description:
                         The user's ID.
                     format: int64
-                    readOnly: true
                     type: integer
                 image:
                     description:
