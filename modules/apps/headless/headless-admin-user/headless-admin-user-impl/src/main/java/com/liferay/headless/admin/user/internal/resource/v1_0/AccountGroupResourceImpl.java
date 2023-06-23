@@ -110,7 +110,7 @@ public class AccountGroupResourceImpl extends BaseAccountGroupResourceImpl {
 
 	@Override
 	public Page<AccountGroup>
-			getAccountByExternalReferenceCodeAccountGroupsPage(
+			getAccountByExternalReferenceCodeAccountExternalReferenceCodeAccountGroupsPage(
 				String accountExternalReferenceCode, Pagination pagination)
 		throws Exception {
 
