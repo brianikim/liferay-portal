@@ -77,13 +77,15 @@ public class CommerceShipmentItemFDSDataProvider
 			if (commerceShipmentItem.getCommerceInventoryWarehouseId() > 0) {
 				CommerceInventoryWarehouse commerceInventoryWarehouse =
 					_commerceInventoryWarehouseService.
-						getCommerceInventoryWarehouse(
+						fetchByCommerceInventoryWarehouse(
 							commerceShipmentItem.
 								getCommerceInventoryWarehouseId());
 
-				commerceInventoryWarehouseName =
-					commerceInventoryWarehouse.getName(
-						_portal.getLocale(httpServletRequest));
+				if (commerceInventoryWarehouse != null) {
+					commerceInventoryWarehouseName =
+						commerceInventoryWarehouse.getName(
+							_portal.getLocale(httpServletRequest));
+				}
 			}
 
 			shipmentItems.add(
