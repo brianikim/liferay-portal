@@ -1487,6 +1487,21 @@ public class Mutation {
 					accountId, emailAddress));
 	}
 
+	@GraphQLField(description = "Removes a user assigned to an account")
+	public boolean deleteAccountUserAccount(
+			@GraphQLName("accountId") Long accountId,
+			@GraphQLName("userAccountId") Long userAccountId)
+		throws Exception {
+
+		_applyVoidComponentServiceObjects(
+			_userAccountResourceComponentServiceObjects,
+			this::_populateResourceContext,
+			userAccountResource -> userAccountResource.deleteAccountUserAccount(
+				accountId, userAccountId));
+
+		return true;
+	}
+
 	@GraphQLField
 	public Response createOrganizationUserAccountsPageExportBatch(
 			@GraphQLName("organizationId") String organizationId,
