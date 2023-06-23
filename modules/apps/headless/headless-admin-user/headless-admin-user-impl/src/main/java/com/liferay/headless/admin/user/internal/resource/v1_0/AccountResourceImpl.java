@@ -43,6 +43,7 @@ import com.liferay.portal.kernel.search.filter.Filter;
 import com.liferay.portal.kernel.search.filter.TermFilter;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
+import com.liferay.portal.kernel.service.AddressLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -61,7 +62,6 @@ import com.liferay.portal.vulcan.fields.NestedFieldSupport;
 import com.liferay.portal.vulcan.pagination.Page;
 import com.liferay.portal.vulcan.pagination.Pagination;
 import com.liferay.portal.vulcan.util.SearchUtil;
-import com.liferay.users.admin.kernel.util.UsersAdmin;
 
 import java.util.Collections;
 import java.util.List;
@@ -274,9 +274,18 @@ public class AccountResourceImpl
 			accountEntry.getAccountEntryId(),
 			_getAccountUserAccountIds(account));
 
-		_usersAdmin.updateAddresses(
-			AccountEntry.class.getName(), accountEntry.getAccountEntryId(),
-			_getAddresses(account));
+		for (Address address : _getAddresses(account)) {
+			_addressLocalService.addAddress(
+				address.getExternalReferenceCode(), contextUser.getUserId(),
+				AccountEntry.class.getName(), accountEntry.getAccountEntryId(),
+				address.getName(), address.getDescription(),
+				address.getStreet1(), address.getStreet2(),
+				address.getStreet3(), address.getCity(), address.getZip(),
+				address.getRegionId(), address.getCountryId(),
+				address.getListTypeId(), address.getMailing(),
+				address.getPrimary(), address.getPhoneNumber(),
+				_getServiceContext(account));
+		}
 
 		return _toAccount(accountEntry);
 	}
@@ -319,8 +328,17 @@ public class AccountResourceImpl
 		_accountEntryUserRelLocalService.setAccountEntryUserRels(
 			accountId, _getAccountUserAccountIds(account));
 
-		_usersAdmin.updateAddresses(
-			AccountEntry.class.getName(), accountId, _getAddresses(account));
+		for (Address address : _getAddresses(account)) {
+			_addressLocalService.addAddress(
+				address.getExternalReferenceCode(), contextUser.getUserId(),
+				AccountEntry.class.getName(), accountId, address.getName(),
+				address.getDescription(), address.getStreet1(),
+				address.getStreet2(), address.getStreet3(), address.getCity(),
+				address.getZip(), address.getRegionId(), address.getCountryId(),
+				address.getListTypeId(), address.getMailing(),
+				address.getPrimary(), address.getPhoneNumber(),
+				_getServiceContext(account));
+		}
 
 		return _toAccount(
 			_accountEntryService.updateAccountEntry(
@@ -585,6 +603,9 @@ public class AccountResourceImpl
 	@Reference(target = DTOConverterConstants.ACCOUNT_RESOURCE_DTO_CONVERTER)
 	private DTOConverter<AccountEntry, Account> _accountResourceDTOConverter;
 
+	@Reference
+	private AddressLocalService _addressLocalService;
+
 	private final EntityModel _entityModel = new AccountEntityModel();
 
 	@Reference(
@@ -593,8 +614,5 @@ public class AccountResourceImpl
 	private DTOConverter
 		<com.liferay.portal.kernel.model.Organization, Organization>
 			_organizationResourceDTOConverter;
-
-	@Reference
-	private UsersAdmin _usersAdmin;
 
 }
