@@ -1202,11 +1202,6 @@ public class ServletDataImpl implements ServletData {
 							TicketResourceImpl.class,
 							"getUserAccountPasswordResetTicket"));
 					put(
-						"query#Account.postalAddresses",
-						new ObjectValuePair<>(
-							PostalAddressResourceImpl.class,
-							"getAccountPostalAddressesPage"));
-					put(
 						"query#Account.organizationByExternalReferenceCode",
 						new ObjectValuePair<>(
 							OrganizationResourceImpl.class,

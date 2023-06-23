@@ -44,13 +44,11 @@ import com.liferay.portal.kernel.search.filter.TermFilter;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.service.ServiceContext;
-import com.liferay.portal.kernel.service.ServiceContextFactory;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.PortletKeys;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.odata.entity.EntityModel;
@@ -60,7 +58,6 @@ import com.liferay.portal.vulcan.dto.converter.DefaultDTOConverterContext;
 import com.liferay.portal.vulcan.dto.converter.util.DTOConverterUtil;
 import com.liferay.portal.vulcan.fields.NestedField;
 import com.liferay.portal.vulcan.fields.NestedFieldSupport;
-import com.liferay.portal.vulcan.multipart.MultipartBody;
 import com.liferay.portal.vulcan.pagination.Page;
 import com.liferay.portal.vulcan.pagination.Pagination;
 import com.liferay.portal.vulcan.util.SearchUtil;
@@ -72,7 +69,6 @@ import java.util.Map;
 import java.util.Objects;
 
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -563,21 +559,6 @@ public class AccountResourceImpl
 	private Account _toAccount(AccountEntry accountEntry) throws Exception {
 		return _accountResourceDTOConverter.toDTO(
 			_getDTOConverterContext(accountEntry.getAccountEntryId()));
-	}
-
-	private void _updateAccountLogo(
-			AccountEntry accountEntry, MultipartBody multipartBody)
-		throws Exception {
-
-		_accountEntryService.updateAccountEntry(
-			accountEntry.getAccountEntryId(),
-			accountEntry.getParentAccountEntryId(), accountEntry.getName(),
-			accountEntry.getDescription(), true,
-			StringUtil.split(accountEntry.getDomains()),
-			accountEntry.getEmailAddress(),
-			multipartBody.getBinaryFileAsBytes("image"),
-			accountEntry.getTaxIdNumber(), accountEntry.getStatus(),
-			ServiceContextFactory.getInstance(contextHttpServletRequest));
 	}
 
 	@Reference

@@ -238,7 +238,7 @@ public class Query {
 	/**
 	 * Invoke this method with the command line:
 	 *
-	 * curl -H 'Content-Type: text/plain; charset=utf-8' -X 'POST' 'http://localhost:8080/o/graphql' -d $'{"query": "query {accountByExternalReferenceCode(externalReferenceCode: ___){accountUserAccounts, actions, customFields, description, domains, externalReferenceCode, id, name, numberOfUsers, organizationIds, parentAccountId, status, type}}"}' -u 'test@liferay.com:test'
+	 * curl -H 'Content-Type: text/plain; charset=utf-8' -X 'POST' 'http://localhost:8080/o/graphql' -d $'{"query": "query {accountByExternalReferenceCode(externalReferenceCode: ___){accountUserAccounts, actions, customFields, dateCreated, dateModified, defaultBillingAddressId, defaultShippingAddressId, description, domains, externalReferenceCode, id, logoId, logoURL, name, numberOfUsers, organizationIds, parentAccountId, postalAddresses, status, taxId, type}}"}' -u 'test@liferay.com:test'
 	 */
 	@GraphQLField
 	public Account accountByExternalReferenceCode(
@@ -256,7 +256,7 @@ public class Query {
 	/**
 	 * Invoke this method with the command line:
 	 *
-	 * curl -H 'Content-Type: text/plain; charset=utf-8' -X 'POST' 'http://localhost:8080/o/graphql' -d $'{"query": "query {account(accountId: ___){accountUserAccounts, actions, customFields, description, domains, externalReferenceCode, id, name, numberOfUsers, organizationIds, parentAccountId, status, type}}"}' -u 'test@liferay.com:test'
+	 * curl -H 'Content-Type: text/plain; charset=utf-8' -X 'POST' 'http://localhost:8080/o/graphql' -d $'{"query": "query {account(accountId: ___){accountUserAccounts, actions, customFields, dateCreated, dateModified, defaultBillingAddressId, defaultShippingAddressId, description, domains, externalReferenceCode, id, logoId, logoURL, name, numberOfUsers, organizationIds, parentAccountId, postalAddresses, status, taxId, type}}"}' -u 'test@liferay.com:test'
 	 */
 	@GraphQLField
 	public Account account(@GraphQLName("accountId") Long accountId)
@@ -2347,27 +2347,6 @@ public class Query {
 		}
 
 		private UserAccount _userAccount;
-
-	}
-
-	@GraphQLTypeExtension(Account.class)
-	public class GetAccountPostalAddressesPageTypeExtension {
-
-		public GetAccountPostalAddressesPageTypeExtension(Account account) {
-			_account = account;
-		}
-
-		@GraphQLField(description = "Retrieves the account's postal addresses.")
-		public PostalAddressPage postalAddresses() throws Exception {
-			return _applyComponentServiceObjects(
-				_postalAddressResourceComponentServiceObjects,
-				Query.this::_populateResourceContext,
-				postalAddressResource -> new PostalAddressPage(
-					postalAddressResource.getAccountPostalAddressesPage(
-						_account.getId())));
-		}
-
-		private Account _account;
 
 	}
 
