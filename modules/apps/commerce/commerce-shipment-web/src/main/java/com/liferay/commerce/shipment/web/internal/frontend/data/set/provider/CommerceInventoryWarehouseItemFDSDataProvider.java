@@ -33,8 +33,12 @@ import com.liferay.frontend.data.set.provider.search.FDSPagination;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.search.Sort;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.WebKeys;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,76 +84,87 @@ public class CommerceInventoryWarehouseItemFDSDataProvider
 				getCommerceInventoryWarehouses(
 					companyId, commerceOrderItem.getGroupId(), true);
 
+		ThemeDisplay themeDisplay =
+			(ThemeDisplay)httpServletRequest.getAttribute(
+				WebKeys.THEME_DISPLAY);
+
 		for (CommerceInventoryWarehouse commerceInventoryWarehouse :
 				commerceInventoryWarehouses) {
 
 			long commerceInventoryWarehouseId =
 				commerceInventoryWarehouse.getCommerceInventoryWarehouseId();
 
-			CommerceInventoryWarehouseItem commerceInventoryWarehouseItem =
-				_commerceInventoryWarehouseItemLocalService.
-					fetchCommerceInventoryWarehouseItem(
-						commerceInventoryWarehouseId,
-						commerceOrderItem.getSku());
+			if (_commerceInventoryWarehouseModelResourcePermission.contains(
+					themeDisplay.getPermissionChecker(),
+					commerceInventoryWarehouseId, ActionKeys.VIEW)) {
 
-			String portletNamespace = _portal.getPortletNamespace(
-				CommercePortletKeys.COMMERCE_SHIPMENT);
+				CommerceInventoryWarehouseItem commerceInventoryWarehouseItem =
+					_commerceInventoryWarehouseItemLocalService.
+						fetchCommerceInventoryWarehouseItem(
+							commerceInventoryWarehouseId,
+							commerceOrderItem.getSku());
 
-			String inputName =
-				portletNamespace + commerceInventoryWarehouseId + "_quantity";
+				String portletNamespace = _portal.getPortletNamespace(
+					CommercePortletKeys.COMMERCE_SHIPMENT);
 
-			int maxShippableQuantity =
-				commerceOrderItem.getQuantity() -
-					commerceOrderItem.getShippedQuantity();
+				String inputName =
+					portletNamespace + commerceInventoryWarehouseId +
+						"_quantity";
 
-			int shipmentItemWarehouseItemQuantity = 0;
+				int maxShippableQuantity =
+					commerceOrderItem.getQuantity() -
+						commerceOrderItem.getShippedQuantity();
 
-			long commerceShipmentId = ParamUtil.getLong(
-				httpServletRequest, "commerceShipmentId");
+				int shipmentItemWarehouseItemQuantity = 0;
 
-			commerceShipmentItem =
-				_commerceShipmentItemLocalService.fetchCommerceShipmentItem(
-					commerceShipmentId,
-					commerceOrderItem.getCommerceOrderItemId(),
-					commerceInventoryWarehouseId);
+				long commerceShipmentId = ParamUtil.getLong(
+					httpServletRequest, "commerceShipmentId");
 
-			if (commerceShipmentItem != null) {
-				shipmentItemWarehouseItemQuantity =
-					commerceShipmentItem.getQuantity();
+				commerceShipmentItem =
+					_commerceShipmentItemLocalService.fetchCommerceShipmentItem(
+						commerceShipmentId,
+						commerceOrderItem.getCommerceOrderItemId(),
+						commerceInventoryWarehouseId);
 
-				maxShippableQuantity =
-					maxShippableQuantity + commerceShipmentItem.getQuantity();
-			}
-
-			if (commerceInventoryWarehouseItem != null) {
-				if (maxShippableQuantity >
-						commerceInventoryWarehouseItem.getQuantity()) {
+				if (commerceShipmentItem != null) {
+					shipmentItemWarehouseItemQuantity =
+						commerceShipmentItem.getQuantity();
 
 					maxShippableQuantity =
-						commerceInventoryWarehouseItem.getQuantity();
+						maxShippableQuantity +
+							commerceShipmentItem.getQuantity();
 				}
 
-				warehouses.add(
-					new Warehouse(
-						commerceInventoryWarehouseId,
-						new WarehouseItem(
-							inputName, maxShippableQuantity, 0,
-							shipmentItemWarehouseItemQuantity),
-						commerceInventoryWarehouseItem.getQuantity(),
-						StringPool.BLANK,
-						commerceInventoryWarehouse.getName(
-							_portal.getLocale(httpServletRequest))));
-			}
-			else {
-				warehouses.add(
-					new Warehouse(
-						commerceInventoryWarehouseId,
-						new WarehouseItem(
-							inputName, shipmentItemWarehouseItemQuantity, 0,
-							shipmentItemWarehouseItemQuantity),
-						0, StringPool.BLANK,
-						commerceInventoryWarehouse.getName(
-							_portal.getLocale(httpServletRequest))));
+				if (commerceInventoryWarehouseItem != null) {
+					if (maxShippableQuantity >
+							commerceInventoryWarehouseItem.getQuantity()) {
+
+						maxShippableQuantity =
+							commerceInventoryWarehouseItem.getQuantity();
+					}
+
+					warehouses.add(
+						new Warehouse(
+							commerceInventoryWarehouseId,
+							new WarehouseItem(
+								inputName, maxShippableQuantity, 0,
+								shipmentItemWarehouseItemQuantity),
+							commerceInventoryWarehouseItem.getQuantity(),
+							StringPool.BLANK,
+							commerceInventoryWarehouse.getName(
+								_portal.getLocale(httpServletRequest))));
+				}
+				else {
+					warehouses.add(
+						new Warehouse(
+							commerceInventoryWarehouseId,
+							new WarehouseItem(
+								inputName, shipmentItemWarehouseItemQuantity, 0,
+								shipmentItemWarehouseItemQuantity),
+							0, StringPool.BLANK,
+							commerceInventoryWarehouse.getName(
+								_portal.getLocale(httpServletRequest))));
+				}
 			}
 		}
 
@@ -185,6 +200,12 @@ public class CommerceInventoryWarehouseItemFDSDataProvider
 	@Reference
 	private CommerceInventoryWarehouseLocalService
 		_commerceInventoryWarehouseLocalService;
+
+	@Reference(
+		target = "(model.class.name=com.liferay.commerce.inventory.model.CommerceInventoryWarehouse)"
+	)
+	private ModelResourcePermission<CommerceInventoryWarehouse>
+		_commerceInventoryWarehouseModelResourcePermission;
 
 	@Reference
 	private CommerceOrderItemService _commerceOrderItemService;

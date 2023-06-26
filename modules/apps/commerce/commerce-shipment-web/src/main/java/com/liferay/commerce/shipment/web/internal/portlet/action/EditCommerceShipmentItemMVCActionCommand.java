@@ -33,6 +33,8 @@ import com.liferay.portal.kernel.portlet.PortletProviderUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.portlet.url.builder.PortletURLBuilder;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextFactory;
 import com.liferay.portal.kernel.servlet.SessionErrors;
@@ -233,48 +235,59 @@ public class EditCommerceShipmentItemMVCActionCommand
 					commerceOrderItem.getCompanyId(),
 					commerceOrderItem.getGroupId(), true);
 
+		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
 		for (CommerceInventoryWarehouse commerceInventoryWarehouse :
 				commerceInventoryWarehouses) {
 
 			long commerceInventoryWarehouseId =
 				commerceInventoryWarehouse.getCommerceInventoryWarehouseId();
 
-			commerceShipmentItem =
-				_commerceShipmentItemService.fetchCommerceShipmentItem(
-					commerceShipmentId, commerceOrderItemId,
-					commerceInventoryWarehouseId);
-
-			int quantity = ParamUtil.getInteger(
-				actionRequest, commerceInventoryWarehouseId + "_quantity");
-
-			if ((initialCommerceShipmentItem != null) && (quantity > 0)) {
-				commerceShipmentItem =
-					_commerceShipmentItemService.updateCommerceShipmentItem(
-						initialCommerceShipmentItem.getCommerceShipmentItemId(),
-						commerceInventoryWarehouseId, quantity, true);
-
-				initialCommerceShipmentItem = null;
-			}
-			else if ((commerceShipmentItem == null) && (quantity > 0)) {
-				commerceShipmentItem =
-					_commerceShipmentItemService.addCommerceShipmentItem(
-						null, commerceShipmentId, commerceOrderItemId,
-						commerceInventoryWarehouseId, quantity, true,
-						serviceContext);
-			}
-			else if ((commerceShipmentItem != null) &&
-					 (quantity != commerceShipmentItem.getQuantity())) {
+			if (_commerceInventoryWarehouseModelResourcePermission.contains(
+					themeDisplay.getPermissionChecker(),
+					commerceInventoryWarehouseId, ActionKeys.UPDATE)) {
 
 				commerceShipmentItem =
-					_commerceShipmentItemService.updateCommerceShipmentItem(
-						commerceShipmentItem.getCommerceShipmentItemId(),
-						commerceInventoryWarehouseId, quantity, true);
+					_commerceShipmentItemService.fetchCommerceShipmentItem(
+						commerceShipmentId, commerceOrderItemId,
+						commerceInventoryWarehouseId);
 
-				if (quantity == 0) {
+				int quantity = ParamUtil.getInteger(
+					actionRequest, commerceInventoryWarehouseId + "_quantity");
+
+				if ((initialCommerceShipmentItem != null) && (quantity > 0)) {
 					commerceShipmentItem =
 						_commerceShipmentItemService.updateCommerceShipmentItem(
-							commerceShipmentItem.getCommerceShipmentItemId(), 0,
-							quantity, true);
+							initialCommerceShipmentItem.
+								getCommerceShipmentItemId(),
+							commerceInventoryWarehouseId, quantity, true);
+
+					initialCommerceShipmentItem = null;
+				}
+				else if ((commerceShipmentItem == null) && (quantity > 0)) {
+					commerceShipmentItem =
+						_commerceShipmentItemService.addCommerceShipmentItem(
+							null, commerceShipmentId, commerceOrderItemId,
+							commerceInventoryWarehouseId, quantity, true,
+							serviceContext);
+				}
+				else if ((commerceShipmentItem != null) &&
+						 (quantity != commerceShipmentItem.getQuantity())) {
+
+					commerceShipmentItem =
+						_commerceShipmentItemService.updateCommerceShipmentItem(
+							commerceShipmentItem.getCommerceShipmentItemId(),
+							commerceInventoryWarehouseId, quantity, true);
+
+					if (quantity == 0) {
+						commerceShipmentItem =
+							_commerceShipmentItemService.
+								updateCommerceShipmentItem(
+									commerceShipmentItem.
+										getCommerceShipmentItemId(),
+									0, quantity, true);
+					}
 				}
 			}
 		}
@@ -295,6 +308,12 @@ public class EditCommerceShipmentItemMVCActionCommand
 	@Reference
 	private CommerceInventoryWarehouseLocalService
 		_commerceInventoryWarehouseLocalService;
+
+	@Reference(
+		target = "(model.class.name=com.liferay.commerce.inventory.model.CommerceInventoryWarehouse)"
+	)
+	private ModelResourcePermission<CommerceInventoryWarehouse>
+		_commerceInventoryWarehouseModelResourcePermission;
 
 	@Reference
 	private CommerceOrderItemService _commerceOrderItemService;
