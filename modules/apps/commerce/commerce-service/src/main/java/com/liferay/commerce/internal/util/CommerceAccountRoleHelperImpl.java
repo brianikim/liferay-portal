@@ -226,9 +226,19 @@ public class CommerceAccountRoleHelperImpl
 			}
 
 			companyResourceActionIds.put(
+				PortletKeys.PORTAL,
+				new String[] {ActionKeys.VIEW_CONTROL_PANEL});
+			companyResourceActionIds.put(
+				"com.liferay.commerce.channel",
+				new String[] {
+					CommerceNotificationActionKeys.
+						VIEW_COMMERCE_NOTIFICATION_QUEUE_ENTRIES,
+					CommerceNotificationActionKeys.
+						ADD_COMMERCE_NOTIFICATION_TEMPLATE
+				});
+			companyResourceActionIds.put(
 				"com.liferay.commerce.model.CommerceOrderType",
 				new String[] {ActionKeys.VIEW});
-
 			companyResourceActionIds.put(
 				"com.liferay.commerce.order",
 				new String[] {
@@ -239,28 +249,6 @@ public class CommerceAccountRoleHelperImpl
 					"MANAGE_COMMERCE_ORDER_PRICES",
 					"MANAGE_COMMERCE_ORDER_RESTRICTED_NOTES",
 					"MANAGE_COMMERCE_ORDER_SHIPPING_OPTIONS"
-				});
-
-			companyResourceActionIds.put(
-				"com.liferay.commerce.product",
-				new String[] {
-					CPActionKeys.MANAGE_COMMERCE_PRODUCT_MEASUREMENT_UNITS
-				});
-
-			companyResourceActionIds.put(
-				"com.liferay.commerce.shipment",
-				new String[] {CommerceActionKeys.MANAGE_COMMERCE_SHIPMENTS});
-
-			companyResourceActionIds.put(
-				PortletKeys.PORTAL,
-				new String[] {ActionKeys.VIEW_CONTROL_PANEL});
-			companyResourceActionIds.put(
-				"com.liferay.commerce.channel",
-				new String[] {
-					CommerceNotificationActionKeys.
-						VIEW_COMMERCE_NOTIFICATION_QUEUE_ENTRIES,
-					CommerceNotificationActionKeys.
-						ADD_COMMERCE_NOTIFICATION_TEMPLATE
 				});
 			companyResourceActionIds.put(
 				"com.liferay.commerce.price.list",
@@ -282,9 +270,13 @@ public class CommerceAccountRoleHelperImpl
 					CPActionKeys.ADD_COMMERCE_PRODUCT_SPECIFICATION_OPTION,
 					CPActionKeys.MANAGE_COMMERCE_PRODUCT_ATTACHMENTS,
 					CPActionKeys.MANAGE_COMMERCE_PRODUCT_IMAGES,
+					CPActionKeys.MANAGE_COMMERCE_PRODUCT_MEASUREMENT_UNITS,
 					CPActionKeys.VIEW_COMMERCE_PRODUCT_ATTACHMENTS,
 					CPActionKeys.VIEW_COMMERCE_PRODUCT_IMAGES
 				});
+			companyResourceActionIds.put(
+				"com.liferay.commerce.shipment",
+				new String[] {CommerceActionKeys.MANAGE_COMMERCE_SHIPMENTS});
 			companyResourceActionIds.put(
 				"com.liferay.commerce.tax",
 				new String[] {
