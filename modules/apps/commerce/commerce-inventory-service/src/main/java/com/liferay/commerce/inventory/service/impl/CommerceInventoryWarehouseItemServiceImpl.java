@@ -325,7 +325,7 @@ public class CommerceInventoryWarehouseItemServiceImpl
 		}
 
 		return commerceInventoryWarehouseItemLocalService.
-			getCommerceInventoryWarehouseItemsCount(companyId, sku);
+			getCommerceInventoryWarehouseItemsCount(companyId, groupId, sku);
 	}
 
 	@Override
