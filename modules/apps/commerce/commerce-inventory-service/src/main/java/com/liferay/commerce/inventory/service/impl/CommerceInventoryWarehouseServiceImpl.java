@@ -17,6 +17,8 @@ package com.liferay.commerce.inventory.service.impl;
 import com.liferay.commerce.inventory.constants.CommerceInventoryActionKeys;
 import com.liferay.commerce.inventory.model.CommerceInventoryWarehouse;
 import com.liferay.commerce.inventory.service.base.CommerceInventoryWarehouseServiceBaseImpl;
+import com.liferay.commerce.product.model.CommerceChannel;
+import com.liferay.commerce.product.service.CommerceChannelLocalService;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.search.Sort;
@@ -214,13 +216,24 @@ public class CommerceInventoryWarehouseServiceImpl
 			long companyId, long groupId, boolean active)
 		throws PortalException {
 
-		PortletResourcePermission portletResourcePermission =
-			_commerceInventoryWarehouseModelResourcePermission.
-				getPortletResourcePermission();
+		CommerceChannel commerceChannel =
+			_commerceChannelLocalService.fetchCommerceChannelByGroupClassPK(
+				groupId);
 
-		portletResourcePermission.check(
-			getPermissionChecker(), null,
-			CommerceInventoryActionKeys.MANAGE_INVENTORY);
+		if (commerceChannel != null) {
+			_commerceChannelModelResourcePermission.check(
+				getPermissionChecker(), commerceChannel.getCommerceChannelId(),
+				ActionKeys.VIEW);
+		}
+		else {
+			PortletResourcePermission portletResourcePermission =
+				_commerceInventoryWarehouseModelResourcePermission.
+					getPortletResourcePermission();
+
+			portletResourcePermission.check(
+				getPermissionChecker(), null,
+				CommerceInventoryActionKeys.MANAGE_INVENTORY);
+		}
 
 		return commerceInventoryWarehouseLocalService.
 			getCommerceInventoryWarehouses(companyId, groupId, active);
@@ -346,6 +359,15 @@ public class CommerceInventoryWarehouseServiceImpl
 			updateCommerceInventoryWarehouseExternalReferenceCode(
 				externalReferenceCode, commerceInventoryWarehouseId);
 	}
+
+	@Reference
+	private CommerceChannelLocalService _commerceChannelLocalService;
+
+	@Reference(
+		target = "(model.class.name=com.liferay.commerce.product.model.CommerceChannel)"
+	)
+	private ModelResourcePermission<CommerceChannel>
+		_commerceChannelModelResourcePermission;
 
 	@Reference(
 		target = "(model.class.name=com.liferay.commerce.inventory.model.CommerceInventoryWarehouse)"

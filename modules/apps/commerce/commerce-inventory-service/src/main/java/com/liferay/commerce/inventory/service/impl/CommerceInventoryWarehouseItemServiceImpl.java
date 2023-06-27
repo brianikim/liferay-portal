@@ -19,6 +19,7 @@ import com.liferay.commerce.inventory.model.CommerceInventoryWarehouse;
 import com.liferay.commerce.inventory.model.CommerceInventoryWarehouseItem;
 import com.liferay.commerce.inventory.service.base.CommerceInventoryWarehouseItemServiceBaseImpl;
 import com.liferay.commerce.product.model.CommerceChannel;
+import com.liferay.commerce.product.service.CommerceChannelLocalService;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
@@ -327,8 +328,24 @@ public class CommerceInventoryWarehouseItemServiceImpl
 			long companyId, long groupId, String sku)
 		throws PortalException {
 
-		_commerceChannelModelResourcePermission.check(
-			getPermissionChecker(), groupId, ActionKeys.VIEW);
+		CommerceChannel commerceChannel =
+			_commerceChannelLocalService.fetchCommerceChannelByGroupClassPK(
+				groupId);
+
+		if (commerceChannel != null) {
+			_commerceChannelModelResourcePermission.check(
+				getPermissionChecker(), commerceChannel.getCommerceChannelId(),
+				ActionKeys.VIEW);
+		}
+		else {
+			PortletResourcePermission portletResourcePermission =
+				_commerceInventoryWarehouseModelResourcePermission.
+					getPortletResourcePermission();
+
+			portletResourcePermission.check(
+				getPermissionChecker(), null,
+				CommerceInventoryActionKeys.MANAGE_INVENTORY);
+		}
 
 		return commerceInventoryWarehouseItemLocalService.
 			getCommerceInventoryWarehouseItemsCount(companyId, sku);
@@ -511,6 +528,9 @@ public class CommerceInventoryWarehouseItemServiceImpl
 				getUserId(), commerceInventoryWarehouseItemId, quantity,
 				mvccVersion);
 	}
+
+	@Reference
+	private CommerceChannelLocalService _commerceChannelLocalService;
 
 	@Reference(
 		target = "(model.class.name=com.liferay.commerce.product.model.CommerceChannel)"

@@ -174,7 +174,7 @@ public class CommerceInventoryWarehouseItemFDSDataProvider
 		return _commerceInventoryWarehouseItemService.
 			getCommerceInventoryWarehouseItemsCount(
 				_portal.getCompanyId(httpServletRequest),
-				commerceOrderItem.getSku());
+				commerceOrderItem.getGroupId(), commerceOrderItem.getSku());
 	}
 
 	@Reference
