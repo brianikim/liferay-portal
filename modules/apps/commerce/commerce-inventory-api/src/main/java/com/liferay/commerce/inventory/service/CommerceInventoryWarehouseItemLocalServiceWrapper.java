@@ -550,6 +550,14 @@ public class CommerceInventoryWarehouseItemLocalServiceWrapper
 
 	@Override
 	public int getCommerceInventoryWarehouseItemsCount(
+		long companyId, long groupId, String sku) {
+
+		return _commerceInventoryWarehouseItemLocalService.
+			getCommerceInventoryWarehouseItemsCount(companyId, groupId, sku);
+	}
+
+	@Override
+	public int getCommerceInventoryWarehouseItemsCount(
 		long companyId, String sku) {
 
 		return _commerceInventoryWarehouseItemLocalService.
