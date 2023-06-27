@@ -150,7 +150,7 @@ public class CommerceOrderItemModelListener
 						customerCommerceOrderItem);
 
 					_commerceOrderEngine.checkCommerceOrderShipmentStatus(
-						customerCommerceOrderItem.getCommerceOrder(), true);
+						customerCommerceOrderItem.getCommerceOrder(), false);
 				}
 			}
 		}
