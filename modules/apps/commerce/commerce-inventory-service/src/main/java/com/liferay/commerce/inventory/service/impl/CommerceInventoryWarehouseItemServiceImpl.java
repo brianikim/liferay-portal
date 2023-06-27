@@ -18,6 +18,7 @@ import com.liferay.commerce.inventory.constants.CommerceInventoryActionKeys;
 import com.liferay.commerce.inventory.model.CommerceInventoryWarehouse;
 import com.liferay.commerce.inventory.model.CommerceInventoryWarehouseItem;
 import com.liferay.commerce.inventory.service.base.CommerceInventoryWarehouseItemServiceBaseImpl;
+import com.liferay.commerce.product.model.CommerceChannel;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
@@ -323,6 +324,18 @@ public class CommerceInventoryWarehouseItemServiceImpl
 
 	@Override
 	public int getCommerceInventoryWarehouseItemsCount(
+			long companyId, long groupId, String sku)
+		throws PortalException {
+
+		_commerceChannelModelResourcePermission.check(
+			getPermissionChecker(), groupId, ActionKeys.VIEW);
+
+		return commerceInventoryWarehouseItemLocalService.
+			getCommerceInventoryWarehouseItemsCount(companyId, sku);
+	}
+
+	@Override
+	public int getCommerceInventoryWarehouseItemsCount(
 			long companyId, String sku)
 		throws PortalException {
 
@@ -498,6 +511,12 @@ public class CommerceInventoryWarehouseItemServiceImpl
 				getUserId(), commerceInventoryWarehouseItemId, quantity,
 				mvccVersion);
 	}
+
+	@Reference(
+		target = "(model.class.name=com.liferay.commerce.product.model.CommerceChannel)"
+	)
+	private ModelResourcePermission<CommerceChannel>
+		_commerceChannelModelResourcePermission;
 
 	@Reference(
 		target = "(model.class.name=com.liferay.commerce.inventory.model.CommerceInventoryWarehouse)"

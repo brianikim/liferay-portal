@@ -275,6 +275,14 @@ public class CommerceInventoryWarehouseItemLocalServiceImpl
 
 	@Override
 	public int getCommerceInventoryWarehouseItemsCount(
+		long companyId, long groupId, String sku) {
+
+		return commerceInventoryWarehouseItemFinder.countItemsByC_G_S(
+			companyId, groupId, sku);
+	}
+
+	@Override
+	public int getCommerceInventoryWarehouseItemsCount(
 		long companyId, String sku) {
 
 		return commerceInventoryWarehouseItemPersistence.countByCompanyId_Sku(
