@@ -67,7 +67,7 @@
 	<sql id="com.liferay.commerce.inventory.service.persistence.CommerceInventoryWarehouseItemFinder.countItemsByC_G_S">
 		<![CDATA[
 			SELECT
-				COUNT(DISTINCT CIWarehouseItem.sku) AS COUNT_VALUE
+				COUNT(DISTINCT CIWarehouseItem.CIWarehouseItemId) AS COUNT_VALUE
 			FROM
 				CIWarehouseItem
 			INNER JOIN
