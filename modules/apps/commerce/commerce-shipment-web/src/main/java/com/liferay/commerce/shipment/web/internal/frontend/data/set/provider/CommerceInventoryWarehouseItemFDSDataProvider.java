@@ -91,6 +91,10 @@ public class CommerceInventoryWarehouseItemFDSDataProvider
 						commerceInventoryWarehouseId,
 						commerceOrderItem.getSku());
 
+			if (commerceInventoryWarehouseItem == null) {
+				continue;
+			}
+
 			String portletNamespace = _portal.getPortletNamespace(
 				CommercePortletKeys.COMMERCE_SHIPMENT);
 
@@ -120,36 +124,23 @@ public class CommerceInventoryWarehouseItemFDSDataProvider
 					maxShippableQuantity + commerceShipmentItem.getQuantity();
 			}
 
-			if (commerceInventoryWarehouseItem != null) {
-				if (maxShippableQuantity >
-						commerceInventoryWarehouseItem.getQuantity()) {
+			if (maxShippableQuantity >
+					commerceInventoryWarehouseItem.getQuantity()) {
 
-					maxShippableQuantity =
-						commerceInventoryWarehouseItem.getQuantity();
-				}
+				maxShippableQuantity =
+					commerceInventoryWarehouseItem.getQuantity();
+			}
 
-				warehouses.add(
-					new Warehouse(
-						commerceInventoryWarehouseId,
-						new WarehouseItem(
-							inputName, maxShippableQuantity, 0,
-							shipmentItemWarehouseItemQuantity),
-						commerceInventoryWarehouseItem.getQuantity(),
-						StringPool.BLANK,
-						commerceInventoryWarehouse.getName(
-							_portal.getLocale(httpServletRequest))));
-			}
-			else {
-				warehouses.add(
-					new Warehouse(
-						commerceInventoryWarehouseId,
-						new WarehouseItem(
-							inputName, shipmentItemWarehouseItemQuantity, 0,
-							shipmentItemWarehouseItemQuantity),
-						0, StringPool.BLANK,
-						commerceInventoryWarehouse.getName(
-							_portal.getLocale(httpServletRequest))));
-			}
+			warehouses.add(
+				new Warehouse(
+					commerceInventoryWarehouseId,
+					new WarehouseItem(
+						inputName, maxShippableQuantity, 0,
+						shipmentItemWarehouseItemQuantity),
+					commerceInventoryWarehouseItem.getQuantity(),
+					StringPool.BLANK,
+					commerceInventoryWarehouse.getName(
+						_portal.getLocale(httpServletRequest))));
 		}
 
 		return warehouses;
