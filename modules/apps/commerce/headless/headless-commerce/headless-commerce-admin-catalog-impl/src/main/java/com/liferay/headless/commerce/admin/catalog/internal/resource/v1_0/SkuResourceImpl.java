@@ -412,7 +412,7 @@ public class SkuResourceImpl
 		int expirationDateHour = 0;
 		int expirationDateMinute = 0;
 
-		if (cpInstance.getExpirationDate() != null) {
+		if (sku.getExpirationDate() != null) {
 			DateConfig expirationDateConfig = new DateConfig(
 				DateConfigUtil.convertDateToCalendar(
 					GetterUtil.getDate(
