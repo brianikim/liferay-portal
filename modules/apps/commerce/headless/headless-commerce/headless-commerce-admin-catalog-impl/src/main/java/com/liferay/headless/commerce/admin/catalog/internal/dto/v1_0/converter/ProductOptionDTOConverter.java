@@ -17,8 +17,10 @@ package com.liferay.headless.commerce.admin.catalog.internal.dto.v1_0.converter;
 import com.liferay.commerce.product.model.CPDefinitionOptionRel;
 import com.liferay.commerce.product.model.CPOption;
 import com.liferay.commerce.product.service.CPDefinitionOptionRelService;
+import com.liferay.commerce.product.service.CPOptionLocalService;
 import com.liferay.headless.commerce.admin.catalog.dto.v1_0.ProductOption;
 import com.liferay.headless.commerce.core.util.LanguageUtils;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.vulcan.dto.converter.DTOConverter;
 import com.liferay.portal.vulcan.dto.converter.DTOConverterContext;
 
@@ -48,7 +50,8 @@ public class ProductOptionDTOConverter
 			_cpDefinitionOptionRelService.getCPDefinitionOptionRel(
 				(Long)dtoConverterContext.getId());
 
-		CPOption cpOption = cpDefinitionOptionRel.getCPOption();
+		CPOption cpOption = _cpOptionLocalService.fetchCPOption(
+			cpDefinitionOptionRel.getCPOptionId());
 
 		return new ProductOption() {
 			{
@@ -57,17 +60,35 @@ public class ProductOptionDTOConverter
 				facetable = cpDefinitionOptionRel.isFacetable();
 				fieldType = cpDefinitionOptionRel.getDDMFormFieldTypeName();
 				id = cpDefinitionOptionRel.getCPDefinitionOptionRelId();
-				key = cpOption.getKey();
 				name = LanguageUtils.getLanguageIdMap(
 					cpDefinitionOptionRel.getNameMap());
-				optionId = cpOption.getCPOptionId();
 				required = cpDefinitionOptionRel.isRequired();
 				skuContributor = cpDefinitionOptionRel.isSkuContributor();
+
+				setKey(
+					() -> {
+						if (cpOption != null) {
+							return cpOption.getKey();
+						}
+
+						return StringPool.BLANK;
+					});
+				setOptionId(
+					() -> {
+						if (cpOption != null) {
+							return cpOption.getCPOptionId();
+						}
+
+						return null;
+					});
 			}
 		};
 	}
 
 	@Reference
 	private CPDefinitionOptionRelService _cpDefinitionOptionRelService;
+
+	@Reference
+	private CPOptionLocalService _cpOptionLocalService;
 
 }
