@@ -24,9 +24,6 @@ import com.liferay.headless.commerce.core.util.LanguageUtils;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
-import com.liferay.portal.kernel.model.Company;
-import com.liferay.portal.kernel.service.CompanyLocalService;
-import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.vulcan.dto.converter.DTOConverter;
 import com.liferay.portal.vulcan.dto.converter.DTOConverterContext;
@@ -62,13 +59,6 @@ public class AttachmentDTOConverter
 			_cpAttachmentFileEntryService.getCPAttachmentFileEntry(
 				(Long)dtoConverterContext.getId());
 
-		Company company = _companyLocalService.getCompany(
-			cpAttachmentFileEntry.getCompanyId());
-
-		String portalURL = _portal.getPortalURL(
-			company.getVirtualHostname(), _portal.getPortalServerPort(false),
-			true);
-
 		String downloadURL = _commerceMediaResolver.getDownloadURL(
 			AccountConstants.ACCOUNT_ENTRY_ID_ADMIN,
 			cpAttachmentFileEntry.getCPAttachmentFileEntryId());
@@ -90,7 +80,7 @@ public class AttachmentDTOConverter
 				id = cpAttachmentFileEntry.getCPAttachmentFileEntryId();
 				options = _getAttachmentOptions(cpAttachmentFileEntry);
 				priority = cpAttachmentFileEntry.getPriority();
-				src = portalURL + downloadURL;
+				src = downloadURL;
 				title = LanguageUtils.getLanguageIdMap(
 					cpAttachmentFileEntry.getTitleMap());
 				type = cpAttachmentFileEntry.getType();
@@ -130,15 +120,9 @@ public class AttachmentDTOConverter
 	private CommerceMediaResolver _commerceMediaResolver;
 
 	@Reference
-	private CompanyLocalService _companyLocalService;
-
-	@Reference
 	private CPAttachmentFileEntryService _cpAttachmentFileEntryService;
 
 	@Reference
 	private JSONFactory _jsonFactory;
-
-	@Reference
-	private Portal _portal;
 
 }
