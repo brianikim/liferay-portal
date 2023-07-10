@@ -31,6 +31,7 @@ import com.liferay.commerce.product.type.CPTypeRegistry;
 import com.liferay.expando.kernel.model.ExpandoBridge;
 import com.liferay.headless.commerce.admin.catalog.dto.v1_0.Category;
 import com.liferay.headless.commerce.admin.catalog.dto.v1_0.Product;
+import com.liferay.headless.commerce.admin.catalog.dto.v1_0.ProductSubscriptionConfiguration;
 import com.liferay.headless.commerce.admin.catalog.dto.v1_0.Status;
 import com.liferay.headless.commerce.admin.catalog.internal.dto.v1_0.util.CustomFieldsUtil;
 import com.liferay.headless.commerce.core.util.LanguageUtils;
@@ -138,6 +139,8 @@ public class ProductDTOConverter
 					cpDefinition.getShortDescriptionMap());
 				skuFormatted = _getSku(
 					cpDefinition, dtoConverterContext.getLocale());
+				subscriptionConfiguration =
+					_getProductSubscriptionConfiguration(cpDefinition);
 				tags = TransformUtil.transformToArray(
 					_assetTagService.getTags(
 						cpDefinition.getModelClassName(),
@@ -168,6 +171,35 @@ public class ProductDTOConverter
 
 	private CPType _getCPType(String name) {
 		return _cpTypeRegistry.getCPType(name);
+	}
+
+	private ProductSubscriptionConfiguration
+		_getProductSubscriptionConfiguration(CPDefinition cpDefinition) {
+
+		return new ProductSubscriptionConfiguration() {
+			{
+				deliverySubscriptionEnable =
+					cpDefinition.isDeliverySubscriptionEnabled();
+				deliverySubscriptionLength =
+					cpDefinition.getDeliverySubscriptionLength();
+				deliverySubscriptionNumberOfLength =
+					cpDefinition.getDeliveryMaxSubscriptionCycles();
+				deliverySubscriptionType =
+					ProductSubscriptionConfiguration.DeliverySubscriptionType.
+						create(cpDefinition.getDeliverySubscriptionType());
+				deliverySubscriptionTypeSettings =
+					cpDefinition.
+						getDeliverySubscriptionTypeSettingsUnicodeProperties();
+				enable = cpDefinition.isSubscriptionEnabled();
+				length = cpDefinition.getSubscriptionLength();
+				numberOfLength = cpDefinition.getMaxSubscriptionCycles();
+				subscriptionType =
+					ProductSubscriptionConfiguration.SubscriptionType.create(
+						cpDefinition.getSubscriptionType());
+				subscriptionTypeSettings =
+					cpDefinition.getSubscriptionTypeSettingsUnicodeProperties();
+			}
+		};
 	}
 
 	private String _getSku(CPDefinition cpDefinition, Locale locale) {
