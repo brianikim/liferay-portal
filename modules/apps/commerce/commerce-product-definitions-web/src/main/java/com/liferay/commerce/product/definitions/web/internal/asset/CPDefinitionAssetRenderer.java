@@ -120,12 +120,12 @@ public class CPDefinitionAssetRenderer
 		String summary = _cpDefinition.getDescription();
 
 		if (Validator.isNull(summary)) {
-			summary = HtmlUtil.stripHtml(
+			summary =
 				StringUtil.shorten(
-					_cpDefinition.getDescriptionMapAsXML(), abstractLength));
+					_cpDefinition.getDescriptionMapAsXML(), abstractLength);
 		}
 
-		return summary;
+		return HtmlUtil.stripHtml(summary);
 	}
 
 	@Override
