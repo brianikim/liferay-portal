@@ -66,11 +66,6 @@ public class CPDefinitionSearcher extends BaseSearcher {
 	}
 
 	@Override
-	public String[] getSearchClassNames() {
-		return new String[] {_CLASS_NAME};
-	}
-
-	@Override
 	protected void addSearchAssetCategoryIds(
 			BooleanFilter queryBooleanFilter, SearchContext searchContext)
 		throws Exception {
