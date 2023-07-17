@@ -54,6 +54,7 @@ import com.liferay.portal.kernel.module.configuration.ConfigurationProvider;
 import com.liferay.portal.kernel.portlet.LiferayPortletURL;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.portlet.PortletURLFactory;
+import com.liferay.portal.kernel.portlet.url.builder.PortletURLBuilder;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
@@ -186,56 +187,34 @@ public class CommerceOrderHttpHelperImpl implements CommerceOrderHttpHelper {
 			CommerceOrder commerceOrder)
 		throws PortalException {
 
-		long plid = _portal.getPlidFromPortletId(
-			groupId, CommercePortletKeys.COMMERCE_ORDER_CONTENT);
-
-		if ((plid > 0) && (commerceOrder != null) && !commerceOrder.isOpen()) {
-			PortletURL portletURL = _getPortletURL(
-				groupId, httpServletRequest,
-				CommercePortletKeys.COMMERCE_ORDER_CONTENT);
-
-			if (commerceOrder != null) {
-				portletURL.setParameter(
-					"mvcRenderCommandName",
-					"/commerce_order_content/view_commerce_order_details");
-				portletURL.setParameter(
-					"commerceOrderUuid",
-					String.valueOf(commerceOrder.getUuid()));
-				portletURL.setParameter(
-					"commerceOrderId",
-					String.valueOf(commerceOrder.getCommerceOrderId()));
-			}
-
-			return portletURL;
-		}
-
-		plid = _portal.getPlidFromPortletId(
-			groupId, CommercePortletKeys.COMMERCE_CART_CONTENT);
-
-		if (plid > 0) {
+		if (commerceOrder == null) {
 			return _getPortletURL(
 				groupId, httpServletRequest,
 				CommercePortletKeys.COMMERCE_CART_CONTENT);
 		}
-
-		plid = _portal.getPlidFromPortletId(
-			groupId, CommercePortletKeys.COMMERCE_OPEN_ORDER_CONTENT);
-
-		if ((plid > 0) && (commerceOrder != null) && commerceOrder.isOpen()) {
-			PortletURL portletURL = _getPortletURL(
-				groupId, httpServletRequest,
-				CommercePortletKeys.COMMERCE_OPEN_ORDER_CONTENT);
-
-			if (commerceOrder != null) {
-				portletURL.setParameter(
-					"mvcRenderCommandName",
-					"/commerce_open_order_content/edit_commerce_order");
-				portletURL.setParameter(
-					"commerceOrderUuid",
-					String.valueOf(commerceOrder.getUuid()));
-			}
-
-			return portletURL;
+		else if (!commerceOrder.isOpen()) {
+			return PortletURLBuilder.create(
+				_getPortletURL(
+					groupId, httpServletRequest,
+					CommercePortletKeys.COMMERCE_ORDER_CONTENT)
+			).setMVCRenderCommandName(
+				"/commerce_order_content/view_commerce_order_details"
+			).setParameter(
+				"commerceOrderId", commerceOrder.getCommerceOrderId()
+			).setParameter(
+				"commerceOrderUuid", commerceOrder.getUuid()
+			).buildPortletURL();
+		}
+		else if (commerceOrder.isOpen()) {
+			return PortletURLBuilder.create(
+				_getPortletURL(
+					groupId, httpServletRequest,
+					CommercePortletKeys.COMMERCE_OPEN_ORDER_CONTENT)
+			).setMVCRenderCommandName(
+				"/commerce_open_order_content/edit_commerce_order"
+			).setParameter(
+				"commerceOrderUuid", commerceOrder.getUuid()
+			).buildPortletURL();
 		}
 
 		return null;
