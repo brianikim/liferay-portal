@@ -11,6 +11,9 @@ import com.liferay.commerce.product.util.CPSubscriptionType;
 import com.liferay.commerce.product.util.CPSubscriptionTypeJSPContributor;
 import com.liferay.commerce.product.util.CPSubscriptionTypeJSPContributorRegistry;
 import com.liferay.commerce.product.util.CPSubscriptionTypeRegistry;
+import com.liferay.petra.string.CharPool;
+import com.liferay.portal.kernel.language.LanguageUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 
 import java.util.List;
 
@@ -49,6 +52,19 @@ public class BaseCPDefinitionSubscriptionInfoDisplayContext
 
 	public List<CPSubscriptionType> getCPSubscriptionTypes() {
 		return _cpSubscriptionTypeRegistry.getCPSubscriptionTypes();
+	}
+
+	public String getSubscriptionLabel(
+		int subscriptionLength, String subscriptionTypeLabel) {
+
+		if (subscriptionLength > 1) {
+			return LanguageUtil.get(
+				httpServletRequest,
+				StringUtil.toLowerCase(
+					subscriptionTypeLabel + CharPool.LOWER_CASE_S));
+		}
+
+		return LanguageUtil.get(httpServletRequest, subscriptionTypeLabel);
 	}
 
 	private final CPSubscriptionTypeJSPContributorRegistry
