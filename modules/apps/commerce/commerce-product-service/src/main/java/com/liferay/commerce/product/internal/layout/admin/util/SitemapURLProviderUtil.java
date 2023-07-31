@@ -7,6 +7,12 @@ package com.liferay.commerce.product.internal.layout.admin.util;
 
 import com.liferay.friendly.url.model.FriendlyURLEntryLocalization;
 import com.liferay.friendly.url.service.FriendlyURLEntryLocalService;
+import com.liferay.petra.string.StringBundler;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.LayoutTypePortlet;
+import com.liferay.portal.kernel.model.Portlet;
 import com.liferay.portal.kernel.util.LocaleUtil;
 
 import java.util.HashMap;
@@ -42,5 +48,49 @@ public class SitemapURLProviderUtil {
 
 		return alternateFriendlyURLs;
 	}
+
+	protected static boolean layoutContainsPortletId(
+		Layout layout, String portletId) {
+
+		long startTime = System.nanoTime();
+
+		LayoutTypePortlet layoutTypePortlet =
+			(LayoutTypePortlet)layout.getLayoutType();
+
+		for (Portlet portlet : layoutTypePortlet.getAllNonembeddedPortlets()) {
+			if (portletId.equals(portlet.getPortletId()) ||
+				portletId.equals(portlet.getRootPortletId())) {
+
+				if (_log.isDebugEnabled()) {
+					long endTime = System.nanoTime();
+
+					_log.debug(
+						StringBundler.concat(
+							"The layout: ", layout.getName(),
+							"has the portlet: ", portletId,
+							"and took following time to complete search: ",
+							endTime - startTime, "\n"));
+				}
+
+				return true;
+			}
+		}
+
+		if (_log.isDebugEnabled()) {
+			long endTime1 = System.nanoTime();
+
+			_log.debug(
+				StringBundler.concat(
+					"The layout: ", layout.getName(),
+					"does not have the portlet: ", portletId,
+					"and took following time to complete search: ",
+					endTime1 - startTime, "\n"));
+		}
+
+		return false;
+	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		SitemapURLProviderUtil.class);
 
 }
