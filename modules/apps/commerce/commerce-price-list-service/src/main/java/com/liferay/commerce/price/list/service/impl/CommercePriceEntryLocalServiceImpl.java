@@ -368,6 +368,12 @@ public class CommercePriceEntryLocalServiceImpl
 		_expandoRowLocalService.deleteRows(
 			commercePriceEntry.getCommercePriceEntryId());
 
+		CPInstance cpInstance = _cpInstanceLocalService.fetchCPInstance(
+			commercePriceEntry.getCProductId(),
+			commercePriceEntry.getCPInstanceUuid());
+
+		_reindexCPDefinition(cpInstance.getCPDefinitionId());
+
 		return commercePriceEntry;
 	}
 
@@ -695,6 +701,8 @@ public class CommercePriceEntryLocalServiceImpl
 		commercePriceEntry = _startWorkflowInstance(
 			user.getUserId(), commercePriceEntry, serviceContext);
 
+		_reindexCPDefinition(cpInstance.getCPDefinitionId());
+
 		return commercePriceEntry;
 	}
 
@@ -965,6 +973,18 @@ public class CommercePriceEntryLocalServiceImpl
 		}
 
 		return null;
+	}
+
+	private void _reindexCPDefinition(long cpDefinitionId)
+		throws PortalException {
+
+		CPDefinition cpDefinition = _cpDefinitionLocalService.getCPDefinition(
+			cpDefinitionId);
+
+		Indexer<CPDefinition> indexer = IndexerRegistryUtil.nullSafeGetIndexer(
+			CPDefinition.class);
+
+		indexer.reindex(cpDefinition);
 	}
 
 	private BaseModelSearchResult<CommercePriceEntry>
