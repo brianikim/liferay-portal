@@ -53,10 +53,21 @@ public class EditCommerceDiscountRuleMVCActionCommand
 				_deleteCommerceDiscountCPDefinition(actionRequest);
 			}
 		}
-		catch (Exception exception) {
-			SessionErrors.add(actionRequest, exception.getClass());
+		catch (Throwable throwable) {
+			if (throwable instanceof NumberFormatException) {
+				SessionErrors.add(
+					actionRequest, throwable.getClass(), throwable);
 
-			actionResponse.setRenderParameter("mvcPath", "/error.jsp");
+				String redirect = ParamUtil.getString(
+					actionRequest, "redirect");
+
+				sendRedirect(actionRequest, actionResponse, redirect);
+			}
+			else {
+				SessionErrors.add(actionRequest, throwable.getClass());
+
+				actionResponse.setRenderParameter("mvcPath", "/error.jsp");
+			}
 		}
 	}
 
@@ -90,6 +101,7 @@ public class EditCommerceDiscountRuleMVCActionCommand
 	private void _updateCommerceDiscountRule(ActionRequest actionRequest)
 		throws Exception {
 
+		String name = ParamUtil.getString(actionRequest, "name");
 		String type = ParamUtil.getString(actionRequest, "type");
 		String typeSettings = ParamUtil.getString(
 			actionRequest, "typeSettings");
@@ -99,7 +111,7 @@ public class EditCommerceDiscountRuleMVCActionCommand
 
 		if (commerceDiscountRuleId > 0) {
 			_commerceDiscountRuleService.updateCommerceDiscountRule(
-				commerceDiscountRuleId, type, typeSettings);
+				commerceDiscountRuleId, name, type, typeSettings);
 		}
 		else {
 			long commerceDiscountId = ParamUtil.getLong(
@@ -109,7 +121,7 @@ public class EditCommerceDiscountRuleMVCActionCommand
 				CommerceDiscountRule.class.getName(), actionRequest);
 
 			_commerceDiscountRuleService.addCommerceDiscountRule(
-				commerceDiscountId, type, typeSettings, serviceContext);
+				commerceDiscountId, name, type, typeSettings, serviceContext);
 		}
 	}
 
