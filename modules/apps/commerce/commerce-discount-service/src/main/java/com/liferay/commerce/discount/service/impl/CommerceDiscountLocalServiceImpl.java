@@ -10,7 +10,6 @@ import com.liferay.asset.kernel.model.AssetEntry;
 import com.liferay.asset.kernel.service.AssetEntryLocalService;
 import com.liferay.commerce.constants.CommercePriceConstants;
 import com.liferay.commerce.discount.constants.CommerceDiscountConstants;
-import com.liferay.commerce.discount.constants.CommerceDiscountRuleConstants;
 import com.liferay.commerce.discount.exception.CommerceDiscountCouponCodeException;
 import com.liferay.commerce.discount.exception.CommerceDiscountDisplayDateException;
 import com.liferay.commerce.discount.exception.CommerceDiscountExpirationDateException;
@@ -29,6 +28,8 @@ import com.liferay.commerce.discount.model.CommerceDiscountOrderTypeRelTable;
 import com.liferay.commerce.discount.model.CommerceDiscountRelTable;
 import com.liferay.commerce.discount.model.CommerceDiscountRule;
 import com.liferay.commerce.discount.model.CommerceDiscountTable;
+import com.liferay.commerce.discount.rule.type.CommerceDiscountRuleType;
+import com.liferay.commerce.discount.rule.type.CommerceDiscountRuleTypeRegistry;
 import com.liferay.commerce.discount.service.CommerceDiscountCommerceAccountGroupRelLocalService;
 import com.liferay.commerce.discount.service.CommerceDiscountOrderTypeRelLocalService;
 import com.liferay.commerce.discount.service.CommerceDiscountRelLocalService;
@@ -1991,11 +1992,13 @@ public class CommerceDiscountLocalServiceImpl
 			for (CommerceDiscountRule commerceDiscountRule :
 					commerceDiscountRules) {
 
-				String type = commerceDiscountRule.getType();
+				CommerceDiscountRuleType commerceDiscountRuleType =
+					_commerceDiscountRuleTypeRegistry.
+						getCommerceDiscountRuleType(
+							commerceDiscountRule.getType());
 
-				if (type.equals(
-						CommerceDiscountRuleConstants.TYPE_CART_TOTAL) &&
-					Validator.isNull(commerceDiscountRule.getTypeSettings())) {
+				if (!commerceDiscountRuleType.validate(
+						commerceDiscountRule.getTypeSettings())) {
 
 					throw new CommerceDiscountRuleTypeSettingsException();
 				}
@@ -2033,6 +2036,9 @@ public class CommerceDiscountLocalServiceImpl
 
 	@Reference
 	private CommerceDiscountRuleLocalService _commerceDiscountRuleLocalService;
+
+	@Reference
+	private CommerceDiscountRuleTypeRegistry _commerceDiscountRuleTypeRegistry;
 
 	@Reference
 	private CommerceDiscountTargetRegistry _commerceDiscountTargetRegistry;
