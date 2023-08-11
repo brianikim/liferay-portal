@@ -10,11 +10,13 @@ import com.liferay.asset.kernel.model.AssetEntry;
 import com.liferay.asset.kernel.service.AssetEntryLocalService;
 import com.liferay.commerce.constants.CommercePriceConstants;
 import com.liferay.commerce.discount.constants.CommerceDiscountConstants;
+import com.liferay.commerce.discount.constants.CommerceDiscountRuleConstants;
 import com.liferay.commerce.discount.exception.CommerceDiscountCouponCodeException;
 import com.liferay.commerce.discount.exception.CommerceDiscountDisplayDateException;
 import com.liferay.commerce.discount.exception.CommerceDiscountExpirationDateException;
 import com.liferay.commerce.discount.exception.CommerceDiscountLimitationTypeException;
 import com.liferay.commerce.discount.exception.CommerceDiscountMaxPriceValueException;
+import com.liferay.commerce.discount.exception.CommerceDiscountRuleTypeSettingsException;
 import com.liferay.commerce.discount.exception.CommerceDiscountTargetException;
 import com.liferay.commerce.discount.exception.CommerceDiscountTitleException;
 import com.liferay.commerce.discount.exception.DuplicateCommerceDiscountException;
@@ -25,6 +27,7 @@ import com.liferay.commerce.discount.model.CommerceDiscountAccountRelTable;
 import com.liferay.commerce.discount.model.CommerceDiscountCommerceAccountGroupRelTable;
 import com.liferay.commerce.discount.model.CommerceDiscountOrderTypeRelTable;
 import com.liferay.commerce.discount.model.CommerceDiscountRelTable;
+import com.liferay.commerce.discount.model.CommerceDiscountRule;
 import com.liferay.commerce.discount.model.CommerceDiscountTable;
 import com.liferay.commerce.discount.service.CommerceDiscountCommerceAccountGroupRelLocalService;
 import com.liferay.commerce.discount.service.CommerceDiscountOrderTypeRelLocalService;
@@ -51,6 +54,7 @@ import com.liferay.petra.sql.dsl.query.GroupByStep;
 import com.liferay.petra.sql.dsl.query.JoinStep;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.aop.AopService;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -1976,6 +1980,26 @@ public class CommerceDiscountLocalServiceImpl
 			((level4 != null) && (level4.compareTo(maxValue) > 0))) {
 
 			throw new CommerceDiscountMaxPriceValueException();
+		}
+
+		if (commerceDiscountId > 0) {
+			List<CommerceDiscountRule> commerceDiscountRules =
+				_commerceDiscountRuleLocalService.getCommerceDiscountRules(
+					commerceDiscountId, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+					null);
+
+			for (CommerceDiscountRule commerceDiscountRule :
+					commerceDiscountRules) {
+
+				String type = commerceDiscountRule.getType();
+
+				if (type.equals(
+						CommerceDiscountRuleConstants.TYPE_CART_TOTAL) &&
+					Validator.isNull(commerceDiscountRule.getTypeSettings())) {
+
+					throw new CommerceDiscountRuleTypeSettingsException();
+				}
+			}
 		}
 	}
 
