@@ -25,7 +25,7 @@ String type = BeanParamUtil.getString(commerceDiscountRule, request, "type");
 		<aui:input name="redirect" type="hidden" value="<%= currentURL %>" />
 		<aui:input name="commerceDiscountId" type="hidden" value="<%= commerceDiscountRule.getCommerceDiscountId() %>" />
 		<aui:input name="commerceDiscountRuleId" type="hidden" value="<%= commerceDiscountRule.getCommerceDiscountRuleId() %>" />
-		<aui:input name="type" type="hidden" value="<%= commerceDiscountRule.getType() %>" />
+		<aui:input name="commerceDiscountRuleType" type="hidden" value="<%= commerceDiscountRule.getType() %>" />
 
 		<aui:model-context bean="<%= commerceDiscountRule %>" model="<%= CommerceDiscountRule.class %>" />
 

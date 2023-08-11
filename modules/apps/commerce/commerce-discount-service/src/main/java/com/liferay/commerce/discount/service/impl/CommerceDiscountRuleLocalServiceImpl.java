@@ -64,7 +64,7 @@ public class CommerceDiscountRuleLocalServiceImpl
 
 		User user = _userLocalService.getUser(serviceContext.getUserId());
 
-		_validate(type, typeSettings);
+		_validate(0, type, typeSettings);
 
 		long commerceDiscountRuleId = counterLocalService.increment();
 
@@ -185,7 +185,7 @@ public class CommerceDiscountRuleLocalServiceImpl
 			commerceDiscountRulePersistence.findByPrimaryKey(
 				commerceDiscountRuleId);
 
-		_validate(type, typeSettings);
+		_validate(commerceDiscountRuleId, type, typeSettings);
 
 		commerceDiscountRule.setType(type);
 
@@ -218,7 +218,7 @@ public class CommerceDiscountRuleLocalServiceImpl
 			commerceDiscountRulePersistence.findByPrimaryKey(
 				commerceDiscountRuleId);
 
-		_validate(type, typeSettings);
+		_validate(commerceDiscountRuleId, type, typeSettings);
 
 		commerceDiscountRule.setName(name);
 		commerceDiscountRule.setType(type);
@@ -258,7 +258,7 @@ public class CommerceDiscountRuleLocalServiceImpl
 		indexer.reindex(commerceDiscount);
 	}
 
-	private void _validate(String type, String typeSettings)
+	private void _validate(long commerceDiscountRuleId, String type, String typeSettings)
 		throws PortalException {
 
 		CommerceDiscountRuleType commerceDiscountRuleType =
@@ -268,7 +268,7 @@ public class CommerceDiscountRuleLocalServiceImpl
 			throw new CommerceDiscountRuleTypeException();
 		}
 
-		if (!commerceDiscountRuleType.validate(typeSettings)) {
+		if (commerceDiscountRuleId > 0 && !commerceDiscountRuleType.validate(typeSettings)) {
 			throw new CommerceDiscountRuleTypeSettingsException();
 		}
 	}

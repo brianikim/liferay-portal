@@ -5,6 +5,7 @@
 
 package com.liferay.commerce.pricing.web.internal.portlet.action;
 
+import com.liferay.commerce.discount.exception.CommerceDiscountRuleTypeSettingsException;
 import com.liferay.commerce.discount.model.CommerceDiscountRule;
 import com.liferay.commerce.discount.service.CommerceDiscountRuleService;
 import com.liferay.commerce.pricing.constants.CommercePricingPortletKeys;
@@ -54,7 +55,7 @@ public class EditCommerceDiscountRuleMVCActionCommand
 			}
 		}
 		catch (Throwable throwable) {
-			if (throwable instanceof NumberFormatException) {
+			if (throwable instanceof CommerceDiscountRuleTypeSettingsException) {
 				SessionErrors.add(
 					actionRequest, throwable.getClass(), throwable);
 
@@ -101,8 +102,8 @@ public class EditCommerceDiscountRuleMVCActionCommand
 	private void _updateCommerceDiscountRule(ActionRequest actionRequest)
 		throws Exception {
 
+		String commerceDiscountRuleType = ParamUtil.getString(actionRequest, "commerceDiscountRuleType");
 		String name = ParamUtil.getString(actionRequest, "name");
-		String type = ParamUtil.getString(actionRequest, "type");
 		String typeSettings = ParamUtil.getString(
 			actionRequest, "typeSettings");
 
@@ -111,7 +112,7 @@ public class EditCommerceDiscountRuleMVCActionCommand
 
 		if (commerceDiscountRuleId > 0) {
 			_commerceDiscountRuleService.updateCommerceDiscountRule(
-				commerceDiscountRuleId, name, type, typeSettings);
+				commerceDiscountRuleId, name, commerceDiscountRuleType, typeSettings);
 		}
 		else {
 			long commerceDiscountId = ParamUtil.getLong(
@@ -121,7 +122,7 @@ public class EditCommerceDiscountRuleMVCActionCommand
 				CommerceDiscountRule.class.getName(), actionRequest);
 
 			_commerceDiscountRuleService.addCommerceDiscountRule(
-				commerceDiscountId, name, type, typeSettings, serviceContext);
+				commerceDiscountId, name, commerceDiscountRuleType, typeSettings, serviceContext);
 		}
 	}
 

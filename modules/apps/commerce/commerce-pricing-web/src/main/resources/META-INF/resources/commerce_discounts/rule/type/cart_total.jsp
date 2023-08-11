@@ -12,7 +12,7 @@ CartTotalCommerceDiscountRuleDisplayContext cartTotalCommerceDiscountRuleDisplay
 %>
 
 <div class="col-12">
-	<liferay-ui:error exception="<%= NumberFormatException.class %>" message="cart-total-minimum-amount-cannot-be-empty-and-must-be-a-decimal-number" />
+	<liferay-ui:error exception="<%= CommerceDiscountRuleTypeSettingsException.class %>" message="cart-total-minimum-amount-cannot-be-empty-and-must-be-a-decimal-number" />
 
 	<commerce-ui:panel
 		bodyClasses="flex-fill"
