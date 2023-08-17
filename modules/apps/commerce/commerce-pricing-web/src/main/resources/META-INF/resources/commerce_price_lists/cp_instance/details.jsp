@@ -55,6 +55,20 @@ CommerceCurrency commerceCurrency = commercePriceList.getCommerceCurrency();
 		</div>
 	</div>
 
+	<div class="tier-price-entries">
+		<aui:fieldset collapsible="<%= false %>" cssClass="price-entry-price-settings" label="tier-price-settings">
+			<div class="row">
+				<div class="col-12">
+					<aui:input checked="<%= commercePriceEntry.isBulkPricing() %>" label="bulk-pricing" name="bulkPricing" type="radio" value="<%= true %>" />
+				</div>
+
+				<div class="col-12">
+					<aui:input checked="<%= !commercePriceEntry.isBulkPricing() %>" label="tiered-pricing" name="bulkPricing" type="radio" value="<%= false %>" />
+				</div>
+			</div>
+		</aui:fieldset>
+	</div>
+
 	<aui:button-row cssClass="price-entry-button-row">
 		<aui:button cssClass="btn-lg" type="submit" />
 	</aui:button-row>

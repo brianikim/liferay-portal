@@ -9,6 +9,7 @@ import com.liferay.commerce.price.list.exception.DuplicateCommercePriceEntryExce
 import com.liferay.commerce.price.list.exception.NoSuchPriceEntryException;
 import com.liferay.commerce.price.list.exception.NoSuchPriceListException;
 import com.liferay.commerce.price.list.model.CommercePriceEntry;
+import com.liferay.commerce.price.list.service.CommercePriceEntryLocalServiceUtil;
 import com.liferay.commerce.price.list.service.CommercePriceEntryService;
 import com.liferay.commerce.product.constants.CPPortletKeys;
 import com.liferay.commerce.product.exception.NoSuchCPInstanceException;
@@ -163,12 +164,19 @@ public class EditCPInstanceCommercePriceEntryMVCActionCommand
 		String unitOfMeasureKey = ParamUtil.getString(
 			actionRequest, "unitOfMeasureKey");
 
+		boolean bulkPricing = ParamUtil.getBoolean(
+			actionRequest, "bulkPricing");
+
 		ServiceContext serviceContext = ServiceContextFactory.getInstance(
 			CommercePriceEntry.class.getName(), actionRequest);
 
-		return _commercePriceEntryService.updateCommercePriceEntry(
+		CommercePriceEntry commercePriceEntry = _commercePriceEntryService.updateCommercePriceEntry(
 			commercePriceEntryId, price, false, promoPrice, unitOfMeasureKey,
 			serviceContext);
+
+		commercePriceEntry.setBulkPricing(bulkPricing);
+
+		return CommercePriceEntryLocalServiceUtil.updateCommercePriceEntry(commercePriceEntry);
 	}
 
 	@Reference
