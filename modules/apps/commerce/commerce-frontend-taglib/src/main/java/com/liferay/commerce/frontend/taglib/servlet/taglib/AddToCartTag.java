@@ -24,8 +24,10 @@ import com.liferay.commerce.product.catalog.CPCatalogEntry;
 import com.liferay.commerce.product.catalog.CPSku;
 import com.liferay.commerce.product.constants.CommerceChannelConstants;
 import com.liferay.commerce.product.content.helper.CPContentHelper;
+import com.liferay.commerce.product.model.CPInstanceUnitOfMeasure;
 import com.liferay.commerce.product.model.CommerceChannel;
 import com.liferay.commerce.product.service.CPDefinitionOptionRelLocalService;
+import com.liferay.commerce.product.service.CPInstanceUnitOfMeasureLocalService;
 import com.liferay.commerce.product.service.CommerceChannelLocalService;
 import com.liferay.commerce.product.util.CPJSONUtil;
 import com.liferay.commerce.service.CommerceOrderItemLocalService;
@@ -124,6 +126,18 @@ public class AddToCartTag extends IncludeTag {
 				_cpInstanceId = cpSku.getCPInstanceId();
 				_disabled = !cpSku.isPurchasable() || (_commerceAccountId == 0);
 				sku = cpSku.getSku();
+
+				if ((_cpInstanceId > 0) &&
+					Validator.isNull(_unitOfMeasureKey)) {
+
+					CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure =
+						cpInstanceUnitOfMeasureLocalService.
+							fetchPrimaryCPInstanceUnitOfMeasure(_cpInstanceId);
+
+					if (cpInstanceUnitOfMeasure != null) {
+						_unitOfMeasureKey = cpInstanceUnitOfMeasure.getKey();
+					}
+				}
 
 				if (commerceOrder != null) {
 					List<CommerceOrderItem> commerceOrderItems =
@@ -246,12 +260,20 @@ public class AddToCartTag extends IncludeTag {
 		return _namespace;
 	}
 
+	public BigDecimal getQuantity() {
+		return _quantity;
+	}
+
 	public String getSize() {
 		return _size;
 	}
 
 	public String getSkuOptions() {
 		return _skuOptions;
+	}
+
+	public String getUnitOfMeasureKey() {
+		return _unitOfMeasureKey;
 	}
 
 	public void setAlignment(String alignment) {
@@ -292,6 +314,8 @@ public class AddToCartTag extends IncludeTag {
 		setNamespacedAttribute(httpServletRequest, "skuOptions", _skuOptions);
 		setNamespacedAttribute(
 			httpServletRequest, "stockQuantity", _stockQuantity);
+		setNamespacedAttribute(
+			httpServletRequest, "unitOfMeasureKey", _unitOfMeasureKey);
 	}
 
 	public void setCPCatalogEntry(CPCatalogEntry cpCatalogEntry) {
@@ -339,12 +363,20 @@ public class AddToCartTag extends IncludeTag {
 		_productHelper = ServletContextUtil.getProductHelper();
 	}
 
+	public void setQuantity(BigDecimal quantity) {
+		_quantity = quantity;
+	}
+
 	public void setSize(String size) {
 		_size = size;
 	}
 
 	public void setSkuOptions(String skuOptions) {
 		_skuOptions = skuOptions;
+	}
+
+	public void setUnitOfMeasureKey(String unitOfMeasureKey) {
+		_unitOfMeasureKey = unitOfMeasureKey;
 	}
 
 	@Override
@@ -375,17 +407,22 @@ public class AddToCartTag extends IncludeTag {
 		_namespace = StringPool.BLANK;
 		_productHelper = null;
 		_productSettingsModel = null;
+		_quantity = BigDecimal.ZERO;
 		_showOrderTypeModal = false;
 		_showOrderTypeModalURL = null;
 		_size = "md";
 		_skuOptions = null;
 		_stockQuantity = 0;
+		_unitOfMeasureKey = StringPool.BLANK;
 	}
 
 	@Override
 	protected String getPage() {
 		return _PAGE;
 	}
+
+	protected CPInstanceUnitOfMeasureLocalService
+		cpInstanceUnitOfMeasureLocalService;
 
 	private String _getShowOrderTypeModalURL(
 		HttpServletRequest httpServletRequest) {
@@ -440,10 +477,12 @@ public class AddToCartTag extends IncludeTag {
 	private String _namespace = StringPool.BLANK;
 	private ProductHelper _productHelper;
 	private ProductSettingsModel _productSettingsModel;
+	private BigDecimal _quantity = BigDecimal.ZERO;
 	private boolean _showOrderTypeModal;
 	private String _showOrderTypeModalURL;
 	private String _size = "md";
 	private String _skuOptions;
 	private int _stockQuantity;
+	private String _unitOfMeasureKey = StringPool.BLANK;
 
 }

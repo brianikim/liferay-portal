@@ -55,6 +55,7 @@ if (alignment.equals("full-width")) {
 		},
 		cpInstance: {
 			inCart: <%= inCart %>,
+			quantity: <%= quantity %>,
 			skuId: <%= cpInstanceId %>,
 			skuOptions: <%= skuOptions %> || [],
 			stockQuantity: <%= stockQuantity %>,
@@ -69,6 +70,7 @@ if (alignment.equals("full-width")) {
 		},
 		showOrderTypeModal: <%= showOrderTypeModal %>,
 		showOrderTypeModalURL: '<%= showOrderTypeModalURL %>',
+		unitOfMeasureKey: '<%= unitOfMeasureKey %>',
 	};
 
 	<c:if test="<%= productSettingsModel != null %>">

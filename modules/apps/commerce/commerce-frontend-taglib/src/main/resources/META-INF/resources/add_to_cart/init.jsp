@@ -34,11 +34,13 @@ String inCart = (String)request.getAttribute("liferay-commerce:add-to-cart:inCar
 String inline = (String)request.getAttribute("liferay-commerce:add-to-cart:inline");
 String namespace = (String)request.getAttribute("liferay-commerce:add-to-cart:namespace");
 ProductSettingsModel productSettingsModel = (ProductSettingsModel)request.getAttribute("liferay-commerce:add-to-cart:productSettingsModel");
+String quantity = (String)request.getAttribute("liferay-commerce:add-to-cart:quantity");
 String size = (String)request.getAttribute("liferay-commerce:add-to-cart:size");
 String showOrderTypeModal = (String)request.getAttribute("liferay-commerce:add-to-cart:showOrderTypeModal");
 String showOrderTypeModalURL = (String)request.getAttribute("liferay-commerce:add-to-cart:showOrderTypeModalURL");
 String skuOptions = (String)request.getAttribute("liferay-commerce:add-to-cart:skuOptions");
 String stockQuantity = (String)request.getAttribute("liferay-commerce:add-to-cart:stockQuantity");
+String unitOfMeasureKey = (String)request.getAttribute("liferay-commerce:add-to-cart:unitOfMeasureKey");
 
 String randomNamespace = PortalUtil.generateRandomKey(request, "taglib") + StringPool.UNDERLINE;
 
