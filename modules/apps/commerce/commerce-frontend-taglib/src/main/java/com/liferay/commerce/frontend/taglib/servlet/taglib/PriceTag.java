@@ -26,6 +26,7 @@ import com.liferay.commerce.product.service.CommerceChannelLocalService;
 import com.liferay.commerce.product.util.CPJSONUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -223,7 +224,9 @@ public class PriceTag extends IncludeTag {
 					getCPDefinitionOptionRelKeysCPDefinitionOptionValueRelKeys(
 						cpInstanceId));
 
-			if (Validator.isNull(_unitOfMeasureKey)) {
+			if (FeatureFlagManagerUtil.isEnabled("COMMERCE-11287") &&
+				Validator.isNull(_unitOfMeasureKey)) {
+
 				CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure =
 					cpInstanceUnitOfMeasureLocalService.
 						fetchPrimaryCPInstanceUnitOfMeasure(cpInstanceId);

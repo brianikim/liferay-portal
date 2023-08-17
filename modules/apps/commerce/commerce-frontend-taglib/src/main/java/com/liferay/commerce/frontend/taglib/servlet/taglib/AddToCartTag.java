@@ -34,6 +34,7 @@ import com.liferay.commerce.service.CommerceOrderItemLocalService;
 import com.liferay.commerce.service.CommerceOrderTypeLocalService;
 import com.liferay.commerce.util.CommerceUtil;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -127,7 +128,8 @@ public class AddToCartTag extends IncludeTag {
 				_disabled = !cpSku.isPurchasable() || (_commerceAccountId == 0);
 				sku = cpSku.getSku();
 
-				if ((_cpInstanceId > 0) &&
+				if (FeatureFlagManagerUtil.isEnabled("COMMERCE-11287") &&
+					(_cpInstanceId > 0) &&
 					Validator.isNull(_unitOfMeasureKey)) {
 
 					CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure =
