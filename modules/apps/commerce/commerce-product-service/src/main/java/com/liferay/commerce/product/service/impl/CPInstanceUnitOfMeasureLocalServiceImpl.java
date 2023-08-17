@@ -127,6 +127,14 @@ public class CPInstanceUnitOfMeasureLocalServiceImpl
 	}
 
 	@Override
+	public CPInstanceUnitOfMeasure fetchPrimaryCPInstanceUnitOfMeasure(
+		long cpInstanceId) {
+
+		return cpInstanceUnitOfMeasurePersistence.fetchByC_P_First(
+			cpInstanceId, true, null);
+	}
+
+	@Override
 	public CPInstanceUnitOfMeasure getCPInstanceUnitOfMeasure(
 			long cpInstanceId, String key)
 		throws PortalException {
