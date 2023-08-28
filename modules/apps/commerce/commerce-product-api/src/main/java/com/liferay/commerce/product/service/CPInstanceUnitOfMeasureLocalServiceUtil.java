@@ -261,6 +261,12 @@ public class CPInstanceUnitOfMeasureLocalServiceUtil {
 			uuid, companyId);
 	}
 
+	public static CPInstanceUnitOfMeasure fetchPrimaryCPInstanceUnitOfMeasure(
+		long cpInstanceId) {
+
+		return getService().fetchPrimaryCPInstanceUnitOfMeasure(cpInstanceId);
+	}
+
 	public static com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery
 		getActionableDynamicQuery() {
 
