@@ -28,6 +28,7 @@ boolean compact = (boolean)request.getAttribute("commerce-ui:price:compact");
 boolean displayDiscountLevels = (boolean)request.getAttribute("commerce-ui:price:displayDiscountLevels");
 String namespace = (String)request.getAttribute("commerce-ui:price:namespace");
 boolean netPrice = (boolean)request.getAttribute("commerce-ui:price:netPrice");
+String unitOfMeasureKey = (String)request.getAttribute("commerce-ui:price:unitOfMeasureKey");
 PriceModel priceModel = (PriceModel)request.getAttribute("commerce-ui:price:priceModel");
 
 JSONSerializer jsonSerializer = JSONFactoryUtil.createJSONSerializer();

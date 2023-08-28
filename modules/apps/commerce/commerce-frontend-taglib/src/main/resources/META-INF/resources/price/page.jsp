@@ -57,6 +57,7 @@ if (Validator.isNotNull(namespace) || (Validator.isNull(namespace) && !compact))
 			netPrice: <%= netPrice %>,
 			price: <%= jsonSerializer.serializeDeep(priceModel) %>,
 			standalone: true,
+			unitOfMeasureKey: <%= unitOfMeasureKey %>,
 		};
 
 		Price.default(componentId, componentId, initialProps);
