@@ -1257,19 +1257,6 @@ public class Mutation {
 	}
 
 	@GraphQLField
-	public AdminAccountGroup createAccountGroup(
-			@GraphQLName("adminAccountGroup") AdminAccountGroup
-				adminAccountGroup)
-		throws Exception {
-
-		return _applyComponentServiceObjects(
-			_adminAccountGroupResourceComponentServiceObjects,
-			this::_populateResourceContext,
-			adminAccountGroupResource ->
-				adminAccountGroupResource.postAccountGroup(adminAccountGroup));
-	}
-
-	@GraphQLField
 	public Response deleteAccountGroupByExternalReferenceCode(
 			@GraphQLName("externalReferenceCode") String externalReferenceCode)
 		throws Exception {
@@ -1323,6 +1310,19 @@ public class Mutation {
 			adminAccountGroupResource ->
 				adminAccountGroupResource.patchAccountGroup(
 					id, adminAccountGroup));
+	}
+
+	@GraphQLField
+	public AdminAccountGroup createAccountGroup(
+			@GraphQLName("adminAccountGroup") AdminAccountGroup
+				adminAccountGroup)
+		throws Exception {
+
+		return _applyComponentServiceObjects(
+			_adminAccountGroupResourceComponentServiceObjects,
+			this::_populateResourceContext,
+			adminAccountGroupResource ->
+				adminAccountGroupResource.postAccountGroup(adminAccountGroup));
 	}
 
 	@GraphQLField

@@ -490,11 +490,6 @@ public class ServletDataImpl implements ServletData {
 							AccountOrganizationResourceImpl.class,
 							"deleteAccountIdAccountOrganization"));
 					put(
-						"mutation#createAccountGroup",
-						new ObjectValuePair<>(
-							AdminAccountGroupResourceImpl.class,
-							"postAccountGroup"));
-					put(
 						"mutation#deleteAccountGroupByExternalReferenceCode",
 						new ObjectValuePair<>(
 							AdminAccountGroupResourceImpl.class,
@@ -514,6 +509,11 @@ public class ServletDataImpl implements ServletData {
 						new ObjectValuePair<>(
 							AdminAccountGroupResourceImpl.class,
 							"patchAccountGroup"));
+					put(
+						"mutation#createAccountGroup",
+						new ObjectValuePair<>(
+							AdminAccountGroupResourceImpl.class,
+							"postAccountGroup"));
 					put(
 						"mutation#createAccountByExternalReferenceCodeAccountMemberCreateUser",
 						new ObjectValuePair<>(
@@ -744,11 +744,6 @@ public class ServletDataImpl implements ServletData {
 							AccountOrganizationResourceImpl.class,
 							"getAccountIdAccountOrganization"));
 					put(
-						"query#accountGroups",
-						new ObjectValuePair<>(
-							AdminAccountGroupResourceImpl.class,
-							"getAccountGroupsPage"));
-					put(
 						"query#accountGroupByExternalReferenceCode",
 						new ObjectValuePair<>(
 							AdminAccountGroupResourceImpl.class,
@@ -768,6 +763,11 @@ public class ServletDataImpl implements ServletData {
 						new ObjectValuePair<>(
 							AdminAccountGroupResourceImpl.class,
 							"getAccountIdAccountGroupsPage"));
+					put(
+						"query#accountGroups",
+						new ObjectValuePair<>(
+							AdminAccountGroupResourceImpl.class,
+							"getAccountGroupsPage"));
 
 					put(
 						"query#Account.byExternalReferenceCodeAccountChannelShippingOption",

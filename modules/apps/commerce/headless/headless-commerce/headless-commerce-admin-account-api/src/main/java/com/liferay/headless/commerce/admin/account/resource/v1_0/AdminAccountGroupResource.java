@@ -49,14 +49,6 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public interface AdminAccountGroupResource {
 
-	public Page<AdminAccountGroup> getAccountGroupsPage(
-			String search, Filter filter, Pagination pagination, Sort[] sorts)
-		throws Exception;
-
-	public AdminAccountGroup postAccountGroup(
-			AdminAccountGroup adminAccountGroup)
-		throws Exception;
-
 	public Response deleteAccountGroupByExternalReferenceCode(
 			String externalReferenceCode)
 		throws Exception;
@@ -84,6 +76,14 @@ public interface AdminAccountGroupResource {
 
 	public Page<AdminAccountGroup> getAccountIdAccountGroupsPage(
 			Long id, Pagination pagination)
+		throws Exception;
+
+	public Page<AdminAccountGroup> getAccountGroupsPage(
+			String search, Filter filter, Pagination pagination, Sort[] sorts)
+		throws Exception;
+
+	public AdminAccountGroup postAccountGroup(
+			AdminAccountGroup adminAccountGroup)
 		throws Exception;
 
 	public default void setContextAcceptLanguage(
