@@ -6,6 +6,8 @@
 package com.liferay.commerce.discount.internal.upgrade.registry;
 
 import com.liferay.commerce.discount.internal.upgrade.v2_0_0.util.CommerceDiscountCommerceAccountGroupRelTable;
+import com.liferay.commerce.discount.internal.upgrade.v2_10_0.CommerceDiscountEntryCheckUpgradeProcess;
+import com.liferay.commerce.discount.internal.upgrade.v2_10_0.util.CommerceDiscountEntryCheckTable;
 import com.liferay.commerce.discount.internal.upgrade.v2_2_0.CommerceDiscountRuleNameUpgradeProcess;
 import com.liferay.commerce.discount.internal.upgrade.v2_2_0.util.CommerceDiscountAccountRelTable;
 import com.liferay.commerce.discount.internal.upgrade.v2_6_0.util.CommerceDiscountOrderTypeRelTable;
@@ -15,6 +17,7 @@ import com.liferay.commerce.discount.model.impl.CommerceDiscountRuleModelImpl;
 import com.liferay.commerce.discount.model.impl.CommerceDiscountUsageEntryModelImpl;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.upgrade.BaseExternalReferenceCodeUpgradeProcess;
 import com.liferay.portal.kernel.upgrade.DummyUpgradeStep;
 import com.liferay.portal.kernel.upgrade.MVCCVersionUpgradeProcess;
@@ -22,6 +25,7 @@ import com.liferay.portal.kernel.upgrade.UpgradeProcessFactory;
 import com.liferay.portal.upgrade.registry.UpgradeStepRegistrator;
 
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Alessio Antonio Rendina
@@ -121,6 +125,10 @@ public class CommerceDiscountServiceUpgradeStepRegistrator
 				CommerceDiscountRelModelImpl.TABLE_NAME,
 				"typeSettings TEXT null"));
 
+		registry.register(
+			"2.9.0", "2.10.0", CommerceDiscountEntryCheckTable.create(),
+			new CommerceDiscountEntryCheckUpgradeProcess(_userLocalService));
+
 		if (_log.isInfoEnabled()) {
 			_log.info("Commerce discount upgrade step registrator finished");
 		}
@@ -128,5 +136,8 @@ public class CommerceDiscountServiceUpgradeStepRegistrator
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		CommerceDiscountServiceUpgradeStepRegistrator.class);
+
+	@Reference
+	private UserLocalService _userLocalService;
 
 }
