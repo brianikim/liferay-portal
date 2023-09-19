@@ -20,6 +20,9 @@ public interface DestinationNames {
 	public static final String COMMERCE_BASE_PRICE_LIST =
 		"liferay/commerce_base_price_list";
 
+	public static final String COMMERCE_DISCOUNT_ENTRY_CHECK =
+		"liferay/commerce_discount_entry_check";
+
 	public static final String COMMERCE_ORDER_STATUS =
 		"liferay/commerce_order_status";
 

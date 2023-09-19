@@ -5,6 +5,7 @@
 
 package com.liferay.commerce.internal.messaging;
 
+import com.liferay.commerce.discount.model.CommerceDiscountEntryCheck;
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.model.CommerceShipment;
 import com.liferay.commerce.price.list.model.CommercePriceList;
@@ -35,6 +36,9 @@ public class CommerceMessagingConfigurator {
 		_basePriceListServiceRegistration = _registerDestination(
 			bundleContext, DestinationNames.COMMERCE_BASE_PRICE_LIST,
 			CommercePriceList.class.getName());
+		_commerceDiscountEntryCheckServiceRegistration = _registerDestination(
+			bundleContext, DestinationNames.COMMERCE_DISCOUNT_ENTRY_CHECK,
+			CommerceDiscountEntryCheck.class.getName());
 		_orderStatusServiceRegistration = _registerDestination(
 			bundleContext, DestinationNames.COMMERCE_ORDER_STATUS,
 			CommerceOrder.class.getName());
@@ -53,6 +57,10 @@ public class CommerceMessagingConfigurator {
 	protected void deactivate() {
 		if (_basePriceListServiceRegistration != null) {
 			_basePriceListServiceRegistration.unregister();
+		}
+
+		if (_commerceDiscountEntryCheckServiceRegistration != null) {
+			_commerceDiscountEntryCheckServiceRegistration.unregister();
 		}
 
 		if (_orderStatusServiceRegistration != null) {
@@ -95,6 +103,8 @@ public class CommerceMessagingConfigurator {
 
 	private volatile ServiceRegistration<Destination>
 		_basePriceListServiceRegistration;
+	private volatile ServiceRegistration<Destination>
+		_commerceDiscountEntryCheckServiceRegistration;
 
 	@Reference
 	private DestinationFactory _destinationFactory;
