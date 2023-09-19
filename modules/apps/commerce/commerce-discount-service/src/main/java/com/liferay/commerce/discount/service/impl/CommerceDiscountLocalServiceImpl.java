@@ -31,6 +31,7 @@ import com.liferay.commerce.discount.model.CommerceDiscountTable;
 import com.liferay.commerce.discount.rule.type.CommerceDiscountRuleType;
 import com.liferay.commerce.discount.rule.type.CommerceDiscountRuleTypeRegistry;
 import com.liferay.commerce.discount.service.CommerceDiscountCommerceAccountGroupRelLocalService;
+import com.liferay.commerce.discount.service.CommerceDiscountEntryCheckLocalService;
 import com.liferay.commerce.discount.service.CommerceDiscountOrderTypeRelLocalService;
 import com.liferay.commerce.discount.service.CommerceDiscountRelLocalService;
 import com.liferay.commerce.discount.service.CommerceDiscountRuleLocalService;
@@ -609,6 +610,10 @@ public class CommerceDiscountLocalServiceImpl
 
 		_commerceDiscountUsageEntryLocalService.
 			deleteCommerceUsageEntryByDiscountId(
+				commerceDiscount.getCommerceDiscountId());
+
+		_commerceDiscountEntryCheckLocalService.
+			deleteCommerceDiscountEntryChecks(
 				commerceDiscount.getCommerceDiscountId());
 
 		_expandoRowLocalService.deleteRows(
@@ -2027,6 +2032,10 @@ public class CommerceDiscountLocalServiceImpl
 	@Reference
 	private CommerceDiscountCommerceAccountGroupRelLocalService
 		_commerceDiscountCommerceAccountGroupRelLocalService;
+
+	@Reference
+	private CommerceDiscountEntryCheckLocalService
+		_commerceDiscountEntryCheckLocalService;
 
 	@Reference
 	private CommerceDiscountOrderTypeRelLocalService

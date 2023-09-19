@@ -5,9 +5,9 @@
 
 package com.liferay.commerce.discount.service.impl;
 
-import com.liferay.commerce.discount.constants.CommerceDiscountConstants;
-import com.liferay.commerce.discount.model.CommerceDiscount;
+import com.liferay.commerce.discount.model.CommerceDiscountEntryCheck;
 import com.liferay.commerce.discount.model.CommerceDiscountUsageEntry;
+import com.liferay.commerce.discount.service.CommerceDiscountEntryCheckLocalService;
 import com.liferay.commerce.discount.service.base.CommerceDiscountUsageEntryLocalServiceBaseImpl;
 import com.liferay.commerce.discount.service.persistence.CommerceDiscountPersistence;
 import com.liferay.portal.aop.AopService;
@@ -15,8 +15,6 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
-
-import java.util.Objects;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -117,70 +115,21 @@ public class CommerceDiscountUsageEntryLocalServiceImpl
 			long commerceAccountId, long commerceDiscountId)
 		throws PortalException {
 
-		CommerceDiscount commerceDiscount =
-			_commerceDiscountPersistence.findByPrimaryKey(commerceDiscountId);
+		CommerceDiscountEntryCheck commerceDiscountEntryCheck =
+			_commerceDiscountEntryCheckLocalService.
+				getCommerceDiscountEntryCheck(
+					commerceAccountId, commerceDiscountId);
 
-		if (Objects.equals(
-				commerceDiscount.getLimitationType(),
-				CommerceDiscountConstants.LIMITATION_TYPE_UNLIMITED)) {
-
+		if (commerceDiscountEntryCheck == null) {
 			return true;
 		}
 
-		int limitationTimes = commerceDiscount.getLimitationTimes();
-
-		if (Objects.equals(
-				commerceDiscount.getLimitationType(),
-				CommerceDiscountConstants.LIMITATION_TYPE_LIMITED)) {
-
-			int commerceDiscountUsageEntriesCount =
-				getCommerceDiscountUsageEntriesCount(commerceDiscountId);
-
-			if (commerceDiscountUsageEntriesCount < limitationTimes) {
-				return true;
-			}
-
-			return false;
-		}
-
-		int limitationTimesPerAccount =
-			commerceDiscount.getLimitationTimesPerAccount();
-
-		if (Objects.equals(
-				commerceDiscount.getLimitationType(),
-				CommerceDiscountConstants.
-					LIMITATION_TYPE_LIMITED_FOR_ACCOUNTS)) {
-
-			int commerceDiscountUsageEntriesCount =
-				getCommerceDiscountUsageEntriesCountByAccountId(
-					commerceAccountId, commerceDiscountId);
-
-			if (commerceDiscountUsageEntriesCount < limitationTimesPerAccount) {
-				return true;
-			}
-
-			return false;
-		}
-
-		int commerceDiscountUsageEntriesTotalCount =
-			getCommerceDiscountUsageEntriesCount(commerceDiscountId);
-
-		if (commerceDiscountUsageEntriesTotalCount >= limitationTimes) {
-			return false;
-		}
-
-		int commerceDiscountUsageEntriesUserCount =
-			getCommerceDiscountUsageEntriesCountByAccountId(
-				commerceAccountId, commerceDiscountId);
-
-		if (commerceDiscountUsageEntriesUserCount >=
-				limitationTimesPerAccount) {
-
-			return false;
-		}
-
-		return true;
+		return false;
 	}
+
+	@Reference
+	private CommerceDiscountEntryCheckLocalService
+		_commerceDiscountEntryCheckLocalService;
 
 	@Reference
 	private CommerceDiscountPersistence _commerceDiscountPersistence;
