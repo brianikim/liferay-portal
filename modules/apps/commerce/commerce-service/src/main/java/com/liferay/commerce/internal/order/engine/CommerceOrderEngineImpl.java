@@ -534,6 +534,27 @@ public class CommerceOrderEngineImpl implements CommerceOrderEngine {
 		return commerceOrderCheckoutConfiguration.guestCheckoutEnabled();
 	}
 
+	private void _sendCommerceDiscountEntryCheckMessage(
+		long commerceAccountId, long commerceDiscountId) {
+
+		TransactionCommitCallbackUtil.registerCallback(
+			() -> {
+				Message message = new Message();
+
+				message.setPayload(
+					JSONUtil.put(
+						"commerceAccountId", commerceAccountId
+					).put(
+						"commerceDiscountId", commerceDiscountId
+					));
+
+				MessageBusUtil.sendMessage(
+					DestinationNames.COMMERCE_DISCOUNT_ENTRY_CHECK, message);
+
+				return null;
+			});
+	}
+
 	private void _sendOrderStatusMessage(
 		CommerceOrder commerceOrder, int orderStatus) {
 
@@ -659,6 +680,9 @@ public class CommerceOrderEngineImpl implements CommerceOrderEngine {
 				addCommerceDiscountUsageEntry(
 					commerceAccountId, commerceOrderId,
 					commerceDiscount.getCommerceDiscountId(), serviceContext);
+
+			_sendCommerceDiscountEntryCheckMessage(
+				commerceAccountId, commerceDiscount.getCommerceDiscountId());
 		}
 	}
 
