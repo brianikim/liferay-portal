@@ -61,6 +61,18 @@ create table CommerceDiscountAccountRel (
 	lastPublishDate DATE null
 );
 
+create table CommerceDiscountEntryCheck (
+	mvccVersion LONG default 0 not null,
+	commerceDiscountEntryCheckId LONG not null primary key,
+	companyId LONG,
+	userId LONG,
+	userName VARCHAR(75) null,
+	createDate DATE null,
+	modifiedDate DATE null,
+	commerceAccountId LONG,
+	commerceDiscountId LONG
+);
+
 create table CommerceDiscountOrderTypeRel (
 	mvccVersion LONG default 0 not null,
 	uuid_ VARCHAR(75) null,

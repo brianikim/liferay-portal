@@ -63,6 +63,17 @@
 		<field name="commerceDiscountId" type="long" />
 		<field name="commerceAccountGroupId" type="long" />
 	</model>
+	<model name="com.liferay.commerce.discount.model.CommerceDiscountEntryCheck">
+		<field name="mvccVersion" type="long" />
+		<field name="commerceDiscountEntryCheckId" type="long" />
+		<field name="companyId" type="long" />
+		<field name="userId" type="long" />
+		<field name="userName" type="String" />
+		<field name="createDate" type="Date" />
+		<field name="modifiedDate" type="Date" />
+		<field name="commerceAccountId" type="long" />
+		<field name="commerceDiscountId" type="long" />
+	</model>
 	<model name="com.liferay.commerce.discount.model.CommerceDiscountOrderTypeRel">
 		<field name="mvccVersion" type="long" />
 		<field name="uuid" type="String" />

@@ -12,6 +12,9 @@ create unique index IX_E082887A on CommerceDiscountAccountRel (commerceAccountId
 create index IX_6EA2AA99 on CommerceDiscountAccountRel (commerceDiscountId);
 create index IX_D365BDE2 on CommerceDiscountAccountRel (uuid_[$COLUMN_LENGTH:75$], companyId);
 
+create index IX_B6AB330 on CommerceDiscountEntryCheck (commerceAccountId, commerceDiscountId);
+create index IX_96A2BFA3 on CommerceDiscountEntryCheck (commerceDiscountId);
+
 create unique index IX_614617A on CommerceDiscountOrderTypeRel (commerceDiscountId, commerceOrderTypeId);
 create index IX_707E0345 on CommerceDiscountOrderTypeRel (commerceOrderTypeId);
 create index IX_19936B07 on CommerceDiscountOrderTypeRel (uuid_[$COLUMN_LENGTH:75$], companyId);

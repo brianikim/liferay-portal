@@ -5,6 +5,7 @@
 	<import class="com.liferay.commerce.discount.model.CommerceDiscount" />
 	<import class="com.liferay.commerce.discount.model.CommerceDiscountAccountRel" />
 	<import class="com.liferay.commerce.discount.model.CommerceDiscountCommerceAccountGroupRel" />
+	<import class="com.liferay.commerce.discount.model.CommerceDiscountEntryCheck" />
 	<import class="com.liferay.commerce.discount.model.CommerceDiscountOrderTypeRel" />
 	<import class="com.liferay.commerce.discount.model.CommerceDiscountRel" />
 	<import class="com.liferay.commerce.discount.model.CommerceDiscountRule" />
@@ -74,6 +75,19 @@
 		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="modifiedDate" type="org.hibernate.type.TimestampType" />
 		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="commerceDiscountId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="commerceAccountGroupId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+	</class>
+	<class dynamic-update="true" name="com.liferay.commerce.discount.model.impl.CommerceDiscountEntryCheckImpl" table="CommerceDiscountEntryCheck">
+		<id access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="commerceDiscountEntryCheckId" type="long">
+			<generator class="assigned" />
+		</id>
+		<version access="com.liferay.portal.dao.orm.hibernate.PrivateFieldPropertyAccessor" name="mvccVersion" type="long" />
+		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="companyId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="userId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="userName" type="com.liferay.portal.dao.orm.hibernate.StringType" />
+		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="createDate" type="org.hibernate.type.TimestampType" />
+		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="modifiedDate" type="org.hibernate.type.TimestampType" />
+		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="commerceAccountId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="commerceDiscountId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
 	</class>
 	<class dynamic-update="true" name="com.liferay.commerce.discount.model.impl.CommerceDiscountOrderTypeRelImpl" table="CommerceDiscountOrderTypeRel">
 		<id access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="commerceDiscountOrderTypeRelId" type="long">
