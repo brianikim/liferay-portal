@@ -12,9 +12,8 @@ import com.liferay.headless.commerce.core.util.LanguageUtils;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.util.BigDecimalUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
-
-import java.math.BigDecimal;
 
 /**
  * @author Alessio Antonio Rendina
@@ -54,7 +53,10 @@ public class ProductOptionValueUtil {
 						GetterUtil.get(
 							productOptionValue.getPriority(),
 							cpDefinitionOptionValueRel.getPriority()),
-						BigDecimal.ZERO, StringPool.BLANK, serviceContext);
+						BigDecimalUtil.get(
+							productOptionValue.getQuantity(),
+							cpDefinitionOptionValueRel.getQuantity()),
+						StringPool.BLANK, serviceContext);
 		}
 
 		return cpDefinitionOptionValueRel;
