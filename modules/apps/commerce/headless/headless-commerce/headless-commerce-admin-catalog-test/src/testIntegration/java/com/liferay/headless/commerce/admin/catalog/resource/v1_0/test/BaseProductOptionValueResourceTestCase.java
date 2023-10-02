@@ -782,6 +782,14 @@ public abstract class BaseProductOptionValueResourceTestCase {
 		for (String additionalAssertFieldName :
 				getAdditionalAssertFieldNames()) {
 
+			if (Objects.equals("cpInstanceId", additionalAssertFieldName)) {
+				if (productOptionValue.getCpInstanceId() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
 			if (Objects.equals("key", additionalAssertFieldName)) {
 				if (productOptionValue.getKey() == null) {
 					valid = false;
@@ -800,6 +808,14 @@ public abstract class BaseProductOptionValueResourceTestCase {
 
 			if (Objects.equals("priority", additionalAssertFieldName)) {
 				if (productOptionValue.getPriority() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("quantity", additionalAssertFieldName)) {
+				if (productOptionValue.getQuantity() == null) {
 					valid = false;
 				}
 
@@ -927,6 +943,17 @@ public abstract class BaseProductOptionValueResourceTestCase {
 		for (String additionalAssertFieldName :
 				getAdditionalAssertFieldNames()) {
 
+			if (Objects.equals("cpInstanceId", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						productOptionValue1.getCpInstanceId(),
+						productOptionValue2.getCpInstanceId())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
 			if (Objects.equals("id", additionalAssertFieldName)) {
 				if (!Objects.deepEquals(
 						productOptionValue1.getId(),
@@ -964,6 +991,17 @@ public abstract class BaseProductOptionValueResourceTestCase {
 				if (!Objects.deepEquals(
 						productOptionValue1.getPriority(),
 						productOptionValue2.getPriority())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("quantity", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						productOptionValue1.getQuantity(),
+						productOptionValue2.getQuantity())) {
 
 					return false;
 				}
@@ -1075,6 +1113,11 @@ public abstract class BaseProductOptionValueResourceTestCase {
 		sb.append(operator);
 		sb.append(" ");
 
+		if (entityFieldName.equals("cpInstanceId")) {
+			throw new IllegalArgumentException(
+				"Invalid entity field " + entityFieldName);
+		}
+
 		if (entityFieldName.equals("id")) {
 			throw new IllegalArgumentException(
 				"Invalid entity field " + entityFieldName);
@@ -1137,6 +1180,11 @@ public abstract class BaseProductOptionValueResourceTestCase {
 			return sb.toString();
 		}
 
+		if (entityFieldName.equals("quantity")) {
+			throw new IllegalArgumentException(
+				"Invalid entity field " + entityFieldName);
+		}
+
 		throw new IllegalArgumentException(
 			"Invalid entity field " + entityFieldName);
 	}
@@ -1181,6 +1229,7 @@ public abstract class BaseProductOptionValueResourceTestCase {
 	protected ProductOptionValue randomProductOptionValue() throws Exception {
 		return new ProductOptionValue() {
 			{
+				cpInstanceId = RandomTestUtil.randomLong();
 				id = RandomTestUtil.randomLong();
 				key = StringUtil.toLowerCase(RandomTestUtil.randomString());
 				priority = RandomTestUtil.randomDouble();
