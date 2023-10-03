@@ -823,6 +823,8 @@ components:
                     minimum: 0
                     readOnly: true
                     type: integer
+                name:
+                    type: string
                 price:
                     type: string
                 priceType:
