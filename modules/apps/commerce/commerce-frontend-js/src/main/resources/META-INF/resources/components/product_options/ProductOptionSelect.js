@@ -121,6 +121,7 @@ const ProductOptionSelect = ({
 						...(skuOptionsAtomState[skuOptionsKey] || []),
 						{
 							key: productOption.key,
+							name: initialProductOptionValue?.name,
 							price: initialProductOptionValue?.price,
 							priceType: initialProductOptionValue?.priceType,
 							quantity: initialProductOptionValue?.quantity,
@@ -208,6 +209,7 @@ const ProductOptionSelect = ({
 				if (skuOption.skuOptionKey === productOption.key) {
 					return {
 						key: productOption.key,
+						name: currentProductOptionValue.name,
 						price: currentProductOptionValue.price,
 						priceType: currentProductOptionValue.priceType,
 						quantity: currentProductOptionValue.quantity,
@@ -226,6 +228,7 @@ const ProductOptionSelect = ({
 				...currentSkuOptions,
 				{
 					key: productOption.key,
+					name: currentProductOptionValue.name,
 					price: currentProductOptionValue.price,
 					priceType: currentProductOptionValue.priceType,
 					quantity: currentProductOptionValue.quantity,

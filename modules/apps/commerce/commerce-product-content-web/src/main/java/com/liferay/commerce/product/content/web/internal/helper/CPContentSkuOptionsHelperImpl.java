@@ -73,6 +73,8 @@ public class CPContentSkuOptionsHelperImpl
 			jsonObject.put(
 				"key", skuOption.getSkuOptionKey()
 			).put(
+				"name", skuOption.getName()
+			).put(
 				"value", skuOption.getSkuOptionValueKey()
 			);
 

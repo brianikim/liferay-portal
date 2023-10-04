@@ -82,6 +82,7 @@ const ProductOptionRadio = ({
 						...(skuOptionsAtomState[skuOptionsKey] || []),
 						{
 							key: productOption.key,
+							name: defaultProductOptionValue?.name,
 							price: defaultProductOptionValue?.price,
 							priceType: defaultProductOptionValue?.priceType,
 							quantity: defaultProductOptionValue?.quantity,
@@ -166,6 +167,7 @@ const ProductOptionRadio = ({
 				if (skuOption.skuOptionKey === productOption.key) {
 					return {
 						key: productOption.key,
+						name: currentProductOptionValue.name,
 						price: currentProductOptionValue.price,
 						priceType: currentProductOptionValue.priceType,
 						quantity: currentProductOptionValue.quantity,
@@ -184,6 +186,7 @@ const ProductOptionRadio = ({
 				...currentSkuOptions,
 				{
 					key: productOption.key,
+					name: currentProductOptionValue.name,
 					price: currentProductOptionValue.price,
 					priceType: currentProductOptionValue.priceType,
 					quantity: currentProductOptionValue.quantity,

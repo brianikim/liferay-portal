@@ -224,7 +224,7 @@ export function parseOptions(jsonString) {
 	}
 
 	return Array.isArray(options)
-		? options.map(({value}) => `${value}`).join(', ')
+		? options.map(({name, value}) => `${name || value}`).join(', ')
 		: options;
 }
 
