@@ -54,6 +54,20 @@ public class SkuOptionSerDes {
 			sb.append(skuOption.getKey());
 		}
 
+		if (skuOption.getName() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"name\": ");
+
+			sb.append("\"");
+
+			sb.append(_escape(skuOption.getName()));
+
+			sb.append("\"");
+		}
+
 		if (skuOption.getPrice() != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -189,6 +203,13 @@ public class SkuOptionSerDes {
 			map.put("key", String.valueOf(skuOption.getKey()));
 		}
 
+		if (skuOption.getName() == null) {
+			map.put("name", null);
+		}
+		else {
+			map.put("name", String.valueOf(skuOption.getName()));
+		}
+
 		if (skuOption.getPrice() == null) {
 			map.put("price", null);
 		}
@@ -281,6 +302,11 @@ public class SkuOptionSerDes {
 				if (jsonParserFieldValue != null) {
 					skuOption.setKey(
 						Long.valueOf((String)jsonParserFieldValue));
+				}
+			}
+			else if (Objects.equals(jsonParserFieldName, "name")) {
+				if (jsonParserFieldValue != null) {
+					skuOption.setName((String)jsonParserFieldValue);
 				}
 			}
 			else if (Objects.equals(jsonParserFieldName, "price")) {

@@ -77,6 +77,32 @@ public class SkuOption implements Serializable {
 	protected Long key;
 
 	@Schema
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	@JsonIgnore
+	public void setName(UnsafeSupplier<String, Exception> nameUnsafeSupplier) {
+		try {
+			name = nameUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected String name;
+
+	@Schema
 	public String getPrice() {
 		return price;
 	}
@@ -360,6 +386,20 @@ public class SkuOption implements Serializable {
 			sb.append("\"key\": ");
 
 			sb.append(key);
+		}
+
+		if (name != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"name\": ");
+
+			sb.append("\"");
+
+			sb.append(_escape(name));
+
+			sb.append("\"");
 		}
 
 		if (price != null) {
