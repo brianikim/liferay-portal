@@ -126,7 +126,9 @@ const ProductOptionSelect = ({
 							quantity: initialProductOptionValue?.quantity,
 							skuId: initialProductOptionValue?.skuId,
 							skuOptionKey: productOption.key,
+							skuOptionName: productOption.name,
 							skuOptionValueKey: initialProductOptionValue?.key,
+							skuOptionValueName: initialProductOptionValue?.name,
 							value: initialProductOptionValue?.key || '',
 						},
 				  ],
@@ -213,7 +215,9 @@ const ProductOptionSelect = ({
 						quantity: currentProductOptionValue.quantity,
 						skuId: currentProductOptionValue.skuId,
 						skuOptionKey: productOption.key,
+						skuOptionName: productOption.name,
 						skuOptionValueKey: valueArray[1],
+						skuOptionValueName: currentProductOptionValue.name,
 						value: valueArray[1],
 					};
 				}
@@ -231,7 +235,9 @@ const ProductOptionSelect = ({
 					quantity: currentProductOptionValue.quantity,
 					skuId: currentProductOptionValue.skuId,
 					skuOptionKey: productOption.key,
+					skuOptionName: productOption.name,
 					skuOptionValueKey: valueArray[1],
+					skuOptionValueName: currentProductOptionValue.name,
 					value: valueArray[1],
 				},
 			];
