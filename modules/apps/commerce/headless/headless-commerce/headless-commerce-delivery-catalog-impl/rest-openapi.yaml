@@ -841,12 +841,18 @@ components:
                 skuOptionKey:
                     example: Sku Option Key
                     type: string
+                skuOptionName:
+                    example: Sku Option Name
+                    type: string
                 skuOptionValueId:
                     example: 30130
                     format: int64
                     type: integer
                 skuOptionValueKey:
                     example: Sku Option Value Key
+                    type: string
+                skuOptionValueName:
+                    example: Sku Option Value Name
                     type: string
                 value:
                     example: 31130
