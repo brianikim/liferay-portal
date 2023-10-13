@@ -221,11 +221,17 @@ function CartItem({
 					</div>
 				</div>
 			) : (
-				<a
-					className="mini-cart-item-details"
-					data-senna-off="true"
-					href={productPageUrl}
-				>
+				<div className="mini-cart-item-details position-relative">
+					<a
+						className="h-100 mini-cart-item-anchor position-absolute w-100"
+						data-senna-off="true"
+						href={productPageUrl}
+					>
+						<span className="sr-only">
+							{sub(Liferay.Language.get('go-to-x'), name)}
+						</span>
+					</a>
+
 					{!!adaptiveMediaImageHTMLTag && (
 						<div
 							className="mini-cart-item-thumbnail"
@@ -236,9 +242,12 @@ function CartItem({
 					)}
 
 					<div
-						className={classnames('mini-cart-item-info ml-3', {
-							options: Boolean(options),
-						})}
+						className={classnames(
+							'mini-cart-item-info ml-3 w-100',
+							{
+								options: Boolean(options),
+							}
+						)}
 					>
 						<ItemInfoView
 							childItems={childItems}
@@ -248,7 +257,7 @@ function CartItem({
 							sku={sku}
 						/>
 					</div>
-				</a>
+				</div>
 			)}
 
 			<div
