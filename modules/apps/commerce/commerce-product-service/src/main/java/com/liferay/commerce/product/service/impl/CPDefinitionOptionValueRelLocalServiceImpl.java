@@ -117,9 +117,9 @@ public class CPDefinitionOptionValueRelLocalServiceImpl
 	@Indexable(type = IndexableType.REINDEX)
 	@Override
 	public CPDefinitionOptionValueRel addCPDefinitionOptionValueRel(
-			long cpDefinitionOptionRelId, String key,
-			Map<Locale, String> nameMap, double priority,
-			ServiceContext serviceContext)
+			long cpDefinitionOptionRelId, long cpInstanceId, String key,
+			Map<Locale, String> nameMap, BigDecimal deltaPrice, double priority,
+			BigDecimal quantity, ServiceContext serviceContext)
 		throws PortalException {
 
 		// Commerce product definition option value rel
@@ -128,7 +128,8 @@ public class CPDefinitionOptionValueRelLocalServiceImpl
 
 		key = _friendlyURLNormalizer.normalize(key);
 
-		_validate(0, cpDefinitionOptionRelId, 0, key, StringPool.BLANK);
+		_validate(
+			0, cpDefinitionOptionRelId, cpInstanceId, key, StringPool.BLANK);
 
 		long cpDefinitionOptionValueRelId = counterLocalService.increment();
 
@@ -156,6 +157,10 @@ public class CPDefinitionOptionValueRelLocalServiceImpl
 				cpDefinitionOptionRel.getCPDefinitionOptionRelId();
 		}
 
+		cpDefinitionOptionValueRel =
+			_updateCPDefinitionOptionValueRelCPInstance(
+				cpDefinitionOptionValueRel, cpInstanceId);
+
 		cpDefinitionOptionValueRel.setGroupId(
 			cpDefinitionOptionRel.getGroupId());
 		cpDefinitionOptionValueRel.setCompanyId(user.getCompanyId());
@@ -168,11 +173,12 @@ public class CPDefinitionOptionValueRelLocalServiceImpl
 		cpDefinitionOptionValueRel.setNameMap(nameMap);
 
 		if (cpDefinitionOptionRel.isPriceTypeStatic()) {
-			cpDefinitionOptionValueRel.setPrice(BigDecimal.ZERO);
+			cpDefinitionOptionValueRel.setPrice(
+				BigDecimalUtil.get(deltaPrice, BigDecimal.ZERO));
 		}
 
 		cpDefinitionOptionValueRel.setPriority(priority);
-		cpDefinitionOptionValueRel.setQuantity(BigDecimal.ZERO);
+		cpDefinitionOptionValueRel.setQuantity(quantity);
 
 		_validateLinkedCPDefinitionOptionValueRel(cpDefinitionOptionValueRel);
 		_validatePriceableCPDefinitionOptionValue(
