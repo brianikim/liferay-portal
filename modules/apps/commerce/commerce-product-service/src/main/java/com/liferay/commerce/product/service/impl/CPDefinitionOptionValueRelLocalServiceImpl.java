@@ -1110,7 +1110,8 @@ public class CPDefinitionOptionValueRelLocalServiceImpl
 					cpInstance.getCPDefinitionId()) ||
 			(cpInstance.getCPSubscriptionInfo() != null)) {
 
-			throw new CPDefinitionOptionValueRelCPInstanceException();
+			throw new CPDefinitionOptionValueRelCPInstanceException(
+				"Please select a valid SKU");
 		}
 
 		if (BigDecimalUtil.lte(
