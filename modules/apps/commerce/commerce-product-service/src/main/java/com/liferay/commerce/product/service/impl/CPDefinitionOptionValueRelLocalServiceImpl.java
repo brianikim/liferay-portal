@@ -1062,9 +1062,9 @@ public class CPDefinitionOptionValueRelLocalServiceImpl
 			String priceType)
 		throws PortalException {
 
-		if (cpDefinitionOptionValueRel.isNew()) {
+/*		if (cpDefinitionOptionValueRel.isNew()) {
 			return;
-		}
+		}*/
 
 		if (Validator.isNull(priceType)) {
 			BigDecimal quantity = cpDefinitionOptionValueRel.getQuantity();
