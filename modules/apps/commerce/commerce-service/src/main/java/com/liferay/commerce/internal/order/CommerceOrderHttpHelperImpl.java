@@ -582,9 +582,15 @@ public class CommerceOrderHttpHelperImpl implements CommerceOrderHttpHelper {
 		if (userCommerceOrder == null) {
 			httpSession.removeAttribute(cookieName);
 
-			return _commerceOrderLocalService.updateAccount(
+			commerceOrder = _commerceOrderLocalService.updateAccount(
 				commerceOrder.getCommerceOrderId(), user.getUserId(),
 				accountEntry.getAccountEntryId());
+			commerceOrder = _commerceOrderLocalService.updateShippingAddress(
+				commerceOrder.getCommerceOrderId(), 0);
+			commerceOrder = _commerceOrderLocalService.updateBillingAddress(
+				commerceOrder.getCommerceOrderId(), 0);
+
+			return commerceOrder;
 		}
 
 		ServiceContext serviceContext = ServiceContextFactory.getInstance(
