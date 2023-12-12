@@ -6,6 +6,7 @@
 package com.liferay.commerce.product.content.web.internal.info.collection.provider;
 
 import com.liferay.commerce.product.model.CPDefinition;
+import com.liferay.commerce.product.model.CommerceChannel;
 import com.liferay.commerce.product.service.CPDefinitionService;
 import com.liferay.commerce.product.service.CommerceChannelLocalService;
 import com.liferay.info.collection.provider.CollectionQuery;
@@ -20,14 +21,10 @@ import com.liferay.portal.kernel.search.BaseModelSearchResult;
 import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
-import com.liferay.portal.kernel.theme.PortletDisplay;
-import com.liferay.portal.kernel.theme.ThemeDisplay;
-import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
 import java.util.Collections;
 import java.util.Locale;
-import java.util.Objects;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -114,13 +111,11 @@ public class CPDefinitionInfoCollectionProvider
 		ServiceContext serviceContext =
 			ServiceContextThreadLocal.getServiceContext();
 
-		ThemeDisplay themeDisplay = serviceContext.getThemeDisplay();
+		CommerceChannel commerceChannel =
+			_commerceChannelLocalService.fetchCommerceChannelBySiteGroupId(
+				serviceContext.getScopeGroupId());
 
-		PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
-
-		if (Objects.equals(
-				portletDisplay.getPortletName(), PortletKeys.ITEM_SELECTOR)) {
-
+		if (commerceChannel == null) {
 			return false;
 		}
 
