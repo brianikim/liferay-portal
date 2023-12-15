@@ -78,6 +78,7 @@ public class AttachmentDTOConverter
 					dtoConverterContext.getLocale());
 				displayDate = cpAttachmentFileEntry.getDisplayDate();
 				expirationDate = cpAttachmentFileEntry.getExpirationDate();
+				fileEntryId = cpAttachmentFileEntry.getFileEntryId();
 				galleryEnabled = cpAttachmentFileEntry.isGalleryEnabled();
 				id = cpAttachmentFileEntry.getCPAttachmentFileEntryId();
 				options = _getAttachmentOptions(cpAttachmentFileEntry);
