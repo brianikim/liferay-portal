@@ -91,6 +91,8 @@ public class OpenAPIResourceImpl {
 
 			add(ChannelResourceImpl.class);
 
+			add(DocumentResourceImpl.class);
+
 			add(LinkedProductResourceImpl.class);
 
 			add(MappedProductResourceImpl.class);

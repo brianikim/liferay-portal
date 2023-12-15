@@ -90,6 +90,27 @@ public class Attachment implements Cloneable, Serializable {
 
 	protected Date displayDate;
 
+	public Document getDocument() {
+		return document;
+	}
+
+	public void setDocument(Document document) {
+		this.document = document;
+	}
+
+	public void setDocument(
+		UnsafeSupplier<Document, Exception> documentUnsafeSupplier) {
+
+		try {
+			document = documentUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected Document document;
+
 	public Date getExpirationDate() {
 		return expirationDate;
 	}

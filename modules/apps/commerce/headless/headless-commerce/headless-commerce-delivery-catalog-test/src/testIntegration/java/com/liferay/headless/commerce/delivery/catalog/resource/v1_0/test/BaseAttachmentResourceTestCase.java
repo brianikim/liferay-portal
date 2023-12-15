@@ -592,6 +592,14 @@ public abstract class BaseAttachmentResourceTestCase {
 				continue;
 			}
 
+			if (Objects.equals("document", additionalAssertFieldName)) {
+				if (attachment.getDocument() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
 			if (Objects.equals("expirationDate", additionalAssertFieldName)) {
 				if (attachment.getExpirationDate() == null) {
 					valid = false;
@@ -807,6 +815,16 @@ public abstract class BaseAttachmentResourceTestCase {
 				if (!Objects.deepEquals(
 						attachment1.getDisplayDate(),
 						attachment2.getDisplayDate())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("document", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						attachment1.getDocument(), attachment2.getDocument())) {
 
 					return false;
 				}
@@ -1101,6 +1119,11 @@ public abstract class BaseAttachmentResourceTestCase {
 			}
 
 			return sb.toString();
+		}
+
+		if (entityFieldName.equals("document")) {
+			throw new IllegalArgumentException(
+				"Invalid entity field " + entityFieldName);
 		}
 
 		if (entityFieldName.equals("expirationDate")) {
