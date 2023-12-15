@@ -55,6 +55,9 @@ components:
                     example: 2017-07-21
                     format: date
                     type: string
+                document:
+                    $ref: "#/components/schemas/Document"
+                    readOnly: true
                 expirationDate:
                     example: 2017-08-21
                     format: date
@@ -158,6 +161,28 @@ components:
                 - name
                 - type
             type: object
+        ContentField:
+            properties:
+                contentFieldValue:
+                    $ref: "#/components/schemas/ContentFieldValue"
+                    description:
+                        The field's value.
+                dataType:
+                    description:
+                        The field type (e.g., image, text, etc.).
+                    readOnly: true
+                    type: string
+                label:
+                    description:
+                        The field's label.
+                    readOnly: true
+                    type: string
+        ContentFieldValue:
+            properties:
+                data:
+                    description:
+                        The field's content for simple types.
+                    type: string
         CustomField:
             description:
                 Represents the value of each custom field. Fields can contain different information types (e.g.,
@@ -202,6 +227,70 @@ components:
                     items:
                         type: string
                     type: array
+            type: object
+        Document:
+            properties:
+                description:
+                    description:
+                        The document's description.
+                    type: string
+                documentType:
+                    properties:
+                        availableLanguages:
+                            # @review
+                            description:
+                                The list of languages the document type has a translation for.
+                            items:
+                                type: string
+                            readOnly: true
+                            type: array
+                        contentFields:
+                            # @review
+                            description:
+                                The list of content fields the document type has.
+                            items:
+                                $ref: "#/components/schemas/ContentField"
+                            type: array
+                        description:
+                            # @review
+                            description:
+                                The document type's description.
+                            type: string
+                        name:
+                            # @review
+                            description:
+                                The document type's name.
+                            type: string
+                    type: object
+                encodingFormat:
+                    description:
+                        The document's content type (e.g., `application/pdf`, etc.).
+                    readOnly: true
+                    type: string
+                externalReferenceCode:
+                    # @review
+                    description:
+                        The document's external reference code.
+                    type: string
+                fileExtension:
+                    description:
+                        The document's file extension.
+                    readOnly: true
+                    type: string
+                fileName:
+                    description:
+                        The document's file name.
+                    type: string
+                id:
+                    description:
+                        The document's ID.
+                    format: int64
+                    readOnly: true
+                    type: integer
+                title:
+                    description:
+                        The document's main title/name.
+                    type: string
             type: object
         Error:
             properties:
@@ -3450,5 +3539,66 @@ paths:
                         Unexpected error
             summary: Creates a WishList Item.
             tags: ["WishListItem"]
+    /attachments/{id}/document:
+        get:
+            operationId: getAttachmentIdDocument
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      description:
+                          The resource Id
+                      example: 30130
+                      format: int64
+                      minimum: 0
+                      type: integer
+            responses:
+                200:
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Document"
+                        application/xml:
+                            schema:
+                                $ref: "#/components/schemas/Document"
+                    description:
+                        Successful operation
+                400:
+                    description:
+                        Invalid input
+                401:
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+                        application/xml:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+                    description:
+                        Authentication information is missing or invalid
+                404:
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+                        application/xml:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+                    description:
+                        The specified resource was not found
+                500:
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+                        application/xml:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+                    description:
+                        Unexpected error
+            summary: Gets a Document related to an Attachment.
+            tags:
+                - Document
 servers:
     - url: /
