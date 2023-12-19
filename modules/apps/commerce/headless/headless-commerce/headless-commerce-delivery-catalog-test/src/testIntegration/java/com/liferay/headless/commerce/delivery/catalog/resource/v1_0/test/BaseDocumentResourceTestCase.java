@@ -1,5 +1,5 @@
 /**
- * SPDX-FileCopyrightText: (c) 2000 Liferay, Inc. https://liferay.com
+ * SPDX-FileCopyrightText: (c) 2023 Liferay, Inc. https://liferay.com
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
@@ -13,12 +13,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 
-import com.liferay.headless.commerce.delivery.catalog.client.dto.v1_0.Attachment;
+import com.liferay.headless.commerce.delivery.catalog.client.dto.v1_0.Document;
 import com.liferay.headless.commerce.delivery.catalog.client.http.HttpInvoker;
 import com.liferay.headless.commerce.delivery.catalog.client.pagination.Page;
-import com.liferay.headless.commerce.delivery.catalog.client.pagination.Pagination;
-import com.liferay.headless.commerce.delivery.catalog.client.resource.v1_0.AttachmentResource;
-import com.liferay.headless.commerce.delivery.catalog.client.serdes.v1_0.AttachmentSerDes;
+import com.liferay.headless.commerce.delivery.catalog.client.resource.v1_0.DocumentResource;
+import com.liferay.headless.commerce.delivery.catalog.client.serdes.v1_0.DocumentSerDes;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.reflect.ReflectionUtil;
 import com.liferay.petra.string.StringBundler;
@@ -31,7 +30,6 @@ import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.DateFormatFactoryUtil;
-import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.odata.entity.EntityField;
@@ -59,8 +57,6 @@ import javax.annotation.Generated;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 
-import org.apache.commons.lang.time.DateUtils;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -74,7 +70,7 @@ import org.junit.Test;
  * @generated
  */
 @Generated("")
-public abstract class BaseAttachmentResourceTestCase {
+public abstract class BaseDocumentResourceTestCase {
 
 	@ClassRule
 	@Rule
@@ -95,11 +91,11 @@ public abstract class BaseAttachmentResourceTestCase {
 		testCompany = CompanyLocalServiceUtil.getCompany(
 			testGroup.getCompanyId());
 
-		_attachmentResource.setContextCompany(testCompany);
+		_documentResource.setContextCompany(testCompany);
 
-		AttachmentResource.Builder builder = AttachmentResource.builder();
+		DocumentResource.Builder builder = DocumentResource.builder();
 
-		attachmentResource = builder.authentication(
+		documentResource = builder.authentication(
 			"test@liferay.com", "test"
 		).locale(
 			LocaleUtil.getDefault()
@@ -130,13 +126,13 @@ public abstract class BaseAttachmentResourceTestCase {
 			}
 		};
 
-		Attachment attachment1 = randomAttachment();
+		Document document1 = randomDocument();
 
-		String json = objectMapper.writeValueAsString(attachment1);
+		String json = objectMapper.writeValueAsString(document1);
 
-		Attachment attachment2 = AttachmentSerDes.toDTO(json);
+		Document document2 = DocumentSerDes.toDTO(json);
 
-		Assert.assertTrue(equals(attachment1, attachment2));
+		Assert.assertTrue(equals(document1, document2));
 	}
 
 	@Test
@@ -156,10 +152,10 @@ public abstract class BaseAttachmentResourceTestCase {
 			}
 		};
 
-		Attachment attachment = randomAttachment();
+		Document document = randomDocument();
 
-		String json1 = objectMapper.writeValueAsString(attachment);
-		String json2 = AttachmentSerDes.toJSON(attachment);
+		String json1 = objectMapper.writeValueAsString(document);
+		String json2 = DocumentSerDes.toJSON(document);
 
 		Assert.assertEquals(
 			objectMapper.readTree(json1), objectMapper.readTree(json2));
@@ -169,335 +165,119 @@ public abstract class BaseAttachmentResourceTestCase {
 	public void testEscapeRegexInStringFields() throws Exception {
 		String regex = "^[0-9]+(\\.[0-9]{1,2})\"?";
 
-		Attachment attachment = randomAttachment();
+		Document document = randomDocument();
 
-		attachment.setAttachment(regex);
-		attachment.setSrc(regex);
-		attachment.setTitle(regex);
+		document.setDescription(regex);
+		document.setEncodingFormat(regex);
+		document.setExternalReferenceCode(regex);
+		document.setFileExtension(regex);
+		document.setFileName(regex);
+		document.setTitle(regex);
 
-		String json = AttachmentSerDes.toJSON(attachment);
+		String json = DocumentSerDes.toJSON(document);
 
 		Assert.assertFalse(json.contains(regex));
 
-		attachment = AttachmentSerDes.toDTO(json);
+		document = DocumentSerDes.toDTO(json);
 
-		Assert.assertEquals(regex, attachment.getAttachment());
-		Assert.assertEquals(regex, attachment.getSrc());
-		Assert.assertEquals(regex, attachment.getTitle());
+		Assert.assertEquals(regex, document.getDescription());
+		Assert.assertEquals(regex, document.getEncodingFormat());
+		Assert.assertEquals(regex, document.getExternalReferenceCode());
+		Assert.assertEquals(regex, document.getFileExtension());
+		Assert.assertEquals(regex, document.getFileName());
+		Assert.assertEquals(regex, document.getTitle());
 	}
 
 	@Test
-	public void testGetChannelProductAttachmentsPage() throws Exception {
-		Long channelId = testGetChannelProductAttachmentsPage_getChannelId();
-		Long irrelevantChannelId =
-			testGetChannelProductAttachmentsPage_getIrrelevantChannelId();
-		Long productId = testGetChannelProductAttachmentsPage_getProductId();
-		Long irrelevantProductId =
-			testGetChannelProductAttachmentsPage_getIrrelevantProductId();
+	public void testGetAttachmentIdDocument() throws Exception {
+		Document postDocument = testGetAttachmentIdDocument_addDocument();
 
-		Page<Attachment> page =
-			attachmentResource.getChannelProductAttachmentsPage(
-				channelId, productId, null, Pagination.of(1, 10));
+		Document getDocument = documentResource.getAttachmentIdDocument(
+			testGetAttachmentIdDocument_getId(postDocument));
 
-		long totalCount = page.getTotalCount();
-
-		if ((irrelevantChannelId != null) && (irrelevantProductId != null)) {
-			Attachment irrelevantAttachment =
-				testGetChannelProductAttachmentsPage_addAttachment(
-					irrelevantChannelId, irrelevantProductId,
-					randomIrrelevantAttachment());
-
-			page = attachmentResource.getChannelProductAttachmentsPage(
-				irrelevantChannelId, irrelevantProductId, null,
-				Pagination.of(1, (int)totalCount + 1));
-
-			Assert.assertEquals(totalCount + 1, page.getTotalCount());
-
-			assertContains(
-				irrelevantAttachment, (List<Attachment>)page.getItems());
-			assertValid(
-				page,
-				testGetChannelProductAttachmentsPage_getExpectedActions(
-					irrelevantChannelId, irrelevantProductId));
-		}
-
-		Attachment attachment1 =
-			testGetChannelProductAttachmentsPage_addAttachment(
-				channelId, productId, randomAttachment());
-
-		Attachment attachment2 =
-			testGetChannelProductAttachmentsPage_addAttachment(
-				channelId, productId, randomAttachment());
-
-		page = attachmentResource.getChannelProductAttachmentsPage(
-			channelId, productId, null, Pagination.of(1, 10));
-
-		Assert.assertEquals(totalCount + 2, page.getTotalCount());
-
-		assertContains(attachment1, (List<Attachment>)page.getItems());
-		assertContains(attachment2, (List<Attachment>)page.getItems());
-		assertValid(
-			page,
-			testGetChannelProductAttachmentsPage_getExpectedActions(
-				channelId, productId));
+		assertEquals(postDocument, getDocument);
+		assertValid(getDocument);
 	}
 
-	protected Map<String, Map<String, String>>
-			testGetChannelProductAttachmentsPage_getExpectedActions(
-				Long channelId, Long productId)
+	protected Long testGetAttachmentIdDocument_getId(Document document)
 		throws Exception {
 
-		Map<String, Map<String, String>> expectedActions = new HashMap<>();
+		return document.getId();
+	}
 
-		return expectedActions;
+	protected Document testGetAttachmentIdDocument_addDocument()
+		throws Exception {
+
+		throw new UnsupportedOperationException(
+			"This method needs to be implemented");
 	}
 
 	@Test
-	public void testGetChannelProductAttachmentsPageWithPagination()
+	public void testGraphQLGetAttachmentIdDocument() throws Exception {
+		Document document = testGraphQLGetAttachmentIdDocument_addDocument();
+
+		Assert.assertTrue(
+			equals(
+				document,
+				DocumentSerDes.toDTO(
+					JSONUtil.getValueAsString(
+						invokeGraphQLQuery(
+							new GraphQLField(
+								"attachmentIdDocument",
+								new HashMap<String, Object>() {
+									{
+										put(
+											"id",
+											testGraphQLGetAttachmentIdDocument_getId(
+												document));
+									}
+								},
+								getGraphQLFields())),
+						"JSONObject/data", "Object/attachmentIdDocument"))));
+	}
+
+	protected Long testGraphQLGetAttachmentIdDocument_getId(Document document)
 		throws Exception {
 
-		Long channelId = testGetChannelProductAttachmentsPage_getChannelId();
-		Long productId = testGetChannelProductAttachmentsPage_getProductId();
+		return document.getId();
+	}
 
-		Page<Attachment> attachmentPage =
-			attachmentResource.getChannelProductAttachmentsPage(
-				channelId, productId, null, null);
-
-		int totalCount = GetterUtil.getInteger(attachmentPage.getTotalCount());
-
-		Attachment attachment1 =
-			testGetChannelProductAttachmentsPage_addAttachment(
-				channelId, productId, randomAttachment());
-
-		Attachment attachment2 =
-			testGetChannelProductAttachmentsPage_addAttachment(
-				channelId, productId, randomAttachment());
-
-		Attachment attachment3 =
-			testGetChannelProductAttachmentsPage_addAttachment(
-				channelId, productId, randomAttachment());
-
-		Page<Attachment> page1 =
-			attachmentResource.getChannelProductAttachmentsPage(
-				channelId, productId, null, Pagination.of(1, totalCount + 2));
-
-		List<Attachment> attachments1 = (List<Attachment>)page1.getItems();
+	@Test
+	public void testGraphQLGetAttachmentIdDocumentNotFound() throws Exception {
+		Long irrelevantId = RandomTestUtil.randomLong();
 
 		Assert.assertEquals(
-			attachments1.toString(), totalCount + 2, attachments1.size());
-
-		Page<Attachment> page2 =
-			attachmentResource.getChannelProductAttachmentsPage(
-				channelId, productId, null, Pagination.of(2, totalCount + 2));
-
-		Assert.assertEquals(totalCount + 3, page2.getTotalCount());
-
-		List<Attachment> attachments2 = (List<Attachment>)page2.getItems();
-
-		Assert.assertEquals(attachments2.toString(), 1, attachments2.size());
-
-		Page<Attachment> page3 =
-			attachmentResource.getChannelProductAttachmentsPage(
-				channelId, productId, null,
-				Pagination.of(1, (int)totalCount + 3));
-
-		assertContains(attachment1, (List<Attachment>)page3.getItems());
-		assertContains(attachment2, (List<Attachment>)page3.getItems());
-		assertContains(attachment3, (List<Attachment>)page3.getItems());
+			"Not Found",
+			JSONUtil.getValueAsString(
+				invokeGraphQLQuery(
+					new GraphQLField(
+						"attachmentIdDocument",
+						new HashMap<String, Object>() {
+							{
+								put("id", irrelevantId);
+							}
+						},
+						getGraphQLFields())),
+				"JSONArray/errors", "Object/0", "JSONObject/extensions",
+				"Object/code"));
 	}
 
-	protected Attachment testGetChannelProductAttachmentsPage_addAttachment(
-			Long channelId, Long productId, Attachment attachment)
+	protected Document testGraphQLGetAttachmentIdDocument_addDocument()
 		throws Exception {
 
+		return testGraphQLDocument_addDocument();
+	}
+
+	protected Document testGraphQLDocument_addDocument() throws Exception {
 		throw new UnsupportedOperationException(
 			"This method needs to be implemented");
 	}
 
-	protected Long testGetChannelProductAttachmentsPage_getChannelId()
-		throws Exception {
-
-		throw new UnsupportedOperationException(
-			"This method needs to be implemented");
-	}
-
-	protected Long testGetChannelProductAttachmentsPage_getIrrelevantChannelId()
-		throws Exception {
-
-		return null;
-	}
-
-	protected Long testGetChannelProductAttachmentsPage_getProductId()
-		throws Exception {
-
-		throw new UnsupportedOperationException(
-			"This method needs to be implemented");
-	}
-
-	protected Long testGetChannelProductAttachmentsPage_getIrrelevantProductId()
-		throws Exception {
-
-		return null;
-	}
-
-	@Test
-	public void testGetChannelProductImagesPage() throws Exception {
-		Long channelId = testGetChannelProductImagesPage_getChannelId();
-		Long irrelevantChannelId =
-			testGetChannelProductImagesPage_getIrrelevantChannelId();
-		Long productId = testGetChannelProductImagesPage_getProductId();
-		Long irrelevantProductId =
-			testGetChannelProductImagesPage_getIrrelevantProductId();
-
-		Page<Attachment> page = attachmentResource.getChannelProductImagesPage(
-			channelId, productId, null, Pagination.of(1, 10));
-
-		long totalCount = page.getTotalCount();
-
-		if ((irrelevantChannelId != null) && (irrelevantProductId != null)) {
-			Attachment irrelevantAttachment =
-				testGetChannelProductImagesPage_addAttachment(
-					irrelevantChannelId, irrelevantProductId,
-					randomIrrelevantAttachment());
-
-			page = attachmentResource.getChannelProductImagesPage(
-				irrelevantChannelId, irrelevantProductId, null,
-				Pagination.of(1, (int)totalCount + 1));
-
-			Assert.assertEquals(totalCount + 1, page.getTotalCount());
-
-			assertContains(
-				irrelevantAttachment, (List<Attachment>)page.getItems());
-			assertValid(
-				page,
-				testGetChannelProductImagesPage_getExpectedActions(
-					irrelevantChannelId, irrelevantProductId));
-		}
-
-		Attachment attachment1 = testGetChannelProductImagesPage_addAttachment(
-			channelId, productId, randomAttachment());
-
-		Attachment attachment2 = testGetChannelProductImagesPage_addAttachment(
-			channelId, productId, randomAttachment());
-
-		page = attachmentResource.getChannelProductImagesPage(
-			channelId, productId, null, Pagination.of(1, 10));
-
-		Assert.assertEquals(totalCount + 2, page.getTotalCount());
-
-		assertContains(attachment1, (List<Attachment>)page.getItems());
-		assertContains(attachment2, (List<Attachment>)page.getItems());
-		assertValid(
-			page,
-			testGetChannelProductImagesPage_getExpectedActions(
-				channelId, productId));
-	}
-
-	protected Map<String, Map<String, String>>
-			testGetChannelProductImagesPage_getExpectedActions(
-				Long channelId, Long productId)
-		throws Exception {
-
-		Map<String, Map<String, String>> expectedActions = new HashMap<>();
-
-		return expectedActions;
-	}
-
-	@Test
-	public void testGetChannelProductImagesPageWithPagination()
-		throws Exception {
-
-		Long channelId = testGetChannelProductImagesPage_getChannelId();
-		Long productId = testGetChannelProductImagesPage_getProductId();
-
-		Page<Attachment> attachmentPage =
-			attachmentResource.getChannelProductImagesPage(
-				channelId, productId, null, null);
-
-		int totalCount = GetterUtil.getInteger(attachmentPage.getTotalCount());
-
-		Attachment attachment1 = testGetChannelProductImagesPage_addAttachment(
-			channelId, productId, randomAttachment());
-
-		Attachment attachment2 = testGetChannelProductImagesPage_addAttachment(
-			channelId, productId, randomAttachment());
-
-		Attachment attachment3 = testGetChannelProductImagesPage_addAttachment(
-			channelId, productId, randomAttachment());
-
-		Page<Attachment> page1 = attachmentResource.getChannelProductImagesPage(
-			channelId, productId, null, Pagination.of(1, totalCount + 2));
-
-		List<Attachment> attachments1 = (List<Attachment>)page1.getItems();
-
-		Assert.assertEquals(
-			attachments1.toString(), totalCount + 2, attachments1.size());
-
-		Page<Attachment> page2 = attachmentResource.getChannelProductImagesPage(
-			channelId, productId, null, Pagination.of(2, totalCount + 2));
-
-		Assert.assertEquals(totalCount + 3, page2.getTotalCount());
-
-		List<Attachment> attachments2 = (List<Attachment>)page2.getItems();
-
-		Assert.assertEquals(attachments2.toString(), 1, attachments2.size());
-
-		Page<Attachment> page3 = attachmentResource.getChannelProductImagesPage(
-			channelId, productId, null, Pagination.of(1, (int)totalCount + 3));
-
-		assertContains(attachment1, (List<Attachment>)page3.getItems());
-		assertContains(attachment2, (List<Attachment>)page3.getItems());
-		assertContains(attachment3, (List<Attachment>)page3.getItems());
-	}
-
-	protected Attachment testGetChannelProductImagesPage_addAttachment(
-			Long channelId, Long productId, Attachment attachment)
-		throws Exception {
-
-		throw new UnsupportedOperationException(
-			"This method needs to be implemented");
-	}
-
-	protected Long testGetChannelProductImagesPage_getChannelId()
-		throws Exception {
-
-		throw new UnsupportedOperationException(
-			"This method needs to be implemented");
-	}
-
-	protected Long testGetChannelProductImagesPage_getIrrelevantChannelId()
-		throws Exception {
-
-		return null;
-	}
-
-	protected Long testGetChannelProductImagesPage_getProductId()
-		throws Exception {
-
-		throw new UnsupportedOperationException(
-			"This method needs to be implemented");
-	}
-
-	protected Long testGetChannelProductImagesPage_getIrrelevantProductId()
-		throws Exception {
-
-		return null;
-	}
-
-	protected Attachment testGraphQLAttachment_addAttachment()
-		throws Exception {
-
-		throw new UnsupportedOperationException(
-			"This method needs to be implemented");
-	}
-
-	protected void assertContains(
-		Attachment attachment, List<Attachment> attachments) {
-
+	protected void assertContains(Document document, List<Document> documents) {
 		boolean contains = false;
 
-		for (Attachment item : attachments) {
-			if (equals(attachment, item)) {
+		for (Document item : documents) {
+			if (equals(document, item)) {
 				contains = true;
 
 				break;
@@ -505,7 +285,7 @@ public abstract class BaseAttachmentResourceTestCase {
 		}
 
 		Assert.assertTrue(
-			attachments + " does not contain " + attachment, contains);
+			documents + " does not contain " + document, contains);
 	}
 
 	protected void assertHttpResponseStatusCode(
@@ -516,37 +296,35 @@ public abstract class BaseAttachmentResourceTestCase {
 			expectedHttpResponseStatusCode, actualHttpResponse.getStatusCode());
 	}
 
-	protected void assertEquals(
-		Attachment attachment1, Attachment attachment2) {
-
+	protected void assertEquals(Document document1, Document document2) {
 		Assert.assertTrue(
-			attachment1 + " does not equal " + attachment2,
-			equals(attachment1, attachment2));
+			document1 + " does not equal " + document2,
+			equals(document1, document2));
 	}
 
 	protected void assertEquals(
-		List<Attachment> attachments1, List<Attachment> attachments2) {
+		List<Document> documents1, List<Document> documents2) {
 
-		Assert.assertEquals(attachments1.size(), attachments2.size());
+		Assert.assertEquals(documents1.size(), documents2.size());
 
-		for (int i = 0; i < attachments1.size(); i++) {
-			Attachment attachment1 = attachments1.get(i);
-			Attachment attachment2 = attachments2.get(i);
+		for (int i = 0; i < documents1.size(); i++) {
+			Document document1 = documents1.get(i);
+			Document document2 = documents2.get(i);
 
-			assertEquals(attachment1, attachment2);
+			assertEquals(document1, document2);
 		}
 	}
 
 	protected void assertEqualsIgnoringOrder(
-		List<Attachment> attachments1, List<Attachment> attachments2) {
+		List<Document> documents1, List<Document> documents2) {
 
-		Assert.assertEquals(attachments1.size(), attachments2.size());
+		Assert.assertEquals(documents1.size(), documents2.size());
 
-		for (Attachment attachment1 : attachments1) {
+		for (Document document1 : documents1) {
 			boolean contains = false;
 
-			for (Attachment attachment2 : attachments2) {
-				if (equals(attachment1, attachment2)) {
+			for (Document document2 : documents2) {
+				if (equals(document1, document2)) {
 					contains = true;
 
 					break;
@@ -554,102 +332,64 @@ public abstract class BaseAttachmentResourceTestCase {
 			}
 
 			Assert.assertTrue(
-				attachments2 + " does not contain " + attachment1, contains);
+				documents2 + " does not contain " + document1, contains);
 		}
 	}
 
-	protected void assertValid(Attachment attachment) throws Exception {
+	protected void assertValid(Document document) throws Exception {
 		boolean valid = true;
 
-		if (attachment.getId() == null) {
+		if (document.getId() == null) {
 			valid = false;
 		}
 
 		for (String additionalAssertFieldName :
 				getAdditionalAssertFieldNames()) {
 
-			if (Objects.equals("attachment", additionalAssertFieldName)) {
-				if (attachment.getAttachment() == null) {
+			if (Objects.equals("description", additionalAssertFieldName)) {
+				if (document.getDescription() == null) {
 					valid = false;
 				}
 
 				continue;
 			}
 
-			if (Objects.equals("customFields", additionalAssertFieldName)) {
-				if (attachment.getCustomFields() == null) {
+			if (Objects.equals("documentType", additionalAssertFieldName)) {
+				if (document.getDocumentType() == null) {
 					valid = false;
 				}
 
 				continue;
 			}
 
-			if (Objects.equals("displayDate", additionalAssertFieldName)) {
-				if (attachment.getDisplayDate() == null) {
+			if (Objects.equals("encodingFormat", additionalAssertFieldName)) {
+				if (document.getEncodingFormat() == null) {
 					valid = false;
 				}
 
 				continue;
 			}
 
-			if (Objects.equals("document", additionalAssertFieldName)) {
-				if (attachment.getDocument() == null) {
+			if (Objects.equals(
+					"externalReferenceCode", additionalAssertFieldName)) {
+
+				if (document.getExternalReferenceCode() == null) {
 					valid = false;
 				}
 
 				continue;
 			}
 
-			if (Objects.equals("expirationDate", additionalAssertFieldName)) {
-				if (attachment.getExpirationDate() == null) {
+			if (Objects.equals("fileExtension", additionalAssertFieldName)) {
+				if (document.getFileExtension() == null) {
 					valid = false;
 				}
 
 				continue;
 			}
 
-			if (Objects.equals("galleryEnabled", additionalAssertFieldName)) {
-				if (attachment.getGalleryEnabled() == null) {
-					valid = false;
-				}
-
-				continue;
-			}
-
-			if (Objects.equals("neverExpire", additionalAssertFieldName)) {
-				if (attachment.getNeverExpire() == null) {
-					valid = false;
-				}
-
-				continue;
-			}
-
-			if (Objects.equals("options", additionalAssertFieldName)) {
-				if (attachment.getOptions() == null) {
-					valid = false;
-				}
-
-				continue;
-			}
-
-			if (Objects.equals("priority", additionalAssertFieldName)) {
-				if (attachment.getPriority() == null) {
-					valid = false;
-				}
-
-				continue;
-			}
-
-			if (Objects.equals("src", additionalAssertFieldName)) {
-				if (attachment.getSrc() == null) {
-					valid = false;
-				}
-
-				continue;
-			}
-
-			if (Objects.equals("tags", additionalAssertFieldName)) {
-				if (attachment.getTags() == null) {
+			if (Objects.equals("fileName", additionalAssertFieldName)) {
+				if (document.getFileName() == null) {
 					valid = false;
 				}
 
@@ -657,15 +397,7 @@ public abstract class BaseAttachmentResourceTestCase {
 			}
 
 			if (Objects.equals("title", additionalAssertFieldName)) {
-				if (attachment.getTitle() == null) {
-					valid = false;
-				}
-
-				continue;
-			}
-
-			if (Objects.equals("type", additionalAssertFieldName)) {
-				if (attachment.getType() == null) {
+				if (document.getTitle() == null) {
 					valid = false;
 				}
 
@@ -680,19 +412,18 @@ public abstract class BaseAttachmentResourceTestCase {
 		Assert.assertTrue(valid);
 	}
 
-	protected void assertValid(Page<Attachment> page) {
+	protected void assertValid(Page<Document> page) {
 		assertValid(page, Collections.emptyMap());
 	}
 
 	protected void assertValid(
-		Page<Attachment> page,
-		Map<String, Map<String, String>> expectedActions) {
+		Page<Document> page, Map<String, Map<String, String>> expectedActions) {
 
 		boolean valid = false;
 
-		java.util.Collection<Attachment> attachments = page.getItems();
+		java.util.Collection<Document> documents = page.getItems();
 
-		int size = attachments.size();
+		int size = documents.size();
 
 		if ((page.getLastPage() > 0) && (page.getPage() > 0) &&
 			(page.getPageSize() > 0) && (page.getTotalCount() > 0) &&
@@ -733,7 +464,7 @@ public abstract class BaseAttachmentResourceTestCase {
 		for (java.lang.reflect.Field field :
 				getDeclaredFields(
 					com.liferay.headless.commerce.delivery.catalog.dto.v1_0.
-						Attachment.class)) {
+						Document.class)) {
 
 			if (!ArrayUtil.contains(
 					getAdditionalAssertFieldNames(), field.getName())) {
@@ -781,18 +512,18 @@ public abstract class BaseAttachmentResourceTestCase {
 		return new String[0];
 	}
 
-	protected boolean equals(Attachment attachment1, Attachment attachment2) {
-		if (attachment1 == attachment2) {
+	protected boolean equals(Document document1, Document document2) {
+		if (document1 == document2) {
 			return true;
 		}
 
 		for (String additionalAssertFieldName :
 				getAdditionalAssertFieldNames()) {
 
-			if (Objects.equals("attachment", additionalAssertFieldName)) {
+			if (Objects.equals("description", additionalAssertFieldName)) {
 				if (!Objects.deepEquals(
-						attachment1.getAttachment(),
-						attachment2.getAttachment())) {
+						document1.getDescription(),
+						document2.getDescription())) {
 
 					return false;
 				}
@@ -800,10 +531,10 @@ public abstract class BaseAttachmentResourceTestCase {
 				continue;
 			}
 
-			if (Objects.equals("customFields", additionalAssertFieldName)) {
+			if (Objects.equals("documentType", additionalAssertFieldName)) {
 				if (!Objects.deepEquals(
-						attachment1.getCustomFields(),
-						attachment2.getCustomFields())) {
+						document1.getDocumentType(),
+						document2.getDocumentType())) {
 
 					return false;
 				}
@@ -811,10 +542,10 @@ public abstract class BaseAttachmentResourceTestCase {
 				continue;
 			}
 
-			if (Objects.equals("displayDate", additionalAssertFieldName)) {
+			if (Objects.equals("encodingFormat", additionalAssertFieldName)) {
 				if (!Objects.deepEquals(
-						attachment1.getDisplayDate(),
-						attachment2.getDisplayDate())) {
+						document1.getEncodingFormat(),
+						document2.getEncodingFormat())) {
 
 					return false;
 				}
@@ -822,9 +553,12 @@ public abstract class BaseAttachmentResourceTestCase {
 				continue;
 			}
 
-			if (Objects.equals("document", additionalAssertFieldName)) {
+			if (Objects.equals(
+					"externalReferenceCode", additionalAssertFieldName)) {
+
 				if (!Objects.deepEquals(
-						attachment1.getDocument(), attachment2.getDocument())) {
+						document1.getExternalReferenceCode(),
+						document2.getExternalReferenceCode())) {
 
 					return false;
 				}
@@ -832,10 +566,10 @@ public abstract class BaseAttachmentResourceTestCase {
 				continue;
 			}
 
-			if (Objects.equals("expirationDate", additionalAssertFieldName)) {
+			if (Objects.equals("fileExtension", additionalAssertFieldName)) {
 				if (!Objects.deepEquals(
-						attachment1.getExpirationDate(),
-						attachment2.getExpirationDate())) {
+						document1.getFileExtension(),
+						document2.getFileExtension())) {
 
 					return false;
 				}
@@ -843,10 +577,9 @@ public abstract class BaseAttachmentResourceTestCase {
 				continue;
 			}
 
-			if (Objects.equals("galleryEnabled", additionalAssertFieldName)) {
+			if (Objects.equals("fileName", additionalAssertFieldName)) {
 				if (!Objects.deepEquals(
-						attachment1.getGalleryEnabled(),
-						attachment2.getGalleryEnabled())) {
+						document1.getFileName(), document2.getFileName())) {
 
 					return false;
 				}
@@ -855,61 +588,7 @@ public abstract class BaseAttachmentResourceTestCase {
 			}
 
 			if (Objects.equals("id", additionalAssertFieldName)) {
-				if (!Objects.deepEquals(
-						attachment1.getId(), attachment2.getId())) {
-
-					return false;
-				}
-
-				continue;
-			}
-
-			if (Objects.equals("neverExpire", additionalAssertFieldName)) {
-				if (!Objects.deepEquals(
-						attachment1.getNeverExpire(),
-						attachment2.getNeverExpire())) {
-
-					return false;
-				}
-
-				continue;
-			}
-
-			if (Objects.equals("options", additionalAssertFieldName)) {
-				if (!equals(
-						(Map)attachment1.getOptions(),
-						(Map)attachment2.getOptions())) {
-
-					return false;
-				}
-
-				continue;
-			}
-
-			if (Objects.equals("priority", additionalAssertFieldName)) {
-				if (!Objects.deepEquals(
-						attachment1.getPriority(), attachment2.getPriority())) {
-
-					return false;
-				}
-
-				continue;
-			}
-
-			if (Objects.equals("src", additionalAssertFieldName)) {
-				if (!Objects.deepEquals(
-						attachment1.getSrc(), attachment2.getSrc())) {
-
-					return false;
-				}
-
-				continue;
-			}
-
-			if (Objects.equals("tags", additionalAssertFieldName)) {
-				if (!Objects.deepEquals(
-						attachment1.getTags(), attachment2.getTags())) {
-
+				if (!Objects.deepEquals(document1.getId(), document2.getId())) {
 					return false;
 				}
 
@@ -918,17 +597,7 @@ public abstract class BaseAttachmentResourceTestCase {
 
 			if (Objects.equals("title", additionalAssertFieldName)) {
 				if (!Objects.deepEquals(
-						attachment1.getTitle(), attachment2.getTitle())) {
-
-					return false;
-				}
-
-				continue;
-			}
-
-			if (Objects.equals("type", additionalAssertFieldName)) {
-				if (!Objects.deepEquals(
-						attachment1.getType(), attachment2.getType())) {
+						document1.getTitle(), document2.getTitle())) {
 
 					return false;
 				}
@@ -988,13 +657,13 @@ public abstract class BaseAttachmentResourceTestCase {
 	protected java.util.Collection<EntityField> getEntityFields()
 		throws Exception {
 
-		if (!(_attachmentResource instanceof EntityModelResource)) {
+		if (!(_documentResource instanceof EntityModelResource)) {
 			throw new UnsupportedOperationException(
 				"Resource is not an instance of EntityModelResource");
 		}
 
 		EntityModelResource entityModelResource =
-			(EntityModelResource)_attachmentResource;
+			(EntityModelResource)_documentResource;
 
 		EntityModel entityModel = entityModelResource.getEntityModel(
 			new MultivaluedHashMap());
@@ -1027,7 +696,7 @@ public abstract class BaseAttachmentResourceTestCase {
 	}
 
 	protected String getFilterString(
-		EntityField entityField, String operator, Attachment attachment) {
+		EntityField entityField, String operator, Document document) {
 
 		StringBundler sb = new StringBundler();
 
@@ -1039,8 +708,8 @@ public abstract class BaseAttachmentResourceTestCase {
 		sb.append(operator);
 		sb.append(" ");
 
-		if (entityFieldName.equals("attachment")) {
-			Object object = attachment.getAttachment();
+		if (entityFieldName.equals("description")) {
+			Object object = document.getDescription();
 
 			String value = String.valueOf(object);
 
@@ -1085,83 +754,193 @@ public abstract class BaseAttachmentResourceTestCase {
 			return sb.toString();
 		}
 
-		if (entityFieldName.equals("customFields")) {
+		if (entityFieldName.equals("documentType")) {
 			throw new IllegalArgumentException(
 				"Invalid entity field " + entityFieldName);
 		}
 
-		if (entityFieldName.equals("displayDate")) {
-			if (operator.equals("between")) {
+		if (entityFieldName.equals("encodingFormat")) {
+			Object object = document.getEncodingFormat();
+
+			String value = String.valueOf(object);
+
+			if (operator.equals("contains")) {
 				sb = new StringBundler();
 
-				sb.append("(");
+				sb.append("contains(");
 				sb.append(entityFieldName);
-				sb.append(" gt ");
-				sb.append(
-					_dateFormat.format(
-						DateUtils.addSeconds(attachment.getDisplayDate(), -2)));
-				sb.append(" and ");
+				sb.append(",'");
+
+				if ((object != null) && (value.length() > 2)) {
+					sb.append(value.substring(1, value.length() - 1));
+				}
+				else {
+					sb.append(value);
+				}
+
+				sb.append("')");
+			}
+			else if (operator.equals("startswith")) {
+				sb = new StringBundler();
+
+				sb.append("startswith(");
 				sb.append(entityFieldName);
-				sb.append(" lt ");
-				sb.append(
-					_dateFormat.format(
-						DateUtils.addSeconds(attachment.getDisplayDate(), 2)));
-				sb.append(")");
+				sb.append(",'");
+
+				if ((object != null) && (value.length() > 1)) {
+					sb.append(value.substring(0, value.length() - 1));
+				}
+				else {
+					sb.append(value);
+				}
+
+				sb.append("')");
 			}
 			else {
-				sb.append(entityFieldName);
-
-				sb.append(" ");
-				sb.append(operator);
-				sb.append(" ");
-
-				sb.append(_dateFormat.format(attachment.getDisplayDate()));
+				sb.append("'");
+				sb.append(value);
+				sb.append("'");
 			}
 
 			return sb.toString();
 		}
 
-		if (entityFieldName.equals("document")) {
-			throw new IllegalArgumentException(
-				"Invalid entity field " + entityFieldName);
-		}
+		if (entityFieldName.equals("externalReferenceCode")) {
+			Object object = document.getExternalReferenceCode();
 
-		if (entityFieldName.equals("expirationDate")) {
-			if (operator.equals("between")) {
+			String value = String.valueOf(object);
+
+			if (operator.equals("contains")) {
 				sb = new StringBundler();
 
-				sb.append("(");
+				sb.append("contains(");
 				sb.append(entityFieldName);
-				sb.append(" gt ");
-				sb.append(
-					_dateFormat.format(
-						DateUtils.addSeconds(
-							attachment.getExpirationDate(), -2)));
-				sb.append(" and ");
+				sb.append(",'");
+
+				if ((object != null) && (value.length() > 2)) {
+					sb.append(value.substring(1, value.length() - 1));
+				}
+				else {
+					sb.append(value);
+				}
+
+				sb.append("')");
+			}
+			else if (operator.equals("startswith")) {
+				sb = new StringBundler();
+
+				sb.append("startswith(");
 				sb.append(entityFieldName);
-				sb.append(" lt ");
-				sb.append(
-					_dateFormat.format(
-						DateUtils.addSeconds(
-							attachment.getExpirationDate(), 2)));
-				sb.append(")");
+				sb.append(",'");
+
+				if ((object != null) && (value.length() > 1)) {
+					sb.append(value.substring(0, value.length() - 1));
+				}
+				else {
+					sb.append(value);
+				}
+
+				sb.append("')");
 			}
 			else {
-				sb.append(entityFieldName);
-
-				sb.append(" ");
-				sb.append(operator);
-				sb.append(" ");
-
-				sb.append(_dateFormat.format(attachment.getExpirationDate()));
+				sb.append("'");
+				sb.append(value);
+				sb.append("'");
 			}
 
 			return sb.toString();
 		}
 
-		if (entityFieldName.equals("galleryEnabled")) {
-			throw new IllegalArgumentException(
-				"Invalid entity field " + entityFieldName);
+		if (entityFieldName.equals("fileExtension")) {
+			Object object = document.getFileExtension();
+
+			String value = String.valueOf(object);
+
+			if (operator.equals("contains")) {
+				sb = new StringBundler();
+
+				sb.append("contains(");
+				sb.append(entityFieldName);
+				sb.append(",'");
+
+				if ((object != null) && (value.length() > 2)) {
+					sb.append(value.substring(1, value.length() - 1));
+				}
+				else {
+					sb.append(value);
+				}
+
+				sb.append("')");
+			}
+			else if (operator.equals("startswith")) {
+				sb = new StringBundler();
+
+				sb.append("startswith(");
+				sb.append(entityFieldName);
+				sb.append(",'");
+
+				if ((object != null) && (value.length() > 1)) {
+					sb.append(value.substring(0, value.length() - 1));
+				}
+				else {
+					sb.append(value);
+				}
+
+				sb.append("')");
+			}
+			else {
+				sb.append("'");
+				sb.append(value);
+				sb.append("'");
+			}
+
+			return sb.toString();
+		}
+
+		if (entityFieldName.equals("fileName")) {
+			Object object = document.getFileName();
+
+			String value = String.valueOf(object);
+
+			if (operator.equals("contains")) {
+				sb = new StringBundler();
+
+				sb.append("contains(");
+				sb.append(entityFieldName);
+				sb.append(",'");
+
+				if ((object != null) && (value.length() > 2)) {
+					sb.append(value.substring(1, value.length() - 1));
+				}
+				else {
+					sb.append(value);
+				}
+
+				sb.append("')");
+			}
+			else if (operator.equals("startswith")) {
+				sb = new StringBundler();
+
+				sb.append("startswith(");
+				sb.append(entityFieldName);
+				sb.append(",'");
+
+				if ((object != null) && (value.length() > 1)) {
+					sb.append(value.substring(0, value.length() - 1));
+				}
+				else {
+					sb.append(value);
+				}
+
+				sb.append("')");
+			}
+			else {
+				sb.append("'");
+				sb.append(value);
+				sb.append("'");
+			}
+
+			return sb.toString();
 		}
 
 		if (entityFieldName.equals("id")) {
@@ -1169,75 +948,8 @@ public abstract class BaseAttachmentResourceTestCase {
 				"Invalid entity field " + entityFieldName);
 		}
 
-		if (entityFieldName.equals("neverExpire")) {
-			throw new IllegalArgumentException(
-				"Invalid entity field " + entityFieldName);
-		}
-
-		if (entityFieldName.equals("options")) {
-			throw new IllegalArgumentException(
-				"Invalid entity field " + entityFieldName);
-		}
-
-		if (entityFieldName.equals("priority")) {
-			sb.append(String.valueOf(attachment.getPriority()));
-
-			return sb.toString();
-		}
-
-		if (entityFieldName.equals("src")) {
-			Object object = attachment.getSrc();
-
-			String value = String.valueOf(object);
-
-			if (operator.equals("contains")) {
-				sb = new StringBundler();
-
-				sb.append("contains(");
-				sb.append(entityFieldName);
-				sb.append(",'");
-
-				if ((object != null) && (value.length() > 2)) {
-					sb.append(value.substring(1, value.length() - 1));
-				}
-				else {
-					sb.append(value);
-				}
-
-				sb.append("')");
-			}
-			else if (operator.equals("startswith")) {
-				sb = new StringBundler();
-
-				sb.append("startswith(");
-				sb.append(entityFieldName);
-				sb.append(",'");
-
-				if ((object != null) && (value.length() > 1)) {
-					sb.append(value.substring(0, value.length() - 1));
-				}
-				else {
-					sb.append(value);
-				}
-
-				sb.append("')");
-			}
-			else {
-				sb.append("'");
-				sb.append(value);
-				sb.append("'");
-			}
-
-			return sb.toString();
-		}
-
-		if (entityFieldName.equals("tags")) {
-			throw new IllegalArgumentException(
-				"Invalid entity field " + entityFieldName);
-		}
-
 		if (entityFieldName.equals("title")) {
-			Object object = attachment.getTitle();
+			Object object = document.getTitle();
 
 			String value = String.valueOf(object);
 
@@ -1278,12 +990,6 @@ public abstract class BaseAttachmentResourceTestCase {
 				sb.append(value);
 				sb.append("'");
 			}
-
-			return sb.toString();
-		}
-
-		if (entityFieldName.equals("type")) {
-			sb.append(String.valueOf(attachment.getType()));
 
 			return sb.toString();
 		}
@@ -1329,35 +1035,36 @@ public abstract class BaseAttachmentResourceTestCase {
 			invoke(queryGraphQLField.toString()));
 	}
 
-	protected Attachment randomAttachment() throws Exception {
-		return new Attachment() {
+	protected Document randomDocument() throws Exception {
+		return new Document() {
 			{
-				attachment = StringUtil.toLowerCase(
+				description = StringUtil.toLowerCase(
 					RandomTestUtil.randomString());
-				displayDate = RandomTestUtil.nextDate();
-				expirationDate = RandomTestUtil.nextDate();
-				galleryEnabled = RandomTestUtil.randomBoolean();
+				encodingFormat = StringUtil.toLowerCase(
+					RandomTestUtil.randomString());
+				externalReferenceCode = StringUtil.toLowerCase(
+					RandomTestUtil.randomString());
+				fileExtension = StringUtil.toLowerCase(
+					RandomTestUtil.randomString());
+				fileName = StringUtil.toLowerCase(
+					RandomTestUtil.randomString());
 				id = RandomTestUtil.randomLong();
-				neverExpire = RandomTestUtil.randomBoolean();
-				priority = RandomTestUtil.randomDouble();
-				src = StringUtil.toLowerCase(RandomTestUtil.randomString());
 				title = StringUtil.toLowerCase(RandomTestUtil.randomString());
-				type = RandomTestUtil.randomInt();
 			}
 		};
 	}
 
-	protected Attachment randomIrrelevantAttachment() throws Exception {
-		Attachment randomIrrelevantAttachment = randomAttachment();
+	protected Document randomIrrelevantDocument() throws Exception {
+		Document randomIrrelevantDocument = randomDocument();
 
-		return randomIrrelevantAttachment;
+		return randomIrrelevantDocument;
 	}
 
-	protected Attachment randomPatchAttachment() throws Exception {
-		return randomAttachment();
+	protected Document randomPatchDocument() throws Exception {
+		return randomDocument();
 	}
 
-	protected AttachmentResource attachmentResource;
+	protected DocumentResource documentResource;
 	protected com.liferay.portal.kernel.model.Group irrelevantGroup;
 	protected com.liferay.portal.kernel.model.Company testCompany;
 	protected com.liferay.portal.kernel.model.Group testGroup;
@@ -1543,12 +1250,12 @@ public abstract class BaseAttachmentResourceTestCase {
 	}
 
 	private static final com.liferay.portal.kernel.log.Log _log =
-		LogFactoryUtil.getLog(BaseAttachmentResourceTestCase.class);
+		LogFactoryUtil.getLog(BaseDocumentResourceTestCase.class);
 
 	private static DateFormat _dateFormat;
 
 	@Inject
 	private com.liferay.headless.commerce.delivery.catalog.resource.v1_0.
-		AttachmentResource _attachmentResource;
+		DocumentResource _documentResource;
 
 }

@@ -8,6 +8,7 @@ package com.liferay.headless.commerce.delivery.catalog.internal.graphql.query.v1
 import com.liferay.headless.commerce.delivery.catalog.dto.v1_0.Attachment;
 import com.liferay.headless.commerce.delivery.catalog.dto.v1_0.Category;
 import com.liferay.headless.commerce.delivery.catalog.dto.v1_0.Channel;
+import com.liferay.headless.commerce.delivery.catalog.dto.v1_0.Document;
 import com.liferay.headless.commerce.delivery.catalog.dto.v1_0.LinkedProduct;
 import com.liferay.headless.commerce.delivery.catalog.dto.v1_0.MappedProduct;
 import com.liferay.headless.commerce.delivery.catalog.dto.v1_0.Pin;
@@ -22,6 +23,7 @@ import com.liferay.headless.commerce.delivery.catalog.dto.v1_0.WishListItem;
 import com.liferay.headless.commerce.delivery.catalog.resource.v1_0.AttachmentResource;
 import com.liferay.headless.commerce.delivery.catalog.resource.v1_0.CategoryResource;
 import com.liferay.headless.commerce.delivery.catalog.resource.v1_0.ChannelResource;
+import com.liferay.headless.commerce.delivery.catalog.resource.v1_0.DocumentResource;
 import com.liferay.headless.commerce.delivery.catalog.resource.v1_0.LinkedProductResource;
 import com.liferay.headless.commerce.delivery.catalog.resource.v1_0.MappedProductResource;
 import com.liferay.headless.commerce.delivery.catalog.resource.v1_0.PinResource;
@@ -87,6 +89,14 @@ public class Query {
 
 		_channelResourceComponentServiceObjects =
 			channelResourceComponentServiceObjects;
+	}
+
+	public static void setDocumentResourceComponentServiceObjects(
+		ComponentServiceObjects<DocumentResource>
+			documentResourceComponentServiceObjects) {
+
+		_documentResourceComponentServiceObjects =
+			documentResourceComponentServiceObjects;
 	}
 
 	public static void setLinkedProductResourceComponentServiceObjects(
@@ -267,6 +277,21 @@ public class Query {
 					_filterBiFunction.apply(channelResource, filterString),
 					Pagination.of(page, pageSize),
 					_sortsBiFunction.apply(channelResource, sortsString))));
+	}
+
+	/**
+	 * Invoke this method with the command line:
+	 *
+	 * curl -H 'Content-Type: text/plain; charset=utf-8' -X 'POST' 'http://localhost:8080/o/graphql' -d $'{"query": "query {attachmentIdDocument(id: ___){description, documentType, encodingFormat, externalReferenceCode, fileExtension, fileName, id, title}}"}' -u 'test@liferay.com:test'
+	 */
+	@GraphQLField
+	public Document attachmentIdDocument(@GraphQLName("id") Long id)
+		throws Exception {
+
+		return _applyComponentServiceObjects(
+			_documentResourceComponentServiceObjects,
+			this::_populateResourceContext,
+			documentResource -> documentResource.getAttachmentIdDocument(id));
 	}
 
 	/**
@@ -735,6 +760,39 @@ public class Query {
 
 	}
 
+	@GraphQLName("DocumentPage")
+	public class DocumentPage {
+
+		public DocumentPage(Page documentPage) {
+			actions = documentPage.getActions();
+
+			items = documentPage.getItems();
+			lastPage = documentPage.getLastPage();
+			page = documentPage.getPage();
+			pageSize = documentPage.getPageSize();
+			totalCount = documentPage.getTotalCount();
+		}
+
+		@GraphQLField
+		protected Map<String, Map<String, String>> actions;
+
+		@GraphQLField
+		protected java.util.Collection<Document> items;
+
+		@GraphQLField
+		protected long lastPage;
+
+		@GraphQLField
+		protected long page;
+
+		@GraphQLField
+		protected long pageSize;
+
+		@GraphQLField
+		protected long totalCount;
+
+	}
+
 	@GraphQLName("LinkedProductPage")
 	public class LinkedProductPage {
 
@@ -1156,6 +1214,19 @@ public class Query {
 		channelResource.setRoleLocalService(_roleLocalService);
 	}
 
+	private void _populateResourceContext(DocumentResource documentResource)
+		throws Exception {
+
+		documentResource.setContextAcceptLanguage(_acceptLanguage);
+		documentResource.setContextCompany(_company);
+		documentResource.setContextHttpServletRequest(_httpServletRequest);
+		documentResource.setContextHttpServletResponse(_httpServletResponse);
+		documentResource.setContextUriInfo(_uriInfo);
+		documentResource.setContextUser(_user);
+		documentResource.setGroupLocalService(_groupLocalService);
+		documentResource.setRoleLocalService(_roleLocalService);
+	}
+
 	private void _populateResourceContext(
 			LinkedProductResource linkedProductResource)
 		throws Exception {
@@ -1322,6 +1393,8 @@ public class Query {
 		_categoryResourceComponentServiceObjects;
 	private static ComponentServiceObjects<ChannelResource>
 		_channelResourceComponentServiceObjects;
+	private static ComponentServiceObjects<DocumentResource>
+		_documentResourceComponentServiceObjects;
 	private static ComponentServiceObjects<LinkedProductResource>
 		_linkedProductResourceComponentServiceObjects;
 	private static ComponentServiceObjects<MappedProductResource>

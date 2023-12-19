@@ -140,6 +140,35 @@ public class Attachment implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected Date displayDate;
 
+	@Schema
+	@Valid
+	public Document getDocument() {
+		return document;
+	}
+
+	public void setDocument(Document document) {
+		this.document = document;
+	}
+
+	@JsonIgnore
+	public void setDocument(
+		UnsafeSupplier<Document, Exception> documentUnsafeSupplier) {
+
+		try {
+			document = documentUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
+	protected Document document;
+
 	@Schema(example = "2017-08-21")
 	public Date getExpirationDate() {
 		return expirationDate;
@@ -492,6 +521,16 @@ public class Attachment implements Serializable {
 			sb.append(liferayToJSONDateFormat.format(displayDate));
 
 			sb.append("\"");
+		}
+
+		if (document != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"document\": ");
+
+			sb.append(String.valueOf(document));
 		}
 
 		if (expirationDate != null) {

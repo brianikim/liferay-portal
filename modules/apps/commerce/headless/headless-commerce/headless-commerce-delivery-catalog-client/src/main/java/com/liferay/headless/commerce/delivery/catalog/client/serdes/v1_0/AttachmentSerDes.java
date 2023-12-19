@@ -100,6 +100,16 @@ public class AttachmentSerDes {
 			sb.append("\"");
 		}
 
+		if (attachment.getDocument() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"document\": ");
+
+			sb.append(String.valueOf(attachment.getDocument()));
+		}
+
 		if (attachment.getExpirationDate() != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -272,6 +282,13 @@ public class AttachmentSerDes {
 				liferayToJSONDateFormat.format(attachment.getDisplayDate()));
 		}
 
+		if (attachment.getDocument() == null) {
+			map.put("document", null);
+		}
+		else {
+			map.put("document", String.valueOf(attachment.getDocument()));
+		}
+
 		if (attachment.getExpirationDate() == null) {
 			map.put("expirationDate", null);
 		}
@@ -392,6 +409,12 @@ public class AttachmentSerDes {
 				if (jsonParserFieldValue != null) {
 					attachment.setDisplayDate(
 						toDate((String)jsonParserFieldValue));
+				}
+			}
+			else if (Objects.equals(jsonParserFieldName, "document")) {
+				if (jsonParserFieldValue != null) {
+					attachment.setDocument(
+						DocumentSerDes.toDTO((String)jsonParserFieldValue));
 				}
 			}
 			else if (Objects.equals(jsonParserFieldName, "expirationDate")) {
