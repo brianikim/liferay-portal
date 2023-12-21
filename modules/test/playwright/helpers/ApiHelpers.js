@@ -5,12 +5,14 @@
 
 import {liferayConfig} from '../liferay.config';
 import {FeatureFlagApiHelper} from './FeatureFlagApiHelper';
+import {HeadlessCommerceAdminPaymentApiHelper} from './HeadlessCommerceAdminPaymentApiHelper';
 import {ObjectAdminApiHelper} from './ObjectAdminApiHelper';
 
 export class ApiHelpers {
-	constructor(page) {
+	constructor(dataHelper, page) {
 		this.baseUrl = liferayConfig.environment.baseUrl + '/o/';
 		this.featureFlag = new FeatureFlagApiHelper(page);
+		this.headlessCommerceAdminPayment = new HeadlessCommerceAdminPaymentApiHelper(this, dataHelper);
 		this.objectAdmin = new ObjectAdminApiHelper(this);
 		this.page = page;
 	}
@@ -19,6 +21,15 @@ export class ApiHelpers {
 		return this.page.request.delete(url, {
 			headers: await this.getHeader(),
 		});
+	}
+
+	async patch(url, data) {
+		const response = await this.page.request.patch(url, {
+			data,
+			headers: await this.getHeader(),
+		});
+
+		return response.json();
 	}
 
 	async post(url, data) {

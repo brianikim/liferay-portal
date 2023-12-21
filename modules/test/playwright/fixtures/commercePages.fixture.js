@@ -5,10 +5,10 @@
 
 import {test} from '@playwright/test';
 
-import {ApiHelpers} from '../helpers/ApiHelpers';
+import {PaymentsPage} from '../pages/commerce/payments.page';
 
 exports.test = test.extend({
-	_apiHelpers: async ({_dataHelper, page}, use) => {
-		await use(new ApiHelpers(_dataHelper, page));
+	_paymentsPage: async ({page}, use) => {
+		await use(new PaymentsPage(page));
 	},
 });

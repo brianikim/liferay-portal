@@ -6,12 +6,13 @@
 import {defineConfig} from '@playwright/test';
 
 import {config as setup} from './tests/global.setup.config';
+import {config as commerce} from './tests/commerce/config';
 import {config as object} from './tests/object/config';
 import {config as portalWeb} from './tests/portal-web/config';
 
 export default defineConfig({
 	forbidOnly: !!process.env.CI,
-	projects: [object, portalWeb, setup],
+	projects: [commerce, object, portalWeb, setup],
 	reporter: [
 		[
 			'html',
