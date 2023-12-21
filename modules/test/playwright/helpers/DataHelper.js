@@ -20,7 +20,11 @@ export class DataHelper {
 	async clearData() {
 		await Promise.all(
 			this.data.map((dataObject) => {
-				return dataObject.handleDelete(this.apiHelpers, dataObject.id);
+				return dataObject.handleDelete(
+					this.apiHelpers,
+					dataObject.basePath,
+					dataObject.id
+				);
 			})
 		);
 

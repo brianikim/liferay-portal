@@ -10,34 +10,29 @@ export class HeadlessCommerceAdminPaymentApiHelper {
 		this.dataHelper = dataHelper;
 	}
 
-	async deletePayment(
-		apiHelpers = this.apiHelpers,
-		paymentId
-	) {
+	async deletePayment(apiHelpers = this.apiHelpers, paymentId) {
 		return apiHelpers.delete(
 			`${apiHelpers.baseUrl}${this.basePath}/payments/${paymentId}`
 		);
 	}
 
-	async patchPayment(
-		paymentId,
-		payment
-	) {
+	async patchPayment(paymentId, payment) {
 		return this.apiHelpers.patch(
 			`${this.apiHelpers.baseUrl}${this.basePath}/payments/${paymentId}`,
 			payment
 		);
 	}
 
-	async postRandomPayment(
-		payment
-	) {
+	async postRandomPayment(payment) {
 		const postPayment = await this.apiHelpers.post(
 			`${this.apiHelpers.baseUrl}${this.basePath}/payments`,
 			payment
 		);
 
-		this.dataHelper.addDataObject({handleDelete: this.deletePayment, id: postPayment.id});
+		this.dataHelper.addDataObject({
+			handleDelete: this.deletePayment,
+			id: postPayment.id,
+		});
 
 		return postPayment;
 	}

@@ -9,7 +9,7 @@ export class PaymentsPage {
 	constructor(page) {
 		this.applicationsMenuPage = new ApplicationsMenuPage(page);
 		this.page = page;
-		this.title = page.getByRole('heading', { name: 'Payments' })
+		this.title = page.getByRole('heading', {name: 'Payments'});
 	}
 
 	async goto() {

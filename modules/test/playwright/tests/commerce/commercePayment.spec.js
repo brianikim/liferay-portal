@@ -11,7 +11,12 @@ import {test as commercePagesTest} from '../../fixtures/commercePages.fixture';
 import {test as dataHelperTest} from '../../fixtures/dataHelper.fixture';
 import {getRandomInt} from '../../utils/util';
 
-export const test = mergeTests(ApiHelpersTest, applicationsMenuPagesTest, commercePagesTest, dataHelperTest);
+export const test = mergeTests(
+	ApiHelpersTest,
+	applicationsMenuPagesTest,
+	commercePagesTest,
+	dataHelperTest
+);
 
 const getRandomPayment = (payment = {}) => {
 	const randomPayment = {
@@ -33,7 +38,11 @@ test.afterEach(async ({_dataHelper}) => {
 	await _dataHelper.clearData();
 });
 
-test('payments page is visible', async ({_apiHelpers, _applicationsMenuPage, _paymentsPage}) => {
+test('payments page is visible', async ({
+	_apiHelpers,
+	_applicationsMenuPage,
+	_paymentsPage,
+}) => {
 	await _apiHelpers.featureFlag.updateFeatureFlag('COMMERCE-12754', 'false');
 
 	await _applicationsMenuPage.goToCommerce();
@@ -46,7 +55,9 @@ test('payments page is visible', async ({_apiHelpers, _applicationsMenuPage, _pa
 		getRandomPayment()
 	);
 
-	await _apiHelpers.headlessCommerceAdminPayment.patchPayment(payment.id, {paymentStatus: 0});
+	await _apiHelpers.headlessCommerceAdminPayment.patchPayment(payment.id, {
+		paymentStatus: 0,
+	});
 
 	await _paymentsPage.goto();
 

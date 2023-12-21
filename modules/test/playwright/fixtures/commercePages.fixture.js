@@ -5,10 +5,20 @@
 
 import {test} from '@playwright/test';
 
+import {CommerceLayoutsPage} from '../pages/commerce/layouts.page';
 import {PaymentsPage} from '../pages/commerce/payments.page';
+import {SpecificationFacetsPage} from '../pages/commerce/specificationFacets.page';
 
 exports.test = test.extend({
+	_layoutsPage: async ({page}, use) => {
+		await use(new CommerceLayoutsPage(page));
+	},
+
 	_paymentsPage: async ({page}, use) => {
 		await use(new PaymentsPage(page));
+	},
+
+	_specificationFacetsPage: async ({page}, use) => {
+		await use(new SpecificationFacetsPage(page));
 	},
 });

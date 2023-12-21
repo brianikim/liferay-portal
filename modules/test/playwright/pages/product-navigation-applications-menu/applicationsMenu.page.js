@@ -30,7 +30,6 @@ export class ApplicationsMenuPage {
 		await this.page.goto('/');
 	}
 
-
 	async goToCommerce() {
 		await this.goto();
 		await this.applicationMenuButton.click();
