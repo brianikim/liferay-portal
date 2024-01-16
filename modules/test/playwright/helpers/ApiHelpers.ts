@@ -7,11 +7,17 @@ import {Page} from '@playwright/test';
 
 import {liferayConfig} from '../liferay.config';
 import {FeatureFlagApiHelper} from './FeatureFlagApiHelper';
+import {HeadlessAdminUserApiHelper} from './HeadlessAdminUserApiHelper';
+import {HeadlessCommerceAdminCatalogApiHelper} from './HeadlessCommerceAdminCatalogApiHelper';
+import {HeadlessCommerceAdminChannelApiHelper} from './HeadlessCommerceAdminChannelApiHelper';
 import {ObjectAdminApiHelper} from './ObjectAdminApiHelper';
 
 export class ApiHelpers {
 	readonly baseUrl: string;
 	readonly featureFlag: FeatureFlagApiHelper;
+	readonly headlessCommerceAdminCatalog: HeadlessCommerceAdminCatalogApiHelper;
+	readonly headlessCommerceAdminChannel: HeadlessCommerceAdminChannelApiHelper;
+	readonly headlessAdminUser: HeadlessAdminUserApiHelper;
 	readonly objectAdmin: ObjectAdminApiHelper;
 	readonly page: Page;
 
@@ -19,6 +25,11 @@ export class ApiHelpers {
 		this.baseUrl = liferayConfig.environment.baseUrl + '/o/';
 		this.featureFlag = new FeatureFlagApiHelper(page);
 		this.objectAdmin = new ObjectAdminApiHelper(this);
+		this.headlessCommerceAdminCatalog =
+			new HeadlessCommerceAdminCatalogApiHelper(this);
+		this.headlessCommerceAdminChannel =
+			new HeadlessCommerceAdminChannelApiHelper(this);
+		this.headlessAdminUser = new HeadlessAdminUserApiHelper(this);
 		this.page = page;
 	}
 
@@ -26,6 +37,23 @@ export class ApiHelpers {
 		return this.page.request.delete(url, {
 			headers: await this.getHeader(),
 		});
+	}
+
+	async get(url: string) {
+		const response = await this.page.request.get(url, {
+			headers: await this.getHeader(),
+		});
+
+		return response.json();
+	}
+
+	async patch(url: string, data: DataObject) {
+		const response = await this.page.request.patch(url, {
+			data,
+			headers: await this.getHeader(),
+		});
+
+		return response.json();
 	}
 
 	async post(url: string, data: DataObject) {
