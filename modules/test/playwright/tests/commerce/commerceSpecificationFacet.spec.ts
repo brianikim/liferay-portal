@@ -78,7 +78,7 @@ test('can sort specifications by specification group priority', async ({
 	await specificationFacetsPage.goToPage();
 	await specificationFacetsPage.addSearchOptionsWidget();
 	await specificationFacetsPage.configureSearchOptions();
-	await specificationFacetsPage.reloadPage();
+	await specificationFacetsPage.goToPage();
 	await specificationFacetsPage.addSpecificationFacetWidget();
 
 	const site = await apiHelpers.headlessAdminUser.getSiteByFriendlyUrlPath(
