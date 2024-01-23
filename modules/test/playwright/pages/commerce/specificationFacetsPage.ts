@@ -17,7 +17,6 @@ export class SpecificationFacetsPage {
 	readonly panelList: Locator;
 	readonly searchFormInput: Locator;
 	readonly searchOptionsAllowEmptySearchesInput: Locator;
-	readonly searchOptionsConfigurationCancelButton: Locator;
 	readonly searchOptionsConfigurationEditButton: Locator;
 	readonly searchOptionsConfigurationSaveButton: Locator;
 
@@ -45,10 +44,6 @@ export class SpecificationFacetsPage {
 		this.searchOptionsAllowEmptySearchesInput = page
 			.frameLocator('#modalIframe')
 			.getByTestId('allowEmptySearches');
-		this.searchOptionsConfigurationCancelButton = page
-			.frameLocator('#modalIframe')
-			.getByTestId('searchOptionsFooter')
-			.getByRole('button', {exact: true, name: 'Cancel'});
 		this.searchOptionsConfigurationEditButton =
 			page.getByTestId('searchOptionsHref');
 		this.searchOptionsConfigurationSaveButton = page
@@ -82,7 +77,6 @@ export class SpecificationFacetsPage {
 		});
 		await this.searchOptionsAllowEmptySearchesInput.click();
 		await this.searchOptionsConfigurationSaveButton.click();
-		await this.searchOptionsConfigurationCancelButton.click();
 	}
 
 	async goto() {
