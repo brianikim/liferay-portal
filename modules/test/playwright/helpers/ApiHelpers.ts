@@ -10,7 +10,9 @@ import {FeatureFlagApiHelper} from './FeatureFlagApiHelper';
 import {HeadlessAdminUserApiHelper} from './HeadlessAdminUserApiHelper';
 import {HeadlessCommerceAdminCatalogApiHelper} from './HeadlessCommerceAdminCatalogApiHelper';
 import {HeadlessCommerceAdminChannelApiHelper} from './HeadlessCommerceAdminChannelApiHelper';
+import {HeadlessCommerceAdminOrderApiHelper} from './HeadlessCommerceAdminOrderApiHelper';
 import {HeadlessDeliveryApiHelper} from './HeadlessDeliveryApiHelper';
+import {HeadlessPortalInstancesHelper} from './HeadlessPortalInstancesHelper';
 import {HeadlessSiteApiHelper} from './HeadlessSiteApiHelper';
 import {ObjectAdminApiHelper} from './ObjectAdminApiHelper';
 import {ObjectApiHelper} from './ObjectApiHelper';
@@ -21,7 +23,9 @@ export class ApiHelpers {
 	readonly headlessAdminUser: HeadlessAdminUserApiHelper;
 	readonly headlessCommerceAdminCatalog: HeadlessCommerceAdminCatalogApiHelper;
 	readonly headlessCommerceAdminChannel: HeadlessCommerceAdminChannelApiHelper;
+	readonly headlessCommerceAdminOrder: HeadlessCommerceAdminOrderApiHelper;
 	readonly headlessDelivery: HeadlessDeliveryApiHelper;
+	readonly headlessPortalInstances: HeadlessPortalInstancesHelper;
 	readonly headlessSite: HeadlessSiteApiHelper;
 	readonly object: ObjectApiHelper;
 	readonly objectAdmin: ObjectAdminApiHelper;
@@ -31,6 +35,7 @@ export class ApiHelpers {
 		this.baseUrl = liferayConfig.environment.baseUrl + '/o/';
 		this.featureFlag = new FeatureFlagApiHelper(page);
 		this.headlessDelivery = new HeadlessDeliveryApiHelper(this);
+		this.headlessPortalInstances = new HeadlessPortalInstancesHelper(this);
 		this.headlessSite = new HeadlessSiteApiHelper(this);
 		this.object = new ObjectApiHelper(this);
 		this.objectAdmin = new ObjectAdminApiHelper(this);
