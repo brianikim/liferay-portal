@@ -17,7 +17,7 @@ test('LPD-15689 - roles in account settings should have no save button', async (
 
     await expect(
         accountSettingsPage.saveButton
-    ).toBeHidden({
+    ).not.toBeVisible({
         timeout: 8 * 1000,
     });
 
