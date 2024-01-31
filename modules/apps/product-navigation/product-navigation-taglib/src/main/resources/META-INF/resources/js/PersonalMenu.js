@@ -102,6 +102,7 @@ function PersonalMenu({
 							userName
 						)}
 						className="rounded-circle"
+						data-testid="userPersonalMenu"
 						displayType="unstyled"
 						onFocus={preloadItems}
 						onMouseOver={preloadItems}

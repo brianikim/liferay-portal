@@ -18,7 +18,7 @@ export class AccountSettingsPage {
         this.accountSettingsMenuItem = page.getByRole('menuitem', {
                 name: 'Account Settings'
             });
-        this.personalMenuButton = page.getByLabel('Test Test User Profile');
+        this.personalMenuButton = page.getByTestId('userPersonalMenu');
         this.rolesMenuItem = page.getByRole('link', {
                 name: 'Roles'
             });
