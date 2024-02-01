@@ -14,6 +14,7 @@ import {HeadlessCommerceAdminCatalogApiHelper} from './HeadlessCommerceAdminCata
 import {HeadlessCommerceAdminChannelApiHelper} from './HeadlessCommerceAdminChannelApiHelper';
 import {HeadlessCommerceDeliveryCatalogApiHelper} from './HeadlessCommerceDeliveryCatalogApiHelper';
 import {HeadlessDeliveryApiHelper} from './HeadlessDeliveryApiHelper';
+import {HeadlessPortalInstancesHelper} from './HeadlessPortalInstancesHelper';
 import {HeadlessSiteApiHelper} from './HeadlessSiteApiHelper';
 import {ObjectAdminApiHelper} from './ObjectAdminApiHelper';
 import {ObjectApiHelper} from './ObjectApiHelper';
@@ -26,6 +27,7 @@ export class ApiHelpers {
 	readonly headlessCommerceAdminChannel: HeadlessCommerceAdminChannelApiHelper;
 	readonly headlessCommerceDeliveryCatalog: HeadlessCommerceDeliveryCatalogApiHelper;
 	readonly headlessDelivery: HeadlessDeliveryApiHelper;
+	readonly headlessPortalInstances: HeadlessPortalInstancesHelper;
 	readonly headlessSite: HeadlessSiteApiHelper;
 	readonly object: ObjectApiHelper;
 	readonly objectAdmin: ObjectAdminApiHelper;
