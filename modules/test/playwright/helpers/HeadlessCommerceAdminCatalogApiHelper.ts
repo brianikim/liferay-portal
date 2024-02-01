@@ -63,6 +63,20 @@ export class HeadlessCommerceAdminCatalogApiHelper {
 		);
 	}
 
+	async patchProduct(productId: string, product?: DataObject) {
+		const response = await this.apiHelpers.patch(
+			`${this.apiHelpers.baseUrl}${this.basePath}/products/${productId}`,
+			{
+				name: {
+					en_US: 'Product' + getRandomInt(),
+				},
+				...(product || {}),
+			}
+		);
+
+		return response;
+	}
+
 	async postCatalog(catalogName: string = 'Catalog' + getRandomInt()) {
 		const postCatalog = await this.apiHelpers.post(
 			`${this.apiHelpers.baseUrl}${this.basePath}/catalogs`,
@@ -116,7 +130,7 @@ export class HeadlessCommerceAdminCatalogApiHelper {
 			);
 		}
 
-		return await this.apiHelpers.post(
+		return this.apiHelpers.post(
 			`${this.apiHelpers.baseUrl}${this.basePath}/products`,
 			{
 				active: true,
