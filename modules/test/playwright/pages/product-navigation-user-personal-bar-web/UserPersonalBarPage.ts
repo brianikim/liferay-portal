@@ -9,7 +9,7 @@ import {ApplicationsMenuPage} from '../product-navigation-applications-menu/Appl
 
 export class UserPersonalBarPage {
 	readonly applicationsMenuPage: ApplicationsMenuPage;
-	readonly editConfigurationUpdateButton: Locator;
+	readonly editConfigurationSubmitButton: Locator;
 	readonly notificationBadge: Locator;
 	readonly page: Page;
 	readonly processBuilderConfigurationTab: Locator;
@@ -24,9 +24,9 @@ export class UserPersonalBarPage {
 
 	constructor(page: Page) {
 		this.applicationsMenuPage = new ApplicationsMenuPage(page);
-		this.editConfigurationUpdateButton = page
-			.getByTestId('editConfigurationFooter')
-			.getByRole('button', {name: 'Update'});
+		this.editConfigurationSubmitButton = page.getByTestId(
+			'submitConfiguration'
+		);
 		this.notificationBadge = page.getByTestId('notificationsCount');
 		this.page = page;
 		this.processBuilderConfigurationTab = page.getByRole('link', {
@@ -63,7 +63,7 @@ export class UserPersonalBarPage {
 		await this.applicationsMenuPage.goToInstanceSettings();
 		await this.usersSetting.click();
 		await this.showNotificationBadgeInPersonalMenuLabel.uncheck();
-		await this.editConfigurationUpdateButton.click();
+		await this.editConfigurationSubmitButton.click();
 	}
 
 	async disableSingleApproverWorkflowProduct() {
@@ -79,7 +79,7 @@ export class UserPersonalBarPage {
 		await this.applicationsMenuPage.goToInstanceSettings();
 		await this.usersSetting.click();
 		await this.showNotificationBadgeInPersonalMenuLabel.check();
-		await this.editConfigurationUpdateButton.click();
+		await this.editConfigurationSubmitButton.click();
 	}
 
 	async enableSingleApproverWorkflowProduct() {
@@ -89,10 +89,6 @@ export class UserPersonalBarPage {
 			'Single Approver'
 		);
 		await this.workflowDefinitionLinkSaveButton.click();
-	}
-
-	async goto() {
-		await this.page.goto('/');
 	}
 
 	async goToProcessBuilderConfigurationTab() {

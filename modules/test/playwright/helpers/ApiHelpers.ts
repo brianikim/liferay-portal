@@ -64,6 +64,12 @@ export class ApiHelpers {
 			headers: await this.getHeader(),
 		});
 
+		const text = await response.text();
+
+		if (!text) {
+			return response;
+		}
+
 		return response.json();
 	}
 
