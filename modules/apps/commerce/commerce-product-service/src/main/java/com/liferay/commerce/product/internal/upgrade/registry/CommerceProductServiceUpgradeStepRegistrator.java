@@ -430,6 +430,20 @@ public class CommerceProductServiceUpgradeStepRegistrator
 				CommerceChannelUpgradeProcess(
 					_accountEntryGroupSettings, _configurationProvider));
 
+		registry.register(
+			"5.12.0", "5.13.0",
+			new BaseExternalReferenceCodeUpgradeProcess() {
+
+				@Override
+				protected String[][] getTableAndPrimaryKeyColumnNames() {
+					return new String[][] {
+						{"CPAttachmentFileEntry", "CPAttachmentFileEntryId"},
+						{"CPMeasurementUnit", "CPMeasurementUnitId"}
+					};
+				}
+
+			});
+
 		if (_log.isInfoEnabled()) {
 			_log.info("Commerce product upgrade step registrator finished");
 		}
