@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-//@ts-ignore
+// @ts-ignore
+
 import {expect, mergeTests} from '@playwright/test';
 
 import {apiHelpersTest} from '../../fixtures/apiHelpersTest';
@@ -13,40 +14,46 @@ import {loginTest} from '../../fixtures/loginTest';
 export const test = mergeTests(apiHelpersTest, commercePagesTest, loginTest);
 
 test('LPD-5780 modal title and product name appear properly in product menu', async ({
-    apiHelpers,
-    commerceProductsPage
+	apiHelpers,
+	commerceProductsPage,
+	page,
 }) => {
 
-    const catalog = await apiHelpers.headlessCommerceAdminCatalog.postCatalog(
+	// CREATE
+
+	const catalog = await apiHelpers.headlessCommerceAdminCatalog.postCatalog(
 		'Product Catalog'
 	);
 
-    const product1 = await apiHelpers.headlessCommerceAdminCatalog.postProduct(
+	const product1 = await apiHelpers.headlessCommerceAdminCatalog.postProduct(
 		catalog.id,
-		'\"Product1\"'
+		'"Product1"'
 	);
 
-    const product2 = await apiHelpers.headlessCommerceAdminCatalog.postProduct(
-        catalog.id,
-        'Product2'
-    );
+	const product2 = await apiHelpers.headlessCommerceAdminCatalog.postProduct(
+		catalog.id,
+		'Product2'
+	);
 
-	//double-check data set
-	const returnedProduct = await apiHelpers.headlessCommerceAdminCatalog.getProduct(
-		product1.productId);
+	// double-check data set
 
-	expect(returnedProduct.name).toBe('\"Product1\"');
+	const returnedProduct =
+		await apiHelpers.headlessCommerceAdminCatalog.getProduct(
+			product1.productId
+		);
 
-	//now check in the actual GUI
-    await commerceProductsPage.goto();
+	expect(returnedProduct.name).toBe('"Product1"');
+
+	// now check in the actual GUI
+
+	await commerceProductsPage.goto();
 
 	await commerceProductsPage.goToSpecificProductMenu(product1.name);
 
 	await commerceProductsPage.addSpareProductRelation();
 
 	await expect(
-		commerceProductsPage.getByRole(
-			'heading', {name: 'Add New Product to \"Product1\"'})
+		page.getByRole('heading', {name: 'Add New Product to "Product1"'})
 	).toBeVisible();
 
 	await commerceProductsPage.modalCloseButton.click();
@@ -57,23 +64,27 @@ test('LPD-5780 modal title and product name appear properly in product menu', as
 
 	await commerceProductsPage.addSpareProductRelation();
 
-	await commerceProductsPage
+	// there should theoretically only be two checkboxes
+	// the one matching our current product would be disabled so we pick the non-disabled one
+
+	await page
 		.frameLocator('#modalIframe')
-		.getByRole('checkbox', {value: product1.productId})
-	.check();
+		.getByRole('checkbox', {disabled: false})
+		.check();
 
 	await commerceProductsPage.modalAddButton.click();
 
-	await expect(
-		commerceProductsPage.getByRole('link', {name: product1.name}))
-	.toBeVisible();
+	await expect(page.getByRole('link', {name: product1.name})).toBeVisible();
 
-	//this almost certainly could be handled using an apihelper
+	// CLEAN UP
+
+	// this first part almost certainly could be handled using an apihelper?
+
 	await commerceProductsPage.itemOptionMenu.click();
 
 	await commerceProductsPage.deleteMenuItem.click();
 
-    await apiHelpers.headlessCommerceAdminCatalog.deleteProduct(
+	await apiHelpers.headlessCommerceAdminCatalog.deleteProduct(
 		product1.productId
 	);
 	await apiHelpers.headlessCommerceAdminCatalog.deleteProduct(
