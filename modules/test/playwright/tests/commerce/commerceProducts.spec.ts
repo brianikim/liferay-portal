@@ -15,25 +15,29 @@ export const test = mergeTests(apiHelpersTest, commercePagesTest, loginTest);
 
 test('LPD-5780 modal title and product name appear properly in product menu', async ({
 	apiHelpers,
-	commerceProductsPage,
+	commerceProductAdminPage,
 	page,
 }) => {
 
 	// CREATE
 
-	const catalog = await apiHelpers.headlessCommerceAdminCatalog.postCatalog(
-		'Product Catalog'
-	);
+	const catalog = await apiHelpers.headlessCommerceAdminCatalog.postCatalog({
+		name: 'Product Catalog',
+	});
 
-	const product1 = await apiHelpers.headlessCommerceAdminCatalog.postProduct(
-		catalog.id,
-		'"Product1"'
-	);
+	const product1 = await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+		catalogId: catalog.id,
+		name: {
+			en_US: '"Product1"',
+		},
+	});
 
-	const product2 = await apiHelpers.headlessCommerceAdminCatalog.postProduct(
-		catalog.id,
-		'Product2'
-	);
+	const product2 = await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+		catalogId: catalog.id,
+		name: {
+			en_US: 'Product2',
+		},
+	});
 
 	// double-check data set
 
@@ -46,23 +50,23 @@ test('LPD-5780 modal title and product name appear properly in product menu', as
 
 	// now check in the actual GUI
 
-	await commerceProductsPage.goto();
+	await commerceProductAdminPage.goto();
 
-	await commerceProductsPage.goToSpecificProductMenu(product1.name);
+	await commerceProductAdminPage.goToSpecificProductMenu(product1.name.en_US);
 
-	await commerceProductsPage.addSpareProductRelation();
+	await commerceProductAdminPage.addSpareProductRelation();
 
 	await expect(
 		page.getByRole('heading', {name: 'Add New Product to "Product1"'})
 	).toBeVisible();
 
-	await commerceProductsPage.modalCloseButton.click();
+	await commerceProductAdminPage.modalCloseButton.click();
 
-	await commerceProductsPage.goto();
+	await commerceProductAdminPage.goto();
 
-	await commerceProductsPage.goToSpecificProductMenu(product2.name);
+	await commerceProductAdminPage.goToSpecificProductMenu(product2.name.en_US);
 
-	await commerceProductsPage.addSpareProductRelation();
+	await commerceProductAdminPage.addSpareProductRelation();
 
 	// there should theoretically only be two checkboxes
 	// the one matching our current product would be disabled so we pick the non-disabled one
@@ -72,17 +76,19 @@ test('LPD-5780 modal title and product name appear properly in product menu', as
 		.getByRole('checkbox', {disabled: false})
 		.check();
 
-	await commerceProductsPage.modalAddButton.click();
+	await commerceProductAdminPage.modalAddButton.click();
 
-	await expect(page.getByRole('link', {name: product1.name})).toBeVisible();
+	await expect(
+		page.getByRole('link', {name: product1.name.en_US})
+	).toBeVisible();
 
 	// CLEAN UP
 
 	// this first part almost certainly could be handled using an apihelper?
 
-	await commerceProductsPage.itemOptionMenu.click();
+	await commerceProductAdminPage.itemOptionMenu.click();
 
-	await commerceProductsPage.deleteMenuItem.click();
+	await commerceProductAdminPage.deleteMenuItem.click();
 
 	await apiHelpers.headlessCommerceAdminCatalog.deleteProduct(
 		product1.productId

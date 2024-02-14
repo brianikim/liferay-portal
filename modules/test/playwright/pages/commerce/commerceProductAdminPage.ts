@@ -43,7 +43,7 @@ export class CommerceProductAdminPage {
 		this.newMenuButton = page.getByTestId('creationMenuNewButton');
 		this.productRelationsLink = page.getByRole('link', {
 			exact: true,
-			name: 'Product Relations'
+			name: 'Product Relations',
 		});
 		this.productSkusLink = page.getByRole('link', {
 			exact: true,
