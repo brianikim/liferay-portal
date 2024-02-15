@@ -8,6 +8,9 @@ import {Locator, Page} from '@playwright/test';
 import {ApplicationsMenuPage} from '../product-navigation-applications-menu/ApplicationsMenuPage';
 
 export class CommerceProductAdminPage {
+	readonly addProductRelationHeading: (
+		productName: string
+	) => Promise<Locator>;
 	readonly applicationsMenuPage: ApplicationsMenuPage;
 	readonly creationMenuNewButton: Locator;
 	readonly deleteMenuItem: Locator;
@@ -15,14 +18,20 @@ export class CommerceProductAdminPage {
 	readonly itemOptionMenu: Locator;
 	readonly managementToolbarSearchInput: Locator;
 	readonly modalAddButton: Locator;
-	readonly modalCloseButton: Locator;
+	readonly modalCancelButton: Locator;
 	readonly newMenuButton: Locator;
 	readonly page: Page;
 	readonly productRelationsLink: Locator;
 	readonly productSkusLink: Locator;
 	readonly spareProductMenuButton: Locator;
+	readonly specificProductMenuLink: (productName: string) => Promise<Locator>;
 
 	constructor(page: Page) {
+		this.addProductRelationHeading = async (productName: string) => {
+			return page.getByRole('heading', {
+				name: 'Add New Product to ' + productName,
+			});
+		};
 		this.applicationsMenuPage = new ApplicationsMenuPage(page);
 		this.creationMenuNewButton = page.getByTestId('creationMenuNewButton');
 		this.deleteMenuItem = page.getByRole('menuitem', {name: 'Delete'});
@@ -34,12 +43,8 @@ export class CommerceProductAdminPage {
 		this.managementToolbarSearchInput = page
 			.getByTestId('management-toolbar')
 			.getByPlaceholder('Search', {exact: true});
-		this.modalAddButton = page
-			.locator('modal-item-last')
-			.getByRole('button', {name: 'Add'});
-		this.modalCloseButton = page
-			.locator('modal-header')
-			.getByRole('button', {name: 'close'});
+		this.modalAddButton = page.getByTestId('modalAddButton');
+		this.modalCancelButton = page.getByTestId('modalCancelButton');
 		this.newMenuButton = page.getByTestId('creationMenuNewButton');
 		this.productRelationsLink = page.getByRole('link', {
 			exact: true,
@@ -53,6 +58,9 @@ export class CommerceProductAdminPage {
 			exact: true,
 			name: 'Add Spare Product',
 		});
+		this.specificProductMenuLink = async (productName: string) => {
+			return page.getByRole('link', {name: productName});
+		};
 	}
 
 	async addSpareProductRelation() {
@@ -84,6 +92,6 @@ export class CommerceProductAdminPage {
 	}
 
 	async goToSpecificProductMenu(productName: string) {
-		await this.page.getByRole('link', {name: productName}).click();
+		await (await this.specificProductMenuLink(productName)).click();
 	}
 }
