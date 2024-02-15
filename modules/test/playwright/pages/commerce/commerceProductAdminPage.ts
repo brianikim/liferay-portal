@@ -19,12 +19,12 @@ export class CommerceProductAdminPage {
 	readonly managementToolbarSearchInput: Locator;
 	readonly modalAddButton: Locator;
 	readonly modalCancelButton: Locator;
-	readonly newMenuButton: Locator;
 	readonly page: Page;
 	readonly productRelationsLink: Locator;
 	readonly productSkusLink: Locator;
 	readonly spareProductMenuButton: Locator;
 	readonly specificProductMenuLink: (productName: string) => Promise<Locator>;
+	readonly validProductCheckbox: (productName: string) => Promise<Locator>;
 
 	constructor(page: Page) {
 		this.addProductRelationHeading = async (productName: string) => {
@@ -33,7 +33,9 @@ export class CommerceProductAdminPage {
 			});
 		};
 		this.applicationsMenuPage = new ApplicationsMenuPage(page);
-		this.creationMenuNewButton = page.getByTestId('creationMenuNewButton');
+		this.creationMenuNewButton = page
+			.getByTestId('creationMenuNewButton')
+			.nth(0);
 		this.deleteMenuItem = page.getByRole('menuitem', {name: 'Delete'});
 		this.generateSkusMenuItem = page.getByRole('menuitem', {
 			exact: true,
@@ -45,7 +47,7 @@ export class CommerceProductAdminPage {
 			.getByPlaceholder('Search', {exact: true});
 		this.modalAddButton = page.getByTestId('modalAddButton');
 		this.modalCancelButton = page.getByTestId('modalCancelButton');
-		this.newMenuButton = page.getByTestId('creationMenuNewButton');
+		this.page = page;
 		this.productRelationsLink = page.getByRole('link', {
 			exact: true,
 			name: 'Product Relations',
@@ -61,10 +63,29 @@ export class CommerceProductAdminPage {
 		this.specificProductMenuLink = async (productName: string) => {
 			return page.getByRole('link', {name: productName});
 		};
+		this.validProductCheckbox = async (productName: string) => {
+			return page
+				.frameLocator('#modalIframe')
+				.getByTestId('row')
+				.filter({hasText: productName})
+				.getByRole('checkbox', {disabled: false});
+		};
 	}
 
 	async addSpareProductRelation() {
-		await this.goToProductRelations();
+		await Promise.all([
+			this.goToProductRelations(),
+			this.page.waitForResponse(
+				(resp) =>
+					resp.status() === 200 &&
+					resp
+						.url()
+						.includes(
+							'screenNavigationCategoryKey=product-relations'
+						)
+			),
+		]);
+
 		await this.creationMenuNewButton.click();
 
 		if (await this.spareProductMenuButton.isVisible()) {

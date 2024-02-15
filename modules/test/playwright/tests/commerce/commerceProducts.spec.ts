@@ -17,7 +17,6 @@ export const test = mergeTests(apiHelpersTest, commercePagesTest, loginTest);
 test('LPD-5780 modal title and product name appear properly in product menu', async ({
 	apiHelpers,
 	commerceProductAdminPage,
-	page,
 }) => {
 	const catalog = await apiHelpers.headlessCommerceAdminCatalog.postCatalog({
 		name: 'Product Catalog',
@@ -54,10 +53,9 @@ test('LPD-5780 modal title and product name appear properly in product menu', as
 
 	await commerceProductAdminPage.addSpareProductRelation();
 
-	await page
-		.frameLocator('#modalIframe')
-		.getByRole('checkbox', {disabled: false})
-		.check();
+	await (
+		await commerceProductAdminPage.validProductCheckbox(product1.name.en_US)
+	).check();
 
 	await commerceProductAdminPage.modalAddButton.click();
 
