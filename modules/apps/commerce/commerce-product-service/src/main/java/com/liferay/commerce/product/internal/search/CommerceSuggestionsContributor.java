@@ -1,13 +1,15 @@
 /**
- * SPDX-FileCopyrightText: (c) 2000 Liferay, Inc. https://liferay.com
+ * SPDX-FileCopyrightText: (c) 2024 Liferay, Inc. https://liferay.com
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-package com.liferay.portal.search.internal.suggestions.spi;
+package com.liferay.commerce.product.internal.search;
 
 import com.liferay.asset.kernel.AssetRendererFactoryRegistryUtil;
 import com.liferay.asset.kernel.model.AssetRenderer;
 import com.liferay.asset.kernel.model.AssetRendererFactory;
+import com.liferay.commerce.product.model.CommerceChannel;
+import com.liferay.commerce.product.service.CommerceChannelLocalService;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
@@ -17,11 +19,13 @@ import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.SearchContext;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.search.asset.AssetURLViewProvider;
 import com.liferay.portal.search.document.Document;
 import com.liferay.portal.search.hits.SearchHit;
@@ -47,28 +51,43 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * @author Petteri Karttunen
+ * @author Lianne Louie
  */
 @Component(
-	enabled = true, property = "search.suggestions.contributor.name=basic",
+	enabled = true, property = "search.suggestions.contributor.name=commerce",
 	service = SuggestionsContributor.class
 )
-public class BasicSuggestionsContributor implements SuggestionsContributor {
-
+public class CommerceSuggestionsContributor implements SuggestionsContributor {
 	@Override
 	public SuggestionsContributorResults getSuggestionsContributorResults(
 		LiferayPortletRequest liferayPortletRequest,
 		LiferayPortletResponse liferayPortletResponse,
 		SearchContext searchContext,
-		SuggestionsContributorConfiguration
-			suggestionsContributorConfiguration) {
+		SuggestionsContributorConfiguration suggestionsContributorConfiguration) {
 
 		if (!_exceedsCharacterThreshold(
-				(Map<String, Object>)
-					suggestionsContributorConfiguration.getAttributes(),
-				searchContext.getKeywords())) {
+			(Map<String, Object>)
+				suggestionsContributorConfiguration.getAttributes(),
+			searchContext.getKeywords())) {
 
 			return null;
+		}
+
+		ThemeDisplay themeDisplay =
+			(ThemeDisplay)liferayPortletRequest.getAttribute(
+				WebKeys.THEME_DISPLAY);
+
+		CommerceChannel commerceChannel =
+			_commerceChannelLocalService.fetchCommerceChannelBySiteGroupId(
+				themeDisplay.getScopeGroupId());
+
+		if (commerceChannel != null) {
+			long commerceChannelGroupId = commerceChannel.getGroupId();
+
+			if (commerceChannelGroupId > 0) {
+				searchContext.setAttribute(
+					"commerceChannelGroupId", commerceChannelGroupId);
+			}
 		}
 
 		SearchResponse searchResponse = _searcher.search(
@@ -125,6 +144,16 @@ public class BasicSuggestionsContributor implements SuggestionsContributor {
 			searchContext2 -> {
 				searchContext2.setAttribute(
 					"search.contribute.tuning.rankings", Boolean.TRUE);
+
+				if (searchContext1.getAttribute("commerceChannelGroupId") !=
+					null) {
+
+					searchContext2.setAttribute(
+						"commerceChannelGroupId",
+						searchContext1.getAttribute("commerceChannelGroupId"));
+					searchContext2.setAttribute("secure", Boolean.TRUE);
+				}
+
 				searchContext2.setCompanyId(searchContext1.getCompanyId());
 				searchContext2.setGroupIds(searchContext1.getGroupIds());
 				searchContext2.setKeywords(searchContext1.getKeywords());
@@ -251,10 +280,13 @@ public class BasicSuggestionsContributor implements SuggestionsContributor {
 	private static final int _CHARACTER_THRESHOLD = 2;
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		BasicSuggestionsContributor.class);
+		CommerceSuggestionsContributor.class);
 
 	@Reference
 	private AssetURLViewProvider _assetURLViewProvider;
+
+	@Reference
+	private CommerceChannelLocalService _commerceChannelLocalService;
 
 	@Reference
 	private Searcher _searcher;
@@ -268,5 +300,4 @@ public class BasicSuggestionsContributor implements SuggestionsContributor {
 	@Reference
 	private SuggestionsContributorResultsBuilderFactory
 		_suggestionsContributorResultsBuilderFactory;
-
 }
