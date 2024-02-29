@@ -8,6 +8,7 @@ import React, {useState} from 'react';
 
 import {CONTRIBUTOR_TYPES} from '../../../utils/types/contributorTypes';
 import BasicAttributes from './Basic';
+import CommerceAttributes from './Commerce';
 import SXPBlueprintAttributes from './SXPBlueprint';
 import SiteActivitiesInputs from './SiteActivities';
 
@@ -43,6 +44,16 @@ function ContributorInputSetItem({index, onInputSetItemChange, value = {}}) {
 
 			{value.contributorName === CONTRIBUTOR_TYPES.BASIC && (
 				<BasicAttributes
+					index={index}
+					onBlur={_handleBlur}
+					onInputSetItemChange={onInputSetItemChange}
+					touched={touched}
+					value={value}
+				/>
+			)}
+
+			{value.contributorName === CONTRIBUTOR_TYPES.COMMERCE && (
+				<CommerceAttributes
 					index={index}
 					onBlur={_handleBlur}
 					onInputSetItemChange={onInputSetItemChange}
