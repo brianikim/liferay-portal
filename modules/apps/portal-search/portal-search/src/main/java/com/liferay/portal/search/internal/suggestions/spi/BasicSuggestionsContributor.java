@@ -8,6 +8,8 @@ package com.liferay.portal.search.internal.suggestions.spi;
 import com.liferay.asset.kernel.AssetRendererFactoryRegistryUtil;
 import com.liferay.asset.kernel.model.AssetRenderer;
 import com.liferay.asset.kernel.model.AssetRendererFactory;
+import com.liferay.commerce.product.model.CommerceChannel;
+import com.liferay.commerce.product.service.CommerceChannelLocalService;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
@@ -17,11 +19,13 @@ import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.SearchContext;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.search.asset.AssetURLViewProvider;
 import com.liferay.portal.search.document.Document;
 import com.liferay.portal.search.hits.SearchHit;
@@ -69,6 +73,23 @@ public class BasicSuggestionsContributor implements SuggestionsContributor {
 				searchContext.getKeywords())) {
 
 			return null;
+		}
+
+		ThemeDisplay themeDisplay =
+			(ThemeDisplay)liferayPortletRequest.getAttribute(
+				WebKeys.THEME_DISPLAY);
+
+		CommerceChannel commerceChannel =
+			_commerceChannelLocalService.fetchCommerceChannelBySiteGroupId(
+				themeDisplay.getScopeGroupId());
+
+		if (commerceChannel != null) {
+			long commerceChannelGroupId = commerceChannel.getGroupId();
+
+			if (commerceChannelGroupId > 0) {
+				searchContext.setAttribute(
+					"commerceChannelGroupId", commerceChannelGroupId);
+			}
 		}
 
 		SearchResponse searchResponse = _searcher.search(
@@ -125,6 +146,16 @@ public class BasicSuggestionsContributor implements SuggestionsContributor {
 			searchContext2 -> {
 				searchContext2.setAttribute(
 					"search.contribute.tuning.rankings", Boolean.TRUE);
+
+				if (searchContext1.getAttribute("commerceChannelGroupId") !=
+						null) {
+
+					searchContext2.setAttribute(
+						"commerceChannelGroupId",
+						searchContext1.getAttribute("commerceChannelGroupId"));
+					searchContext2.setAttribute("secure", Boolean.TRUE);
+				}
+
 				searchContext2.setCompanyId(searchContext1.getCompanyId());
 				searchContext2.setGroupIds(searchContext1.getGroupIds());
 				searchContext2.setKeywords(searchContext1.getKeywords());
@@ -255,6 +286,9 @@ public class BasicSuggestionsContributor implements SuggestionsContributor {
 
 	@Reference
 	private AssetURLViewProvider _assetURLViewProvider;
+
+	@Reference
+	private CommerceChannelLocalService _commerceChannelLocalService;
 
 	@Reference
 	private Searcher _searcher;
