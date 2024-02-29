@@ -58,17 +58,19 @@ import org.osgi.service.component.annotations.Reference;
 	service = SuggestionsContributor.class
 )
 public class CommerceSuggestionsContributor implements SuggestionsContributor {
+
 	@Override
 	public SuggestionsContributorResults getSuggestionsContributorResults(
 		LiferayPortletRequest liferayPortletRequest,
 		LiferayPortletResponse liferayPortletResponse,
 		SearchContext searchContext,
-		SuggestionsContributorConfiguration suggestionsContributorConfiguration) {
+		SuggestionsContributorConfiguration
+			suggestionsContributorConfiguration) {
 
 		if (!_exceedsCharacterThreshold(
-			(Map<String, Object>)
-				suggestionsContributorConfiguration.getAttributes(),
-			searchContext.getKeywords())) {
+				(Map<String, Object>)
+					suggestionsContributorConfiguration.getAttributes(),
+				searchContext.getKeywords())) {
 
 			return null;
 		}
@@ -146,7 +148,7 @@ public class CommerceSuggestionsContributor implements SuggestionsContributor {
 					"search.contribute.tuning.rankings", Boolean.TRUE);
 
 				if (searchContext1.getAttribute("commerceChannelGroupId") !=
-					null) {
+						null) {
 
 					searchContext2.setAttribute(
 						"commerceChannelGroupId",
@@ -300,4 +302,5 @@ public class CommerceSuggestionsContributor implements SuggestionsContributor {
 	@Reference
 	private SuggestionsContributorResultsBuilderFactory
 		_suggestionsContributorResultsBuilderFactory;
+
 }
