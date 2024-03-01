@@ -28,7 +28,9 @@ function Commerce({index, onBlur, onInputSetItemChange, touched, value}) {
 				</InputSetItemHeader.Title>
 
 				<InputSetItemHeader.Description>
-					{Liferay.Language.get('commerce-suggestions-contributor-help')}
+					{Liferay.Language.get(
+						'commerce-suggestions-contributor-help'
+					)}
 				</InputSetItemHeader.Description>
 			</InputSetItemHeader>
 
