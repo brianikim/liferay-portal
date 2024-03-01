@@ -30,9 +30,11 @@ export default function cleanSuggestionsContributorConfiguration(
 				return false;
 			}
 
-			if (!isDXP &&
+			if (
+				!isDXP &&
 				item.contributorName !== CONTRIBUTOR_TYPES.BASIC &&
-				item.contributorName !== CONTRIBUTOR_TYPES.COMMERCE) {
+				item.contributorName !== CONTRIBUTOR_TYPES.COMMERCE
+			) {
 				return false;
 			}
 

@@ -134,7 +134,7 @@ function SearchBarConfigurationSuggestions({
 			options.push(BASIC_OPTION);
 		}
 
-		if(isCommerceEnabled) {
+		if (isCommerceEnabled) {
 			options.push(COMMERCE_OPTION);
 		}
 
