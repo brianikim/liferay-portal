@@ -20,6 +20,7 @@ type TProduct = {
 	name?: {
 		[key: string]: string;
 	};
+	productChannelFilter?: boolean;
 	productId?: number;
 	productOptions?: any[];
 	productSpecifications?: any[];
@@ -222,6 +223,7 @@ export class HeadlessCommerceAdminCatalogApiHelper {
 				name: {
 					en_US: 'Product' + getRandomInt(),
 				},
+				productChannelFilter: true,
 				productStatus: 0,
 				productType: 'simple',
 				skus: [
