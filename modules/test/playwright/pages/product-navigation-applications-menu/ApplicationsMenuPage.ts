@@ -26,6 +26,7 @@ export class ApplicationsMenuPage {
 	readonly page: Page;
 	private readonly processBuilderItem: Locator;
 	private readonly productsMenuItem: Locator;
+	private readonly serviceAccountsItem: Locator;
 	private readonly usersAndOrganizationsItem: Locator;
 
 	constructor(page: Page) {
@@ -86,6 +87,10 @@ export class ApplicationsMenuPage {
 		this.usersAndOrganizationsItem = page.getByRole('menuitem', {
 			exact: true,
 			name: 'Users and Organizations',
+		});
+		this.serviceAccountsItem = page.getByRole('menuitem', {
+			exact: true,
+			name: 'Service Accounts',
 		});
 		this.aiCreatorLink = page.getByRole('link', {
 			exact: true,
@@ -187,6 +192,12 @@ export class ApplicationsMenuPage {
 	async goToProcessBuilder() {
 		await this.goToApplicationsMenu();
 		await this.processBuilderItem.click();
+	}
+
+	async goToServiceAccounts() {
+		await this.goto();
+		await this.controlPanelButton.click();
+		await this.serviceAccountsItem.click();
 	}
 
 	async goToUsersAndOrganizations() {
