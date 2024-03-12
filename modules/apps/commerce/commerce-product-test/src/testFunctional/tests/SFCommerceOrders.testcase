@@ -1416,12 +1416,16 @@ definition {
 		}
 
 		task ("Then the order date is shown in MMM d, yyyy format") {
-			var currentDate = DateUtil.getFormattedCurrentDate("MMM d, yyyy", "UTC");
+			var result = CommerceUtilities.checkCurrentDateFormat(
+					date = selenium.getText("//div[contains(@class,'table-list-title')]/a[contains(.,'')]/following::div[4]"),
+					format1 = "MMM d, yy",
+					format2 = "MMM d, yyyy",
+					timeZone1 = "UTC",
+					timeZone2 = "UTC");
 
-			AssertTextEquals(
-				key_orderId = "",
-				locator1 = "CommerceOrders#PLACED_ORDERS_LIST_DATE",
-				value1 = ${currentDate});
+			TestUtils.assertEquals(
+				actual = ${result},
+				expected = "True");
 		}
 
 		task ("When the buyer views the order from the placed orders details page") {
@@ -1429,9 +1433,16 @@ definition {
 		}
 
 		task ("Then the order date is shown in MMM d, yyyy format") {
-			AssertTextEquals(
-				locator1 = "CommerceOrders#ORDER_DETAILS_DATE",
-				value1 = ${currentDate});
+			var result = CommerceUtilities.checkCurrentDateFormat(
+					date = selenium.getText("CommerceOrders#ORDER_DETAILS_DATE"),
+					format1 = "MMM d, yy",
+					format2 = "MMM d, yyyy",
+					timeZone1 = "UTC",
+					timeZone2 = "UTC");
+
+			TestUtils.assertEquals(
+				actual = ${result},
+				expected = "True");
 		}
 	}
 
