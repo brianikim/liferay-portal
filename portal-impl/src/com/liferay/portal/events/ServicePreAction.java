@@ -33,6 +33,7 @@ import com.liferay.portal.kernel.model.GroupConstants;
 import com.liferay.portal.kernel.model.Image;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutConstants;
+import com.liferay.portal.kernel.model.LayoutFriendlyURL;
 import com.liferay.portal.kernel.model.LayoutSet;
 import com.liferay.portal.kernel.model.LayoutTemplate;
 import com.liferay.portal.kernel.model.LayoutTypeAccessPolicy;
@@ -53,6 +54,7 @@ import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUti
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.service.ImageLocalServiceUtil;
+import com.liferay.portal.kernel.service.LayoutFriendlyURLLocalServiceUtil;
 import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
 import com.liferay.portal.kernel.service.LayoutSetLocalServiceUtil;
 import com.liferay.portal.kernel.service.RoleLocalServiceUtil;
@@ -1005,6 +1007,25 @@ public class ServicePreAction extends Action {
 			}
 		}
 
+		String pathInfo = httpServletRequest.getPathInfo();
+
+		if (layout == null && pathInfo.contains(_PATH_PORTAL_UPDATE_LANGUAGE)) {
+			long layoutFriendlyURLId = ParamUtil.getLong(
+				PortalUtil.getOriginalServletRequest(
+					httpServletRequest),
+				"layoutFriendlyURLId");
+
+			if (layoutFriendlyURLId > 0) {
+				LayoutFriendlyURL layoutFriendlyURL =
+					LayoutFriendlyURLLocalServiceUtil.getLayoutFriendlyURL(
+						layoutFriendlyURLId);
+
+				plid = layoutFriendlyURL.getPlid();
+
+				layout = LayoutLocalServiceUtil.getLayout(plid);
+			}
+		}
+
 		if (layout != null) {
 			Group layoutGroup = layout.getGroup();
 
@@ -1035,6 +1056,7 @@ public class ServicePreAction extends Action {
 						}
 
 						throw new NoSuchLayoutException(message);
+						}
 					}
 				}
 
@@ -1056,7 +1078,6 @@ public class ServicePreAction extends Action {
 						layout.getPlid());
 				}
 			}
-		}
 
 		boolean viewableSourceGroup = true;
 
@@ -2211,6 +2232,9 @@ public class ServicePreAction extends Action {
 	private static final String _PATH_PORTAL_LOGIN = "/portal/login";
 
 	private static final String _PATH_PORTAL_LOGOUT = "/portal/logout";
+
+	private static final String _PATH_PORTAL_UPDATE_LANGUAGE =
+		"/portal/update_language";
 
 	private static final String _PATH_PROXY;
 

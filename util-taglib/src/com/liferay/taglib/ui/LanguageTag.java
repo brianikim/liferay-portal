@@ -6,6 +6,8 @@
 package com.liferay.taglib.ui;
 
 import com.liferay.portal.kernel.language.LanguageUtil;
+import com.liferay.portal.kernel.model.LayoutFriendlyURL;
+import com.liferay.portal.kernel.service.LayoutFriendlyURLLocalServiceUtil;
 import com.liferay.portal.kernel.servlet.taglib.ui.LanguageEntry;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
@@ -149,8 +151,15 @@ public class LanguageTag extends IncludeTag {
 				WebKeys.THEME_DISPLAY);
 
 		formAction =
-			themeDisplay.getPathMain() + "/portal/update_language?p_l_id=" +
-				themeDisplay.getPlid();
+			themeDisplay.getPathMain() + "/portal/update_language";
+
+		LayoutFriendlyURL layoutFriendlyURL =
+			LayoutFriendlyURLLocalServiceUtil.fetchLayoutFriendlyURL(
+				themeDisplay.getPlid(), _languageId);
+
+		formAction = HttpComponentsUtil.setParameter(
+			formAction, "layoutFriendlyURLId",
+			layoutFriendlyURL.getLayoutFriendlyURLId());
 
 		formAction = HttpComponentsUtil.setParameter(
 			formAction, "redirect",
