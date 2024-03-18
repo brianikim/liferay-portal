@@ -12,6 +12,7 @@ import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Country;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.service.CountryLocalService;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
@@ -85,7 +86,7 @@ public class CountryStagedModelDataHandler
 		throws Exception {
 
 		Country existingCountry = _countryLocalService.fetchCountryByA2(
-			country.getCompanyId(), country.getA2());
+			CompanyThreadLocal.getCompanyId(), country.getA2());
 
 		Country importedCountry = null;
 
