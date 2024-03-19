@@ -42,7 +42,6 @@ const removeEmptyFields = (fields) =>
 
 function SearchBarConfigurationSuggestions({
 	initialSuggestionsContributorConfiguration = '[]',
-	isCommerceEnabled = true,
 	isDXP = false,
 	isSearchExperiencesSupported = true,
 	learnResources,
@@ -134,7 +133,12 @@ function SearchBarConfigurationSuggestions({
 			options.push(BASIC_OPTION);
 		}
 
-		if (isCommerceEnabled) {
+		const commerceContributorExists =
+			suggestionsContributorConfiguration.findIndex(
+				(value) => value.contributorName === CONTRIBUTOR_TYPES.COMMERCE
+			) > -1;
+
+		if (!commerceContributorExists) {
 			options.push(COMMERCE_OPTION);
 		}
 
