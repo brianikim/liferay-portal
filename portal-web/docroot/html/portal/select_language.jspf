@@ -8,7 +8,9 @@
 <div class="float-right">
 
 	<%
-	String updateLanguageFormAction = HttpComponentsUtil.addParameter(themeDisplay.getPathMain() + "/portal/update_language", "p_l_id", themeDisplay.getPlid());
+	LayoutFriendlyURL layoutFriendlyURL = LayoutFriendlyURLLocalServiceUtil.getLayoutFriendlyURL(themeDisplay.getPlid(), themeDisplay.getLanguageId());
+
+	String updateLanguageFormAction = HttpComponentsUtil.addParameter(themeDisplay.getPathMain() + "/portal/update_language", "layoutFriendlyURLId", layoutFriendlyURL.getlayoutFriendlyURLId());
 
 	String updateLanguageRedirect = HttpComponentsUtil.addParameter(PortalUtil.getCurrentURL(request), "ticketKey", ParamUtil.getString(request, "ticketKey"));
 

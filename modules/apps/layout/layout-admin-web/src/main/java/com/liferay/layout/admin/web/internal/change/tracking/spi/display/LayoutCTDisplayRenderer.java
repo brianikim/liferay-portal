@@ -14,9 +14,11 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.ColorScheme;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.LayoutFriendlyURL;
 import com.liferay.portal.kernel.model.Theme;
 import com.liferay.portal.kernel.portlet.url.builder.PortletURLBuilder;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.service.LayoutFriendlyURLLocalServiceUtil;
 import com.liferay.portal.kernel.service.permission.LayoutPermission;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HttpComponentsUtil;
@@ -133,9 +135,15 @@ public class LayoutCTDisplayRenderer extends BaseCTDisplayRenderer<Layout> {
 			previewLayout = layout.fetchDraftLayout();
 		}
 
+		String languageId = LocaleUtil.toLanguageId(displayContext.getLocale());
+
+		LayoutFriendlyURL layoutFriendlyURL =
+			LayoutFriendlyURLLocalServiceUtil.fetchLayoutFriendlyURL(
+				previewLayout.getPlid(), languageId);
+
 		String url = HttpComponentsUtil.addParameter(
-			themeDisplay.getPathMain() + "/portal/update_language", "p_l_id",
-			previewLayout.getPlid());
+			themeDisplay.getPathMain() + "/portal/update_language", "layoutFriendlyURLId",
+			layoutFriendlyURL.getLayoutFriendlyURLId());
 
 		String redirect = HttpComponentsUtil.addParameter(
 			_portal.getLayoutFriendlyURL(previewLayout, themeDisplay),
@@ -153,8 +161,6 @@ public class LayoutCTDisplayRenderer extends BaseCTDisplayRenderer<Layout> {
 		}
 
 		url = HttpComponentsUtil.addParameter(url, "redirect", redirect);
-
-		String languageId = LocaleUtil.toLanguageId(displayContext.getLocale());
 
 		url = HttpComponentsUtil.addParameter(url, "languageId", languageId);
 
