@@ -8,9 +8,9 @@
 <%@ include file="/dynamic_include/init.jsp" %>
 
 <%
-	Locale userLocale = user.getLocale();
+Locale userLocale = user.getLocale();
 
-	LayoutFriendlyURL layoutFriendlyURL = LayoutFriendlyURLLocalServiceUtil.getLayoutFriendlyURL(themeDisplay.getPlid(), user.getLanguageId());
+LayoutFriendlyURL layoutFriendlyURL = LayoutFriendlyURLLocalServiceUtil.getLayoutFriendlyURL(themeDisplay.getPlid(), user.getLanguageId());
 %>
 
 <liferay-util:buffer
@@ -29,8 +29,9 @@
 	</div>
 
 	<div dir="<%= LanguageUtil.get(request, "lang.dir") %>">
-		<aui:a cssClass="d-block" href='<%= themeDisplay.getPathMain() + "/portal/update_language?layoutFriendlyURLId=" + layoutFriendlyURL.getLayoutFriendlyURLId()
-		 + "&redirect=" + URLCodec.encodeURL(themeDisplay.getURLCurrent()) + "&languageId=" + themeDisplay.getLanguageId() + "&showUserLocaleOptionsMessage=false" %>'>
+		<aui:a cssClass="d-block" href='<%=
+			themeDisplay.getPathMain() + "/portal/update_language?layoutFriendlyURLId=" + layoutFriendlyURL.getLayoutFriendlyURLId()
+			+ "&redirect=" + URLCodec.encodeURL(themeDisplay.getURLCurrent()) + "&languageId=" + themeDisplay.getLanguageId() + "&showUserLocaleOptionsMessage=false" %>'>
 			<%= LanguageUtil.format(locale, "set-x-as-your-preferred-language", locale.getDisplayName(locale)) %>
 		</aui:a>
 	</div>

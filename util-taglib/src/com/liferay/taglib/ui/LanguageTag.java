@@ -150,8 +150,7 @@ public class LanguageTag extends IncludeTag {
 			(ThemeDisplay)httpServletRequest.getAttribute(
 				WebKeys.THEME_DISPLAY);
 
-		formAction =
-			themeDisplay.getPathMain() + "/portal/update_language";
+		formAction = themeDisplay.getPathMain() + "/portal/update_language";
 
 		LayoutFriendlyURL layoutFriendlyURL =
 			LayoutFriendlyURLLocalServiceUtil.fetchLayoutFriendlyURL(
