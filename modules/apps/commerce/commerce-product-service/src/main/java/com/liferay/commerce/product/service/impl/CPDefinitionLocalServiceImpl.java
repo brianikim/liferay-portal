@@ -366,12 +366,14 @@ public class CPDefinitionLocalServiceImpl
 
 		// Asset
 
-		updateAsset(
-			user.getUserId(), cpDefinition,
-			serviceContext.getAssetCategoryIds(),
-			serviceContext.getAssetTagNames(),
-			serviceContext.getAssetLinkEntryIds(),
-			serviceContext.getAssetPriority());
+		if (!cpDefinition.isDraft()) {
+			updateAsset(
+				user.getUserId(), cpDefinition,
+				serviceContext.getAssetCategoryIds(),
+				serviceContext.getAssetTagNames(),
+				serviceContext.getAssetLinkEntryIds(),
+				serviceContext.getAssetPriority());
+		}
 
 		// Workflow
 
