@@ -25,6 +25,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 import java.util.Map;
 
+import com.liferay.portal.kernel.util.Validator;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -79,6 +80,10 @@ public class CommerceOrderItemQuantityFormatterImpl
 
 	@Override
 	public BigDecimal parse(String quantity, Locale locale) throws Exception {
+		if (Validator.isNull(quantity)) {
+			quantity = BigDecimal.ZERO.toString();
+		}
+
 		DecimalFormat decimalFormat = _getDecimalFormat(true, true, locale);
 
 		return (BigDecimal)decimalFormat.parse(quantity);

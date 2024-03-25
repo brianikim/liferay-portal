@@ -111,6 +111,21 @@
 	<td></td>
 </tr>
 <tr>
+	<td>ORDER_ITEM_CURRENCY_INPUT</td>
+	<td>//div[label[contains(.,'${key_fieldLabel}')]]//input[@type='currency'] | //div[contains(@class,'ddm-field') and contains(.,'${key_fieldLabel}')]//input[@type='currency']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ORDER_ITEM_CURRENCY_INPUT_N</td>
+	<td>xpath=(//div[label[contains(.,'${key_fieldLabel}')]]//input[@type='currency'])[${key_indexNumber}]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ORDER_ITEM_QUANTITY_INPUT</td>
+	<td>//div[label[contains(.,'${key_fieldLabel}')]]//input[@type='quantity'] | //div[contains(@class,'ddm-field') and contains(.,'${key_fieldLabel}')]//input[@type='quantity']</td>
+	<td></td>
+</tr>
+<tr>
 	<td>ORDER_ITEMS_FILE_NAME</td>
 	<td>//span[contains(@id,'_CommerceOrderPortlet_fileEntryNameInput')]/a</td>
 	<td></td>
@@ -120,6 +135,7 @@
 	<td>//tbody//td[2][contains(.,'${key_productSku}')]/..//div[@class='table-list-title']/button</td>
 	<td></td>
 </tr>
+
 <tr>
 	<td>ORDER_NOTES_ENTRY_ELLIPSIS</td>
 	<td>//div[contains(text(),'${key_orderNoteBody}')]/..//following-sibling::div//*[*[name()='svg'][contains(@class,'icon-ellipsis')]]</td>
