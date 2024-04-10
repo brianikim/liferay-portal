@@ -240,26 +240,14 @@ public class EditCPInstanceMVCActionCommand extends BaseMVCActionCommand {
 		double depth = ParamUtil.getDouble(actionRequest, "depth");
 		double weight = ParamUtil.getDouble(actionRequest, "weight");
 
-		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
 		BigDecimal formattedPrice = new BigDecimal(
-			_commercePriceFormatter.parse(
-				ParamUtil.getString(
-					actionRequest, "price", BigDecimal.ZERO.toString()),
-				themeDisplay.getLocale()));
+			_commercePriceFormatter.parse(actionRequest, "price"));
 
 		BigDecimal formattedPromoPrice = new BigDecimal(
-			_commercePriceFormatter.parse(
-				ParamUtil.getString(
-					actionRequest, "promoPrice", BigDecimal.ZERO.toString()),
-				themeDisplay.getLocale()));
+			_commercePriceFormatter.parse(actionRequest, "promoPrice"));
 
 		BigDecimal formattedCost = new BigDecimal(
-			_commercePriceFormatter.parse(
-				ParamUtil.getString(
-					actionRequest, "cost", BigDecimal.ZERO.toString()),
-				themeDisplay.getLocale()));
+			_commercePriceFormatter.parse(actionRequest, "cost"));
 
 		int displayDateMonth = ParamUtil.getInteger(
 			actionRequest, "displayDateMonth");

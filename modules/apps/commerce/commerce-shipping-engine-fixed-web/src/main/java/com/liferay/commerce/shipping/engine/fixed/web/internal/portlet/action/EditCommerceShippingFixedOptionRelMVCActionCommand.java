@@ -16,11 +16,9 @@ import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.servlet.SessionErrors;
-import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.kernel.util.WebKeys;
 
 import java.math.BigDecimal;
 
@@ -115,21 +113,12 @@ public class EditCommerceShippingFixedOptionRelMVCActionCommand
 		double weightFrom = ParamUtil.getDouble(actionRequest, "weightFrom");
 		double weightTo = ParamUtil.getDouble(actionRequest, "weightTo");
 
-		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
 		BigDecimal formattedFixedPrice = new BigDecimal(
-			_commercePriceFormatter.parse(
-				ParamUtil.getString(
-					actionRequest, "fixedPrice", BigDecimal.ZERO.toString()),
-				themeDisplay.getLocale()));
+			_commercePriceFormatter.parse(actionRequest, "fixedPrice"));
 
 		BigDecimal formattedRateUnitWeightPrice = new BigDecimal(
 			_commercePriceFormatter.parse(
-				ParamUtil.getString(
-					actionRequest, "rateUnitWeightPrice",
-					BigDecimal.ZERO.toString()),
-				themeDisplay.getLocale()));
+				actionRequest, "rateUnitWeightPrice"));
 
 		double ratePercentage = ParamUtil.getDouble(
 			actionRequest, "ratePercentage");

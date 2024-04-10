@@ -138,14 +138,8 @@ public class EditCommercePaymentEntryMVCActionCommand
 		long commercePaymentEntryId = ParamUtil.getLong(
 			actionRequest, "commercePaymentEntryId");
 
-		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
 		BigDecimal formattedAmount = new BigDecimal(
-			_commercePriceFormatter.parse(
-				ParamUtil.getString(
-					actionRequest, "amount", BigDecimal.ZERO.toString()),
-				themeDisplay.getLocale()));
+			_commercePriceFormatter.parse(actionRequest, "amount"));
 
 		String reasonKey = ParamUtil.getString(actionRequest, "reasonKey");
 

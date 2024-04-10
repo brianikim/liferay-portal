@@ -19,10 +19,8 @@ import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.service.ServiceContextFactory;
 import com.liferay.portal.kernel.servlet.SessionErrors;
-import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.WebKeys;
 
 import java.math.BigDecimal;
 
@@ -163,19 +161,12 @@ public class EditCommerceDiscountMVCActionCommand extends BaseMVCActionCommand {
 		boolean usePercentage = ParamUtil.getBoolean(
 			actionRequest, "usePercentage");
 
-		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
 		String level = ParamUtil.getString(actionRequest, "level");
 
-		BigDecimal formattedAmount = new BigDecimal(
-			_commercePriceFormatter.parse(
-				ParamUtil.getString(
-					actionRequest, "amount", BigDecimal.ZERO.toString()),
-				themeDisplay.getLocale()));
-
 		BigDecimal[] discountLevels = _getDiscountLevels(
-			level, formattedAmount);
+			level,
+			new BigDecimal(
+				_commercePriceFormatter.parse(actionRequest, "amount")));
 
 		int limitationTimes = ParamUtil.getInteger(
 			actionRequest, "limitationTimes");
@@ -208,10 +199,7 @@ public class EditCommerceDiscountMVCActionCommand extends BaseMVCActionCommand {
 			usePercentage,
 			new BigDecimal(
 				_commercePriceFormatter.parse(
-					ParamUtil.getString(
-						actionRequest, "maximumDiscountAmount",
-						BigDecimal.ZERO.toString()),
-					themeDisplay.getLocale())),
+					actionRequest, "maximumDiscountAmount")),
 			level, discountLevels[0], discountLevels[1], discountLevels[2],
 			discountLevels[3],
 			_getLimitationType(limitationTimes, limitationTimesPerAccount),

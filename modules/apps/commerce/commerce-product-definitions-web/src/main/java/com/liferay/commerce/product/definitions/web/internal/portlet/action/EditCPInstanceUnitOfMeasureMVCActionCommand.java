@@ -221,14 +221,8 @@ public class EditCPInstanceUnitOfMeasureMVCActionCommand
 		CPInstance cpInstance = _cpInstanceService.fetchCPInstance(
 			cpInstanceId);
 
-		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
 		BigDecimal formattedBasePrice = new BigDecimal(
-			_commercePriceFormatter.parse(
-				ParamUtil.getString(
-					actionRequest, "basePrice", BigDecimal.ZERO.toString()),
-				themeDisplay.getLocale()));
+			_commercePriceFormatter.parse(actionRequest, "basePrice"));
 
 		ServiceContext serviceContext = ServiceContextFactory.getInstance(
 			CPInstanceUnitOfMeasure.class.getName(), actionRequest);
@@ -240,10 +234,7 @@ public class EditCPInstanceUnitOfMeasureMVCActionCommand
 		}
 
 		BigDecimal formattedPromoPrice = new BigDecimal(
-			_commercePriceFormatter.parse(
-				ParamUtil.getString(
-					actionRequest, "promoPrice", BigDecimal.ZERO.toString()),
-				themeDisplay.getLocale()));
+			_commercePriceFormatter.parse(actionRequest, "promoPrice"));
 
 		if (formattedPromoPrice != null) {
 			_updateCommercePriceEntry(

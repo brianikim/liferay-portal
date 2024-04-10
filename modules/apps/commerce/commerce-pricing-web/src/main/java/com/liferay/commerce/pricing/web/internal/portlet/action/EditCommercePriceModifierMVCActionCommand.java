@@ -17,12 +17,10 @@ import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextFactory;
 import com.liferay.portal.kernel.servlet.SessionErrors;
-import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.kernel.util.WebKeys;
 
 import java.math.BigDecimal;
 
@@ -121,15 +119,8 @@ public class EditCommercePriceModifierMVCActionCommand
 		String modifierType = ParamUtil.getString(
 			actionRequest, "modifierType");
 
-		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
 		BigDecimal formattedModifierAmount = new BigDecimal(
-			_commercePriceFormatter.parse(
-				ParamUtil.getString(
-					actionRequest, "modifierAmount",
-					BigDecimal.ZERO.toString()),
-				themeDisplay.getLocale()));
+			_commercePriceFormatter.parse(actionRequest, "modifierAmount"));
 
 		double priority = ParamUtil.getDouble(actionRequest, "priority");
 		boolean active = ParamUtil.getBoolean(actionRequest, "active");

@@ -23,13 +23,11 @@ import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextFactory;
 import com.liferay.portal.kernel.servlet.SessionErrors;
-import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.transaction.TransactionConfig;
 import com.liferay.portal.kernel.transaction.TransactionInvokerUtil;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.WebKeys;
 
 import java.math.BigDecimal;
 
@@ -206,42 +204,26 @@ public class EditCommerceOrderItemMVCActionCommand
 			serviceContext);
 
 		if (!commerceOrder.isOpen()) {
-			ThemeDisplay themeDisplay =
-				(ThemeDisplay)actionRequest.getAttribute(WebKeys.THEME_DISPLAY);
-
-			BigDecimal formattedPrice = new BigDecimal(
-				_commercePriceFormatter.parse(
-					ParamUtil.getString(
-						actionRequest, "price", BigDecimal.ZERO.toString()),
-					themeDisplay.getLocale()));
-
 			commerceOrderItem =
 				_commerceOrderItemService.updateCommerceOrderItemUnitPrice(
 					commerceOrderItemId, formattedDecimalQuantity,
-					formattedPrice);
-
-			BigDecimal formattedDiscountAmount = new BigDecimal(
-				_commercePriceFormatter.parse(
-					ParamUtil.getString(
-						actionRequest, "discountAmount",
-						BigDecimal.ZERO.toString()),
-					themeDisplay.getLocale()));
-
-			BigDecimal formattedFinalPrice = new BigDecimal(
-				_commercePriceFormatter.parse(
-					ParamUtil.getString(
-						actionRequest, "finalPrice",
-						BigDecimal.ZERO.toString()),
-					themeDisplay.getLocale()));
+					new BigDecimal(
+						_commercePriceFormatter.parse(actionRequest, "price")));
 
 			commerceOrderItem =
 				_commerceOrderItemService.updateCommerceOrderItemPrices(
-					commerceOrderItemId, formattedDiscountAmount,
+					commerceOrderItemId,
+					new BigDecimal(
+						_commercePriceFormatter.parse(
+							actionRequest, "discountAmount")),
 					commerceOrderItem.getDiscountPercentageLevel1(),
 					commerceOrderItem.getDiscountPercentageLevel2(),
 					commerceOrderItem.getDiscountPercentageLevel3(),
 					commerceOrderItem.getDiscountPercentageLevel4(),
-					formattedFinalPrice, commerceOrderItem.getPromoPrice(),
+					new BigDecimal(
+						_commercePriceFormatter.parse(
+							actionRequest, "finalPrice")),
+					commerceOrderItem.getPromoPrice(),
 					commerceOrderItem.getUnitPrice());
 		}
 
