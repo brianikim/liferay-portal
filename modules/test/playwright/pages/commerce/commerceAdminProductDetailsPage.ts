@@ -7,12 +7,18 @@ import {Locator, Page} from '@playwright/test';
 
 export class CommerceAdminProductDetailsPage {
 	readonly page: Page;
+	readonly headerActionButton: (action: string) => Locator;
 	readonly productDiagramTab: Locator;
 	readonly productRelationsTab: Locator;
 	readonly visibilityTab: Locator;
+	readonly workflowStatusLabel: (status: string) => Locator;
 
 	constructor(page: Page) {
 		this.page = page;
+		this.headerActionButton = (action) => {
+			return page
+				.getByTestId(action)
+		};
 		this.productDiagramTab = page.getByRole('link', {
 			name: 'Diagram',
 		});
@@ -22,6 +28,10 @@ export class CommerceAdminProductDetailsPage {
 		this.visibilityTab = page.getByRole('link', {
 			name: 'Visibility',
 		});
+		this.workflowStatusLabel = (status) => {
+			return page
+				.getByTestId(status)
+		};
 	}
 
 	async goToProductDiagram() {
