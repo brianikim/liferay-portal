@@ -192,15 +192,9 @@ public class EditCommerceOrderItemMVCActionCommand
 		long cpMeasurementUnitId = ParamUtil.getLong(
 			actionRequest, "cpMeasurementUnitId");
 
-		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
-		String decimalQuantity = ParamUtil.getString(
-			actionRequest, "decimalQuantity", BigDecimal.ZERO.toString());
-
 		BigDecimal formattedDecimalQuantity =
 			_commerceOrderItemQuantityFormatter.parse(
-				decimalQuantity, themeDisplay.getLocale());
+				actionRequest, "decimalQuantity");
 
 		ServiceContext serviceContext = ServiceContextFactory.getInstance(
 			CommerceOrderItem.class.getName(), actionRequest);
@@ -212,34 +206,33 @@ public class EditCommerceOrderItemMVCActionCommand
 			serviceContext);
 
 		if (!commerceOrder.isOpen()) {
-			String price = ParamUtil.getString(
-				actionRequest, "price", BigDecimal.ZERO.toString());
+			ThemeDisplay themeDisplay =
+				(ThemeDisplay)actionRequest.getAttribute(WebKeys.THEME_DISPLAY);
 
-			price = _commercePriceFormatter.parse(
-				price, themeDisplay.getLocale());
-
-			BigDecimal formattedPrice = new BigDecimal(price);
+			BigDecimal formattedPrice = new BigDecimal(
+				_commercePriceFormatter.parse(
+					ParamUtil.getString(
+						actionRequest, "price", BigDecimal.ZERO.toString()),
+					themeDisplay.getLocale()));
 
 			commerceOrderItem =
 				_commerceOrderItemService.updateCommerceOrderItemUnitPrice(
 					commerceOrderItemId, formattedDecimalQuantity,
 					formattedPrice);
 
-			String discountAmount = ParamUtil.getString(
-				actionRequest, "discountAmount", BigDecimal.ZERO.toString());
+			BigDecimal formattedDiscountAmount = new BigDecimal(
+				_commercePriceFormatter.parse(
+					ParamUtil.getString(
+						actionRequest, "discountAmount",
+						BigDecimal.ZERO.toString()),
+					themeDisplay.getLocale()));
 
-			discountAmount = _commercePriceFormatter.parse(
-				discountAmount, themeDisplay.getLocale());
-
-			BigDecimal formattedDiscountAmount = new BigDecimal(discountAmount);
-
-			String finalPrice = ParamUtil.getString(
-				actionRequest, "finalPrice", BigDecimal.ZERO.toString());
-
-			finalPrice = _commercePriceFormatter.parse(
-				finalPrice, themeDisplay.getLocale());
-
-			BigDecimal formattedFinalPrice = new BigDecimal(finalPrice);
+			BigDecimal formattedFinalPrice = new BigDecimal(
+				_commercePriceFormatter.parse(
+					ParamUtil.getString(
+						actionRequest, "finalPrice",
+						BigDecimal.ZERO.toString()),
+					themeDisplay.getLocale()));
 
 			commerceOrderItem =
 				_commerceOrderItemService.updateCommerceOrderItemPrices(
