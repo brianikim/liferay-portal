@@ -97,3 +97,41 @@ test('LPD-13559 bulk actions for product relations', async ({
 		await apiHelpers.headlessCommerceAdminCatalog.deleteCatalog(catalog.id);
 	}
 });
+
+test('LPD-22886 Update published status on product relations', async ({
+																apiHelpers,
+																commerceAdminProductDetailsPage,
+																commerceAdminProductPage,
+																page,
+															}) => {
+	await page.goto('/');
+
+	const catalog = await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+	const product = await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+		catalogId: catalog.id,
+		productStatus: 2,
+	});
+
+	try {
+		await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+		await commerceAdminProductDetailsPage.productRelationsTab.click();
+
+		await expect(
+			commerceAdminProductDetailsPage.workflowStatusLabel('draft')
+		).toBeVisible();
+
+		await commerceAdminProductDetailsPage.headerActionButton('Publish').click();
+
+		await expect(
+			commerceAdminProductDetailsPage.workflowStatusLabel('approved')
+		).toBeVisible();
+	}
+	finally {
+		await apiHelpers.headlessCommerceAdminCatalog.deleteProduct(
+			product.productId
+		);
+		await apiHelpers.headlessCommerceAdminCatalog.deleteCatalog(catalog.id);
+	}
+});

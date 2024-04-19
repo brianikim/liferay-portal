@@ -271,6 +271,7 @@ String myWorkflowTasksPortletNamespace = PortalUtil.getPortletNamespace(PortletK
 
 							<clay:link
 								cssClass="<%= HtmlUtil.escape(buttonCssClasses) %>"
+								data-qa-id="<%= LanguageUtil.get(request, HtmlUtil.escape(action.getLabel())) %>"
 								href="<%= Validator.isNotNull(action.getHref()) ? action.getHref() : StringPool.POUND %>"
 								id="<%= HtmlUtil.escape(actionId) %>"
 								label="<%= LanguageUtil.get(request, HtmlUtil.escape(action.getLabel())) %>"
