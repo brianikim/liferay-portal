@@ -62,7 +62,7 @@ public class CPDefinitionModelPreFilterContributor
 		_filterByStatuses(booleanFilter, searchContext);
 		_filterBySubscriptionEnabled(booleanFilter, searchContext);
 
-		if (GetterUtil.getBoolean(searchContext.getAttribute("secure"))) {
+		if (GetterUtil.getBoolean(searchContext.getAttribute("secure"), true)) {
 			_filterByAccountGroupIds(booleanFilter, searchContext);
 			_filterByCommerceChannelId(booleanFilter, searchContext);
 		}

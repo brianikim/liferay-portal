@@ -892,6 +892,7 @@ public class ProductResourceImpl extends BaseProductResourceImpl {
 
 				searchContext.setAttribute(
 					Field.STATUS, WorkflowConstants.STATUS_ANY);
+				searchContext.setAttribute("secure", Boolean.FALSE);
 
 				if (preferredLocale != null) {
 					searchContext.setLocale(preferredLocale);

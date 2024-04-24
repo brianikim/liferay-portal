@@ -2080,6 +2080,7 @@ public class CPDefinitionLocalServiceImpl
 		List<Facet> facets = getFacets(
 			filterFields, filterValues, searchContext);
 
+		searchContext.setAttribute("secure", Boolean.FALSE);
 		searchContext.setFacets(facets);
 
 		return _searchCPDefinitions(searchContext);
