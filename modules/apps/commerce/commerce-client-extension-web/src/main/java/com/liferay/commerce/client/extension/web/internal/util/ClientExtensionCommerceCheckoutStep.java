@@ -103,16 +103,18 @@ public class ClientExtensionCommerceCheckoutStep
 
 		User currentUser = _userService.getCurrentUser();
 
-		try {
-			String status = new String(
-				_portalCatapult.launch(
-					commerceOrder.getCompanyId(), Http.Method.GET,
-					_oAuth2ApplicationExternalReferenceCode,
-					_jsonFactory.createJSONObject(), "/ready",
-					currentUser.getUserId()
-				).get());
+		JSONObject jsonObject = _jsonFactory.createJSONObject();
 
-			if (Objects.equals(status, "READY") && _active) {
+		try {
+			jsonObject =  _jsonFactory.createJSONObject(
+				new String(
+					_portalCatapult.launch(
+						currentUser.getCompanyId(), Http.Method.POST,
+						_oAuth2ApplicationExternalReferenceCode, jsonObject.put("paymentMethod", commerceOrder.getCommercePaymentMethodKey()), "/active/payment-method",
+						currentUser.getUserId()
+					).get()));
+
+			if (jsonObject.getBoolean("active") && _active) {
 				return true;
 			}
 		}
