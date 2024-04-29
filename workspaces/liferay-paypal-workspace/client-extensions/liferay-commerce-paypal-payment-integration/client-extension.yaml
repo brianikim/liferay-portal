@@ -1,0 +1,21 @@
+assemble:
+    - fromTask: bootJar
+liferay-commerce-paypal-payment-integration:
+    key: liferay-commerce-paypal-payment-integration
+    name: Liferay Commerce Paypal Payment Integration
+    oAuth2ApplicationExternalReferenceCode: liferay-commerce-paypal-payment-integration-oauth-application-user-agent
+    paymentIntegrationType: 3
+    paymentIntegrationTypeSettings:
+        key1: value1
+        key2: value2
+        key3: value3
+        key4: value4
+        key5: value5
+    type: commercePaymentIntegration
+liferay-commerce-paypal-payment-integration-oauth-application-user-agent:
+    .serviceAddress: localhost:58081
+    .serviceScheme: http
+    name: Liferay Commerce Paypal Payment Integration OAuth Application User Agent
+    scopes:
+        - Liferay.Headless.Admin.Workflow.everything
+    type: oAuthApplicationUserAgent
