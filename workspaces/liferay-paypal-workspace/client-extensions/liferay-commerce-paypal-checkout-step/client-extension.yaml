@@ -1,0 +1,16 @@
+assemble:
+    - from: assets
+      into: static
+    - fromTask: bootJar
+liferay-commerce-paypal-checkout-step:
+    active: true
+    checkoutStepLabel: liferay-commerce-paypal-checkout-step-label
+    checkoutStepName: liferay-commerce-paypal-checkout-step-name
+    checkoutStepOrder: 2147483547
+    name: Liferay Commerce Paypal Checkout Step
+    oAuth2ApplicationExternalReferenceCode: liferay-commerce-paypal-checkout-step-oauth-application-user-agent
+    order: true
+    sennaDisabled: true
+    showControls: true
+    type: commerceCheckoutStep
+    visible: true
