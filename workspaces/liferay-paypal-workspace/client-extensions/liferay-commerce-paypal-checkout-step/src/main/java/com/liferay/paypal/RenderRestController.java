@@ -38,37 +38,7 @@ public class RenderRestController extends BaseRestController {
 		JSONObject jsonObject = new JSONObject(json);
 
 		_clientId = String.valueOf(jsonObject.get("clientId"));
-		_merchantId = String.valueOf(jsonObject.get("merchantId"));
-
-		String mode = String.valueOf(jsonObject.get("mode"));
-
-		if (mode.equals("live")) {
-			_apiBaseURL = "https://api-m.paypal.com/v2/";
-		}
-		else {
-			_apiBaseURL = "https://api-m.sandbox.paypal.com/v2/";
-		}
 
 		return new ResponseEntity<>(json, HttpStatus.OK);
 	}
-
-	@GetMapping
-	public ResponseEntity<String> get(
-		@AuthenticationPrincipal Jwt jwt) {
-
-		JSONObject jsonObject = new JSONObject();
-
-		jsonObject.put("clientId", _clientId);
-		jsonObject.put("merchantId", _merchantId);
-		jsonObject.put("clientSecret", _clientSeret);
-		jsonObject.put("apiBaseURL", _apiBaseURL);
-
-		return new ResponseEntity<>(jsonObject.toString(), HttpStatus.OK);
-	}
-
-	private String _clientId;
-	private String _clientSeret;
-	private String _merchantId;
-
-	private String _apiBaseURL;
 }

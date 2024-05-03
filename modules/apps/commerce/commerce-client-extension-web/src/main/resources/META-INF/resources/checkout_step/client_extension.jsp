@@ -17,6 +17,8 @@ String renderURL = (String)request.getAttribute(CommerceClientExtensionWebKeys.R
 	context='<%=
 		HashMapBuilder.<String, Object>put(
 			"renderURL", renderURL
+		).put(
+			"test", "test"
 		).build()
 	%>'
 	module="{main} from commerce-client-extension-web"
