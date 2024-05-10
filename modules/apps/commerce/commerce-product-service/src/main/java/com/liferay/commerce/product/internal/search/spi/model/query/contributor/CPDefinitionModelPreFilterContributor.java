@@ -188,6 +188,22 @@ public class CPDefinitionModelPreFilterContributor
 		long commerceChannelGroupId = GetterUtil.getLong(
 			searchContext.getAttribute("commerceChannelGroupId"));
 
+		if (commerceChannelGroupId == 0) {
+			long[] groupIds = searchContext.getGroupIds();
+
+			if (ArrayUtil.isNotEmpty(groupIds)) {
+				CommerceChannel commerceChannel =
+					_commerceChannelLocalService.
+						fetchCommerceChannelBySiteGroupId(groupIds[0]);
+
+				if ((commerceChannel != null) &&
+					(commerceChannel.getGroupId() > 0)) {
+
+					commerceChannelGroupId = commerceChannel.getGroupId();
+				}
+			}
+		}
+
 		long[] commerceChannelGroupIds = GetterUtil.getLongValues(
 			searchContext.getAttribute("commerceChannelGroupIds"),
 			new long[] {commerceChannelGroupId});
