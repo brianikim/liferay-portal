@@ -5,6 +5,9 @@
 
 package com.liferay.commerce.product.internal.search.spi.model.query.contributor;
 
+import com.liferay.account.model.AccountEntry;
+import com.liferay.account.service.AccountEntryLocalService;
+import com.liferay.account.service.AccountGroupLocalService;
 import com.liferay.commerce.product.constants.CPField;
 import com.liferay.commerce.product.constants.CommerceChannelAccountEntryRelConstants;
 import com.liferay.commerce.product.model.CommerceCatalog;
@@ -15,6 +18,9 @@ import com.liferay.commerce.product.service.CommerceChannelAccountEntryRelLocalS
 import com.liferay.commerce.product.service.CommerceChannelLocalService;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.search.BooleanClauseOccur;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.SearchContext;
@@ -86,6 +92,11 @@ public class CPDefinitionModelPreFilterContributor
 
 		long[] accountGroupIds = GetterUtil.getLongValues(
 			searchContext.getAttribute("commerceAccountGroupIds"), null);
+
+		if (ArrayUtil.isEmpty(accountGroupIds)) {
+			accountGroupIds = _accountGroupLocalService.getAccountGroupIds(
+				_getAccountEntryId(searchContext));
+		}
 
 		if ((accountGroupIds != null) && (accountGroupIds.length > 0)) {
 			BooleanFilter accountGroupIdsBooleanFilter = new BooleanFilter();
@@ -184,6 +195,10 @@ public class CPDefinitionModelPreFilterContributor
 
 		long accountEntryId = GetterUtil.getLong(
 			searchContext.getAttribute("accountEntryId"));
+
+		if (accountEntryId == 0) {
+			accountEntryId = _getAccountEntryId(searchContext);
+		}
 
 		long commerceChannelGroupId = GetterUtil.getLong(
 			searchContext.getAttribute("commerceChannelGroupId"));
@@ -343,6 +358,25 @@ public class CPDefinitionModelPreFilterContributor
 		}
 	}
 
+	private long _getAccountEntryId(SearchContext searchContext) {
+		try {
+			AccountEntry accountEntry =
+				_accountEntryLocalService.getGuestAccountEntry(
+					searchContext.getCompanyId());
+
+			if (accountEntry != null) {
+				return accountEntry.getAccountEntryId();
+			}
+		}
+		catch (PortalException portalException) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(portalException);
+			}
+		}
+
+		return 0;
+	}
+
 	private long[] _getCommerceCatalogIds(SearchContext searchContext) {
 		return TransformUtil.transformToLongArray(
 			_commerceCatalogService.getCommerceCatalogs(
@@ -356,6 +390,15 @@ public class CPDefinitionModelPreFilterContributor
 			searchContext.getAttribute(
 				"search.full.query.suppress.indexer.provided.clauses"));
 	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		CPDefinitionModelPreFilterContributor.class);
+
+	@Reference
+	private AccountEntryLocalService _accountEntryLocalService;
+
+	@Reference
+	private AccountGroupLocalService _accountGroupLocalService;
 
 	@Reference
 	private CommerceCatalogService _commerceCatalogService;
