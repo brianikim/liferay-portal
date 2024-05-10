@@ -185,8 +185,6 @@ public class CPSpecificationOptionFacetsPortletSharedSearchContributor
 			}
 		}
 
-		searchContext.setAttribute("secure", Boolean.TRUE);
-
 		return searchContext;
 	}
 

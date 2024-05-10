@@ -251,7 +251,6 @@ public class CPDefinitionHelperImpl implements CPDefinitionHelper {
 		searchContext.setAttribute(CPField.PUBLISHED, Boolean.TRUE);
 		searchContext.setAttribute(
 			"commerceChannelGroupIds", _checkChannelGroupIds(groupIds));
-		searchContext.setAttribute("secure", Boolean.TRUE);
 		searchContext.setEnd(end);
 		searchContext.setSorts(_getSorts(cpQuery));
 		searchContext.setStart(start);

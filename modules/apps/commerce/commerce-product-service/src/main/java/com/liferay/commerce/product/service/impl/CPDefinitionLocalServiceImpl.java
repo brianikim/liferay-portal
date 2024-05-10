@@ -2101,7 +2101,6 @@ public class CPDefinitionLocalServiceImpl
 			CPField.COMMERCE_CHANNEL_GROUP_ID, commerceChannelGroupId);
 		searchContext.setAttribute(
 			"ignoreCommerceAccountGroup", ignoreCommerceAccountGroup);
-		searchContext.setAttribute("secure", Boolean.TRUE);
 
 		return _searchCPDefinitions(searchContext);
 	}

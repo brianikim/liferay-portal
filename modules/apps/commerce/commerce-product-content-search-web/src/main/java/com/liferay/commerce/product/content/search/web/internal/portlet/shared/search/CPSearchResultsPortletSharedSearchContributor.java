@@ -140,8 +140,6 @@ public class CPSearchResultsPortletSharedSearchContributor
 			}
 		}
 
-		searchContext.setAttribute("secure", Boolean.TRUE);
-
 		QueryConfig queryConfig = portletSharedSearchSettings.getQueryConfig();
 
 		queryConfig.setHighlightEnabled(false);

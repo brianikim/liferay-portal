@@ -153,7 +153,6 @@ public class CPOptionFacetsPortletSharedSearchContributor
 			if (commerceChannelGroupId > 0) {
 				searchContext.setAttribute(
 					CPField.COMMERCE_CHANNEL_GROUP_ID, commerceChannelGroupId);
-				searchContext.setAttribute("secure", Boolean.TRUE);
 
 				AccountEntry accountEntry =
 					_commerceAccountHelper.getCurrentAccountEntry(
@@ -236,8 +235,6 @@ public class CPOptionFacetsPortletSharedSearchContributor
 						accountEntry.getAccountEntryId()));
 			}
 		}
-
-		searchContext.setAttribute("secure", Boolean.TRUE);
 
 		return searchContext;
 	}
