@@ -702,6 +702,8 @@ AUI.add(
 				if (!trigger.hasClass('disabled')) {
 					const menu = menuInstance._getMenu(trigger);
 
+					menuInstance._closeActiveMenu();
+
 					menuInstance._activeMenu = menu;
 					menuInstance._activeTrigger = trigger;
 
