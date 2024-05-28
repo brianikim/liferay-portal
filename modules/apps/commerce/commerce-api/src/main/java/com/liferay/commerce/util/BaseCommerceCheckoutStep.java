@@ -45,6 +45,7 @@ public abstract class BaseCommerceCheckoutStep implements CommerceCheckoutStep {
 	public boolean isPayment() {
 		return false;
 	}
+
 	@Override
 	public boolean isSennaDisabled() {
 		return false;
