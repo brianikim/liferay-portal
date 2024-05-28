@@ -5,6 +5,9 @@
 
 package com.liferay.paypal;
 
+import java.util.Objects;
+
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -21,10 +24,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-
-import java.util.Objects;
-
 
 /**
  * @author Brian I. Kim
@@ -52,13 +51,21 @@ public class AuthorizeRestController extends BaseRestController {
 				jsonObject.getJSONObject("commercePaymentEntry");
 
 			String authorizeOrderResponse = WebClient.create(
-				getEnvironmentURL(typeSettingsJSONObject.getString("mode"))).post(
+				getEnvironmentURL(typeSettingsJSONObject.getString("mode"))
+			).post(
 			).uri(
-				"v2/checkout/orders/" + commercePaymentEntryJSONObject.getString("transactionCode") + "/authorize"
+				"v2/checkout/orders/" +
+					commercePaymentEntryJSONObject.getString(
+						"transactionCode") + "/authorize"
 			).contentType(
 				MediaType.APPLICATION_JSON
 			).header(
-				HttpHeaders.AUTHORIZATION, "Bearer " + getAuthorization(typeSettingsJSONObject.getString("mode"),typeSettingsJSONObject.getString("clientId"), typeSettingsJSONObject.getString("clientSecret"))
+				HttpHeaders.AUTHORIZATION,
+				"Bearer " +
+					getAuthorization(
+						typeSettingsJSONObject.getString("mode"),
+						typeSettingsJSONObject.getString("clientId"),
+						typeSettingsJSONObject.getString("clientSecret"))
 			).header(
 				"Prefer", "return=representation"
 			).retrieve(
@@ -66,9 +73,13 @@ public class AuthorizeRestController extends BaseRestController {
 				String.class
 			).block();
 
-			JSONObject authorizeOrderResponseJSONObject = new JSONObject(authorizeOrderResponse);
+			JSONObject authorizeOrderResponseJSONObject = new JSONObject(
+				authorizeOrderResponse);
 
-			if (Objects.equals(authorizeOrderResponseJSONObject.getString("status"), "COMPLETED")) {
+			if (Objects.equals(
+					authorizeOrderResponseJSONObject.getString("status"),
+					"COMPLETED")) {
+
 				paymentStatus = "2";
 			}
 		}

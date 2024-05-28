@@ -5,6 +5,9 @@
 
 package com.liferay.paypal;
 
+import java.util.Objects;
+
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -21,10 +24,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-
-import java.util.Objects;
-
 
 /**
  * @author Brian I. Kim
@@ -52,15 +51,25 @@ public class CaptureRestController extends BaseRestController {
 				jsonObject.getJSONObject("commercePaymentEntry");
 
 			String captureOrderResponse = WebClient.create(
-				getEnvironmentURL(typeSettingsJSONObject.getString("mode"))).post(
+				getEnvironmentURL(typeSettingsJSONObject.getString("mode"))
+			).post(
 			).uri(
-				"v2/checkout/orders/" + commercePaymentEntryJSONObject.getString("transactionCode") + "/capture"
+				"v2/checkout/orders/" +
+					commercePaymentEntryJSONObject.getString(
+						"transactionCode") + "/capture"
 			).contentType(
 				MediaType.APPLICATION_JSON
 			).header(
-				HttpHeaders.AUTHORIZATION, "Bearer " + getAuthorization(typeSettingsJSONObject.getString("mode"),typeSettingsJSONObject.getString("clientId"), typeSettingsJSONObject.getString("clientSecret"))
+				HttpHeaders.AUTHORIZATION,
+				"Bearer " +
+					getAuthorization(
+						typeSettingsJSONObject.getString("mode"),
+						typeSettingsJSONObject.getString("clientId"),
+						typeSettingsJSONObject.getString("clientSecret"))
 			).header(
-				"PayPal-Request-Id", commercePaymentEntryJSONObject.getString("commercePaymentEntryId")
+				"PayPal-Request-Id",
+				commercePaymentEntryJSONObject.getString(
+					"commercePaymentEntryId")
 			).header(
 				"Prefer", "return=representation"
 			).retrieve(
@@ -68,9 +77,13 @@ public class CaptureRestController extends BaseRestController {
 				String.class
 			).block();
 
-			JSONObject captureOrderResponseJSONObject = new JSONObject(captureOrderResponse);
+			JSONObject captureOrderResponseJSONObject = new JSONObject(
+				captureOrderResponse);
 
-			if (Objects.equals(captureOrderResponseJSONObject.getString("status"), "COMPLETED")) {
+			if (Objects.equals(
+					captureOrderResponseJSONObject.getString("status"),
+					"COMPLETED")) {
+
 				paymentStatus = "0";
 			}
 		}

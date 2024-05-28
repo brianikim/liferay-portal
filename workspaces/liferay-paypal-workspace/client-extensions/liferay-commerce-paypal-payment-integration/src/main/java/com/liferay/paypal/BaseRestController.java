@@ -8,8 +8,8 @@ package com.liferay.paypal;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
-
 import org.apache.tomcat.util.codec.binary.Base64;
+
 import org.json.JSONObject;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -18,13 +18,48 @@ import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.reactive.function.client.WebClient;
 
-
 /**
  * @author Raymond Augé
  * @author Gregory Amerson
  * @author Brian Wing Shun Chan
  */
 public abstract class BaseRestController {
+
+	protected String getAuthorization(
+		String mode, String clientId, String clientSecret) {
+
+		String authorization = clientId + ":" + clientSecret;
+
+		JSONObject authorizationRequest = new JSONObject(
+			WebClient.create(
+				getEnvironmentURL(mode)
+			).post(
+			).uri(
+				"/v1/oauth2/token"
+			).accept(
+				MediaType.APPLICATION_JSON
+			).contentType(
+				MediaType.APPLICATION_FORM_URLENCODED
+			).header(
+				HttpHeaders.AUTHORIZATION,
+				"Basic " + Base64.encodeBase64String(authorization.getBytes())
+			).bodyValue(
+				"grant_type=client_credentials"
+			).retrieve(
+			).bodyToMono(
+				String.class
+			).block());
+
+		return authorizationRequest.getString("access_token");
+	}
+
+	protected String getEnvironmentURL(String mode) {
+		if (mode.equals("live")) {
+			return "https://api-m.paypal.com";
+		}
+
+		return "https://api-m.sandbox.paypal.com";
+	}
 
 	protected void log(Jwt jwt, Log log) {
 		if (log.isInfoEnabled()) {
@@ -41,37 +76,6 @@ public abstract class BaseRestController {
 			log.info("JWT Subject: " + jwt.getSubject());
 			log.info("Parameters: " + parameters);
 		}
-	}
-
-	protected String getAuthorization(String mode, String clientId, String clientSecret) {
-		String authorization = clientId + ":" + clientSecret;
-
-		JSONObject authorizationRequest =  new JSONObject(WebClient.create(
-			getEnvironmentURL(mode)).post(
-		).uri(
-			"/v1/oauth2/token"
-		).accept(
-			MediaType.APPLICATION_JSON
-		).contentType(
-			MediaType.APPLICATION_FORM_URLENCODED
-		).header(
-			HttpHeaders.AUTHORIZATION, "Basic " + Base64.encodeBase64String(authorization.getBytes())
-		).bodyValue(
-			"grant_type=client_credentials"
-		).retrieve(
-		).bodyToMono(
-			String.class
-		).block());
-
-		return authorizationRequest.getString("access_token");
-	}
-
-	protected String getEnvironmentURL(String mode) {
-		if (mode.equals("live")) {
-			return "https://api-m.paypal.com";
-		}
-
-		return "https://api-m.sandbox.paypal.com";
 	}
 
 	protected void log(Jwt jwt, Log log, String json) {
@@ -91,8 +95,7 @@ public abstract class BaseRestController {
 		}
 	}
 
-
-	protected String _id = null;
+	protected String _id;
 
 	@Value("${com.liferay.lxc.dxp.mainDomain}")
 	protected String lxcDXPMainDomain;
