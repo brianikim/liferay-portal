@@ -128,7 +128,9 @@
 		z-index: $zindex-sticky;
 
 		@include media-breakpoint-up(md) {
+			/*
 			position: fixed;
+			*/
 		}
 
 		.btn {

@@ -5,7 +5,9 @@ $dialog-footer-height: 70px;
 
 .side-panel-iframe {
 	.dialog-footer {
+		/*
 		position: fixed;
+		*/
 		z-index: 999 !important;
 	}
 
