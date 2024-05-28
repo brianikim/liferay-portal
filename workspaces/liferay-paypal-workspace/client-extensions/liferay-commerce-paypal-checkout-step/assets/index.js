@@ -45,12 +45,14 @@ export default function CommerceCheckoutStep() {
 
 						const resource = await fetch(cartPaymentURL);
 
-						orderData = await paypalOauth.fetch("/set-up-payment/get/" + Liferay.CommerceContext.order.orderId);
+						if (resource.ok) {
+							orderData = await paypalOauth.fetch("/set-up-payment/get/" + Liferay.CommerceContext.order.orderId);
 
-						if (orderData) {
-							const orderDataJson = await orderData.json();
+							if (orderData) {
+								const orderDataJson = await orderData.json();
 
-							return orderDataJson.id;
+								return orderDataJson.id;
+							}
 						}
 					}
 					catch (error) {
@@ -78,36 +80,11 @@ export default function CommerceCheckoutStep() {
 
 						const cartPaymentURLJson = await cartPaymentResource.json();
 						const cartPaymentURL = cartPaymentURLJson.url;
-
-						let orderData;
-
 						const test = await fetch(cartPaymentURL);
-						console.log("Finished");
 
-						/*						const orderData = await response.json();
-
-												const errorDetail = orderData?.details?.[0];
-
-												if (errorDetail?.issue === "INSTRUMENT_DECLINED") {
-													return actions.restart();
-												} else if (errorDetail) {
-													throw new Error(`${errorDetail.description} (${orderData.debug_id})`);
-												} else if (!orderData.purchase_units) {
-													throw new Error(JSON.stringify(orderData));
-												} else {
-													const transaction =
-														orderData?.purchase_units?.[0]?.payments?.captures?.[0] ||
-														orderData?.purchase_units?.[0]?.payments?.authorizations?.[0];
-													resultMessage(
-														`Transaction ${transaction.status}: ${transaction.id}<br><br>See console for all available details`,
-													);
-													console.log(
-														"Capture result",
-														orderData,
-														JSON.stringify(orderData, null, 2),
-													);
-													orderDataTest.setAttribute("data", orderData);
-												}*/
+						if (test.ok) {
+							window.location.href = test.url;
+						}
 					} catch (error) {
 						console.error(error);
 						resultMessage(
@@ -115,6 +92,9 @@ export default function CommerceCheckoutStep() {
 						);
 					}
 				},
+				async onCancel(data) {
+					console.log(window.location.href);
+				}
 			})
 			.render("#paypal-button-container");
 	})

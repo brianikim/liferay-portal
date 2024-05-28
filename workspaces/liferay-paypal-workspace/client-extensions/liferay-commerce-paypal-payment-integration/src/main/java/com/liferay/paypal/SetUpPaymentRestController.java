@@ -8,6 +8,8 @@ package com.liferay.paypal;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Objects;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -32,7 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
- * @author Crescenzo Rega
+ * @author Brian I. Kim
  */
 @RequestMapping("/set-up-payment")
 @RestController
@@ -43,7 +45,20 @@ public class SetUpPaymentRestController extends BaseRestController {
 		@AuthenticationPrincipal Jwt jwt,
 		@PathVariable("orderId") long orderId) {
 
-		JSONObject paymentJSONObject = new JSONObject(
+		return new ResponseEntity<>(
+			new JSONObject(
+			).put(
+				"id", _id
+			).put(
+				"entryId", _getCommercePaymentEntryId(jwt, orderId)
+			).toString(),
+			HttpStatus.OK);
+	}
+
+	private String _getCommercePaymentEntryId(		@AuthenticationPrincipal Jwt jwt,
+													  @PathVariable("orderId") long orderId) {
+
+		JSONObject paymentsJSONObject = new JSONObject(
 			Objects.requireNonNull(
 				WebClient.create(
 				).get(
@@ -61,15 +76,21 @@ public class SetUpPaymentRestController extends BaseRestController {
 					String.class
 				).block()));
 
-		return new ResponseEntity<>(
-			new JSONObject(
-			).put(
-				"id", _id
-			).put(
-				"entryId", paymentJSONObject.getLong("id")
-			).toString(),
-			HttpStatus.OK);
+		JSONArray itemsjsonArray = paymentsJSONObject.getJSONArray("items");
+
+		for (int i = 0; i < itemsjsonArray.length(); i++) {
+			JSONObject itemjsonObject = itemsjsonArray.getJSONObject(i);
+
+			if (Objects.equals(itemjsonObject.getString("transactionCode"),
+				_id)) {
+
+				return String.valueOf(itemjsonObject.getLong("id"));
+			}
+		}
+
+		return null;
 	}
+
 
 	@PostMapping
 	public ResponseEntity<String> post(
@@ -96,7 +117,7 @@ public class SetUpPaymentRestController extends BaseRestController {
 				"payment_source",
 				_getPaymentSource(commercePaymentEntryJSONObject)
 			).put(
-				"purchase_units", _getPurchaseUnit(jsonObject)
+				"purchase_units", _getPurchaseUnit(commercePaymentEntryJSONObject, typeSettingsJSONObject.getString("merchantId"), jwt)
 			);
 
 			String createOrderRequest = WebClient.create(
@@ -129,7 +150,7 @@ public class SetUpPaymentRestController extends BaseRestController {
 			JSONObject createOrderRequestJSONObject = new JSONObject(
 				createOrderRequest);
 
-			_id = createOrderRequestJSONObject.getString("id");
+			transactionCode = createOrderRequestJSONObject.getString("id");
 		}
 		catch (Exception exception) {
 			errorMessages = ExceptionUtils.getStackTrace(exception);
@@ -137,12 +158,14 @@ public class SetUpPaymentRestController extends BaseRestController {
 			_log.error(errorMessages);
 		}
 
+		_id = transactionCode;
+
 		return new ResponseEntity<>(
 			new JSONObject(
 			).put(
 				"errorMessages", errorMessages
 			).put(
-				"paymentStatus", paymentStatus
+				"paymentStatus", 18
 			).put(
 				"redirectURL", "LPD-20381"
 			).put(
@@ -157,10 +180,12 @@ public class SetUpPaymentRestController extends BaseRestController {
 		JSONObject experienceContextJSONObject = new JSONObject();
 
 		experienceContextJSONObject.put(
-			"cancel_url", "https://www.google.com/"
+			"cancel_url", 			commercePaymentEntryJSONObject.getString("cancelURL")
 		).put(
 			"return_url",
 			commercePaymentEntryJSONObject.getString("callbackURL")
+		).put(
+			"shipping_preference", "SET_PROVIDED_ADDRESS"
 		).put(
 			"user_action", "PAY_NOW"
 		);
@@ -194,25 +219,140 @@ public class SetUpPaymentRestController extends BaseRestController {
 		return payPalPaymentSourceJSONObject;
 	}
 
-	private JSONArray _getPurchaseUnit(JSONObject jsonObject) {
-		JSONArray jsonArray = new JSONArray();
+	private JSONArray _getPurchaseUnit(JSONObject commercePaymentEntryJSONObject, String merchantId, Jwt jwt) {
 
-		JSONObject amountObject = new JSONObject();
 
-		amountObject.put("currency_code", "USD");
-		amountObject.put("value", "100.00");
+		JSONArray purchaseUnitArray = new JSONArray();
 
-		JSONObject test = new JSONObject();
+		JSONObject purchaseUnitJSONObject = new JSONObject();
 
-		test.put("amount", amountObject);
-		test.put("reference_id", "d9f80740-38f0-11e8-b467-0ed5f89f718b");
+		if (Objects.equals(
+			commercePaymentEntryJSONObject.getString("className"),
+			"com.liferay.commerce.model.CommerceOrder")) {
 
-		jsonArray.put(test);
+			JSONObject orderJSONObject = new JSONObject(
+				Objects.requireNonNull(
+					WebClient.create(
+					).get(
+					).uri(
+						StringBundler.concat(
+							lxcDXPServerProtocol, "://", lxcDXPMainDomain,
+							"/o/headless-commerce-admin-order/v1.0/orders/",
+							commercePaymentEntryJSONObject.getLong("classPK"),
+							"?nestedFields=orderItems,shippingAddress")
+					).accept(
+						MediaType.APPLICATION_JSON
+					).header(
+						HttpHeaders.AUTHORIZATION,
+						"Bearer " + jwt.getTokenValue()
+					).retrieve(
+					).bodyToMono(
+						String.class
+					).block()));
 
-		_log.fatal("purchase");
-		_log.fatal(jsonArray.toString());
+			purchaseUnitJSONObject.put("shipping", _getShippingJSONObject(orderJSONObject.getJSONObject("shippingAddress")));
+			purchaseUnitJSONObject.put("amount", _getAmountJSONObject(orderJSONObject, commercePaymentEntryJSONObject.getString("currencyCode")));
+			purchaseUnitJSONObject.put("items",
+				_getItemsJSONArray(orderJSONObject,
+					commercePaymentEntryJSONObject.getString("currencyCode"), commercePaymentEntryJSONObject.getString("languageId")));
+		}
 
-		return jsonArray;
+		purchaseUnitJSONObject.put("description", "Payment: " + commercePaymentEntryJSONObject.getString("commercePaymentEntryId"));
+		purchaseUnitJSONObject.put("payee", new JSONObject().put("merchant_id", merchantId));
+		purchaseUnitJSONObject.put("reference_id", commercePaymentEntryJSONObject.getString("commercePaymentEntryId"));
+
+		purchaseUnitArray.put(purchaseUnitJSONObject);
+
+		return purchaseUnitArray;
+	}
+
+	private JSONArray _getItemsJSONArray(JSONObject orderJSONObject, String currencyCode, String languageId) {
+		JSONArray itemsJSONArray = new JSONArray();
+
+		JSONArray orderItemsJSONArray = orderJSONObject.getJSONArray("orderItems");
+
+		for (int i = 0; i < orderItemsJSONArray.length(); i++) {
+			JSONObject orderItemJSONObject = orderItemsJSONArray.getJSONObject(
+				i);
+
+			BigDecimal finalPrice = BigDecimal.valueOf(
+				orderItemJSONObject.getDouble("finalPrice"));
+			long quantity = orderItemJSONObject.getLong("quantity");
+
+			JSONObject tempItemJSONObject = new JSONObject();
+
+			tempItemJSONObject.put("unit_amount", new JSONObject().put("currency_code", currencyCode).put("value", 			finalPrice.divide(
+				BigDecimal.valueOf(quantity)
+			).longValue()));
+
+			String name = orderItemJSONObject.getJSONObject(
+				"name"
+			).getString(
+				languageId
+			);
+
+			tempItemJSONObject.put("sku", orderItemJSONObject.getString("sku"));
+			tempItemJSONObject.put("name", name);
+			tempItemJSONObject.put("quantity", 				BigDecimal.valueOf(quantity).stripTrailingZeros());
+
+			itemsJSONArray.put(tempItemJSONObject);
+		}
+
+		return itemsJSONArray;
+	}
+
+	private JSONObject _getAmountJSONObject(JSONObject orderJSONObject, String currencyCode) {
+		JSONObject amountJSONObject = new JSONObject();
+
+		amountJSONObject.put("currency_code", currencyCode);
+		amountJSONObject.put(
+			"value", 					BigDecimal.valueOf(
+				orderJSONObject.getDouble("totalAmount")
+			).longValue());
+		amountJSONObject.put("breakdown", _getBreakdownJSONObject(orderJSONObject, currencyCode));
+
+
+		return amountJSONObject;
+	}
+
+	private JSONObject _getBreakdownJSONObject(JSONObject orderJSONObject, String currencyCode) {
+		JSONObject breakdownJSONObject = new JSONObject();
+
+		breakdownJSONObject.put("item_total", new JSONObject().put("currency_code", currencyCode).put(			"value", 					BigDecimal.valueOf(
+			orderJSONObject.getDouble("subtotalAmount")
+		).longValue()));
+
+		breakdownJSONObject.put("shipping", new JSONObject().put("currency_code", currencyCode).put(			"value", 					BigDecimal.valueOf(
+			orderJSONObject.getDouble("shippingAmountValue")
+		).longValue()));
+
+		breakdownJSONObject.put("tax_total", new JSONObject().put("currency_code", currencyCode).put(			"value", 					BigDecimal.valueOf(
+			orderJSONObject.getDouble("taxAmount")
+		).longValue()));
+
+		return breakdownJSONObject;
+	}
+
+	private JSONObject _getShippingJSONObject(JSONObject shippingAddressJSONObject) {
+		JSONObject shippingJSONObject = new JSONObject();
+
+
+		JSONObject nameJSONObject = new JSONObject();
+		nameJSONObject.put("full_name", shippingAddressJSONObject.getString("name"));
+
+		shippingJSONObject.put("name", nameJSONObject);
+
+		JSONObject addressJSONObject = new JSONObject();
+		addressJSONObject.put("address_line_1", shippingAddressJSONObject.getString("street1"));
+		addressJSONObject.put("address_line_2", shippingAddressJSONObject.getString("street2"));
+		addressJSONObject.put("admin_area_2", shippingAddressJSONObject.getString("city"));
+		addressJSONObject.put("admin_area_1", shippingAddressJSONObject.getString("regionISOCode"));
+		addressJSONObject.put("postal_code", shippingAddressJSONObject.getString("zip"));
+		addressJSONObject.put("country_code", shippingAddressJSONObject.getString("countryISOCode"));
+
+		shippingJSONObject.put("address", addressJSONObject);
+
+		return shippingJSONObject;
 	}
 
 	private String _getRedirectURL(JSONArray jsonArray) {

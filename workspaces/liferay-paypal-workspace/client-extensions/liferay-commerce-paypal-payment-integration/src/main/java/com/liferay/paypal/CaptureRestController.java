@@ -40,6 +40,7 @@ public class CaptureRestController extends BaseRestController {
 
 		String errorMessages = null;
 		String paymentStatus = "4";
+		String transactionCode = null;
 
 		try {
 			JSONObject jsonObject = new JSONObject(json);
@@ -85,6 +86,7 @@ public class CaptureRestController extends BaseRestController {
 					"COMPLETED")) {
 
 				paymentStatus = "0";
+				transactionCode = captureOrderResponseJSONObject.getString("id");
 			}
 		}
 		catch (Exception exception) {
@@ -99,6 +101,8 @@ public class CaptureRestController extends BaseRestController {
 				"errorMessages", errorMessages
 			).put(
 				"paymentStatus", paymentStatus
+			).put(
+				"transactionCode", transactionCode
 			).toString(),
 			HttpStatus.OK);
 	}

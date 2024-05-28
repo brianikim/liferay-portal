@@ -38,65 +38,12 @@ public class AuthorizeRestController extends BaseRestController {
 
 		log(jwt, _log, json);
 
-		String errorMessages = null;
-		String paymentStatus = "4";
-
-		try {
-			JSONObject jsonObject = new JSONObject(json);
-
-			JSONObject typeSettingsJSONObject = jsonObject.getJSONObject(
-				"typeSettings");
-
-			JSONObject commercePaymentEntryJSONObject =
-				jsonObject.getJSONObject("commercePaymentEntry");
-
-			String authorizeOrderResponse = WebClient.create(
-				getEnvironmentURL(typeSettingsJSONObject.getString("mode"))
-			).post(
-			).uri(
-				"v2/checkout/orders/" +
-					commercePaymentEntryJSONObject.getString(
-						"transactionCode") + "/authorize"
-			).contentType(
-				MediaType.APPLICATION_JSON
-			).header(
-				HttpHeaders.AUTHORIZATION,
-				"Bearer " +
-					getAuthorization(
-						typeSettingsJSONObject.getString("mode"),
-						typeSettingsJSONObject.getString("clientId"),
-						typeSettingsJSONObject.getString("clientSecret"))
-			).header(
-				"Prefer", "return=representation"
-			).retrieve(
-			).bodyToMono(
-				String.class
-			).block();
-
-			JSONObject authorizeOrderResponseJSONObject = new JSONObject(
-				authorizeOrderResponse);
-
-			if (Objects.equals(
-					authorizeOrderResponseJSONObject.getString("status"),
-					"COMPLETED")) {
-
-				paymentStatus = "2";
-			}
-		}
-		catch (Exception exception) {
-			errorMessages = ExceptionUtils.getStackTrace(exception);
-
-			_log.error(errorMessages);
-		}
-
 		return new ResponseEntity<>(
 			new JSONObject(
 			).put(
-				"errorMessages", errorMessages
-			).put(
 				"redirectURL", ""
 			).put(
-				"paymentStatus", paymentStatus
+				"paymentStatus", 2
 			).toString(),
 			HttpStatus.OK);
 	}
