@@ -29,6 +29,7 @@ public interface CommerceCheckoutStep {
 
 	public boolean isOrder();
 
+	public boolean isPayment();
 	public boolean isSennaDisabled();
 
 	public boolean isVisible(
