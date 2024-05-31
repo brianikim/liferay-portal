@@ -52,6 +52,11 @@ public interface CommerceCheckoutStepCET extends CET {
 	public boolean getOrder();
 
 	@CETProperty(
+		defaultValue = "", name = "payment", type = CETProperty.Type.Boolean
+	)
+	public boolean getPayment();
+
+	@CETProperty(
 		defaultValue = "", name = "sennaDisabled",
 		type = CETProperty.Type.Boolean
 	)
