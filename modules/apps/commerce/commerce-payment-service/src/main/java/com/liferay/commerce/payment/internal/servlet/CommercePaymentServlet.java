@@ -350,6 +350,16 @@ public class CommercePaymentServlet extends HttpServlet {
 				}
 			}
 
+			if (commercePaymentEntry.getRedirectURL(
+				).equals(
+					"LPD-20381"
+				)) {
+
+				commercePaymentEntry.setRedirectURL(null);
+
+				return;
+			}
+
 			URL redirectURL = new URL(commercePaymentEntry.getRedirectURL());
 
 			if (Objects.equals(portalURL.getHost(), redirectURL.getHost())) {
