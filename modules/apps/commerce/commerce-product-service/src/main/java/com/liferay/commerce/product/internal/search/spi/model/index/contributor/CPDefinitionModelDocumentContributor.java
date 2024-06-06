@@ -120,6 +120,11 @@ public class CPDefinitionModelDocumentContributor
 				document.addNumber(CPField.BASE_PRICE, basePrice);
 			}
 
+			for (CPInstance cpInstance : cpDefinition.getCPInstances()) {
+				_expandoBridgeIndexer.addAttributes(
+					document, cpInstance.getExpandoBridge());
+			}
+
 			document.addKeyword(
 				CPField.CHANNEL_FILTER_ENABLED,
 				cpDefinition.isChannelFilterEnabled());
