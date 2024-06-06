@@ -941,6 +941,9 @@ components:
                 catalog:
                     $ref: "#/components/schemas/Catalog"
                     readOnly: true
+                catalogExternalReferenceCode:
+                    example: AB-34098-789-N
+                    type: string
                 catalogId:
                     example: 30054
                     format: int64
@@ -1142,7 +1145,6 @@ components:
                     readOnly: true
             required:
                 - active
-                - catalogId
                 - name
                 - productType
             type: object
@@ -2193,7 +2195,7 @@ info:
         name: Commerce Team
     description:
         "Liferay Commerce Admin Catalog API. A Java client JAR is available for use with the group ID 'com.liferay',
-        artifact ID 'com.liferay.headless.commerce.admin.catalog.client', and version '4.0.60'."
+        artifact ID 'com.liferay.headless.commerce.admin.catalog.client', and version '4.0.61'."
     license:
         name: "Apache 2.0"
         url: "http://www.apache.org/licenses/LICENSE-2.0.html"
