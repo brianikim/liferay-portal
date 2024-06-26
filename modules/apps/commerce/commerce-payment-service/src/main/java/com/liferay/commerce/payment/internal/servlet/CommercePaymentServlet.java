@@ -29,6 +29,8 @@ import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.json.JSONFactory;
+import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -287,7 +289,14 @@ public class CommercePaymentServlet extends HttpServlet {
 						CommerceOrderPaymentConstants.STATUS_CANCELLED,
 						StringPool.BLANK, StringPool.BLANK);
 
-					httpServletResponse.sendRedirect(_redirect);
+					commercePaymentEntry.setPaymentStatus(CommerceOrderPaymentConstants.STATUS_CANCELLED);
+
+					_commercePaymentEntryLocalService.updateCommercePaymentEntry(commercePaymentEntry);
+
+					if (ParamUtil.getBoolean(httpServletRequest, "redirect", true)) {
+
+						httpServletResponse.sendRedirect(_redirect);
+					}
 
 					return;
 				}
@@ -337,6 +346,12 @@ public class CommercePaymentServlet extends HttpServlet {
 			if (Validator.isNull(commercePaymentEntry.getRedirectURL())) {
 				if (CommercePaymentEntryConstants.STATUS_CREATED ==
 						paymentStatus) {
+
+					JSONObject jsonObject = _jsonFactory.createJSONObject(commercePaymentEntry.getPayload());
+
+					if (jsonObject.has("PAYER_ACTION_REQUIRED")) {
+						return;
+					}
 
 					commercePaymentEntry = _commercePaymentGateway.authorize(
 						httpServletRequest, commercePaymentEntry);
@@ -570,6 +585,9 @@ public class CommercePaymentServlet extends HttpServlet {
 
 	@Reference
 	private CommerceSubscriptionEngine _commerceSubscriptionEngine;
+
+	@Reference
+	private JSONFactory _jsonFactory;
 
 	@Reference
 	private Language _language;
