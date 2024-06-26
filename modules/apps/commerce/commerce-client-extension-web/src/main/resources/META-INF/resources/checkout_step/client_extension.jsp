@@ -8,10 +8,15 @@
 <%@ include file="/init.jsp" %>
 
 <%
+String clientId = (String)request.getAttribute("clientId");
 String renderURL = (String)request.getAttribute(CommerceClientExtensionWebKeys.RENDER_URL);
 %>
 
 <div class="form-group form-group-item" id="<portlet:namespace />commerceCheckoutStepContainer"></div>
+
+<c:if test="<%= Validator.isNotNull(clientId) %>">
+	<input id="payment-client-id" name="clientId" type="hidden" value="<%= clientId %>" />
+</c:if>
 
 <liferay-frontend:component
 	context='<%=
