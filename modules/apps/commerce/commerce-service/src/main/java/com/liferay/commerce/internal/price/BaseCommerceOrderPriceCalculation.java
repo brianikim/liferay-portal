@@ -500,6 +500,17 @@ public abstract class BaseCommerceOrderPriceCalculation
 		}
 
 		if (unit) {
+			if (Validator.isNotNull(commerceOrderItem.getUnitOfMeasureKey())) {
+				BigDecimal unitOfMeasureIncrementalOrderQuantity =
+					commerceOrderItem.
+						getUnitOfMeasureIncrementalOrderQuantity();
+
+				parentQuantity = parentQuantity.divide(
+					unitOfMeasureIncrementalOrderQuantity,
+					unitOfMeasureIncrementalOrderQuantity.scale(),
+					RoundingMode.HALF_UP);
+			}
+
 			finalPrice = finalPrice.divide(
 				parentQuantity,
 				RoundingMode.valueOf(commerceCurrency.getRoundingMode()));
@@ -519,8 +530,8 @@ public abstract class BaseCommerceOrderPriceCalculation
 		_updateDiscounts(
 			commerceCurrency, commerceOrderItemPrice, discountAmount,
 			discountPercentageLevel1, discountPercentageLevel2,
-			discountPercentageLevel3, discountPercentageLevel4,
-			commerceOrderItem.getQuantity(), unitPrice);
+			discountPercentageLevel3, discountPercentageLevel4, parentQuantity,
+			unitPrice);
 
 		return commerceOrderItemPrice;
 	}
