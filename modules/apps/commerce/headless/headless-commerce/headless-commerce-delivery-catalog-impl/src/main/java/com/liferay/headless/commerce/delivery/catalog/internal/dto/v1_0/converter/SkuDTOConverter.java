@@ -65,6 +65,7 @@ import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.settings.SystemSettingsLocator;
 import com.liferay.portal.kernel.util.MapUtil;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.vulcan.dto.converter.DTOConverter;
 import com.liferay.portal.vulcan.dto.converter.DTOConverterContext;
@@ -382,6 +383,18 @@ public class SkuDTOConverter implements DTOConverter<CPInstance, Sku> {
 			String formFieldValues, Locale locale, BigDecimal quantity,
 			String unitOfMeasureKey)
 		throws Exception {
+
+		if (Validator.isNotNull(unitOfMeasureKey)) {
+			CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure =
+				_cpInstanceUnitOfMeasureLocalService.
+					fetchCPInstanceUnitOfMeasure(
+						cpInstance.getCPInstanceId(), unitOfMeasureKey);
+
+			if (cpInstanceUnitOfMeasure != null) {
+				quantity =
+					cpInstanceUnitOfMeasure.getIncrementalOrderQuantity();
+			}
+		}
 
 		CommerceProductPrice commerceProductPrice =
 			_commerceProductPriceCalculation.getCommerceProductPrice(
