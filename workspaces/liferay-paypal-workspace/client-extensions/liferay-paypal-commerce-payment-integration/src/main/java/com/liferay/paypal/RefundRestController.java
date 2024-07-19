@@ -42,6 +42,7 @@ public class RefundRestController extends BaseRestController {
 
 		String errorMessages = null;
 		String paymentStatus = "4";
+		String transactionCode = null;
 
 		try {
 			JSONObject jsonObject = new JSONObject(json);
@@ -52,27 +53,29 @@ public class RefundRestController extends BaseRestController {
 			JSONObject commercePaymentEntryJSONObject =
 				jsonObject.getJSONObject("commercePaymentEntry");
 
-			JSONObject amountJSONObject = new JSONObject();
+			JSONObject amountJSONObject = new JSONObject(
+			).put(
+				"amount", _getAmountJSONObject(commercePaymentEntryJSONObject)
+			);
 
-			amountJSONObject.put(
-				"amount", _getAmountJSONObject(commercePaymentEntryJSONObject));
+			String transactionCodeRefund =
+				commercePaymentEntryJSONObject.getString("transactionCode") +
+					"/refund";
+
+			String authorization = getAuthorization(
+				typeSettingsJSONObject.getString("clientId"),
+				typeSettingsJSONObject.getString("clientSecret"),
+				typeSettingsJSONObject.getString("mode"));
 
 			String refundOrderResponse = WebClient.create(
 				getEnvironmentURL(typeSettingsJSONObject.getString("mode"))
 			).post(
 			).uri(
-				"v2/payments/captures/" +
-					commercePaymentEntryJSONObject.getString(
-						"transactionCode") + "/refund"
+				"v2/payments/captures/" + transactionCodeRefund
 			).contentType(
 				MediaType.APPLICATION_JSON
 			).header(
-				HttpHeaders.AUTHORIZATION,
-				"Bearer " +
-					getAuthorization(
-						typeSettingsJSONObject.getString("mode"),
-						typeSettingsJSONObject.getString("clientId"),
-						typeSettingsJSONObject.getString("clientSecret"))
+				HttpHeaders.AUTHORIZATION, "Bearer " + authorization
 			).header(
 				"Prefer", "return=representation"
 			).bodyValue(
@@ -90,6 +93,29 @@ public class RefundRestController extends BaseRestController {
 					"COMPLETED")) {
 
 				paymentStatus = "17";
+				transactionCode = refundOrderResponseJSONObject.getString("id");
+
+				post(
+					"Bearer " + jwt.getTokenValue(),
+					new JSONObject(
+					).put(
+						"externalReferenceCode", transactionCode
+					).put(
+						"clientId", typeSettingsJSONObject.getString("clientId")
+					).put(
+						"clientSecret",
+						typeSettingsJSONObject.getString("clientSecret")
+					).put(
+						"mode", typeSettingsJSONObject.getString("mode")
+					).put(
+						"paymentEntryId",
+						commercePaymentEntryJSONObject.getLong(
+							"commercePaymentEntryId")
+					).put(
+						"webhookId",
+						typeSettingsJSONObject.getString("webhookId")
+					).toString(),
+					"/o/c/n2a1paypalwebhooks");
 			}
 		}
 		catch (Exception exception) {
@@ -104,6 +130,8 @@ public class RefundRestController extends BaseRestController {
 				"errorMessages", errorMessages
 			).put(
 				"paymentStatus", paymentStatus
+			).put(
+				"transactionCode", transactionCode
 			).toString(),
 			HttpStatus.OK);
 	}
@@ -115,12 +143,13 @@ public class RefundRestController extends BaseRestController {
 
 		amountJSONObject.put(
 			"currency_code",
-			commercePaymentEntryJSONObject.getString("currencyCode"));
-		amountJSONObject.put(
+			commercePaymentEntryJSONObject.getString("currencyCode")
+		).put(
 			"value",
 			BigDecimal.valueOf(
 				commercePaymentEntryJSONObject.getDouble("amount")
-			).longValue());
+			).longValue()
+		);
 
 		return amountJSONObject;
 	}

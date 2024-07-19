@@ -4,8 +4,8 @@ assemble:
     - fromTask: bootJar
 liferay-paypal-commerce-checkout-step:
     active: true
-    checkoutStepLabel: liferay-paypal-commerce-checkout-step-label
-    checkoutStepName: liferay-paypal-commerce-checkout-step-name
+    checkoutStepLabel: PayPal SDK Checkout Step
+    checkoutStepName: PayPal SDK Checkout Step
     checkoutStepOrder: 2147483547
     name: Liferay PayPal Commerce Checkout Step
     oAuth2ApplicationExternalReferenceCode: liferay-paypal-commerce-checkout-step-oauth-application-user-agent

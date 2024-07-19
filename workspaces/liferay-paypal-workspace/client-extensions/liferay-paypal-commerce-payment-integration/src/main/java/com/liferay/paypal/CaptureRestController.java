@@ -52,22 +52,24 @@ public class CaptureRestController extends BaseRestController {
 			JSONObject commercePaymentEntryJSONObject =
 				jsonObject.getJSONObject("commercePaymentEntry");
 
+			String transactionCodeCapture =
+				commercePaymentEntryJSONObject.getString("transactionCode") +
+					"/capture";
+
+			String authorization = getAuthorization(
+				typeSettingsJSONObject.getString("clientId"),
+				typeSettingsJSONObject.getString("clientSecret"),
+				typeSettingsJSONObject.getString("mode"));
+
 			String captureOrderResponse = WebClient.create(
 				getEnvironmentURL(typeSettingsJSONObject.getString("mode"))
 			).post(
 			).uri(
-				"v2/checkout/orders/" +
-					commercePaymentEntryJSONObject.getString(
-						"transactionCode") + "/capture"
+				"v2/checkout/orders/" + transactionCodeCapture
 			).contentType(
 				MediaType.APPLICATION_JSON
 			).header(
-				HttpHeaders.AUTHORIZATION,
-				"Bearer " +
-					getAuthorization(
-						typeSettingsJSONObject.getString("mode"),
-						typeSettingsJSONObject.getString("clientId"),
-						typeSettingsJSONObject.getString("clientSecret"))
+				HttpHeaders.AUTHORIZATION, "Bearer " + authorization
 			).header(
 				"PayPal-Request-Id",
 				commercePaymentEntryJSONObject.getString(
@@ -82,15 +84,13 @@ public class CaptureRestController extends BaseRestController {
 			JSONObject captureOrderResponseJSONObject = new JSONObject(
 				captureOrderResponse);
 
-			_log.fatal("CAPTUREDRESPONSE:" + captureOrderResponseJSONObject);
-
 			if (Objects.equals(
 					captureOrderResponseJSONObject.getString("status"),
 					"COMPLETED")) {
 
 				paymentStatus = "0";
 
-				JSONObject paymentUnitsJSONObject =
+				JSONObject purchaseUnitsJSONObject =
 					captureOrderResponseJSONObject.getJSONArray(
 						"purchase_units"
 					).getJSONObject(
@@ -98,17 +98,38 @@ public class CaptureRestController extends BaseRestController {
 					);
 
 				JSONObject paymentsJSONObject =
-					paymentUnitsJSONObject.getJSONObject("payments");
+					purchaseUnitsJSONObject.getJSONObject("payments");
 
-				JSONArray captures = paymentsJSONObject.getJSONArray(
+				JSONArray capturesJSONArray = paymentsJSONObject.getJSONArray(
 					"captures");
 
-				JSONObject capturesJSONObject = captures.getJSONObject(0);
+				JSONObject capturesJSONObject = capturesJSONArray.getJSONObject(
+					0);
 
 				transactionCode = capturesJSONObject.getString("id");
-			}
 
-			_log.fatal(captureOrderResponseJSONObject.toString());
+				post(
+					"Bearer " + jwt.getTokenValue(),
+					new JSONObject(
+					).put(
+						"externalReferenceCode", transactionCode
+					).put(
+						"clientId", typeSettingsJSONObject.getString("clientId")
+					).put(
+						"clientSecret",
+						typeSettingsJSONObject.getString("clientSecret")
+					).put(
+						"mode", typeSettingsJSONObject.getString("mode")
+					).put(
+						"paymentEntryId",
+						commercePaymentEntryJSONObject.getLong(
+							"commercePaymentEntryId")
+					).put(
+						"webhookId",
+						typeSettingsJSONObject.getString("webhookId")
+					).toString(),
+					"/o/c/n2a1paypalwebhooks");
+			}
 		}
 		catch (Exception exception) {
 			errorMessages = ExceptionUtils.getStackTrace(exception);

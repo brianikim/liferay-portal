@@ -12,14 +12,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
 
 /**
- * @author Crescenzo Rega
+ * @author Brian I. Kim
  */
 @Import(ClientExtensionUtilSpringBootComponentScan.class)
 @SpringBootApplication
-public class PaypalSpringBootApplication {
+public class PayPalSpringBootApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(PaypalSpringBootApplication.class, args);
+		SpringApplication.run(PayPalSpringBootApplication.class, args);
 	}
 
 }

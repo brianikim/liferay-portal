@@ -6,7 +6,7 @@
 package com.liferay.paypal;
 
 import com.liferay.petra.string.StringBundler;
-import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.util.ArrayUtil;
 
 import java.math.BigDecimal;
 
@@ -16,7 +16,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.liferay.portal.kernel.util.ArrayUtil;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -24,7 +23,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,8 +46,9 @@ public class SetUpPaymentRestController extends BaseRestController {
 		@PathVariable("orderId") long orderId) {
 
 		return new ResponseEntity<>(
-			new JSONObject().put(
-				"entryId", _getCommercePaymentEntryId(jwt, orderId)
+			new JSONObject(
+			).put(
+				"id", _getTransactionCode(jwt, orderId)
 			).toString(),
 			HttpStatus.OK);
 	}
@@ -58,34 +57,53 @@ public class SetUpPaymentRestController extends BaseRestController {
 	public ResponseEntity<String> post(
 		@AuthenticationPrincipal Jwt jwt, @RequestBody String json) {
 
+		log(jwt, _log, json);
+
 		String errorMessages = null;
 		String paymentStatus = "4";
+		String payload = null;
 		String transactionCode = null;
 
 		try {
 			JSONObject jsonObject = new JSONObject(json);
-
-			JSONObject typeSettingsJSONObject = jsonObject.getJSONObject(
-				"typeSettings");
 
 			JSONObject payPalRequestJSONObject = new JSONObject();
 
 			JSONObject commercePaymentEntryJSONObject =
 				jsonObject.getJSONObject("commercePaymentEntry");
 
+			JSONObject httpServletRequestParameterMapJSONObject =
+				jsonObject.getJSONObject("httpServletRequestParameterMap");
+
+			JSONArray fundingSourceJSONArray =
+				httpServletRequestParameterMapJSONObject.getJSONArray(
+					"fundingSource");
+
+			_log.fatal(fundingSourceJSONArray);
+
+			JSONObject typeSettingsJSONObject = jsonObject.getJSONObject(
+				"typeSettings");
+
 			payPalRequestJSONObject.put(
 				"intent", "CAPTURE"
 			).put(
 				"payment_source",
-				_getPaymentSource(commercePaymentEntryJSONObject, jwt)
+				_getPaymentSourceJSONObject(
+					jwt, commercePaymentEntryJSONObject,
+					String.valueOf(fundingSourceJSONArray.get(0)))
 			).put(
 				"purchase_units",
-				_getPurchaseUnit(
-					commercePaymentEntryJSONObject,
-					typeSettingsJSONObject.getString("merchantId"), jwt)
+				_getPurchaseUnitJSONArray(
+					jwt, commercePaymentEntryJSONObject,
+					typeSettingsJSONObject.getString("merchantId"))
 			);
 
-			String createOrderRequest = WebClient.create(
+			String authorization = getAuthorization(
+				typeSettingsJSONObject.getString("clientId"),
+				typeSettingsJSONObject.getString("clientSecret"),
+				typeSettingsJSONObject.getString("mode"));
+
+			String createOrderResponse = WebClient.create(
 				getEnvironmentURL(typeSettingsJSONObject.getString("mode"))
 			).post(
 			).uri(
@@ -95,12 +113,7 @@ public class SetUpPaymentRestController extends BaseRestController {
 			).contentType(
 				MediaType.APPLICATION_JSON
 			).header(
-				HttpHeaders.AUTHORIZATION,
-				"Bearer " +
-					getAuthorization(
-						typeSettingsJSONObject.getString("mode"),
-						typeSettingsJSONObject.getString("clientId"),
-						typeSettingsJSONObject.getString("clientSecret"))
+				HttpHeaders.AUTHORIZATION, "Bearer " + authorization
 			).header(
 				"PayPal-Partner-Attribution-Id", "Liferay_SP_PPCP_API"
 			).header(
@@ -116,16 +129,25 @@ public class SetUpPaymentRestController extends BaseRestController {
 				String.class
 			).block();
 
-			JSONObject createOrderRequestJSONObject = new JSONObject(
-				createOrderRequest);
+			JSONObject createOrderResponseJSONObject = new JSONObject(
+				createOrderResponse);
 
-			transactionCode = createOrderRequestJSONObject.getString("id");
+			transactionCode = createOrderResponseJSONObject.getString("id");
+
 			paymentStatus = "18";
+			payload = createOrderResponse;
 
-			delete(
+			post(
 				"Bearer " + jwt.getTokenValue(),
-				"/o/c/n2a1paypalwebhooks/by-external-reference-code/" +
-				commercePaymentEntryJSONObject.getString("classPK"));
+				new JSONObject(
+				).put(
+					"externalReferenceCode",
+					String.valueOf(
+						commercePaymentEntryJSONObject.getLong("classPK"))
+				).put(
+					"transactionCode", transactionCode
+				).toString(),
+				"/o/c/n2a1paypaltransactions");
 		}
 		catch (Exception exception) {
 			errorMessages = ExceptionUtils.getStackTrace(exception);
@@ -140,6 +162,8 @@ public class SetUpPaymentRestController extends BaseRestController {
 			).put(
 				"paymentStatus", paymentStatus
 			).put(
+				"payload", payload
+			).put(
 				"transactionCode", transactionCode
 			).toString(),
 			HttpStatus.OK);
@@ -151,14 +175,15 @@ public class SetUpPaymentRestController extends BaseRestController {
 		JSONObject amountJSONObject = new JSONObject();
 
 		amountJSONObject.put(
-			"breakdown",
-			_getBreakdownJSONObject(orderJSONObject, currencyCode));
-		amountJSONObject.put("currency_code", currencyCode);
-		amountJSONObject.put(
+			"breakdown", _getBreakdownJSONObject(orderJSONObject, currencyCode)
+		).put(
+			"currency_code", currencyCode
+		).put(
 			"value",
 			BigDecimal.valueOf(
 				orderJSONObject.getDouble("totalAmount")
-			).longValue());
+			).longValue()
+		);
 
 		return amountJSONObject;
 	}
@@ -178,9 +203,8 @@ public class SetUpPaymentRestController extends BaseRestController {
 				BigDecimal.valueOf(
 					orderJSONObject.getDouble("subtotalAmount")
 				).longValue()
-			));
-
-		breakdownJSONObject.put(
+			)
+		).put(
 			"shipping",
 			new JSONObject(
 			).put(
@@ -190,9 +214,8 @@ public class SetUpPaymentRestController extends BaseRestController {
 				BigDecimal.valueOf(
 					orderJSONObject.getDouble("shippingAmountValue")
 				).longValue()
-			));
-
-		breakdownJSONObject.put(
+			)
+		).put(
 			"tax_total",
 			new JSONObject(
 			).put(
@@ -202,81 +225,36 @@ public class SetUpPaymentRestController extends BaseRestController {
 				BigDecimal.valueOf(
 					orderJSONObject.getDouble("taxAmount")
 				).longValue()
-			));
+			)
+		);
 
 		return breakdownJSONObject;
 	}
 
-	private String _getCommercePaymentEntryId(
-		@AuthenticationPrincipal Jwt jwt,
-		@PathVariable("orderId") long orderId) {
-
-		JSONObject paymentsJSONObject = new JSONObject(
-			Objects.requireNonNull(
-				WebClient.create(
-				).get(
-				).uri(
-					StringBundler.concat(
-						lxcDXPServerProtocol, "://", lxcDXPMainDomain,
-						"/o/headless-commerce-admin-payment/v1.0/payments/?filter=classPK eq ",
-						orderId)
-				).accept(
-					MediaType.APPLICATION_JSON
-				).header(
-					HttpHeaders.AUTHORIZATION, "Bearer " + jwt.getTokenValue()
-				).retrieve(
-				).bodyToMono(
-					String.class
-				).block()));
-
-		JSONArray itemsjsonArray = paymentsJSONObject.getJSONArray("items");
-
-		for (int i = 0; i < itemsjsonArray.length(); i++) {
-			JSONObject itemjsonObject = itemsjsonArray.getJSONObject(i);
-
-			if (Objects.equals(
-					itemjsonObject.getString("paymentStatus"), "18")) {
-
-				return String.valueOf(itemjsonObject.getLong("id"));
-			}
-		}
-
-		return null;
-	}
-
-	private JSONObject _getExperienceContext(
-		long orderId, String cancelURL, String callbackURL) {
+	private JSONObject _getExperienceContextJSONObject(
+		String cancelURL, String callbackURL, String fundingSource) {
 
 		JSONObject experienceContextJSONObject = new JSONObject();
 
-		JSONObject payPalWebhookJSONObject = get("Bearer " + jwt.getTokenValue(),
-				"/o/c/n2a1paypalwebhooks/by-external-reference-code/" +
-				orderId);
+		if (!Objects.equals(fundingSource, "google_pay") &&
+			!Objects.equals(fundingSource, "apple_pay")) {
 
-		if (payPalWebhookJSONObject.has("fundingSource")) {
-			String fundingSource = payPalWebhookJSONObject.getString("fundingSource");
+			experienceContextJSONObject.put(
+				"shipping_preference", "SET_PROVIDED_ADDRESS");
+		}
 
-			if (!Objects.equals(fundingSource, "google_pay") && !Objects.equals(fundingSource,"apple_pay")) {
-				experienceContextJSONObject.put(
-					"shipping_preference", "SET_PROVIDED_ADDRESS"
-				);
-			}
+		if (ArrayUtil.contains(_FUNDING_SOURCES, fundingSource) ||
+			Objects.equals(_FUNDING_SOURCES, "paypal")) {
 
-			if (ArrayUtil.contains(_funding_sources, fundingSource) || Objects.equals(_funding_sources, "paypal")) {
-				experienceContextJSONObject.put(
-					"cancel_url",
-					cancelURL
-				).put(
-					"return_url",
-					callbackURL
-				);
-			}
+			experienceContextJSONObject.put(
+				"cancel_url", cancelURL
+			).put(
+				"return_url", callbackURL
+			);
+		}
 
-			if (fundingSource.equals("paypal")) {
-				experienceContextJSONObject.put(
-					"user_action", "PAY_NOW"
-				);
-			}
+		if (fundingSource.equals("paypal")) {
+			experienceContextJSONObject.put("user_action", "PAY_NOW");
 		}
 
 		return experienceContextJSONObject;
@@ -318,13 +296,16 @@ public class SetUpPaymentRestController extends BaseRestController {
 				languageId
 			);
 
-			tempItemJSONObject.put("name", name);
 			tempItemJSONObject.put(
+				"name", name
+			).put(
 				"quantity",
 				BigDecimal.valueOf(
 					quantity
-				).stripTrailingZeros());
-			tempItemJSONObject.put("sku", orderItemJSONObject.getString("sku"));
+				).stripTrailingZeros()
+			).put(
+				"sku", orderItemJSONObject.getString("sku")
+			);
 
 			itemsJSONArray.put(tempItemJSONObject);
 		}
@@ -332,8 +313,9 @@ public class SetUpPaymentRestController extends BaseRestController {
 		return itemsJSONArray;
 	}
 
-	private JSONObject _getPaymentSource(
-		JSONObject commercePaymentEntryJSONObject, Jwt jwt) {
+	private JSONObject _getPaymentSourceJSONObject(
+		Jwt jwt, JSONObject commercePaymentEntryJSONObject,
+		String fundingSource) {
 
 		JSONObject paymentSourceJSONObject = new JSONObject();
 
@@ -357,19 +339,21 @@ public class SetUpPaymentRestController extends BaseRestController {
 				).block()));
 
 		paymentSourceJSONObject.put(
-			_fundingSource,
-			_getPayPalPaymentSource(
-				commercePaymentEntryJSONObject, orderJSONObject));
+			fundingSource,
+			_getPayPalPaymentSourceJSONObject(
+				fundingSource, commercePaymentEntryJSONObject,
+				orderJSONObject));
 
 		return paymentSourceJSONObject;
 	}
 
-	private JSONObject _getPayPalPaymentSource(
-		JSONObject commercePaymentEntryJSONObject, JSONObject orderJSONObject) {
+	private JSONObject _getPayPalPaymentSourceJSONObject(
+		String fundingSource, JSONObject commercePaymentEntryJSONObject,
+		JSONObject orderJSONObject) {
 
 		JSONObject paymentSourceJSONObject = new JSONObject();
 
-		if (ArrayUtil.contains(_funding_sources, _fundingSource)) {
+		if (ArrayUtil.contains(_FUNDING_SOURCES, fundingSource)) {
 			JSONObject shippingAddressJSONObject =
 				orderJSONObject.getJSONObject("shippingAddress");
 
@@ -383,16 +367,18 @@ public class SetUpPaymentRestController extends BaseRestController {
 
 		paymentSourceJSONObject.put(
 			"experience_context",
-			_getExperienceContext(commercePaymentEntryJSONObject.getLong("classPK"), commercePaymentEntryJSONObject.getString("cancelURL"),
-				commercePaymentEntryJSONObject.getString("callbackURL")));
+			_getExperienceContextJSONObject(
+				commercePaymentEntryJSONObject.getString("cancelURL"),
+				commercePaymentEntryJSONObject.getString("callbackURL"),
+				fundingSource));
 
 		return paymentSourceJSONObject;
 	}
 
-	private JSONArray _getPurchaseUnit(
-		JSONObject commercePaymentEntryJSONObject, String merchantId, Jwt jwt) {
+	private JSONArray _getPurchaseUnitJSONArray(
+		Jwt jwt, JSONObject commercePaymentEntryJSONObject, String merchantId) {
 
-		JSONArray purchaseUnitArray = new JSONArray();
+		JSONArray purchaseUnitJSONArray = new JSONArray();
 
 		JSONObject purchaseUnitJSONObject = new JSONObject();
 
@@ -400,61 +386,49 @@ public class SetUpPaymentRestController extends BaseRestController {
 				commercePaymentEntryJSONObject.getString("className"),
 				"com.liferay.commerce.model.CommerceOrder")) {
 
-			JSONObject orderJSONObject = new JSONObject(
-				Objects.requireNonNull(
-					WebClient.create(
-					).get(
-					).uri(
-						StringBundler.concat(
-							lxcDXPServerProtocol, "://", lxcDXPMainDomain,
-							"/o/headless-commerce-admin-order/v1.0/orders/",
-							commercePaymentEntryJSONObject.getLong("classPK"),
-							"?nestedFields=orderItems,shippingAddress")
-					).accept(
-						MediaType.APPLICATION_JSON
-					).header(
-						HttpHeaders.AUTHORIZATION,
-						"Bearer " + jwt.getTokenValue()
-					).retrieve(
-					).bodyToMono(
-						String.class
-					).block()));
+			JSONObject orderJSONObject = get(
+				"Bearer " + jwt.getTokenValue(),
+				StringBundler.concat(
+					"/o/headless-commerce-admin-order/v1.0/orders/",
+					commercePaymentEntryJSONObject.getLong("classPK"),
+					"?nestedFields=orderItems,shippingAddress"));
 
 			purchaseUnitJSONObject.put(
 				"amount",
 				_getAmountJSONObject(
 					orderJSONObject,
-					commercePaymentEntryJSONObject.getString("currencyCode")));
-			purchaseUnitJSONObject.put(
+					commercePaymentEntryJSONObject.getString("currencyCode"))
+			).put(
 				"items",
 				_getItemsJSONArray(
 					orderJSONObject,
 					commercePaymentEntryJSONObject.getString("currencyCode"),
-					commercePaymentEntryJSONObject.getString("languageId")));
-			purchaseUnitJSONObject.put(
+					commercePaymentEntryJSONObject.getString("languageId"))
+			).put(
 				"shipping",
 				_getShippingJSONObject(
-					orderJSONObject.getJSONObject("shippingAddress")));
+					orderJSONObject.getJSONObject("shippingAddress"))
+			);
 		}
 
+		long commercePaymentEntryId = commercePaymentEntryJSONObject.getLong(
+			"commercePaymentEntryId");
+
 		purchaseUnitJSONObject.put(
-			"description",
-			"Payment: " +
-				commercePaymentEntryJSONObject.getString(
-					"commercePaymentEntryId"));
-		purchaseUnitJSONObject.put(
+			"description", "Payment: " + commercePaymentEntryId
+		).put(
 			"payee",
 			new JSONObject(
 			).put(
 				"merchant_id", merchantId
-			));
-		purchaseUnitJSONObject.put(
-			"reference_id",
-			commercePaymentEntryJSONObject.getString("commercePaymentEntryId"));
+			)
+		).put(
+			"reference_id", commercePaymentEntryId
+		);
 
-		purchaseUnitArray.put(purchaseUnitJSONObject);
+		purchaseUnitJSONArray.put(purchaseUnitJSONObject);
 
-		return purchaseUnitArray;
+		return purchaseUnitJSONArray;
 	}
 
 	private JSONObject _getShippingJSONObject(
@@ -472,29 +446,50 @@ public class SetUpPaymentRestController extends BaseRestController {
 		JSONObject addressJSONObject = new JSONObject();
 
 		addressJSONObject.put(
-			"address_line_1", shippingAddressJSONObject.getString("street1"));
-		addressJSONObject.put(
-			"address_line_2", shippingAddressJSONObject.getString("street2"));
-		addressJSONObject.put(
-			"admin_area_1",
-			shippingAddressJSONObject.getString("regionISOCode"));
-		addressJSONObject.put(
-			"admin_area_2", shippingAddressJSONObject.getString("city"));
-		addressJSONObject.put(
+			"address_line_1", shippingAddressJSONObject.getString("street1")
+		).put(
+			"address_line_2", shippingAddressJSONObject.getString("street2")
+		).put(
+			"admin_area_1", shippingAddressJSONObject.getString("regionISOCode")
+		).put(
+			"admin_area_2", shippingAddressJSONObject.getString("city")
+		).put(
 			"country_code",
-			shippingAddressJSONObject.getString("countryISOCode"));
-		addressJSONObject.put(
-			"postal_code", shippingAddressJSONObject.getString("zip"));
+			shippingAddressJSONObject.getString("countryISOCode")
+		).put(
+			"postal_code", shippingAddressJSONObject.getString("zip")
+		);
 
 		shippingJSONObject.put("address", addressJSONObject);
 
 		return shippingJSONObject;
 	}
 
+	private String _getTransactionCode(
+		@AuthenticationPrincipal Jwt jwt,
+		@PathVariable("orderId") long orderId) {
+
+		JSONObject orderPaymentJSONObject = get(
+			"Bearer " + jwt.getTokenValue(),
+			"/o/c/n2a1paypaltransactions/by-external-reference-code/" +
+				orderId);
+
+		String transactionCode = orderPaymentJSONObject.getString(
+			"transactionCode");
+
+		delete(
+			"Bearer " + jwt.getTokenValue(),
+			"/o/c/n2a1paypaltransactions/by-external-reference-code/" +
+				orderId);
+
+		return transactionCode;
+	}
+
+	private static final String[] _FUNDING_SOURCES = {
+		"bancontact", "eps", "giropay", "ideal", "mybank", "p24", "trustly"
+	};
+
 	private static final Log _log = LogFactory.getLog(
 		SetUpPaymentRestController.class);
 
-	private static final String[] _funding_sources = {
-		"bancontact", "eps", "giropay", "ideal", "mybank", "p24", "trustly"
-	};
 }

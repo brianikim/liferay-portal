@@ -10,9 +10,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.json.JSONObject;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -20,7 +18,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * @author Brian I. Kim
@@ -34,39 +31,6 @@ public class CancelRestController extends BaseRestController {
 		@AuthenticationPrincipal Jwt jwt, @RequestBody String json) {
 
 		log(jwt, _log, json);
-
-		JSONObject jsonObject = new JSONObject(json);
-
-		JSONObject typeSettingsJSONObject = jsonObject.getJSONObject(
-			"typeSettings");
-
-		JSONObject commercePaymentEntryJSONObject = jsonObject.getJSONObject(
-			"commercePaymentEntry");
-
-		String captureOrderResponse = WebClient.create(
-			getEnvironmentURL(typeSettingsJSONObject.getString("mode"))
-		).post(
-		).uri(
-			"v2/checkout/orders/" +
-				commercePaymentEntryJSONObject.getString("transactionCode")
-		).contentType(
-			MediaType.APPLICATION_JSON
-		).header(
-			HttpHeaders.AUTHORIZATION,
-			"Bearer " +
-				getAuthorization(
-					typeSettingsJSONObject.getString("mode"),
-					typeSettingsJSONObject.getString("clientId"),
-					typeSettingsJSONObject.getString("clientSecret"))
-		).retrieve(
-		).bodyToMono(
-			String.class
-		).block();
-
-		JSONObject captureOrderResponseJSONObject = new JSONObject(
-			captureOrderResponse);
-
-		_log.fatal("CANCEL:" + captureOrderResponseJSONObject);
 
 		return new ResponseEntity<>(
 			new JSONObject(

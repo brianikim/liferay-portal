@@ -19,57 +19,14 @@ import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import reactor.core.publisher.Mono;
+
 /**
  * @author Raymond Augé
  * @author Gregory Amerson
  * @author Brian Wing Shun Chan
  */
 public abstract class BaseRestController {
-
-	protected String getAuthorization(
-		String mode, String clientId, String clientSecret) {
-
-		String authorization = clientId + ":" + clientSecret;
-
-		JSONObject authorizationRequest = new JSONObject(
-			WebClient.create(
-				getEnvironmentURL(mode)
-			).post(
-			).uri(
-				"/v1/oauth2/token"
-			).accept(
-				MediaType.APPLICATION_JSON
-			).contentType(
-				MediaType.APPLICATION_FORM_URLENCODED
-			).header(
-				HttpHeaders.AUTHORIZATION,
-				"Basic " + Base64.encodeBase64String(authorization.getBytes())
-			).bodyValue(
-				"grant_type=client_credentials"
-			).retrieve(
-			).bodyToMono(
-				String.class
-			).block());
-
-		return authorizationRequest.getString("access_token");
-	}
-
-	protected void post(String authorization, String body, String path) {
-		_getWebClient(
-		).post(
-		).uri(
-			uriBuilder -> uriBuilder.path(
-				path
-			).build()
-		).bodyValue(
-			body
-		).header(
-			HttpHeaders.AUTHORIZATION, authorization
-		).retrieve(
-		).bodyToMono(
-			String.class
-		).subscribe();
-	}
 
 	protected void delete(String authorization, String path) {
 		_getWebClient(
@@ -105,32 +62,32 @@ public abstract class BaseRestController {
 		return new JSONObject(Objects.requireNonNull(response.block()));
 	}
 
-	protected void patch(String authorization, String body, String path) {
-		_getWebClient(
-		).patch(
-		).uri(
-			uriBuilder -> uriBuilder.path(
-				path
-			).build()
-		).bodyValue(
-			body
-		).header(
-			HttpHeaders.AUTHORIZATION, authorization
-		).retrieve(
-		).bodyToMono(
-			String.class
-		).subscribe();
-	}
+	protected String getAuthorization(
+		String clientId, String clientSecret, String mode) {
 
-	private WebClient _getWebClient() {
-		return WebClient.builder(
-		).baseUrl(
-			lxcDXPServerProtocol + "://" + lxcDXPMainDomain
-		).defaultHeader(
-			HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE
-		).defaultHeader(
-			HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
-		).build();
+		String authorization = clientId + ":" + clientSecret;
+
+		JSONObject authorizationRequest = new JSONObject(
+			WebClient.create(
+				getEnvironmentURL(mode)
+			).post(
+			).uri(
+				"/v1/oauth2/token"
+			).accept(
+				MediaType.APPLICATION_JSON
+			).contentType(
+				MediaType.APPLICATION_FORM_URLENCODED
+			).header(
+				HttpHeaders.AUTHORIZATION,
+				"Basic " + Base64.encodeBase64String(authorization.getBytes())
+			).bodyValue(
+				"grant_type=client_credentials"
+			).retrieve(
+			).bodyToMono(
+				String.class
+			).block());
+
+		return authorizationRequest.getString("access_token");
 	}
 
 	protected String getEnvironmentURL(String mode) {
@@ -175,11 +132,55 @@ public abstract class BaseRestController {
 		}
 	}
 
+	protected void patch(String authorization, String body, String path) {
+		_getWebClient(
+		).patch(
+		).uri(
+			uriBuilder -> uriBuilder.path(
+				path
+			).build()
+		).bodyValue(
+			body
+		).header(
+			HttpHeaders.AUTHORIZATION, authorization
+		).retrieve(
+		).bodyToMono(
+			String.class
+		).subscribe();
+	}
+
+	protected void post(String authorization, String body, String path) {
+		_getWebClient(
+		).post(
+		).uri(
+			uriBuilder -> uriBuilder.path(
+				path
+			).build()
+		).bodyValue(
+			body
+		).header(
+			HttpHeaders.AUTHORIZATION, authorization
+		).retrieve(
+		).bodyToMono(
+			String.class
+		).subscribe();
+	}
 
 	@Value("${com.liferay.lxc.dxp.mainDomain}")
 	protected String lxcDXPMainDomain;
 
 	@Value("${com.liferay.lxc.dxp.server.protocol}")
 	protected String lxcDXPServerProtocol;
+
+	private WebClient _getWebClient() {
+		return WebClient.builder(
+		).baseUrl(
+			lxcDXPServerProtocol + "://" + lxcDXPMainDomain
+		).defaultHeader(
+			HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE
+		).defaultHeader(
+			HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
+		).build();
+	}
 
 }
