@@ -10,8 +10,11 @@ import com.liferay.commerce.client.extension.web.internal.type.deployer.Registra
 import com.liferay.commerce.constants.CommerceWebKeys;
 import com.liferay.commerce.context.CommerceContext;
 import com.liferay.commerce.model.CommerceOrder;
+import com.liferay.commerce.order.CommerceOrderHttpHelper;
 import com.liferay.commerce.payment.model.CommercePaymentMethodGroupRel;
 import com.liferay.commerce.payment.service.CommercePaymentMethodGroupRelLocalService;
+import com.liferay.commerce.product.service.CommerceChannelLocalService;
+import com.liferay.commerce.service.CommerceOrderService;
 import com.liferay.commerce.util.CommerceCheckoutStep;
 import com.liferay.frontend.taglib.servlet.taglib.util.JSPRenderer;
 import com.liferay.portal.catapult.PortalCatapult;
@@ -25,6 +28,8 @@ import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.UserService;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.Http;
+import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
 
@@ -50,6 +55,9 @@ public class ClientExtensionCommerceCheckoutStep
 		CommerceCheckoutStepCET commerceCheckoutStepCET,
 		JSONFactory jsonFactory, JSPRenderer jspRenderer,
 		PortalCatapult portalCatapult, ServletContext servletContext,
+		CommerceChannelLocalService commerceChannelLocalService,
+		CommerceOrderHttpHelper commerceOrderHttpHelper,
+		CommerceOrderService commerceOrderService,
 		CommercePaymentMethodGroupRelLocalService
 			commercePaymentMethodGroupRelLocalService,
 		UserService userService) {
@@ -58,6 +66,9 @@ public class ClientExtensionCommerceCheckoutStep
 		_jspRenderer = jspRenderer;
 		_portalCatapult = portalCatapult;
 		_servletContext = servletContext;
+		_commerceChannelLocalService = commerceChannelLocalService;
+		_commerceOrderHttpHelper = commerceOrderHttpHelper;
+		_commerceOrderService = commerceOrderService;
 		_commercePaymentMethodGroupRelLocalService =
 			commercePaymentMethodGroupRelLocalService;
 		_userService = userService;
@@ -104,11 +115,7 @@ public class ClientExtensionCommerceCheckoutStep
 			HttpServletResponse httpServletResponse)
 		throws Exception {
 
-		CommerceContext commerceContext =
-			(CommerceContext)httpServletRequest.getAttribute(
-				CommerceWebKeys.COMMERCE_CONTEXT);
-
-		CommerceOrder commerceOrder = commerceContext.getCommerceOrder();
+		CommerceOrder commerceOrder = _getCommerceOrder(httpServletRequest);
 
 		User currentUser = _userService.getCurrentUser();
 
@@ -121,7 +128,22 @@ public class ClientExtensionCommerceCheckoutStep
 					currentUser.getUserId()
 				).get());
 
-			if (Objects.equals(status, "READY") && _active) {
+			if (Objects.equals(status, "READY") && _active && _payment) {
+				String paymentMethodKey = new String(
+					_portalCatapult.launch(
+						commerceOrder.getCompanyId(), Http.Method.GET,
+						_oAuth2ApplicationExternalReferenceCode,
+						_jsonFactory.createJSONObject(), "/payment-method",
+						currentUser.getUserId()
+					).get());
+
+				if (paymentMethodKey.equals(
+						commerceOrder.getCommercePaymentMethodKey())) {
+
+					return true;
+				}
+			}
+			else if (Objects.equals(status, "READY") && _active) {
 				return true;
 			}
 		}
@@ -140,6 +162,7 @@ public class ClientExtensionCommerceCheckoutStep
 	public boolean isOrder() {
 		return _order;
 	}
+
 	@Override
 	public boolean isSennaDisabled() {
 		return _sennaDisabled;
@@ -166,7 +189,7 @@ public class ClientExtensionCommerceCheckoutStep
 		CommerceOrder commerceOrder = commerceContext.getCommerceOrder();
 
 		JSONObject jsonObject = JSONUtil.put(
-			"commerceOrderId", commerceOrder.getCommerceOrderId());
+			"orderId", commerceOrder.getCommerceOrderId());
 
 		ActionParameters actionParameters = actionRequest.getActionParameters();
 
@@ -209,12 +232,31 @@ public class ClientExtensionCommerceCheckoutStep
 		return _showControls;
 	}
 
-	private void _renderPayment(HttpServletRequest httpServletRequest) {
-		CommerceContext commerceContext =
-			(CommerceContext)httpServletRequest.getAttribute(
-				CommerceWebKeys.COMMERCE_CONTEXT);
+	private CommerceOrder _getCommerceOrder(
+			HttpServletRequest httpServletRequest)
+		throws Exception {
 
-		CommerceOrder commerceOrder = commerceContext.getCommerceOrder();
+		String commerceOrderUuid = ParamUtil.getString(
+			httpServletRequest, "commerceOrderUuid");
+
+		if (Validator.isNotNull(commerceOrderUuid)) {
+			long groupId =
+				_commerceChannelLocalService.
+					getCommerceChannelGroupIdBySiteGroupId(
+						PortalUtil.getScopeGroupId(httpServletRequest));
+
+			return _commerceOrderService.getCommerceOrderByUuidAndGroupId(
+				commerceOrderUuid, groupId);
+		}
+
+		return _commerceOrderHttpHelper.getCurrentCommerceOrder(
+			httpServletRequest);
+	}
+
+	private void _renderPayment(HttpServletRequest httpServletRequest)
+		throws Exception {
+
+		CommerceOrder commerceOrder = _getCommerceOrder(httpServletRequest);
 
 		CommercePaymentMethodGroupRel commercePaymentMethodGroupRel =
 			_commercePaymentMethodGroupRelLocalService.
@@ -242,7 +284,10 @@ public class ClientExtensionCommerceCheckoutStep
 
 	private final boolean _active;
 	private final String _baseURL;
+	private final CommerceChannelLocalService _commerceChannelLocalService;
 	private final int _commerceCheckoutStepOrder;
+	private final CommerceOrderHttpHelper _commerceOrderHttpHelper;
+	private final CommerceOrderService _commerceOrderService;
 	private final CommercePaymentMethodGroupRelLocalService
 		_commercePaymentMethodGroupRelLocalService;
 	private final Dictionary<String, Object> _dictionary;

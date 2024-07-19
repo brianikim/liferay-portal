@@ -9,7 +9,10 @@ import com.liferay.client.extension.type.CET;
 import com.liferay.client.extension.type.CommerceCheckoutStepCET;
 import com.liferay.client.extension.type.deployer.CommerceCETDeployer;
 import com.liferay.commerce.client.extension.web.internal.util.ClientExtensionCommerceCheckoutStep;
+import com.liferay.commerce.order.CommerceOrderHttpHelper;
 import com.liferay.commerce.payment.service.CommercePaymentMethodGroupRelLocalService;
+import com.liferay.commerce.product.service.CommerceChannelLocalService;
+import com.liferay.commerce.service.CommerceOrderService;
 import com.liferay.commerce.util.CommerceCheckoutStep;
 import com.liferay.frontend.taglib.servlet.taglib.util.JSPRenderer;
 import com.liferay.portal.catapult.PortalCatapult;
@@ -41,6 +44,8 @@ public class CommerceCETDeployerImpl implements CommerceCETDeployer {
 				new ClientExtensionCommerceCheckoutStep(
 					(CommerceCheckoutStepCET)cet, _jsonFactory, _jspRenderer,
 					_portalCatapult, _servletContext,
+					_commerceChannelLocalService, _commerceOrderHttpHelper,
+					_commerceOrderService,
 					_commercePaymentMethodGroupRelLocalService, _userService)));
 	}
 
@@ -57,6 +62,15 @@ public class CommerceCETDeployerImpl implements CommerceCETDeployer {
 	}
 
 	private BundleContext _bundleContext;
+
+	@Reference
+	private CommerceChannelLocalService _commerceChannelLocalService;
+
+	@Reference
+	private CommerceOrderHttpHelper _commerceOrderHttpHelper;
+
+	@Reference
+	private CommerceOrderService _commerceOrderService;
 
 	@Reference
 	private CommercePaymentMethodGroupRelLocalService

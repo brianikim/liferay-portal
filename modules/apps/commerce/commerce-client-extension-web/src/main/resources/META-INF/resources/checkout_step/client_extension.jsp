@@ -9,6 +9,7 @@
 
 <%
 String clientId = (String)request.getAttribute("clientId");
+String orderId = (String)request.getAttribute("orderId");
 String renderURL = (String)request.getAttribute(CommerceClientExtensionWebKeys.RENDER_URL);
 %>
 
@@ -16,6 +17,10 @@ String renderURL = (String)request.getAttribute(CommerceClientExtensionWebKeys.R
 
 <c:if test="<%= Validator.isNotNull(clientId) %>">
 	<input id="payment-client-id" name="clientId" type="hidden" value="<%= clientId %>" />
+</c:if>
+
+<c:if test="<%= Validator.isNotNull(orderId) %>">
+	<input id="payment-order-id" name="orderId" type="hidden" value="<%= orderId %>" />
 </c:if>
 
 <liferay-frontend:component
