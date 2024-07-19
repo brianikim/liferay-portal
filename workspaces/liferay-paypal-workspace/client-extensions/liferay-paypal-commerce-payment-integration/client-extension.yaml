@@ -1,0 +1,33 @@
+assemble:
+    - fromTask: bootJar
+liferay-paypal-commerce-payment-integration:
+    key: liferay-paypal-commerce-payment-integration
+    name: PayPal SDK Payment Integration
+    oAuth2ApplicationExternalReferenceCode: liferay-paypal-commerce-payment-integration-oauth-application-user-agent
+    paymentIntegrationType: 4
+    paymentIntegrationTypeSettings:
+        clientId: enter your client id here
+        clientSecret: enter your client secret here
+        merchantId: enter your merchand id here
+        mode: enter your mode here (sandbox or live)
+    type: commercePaymentIntegration
+liferay-paypal-commerce-payment-integration-oauth-application-headless-server:
+    .serviceAddress: localhost:58082
+    .serviceScheme: http
+    name: Liferay PayPal Commerce Payment Integration OAuth Application Headless Server
+    scopes:
+        - c_n2a1paypalwebhook.everything
+        - Liferay.Headless.Admin.Workflow.everything
+        - Liferay.Headless.Batch.Engine.everything
+        - Liferay.Headless.Commerce.Admin.Payment.everything
+        - Liferay.Object.Admin.REST.everything
+    type: oAuthApplicationHeadlessServer
+liferay-paypal-commerce-payment-integration-oauth-application-user-agent:
+    .serviceAddress: localhost:58082
+    .serviceScheme: http
+    name: Liferay PayPal Commerce Payment Integration OAuth Application User Agent
+    scopes:
+        - Liferay.Headless.Admin.Workflow.everything
+        - Liferay.Headless.Commerce.Admin.Order.everything
+        - Liferay.Headless.Commerce.Admin.Payment.everything
+    type: oAuthApplicationUserAgent

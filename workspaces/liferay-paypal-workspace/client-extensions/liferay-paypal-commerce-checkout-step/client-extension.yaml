@@ -1,0 +1,24 @@
+assemble:
+    - from: assets
+      into: static
+    - fromTask: bootJar
+liferay-paypal-commerce-checkout-step:
+    active: true
+    checkoutStepLabel: liferay-paypal-commerce-checkout-step-label
+    checkoutStepName: liferay-paypal-commerce-checkout-step-name
+    checkoutStepOrder: 2147483547
+    name: Liferay PayPal Commerce Checkout Step
+    oAuth2ApplicationExternalReferenceCode: liferay-paypal-commerce-checkout-step-oauth-application-user-agent
+    order: true
+    payment: true
+    sennaDisabled: true
+    showControls: false
+    type: commerceCheckoutStep
+    visible: true
+liferay-paypal-commerce-checkout-step-oauth-application-user-agent:
+    .serviceAddress: localhost:58081
+    .serviceScheme: http
+    name: Liferay PayPal Commerce Checkout Step OAuth Application User Agent
+    scopes:
+        - Liferay.Headless.Admin.Workflow.everything
+    type: oAuthApplicationUserAgent
