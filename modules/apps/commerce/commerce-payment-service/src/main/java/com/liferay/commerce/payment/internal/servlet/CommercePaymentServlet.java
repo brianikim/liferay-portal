@@ -29,8 +29,6 @@ import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.json.JSONFactory;
-import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -351,10 +349,9 @@ public class CommercePaymentServlet extends HttpServlet {
 				if (CommercePaymentEntryConstants.STATUS_CREATED ==
 						paymentStatus) {
 
-					JSONObject jsonObject = _jsonFactory.createJSONObject(
-						commercePaymentEntry.getPayload());
+					if (!ParamUtil.getBoolean(
+							httpServletRequest, "redirect", true)) {
 
-					if (jsonObject.has("PAYER_ACTION_REQUIRED")) {
 						return;
 					}
 
@@ -590,9 +587,6 @@ public class CommercePaymentServlet extends HttpServlet {
 
 	@Reference
 	private CommerceSubscriptionEngine _commerceSubscriptionEngine;
-
-	@Reference
-	private JSONFactory _jsonFactory;
 
 	@Reference
 	private Language _language;
