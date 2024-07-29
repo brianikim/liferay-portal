@@ -104,7 +104,9 @@ public class CPAttachmentFileEntryServiceImpl
 					externalReferenceCode, serviceContext.getCompanyId());
 		}
 
-		if (cpAttachmentFileEntry == null) {
+		if ((cpAttachmentFileEntry == null) ||
+			(cpAttachmentFileEntry.getClassPK() != classPK)) {
+
 			_checkCPAttachmentFileEntryPermissions(
 				serviceContext.getScopeGroupId(), classNameId, classPK, type);
 		}

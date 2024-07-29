@@ -257,6 +257,13 @@ public class CPAttachmentFileEntryLocalServiceImpl
 					externalReferenceCode, serviceContext.getCompanyId());
 		}
 
+		if ((cpAttachmentFileEntry != null) &&
+			(cpAttachmentFileEntry.getClassPK() != classPK)) {
+
+			cpAttachmentFileEntry = null;
+			externalReferenceCode = null;
+		}
+
 		if (cpAttachmentFileEntry == null) {
 			cpAttachmentFileEntry =
 				cpAttachmentFileEntryLocalService.addCPAttachmentFileEntry(
