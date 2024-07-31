@@ -80,7 +80,7 @@ public class NotificationsRestController extends BaseRestController {
 				}
 
 				_updatePayment(
-					errorMessages, json, transactionCode, paymentStatus);
+					errorMessages, json, paymentStatus, transactionCode);
 
 				delete(
 					_liferayOAuth2AccessTokenManager.getAuthorization(
@@ -178,13 +178,13 @@ public class NotificationsRestController extends BaseRestController {
 	}
 
 	private void _updatePayment(
-		String errorMessages, String json, String transactionCode,
-		String paymentStatus) {
+		String errorMessages, String json, String paymentStatus,
+		String transactionCode) {
 
 		JSONObject payPalWebhookJSONObject = get(
 			_liferayOAuth2AccessTokenManager.getAuthorization(
 				"liferay-paypal-oauth-application-headless-server"),
-			"/o/c/n2a1paypalwebhooks/by-external-reference-code/" +
+			"/o/c/paypalwebhooks/by-external-reference-code/" +
 				transactionCode);
 
 		patch(
