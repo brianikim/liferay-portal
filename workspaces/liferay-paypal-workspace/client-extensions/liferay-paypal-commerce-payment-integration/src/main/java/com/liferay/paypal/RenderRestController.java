@@ -112,15 +112,11 @@ public class RenderRestController extends BaseRestController {
 
 		JSONArray itemsJSONArray = paymentsJSONObject.getJSONArray("items");
 
-		_log.fatal("TC: " + transactionCode);
-
 		for (int i = 0; i < itemsJSONArray.length(); i++) {
 			JSONObject itemJSONObject = itemsJSONArray.getJSONObject(i);
 
 			String itemTransactionCode = itemJSONObject.getString(
 				"transactionCode");
-
-			_log.fatal("itemTC: " + itemTransactionCode);
 
 			if (StringUtils.equals(itemTransactionCode, transactionCode)) {
 				return String.valueOf(itemJSONObject.getInt("id"));
