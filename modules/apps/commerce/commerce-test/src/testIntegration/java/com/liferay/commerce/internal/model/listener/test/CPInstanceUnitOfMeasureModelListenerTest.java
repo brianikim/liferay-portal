@@ -141,7 +141,7 @@ public class CPInstanceUnitOfMeasureModelListenerTest {
 		frutillaRule.scenario(
 			"Add the first CPInstance Unit Of Measure"
 		).given(
-			"An open order and a closed one"
+			"An open order, a pending order, and a closed one"
 		).when(
 			"The CPInstance Unit Of Measure is added"
 		).then(
@@ -172,9 +172,26 @@ public class CPInstanceUnitOfMeasureModelListenerTest {
 			commerceOrder2.getCommerceOrderId());
 
 		commerceOrder2.setOrderStatus(
-			CommerceOrderConstants.ORDER_STATUS_COMPLETED);
+			CommerceOrderConstants.ORDER_STATUS_PENDING);
 
 		_commerceOrderLocalService.updateCommerceOrder(commerceOrder2);
+
+		CommerceOrder commerceOrder3 = CommerceTestUtil.addB2CCommerceOrder(
+			_cpInstance.getUserId(), _commerceChannel.getGroupId(),
+			_commerceCurrency);
+
+		CommerceOrderItem commerceOrderItem3 =
+			CommerceTestUtil.addCommerceOrderItem(
+				commerceOrder3.getCommerceOrderId(),
+				_cpInstance.getCPInstanceId(), quantity);
+
+		commerceOrder3 = _commerceOrderLocalService.getCommerceOrder(
+			commerceOrder3.getCommerceOrderId());
+
+		commerceOrder3.setOrderStatus(
+			CommerceOrderConstants.ORDER_STATUS_COMPLETED);
+
+		_commerceOrderLocalService.updateCommerceOrder(commerceOrder3);
 
 		CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure =
 			CPTestUtil.addCPInstanceUnitOfMeasure(
@@ -204,6 +221,16 @@ public class CPInstanceUnitOfMeasureModelListenerTest {
 			commerceOrderItem2.getUnitOfMeasureKey());
 		Assert.assertTrue(
 			BigDecimalUtil.eq(commerceOrderItem2.getQuantity(), quantity));
+
+		commerceOrderItem3 =
+			_commerceOrderItemLocalService.getCommerceOrderItem(
+				commerceOrderItem3.getCommerceOrderItemId());
+
+		Assert.assertNotEquals(
+			cpInstanceUnitOfMeasure.getKey(),
+			commerceOrderItem3.getUnitOfMeasureKey());
+		Assert.assertTrue(
+			BigDecimalUtil.eq(commerceOrderItem3.getQuantity(), quantity));
 	}
 
 	@Test
@@ -256,7 +283,7 @@ public class CPInstanceUnitOfMeasureModelListenerTest {
 		frutillaRule.scenario(
 			"Update a CPInstance Unit Of Measure"
 		).given(
-			"An open order and a closed one"
+			"An open order, a pending order, and a closed one"
 		).when(
 			"The CPInstance Unit Of Measure is updated"
 		).then(
@@ -282,6 +309,15 @@ public class CPInstanceUnitOfMeasureModelListenerTest {
 		CommerceOrderItem commerceOrderItem2 =
 			CommerceTestUtil.addCommerceOrderItem(
 				commerceOrder2.getCommerceOrderId(),
+				_cpInstance.getCPInstanceId(), quantity);
+
+		CommerceOrder commerceOrder3 = CommerceTestUtil.addB2CCommerceOrder(
+			_cpInstance.getUserId(), _commerceChannel.getGroupId(),
+			_commerceCurrency);
+
+		CommerceOrderItem commerceOrderItem3 =
+			CommerceTestUtil.addCommerceOrderItem(
+				commerceOrder3.getCommerceOrderId(),
 				_cpInstance.getCPInstanceId(), quantity);
 
 		CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure =
@@ -320,9 +356,30 @@ public class CPInstanceUnitOfMeasureModelListenerTest {
 			commerceOrder2.getCommerceOrderId());
 
 		commerceOrder2.setOrderStatus(
-			CommerceOrderConstants.ORDER_STATUS_COMPLETED);
+			CommerceOrderConstants.ORDER_STATUS_PENDING);
 
 		_commerceOrderLocalService.updateCommerceOrder(commerceOrder2);
+
+		commerceOrderItem3 =
+			_commerceOrderItemLocalService.getCommerceOrderItem(
+				commerceOrderItem3.getCommerceOrderItemId());
+
+		Assert.assertEquals(
+			cpInstanceUnitOfMeasure.getKey(),
+			commerceOrderItem3.getUnitOfMeasureKey());
+		Assert.assertTrue(
+			BigDecimalUtil.eq(
+				commerceOrderItem3.getQuantity(),
+				quantity.multiply(
+					cpInstanceUnitOfMeasure.getIncrementalOrderQuantity())));
+
+		commerceOrder3 = _commerceOrderLocalService.getCommerceOrder(
+			commerceOrder3.getCommerceOrderId());
+
+		commerceOrder3.setOrderStatus(
+			CommerceOrderConstants.ORDER_STATUS_COMPLETED);
+
+		_commerceOrderLocalService.updateCommerceOrder(commerceOrder3);
 
 		cpInstanceUnitOfMeasure.setIncrementalOrderQuantity(
 			BigDecimal.valueOf(2));
@@ -352,6 +409,14 @@ public class CPInstanceUnitOfMeasureModelListenerTest {
 		Assert.assertNotEquals(
 			cpInstanceUnitOfMeasure.getKey(),
 			commerceOrderItem2.getUnitOfMeasureKey());
+
+		commerceOrderItem3 =
+			_commerceOrderItemLocalService.getCommerceOrderItem(
+				commerceOrderItem3.getCommerceOrderItemId());
+
+		Assert.assertNotEquals(
+			cpInstanceUnitOfMeasure.getKey(),
+			commerceOrderItem3.getUnitOfMeasureKey());
 	}
 
 	@Rule
