@@ -87,10 +87,7 @@ public class CPInstanceUnitOfMeasureModelListener
 		BigDecimal originalIncrementalOrderQuantity, String originalKey) {
 
 		int[] orderStatuses = ArrayUtil.append(
-			CommerceOrderConstants.ORDER_STATUSES_OPEN,
-			CommerceOrderConstants.ORDER_STATUSES_PENDING,
-			CommerceOrderConstants.ORDER_STATUSES_PROCESSING,
-			CommerceOrderConstants.ORDER_STATUSES_SHIPPING);
+			CommerceOrderConstants.ORDER_STATUSES_OPEN);
 
 		for (CommerceOrderItem commerceOrderItem :
 				_commerceOrderItemLocalService.getCommerceOrderItems(
