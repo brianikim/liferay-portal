@@ -17,8 +17,8 @@ export async function onPaypalLoaded() {
 			try {
 				const cartPaymentResource = await payPalOAuth.fetch('/render', {
 					body: JSON.stringify({
-						orderId,
 						fundingSource: data.paymentSource,
+						orderId,
 						redirect: false,
 					}),
 					method: 'POST',
