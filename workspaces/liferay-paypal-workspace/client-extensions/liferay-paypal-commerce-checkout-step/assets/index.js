@@ -26,8 +26,7 @@ export default function CommerceCheckoutStep() {
 		'_com_liferay_commerce_checkout_web_internal_portlet_CommerceCheckoutPortlet_commerceCheckoutStepContainer'
 	);
 
-	const payPalButtonContainerDivElement =
-		document.createElement('div');
+	const payPalButtonContainerDivElement = document.createElement('div');
 	payPalButtonContainerDivElement.setAttribute(
 		'id',
 		'paypal-button-container'
@@ -37,9 +36,7 @@ export default function CommerceCheckoutStep() {
 	resultMessageElement.setAttribute('id', 'result-message');
 
 	payPalButtonContainerDivElement.appendChild(resultMessageElement);
-	commerceCheckoutStepContainer.appendChild(
-		payPalButtonContainerDivElement
-	);
+	commerceCheckoutStepContainer.appendChild(payPalButtonContainerDivElement);
 
 	return Promise.all([payPalSDKPromise, googleSDKPromise])
 		.then(() => {

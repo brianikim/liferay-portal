@@ -35,7 +35,8 @@ async function getGooglePaymentDataRequest() {
 	const paymentDataRequest = {...baseRequest};
 
 	paymentDataRequest.allowedPaymentMethods = allowedPaymentMethods;
-	paymentDataRequest.transactionInfo = await getGoogleTransactionInfo(countryCode);
+	paymentDataRequest.transactionInfo =
+		await getGoogleTransactionInfo(countryCode);
 	paymentDataRequest.merchantInfo = merchantInfo;
 
 	paymentDataRequest.callbackIntents = ['PAYMENT_AUTHORIZATION'];
@@ -61,11 +62,11 @@ async function getGoogleTransactionInfo(countryCode) {
 
 	const orderId = document.getElementById('payment-order-id').value;
 
-	const orderData = await payPalOAuth.fetch(
-		'/set-up-payment/get-order/' + orderId + '/' + countryCode
-	).then(response => {
-		return response.json();
-	});
+	const orderData = await payPalOAuth
+		.fetch('/set-up-payment/get-order/' + orderId + '/' + countryCode)
+		.then((response) => {
+			return response.json();
+		});
 
 	return orderData;
 }
@@ -148,12 +149,9 @@ async function processPayment(paymentData) {
 						.Googlepay()
 						.initiatePayerAction({orderId: id})
 						.then(async () => {
-							await fetch(
-								`/api/orders/${id}`,
-								{
-									method: 'GET',
-								}
-							).then((res) => res.json());
+							await fetch(`/api/orders/${id}`, {
+								method: 'GET',
+							}).then((res) => res.json());
 
 							const capturePaymentResource =
 								await payPalOAuth.fetch('/render', {
@@ -213,6 +211,3 @@ async function processPayment(paymentData) {
 		};
 	}
 }
-
-
-
