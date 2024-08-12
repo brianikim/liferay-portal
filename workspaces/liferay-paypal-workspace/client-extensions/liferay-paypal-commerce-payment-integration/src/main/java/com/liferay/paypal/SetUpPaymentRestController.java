@@ -42,7 +42,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @RestController
 public class SetUpPaymentRestController extends BaseRestController {
 
-	@GetMapping("get-environment/{clientId}")
+	@GetMapping("get-google-environment/{clientId}")
 	public ResponseEntity<String> getGoogleEnvironmentInfo(
 		@AuthenticationPrincipal Jwt jwt,
 		@PathVariable("clientId") String clientId) {
@@ -61,7 +61,7 @@ public class SetUpPaymentRestController extends BaseRestController {
 			HttpStatus.OK);
 	}
 
-	@GetMapping("get-order/{orderId}/{countryCode}")
+	@GetMapping("get-google-order/{orderId}/{countryCode}")
 	public ResponseEntity<String> getGoogleOrderInfo(
 		@AuthenticationPrincipal Jwt jwt, @PathVariable("orderId") long orderId,
 		@PathVariable("countryCode") String countryCode) {
@@ -115,7 +115,7 @@ public class SetUpPaymentRestController extends BaseRestController {
 			HttpStatus.OK);
 	}
 
-	@GetMapping("get/{orderId}")
+	@GetMapping("get-paypal-order/{orderId}")
 	public ResponseEntity<String> getPayPalOrderInfo(
 		@AuthenticationPrincipal Jwt jwt,
 		@PathVariable("orderId") long orderId) {
@@ -526,27 +526,27 @@ public class SetUpPaymentRestController extends BaseRestController {
 		);
 	}
 
-	private String _getTransactionCode(
-		@AuthenticationPrincipal Jwt jwt,
-		@PathVariable("orderId") long orderId) {
+	private String _getTransactionCode(Jwt jwt, long orderId) {
+		Retryable<String> retryable = new BaseRetryable<String>() {
 
-		String transactionCode = null;
+			@Override
+			public String execute() {
+				String response = get(
+					"Bearer " + jwt.getTokenValue(),
+					"/o/c/b9k3paypaltransactions/by-external-reference-code/" +
+						orderId);
 
-		for (int i = 0; i < 10; i++) {
-			try {
-				JSONObject orderPaymentJSONObject = new JSONObject(
-					get(
-						"Bearer " + jwt.getTokenValue(),
-						"/o/c/b9k3paypaltransactions" +
-							"/by-external-reference-code/" + orderId));
-
-				transactionCode = orderPaymentJSONObject.getString(
-					"transactionCode");
+				return response;
 			}
-			catch (Exception exception) {
-				_log.error(ExceptionUtils.getMessage(exception));
-			}
-		}
+		};
+
+		String transactionCode = new JSONObject(
+			retryable.executeWithRetries()
+		).getString(
+			"transactionCode"
+		);
+
+		_log.error("RETRYABLE:" + transactionCode);
 
 		if (StringUtils.isNotBlank(transactionCode)) {
 			delete(
