@@ -7,6 +7,7 @@ package com.liferay.paypal;
 
 import com.liferay.client.extension.util.spring.boot.LiferayOAuth2AccessTokenManager;
 import com.liferay.petra.string.StringBundler;
+import com.liferay.petra.string.StringPool;
 
 import java.util.Map;
 import java.util.Objects;
@@ -35,7 +36,7 @@ import org.springframework.web.reactive.function.client.WebClient;
  */
 @RequestMapping("/notifications")
 @RestController
-public class NotificationsRestController extends BaseRestController {
+public class NotificationsRestController extends PayPalBaseRestController {
 
 	@PostMapping
 	public ResponseEntity<String> post(
@@ -90,11 +91,12 @@ public class NotificationsRestController extends BaseRestController {
 	private boolean _hasAuthentication(
 		Map<String, String> headers, String json, String transactionCode) {
 
-		JSONObject payPalWebhookJSONObject = get(
-			_liferayOAuth2AccessTokenManager.getAuthorization(
-				"liferay-paypal-oauth-application-headless-server"),
-			"/o/c/b9k3paypalwebhooks/by-external-reference-code/" +
-				transactionCode);
+		JSONObject payPalWebhookJSONObject = new JSONObject(
+			get(
+				_liferayOAuth2AccessTokenManager.getAuthorization(
+					"liferay-paypal-oauth-application-headless-server"),
+				"/o/c/b9k3paypalwebhooks/by-external-reference-code/" +
+					transactionCode));
 
 		if (payPalWebhookJSONObject == null) {
 			return false;
@@ -170,11 +172,12 @@ public class NotificationsRestController extends BaseRestController {
 		String errorMessages, String json, String paymentStatus,
 		String transactionCode) {
 
-		JSONObject payPalWebhookJSONObject = get(
-			_liferayOAuth2AccessTokenManager.getAuthorization(
-				"liferay-paypal-oauth-application-headless-server"),
-			"/o/c/b9k3paypalwebhooks/by-external-reference-code/" +
-				transactionCode);
+		JSONObject payPalWebhookJSONObject = new JSONObject(
+			get(
+				_liferayOAuth2AccessTokenManager.getAuthorization(
+					"liferay-paypal-oauth-application-headless-server"),
+				"/o/c/b9k3paypalwebhooks/by-external-reference-code/" +
+					transactionCode));
 
 		if (payPalWebhookJSONObject != null) {
 			patch(
@@ -194,6 +197,7 @@ public class NotificationsRestController extends BaseRestController {
 			delete(
 				_liferayOAuth2AccessTokenManager.getAuthorization(
 					"liferay-paypal-oauth-application-headless-server"),
+				StringPool.BLANK,
 				"/o/c/b9k3paypalwebhooks/by-external-reference-code/" +
 					transactionCode);
 		}
