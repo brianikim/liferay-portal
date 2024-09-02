@@ -8,10 +8,14 @@ package com.liferay.commerce.frontend.internal.order;
 import com.liferay.commerce.frontend.internal.account.model.Order;
 import com.liferay.commerce.frontend.internal.account.model.OrderList;
 import com.liferay.commerce.model.CommerceOrder;
+import com.liferay.commerce.order.CommerceOrderHttpHelper;
 import com.liferay.commerce.product.service.CommerceChannelLocalService;
 import com.liferay.commerce.service.CommerceOrderService;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.Language;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.PortletProvider;
 import com.liferay.portal.kernel.portlet.PortletProviderUtil;
 import com.liferay.portal.kernel.portlet.url.builder.PortletURLBuilder;
@@ -25,6 +29,16 @@ import java.util.List;
 import javax.portlet.PortletURL;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import javax.ws.rs.FormParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -51,6 +65,46 @@ public class CommerceOrderResource {
 
 		return new OrderList(
 			orders, _getOrdersCount(companyId, groupId, keywords));
+	}
+
+	@Path("/set-current-order")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response setCurrentOrder(
+		@QueryParam("groupId") long groupId,
+		@FormParam("commerceOrderId") long commerceOrderId,
+		@Context HttpServletRequest httpServletRequest) {
+
+		try {
+			long channelGroupId =
+				_commerceChannelLocalService.
+					getCommerceChannelGroupIdBySiteGroupId(groupId);
+
+			CommerceOrder commerceOrder =
+				_commerceOrderService.fetchCommerceOrder(commerceOrderId);
+
+			_commerceOrderHttpHelper.setCurrentCommerceOrder(
+				httpServletRequest, commerceOrder);
+
+			HttpServletRequest originalHttpServletRequest =
+				_portal.getOriginalServletRequest(httpServletRequest);
+
+			HttpSession httpSession = originalHttpServletRequest.getSession();
+
+			httpSession.removeAttribute(
+				CommerceOrder.class.getName() + StringPool.POUND +
+					channelGroupId);
+		}
+		catch (Exception exception) {
+			_log.error(exception);
+
+			Response.ResponseBuilder responseBuilder = Response.serverError();
+
+			return responseBuilder.build();
+		}
+
+		return Response.ok(
+		).build();
 	}
 
 	private String _getOrderLinkURL(
@@ -122,8 +176,14 @@ public class CommerceOrderResource {
 			companyId, groupId, keywords);
 	}
 
+	private static final Log _log = LogFactoryUtil.getLog(
+		CommerceOrderResource.class);
+
 	@Reference
 	private CommerceChannelLocalService _commerceChannelLocalService;
+
+	@Reference
+	private CommerceOrderHttpHelper _commerceOrderHttpHelper;
 
 	@Reference
 	private CommerceOrderService _commerceOrderService;
