@@ -4,6 +4,7 @@
  */
 
 export {default as newView} from './newView';
+export {default as header} from './Header';
 export {default as PendingOrderItemActionDropdownPropsTransformer} from './PendingOrderItemActionDropdownPropsTransformer';
 export {default as preview} from './preview';
 export {default as requestQuote} from './requestQuote';
