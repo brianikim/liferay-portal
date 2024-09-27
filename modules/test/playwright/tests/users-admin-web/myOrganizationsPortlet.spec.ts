@@ -88,7 +88,7 @@ test('LPD-35306 Breadcrumb in My Organizations does not have a link if user does
 	).toHaveCount(1);
 });
 
-test('LPD-35093 organization in my organizations portlet should be visible with update suborganizations permission', async ({
+test('LPD-37376 Suborganizations in My Organizations portlet should be able to be edited with the "Update Suborganizations" permission', async ({
 	apiHelpers,
 	context,
 	page,
