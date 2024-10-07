@@ -389,6 +389,14 @@ public class AccountEntryLocalServiceUtil {
 		return getService().getActionableDynamicQuery();
 	}
 
+	public static List<AccountEntry> getCompanyAccountEntries(
+		long companyId, int start, int end,
+		OrderByComparator<AccountEntry> orderByComparator) {
+
+		return getService().getCompanyAccountEntries(
+			companyId, start, end, orderByComparator);
+	}
+
 	public static com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery
 		getExportActionableDynamicQuery(
 			com.liferay.exportimport.kernel.lar.PortletDataContext
