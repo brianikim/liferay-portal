@@ -575,9 +575,8 @@ public class CommerceAccountHelperImpl implements CommerceAccountHelper {
 				null, AccountEntry.class.getName(),
 				commerceChannel.getCompanyId(), ActionKeys.VIEW)) {
 
-			accountEntries = _accountEntryLocalService.getAccountEntries(
-				commerceChannel.getCompanyId(),
-				WorkflowConstants.STATUS_APPROVED, QueryUtil.ALL_POS,
+			accountEntries = _accountEntryLocalService.getCompanyAccountEntries(
+				commerceChannel.getCompanyId(), QueryUtil.ALL_POS,
 				QueryUtil.ALL_POS, null);
 		}
 		else {
