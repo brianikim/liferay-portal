@@ -18,16 +18,23 @@ import com.liferay.portal.kernel.exception.DuplicateCountryException;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
+import com.liferay.portal.kernel.language.Language;
+import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.test.randomizerbumpers.RandomizerBumper;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
+import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.odata.entity.EntityField;
 import com.liferay.portal.test.rule.Inject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.core.Response;
 
@@ -74,6 +81,55 @@ public class CountryResourceTest extends BaseCountryResourceTestCase {
 		assertContains(country1, (List<Country>)page.getItems());
 		assertContains(country2, (List<Country>)page.getItems());
 		assertValid(page);
+	}
+
+	@Override
+	@Test
+	public void testGetCountry() throws Exception {
+		super.testGetCountry();
+
+		Country country = testGetCountriesPage_addCountry(randomCountry());
+
+		Set<Locale> originalAvailableLocales =
+			_language.getCompanyAvailableLocales(
+				TestPropsValues.getCompanyId());
+
+		StringBuilder sb = new StringBuilder();
+
+		for (Locale locale : originalAvailableLocales) {
+			sb.append(
+				locale.toString()
+			).append(
+				","
+			);
+		}
+
+		Map<String, String> availableLocales = HashMapBuilder.put(
+			"locales", "en_US,pt_BR"
+		).build();
+
+		UnicodeProperties unicodeProperties = new UnicodeProperties(
+			availableLocales, true);
+
+		_companyLocalService.updatePreferences(
+			TestPropsValues.getCompanyId(), unicodeProperties);
+
+		Country getCountry = countryResource.getCountry(country.getId());
+
+		availableLocales = HashMapBuilder.put(
+			"locales", sb.toString()
+		).build();
+
+		unicodeProperties = new UnicodeProperties(availableLocales, true);
+
+		_companyLocalService.updatePreferences(
+			TestPropsValues.getCompanyId(), unicodeProperties);
+
+		Map<String, String> titleMap = getCountry.getTitle_i18n();
+
+		Assert.assertEquals(titleMap.toString(), 2, titleMap.size());
+		Assert.assertTrue(titleMap.containsKey("en_US"));
+		Assert.assertTrue(titleMap.containsKey("pt_BR"));
 	}
 
 	@Override
@@ -490,10 +546,16 @@ public class CountryResourceTest extends BaseCountryResourceTestCase {
 		}
 	}
 
+	@Inject
+	private CompanyLocalService _companyLocalService;
+
 	private final List<String> _countryA2s = new ArrayList<>();
 	private final List<String> _countryA3s = new ArrayList<>();
 
 	@Inject
 	private JSONFactory _jsonFactory;
+
+	@Inject
+	private Language _language;
 
 }
