@@ -50,6 +50,8 @@ public class PayPalCommercePaymentMethodConstants {
 
 	public static final String MONTH = "month";
 
+	public static final String NO_SHIPPING = "NO_SHIPPING";
+
 	public static final String OPERATION_REPLACE = "replace";
 
 	public static final String PAYMENT_DEFINITION_REGULAR = "REGULAR";

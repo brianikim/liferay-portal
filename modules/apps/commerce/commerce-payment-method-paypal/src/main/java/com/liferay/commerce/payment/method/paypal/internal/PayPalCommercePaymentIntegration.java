@@ -348,8 +348,7 @@ public class PayPalCommercePaymentIntegration
 						"&orderType=normal",
 						commercePaymentEntry.getCallbackURL())
 				).shippingPreference(
-					PayPalCommercePaymentMethodConstants.
-						SHIPPING_PREFERENCE_PROVIDED
+					_getCommerceOrderShippingPreference(commercePaymentEntry)
 				).userAction(
 					PayPalCommercePaymentMethodConstants.USER_ACTION_PAY_NOW
 				)
@@ -559,6 +558,22 @@ public class PayPalCommercePaymentIntegration
 		).shippingDetail(
 			_toShippingDetail(commerceOrder.getShippingAddress())
 		);
+	}
+
+	private String _getCommerceOrderShippingPreference(
+			CommercePaymentEntry commercePaymentEntry)
+		throws PortalException {
+
+		CommerceOrder commerceOrder =
+			_commerceOrderLocalService.getCommerceOrder(
+				commercePaymentEntry.getClassPK());
+
+		if (!commerceOrder.isShippable()) {
+			return PayPalCommercePaymentMethodConstants.NO_SHIPPING;
+		}
+
+		return PayPalCommercePaymentMethodConstants.
+			SHIPPING_PREFERENCE_PROVIDED;
 	}
 
 	private PurchaseUnitRequest _getDefaultPurchaseUnitRequest(
