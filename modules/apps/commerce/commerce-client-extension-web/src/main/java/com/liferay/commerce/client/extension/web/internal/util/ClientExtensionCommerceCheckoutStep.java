@@ -109,18 +109,9 @@ public class ClientExtensionCommerceCheckoutStep
 			(CommerceOrder)httpServletRequest.getAttribute(
 				CommerceCheckoutWebKeys.COMMERCE_ORDER);
 
-		User currentUser = _userService.getCurrentUser();
 
 		try {
-			String status = new String(
-				_portalCatapult.launch(
-					commerceOrder.getCompanyId(), Http.Method.GET,
-					_oAuth2ApplicationExternalReferenceCode,
-					_jsonFactory.createJSONObject(), "/ready",
-					currentUser.getUserId()
-				).get());
-
-			if (Objects.equals(status, "READY") && _active &&
+			if (_active &&
 				(Validator.isNull(_paymentMethodKey) ||
 				 _paymentMethodKey.equals(
 					 commerceOrder.getCommercePaymentMethodKey()))) {
