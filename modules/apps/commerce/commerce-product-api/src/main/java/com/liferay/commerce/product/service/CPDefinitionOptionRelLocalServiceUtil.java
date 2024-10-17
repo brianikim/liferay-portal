@@ -492,6 +492,12 @@ public class CPDefinitionOptionRelLocalServiceUtil {
 			cpDefinitionId, skuContributor);
 	}
 
+	public static List<CPDefinitionOptionRel> getCPOptionCPDefinitionOptionRels(
+		long cpOptionId) {
+
+		return getService().getCPOptionCPDefinitionOptionRels(cpOptionId);
+	}
+
 	public static com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery
 		getExportActionableDynamicQuery(
 			com.liferay.exportimport.kernel.lar.PortletDataContext
