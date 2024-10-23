@@ -192,6 +192,45 @@ public class CPDefinitionOptionRelLocalServiceTest {
 	}
 
 	@Test
+	public void testDeleteCPDefinitionOptionRels() throws Exception {
+		frutillaRule.scenario(
+			"Delete CPDefinitionOptionRels when the CPOption is deleted"
+		).given(
+			"An option and a product that uses it"
+		).when(
+			"the option is deleted"
+		).then(
+			"the product option link should be deleted as well"
+		);
+
+		CPDefinition cpDefinition = CPTestUtil.addCPDefinition(
+			_commerceCatalog.getGroupId());
+
+		CPOption cpOption = CPTestUtil.addCPOption(
+			_commerceCatalog.getGroupId(), false);
+
+		CPTestUtil.addCPDefinitionOptionRel(
+			_commerceCatalog.getGroupId(), cpDefinition.getCPDefinitionId(),
+			cpOption.getCPOptionId());
+
+		List<CPDefinitionOptionRel> cpDefinitionOptionRels =
+			_cpDefinitionOptionRelLocalService.
+				getCPOptionCPDefinitionOptionRels(cpOption.getCPOptionId());
+
+		Assert.assertFalse(
+			"CPDefinitionOptionRel list", cpDefinitionOptionRels.isEmpty());
+
+		_cpOptionLocalService.deleteCPOption(cpOption.getCPOptionId());
+
+		cpDefinitionOptionRels =
+			_cpDefinitionOptionRelLocalService.
+				getCPOptionCPDefinitionOptionRels(cpOption.getCPOptionId());
+
+		Assert.assertTrue(
+			"CPDefinitionOptionRel list", cpDefinitionOptionRels.isEmpty());
+	}
+
+	@Test
 	public void testFetchPreselectedCPDefinitionOptionValueRel()
 		throws Exception {
 
