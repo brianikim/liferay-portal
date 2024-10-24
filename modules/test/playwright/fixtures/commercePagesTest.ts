@@ -14,6 +14,7 @@ import {ReturnDetailsPage} from '../pages/commerce/commerce-order-content-web/re
 import {ReturnsPage} from '../pages/commerce/commerce-order-content-web/returnsPage';
 import {OrganizationManagementPage} from '../pages/commerce/commerce-organization-web/organizationManagementPage';
 import {SpecificationFacetsPage} from '../pages/commerce/commerce-product-content-search-web/specificationFacetsPage';
+import {ProductComparisonPage} from '../pages/commerce/commerce-product-content-web/productComparisonPage';
 import {ProductDetailsPage} from '../pages/commerce/commerce-product-content-web/productDetailsPage';
 import {ProductPublisherPage} from '../pages/commerce/commerce-product-content-web/productPublisherPage';
 import {AttachmentsPage} from '../pages/commerce/commerce-product-definitions-web/attachmentsPage';
@@ -82,6 +83,7 @@ const commercePagesTest = test.extend<{
 	organizationManagementPage: OrganizationManagementPage;
 	pendingOrdersPage: PendingOrdersPage;
 	placedOrdersPage: PlacedOrdersPage;
+	productComparisonPage: ProductComparisonPage;
 	productDetailsPage: ProductDetailsPage;
 	productPublisherPage: ProductPublisherPage;
 	returnDetailsPage: ReturnDetailsPage;
@@ -193,6 +195,11 @@ const commercePagesTest = test.extend<{
 	placedOrdersPage: async ({page}, use) => {
 		await use(new PlacedOrdersPage(page));
 	},
+
+	productComparisonPage: async ({page}, use) => {
+		await use(new ProductComparisonPage(page));
+	},
+
 	productDetailsPage: async ({page}, use) => {
 		await use(new ProductDetailsPage(page));
 	},
