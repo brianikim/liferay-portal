@@ -85,7 +85,7 @@ public class OrderItemResourceTest extends BaseOrderItemResourceTestCase {
 			"business", 1, _serviceContext);
 
 		_commerceCurrency = _commerceCurrencyLocalService.addCommerceCurrency(
-			_user.getUserId(), RandomTestUtil.randomString(),
+			_user.getUserId(), RandomTestUtil.randomString(), null,
 			RandomTestUtil.randomLocaleStringMap(),
 			RandomTestUtil.randomString(), BigDecimal.ONE,
 			RandomTestUtil.randomLocaleStringMap(), 2, 2, "HALF_EVEN", false,

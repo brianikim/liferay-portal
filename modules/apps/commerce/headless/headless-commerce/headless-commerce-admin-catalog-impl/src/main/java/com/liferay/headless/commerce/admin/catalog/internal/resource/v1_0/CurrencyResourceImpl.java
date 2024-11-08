@@ -101,6 +101,9 @@ public class CurrencyResourceImpl extends BaseCurrencyResourceImpl {
 		return _toCurrency(
 			_commerceCurrencyService.updateCommerceCurrency(
 				commerceCurrency.getCommerceCurrencyId(),
+				GetterUtil.getString(
+					currency.getExternalReferenceCode(),
+					commerceCurrency.getExternalReferenceCode()),
 				LanguageUtils.getLocalizedMap(nameMap),
 				GetterUtil.getString(
 					currency.getSymbol(), commerceCurrency.getSymbol()),
@@ -138,7 +141,7 @@ public class CurrencyResourceImpl extends BaseCurrencyResourceImpl {
 
 		return _toCurrency(
 			_commerceCurrencyService.addCommerceCurrency(
-				currency.getCode(),
+				currency.getCode(), currency.getExternalReferenceCode(),
 				LanguageUtils.getLocalizedMap(currency.getName()),
 				GetterUtil.getString(currency.getSymbol()),
 				(BigDecimal)GetterUtil.getNumber(currency.getRate()),

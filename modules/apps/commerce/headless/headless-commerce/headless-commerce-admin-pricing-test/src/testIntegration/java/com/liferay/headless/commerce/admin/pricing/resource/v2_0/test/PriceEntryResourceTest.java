@@ -49,7 +49,7 @@ public class PriceEntryResourceTest extends BasePriceEntryResourceTestCase {
 		_user = UserTestUtil.addUser(testCompany);
 
 		_commerceCurrency = _commerceCurrencyLocalService.addCommerceCurrency(
-			_user.getUserId(), RandomTestUtil.randomString(),
+			_user.getUserId(), RandomTestUtil.randomString(), null,
 			Collections.singletonMap(
 				LocaleUtil.getSiteDefault(), RandomTestUtil.randomString()),
 			RandomTestUtil.randomString(), BigDecimal.ONE, new HashMap<>(), 2,

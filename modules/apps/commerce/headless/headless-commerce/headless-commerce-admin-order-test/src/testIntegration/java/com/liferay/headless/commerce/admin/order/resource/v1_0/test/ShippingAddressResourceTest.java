@@ -105,7 +105,7 @@ public class ShippingAddressResourceTest
 
 		CommerceCurrency commerceCurrency =
 			_commerceCurrencyLocalService.addCommerceCurrency(
-				_user.getUserId(), RandomTestUtil.randomString(),
+				_user.getUserId(), RandomTestUtil.randomString(), null,
 				RandomTestUtil.randomLocaleStringMap(),
 				RandomTestUtil.randomString(), BigDecimal.ONE,
 				RandomTestUtil.randomLocaleStringMap(), 2, 2, "HALF_EVEN",

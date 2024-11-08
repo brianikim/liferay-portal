@@ -266,6 +266,8 @@ public class CommerceCurrencyLocalServiceImpl
 				double priority = jsonObject.getDouble("priority");
 				double rate = jsonObject.getDouble("rate");
 				String symbol = jsonObject.getString("symbol");
+				String externalReferenceCode = jsonObject.getString(
+					"externalReferenceCode");
 
 				RoundingTypeConfiguration roundingTypeConfiguration =
 					_configurationProvider.getConfiguration(
@@ -288,8 +290,8 @@ public class CommerceCurrencyLocalServiceImpl
 					roundingTypeConfiguration.roundingMode();
 
 				commerceCurrencyLocalService.addCommerceCurrency(
-					serviceContext.getUserId(), code, nameMap, symbol,
-					BigDecimal.valueOf(rate), formatPatternMap,
+					serviceContext.getUserId(), code, externalReferenceCode,
+					nameMap, symbol, BigDecimal.valueOf(rate), formatPatternMap,
 					roundingTypeConfiguration.maximumFractionDigits(),
 					roundingTypeConfiguration.minimumFractionDigits(),
 					roundingMode.name(), primary, priority, true);
@@ -663,8 +665,9 @@ public class CommerceCurrencyLocalServiceImpl
 	}
 
 	private void _validateExternalReferenceCode(
-		long commerceCurrencyId, long companyId, String externalReferenceCode)
-	throws DuplicateCommerceCurrencyExternalReferenceCodeException{
+			long commerceCurrencyId, long companyId,
+			String externalReferenceCode)
+		throws DuplicateCommerceCurrencyExternalReferenceCodeException {
 
 		if (Validator.isNull(externalReferenceCode)) {
 			return;

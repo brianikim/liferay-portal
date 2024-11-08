@@ -218,6 +218,8 @@ public class EditCommerceCurrencyMVCActionCommand extends BaseMVCActionCommand {
 		double priority = ParamUtil.getDouble(actionRequest, "priority");
 		String symbol = ParamUtil.getString(actionRequest, "symbol");
 		boolean active = ParamUtil.getBoolean(actionRequest, "active");
+		String externalReferenceCode = ParamUtil.getString(
+			actionRequest, "externalReferenceCode");
 
 		CommerceCurrency commerceCurrency = null;
 
@@ -225,18 +227,19 @@ public class EditCommerceCurrencyMVCActionCommand extends BaseMVCActionCommand {
 			String code = ParamUtil.getString(actionRequest, "code");
 
 			commerceCurrency = _commerceCurrencyService.addCommerceCurrency(
-				code, nameMap, symbol, new BigDecimal(rate), formatPatternMap,
-				maxFractionDigits, minFractionDigits, roundingMode, primary,
-				priority, active);
+				code, externalReferenceCode, nameMap, symbol,
+				new BigDecimal(rate), formatPatternMap, maxFractionDigits,
+				minFractionDigits, roundingMode, primary, priority, active);
 		}
 		else {
 			ServiceContext serviceContext = ServiceContextFactory.getInstance(
 				CommerceCurrency.class.getName(), actionRequest);
 
 			commerceCurrency = _commerceCurrencyService.updateCommerceCurrency(
-				commerceCurrencyId, nameMap, symbol, new BigDecimal(rate),
-				formatPatternMap, maxFractionDigits, minFractionDigits,
-				roundingMode, primary, priority, active, serviceContext);
+				commerceCurrencyId, externalReferenceCode, nameMap, symbol,
+				new BigDecimal(rate), formatPatternMap, maxFractionDigits,
+				minFractionDigits, roundingMode, primary, priority, active,
+				serviceContext);
 		}
 
 		return commerceCurrency;
