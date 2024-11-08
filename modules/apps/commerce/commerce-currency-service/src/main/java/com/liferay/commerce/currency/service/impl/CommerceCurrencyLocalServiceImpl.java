@@ -12,6 +12,7 @@ import com.liferay.commerce.currency.constants.CommerceCurrencyExchangeRateConst
 import com.liferay.commerce.currency.constants.RoundingTypeConstants;
 import com.liferay.commerce.currency.exception.CommerceCurrencyCodeException;
 import com.liferay.commerce.currency.exception.CommerceCurrencyNameException;
+import com.liferay.commerce.currency.exception.DuplicateCommerceCurrencyExternalReferenceCodeException;
 import com.liferay.commerce.currency.exception.NoSuchCurrencyException;
 import com.liferay.commerce.currency.internal.model.listener.PortalInstanceLifecycleListenerImpl;
 import com.liferay.commerce.currency.model.CommerceCurrency;
@@ -101,8 +102,8 @@ public class CommerceCurrencyLocalServiceImpl
 	@Indexable(type = IndexableType.REINDEX)
 	@Override
 	public CommerceCurrency addCommerceCurrency(
-			long userId, String code, Map<Locale, String> nameMap,
-			String symbol, BigDecimal rate,
+			long userId, String code, String externalReferenceCode,
+			Map<Locale, String> nameMap, String symbol, BigDecimal rate,
 			Map<Locale, String> formatPatternMap, int maxFractionDigits,
 			int minFractionDigits, String roundingMode, boolean primary,
 			double priority, boolean active)
@@ -114,6 +115,8 @@ public class CommerceCurrencyLocalServiceImpl
 			rate = BigDecimal.ONE;
 		}
 
+		_validateExternalReferenceCode(
+			0, user.getCompanyId(), externalReferenceCode);
 		_validate(0, user.getCompanyId(), code, nameMap, primary);
 
 		if (formatPatternMap.isEmpty()) {
@@ -140,6 +143,7 @@ public class CommerceCurrencyLocalServiceImpl
 		CommerceCurrency commerceCurrency = commerceCurrencyPersistence.create(
 			commerceCurrencyId);
 
+		commerceCurrency.setExternalReferenceCode(externalReferenceCode);
 		commerceCurrency.setCompanyId(user.getCompanyId());
 		commerceCurrency.setUserId(user.getUserId());
 		commerceCurrency.setUserName(user.getFullName());
@@ -390,11 +394,11 @@ public class CommerceCurrencyLocalServiceImpl
 	@Indexable(type = IndexableType.REINDEX)
 	@Override
 	public CommerceCurrency updateCommerceCurrency(
-			long commerceCurrencyId, Map<Locale, String> nameMap, String symbol,
-			BigDecimal rate, Map<Locale, String> formatPatternMap,
-			int maxFractionDigits, int minFractionDigits, String roundingMode,
-			boolean primary, double priority, boolean active,
-			ServiceContext serviceContext)
+			long commerceCurrencyId, String externalReferenceCode,
+			Map<Locale, String> nameMap, String symbol, BigDecimal rate,
+			Map<Locale, String> formatPatternMap, int maxFractionDigits,
+			int minFractionDigits, String roundingMode, boolean primary,
+			double priority, boolean active, ServiceContext serviceContext)
 		throws PortalException {
 
 		CommerceCurrency commerceCurrency =
@@ -404,6 +408,9 @@ public class CommerceCurrencyLocalServiceImpl
 			rate = BigDecimal.ONE;
 		}
 
+		_validateExternalReferenceCode(
+			commerceCurrency.getCommerceCurrencyId(),
+			serviceContext.getCompanyId(), externalReferenceCode);
 		_validate(
 			commerceCurrency.getCommerceCurrencyId(),
 			serviceContext.getCompanyId(), commerceCurrency.getCode(), nameMap,
@@ -428,6 +435,7 @@ public class CommerceCurrencyLocalServiceImpl
 			roundingMode = roundingModeEnum.name();
 		}
 
+		commerceCurrency.setExternalReferenceCode(externalReferenceCode);
 		commerceCurrency.setNameMap(nameMap);
 		commerceCurrency.setSymbol(symbol);
 		commerceCurrency.setRate(rate);
@@ -651,6 +659,29 @@ public class CommerceCurrencyLocalServiceImpl
 					commerceCurrencyPersistence.update(commerceCurrency);
 				}
 			}
+		}
+	}
+
+	private void _validateExternalReferenceCode(
+		long commerceCurrencyId, long companyId, String externalReferenceCode)
+	throws DuplicateCommerceCurrencyExternalReferenceCodeException{
+
+		if (Validator.isNull(externalReferenceCode)) {
+			return;
+		}
+
+		CommerceCurrency commerceCurrency =
+			commerceCurrencyPersistence.fetchByERC_C(
+				externalReferenceCode, companyId);
+
+		if (commerceCurrency == null) {
+			return;
+		}
+
+		if (commerceCurrency.getCommerceCurrencyId() != commerceCurrencyId) {
+			throw new DuplicateCommerceCurrencyExternalReferenceCodeException(
+				"There is another commerce currency with external reference " +
+					"code " + externalReferenceCode);
 		}
 	}
 
