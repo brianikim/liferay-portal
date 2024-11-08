@@ -55,17 +55,18 @@ public class CommerceCurrencyLocalServiceUtil {
 	}
 
 	public static CommerceCurrency addCommerceCurrency(
-			long userId, String code, Map<java.util.Locale, String> nameMap,
-			String symbol, java.math.BigDecimal rate,
+			long userId, String code, String externalReferenceCode,
+			Map<java.util.Locale, String> nameMap, String symbol,
+			java.math.BigDecimal rate,
 			Map<java.util.Locale, String> formatPatternMap,
 			int maxFractionDigits, int minFractionDigits, String roundingMode,
 			boolean primary, double priority, boolean active)
 		throws PortalException {
 
 		return getService().addCommerceCurrency(
-			userId, code, nameMap, symbol, rate, formatPatternMap,
-			maxFractionDigits, minFractionDigits, roundingMode, primary,
-			priority, active);
+			userId, code, externalReferenceCode, nameMap, symbol, rate,
+			formatPatternMap, maxFractionDigits, minFractionDigits,
+			roundingMode, primary, priority, active);
 	}
 
 	/**
@@ -229,6 +230,13 @@ public class CommerceCurrencyLocalServiceUtil {
 		return getService().fetchCommerceCurrency(commerceCurrencyId);
 	}
 
+	public static CommerceCurrency fetchCommerceCurrencyByExternalReferenceCode(
+		String externalReferenceCode, long companyId) {
+
+		return getService().fetchCommerceCurrencyByExternalReferenceCode(
+			externalReferenceCode, companyId);
+	}
+
 	/**
 	 * Returns the commerce currency with the matching UUID and company.
 	 *
@@ -333,6 +341,14 @@ public class CommerceCurrencyLocalServiceUtil {
 		return getService().getCommerceCurrency(companyId, code);
 	}
 
+	public static CommerceCurrency getCommerceCurrencyByExternalReferenceCode(
+			String externalReferenceCode, long companyId)
+		throws PortalException {
+
+		return getService().getCommerceCurrencyByExternalReferenceCode(
+			externalReferenceCode, companyId);
+	}
+
 	/**
 	 * Returns the commerce currency with the matching UUID and company.
 	 *
@@ -432,8 +448,9 @@ public class CommerceCurrencyLocalServiceUtil {
 	}
 
 	public static CommerceCurrency updateCommerceCurrency(
-			long commerceCurrencyId, Map<java.util.Locale, String> nameMap,
-			String symbol, java.math.BigDecimal rate,
+			long commerceCurrencyId, String externalReferenceCode,
+			Map<java.util.Locale, String> nameMap, String symbol,
+			java.math.BigDecimal rate,
 			Map<java.util.Locale, String> formatPatternMap,
 			int maxFractionDigits, int minFractionDigits, String roundingMode,
 			boolean primary, double priority, boolean active,
@@ -441,9 +458,9 @@ public class CommerceCurrencyLocalServiceUtil {
 		throws PortalException {
 
 		return getService().updateCommerceCurrency(
-			commerceCurrencyId, nameMap, symbol, rate, formatPatternMap,
-			maxFractionDigits, minFractionDigits, roundingMode, primary,
-			priority, active, serviceContext);
+			commerceCurrencyId, externalReferenceCode, nameMap, symbol, rate,
+			formatPatternMap, maxFractionDigits, minFractionDigits,
+			roundingMode, primary, priority, active, serviceContext);
 	}
 
 	public static CommerceCurrency updateCommerceCurrencyRate(
