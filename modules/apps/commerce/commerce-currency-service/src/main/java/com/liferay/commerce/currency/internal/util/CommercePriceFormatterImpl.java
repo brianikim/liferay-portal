@@ -7,6 +7,7 @@ package com.liferay.commerce.currency.internal.util;
 
 import com.ibm.icu.text.DecimalFormat;
 import com.ibm.icu.text.DecimalFormatSymbols;
+import com.ibm.icu.util.Currency;
 
 import com.liferay.commerce.currency.configuration.RoundingTypeConfiguration;
 import com.liferay.commerce.currency.constants.CommerceCurrencyConstants;
@@ -25,6 +26,9 @@ import java.math.RoundingMode;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.portlet.ActionRequest;
 
@@ -115,6 +119,10 @@ public class CommercePriceFormatterImpl implements CommercePriceFormatter {
 
 		DecimalFormat decimalFormat = _getDecimalFormat(null, locale);
 
+		if (!_validate(decimalFormat, locale, price)) {
+			throw new NumberFormatException("Unable to parse " + price);
+		}
+
 		return decimalFormat.parse(
 			price
 		).toString();
@@ -166,6 +174,46 @@ public class CommercePriceFormatterImpl implements CommercePriceFormatter {
 
 		return decimalFormat;
 	}
+
+	private boolean _validate(
+		DecimalFormat decimalFormat, Locale locale, String price) {
+
+		if (Objects.equals(locale.getLanguage(), "ar")) {
+			return true;
+		}
+
+		DecimalFormatSymbols decimalFormatSymbols =
+			decimalFormat.getDecimalFormatSymbols();
+
+		Currency currency = decimalFormatSymbols.getCurrency();
+
+		Matcher matcher = null;
+
+		if (currency.equals("INR")) {
+			matcher = _inrDecimalPattern.matcher(price);
+
+			return matcher.find();
+		}
+
+		String decimalSeparator = String.valueOf(
+			decimalFormatSymbols.getDecimalSeparator());
+
+		if (decimalSeparator.equals(StringPool.PERIOD)) {
+			matcher = _periodDecimalPattern.matcher(price);
+		}
+		else if (decimalSeparator.equals(StringPool.COMMA)) {
+			matcher = _commaDecimalPattern.matcher(price);
+		}
+
+		return matcher.find();
+	}
+
+	private static final Pattern _commaDecimalPattern = Pattern.compile(
+		"^\\d{1,3}(?:.\\d{3})*(?:,\\d+)?$|^\\d+(?:,\\d+)?$");
+	private static final Pattern _inrDecimalPattern = Pattern.compile(
+		"^\\d{1,2}(?:,\\d{2})*(?:,\\d{3})(?:\\.\\d+)?$|^\\d+(?:\\.\\d+)?$");
+	private static final Pattern _periodDecimalPattern = Pattern.compile(
+		"^\\d{1,3}(?:,\\d{3})*(?:\\.\\d+)?$|^\\d+(?:\\.\\d+)?$");
 
 	private volatile RoundingTypeConfiguration _roundingTypeConfiguration;
 
