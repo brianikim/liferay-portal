@@ -7,17 +7,18 @@ package com.liferay.commerce.currency.internal.util;
 
 import com.ibm.icu.text.DecimalFormat;
 import com.ibm.icu.text.DecimalFormatSymbols;
-import com.ibm.icu.util.Currency;
 
 import com.liferay.commerce.currency.configuration.RoundingTypeConfiguration;
 import com.liferay.commerce.currency.constants.CommerceCurrencyConstants;
 import com.liferay.commerce.currency.model.CommerceCurrency;
 import com.liferay.commerce.currency.util.CommercePriceFormatter;
+import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 
@@ -117,11 +118,37 @@ public class CommercePriceFormatterImpl implements CommercePriceFormatter {
 			price = BigDecimal.ZERO.toString();
 		}
 
-		DecimalFormat decimalFormat = _getDecimalFormat(null, locale);
+		if (!_validateCommaDecimalPattern(price) &&
+			!_validatePeriodDecimalPattern(price)) {
 
-		if (!_validate(decimalFormat, locale, price)) {
 			throw new NumberFormatException("Unable to parse " + price);
 		}
+
+		DecimalFormatSymbols decimalFormatSymbols =
+			DecimalFormatSymbols.getInstance(locale);
+
+		if (Objects.equals(
+				decimalFormatSymbols.getDecimalSeparator(), CharPool.PERIOD) &&
+			_validateCommaDecimalPattern(price)) {
+
+			price = StringUtil.replace(
+				price, CharPool.COMMA,
+				decimalFormatSymbols.getDecimalSeparator());
+		}
+		else if ((Objects.equals(
+					decimalFormatSymbols.getDecimalSeparator(),
+					CharPool.COMMA) ||
+				  Objects.equals(
+					  decimalFormatSymbols.getDecimalSeparator(),
+					  CharPool.ARABIC_DECIMAL_SEPARATOR)) &&
+				 _validatePeriodDecimalPattern(price)) {
+
+			price = StringUtil.replace(
+				price, CharPool.PERIOD,
+				decimalFormatSymbols.getDecimalSeparator());
+		}
+
+		DecimalFormat decimalFormat = _getDecimalFormat(null, locale);
 
 		return decimalFormat.parse(
 			price
@@ -175,45 +202,22 @@ public class CommercePriceFormatterImpl implements CommercePriceFormatter {
 		return decimalFormat;
 	}
 
-	private boolean _validate(
-		DecimalFormat decimalFormat, Locale locale, String price) {
+	private boolean _validateCommaDecimalPattern(String price) {
+		Matcher matcher = _commaDecimalPattern.matcher(price);
 
-		if (Objects.equals(locale.getLanguage(), "ar")) {
-			return true;
-		}
+		return matcher.find();
+	}
 
-		DecimalFormatSymbols decimalFormatSymbols =
-			decimalFormat.getDecimalFormatSymbols();
-
-		Currency currency = decimalFormatSymbols.getCurrency();
-
-		Matcher matcher = null;
-
-		if (currency.equals("INR")) {
-			matcher = _inrDecimalPattern.matcher(price);
-
-			return matcher.find();
-		}
-
-		String decimalSeparator = String.valueOf(
-			decimalFormatSymbols.getDecimalSeparator());
-
-		if (decimalSeparator.equals(StringPool.PERIOD)) {
-			matcher = _periodDecimalPattern.matcher(price);
-		}
-		else if (decimalSeparator.equals(StringPool.COMMA)) {
-			matcher = _commaDecimalPattern.matcher(price);
-		}
+	private boolean _validatePeriodDecimalPattern(String price) {
+		Matcher matcher = _periodDecimalPattern.matcher(price);
 
 		return matcher.find();
 	}
 
 	private static final Pattern _commaDecimalPattern = Pattern.compile(
-		"^\\d{1,3}(?:.\\d{3})*(?:,\\d+)?$|^\\d+(?:,\\d+)?$");
-	private static final Pattern _inrDecimalPattern = Pattern.compile(
-		"^\\d{1,2}(?:,\\d{2})*(?:,\\d{3})(?:\\.\\d+)?$|^\\d+(?:\\.\\d+)?$");
+		"^\\d+(?:,\\d+)?$");
 	private static final Pattern _periodDecimalPattern = Pattern.compile(
-		"^\\d{1,3}(?:,\\d{3})*(?:\\.\\d+)?$|^\\d+(?:\\.\\d+)?$");
+		"^\\d+(?:\\.\\d+)?$");
 
 	private volatile RoundingTypeConfiguration _roundingTypeConfiguration;
 
