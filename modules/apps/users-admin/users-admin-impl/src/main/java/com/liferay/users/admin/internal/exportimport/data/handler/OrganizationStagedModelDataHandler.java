@@ -106,15 +106,27 @@ public class OrganizationStagedModelDataHandler
 	public boolean validateReference(
 		PortletDataContext portletDataContext, Element referenceElement) {
 
+		Map<Long, Long> organizationIds =
+			(Map<Long, Long>)portletDataContext.getNewPrimaryKeysMap(
+				Organization.class);
+
+		long organizationId = GetterUtil.getLong(
+			referenceElement.attributeValue("class-pk"));
+
+		if (organizationIds.containsKey(organizationId)) {
+			return true;
+		}
+
 		Organization organization =
 			_organizationLocalService.fetchOrganizationByUuidAndCompanyId(
 				GetterUtil.getString(referenceElement.attributeValue("uuid")),
-				GetterUtil.getLong(
-					referenceElement.attributeValue("company-id")));
+				GetterUtil.getLong(portletDataContext.getCompanyId()));
 
 		if (organization == null) {
 			return false;
 		}
+
+		organizationIds.put(organizationId, organization.getOrganizationId());
 
 		return true;
 	}
@@ -186,7 +198,7 @@ public class OrganizationStagedModelDataHandler
 
 		Organization existingOrganization =
 			_organizationLocalService.fetchOrganizationByUuidAndCompanyId(
-				organization.getUuid(), portletDataContext.getGroupId());
+				organization.getUuid(), portletDataContext.getCompanyId());
 
 		if (existingOrganization == null) {
 			existingOrganization = _organizationLocalService.fetchOrganization(
