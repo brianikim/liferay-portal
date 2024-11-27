@@ -109,18 +109,9 @@ public class ClientExtensionCommerceCheckoutStep
 			(CommerceOrder)httpServletRequest.getAttribute(
 				CommerceCheckoutWebKeys.COMMERCE_ORDER);
 
-		User currentUser = _userService.getCurrentUser();
 
 		try {
-			String status = new String(
-				_portalCatapult.launch(
-					commerceOrder.getCompanyId(), Http.Method.GET,
-					_oAuth2ApplicationExternalReferenceCode,
-					_jsonFactory.createJSONObject(), "/ready",
-					currentUser.getUserId()
-				).get());
-
-			if (Objects.equals(status, "READY") && _active &&
+			if (_active &&
 				(Validator.isNull(_paymentMethodKey) ||
 				 _paymentMethodKey.equals(
 					 commerceOrder.getCommercePaymentMethodKey()))) {
@@ -196,6 +187,10 @@ public class ClientExtensionCommerceCheckoutStep
 		httpServletRequest.setAttribute(
 			CommerceClientExtensionWebKeys.RENDER_URL, _baseURL + "/index.js");
 
+		if (_paymentMethodKey != null) {
+			System.out.println(_paymentMethodKey + "is not null\n");
+		}
+
 		if (Validator.isNotNull(_paymentMethodKey)) {
 			_renderPayment(httpServletRequest);
 		}
@@ -226,12 +221,22 @@ public class ClientExtensionCommerceCheckoutStep
 					commerceOrder.getGroupId(),
 					commerceOrder.getCommercePaymentMethodKey());
 
+		if (commercePaymentMethodGroupRel != null) {
+			System.out.println(commercePaymentMethodGroupRel.getName() + "is not null\n");
+		}
+
 		if ((commercePaymentMethodGroupRel != null) &&
 			commercePaymentMethodGroupRel.isActive()) {
 
 			UnicodeProperties typeSettingsUnicodeProperties =
 				commercePaymentMethodGroupRel.
 					getTypeSettingsUnicodeProperties();
+
+			if (typeSettingsUnicodeProperties != null) {
+				System.out.println(typeSettingsUnicodeProperties.get("clientId") + ": clientId\n");
+				System.out.println(typeSettingsUnicodeProperties.get("mode") + ": mode\n");
+				System.out.println(commerceOrder.getCommerceOrderId() + ": commerceOrderId\n");
+			}
 
 			String clientId = typeSettingsUnicodeProperties.get("clientId");
 
