@@ -10,6 +10,7 @@ import com.liferay.commerce.currency.util.CommercePriceFormatter;
 import com.liferay.commerce.model.CommerceShippingMethod;
 import com.liferay.commerce.service.CommerceShippingMethodService;
 import com.liferay.commerce.shipping.engine.fixed.exception.NoSuchShippingFixedOptionRelException;
+import com.liferay.commerce.shipping.engine.fixed.model.CommerceShippingFixedOptionRel;
 import com.liferay.commerce.shipping.engine.fixed.service.CommerceShippingFixedOptionRelService;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
@@ -58,6 +59,7 @@ public class EditCommerceShippingFixedOptionRelMVCActionCommand
 		}
 		catch (Exception exception) {
 			if (exception instanceof NoSuchShippingFixedOptionRelException ||
+				exception instanceof NumberFormatException ||
 				exception instanceof PrincipalException) {
 
 				SessionErrors.add(actionRequest, exception.getClass());
@@ -113,9 +115,11 @@ public class EditCommerceShippingFixedOptionRelMVCActionCommand
 		double weightFrom = ParamUtil.getDouble(actionRequest, "weightFrom");
 		double weightTo = ParamUtil.getDouble(actionRequest, "weightTo");
 		BigDecimal fixedPrice = _commercePriceFormatter.parse(
-			actionRequest, "fixedPrice");
+			actionRequest, CommerceShippingFixedOptionRel.class.getName(),
+			"fixedPrice");
 		BigDecimal rateUnitWeightPrice = _commercePriceFormatter.parse(
-			actionRequest, "rateUnitWeightPrice");
+			actionRequest, CommerceShippingFixedOptionRel.class.getName(),
+			"rateUnitWeightPrice");
 		double ratePercentage = ParamUtil.getDouble(
 			actionRequest, "ratePercentage");
 

@@ -89,7 +89,8 @@ public class EditCommerceOrderItemMVCActionCommand
 				sendRedirect(actionRequest, actionResponse, redirect);
 			}
 			else if (throwable instanceof
-						CommerceOrderItemRequestedDeliveryDateException) {
+						CommerceOrderItemRequestedDeliveryDateException ||
+					 throwable instanceof NumberFormatException) {
 
 				SessionErrors.add(
 					actionRequest, throwable.getClass(), throwable);
@@ -206,18 +207,23 @@ public class EditCommerceOrderItemMVCActionCommand
 			commerceOrderItem =
 				_commerceOrderItemService.updateCommerceOrderItemUnitPrice(
 					commerceOrderItemId, decimalQuantity,
-					_commercePriceFormatter.parse(actionRequest, "price"));
+					_commercePriceFormatter.parse(
+						actionRequest, CommerceOrderItem.class.getName(),
+						"price"));
 
 			commerceOrderItem =
 				_commerceOrderItemService.updateCommerceOrderItemPrices(
 					commerceOrderItemId,
 					_commercePriceFormatter.parse(
-						actionRequest, "discountAmount"),
+						actionRequest, CommerceOrderItem.class.getName(),
+						"discountAmount"),
 					commerceOrderItem.getDiscountPercentageLevel1(),
 					commerceOrderItem.getDiscountPercentageLevel2(),
 					commerceOrderItem.getDiscountPercentageLevel3(),
 					commerceOrderItem.getDiscountPercentageLevel4(),
-					_commercePriceFormatter.parse(actionRequest, "finalPrice"),
+					_commercePriceFormatter.parse(
+						actionRequest, CommerceOrderItem.class.getName(),
+						"finalPrice"),
 					commerceOrderItem.getPromoPrice(),
 					commerceOrderItem.getUnitPrice());
 		}

@@ -74,7 +74,8 @@ public class EditCommerceDiscountMVCActionCommand extends BaseMVCActionCommand {
 			else if (throwable instanceof
 						CommerceDiscountMaxPriceValueException ||
 					 throwable instanceof
-						 CommerceDiscountMinPriceValueException) {
+						 CommerceDiscountMinPriceValueException ||
+					 throwable instanceof NumberFormatException) {
 
 				hideDefaultErrorMessage(actionRequest);
 				hideDefaultSuccessMessage(actionRequest);
@@ -164,7 +165,9 @@ public class EditCommerceDiscountMVCActionCommand extends BaseMVCActionCommand {
 		String level = ParamUtil.getString(actionRequest, "level");
 
 		BigDecimal[] discountLevels = _getDiscountLevels(
-			level, _commercePriceFormatter.parse(actionRequest, "amount"));
+			level,
+			_commercePriceFormatter.parse(
+				actionRequest, CommerceDiscount.class.getName(), "amount"));
 
 		int limitationTimes = ParamUtil.getInteger(
 			actionRequest, "limitationTimes");
@@ -196,7 +199,8 @@ public class EditCommerceDiscountMVCActionCommand extends BaseMVCActionCommand {
 			commerceDiscountId, title, target, useCouponCode, couponCode,
 			usePercentage,
 			_commercePriceFormatter.parse(
-				actionRequest, "maximumDiscountAmount"),
+				actionRequest, CommerceDiscount.class.getName(),
+				"maximumDiscountAmount"),
 			level, discountLevels[0], discountLevels[1], discountLevels[2],
 			discountLevels[3],
 			_getLimitationType(limitationTimes, limitationTimesPerAccount),

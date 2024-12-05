@@ -72,7 +72,9 @@ public class EditCommerceShippingFixedOptionMVCActionCommand
 			}
 		}
 		catch (Exception exception) {
-			if (exception instanceof CommerceShippingFixedOptionKeyException) {
+			if (exception instanceof CommerceShippingFixedOptionKeyException ||
+				exception instanceof NumberFormatException) {
+
 				SessionErrors.add(actionRequest, exception.getClass());
 
 				hideDefaultErrorMessage(actionRequest);
@@ -158,7 +160,8 @@ public class EditCommerceShippingFixedOptionMVCActionCommand
 			actionRequest, "commerceShippingFixedOptionId");
 
 		BigDecimal amount = _commercePriceFormatter.parse(
-			actionRequest, "amount");
+			actionRequest, CommerceShippingFixedOption.class.getName(),
+			"amount");
 		Map<Locale, String> descriptionMap = _localization.getLocalizationMap(
 			actionRequest, "description");
 		String key = ParamUtil.getString(actionRequest, "key");

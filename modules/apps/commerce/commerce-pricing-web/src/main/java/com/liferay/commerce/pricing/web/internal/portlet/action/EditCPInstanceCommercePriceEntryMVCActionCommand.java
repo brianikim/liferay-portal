@@ -144,7 +144,8 @@ public class EditCPInstanceCommercePriceEntryMVCActionCommand
 					 exception instanceof
 						 CommercePriceListMinPriceValueException ||
 					 exception instanceof
-						 DuplicateCommercePriceEntryException) {
+						 DuplicateCommercePriceEntryException ||
+					 exception instanceof NumberFormatException) {
 
 				hideDefaultErrorMessage(actionRequest);
 				hideDefaultSuccessMessage(actionRequest);
@@ -178,13 +179,17 @@ public class EditCPInstanceCommercePriceEntryMVCActionCommand
 		boolean overrideDiscount = ParamUtil.getBoolean(
 			actionRequest, "overrideDiscount");
 		BigDecimal discountLevel1 = _commercePriceFormatter.parse(
-			actionRequest, "discountLevel1");
+			actionRequest, CommercePriceEntry.class.getName(),
+			"discountLevel1");
 		BigDecimal discountLevel2 = _commercePriceFormatter.parse(
-			actionRequest, "discountLevel2");
+			actionRequest, CommercePriceEntry.class.getName(),
+			"discountLevel2");
 		BigDecimal discountLevel3 = _commercePriceFormatter.parse(
-			actionRequest, "discountLevel3");
+			actionRequest, CommercePriceEntry.class.getName(),
+			"discountLevel3");
 		BigDecimal discountLevel4 = _commercePriceFormatter.parse(
-			actionRequest, "discountLevel4");
+			actionRequest, CommercePriceEntry.class.getName(),
+			"discountLevel4");
 		int displayDateMonth = ParamUtil.getInteger(
 			actionRequest, "displayDateMonth");
 		int displayDateDay = ParamUtil.getInteger(
@@ -223,7 +228,7 @@ public class EditCPInstanceCommercePriceEntryMVCActionCommand
 			actionRequest, "neverExpire");
 
 		BigDecimal price = _commercePriceFormatter.parse(
-			actionRequest, "price");
+			actionRequest, CommercePriceEntry.class.getName(), "price");
 		boolean priceOnApplication = ParamUtil.getBoolean(
 			actionRequest, "priceOnApplication");
 

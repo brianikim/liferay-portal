@@ -91,7 +91,8 @@ public class EditCPInstanceUnitOfMeasureMVCActionCommand
 					CPInstanceUnitOfMeasureIncrementalOrderQuantityException ||
 				throwable instanceof CPInstanceUnitOfMeasureRateException ||
 				throwable instanceof
-					DuplicateCPInstanceUnitOfMeasureKeyException) {
+					DuplicateCPInstanceUnitOfMeasureKeyException ||
+				throwable instanceof NumberFormatException) {
 
 				SessionErrors.add(
 					actionRequest, throwable.getClass(), throwable);
@@ -158,7 +159,8 @@ public class EditCPInstanceUnitOfMeasureMVCActionCommand
 			actionRequest, "pricingQuantity");
 		boolean primary = ParamUtil.getBoolean(actionRequest, "primary");
 		double priority = ParamUtil.getDouble(actionRequest, "priority");
-		BigDecimal rate = _commercePriceFormatter.parse(actionRequest, "rate");
+		BigDecimal rate = _commercePriceFormatter.parse(
+			actionRequest, CPInstanceUnitOfMeasure.class.getName(), "rate");
 		String sku = ParamUtil.getString(actionRequest, "sku");
 
 		if (cpInstanceUnitOfMeasureId > 0) {
@@ -208,7 +210,7 @@ public class EditCPInstanceUnitOfMeasureMVCActionCommand
 			cpInstanceId);
 
 		BigDecimal basePrice = _commercePriceFormatter.parse(
-			actionRequest, "basePrice");
+			actionRequest, CommercePriceEntry.class.getName(), "basePrice");
 
 		ServiceContext serviceContext = ServiceContextFactory.getInstance(
 			CPInstanceUnitOfMeasure.class.getName(), actionRequest);
@@ -220,7 +222,7 @@ public class EditCPInstanceUnitOfMeasureMVCActionCommand
 		}
 
 		BigDecimal promoPrice = _commercePriceFormatter.parse(
-			actionRequest, "promoPrice");
+			actionRequest, CommercePriceEntry.class.getName(), "promoPrice");
 
 		if (promoPrice != null) {
 			_updateCommercePriceEntry(

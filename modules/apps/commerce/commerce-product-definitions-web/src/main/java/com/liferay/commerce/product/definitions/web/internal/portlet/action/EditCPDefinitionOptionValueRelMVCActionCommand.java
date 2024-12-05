@@ -85,7 +85,8 @@ public class EditCPDefinitionOptionValueRelMVCActionCommand
 				exception instanceof CPDefinitionOptionValueRelKeyException ||
 				exception instanceof CPDefinitionOptionValueRelPriceException ||
 				exception instanceof
-					CPDefinitionOptionValueRelQuantityException) {
+					CPDefinitionOptionValueRelQuantityException ||
+				exception instanceof NumberFormatException) {
 
 				hideDefaultErrorMessage(actionRequest);
 
@@ -214,7 +215,10 @@ public class EditCPDefinitionOptionValueRelMVCActionCommand
 			updateCPDefinitionOptionValueRel(
 				cpDefinitionOptionValueRelId, cpInstanceId, key, nameMap,
 				ParamUtil.getBoolean(actionRequest, "preselected"),
-				_commercePriceFormatter.parse(actionRequest, "price"), priority,
+				_commercePriceFormatter.parse(
+					actionRequest, CPDefinitionOptionValueRel.class.getName(),
+					"price"),
+				priority,
 				_commerceOrderItemQuantityFormatter.parse(
 					actionRequest, "quantity"),
 				unitOfMeasureKey, serviceContext);

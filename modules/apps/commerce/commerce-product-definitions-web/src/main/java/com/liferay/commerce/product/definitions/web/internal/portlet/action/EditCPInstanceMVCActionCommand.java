@@ -131,7 +131,8 @@ public class EditCPInstanceMVCActionCommand extends BaseMVCActionCommand {
 				throwable instanceof CPInstanceSkuException ||
 				throwable instanceof DuplicateCPInstanceException ||
 				throwable instanceof
-					NoSuchSkuContributorCPDefinitionOptionRelException) {
+					NoSuchSkuContributorCPDefinitionOptionRelException ||
+				throwable instanceof NumberFormatException) {
 
 				SessionErrors.add(
 					actionRequest, throwable.getClass(), throwable);
@@ -249,10 +250,11 @@ public class EditCPInstanceMVCActionCommand extends BaseMVCActionCommand {
 		double depth = ParamUtil.getDouble(actionRequest, "depth");
 		double weight = ParamUtil.getDouble(actionRequest, "weight");
 		BigDecimal price = _commercePriceFormatter.parse(
-			actionRequest, "price");
+			actionRequest, CPInstance.class.getName(), "price");
 		BigDecimal promoPrice = _commercePriceFormatter.parse(
-			actionRequest, "promoPrice");
-		BigDecimal cost = _commercePriceFormatter.parse(actionRequest, "cost");
+			actionRequest, CPInstance.class.getName(), "promoPrice");
+		BigDecimal cost = _commercePriceFormatter.parse(
+			actionRequest, CPInstance.class.getName(), "cost");
 		int displayDateMonth = ParamUtil.getInteger(
 			actionRequest, "displayDateMonth");
 		int displayDateDay = ParamUtil.getInteger(
