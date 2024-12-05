@@ -939,6 +939,7 @@
 		<exception>CommerceOrderDefaultBillingAddress</exception>
 		<exception>CommerceOrderGuestCheckout</exception>
 		<exception>CommerceOrderItemRequestedDeliveryDate</exception>
+		<exception>CommerceOrderItemPrice</exception>
 		<exception>CommerceOrderNoteContent</exception>
 		<exception>CommerceOrderPaymentMethod</exception>
 		<exception>CommerceOrderPrice</exception>
