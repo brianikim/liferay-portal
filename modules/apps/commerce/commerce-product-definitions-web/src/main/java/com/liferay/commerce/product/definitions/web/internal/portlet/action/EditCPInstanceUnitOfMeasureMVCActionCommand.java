@@ -93,6 +93,7 @@ public class EditCPInstanceUnitOfMeasureMVCActionCommand
 				throwable instanceof
 					CPInstanceUnitOfMeasureIncrementalOrderQuantityException ||
 				throwable instanceof CPInstanceUnitOfMeasurePriceException ||
+				throwable instanceof CPInstanceUnitOfMeasureQuantityException ||
 				throwable instanceof CPInstanceUnitOfMeasureRateException ||
 				throwable instanceof
 					DuplicateCPInstanceUnitOfMeasureKeyException) {
@@ -153,13 +154,15 @@ public class EditCPInstanceUnitOfMeasureMVCActionCommand
 		boolean active = ParamUtil.getBoolean(actionRequest, "active");
 		BigDecimal incrementalOrderQuantity =
 			_commerceOrderItemQuantityFormatter.parse(
-				actionRequest, "incrementalOrderQuantity");
+				actionRequest, CPInstanceUnitOfMeasure.class.getName(),
+				"incrementalOrderQuantity");
 		String key = ParamUtil.getString(actionRequest, "key");
 		Map<Locale, String> nameMap = _localization.getLocalizationMap(
 			actionRequest, "name");
 		int precision = ParamUtil.getInteger(actionRequest, "precision");
 		BigDecimal pricingQuantity = _commerceOrderItemQuantityFormatter.parse(
-			actionRequest, "pricingQuantity");
+			actionRequest, CPInstanceUnitOfMeasure.class.getName(),
+			"pricingQuantity");
 		boolean primary = ParamUtil.getBoolean(actionRequest, "primary");
 		double priority = ParamUtil.getDouble(actionRequest, "priority");
 		BigDecimal rate = _commercePriceFormatter.parse(
