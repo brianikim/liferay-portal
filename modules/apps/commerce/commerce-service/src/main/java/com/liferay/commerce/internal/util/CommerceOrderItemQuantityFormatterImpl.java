@@ -27,12 +27,14 @@ import com.liferay.commerce.product.model.CPDefinitionOptionValueRel;
 import com.liferay.commerce.product.model.CPInstanceUnitOfMeasure;
 import com.liferay.commerce.product.model.CPMeasurementUnit;
 import com.liferay.commerce.util.CommerceOrderItemQuantityFormatter;
+import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 
@@ -125,6 +127,34 @@ public class CommerceOrderItemQuantityFormatterImpl
 		}
 
 		_validateQuantity(className, quantity);
+
+		DecimalFormatSymbols decimalFormatSymbols =
+			DecimalFormatSymbols.getInstance(locale);
+
+		if (Objects.equals(
+				decimalFormatSymbols.getDecimalSeparator(), CharPool.PERIOD) &&
+			_hasCommaDecimalPattern(quantity)) {
+
+			quantity = StringUtil.replace(
+				quantity, CharPool.PERIOD, StringPool.BLANK);
+
+			quantity = StringUtil.replace(
+				quantity, CharPool.COMMA, CharPool.PERIOD);
+		}
+		else if ((Objects.equals(
+					decimalFormatSymbols.getDecimalSeparator(),
+					CharPool.COMMA) ||
+				  Objects.equals(
+					  decimalFormatSymbols.getDecimalSeparator(),
+					  CharPool.ARABIC_DECIMAL_SEPARATOR)) &&
+				 _hasPeriodDecimalPattern(quantity)) {
+
+			quantity = StringUtil.replace(
+				quantity, CharPool.COMMA, StringPool.BLANK);
+
+			quantity = StringUtil.replace(
+				quantity, CharPool.PERIOD, CharPool.COMMA);
+		}
 
 		DecimalFormat decimalFormat = _getDecimalFormat(true, true, locale);
 
