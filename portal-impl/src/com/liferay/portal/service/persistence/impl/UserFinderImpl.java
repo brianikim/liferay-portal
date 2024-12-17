@@ -379,7 +379,7 @@ public class UserFinderImpl extends UserFinderBaseImpl implements UserFinder {
 			String sql = CustomSQLUtil.get(FIND_BY_C_FN_MN_LN_SN_EA_S);
 
 			sql = StringUtil.replace(
-				sql, "[$COLUMN_NAMES$]", getColumnNames(null));
+				sql, "[$COLUMN_NAMES$]", getColumnNames(null, false));
 
 			sql = replaceKeywords(
 				sql, firstNames, middleNames, lastNames, screenNames,
@@ -391,7 +391,7 @@ public class UserFinderImpl extends UserFinderBaseImpl implements UserFinder {
 
 			StringBundler sb = new StringBundler((paramsList.size() * 4) + 1);
 
-			sb.append("SELECT COUNT(userId) AS COUNT_VALUE FROM (");
+			sb.append("SELECT COUNT(DISTINCT userId) AS COUNT_VALUE FROM (");
 
 			for (int i = 0; i < paramsList.size(); i++) {
 				if (i != 0) {
@@ -730,7 +730,8 @@ public class UserFinderImpl extends UserFinderBaseImpl implements UserFinder {
 			String sql = CustomSQLUtil.get(FIND_BY_C_FN_MN_LN_SN_EA_S);
 
 			sql = StringUtil.replace(
-				sql, "[$COLUMN_NAMES$]", getColumnNames(orderByComparator));
+				sql, "[$COLUMN_NAMES$]",
+				getColumnNames(orderByComparator, true));
 
 			sql = replaceKeywords(
 				sql, firstNames, middleNames, lastNames, screenNames,
@@ -802,16 +803,27 @@ public class UserFinderImpl extends UserFinderBaseImpl implements UserFinder {
 		}
 	}
 
-	protected String getColumnNames(OrderByComparator<User> orderByComparator) {
+	protected String getColumnNames(
+		OrderByComparator<User> orderByComparator, boolean distinct) {
+
 		if (orderByComparator == null) {
-			return "DISTINCT User_.userId AS userId";
+			if (distinct) {
+				return "DISTINCT User_.userId AS userId";
+			}
+
+			return "User_.userId AS userId";
 		}
 
 		String[] orderByFields = orderByComparator.getOrderByFields();
 
 		StringBundler sb = new StringBundler((orderByFields.length * 4) + 1);
 
-		sb.append("DISTINCT User_.userId AS userId");
+		if (distinct) {
+			sb.append("DISTINCT User_.userId AS userId");
+		}
+		else {
+			sb.append("User_.userId AS userId");
+		}
 
 		for (String field : orderByFields) {
 			sb.append(", User_.");
