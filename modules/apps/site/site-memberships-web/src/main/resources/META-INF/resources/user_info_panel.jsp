@@ -48,18 +48,6 @@ Group group = siteMembershipsDisplayContext.getGroup();
 			>
 				<clay:tabs-panel>
 					<div class="h5"><liferay-ui:message key="num-of-users" /></div>
-
-					<%
-					LinkedHashMap<String, Object> userParams = LinkedHashMapBuilder.<String, Object>put(
-						"inherit", Boolean.TRUE
-					).put(
-						"usersGroups", Long.valueOf(siteMembershipsDisplayContext.getGroupId())
-					).build();
-					%>
-
-					<p>
-						<%= UserLocalServiceUtil.searchCount(company.getCompanyId(), StringPool.BLANK, WorkflowConstants.STATUS_APPROVED, userParams) %>
-					</p>
 				</clay:tabs-panel>
 			</clay:tabs>
 		</div>
