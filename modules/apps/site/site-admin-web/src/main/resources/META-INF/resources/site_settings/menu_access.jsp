@@ -169,6 +169,8 @@ String textCssClass = menuAccessDisplayContext.isShowControlMenuByRole() ? "modi
 						return;
 					}
 					selectedItems.map((item) => {
+						var item = JSON.parse(Liferay.Util.unescape(item.value));
+
 						if (!searchContainerData.includes(item.id)) {
 							const rowColumns = [
 								Liferay.Util.escape(item.name),
