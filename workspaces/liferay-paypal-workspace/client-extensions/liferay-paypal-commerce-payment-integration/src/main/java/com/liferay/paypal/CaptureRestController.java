@@ -79,7 +79,9 @@ public class CaptureRestController extends BaseRestController {
 					"Prefer", "return=representation"
 				).exchangeToMono(
 					clientResponse -> {
-						HttpStatus httpStatus = clientResponse.statusCode();
+						HttpStatus httpStatus = HttpStatus.resolve(
+							clientResponse.statusCode(
+							).value());
 
 						if (!httpStatus.is2xxSuccessful()) {
 							throw new RuntimeException(httpStatus.toString());
