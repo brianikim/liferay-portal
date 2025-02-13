@@ -884,7 +884,7 @@ export class PageEditorPage {
 
 			await this.page.getByText('No Conditions yet').waitFor();
 
-			await this.segmentEditorPage.createSegment(segment, {
+			await this.segmentEditorPage.createSegment(segment, true, true, {
 				user: ['First Name'],
 			});
 

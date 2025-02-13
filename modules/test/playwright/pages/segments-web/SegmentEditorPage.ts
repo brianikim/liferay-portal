@@ -11,7 +11,7 @@ import getRandomString from '../../utils/getRandomString';
 
 type SegmentSection = 'context' | 'segments' | 'user' | 'user-organization';
 
-type SegmentProperty = 'Date of Birth' | 'First Name' | 'Name';
+type SegmentProperty = 'Date of Birth' | 'First Name' | 'Name' | 'Regular Role';
 
 type SegmentProperties = Partial<Record<SegmentSection, SegmentProperty[]>>;
 
@@ -36,7 +36,12 @@ export class SegmentEditorPage {
 	 * for each section so nesting is not supported
 	 */
 
-	async createSegment(name: string, properties: SegmentProperties) {
+	async createSegment(
+		name: string,
+		configure: boolean,
+		submit: boolean,
+		properties: SegmentProperties
+	) {
 
 		// Fill title
 
@@ -50,11 +55,17 @@ export class SegmentEditorPage {
 
 		for (const [section, items] of Object.entries(properties)) {
 			for (const property of items) {
-				await this.addProperty(section as SegmentSection, property);
+				await this.addProperty(
+					configure,
+					section as SegmentSection,
+					property
+				);
 			}
 		}
 
-		await this.saveButton.click();
+		if (submit) {
+			await this.saveButton.click();
+		}
 	}
 
 	/**
@@ -62,7 +73,11 @@ export class SegmentEditorPage {
 	 * of the given section
 	 */
 
-	async addProperty(section: SegmentSection, property: SegmentProperty) {
+	async addProperty(
+		configure: boolean,
+		section: SegmentSection,
+		property: SegmentProperty
+	) {
 		const panel = this.page.locator(`#${section}`);
 		const header = panel.locator('.panel-header');
 		const body = panel.locator('.panel-body');
@@ -92,7 +107,9 @@ export class SegmentEditorPage {
 
 		// Configure property
 
-		await this.configureProperty(property, getRandomString());
+		if (configure) {
+			await this.configureProperty(property, getRandomString());
+		}
 	}
 
 	/**
