@@ -16,6 +16,7 @@ import com.liferay.commerce.exception.CommerceOrderValidatorException;
 import com.liferay.commerce.exception.GuestCartItemMaxAllowedException;
 import com.liferay.commerce.exception.NoSuchOrderItemException;
 import com.liferay.commerce.exception.ProductBundleException;
+import com.liferay.commerce.exception.RequiredOrderItemOptionException;
 import com.liferay.commerce.internal.search.CommerceOrderItemIndexer;
 import com.liferay.commerce.internal.util.CommercePriceConverterUtil;
 import com.liferay.commerce.inventory.constants.CommerceInventoryConstants;
@@ -40,9 +41,12 @@ import com.liferay.commerce.product.constants.CPConstants;
 import com.liferay.commerce.product.exception.NoSuchCPInstanceException;
 import com.liferay.commerce.product.exception.NoSuchCPInstanceUnitOfMeasureException;
 import com.liferay.commerce.product.model.CPDefinition;
+import com.liferay.commerce.product.model.CPDefinitionOptionRel;
 import com.liferay.commerce.product.model.CPInstance;
 import com.liferay.commerce.product.model.CPInstanceUnitOfMeasure;
 import com.liferay.commerce.product.model.CPMeasurementUnit;
+import com.liferay.commerce.product.model.CPOption;
+import com.liferay.commerce.product.model.CPOptionValue;
 import com.liferay.commerce.product.option.CommerceOptionValue;
 import com.liferay.commerce.product.option.CommerceOptionValueHelper;
 import com.liferay.commerce.product.service.CPDefinitionLocalService;
@@ -65,12 +69,14 @@ import com.liferay.petra.sql.dsl.query.GroupByStep;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
+import com.liferay.portal.json.JSONObjectImpl;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONException;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.User;
@@ -1377,6 +1383,8 @@ public class CommerceOrderItemLocalServiceImpl
 			GetterUtil.getBoolean(
 				serviceContext.getAttribute("validateOrder"), true));
 
+		String sanitizedJSON = _validateOptionsJSON(json, cpInstance);
+
 		long commerceOrderItemId = counterLocalService.increment();
 
 		CommerceOrderItem commerceOrderItem =
@@ -1393,7 +1401,7 @@ public class CommerceOrderItemLocalServiceImpl
 		commerceOrderItem.setParentCommerceOrderItemId(
 			parentCommerceOrderItemId);
 		commerceOrderItem.setFreeShipping(cpDefinition.isFreeShipping());
-		commerceOrderItem.setJson(json);
+		commerceOrderItem.setJson(sanitizedJSON);
 		commerceOrderItem.setManuallyAdjusted(false);
 		commerceOrderItem.setNameMap(cpDefinition.getNameMap());
 		commerceOrderItem.setQuantity(quantity);
@@ -2427,6 +2435,11 @@ public class CommerceOrderItemLocalServiceImpl
 			GetterUtil.getBoolean(
 				serviceContext.getAttribute("validateOrder"), true));
 
+		String sanitizedJSON = _validateOptionsJSON(
+			json,
+			_cpInstanceLocalService.getCPInstance(
+				commerceOrderItem.getCPInstanceId()));
+
 		_updateCommerceInventoryBookedQuantity(
 			userId, commerceOrderItem,
 			commerceOrderItem.getCommerceInventoryBookedQuantityId(), quantity,
@@ -2434,7 +2447,7 @@ public class CommerceOrderItemLocalServiceImpl
 
 		commerceOrder = _updateWorkflow(userId, commerceOrder);
 
-		commerceOrderItem.setJson(json);
+		commerceOrderItem.setJson(sanitizedJSON);
 		commerceOrderItem.setQuantity(quantity);
 
 		if (commerceOrder.isOpen()) {
@@ -2494,6 +2507,11 @@ public class CommerceOrderItemLocalServiceImpl
 			GetterUtil.getBoolean(
 				serviceContext.getAttribute("validateOrder"), true));
 
+		String sanitizedJSON = _validateOptionsJSON(
+			json,
+			_cpInstanceLocalService.getCPInstance(
+				commerceOrderItem.getCPInstanceId()));
+
 		_updateCommerceInventoryBookedQuantity(
 			userId, commerceOrderItem,
 			commerceOrderItem.getCommerceInventoryBookedQuantityId(), quantity,
@@ -2501,7 +2519,7 @@ public class CommerceOrderItemLocalServiceImpl
 
 		_updateWorkflow(userId, commerceOrder);
 
-		commerceOrderItem.setJson(json);
+		commerceOrderItem.setJson(sanitizedJSON);
 		commerceOrderItem.setQuantity(quantity);
 		commerceOrderItem.setExpandoBridgeAttributes(serviceContext);
 
@@ -2614,6 +2632,128 @@ public class CommerceOrderItemLocalServiceImpl
 					commerceCartValidatorResults);
 			}
 		}
+	}
+
+	private String _validateOptionsJSON(String json, CPInstance cpInstance)
+		throws PortalException {
+
+		List<CPDefinitionOptionRel> cpDefinitionOptionRels =
+			_cpDefinitionOptionRelLocalService.getCPDefinitionOptionRels(
+				cpInstance.getCPDefinitionId());
+
+		JSONArray jsonArray = _jsonFactory.createJSONArray();
+
+		if (JSONUtil.isJSONArray(json)) {
+			jsonArray = _jsonFactory.createJSONArray(json);
+		}
+
+		for (CPDefinitionOptionRel cpDefinitionOptionRel :
+				cpDefinitionOptionRels) {
+
+			JSONObject optionJSONObject = null;
+
+			for (int i = 0; i < jsonArray.length(); i++) {
+				JSONObject jsonObject = jsonArray.getJSONObject(i);
+
+				String key = jsonObject.getString("key");
+
+				if (key.equals(cpDefinitionOptionRel.getKey())) {
+					optionJSONObject = jsonObject;
+
+					break;
+				}
+			}
+
+			CPOption cpOption = cpDefinitionOptionRel.getCPOption();
+
+			List<CPOptionValue> cpOptionValues = cpOption.getCPOptionValues();
+
+			if (cpOption.isRequired()) {
+				if ((optionJSONObject == null) ||
+					optionJSONObject.getString(
+						"value"
+					).isEmpty()) {
+
+					throw new RequiredOrderItemOptionException();
+				}
+
+				String commerceOptionTypeKey =
+					cpOption.getCommerceOptionTypeKey();
+
+				if (commerceOptionTypeKey.matches("select|radio")) {
+					boolean found = false;
+
+					for (CPOptionValue cpOptionValue : cpOptionValues) {
+						String skuOptionValueKey = optionJSONObject.getString(
+							"skuOptionValueKey");
+
+						if (Objects.equals(
+								cpOptionValue.getKey(), skuOptionValueKey)) {
+
+							found = true;
+
+							break;
+						}
+					}
+
+					if (!found) {
+						throw new RequiredOrderItemOptionException();
+					}
+				}
+				else if (commerceOptionTypeKey.equals("checkbox")) {
+				}
+				else if (commerceOptionTypeKey.equals("checkbox_multiple")) {
+				}
+			}
+			else if (cpOption.isSkuContributor()) {
+				if (optionJSONObject == null) {
+					throw new RequiredOrderItemOptionException();
+				}
+				else if (optionJSONObject.getString(
+							"value"
+						).isEmpty()) {
+
+					CPOptionValue cpOptionValue = cpOptionValues.get(0);
+
+					JSONObject jsonObject = new JSONObjectImpl(
+					).put(
+						"skuOptionName",
+						cpDefinitionOptionRel.getNameCurrentValue()
+					).put(
+						"quantity", String.valueOf(0)
+					).put(
+						"price", String.valueOf(0)
+					).put(
+						"priceType", cpDefinitionOptionRel.getPriceType()
+					).put(
+						"skuOptionKey", cpDefinitionOptionRel.getKey()
+					).put(
+						"skuOptionValueKey", cpOptionValue.getKey()
+					).put(
+						"skuOptionValueNames",
+						_jsonFactory.createJSONArray(
+						).put(
+							cpOptionValue.getNameCurrentValue()
+						)
+					).put(
+						"value", cpOptionValue.getNameCurrentValue()
+					).put(
+						"key", cpDefinitionOptionRel.getKey()
+					).put(
+						"skuId", new JSONObjectImpl()
+					);
+
+					jsonArray.put(jsonObject);
+				}
+			}
+
+			// scenario 3 - Missing optional data
+
+			else {
+			}
+		}
+
+		return jsonArray.toString();
 	}
 
 	private void _validateParentCommerceOrderId(
