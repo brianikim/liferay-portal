@@ -38,12 +38,12 @@ RoleItemSelectorViewDisplayContext roleItemSelectorViewDisplayContext = (RoleIte
 				cssClass += " text-muted";
 			}
 
-			row.setData(
-				HashMapBuilder.<String, Object>put(
-					"id", role.getRoleId()
-				).put(
-					"name", role.getTitle(locale)
-				).build());
+			row.setPrimaryKey(
+					JSONUtil.put(
+						"id", role.getRoleId()
+					).put(
+						"name", role.getTitle(locale)
+					).toString());
 			%>
 
 			<liferay-ui:search-container-column-text
@@ -105,14 +105,19 @@ RoleItemSelectorViewDisplayContext roleItemSelectorViewDisplayContext = (RoleIte
 				'<portlet:namespace /><%= HtmlUtil.escape(roleItemSelectorViewDisplayContext.getSearchContainerId()) %>'
 			);
 
+			debugger;
+
 			searchContainer.on('rowToggled', (event) => {
 				var allSelectedElements = event.elements.allSelectedElements;
+
+				debugger;
+
 				var selectedData = [];
 
 				allSelectedElements.each(function () {
-					var row = this.ancestor('tr');
+					debugger;
 
-					var data = row.getDOM().dataset;
+					var data = JSON.parse(this.getDOM().value);
 
 					selectedData.push({
 						id: data.id,
