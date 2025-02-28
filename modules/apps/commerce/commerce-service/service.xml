@@ -979,5 +979,6 @@
 		<exception>GuestCartItemMaxAllowed</exception>
 		<exception>GuestCartMaxAllowed</exception>
 		<exception>ProductBundle</exception>
+		<exception>RequiredOrderItemOption</exception>
 	</exceptions>
 </service-builder>
