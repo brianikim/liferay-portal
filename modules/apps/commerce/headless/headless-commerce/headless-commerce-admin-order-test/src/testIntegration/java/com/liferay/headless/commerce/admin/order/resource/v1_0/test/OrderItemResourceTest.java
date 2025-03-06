@@ -15,11 +15,16 @@ import com.liferay.commerce.currency.service.CommerceCurrencyLocalService;
 import com.liferay.commerce.media.constants.CommerceMediaConstants;
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.model.CommerceOrderItem;
+import com.liferay.commerce.product.constants.CPConstants;
 import com.liferay.commerce.product.constants.CommerceChannelConstants;
 import com.liferay.commerce.product.model.CPDefinition;
+import com.liferay.commerce.product.model.CPDefinitionOptionRel;
+import com.liferay.commerce.product.model.CPDefinitionOptionValueRel;
 import com.liferay.commerce.product.model.CPInstance;
+import com.liferay.commerce.product.model.CPOption;
 import com.liferay.commerce.product.model.CommerceCatalog;
 import com.liferay.commerce.product.model.CommerceChannel;
+import com.liferay.commerce.product.service.CPOptionLocalService;
 import com.liferay.commerce.product.service.CommerceChannelLocalService;
 import com.liferay.commerce.product.test.util.CPTestUtil;
 import com.liferay.commerce.product.type.virtual.constants.VirtualCPTypeConstants;
@@ -34,8 +39,11 @@ import com.liferay.commerce.test.util.context.TestCommerceContext;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.headless.commerce.admin.order.client.dto.v1_0.OrderItem;
+import com.liferay.headless.commerce.admin.order.client.http.HttpInvoker;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.json.JSONFactory;
+import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.service.ServiceContext;
@@ -51,6 +59,7 @@ import com.liferay.portal.test.rule.Inject;
 
 import java.math.BigDecimal;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Assert;
@@ -197,6 +206,16 @@ public class OrderItemResourceTest extends BaseOrderItemResourceTestCase {
 	@Test
 	public void testPatchOrderItemByExternalReferenceCode() throws Exception {
 		super.testPatchOrderItemByExternalReferenceCode();
+	}
+
+	@Override
+	@Test
+	public void testPostOrderIdOrderItem() throws Exception {
+		super.testPostOrderIdOrderItem();
+
+		_testPostOrderItemWithBundledItem();
+		_testPostOrderItemWithMissingRequiredOption();
+		_testPostOrderItemWithSkuContributorOption();
 	}
 
 	@Override
@@ -394,6 +413,151 @@ public class OrderItemResourceTest extends BaseOrderItemResourceTestCase {
 		};
 	}
 
+	private OrderItem _addProductWithBundledOptionAndIncompleteJSON()
+		throws Exception {
+
+		CPDefinition cpDefinition =
+			CPTestUtil.addCPDefinitionWithChildCPDefinitions(
+				_commerceCatalog.getGroupId(), 1);
+
+		List<CPInstance> cpInstances = cpDefinition.getCPInstances();
+
+		CPInstance cpInstance = cpInstances.get(0);
+
+		List<CPDefinitionOptionRel> cpDefinitionOptionRels =
+			cpDefinition.getCPDefinitionOptionRels();
+
+		CPDefinitionOptionRel cpDefinitionOptionRel =
+			cpDefinitionOptionRels.get(0);
+
+		CPOption cpOption = cpDefinitionOptionRel.getCPOption();
+
+		List<CPDefinitionOptionValueRel> cpDefinitionOptionValueRels =
+			cpDefinitionOptionRel.getCPDefinitionOptionValueRels();
+
+		CPDefinitionOptionValueRel cpDefinitionOptionValueRel =
+			cpDefinitionOptionValueRels.get(0);
+
+		JSONObject jsonObject = _jsonFactory.createJSONObject();
+
+		jsonObject.put(
+			"key", cpOption.getKey()
+		).put(
+			"price", cpDefinitionOptionValueRel.getPrice()
+		).put(
+			"priceType", cpDefinitionOptionRel.getPriceType()
+		).put(
+			"quantity", cpDefinitionOptionValueRel.getQuantity()
+		).put(
+			"skuOptionKey", cpOption.getKey()
+		).put(
+			"skuOptionName", cpOption.getName()
+		).put(
+			"skuOptionValueKey", cpDefinitionOptionValueRel.getKey()
+		).put(
+			"skuOptionValueNames",
+			_jsonFactory.createJSONArray(
+				Collections.singletonList(cpDefinitionOptionValueRel.getName()))
+		).put(
+			"value", cpDefinitionOptionValueRel.getKey()
+		);
+
+		return new OrderItem() {
+			{
+				bookedQuantityId = RandomTestUtil.randomLong();
+				deliveryGroup = StringUtil.toLowerCase(
+					RandomTestUtil.randomString());
+				discountManuallyAdjusted = RandomTestUtil.randomBoolean();
+				externalReferenceCode = RandomTestUtil.randomString();
+				id = RandomTestUtil.randomLong();
+				options = jsonObject.toString();
+				orderExternalReferenceCode =
+					_commerceOrder.getExternalReferenceCode();
+				orderId = _commerceOrder.getCommerceOrderId();
+				priceManuallyAdjusted = RandomTestUtil.randomBoolean();
+				printedNote = StringUtil.toLowerCase(
+					RandomTestUtil.randomString());
+				quantity = BigDecimal.valueOf(RandomTestUtil.randomInt(1, 100));
+				replacedSkuExternalReferenceCode =
+					RandomTestUtil.randomString();
+				requestedDeliveryDate = RandomTestUtil.nextDate();
+				shippable = RandomTestUtil.randomBoolean();
+				shippedQuantity = BigDecimal.valueOf(
+					RandomTestUtil.randomInt());
+				shippingAddressExternalReferenceCode =
+					RandomTestUtil.randomString();
+				shippingAddressId = RandomTestUtil.randomLong();
+				sku = cpInstance.getSku();
+				skuExternalReferenceCode =
+					cpInstance.getExternalReferenceCode();
+				skuId = cpInstance.getCPInstanceId();
+				subscription = RandomTestUtil.randomBoolean();
+				unitOfMeasure = StringUtil.toLowerCase(
+					RandomTestUtil.randomString());
+			}
+		};
+	}
+
+	private OrderItem _addProductWithMissingOptionJSON(
+			boolean required, boolean skuContributor)
+		throws Exception {
+
+		CPInstance cpInstance = CPTestUtil.addCPInstanceWithRandomSku(
+			_commerceCatalog.getGroupId());
+
+		CPOption cpOption = _cpOptionLocalService.addCPOption(
+			null, _user.getUserId(), RandomTestUtil.randomLocaleStringMap(),
+			RandomTestUtil.randomLocaleStringMap(),
+			CPConstants.PRODUCT_OPTION_SELECT_KEY,
+			RandomTestUtil.randomBoolean(), required, skuContributor,
+			RandomTestUtil.randomString(), _serviceContext);
+
+		CPTestUtil.addCPDefinitionOptionRel(
+			_commerceCatalog.getGroupId(), cpInstance.getCPDefinitionId(),
+			cpOption.getCPOptionId());
+
+		CPTestUtil.addCPDefinitionOptionValueRel(
+			cpInstance.getCPDefinitionId(), cpOption.getCPOptionId(),
+			RandomTestUtil.randomString(), RandomTestUtil.randomString(),
+			CPConstants.PRODUCT_OPTION_PRICE_TYPE_STATIC, required,
+			skuContributor, _serviceContext);
+
+		return new OrderItem() {
+			{
+				bookedQuantityId = RandomTestUtil.randomLong();
+				deliveryGroup = StringUtil.toLowerCase(
+					RandomTestUtil.randomString());
+				discountManuallyAdjusted = RandomTestUtil.randomBoolean();
+				externalReferenceCode = RandomTestUtil.randomString();
+				id = RandomTestUtil.randomLong();
+				options = "";
+				orderExternalReferenceCode =
+					_commerceOrder.getExternalReferenceCode();
+				orderId = _commerceOrder.getCommerceOrderId();
+				priceManuallyAdjusted = RandomTestUtil.randomBoolean();
+				printedNote = StringUtil.toLowerCase(
+					RandomTestUtil.randomString());
+				quantity = BigDecimal.valueOf(RandomTestUtil.randomInt(1, 100));
+				replacedSkuExternalReferenceCode =
+					RandomTestUtil.randomString();
+				requestedDeliveryDate = RandomTestUtil.nextDate();
+				shippable = RandomTestUtil.randomBoolean();
+				shippedQuantity = BigDecimal.valueOf(
+					RandomTestUtil.randomInt());
+				shippingAddressExternalReferenceCode =
+					RandomTestUtil.randomString();
+				shippingAddressId = RandomTestUtil.randomLong();
+				sku = cpInstance.getSku();
+				skuExternalReferenceCode =
+					cpInstance.getExternalReferenceCode();
+				skuId = cpInstance.getCPInstanceId();
+				subscription = RandomTestUtil.randomBoolean();
+				unitOfMeasure = StringUtil.toLowerCase(
+					RandomTestUtil.randomString());
+			}
+		};
+	}
+
 	private OrderItem _getOrderItem(long fileEntryId, String url)
 		throws Exception {
 
@@ -448,6 +612,36 @@ public class OrderItemResourceTest extends BaseOrderItemResourceTestCase {
 		};
 	}
 
+	private void _testPostOrderItemWithBundledItem() throws Exception {
+		OrderItem orderItem = _addProductWithBundledOptionAndIncompleteJSON();
+
+		HttpInvoker.HttpResponse httpResponse =
+			orderItemResource.postOrderIdOrderItemHttpResponse(
+				_commerceOrder.getCommerceOrderId(), orderItem);
+
+		assertHttpResponseStatusCode(200, httpResponse);
+	}
+
+	private void _testPostOrderItemWithMissingRequiredOption()
+		throws Exception {
+
+		OrderItem orderItem = _addProductWithMissingOptionJSON(true, false);
+
+		assertHttpResponseStatusCode(
+			400,
+			orderItemResource.postOrderIdOrderItemHttpResponse(
+				_commerceOrder.getCommerceOrderId(), orderItem));
+	}
+
+	private void _testPostOrderItemWithSkuContributorOption() throws Exception {
+		OrderItem orderItem = _addProductWithMissingOptionJSON(false, true);
+
+		assertHttpResponseStatusCode(
+			200,
+			orderItemResource.postOrderIdOrderItemHttpResponse(
+				_commerceOrder.getCommerceOrderId(), orderItem));
+	}
+
 	private AccountEntry _accountEntry;
 
 	@Inject
@@ -481,7 +675,13 @@ public class OrderItemResourceTest extends BaseOrderItemResourceTestCase {
 		_cpDefinitionVirtualSettingLocalService;
 
 	@Inject
+	private CPOptionLocalService _cpOptionLocalService;
+
+	@Inject
 	private DLAppLocalService _dlAppLocalService;
+
+	@Inject
+	private JSONFactory _jsonFactory;
 
 	@Inject
 	private Portal _portal;
