@@ -486,8 +486,15 @@ const openSelectionModal = ({
 
 								const row = node.closest('dd, tr, li');
 
-								if (row && Object.keys(row.dataset).length) {
-									item = {...item, ...row.dataset};
+								if (row) {
+									if (Object.keys(row.dataset).length) {
+										item = {...item, ...row.dataset};
+									}
+								}
+								else {
+									if (Object.keys(node.dataset).length) {
+										item = {...item, ...node.dataset};
+									}
 								}
 
 								return item;
