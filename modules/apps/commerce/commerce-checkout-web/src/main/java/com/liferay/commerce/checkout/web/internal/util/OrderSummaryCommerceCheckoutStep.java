@@ -21,6 +21,7 @@ import com.liferay.commerce.exception.CommerceOrderShippingMethodException;
 import com.liferay.commerce.exception.CommerceOrderStatusException;
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.order.CommerceOrderHttpHelper;
+import com.liferay.commerce.order.CommerceOrderThreadLocal;
 import com.liferay.commerce.order.CommerceOrderValidatorRegistry;
 import com.liferay.commerce.order.engine.CommerceOrderEngine;
 import com.liferay.commerce.payment.method.CommercePaymentMethod;
@@ -253,8 +254,16 @@ public class OrderSummaryCommerceCheckoutStep extends BaseCommerceCheckoutStep {
 				}
 			}
 
-			_commerceOrderEngine.checkoutCommerceOrder(
-				commerceOrder, _portal.getUserId(httpServletRequest));
+			try {
+				CommerceOrderThreadLocal.setHttpServletRequest(
+					httpServletRequest);
+
+				_commerceOrderEngine.checkoutCommerceOrder(
+					commerceOrder, _portal.getUserId(httpServletRequest));
+			}
+			finally {
+				CommerceOrderThreadLocal.setHttpServletRequest(null);
+			}
 		}
 	}
 

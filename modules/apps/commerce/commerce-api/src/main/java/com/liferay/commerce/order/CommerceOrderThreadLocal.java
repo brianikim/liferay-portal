@@ -7,11 +7,17 @@ package com.liferay.commerce.order;
 
 import com.liferay.petra.lang.CentralizedThreadLocal;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * @author Brian I. Kim
  * @author Crescenzo Rega
  */
 public class CommerceOrderThreadLocal {
+
+	public static HttpServletRequest getHttpServletRequest() {
+		return _httpServletRequest.get();
+	}
 
 	public static boolean isDeleteInProcess() {
 		return _deleteInProcess.get();
@@ -25,6 +31,12 @@ public class CommerceOrderThreadLocal {
 		_deleteInProcess.set(deleteInProcess);
 	}
 
+	public static void setHttpServletRequest(
+		HttpServletRequest httpServletRequest) {
+
+		_httpServletRequest.set(httpServletRequest);
+	}
+
 	public static void setSkipValidateAccountLimit(
 		boolean skipValidateAccountLimit) {
 
@@ -35,6 +47,10 @@ public class CommerceOrderThreadLocal {
 		new CentralizedThreadLocal<>(
 			CommerceOrderThreadLocal.class + "._deleteInProcess",
 			() -> Boolean.FALSE);
+	private static final ThreadLocal<HttpServletRequest> _httpServletRequest =
+		new CentralizedThreadLocal<>(
+			CommerceOrderThreadLocal.class + "._httpServletRequest",
+			() -> null);
 	private static final ThreadLocal<Boolean> _skipValidateAccountLimit =
 		new CentralizedThreadLocal<>(
 			CommerceReturnThreadLocal.class + "._skipValidateAccountLimit",

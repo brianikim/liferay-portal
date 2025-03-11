@@ -17,6 +17,7 @@ import com.liferay.commerce.model.CommerceShippingEngine;
 import com.liferay.commerce.model.CommerceShippingMethod;
 import com.liferay.commerce.model.CommerceShippingOption;
 import com.liferay.commerce.order.CommerceDefinitionTermContributor;
+import com.liferay.commerce.order.CommerceOrderThreadLocal;
 import com.liferay.commerce.payment.exception.NoSuchPaymentMethodGroupRelException;
 import com.liferay.commerce.payment.model.CommercePaymentMethodGroupRel;
 import com.liferay.commerce.payment.service.CommercePaymentMethodGroupRelLocalService;
@@ -32,7 +33,6 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Contact;
 import com.liferay.portal.kernel.model.Country;
 import com.liferay.portal.kernel.model.Group;
@@ -40,7 +40,6 @@ import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.ListType;
 import com.liferay.portal.kernel.model.Region;
 import com.liferay.portal.kernel.model.User;
-import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.service.ListTypeService;
 import com.liferay.portal.kernel.service.UserLocalService;
@@ -491,12 +490,11 @@ public class CommerceOrderCommerceDefinitionTermContributor
 				commerceChannel.getType(),
 				CommerceChannelConstants.CHANNEL_TYPE_SITE)) {
 
-			Company company = _companyLocalService.getCompany(
-				commerceOrder.getCompanyId());
-
 			StringBuffer sb = new StringBuffer();
 
-			sb.append(company.getPortalURL(commerceOrder.getGroupId()));
+			sb.append(
+				_portal.getPortalURL(
+					CommerceOrderThreadLocal.getHttpServletRequest()));
 
 			Layout layout = null;
 
@@ -661,9 +659,6 @@ public class CommerceOrderCommerceDefinitionTermContributor
 	@Reference
 	private CommerceShippingFixedOptionLocalService
 		_commerceShippingFixedOptionLocalService;
-
-	@Reference
-	private CompanyLocalService _companyLocalService;
 
 	@Reference
 	private Language _language;
