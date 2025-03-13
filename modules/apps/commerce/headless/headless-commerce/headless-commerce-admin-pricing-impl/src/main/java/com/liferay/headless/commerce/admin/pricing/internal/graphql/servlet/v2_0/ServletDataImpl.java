@@ -598,6 +598,11 @@ public class ServletDataImpl implements ServletData {
 							PriceListAccountResourceImpl.class,
 							"postPriceListByExternalReferenceCodePriceListAccount"));
 					put(
+						"mutation#updatePriceListByExternalReferenceCodePriceListAccount",
+						new ObjectValuePair<>(
+							PriceListAccountResourceImpl.class,
+							"putPriceListByExternalReferenceCodePriceListAccount"));
+					put(
 						"mutation#createPriceListIdPriceListAccount",
 						new ObjectValuePair<>(
 							PriceListAccountResourceImpl.class,

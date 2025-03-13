@@ -65,6 +65,10 @@ public interface PriceListAccountResource {
 				String externalReferenceCode, PriceListAccount priceListAccount)
 		throws Exception;
 
+	public PriceListAccount putPriceListByExternalReferenceCodePriceListAccount(
+			String externalReferenceCode, PriceListAccount priceListAccount)
+		throws Exception;
+
 	public Page<PriceListAccount> getPriceListIdPriceListAccountsPage(
 			Long id, String search, Filter filter, Pagination pagination,
 			Sort[] sorts)
