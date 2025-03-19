@@ -434,14 +434,16 @@ public class AccountResourceImpl extends BaseAccountResourceImpl {
 
 	@Override
 	public Account postAccount(Account account) throws Exception {
-		AccountEntry accountEntry = _accountEntryService.addAccountEntry(
-			contextUser.getUserId(),
-			_getParentAccountId(
-				account, AccountConstants.ACCOUNT_ENTRY_ID_DEFAULT),
-			account.getName(), account.getDescription(), _getDomains(account),
-			null, _getLogoBytes(account, null, false), account.getTaxId(),
-			_getType(account), _getStatus(account),
-			_createServiceContext(account));
+		AccountEntry accountEntry =
+			_accountEntryService.addOrUpdateAccountEntry(
+				GetterUtil.getString(account.getExternalReferenceCode()),
+				contextUser.getUserId(),
+				_getParentAccountId(
+					account, AccountConstants.ACCOUNT_ENTRY_ID_DEFAULT),
+				account.getName(), account.getDescription(),
+				_getDomains(account), null, _getLogoBytes(account, null, false),
+				account.getTaxId(), _getType(account), _getStatus(account),
+				_createServiceContext(account));
 
 		long defaultBillingAddressId = _getDefaultBillingAddressId(account, 0);
 
