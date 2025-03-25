@@ -257,101 +257,102 @@ test('COMMERCE-6193. As a buyer, I want the first selectable quantity of a produ
 	}
 });
 
-test('LPD-25497 Users should not be able to instantly add to cart for product card if options exist', async ({
-	apiHelpers,
-	commerceThemeMiniumCatalogPage,
-	page,
-}) => {
-	const {site} = await miniumSetUp(apiHelpers);
+test(
+	'Users should not be able to instantly add to cart for product card if options exist',
+	{tag: '@LPD-25497'},
+	async ({apiHelpers, commerceThemeMiniumCatalogPage, page}) => {
+		const {site} = await miniumSetUp(apiHelpers);
 
-	const account = await apiHelpers.headlessAdminUser.postAccount({
-		name: getRandomString(),
-		type: 'business',
-	});
-	apiHelpers.data.push({id: account.id, type: 'account'});
+		const account = await apiHelpers.headlessAdminUser.postAccount({
+			name: getRandomString(),
+			type: 'business',
+		});
+		apiHelpers.data.push({id: account.id, type: 'account'});
 
-	const user =
-		await apiHelpers.headlessAdminUser.getUserAccountByEmailAddress(
-			'demo.unprivileged@liferay.com'
+		const user =
+			await apiHelpers.headlessAdminUser.getUserAccountByEmailAddress(
+				'demo.unprivileged@liferay.com'
+			);
+		const rolesResponse =
+			await apiHelpers.headlessAdminUser.getAccountRoles(account.id);
+
+		const accountRoleBuyer = rolesResponse?.items?.filter((role) => {
+			return role.name === 'Buyer';
+		});
+
+		await apiHelpers.headlessAdminUser.assignAccountRoles(
+			account.externalReferenceCode,
+			accountRoleBuyer[0].id,
+			user.emailAddress
 		);
-	const rolesResponse = await apiHelpers.headlessAdminUser.getAccountRoles(
-		account.id
-	);
 
-	const accountRoleBuyer = rolesResponse?.items?.filter((role) => {
-		return role.name === 'Buyer';
-	});
+		const siteRole =
+			await apiHelpers.headlessAdminUser.getRoleByName('Site Member');
 
-	await apiHelpers.headlessAdminUser.assignAccountRoles(
-		account.externalReferenceCode,
-		accountRoleBuyer[0].id,
-		user.emailAddress
-	);
+		await apiHelpers.headlessAdminUser.assignUserToSite(
+			siteRole.id,
+			site.id,
+			user.id
+		);
 
-	const siteRole =
-		await apiHelpers.headlessAdminUser.getRoleByName('Site Member');
+		await apiHelpers.headlessAdminUser.assignUserToAccountByEmailAddress(
+			account.id,
+			[user.emailAddress]
+		);
 
-	await apiHelpers.headlessAdminUser.assignUserToSite(
-		siteRole.id,
-		site.id,
-		user.id
-	);
+		const option = await apiHelpers.headlessCommerceAdminCatalog.postOption(
+			'select',
+			getRandomString(),
+			'Color',
+			1
+		);
 
-	await apiHelpers.headlessAdminUser.assignUserToAccountByEmailAddress(
-		account.id,
-		[user.emailAddress]
-	);
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
 
-	const option = await apiHelpers.headlessCommerceAdminCatalog.postOption(
-		'select',
-		getRandomString(),
-		'Color',
-		1
-	);
-
-	const catalog = await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
-
-	const product = await apiHelpers.headlessCommerceAdminCatalog.postProduct({
-		catalogId: catalog.id,
-		name: {en_US: getRandomString()},
-		productOptions: [
-			{
-				fieldType: 'select',
-				key: option.key,
-				name: option.name,
-				optionId: option.id,
-				priceType: 'dynamic',
-				priority: 1,
-				productOptionValues: [
+		const product =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				name: {en_US: getRandomString()},
+				productOptions: [
 					{
-						key: 'black',
-						name: {
-							en_US: 'Black',
-						},
+						fieldType: 'select',
+						key: option.key,
+						name: option.name,
+						optionId: option.id,
+						priceType: 'dynamic',
 						priority: 1,
-						quantity: 1,
-					},
-					{
-						key: 'white',
-						name: {
-							en_US: 'White',
-						},
-						priority: 2,
-						quantity: 1,
+						productOptionValues: [
+							{
+								key: 'black',
+								name: {
+									en_US: 'Black',
+								},
+								priority: 1,
+								quantity: 1,
+							},
+							{
+								key: 'white',
+								name: {
+									en_US: 'White',
+								},
+								priority: 2,
+								quantity: 1,
+							},
+						],
 					},
 				],
-			},
-		],
-	});
+			});
 
-	await performLogout(page);
-	await performLogin(page, 'demo.unprivileged');
+		await performLogout(page);
+		await performLogin(page, 'demo.unprivileged');
 
-	await page.goto(`/web/${site.name}`);
+		await page.goto(`/web/${site.name}`);
 
-	const productName = product.name['en_US'];
+		const productName = product.name['en_US'];
 
-	await expect(
-		commerceThemeMiniumCatalogPage.productCard(productName)
-	).toContainText('View all variants');
-});
+		await expect(
+			commerceThemeMiniumCatalogPage.productCard(productName)
+		).toContainText('View all variants');
+	}
+);
