@@ -47,8 +47,6 @@ import com.liferay.commerce.product.model.CPDefinitionOptionValueRel;
 import com.liferay.commerce.product.model.CPInstance;
 import com.liferay.commerce.product.model.CPInstanceUnitOfMeasure;
 import com.liferay.commerce.product.model.CPMeasurementUnit;
-import com.liferay.commerce.product.model.CPOption;
-import com.liferay.commerce.product.model.CPOptionValue;
 import com.liferay.commerce.product.option.CommerceOptionValue;
 import com.liferay.commerce.product.option.CommerceOptionValueHelper;
 import com.liferay.commerce.product.service.CPDefinitionLocalService;
@@ -2702,7 +2700,8 @@ public class CommerceOrderItemLocalServiceImpl
 			cpDefinitionOptionRelKeysOptionValueRelKeysMap);
 
 		for (CPDefinitionOptionRel cpDefinitionOptionRel :
-				cpDefinition.getCPDefinitionOptionRels()) {
+				_cpDefinitionOptionRelLocalService.getCPDefinitionOptionRels(
+					cpDefinition.getCPDefinitionId())) {
 
 			List<CPDefinitionOptionValueRel> cpDefinitionOptionValueRels =
 				_cpDefinitionOptionValueRelLocalService.
@@ -2755,8 +2754,6 @@ public class CommerceOrderItemLocalServiceImpl
 			JSONArray optionJSONArray)
 		throws PortalException {
 
-		CPOption cpOption = cpDefinitionOptionRel.getCPOption();
-
 		boolean containsRequiredOption = false;
 
 		for (int i = 0; i < optionJSONArray.length(); i++) {
@@ -2764,7 +2761,7 @@ public class CommerceOrderItemLocalServiceImpl
 
 			String key = jsonObject.getString("key");
 
-			if (Objects.equals(key, cpOption.getKey())) {
+			if (Objects.equals(key, cpDefinitionOptionRel.getKey())) {
 				JSONArray valueJSONArray = jsonObject.getJSONArray("value");
 
 				if ((valueJSONArray == null) ||
@@ -2774,7 +2771,8 @@ public class CommerceOrderItemLocalServiceImpl
 						"Required option must have a value");
 				}
 
-				String optionTypeKey = cpOption.getCommerceOptionTypeKey();
+				String optionTypeKey =
+					cpDefinitionOptionRel.getCommerceOptionTypeKey();
 
 				if (optionTypeKey.matches("checkbox_multiple|radio|select")) {
 					boolean multipleSelect = false;
@@ -2785,12 +2783,17 @@ public class CommerceOrderItemLocalServiceImpl
 						stringList = JSONUtil.toStringList(valueJSONArray);
 					}
 
-					List<CPOptionValue> cpOptionValues =
-						cpOption.getCPOptionValues();
+					List<CPDefinitionOptionValueRel>
+						cpDefinitionOptionValueRels =
+							cpDefinitionOptionRel.
+								getCPDefinitionOptionValueRels();
 
-					for (CPOptionValue cpOptionValue : cpOptionValues) {
+					for (CPDefinitionOptionValueRel cpDefinitionOptionValueRel :
+							cpDefinitionOptionValueRels) {
+
 						if (multipleSelect) {
-							stringList.remove(cpOptionValue.getKey());
+							stringList.remove(
+								cpDefinitionOptionValueRel.getKey());
 
 							if (stringList.isEmpty()) {
 								containsRequiredOption = true;
@@ -2800,7 +2803,7 @@ public class CommerceOrderItemLocalServiceImpl
 						}
 						else {
 							if (Objects.equals(
-									cpOptionValue.getKey(),
+									cpDefinitionOptionValueRel.getKey(),
 									valueJSONArray.get(0))) {
 
 								containsRequiredOption = true;
@@ -2813,7 +2816,9 @@ public class CommerceOrderItemLocalServiceImpl
 				else if (Objects.equals(optionTypeKey, "checkbox")) {
 					String valueString = valueJSONArray.getString(0);
 
-					if (Objects.equals(valueString, cpOption.getKey())) {
+					if (Objects.equals(
+							valueString, cpDefinitionOptionRel.getKey())) {
+
 						containsRequiredOption = true;
 					}
 				}
