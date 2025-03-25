@@ -103,7 +103,7 @@ boolean hasOptions = cpContentHelper.hasCPDefinitionOptionRels(cpCatalogEntry.ge
 
 			<div>
 				<c:choose>
-					<c:when test="<%= (!hasMultipleCPSkus && (cpSku != null)) && !hasOptions %>">
+					<c:when test="<%= !hasMultipleCPSkus && (cpSku != null) && !hasOptions %>">
 						<div class="mt-2">
 							<commerce-ui:add-to-cart
 								alignment="full-width"
