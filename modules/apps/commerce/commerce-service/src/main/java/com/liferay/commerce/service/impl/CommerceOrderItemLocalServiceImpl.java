@@ -40,9 +40,13 @@ import com.liferay.commerce.price.CommerceProductPriceCalculation;
 import com.liferay.commerce.price.CommerceProductPriceImpl;
 import com.liferay.commerce.price.CommerceProductPriceRequest;
 import com.liferay.commerce.product.constants.CPConstants;
+import com.liferay.commerce.product.exception.CPDefinitionOptionRelException;
+import com.liferay.commerce.product.exception.CPInstanceOptionValueRelException;
 import com.liferay.commerce.product.exception.NoSuchCPInstanceException;
 import com.liferay.commerce.product.exception.NoSuchCPInstanceUnitOfMeasureException;
 import com.liferay.commerce.product.model.CPDefinition;
+import com.liferay.commerce.product.model.CPDefinitionOptionRel;
+import com.liferay.commerce.product.model.CPDefinitionOptionValueRel;
 import com.liferay.commerce.product.model.CPInstance;
 import com.liferay.commerce.product.model.CPInstanceUnitOfMeasure;
 import com.liferay.commerce.product.model.CPMeasurementUnit;
@@ -50,9 +54,11 @@ import com.liferay.commerce.product.option.CommerceOptionValue;
 import com.liferay.commerce.product.option.CommerceOptionValueHelper;
 import com.liferay.commerce.product.service.CPDefinitionLocalService;
 import com.liferay.commerce.product.service.CPDefinitionOptionRelLocalService;
+import com.liferay.commerce.product.service.CPDefinitionOptionValueRelLocalService;
 import com.liferay.commerce.product.service.CPInstanceLocalService;
 import com.liferay.commerce.product.service.CPInstanceUnitOfMeasureLocalService;
 import com.liferay.commerce.product.service.CPMeasurementUnitLocalService;
+import com.liferay.commerce.product.util.CPInstanceHelper;
 import com.liferay.commerce.product.util.CPJSONUtil;
 import com.liferay.commerce.service.CommerceOrderLocalService;
 import com.liferay.commerce.service.base.CommerceOrderItemLocalServiceBaseImpl;
@@ -74,6 +80,7 @@ import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONException;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.User;
@@ -1392,6 +1399,8 @@ public class CommerceOrderItemLocalServiceImpl
 			GetterUtil.getBoolean(
 				serviceContext.getAttribute("validateOrder"), true));
 
+		json = _validateJSON(cpDefinition, cpInstance, json);
+
 		long commerceOrderItemId = counterLocalService.increment();
 
 		CommerceOrderItem commerceOrderItem =
@@ -2460,6 +2469,10 @@ public class CommerceOrderItemLocalServiceImpl
 			GetterUtil.getBoolean(
 				serviceContext.getAttribute("validateOrder"), true));
 
+		json = _validateJSON(
+			commerceOrderItem.getCPDefinition(),
+			commerceOrderItem.fetchCPInstance(), json);
+
 		_updateCommerceInventoryBookedQuantity(
 			userId, commerceOrderItem,
 			commerceOrderItem.getCommerceInventoryBookedQuantityId(), quantity,
@@ -2496,6 +2509,10 @@ public class CommerceOrderItemLocalServiceImpl
 			commerceOrderItem.hasParentCommerceOrderItem(),
 			GetterUtil.getBoolean(
 				serviceContext.getAttribute("validateOrder"), true));
+
+		json = _validateJSON(
+			commerceOrderItem.getCPDefinition(),
+			commerceOrderItem.fetchCPInstance(), json);
 
 		_updateCommerceInventoryBookedQuantity(
 			userId, commerceOrderItem,
@@ -2653,6 +2670,101 @@ public class CommerceOrderItemLocalServiceImpl
 		}
 	}
 
+	private void _validateBundleInformation(
+		CPDefinitionOptionRel cpDefinitionOptionRel,
+		List<CPDefinitionOptionValueRel> cpDefinitionOptionValueRels,
+		JSONArray optionJSONArray) {
+
+		for (CPDefinitionOptionValueRel cpDefinitionOptionValueRel :
+				cpDefinitionOptionValueRels) {
+
+			if (Validator.isNotNull(
+					cpDefinitionOptionValueRel.getCPInstanceUuid())) {
+
+				CPInstance linkedCPInstance =
+					_cpInstanceLocalService.fetchCPInstance(
+						cpDefinitionOptionValueRel.getCProductId(),
+						cpDefinitionOptionValueRel.getCPInstanceUuid());
+
+				for (int i = 0; i < optionJSONArray.length(); i++) {
+					JSONObject optionJSONObject = optionJSONArray.getJSONObject(
+						i);
+
+					String key = optionJSONObject.getString("key");
+
+					if (Objects.equals(key, cpDefinitionOptionRel.getKey())) {
+						optionJSONObject.put(
+							"price", cpDefinitionOptionValueRel.getPrice()
+						).put(
+							"priceType", cpDefinitionOptionRel.getPriceType()
+						).put(
+							"quantity", cpDefinitionOptionValueRel.getQuantity()
+						).put(
+							"skuId", linkedCPInstance.getCPInstanceId()
+						).put(
+							"unitOfMeasureKey",
+							cpDefinitionOptionValueRel.getUnitOfMeasureKey()
+						);
+
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	private String _validateJSON(
+			CPDefinition cpDefinition, CPInstance cpInstance, String json)
+		throws PortalException {
+
+		String sanitizedJSON = json;
+		JSONArray optionJSONArray = CPJSONUtil.toJSONArray(json);
+
+		Map<String, List<String>>
+			cpDefinitionOptionRelKeysOptionValueRelKeysMap =
+				_cpDefinitionOptionRelLocalService.
+					getCPDefinitionOptionRelKeysCPDefinitionOptionValueRelKeys(
+						cpInstance.getCPInstanceId());
+
+		JSONArray optionRelJSONArray = CPJSONUtil.toJSONArray(
+			cpDefinitionOptionRelKeysOptionValueRelKeysMap);
+
+		for (CPDefinitionOptionRel cpDefinitionOptionRel :
+				_cpDefinitionOptionRelLocalService.getCPDefinitionOptionRels(
+					cpDefinition.getCPDefinitionId())) {
+
+			List<CPDefinitionOptionValueRel> cpDefinitionOptionValueRels =
+				_cpDefinitionOptionValueRelLocalService.
+					getCPDefinitionOptionValueRels(
+						cpDefinitionOptionRel.getCPDefinitionOptionRelId());
+
+			if (cpDefinitionOptionRel.isSkuContributor()) {
+				_validateSkuContributorOption(
+					cpDefinitionOptionRel, cpInstance, optionJSONArray,
+					optionRelJSONArray);
+
+				sanitizedJSON = optionJSONArray.toString();
+			}
+			else if (cpDefinitionOptionRel.isRequired()) {
+				if (CPJSONUtil.isEmpty(json)) {
+					throw new CPDefinitionOptionRelException(
+						"Required option is missing");
+				}
+
+				_validateRequiredOption(cpDefinitionOptionRel, optionJSONArray);
+			}
+			else if (!cpDefinitionOptionValueRels.isEmpty()) {
+				_validateBundleInformation(
+					cpDefinitionOptionRel, cpDefinitionOptionValueRels,
+					optionJSONArray);
+
+				sanitizedJSON = optionJSONArray.toString();
+			}
+		}
+
+		return sanitizedJSON;
+	}
+
 	private void _validateParentCommerceOrderId(
 			CommerceOrderItem commerceOrderItem)
 		throws PortalException {
@@ -2664,6 +2776,210 @@ public class CommerceOrderItemLocalServiceImpl
 					commerceOrderItem.getCommerceOrderItemId(),
 					" because it is a child commerce order item ",
 					commerceOrderItem.getParentCommerceOrderItemId()));
+		}
+	}
+
+	private void _validateRequiredOption(
+			CPDefinitionOptionRel cpDefinitionOptionRel,
+			JSONArray optionJSONArray)
+		throws PortalException {
+
+		boolean containsRequiredOption = false;
+
+		for (int i = 0; i < optionJSONArray.length(); i++) {
+			JSONObject jsonObject = optionJSONArray.getJSONObject(i);
+
+			String key = jsonObject.getString("key");
+
+			if (Objects.equals(key, cpDefinitionOptionRel.getKey())) {
+				JSONArray valueJSONArray = jsonObject.getJSONArray("value");
+
+				if ((valueJSONArray == null) ||
+					(valueJSONArray.length() == 0)) {
+
+					throw new CPInstanceOptionValueRelException(
+						"Required option must have a value");
+				}
+
+				String optionTypeKey =
+					cpDefinitionOptionRel.getCommerceOptionTypeKey();
+
+				if (optionTypeKey.matches("checkbox_multiple|radio|select")) {
+					boolean multipleSelect = false;
+					List<String> stringList = new ArrayList<>();
+
+					if (Objects.equals(optionTypeKey, "checkbox_multiple")) {
+						multipleSelect = true;
+						stringList = JSONUtil.toStringList(valueJSONArray);
+					}
+
+					List<CPDefinitionOptionValueRel>
+						cpDefinitionOptionValueRels =
+							cpDefinitionOptionRel.
+								getCPDefinitionOptionValueRels();
+
+					for (CPDefinitionOptionValueRel cpDefinitionOptionValueRel :
+							cpDefinitionOptionValueRels) {
+
+						if (multipleSelect) {
+							stringList.remove(
+								cpDefinitionOptionValueRel.getKey());
+
+							if (stringList.isEmpty()) {
+								containsRequiredOption = true;
+
+								break;
+							}
+						}
+						else {
+							if (Objects.equals(
+									cpDefinitionOptionValueRel.getKey(),
+									valueJSONArray.get(0))) {
+
+								containsRequiredOption = true;
+
+								break;
+							}
+						}
+					}
+				}
+				else if (Objects.equals(optionTypeKey, "checkbox")) {
+					String valueString = valueJSONArray.getString(0);
+
+					if (Objects.equals(
+							valueString, cpDefinitionOptionRel.getKey())) {
+
+						containsRequiredOption = true;
+					}
+				}
+				else {
+					containsRequiredOption = true;
+
+					break;
+				}
+			}
+		}
+
+		if (!containsRequiredOption) {
+			throw new CPDefinitionOptionRelException(
+				"Required option is missing");
+		}
+	}
+
+	private void _validateSkuContributorOption(
+			CPDefinitionOptionRel cpDefinitionOptionRel, CPInstance cpInstance,
+			JSONArray optionJSONArray, JSONArray optionRelJSONArray)
+		throws PortalException {
+
+		boolean jsonOptionExists = false;
+
+		for (int i = 0; i < optionRelJSONArray.length(); i++) {
+			JSONObject instanceJSONObject = optionRelJSONArray.getJSONObject(i);
+
+			if (Objects.equals(
+					instanceJSONObject.get("key"),
+					cpDefinitionOptionRel.getKey())) {
+
+				Map<CPDefinitionOptionRel, List<CPDefinitionOptionValueRel>>
+					cpDefinitionOptionRelValueRelMap =
+						_cpInstanceHelper.
+							getCPInstanceCPDefinitionOptionRelsMap(
+								cpInstance.getCPInstanceId());
+
+				List<CPDefinitionOptionValueRel>
+					cpDefinitionOptionValueRelList =
+						cpDefinitionOptionRelValueRelMap.get(
+							cpDefinitionOptionRel);
+
+				CPDefinitionOptionValueRel cpDefinitionOptionValueRel =
+					cpDefinitionOptionValueRelList.get(0);
+
+				for (int j = 0; j < optionJSONArray.length(); j++) {
+					JSONObject optionJSONObject = optionJSONArray.getJSONObject(
+						j);
+
+					String key = optionJSONObject.getString("key");
+
+					if (Objects.equals(key, cpDefinitionOptionRel.getKey())) {
+						jsonOptionExists = true;
+
+						optionJSONObject.put(
+							"price", cpDefinitionOptionValueRel.getPrice()
+						).put(
+							"priceType", cpDefinitionOptionRel.getPriceType()
+						).put(
+							"quantity", cpDefinitionOptionValueRel.getQuantity()
+						).put(
+							"skuOptionKey", instanceJSONObject.get("key")
+						).put(
+							"skuOptionName",
+							instanceJSONObject.get("skuOptionName")
+						).put(
+							"skuOptionValueKey", instanceJSONObject.get("value")
+						).put(
+							"skuOptionValueNames",
+							instanceJSONObject.get("skuOptionValueNames")
+						).put(
+							"value", instanceJSONObject.get("value")
+						);
+
+						if (Validator.isNotNull(
+								cpDefinitionOptionValueRel.
+									getCPInstanceUuid())) {
+
+							CPInstance linkedCPInstance =
+								_cpInstanceLocalService.fetchCPInstance(
+									cpDefinitionOptionValueRel.getCProductId(),
+									cpDefinitionOptionValueRel.
+										getCPInstanceUuid());
+
+							optionJSONObject.put(
+								"skuId", linkedCPInstance.getCPInstanceId());
+						}
+
+						break;
+					}
+				}
+
+				if (!jsonOptionExists) {
+					JSONObject jsonObject = _jsonFactory.createJSONObject();
+
+					jsonObject.put(
+						"key", instanceJSONObject.get("key")
+					).put(
+						"price", cpDefinitionOptionValueRel.getPrice()
+					).put(
+						"priceType", cpDefinitionOptionRel.getPriceType()
+					).put(
+						"quantity", cpDefinitionOptionValueRel.getQuantity()
+					).put(
+						"skuOptionKey", instanceJSONObject.get("key")
+					).put(
+						"skuOptionName", instanceJSONObject.get("skuOptionName")
+					).put(
+						"skuOptionValueKey", instanceJSONObject.get("value")
+					).put(
+						"skuOptionValueNames",
+						instanceJSONObject.get("skuOptionValueNames")
+					).put(
+						"value", instanceJSONObject.get("value")
+					);
+
+					if (Validator.isNotNull(
+							cpDefinitionOptionValueRel.getCPInstanceUuid())) {
+
+						CPInstance linkedCPInstance =
+							_cpInstanceLocalService.fetchCPInstance(
+								cpDefinitionOptionValueRel.getCProductId(),
+								cpDefinitionOptionValueRel.getCPInstanceUuid());
+
+						jsonObject.put(
+							"skuId", linkedCPInstance.getCPInstanceId());
+					}
+
+					optionJSONArray.put(jsonObject);
+				}
+			}
 		}
 	}
 
@@ -2720,6 +3036,13 @@ public class CommerceOrderItemLocalServiceImpl
 	@Reference
 	private CPDefinitionOptionRelLocalService
 		_cpDefinitionOptionRelLocalService;
+
+	@Reference
+	private CPDefinitionOptionValueRelLocalService
+		_cpDefinitionOptionValueRelLocalService;
+
+	@Reference
+	private CPInstanceHelper _cpInstanceHelper;
 
 	@Reference
 	private CPInstanceLocalService _cpInstanceLocalService;
