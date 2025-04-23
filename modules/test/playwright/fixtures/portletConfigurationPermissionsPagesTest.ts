@@ -5,7 +5,7 @@
 
 import {test} from '@playwright/test';
 
-import {PortletConfigurationPermissionsPage} from '../pages/portlet-configuration-web/PortletConfigurationPermissionsPage';
+import {PortletConfigurationPermissionsPage} from '../pages/portlet-configuration-permissions-web/PortletConfigurationPermissionsPage';
 
 const portletConfigurationPermissionsPageTest = test.extend<{
 	portletConfigurationPermissionsPage: PortletConfigurationPermissionsPage;

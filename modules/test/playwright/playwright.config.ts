@@ -99,7 +99,7 @@ import {config as portalWebConfig} from './tests/portal-web/config';
 import {config as portalWorkflowKaleoDesignerWebConfig} from './tests/portal-workflow-kaleo-designer-web/config';
 import {config as portalWorkflowTaskWebConfig} from './tests/portal-workflow-task-web/config';
 import {config as portletConfigurationCssWebConfig} from './tests/portlet-configuration-css-web/config';
-import {config as portletConfigurationWebConfig} from './tests/portlet-configuration-web/config';
+import {config as portletConfigurationPermissionsWebConfig} from './tests/portlet-configuration-permissions-web/config';
 import {config as productNavigationProductMenuWeb} from './tests/product-navigation-product-menu-web/config';
 import {config as productNavigationUserPersonalBarWebConfig} from './tests/product-navigation-user-personal-bar-web/config';
 import {config as questionsWebConfig} from './tests/questions-web/config';
@@ -240,7 +240,7 @@ export default defineConfig({
 		portalWorkflowKaleoDesignerWebConfig,
 		portalWorkflowTaskWebConfig,
 		portletConfigurationCssWebConfig,
-		portletConfigurationWebConfig,
+		portletConfigurationPermissionsWebConfig,
 		productNavigationProductMenuWeb,
 		productNavigationUserPersonalBarWebConfig,
 		questionsWebConfig,

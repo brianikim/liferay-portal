@@ -4,8 +4,8 @@
  */
 
 export const config = {
-	name: 'portlet-configuration-web',
-	testDir: 'tests/portlet-configuration-web',
+	name: 'portlet-configuration-permissions-web',
+	testDir: 'tests/portlet-configuration-permissions-web',
 	use: {
 		testIdAttribute: 'data-qa-id',
 	},
