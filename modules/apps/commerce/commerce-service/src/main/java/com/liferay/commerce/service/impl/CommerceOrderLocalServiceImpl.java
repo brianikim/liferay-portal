@@ -324,6 +324,9 @@ public class CommerceOrderLocalServiceImpl
 		commerceOrder.setCompanyId(user.getCompanyId());
 		commerceOrder.setUserId(userId);
 		commerceOrder.setUserName(user.getFullName());
+		commerceOrder.setCommerceAccountId(commerceAccountId);
+		commerceOrder.setCommerceCurrencyCode(commerceCurrencyCode);
+		commerceOrder.setCommerceOrderTypeId(commerceOrderTypeId);
 
 		if (billingAddressId > 0) {
 			commerceOrder.setBillingAddressId(billingAddressId);
@@ -331,11 +334,6 @@ public class CommerceOrderLocalServiceImpl
 		else {
 			_setAccountDefaultBillingAddress(commerceChannel, commerceOrder);
 		}
-
-		commerceOrder.setCommerceAccountId(commerceAccountId);
-		commerceOrder.setCommerceCurrencyCode(commerceCurrencyCode);
-		commerceOrder.setCommerceOrderTypeId(commerceOrderTypeId);
-		commerceOrder.setCommerceShippingMethodId(commerceShippingMethodId);
 
 		if (shippingAddressId > 0) {
 			commerceOrder.setShippingAddressId(shippingAddressId);

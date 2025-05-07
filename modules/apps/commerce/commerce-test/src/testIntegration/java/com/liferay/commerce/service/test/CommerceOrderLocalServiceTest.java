@@ -233,9 +233,7 @@ public class CommerceOrderLocalServiceTest {
 			commerceAddress.getCommerceAddressId(),
 			commerceOrder.getBillingAddressId());
 		Assert.assertEquals(0, commerceOrder.getCommerceShippingMethodId());
-		Assert.assertEquals(
-			commerceDeliveryTerm.getCommerceTermEntryId(),
-			commerceOrder.getDeliveryCommerceTermEntryId());
+		Assert.assertEquals(0, commerceOrder.getDeliveryCommerceTermEntryId());
 		Assert.assertEquals(
 			commercePaymentTerm.getCommerceTermEntryId(),
 			commerceOrder.getPaymentCommerceTermEntryId());
