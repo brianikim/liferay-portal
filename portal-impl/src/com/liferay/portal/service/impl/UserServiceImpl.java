@@ -3524,8 +3524,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 	protected long[] checkOrganizations(long userId, long[] organizationIds)
 		throws PortalException {
 
-		long[] oldOrganizationIds = null;
-
 		PermissionChecker permissionChecker = getPermissionChecker();
 
 		if (userId != CompanyConstants.SYSTEM) {
@@ -3537,11 +3535,7 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 			List<Organization> oldOrganizations =
 				_organizationLocalService.getUserOrganizations(userId);
 
-			oldOrganizationIds = new long[oldOrganizations.size()];
-
-			for (int i = 0; i < oldOrganizations.size(); i++) {
-				Organization organization = oldOrganizations.get(i);
-
+			for (Organization organization : oldOrganizations) {
 				if (!ArrayUtil.contains(
 						organizationIds, organization.getOrganizationId()) &&
 					(!OrganizationPermissionUtil.contains(
@@ -3556,8 +3550,6 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 					organizationIds = ArrayUtil.append(
 						organizationIds, organization.getOrganizationId());
 				}
-
-				oldOrganizationIds[i] = organization.getOrganizationId();
 			}
 		}
 
@@ -3574,8 +3566,8 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 
 		for (long organizationId : organizationIds) {
 			if (OrganizationPermissionUtil.contains(
-				permissionChecker, organizationId,
-				ActionKeys.MANAGE_USERS)) {
+					permissionChecker, organizationId,
+					ActionKeys.MANAGE_USERS)) {
 
 				allowed = true;
 
@@ -3583,7 +3575,7 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 			}
 		}
 
-		if (!allowed){
+		if (!allowed) {
 			throw new PrincipalException.MustHavePermission(
 				permissionChecker, Organization.class.getName(), 0,
 				ActionKeys.MANAGE_USERS);
