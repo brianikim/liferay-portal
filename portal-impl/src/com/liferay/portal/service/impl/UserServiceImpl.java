@@ -3564,18 +3564,29 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 		// Check that the administrator has the permission to add a new
 		// organization and that the organization membership is allowed
 
+		if (!PropsValues.ORGANIZATIONS_ASSIGNMENT_STRICT ||
+			permissionChecker.isCompanyAdmin()) {
+
+			return organizationIds;
+		}
+
+		boolean allowed = false;
+
 		for (long organizationId : organizationIds) {
-			if ((oldOrganizationIds != null) &&
-				ArrayUtil.contains(oldOrganizationIds, organizationId)) {
+			if (OrganizationPermissionUtil.contains(
+				permissionChecker, organizationId,
+				ActionKeys.MANAGE_USERS)) {
 
-				continue;
+				allowed = true;
+
+				break;
 			}
+		}
 
-			Organization organization =
-				_organizationPersistence.findByPrimaryKey(organizationId);
-
-			OrganizationPermissionUtil.check(
-				permissionChecker, organization, ActionKeys.ASSIGN_MEMBERS);
+		if (!allowed){
+			throw new PrincipalException.MustHavePermission(
+				permissionChecker, Organization.class.getName(), 0,
+				ActionKeys.MANAGE_USERS);
 		}
 
 		return organizationIds;
