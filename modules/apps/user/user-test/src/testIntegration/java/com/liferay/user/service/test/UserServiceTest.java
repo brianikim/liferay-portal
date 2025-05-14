@@ -27,6 +27,7 @@ import com.liferay.portal.kernel.test.randomizerbumpers.UniqueStringRandomizerBu
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DataGuard;
 import com.liferay.portal.kernel.test.util.CompanyTestUtil;
+import com.liferay.portal.kernel.test.util.OrganizationTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.RoleTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
@@ -89,6 +90,57 @@ public class UserServiceTest {
 				message.contains(
 					"User " + user2.getUserId() +
 						" must have VIEW permission"));
+		}
+		finally {
+			PermissionThreadLocal.setPermissionChecker(
+				originalPermissionChecker);
+		}
+	}
+
+	@Test
+	public void testAddUserToOrgWithoutPermission() throws Exception {
+		PermissionChecker originalPermissionChecker =
+			PermissionThreadLocal.getPermissionChecker();
+
+		try {
+			Role role = RoleTestUtil.addRole(RoleConstants.TYPE_REGULAR);
+
+			RoleTestUtil.addResourcePermission(
+				role, User.class.getName(), ResourceConstants.SCOPE_COMPANY,
+				String.valueOf(TestPropsValues.getCompanyId()),
+				ActionKeys.UPDATE);
+			RoleTestUtil.addResourcePermission(
+				role, Organization.class.getName(),
+				ResourceConstants.SCOPE_COMPANY,
+				String.valueOf(TestPropsValues.getCompanyId()),
+				ActionKeys.ASSIGN_MEMBERS);
+
+			User user1 = UserTestUtil.addUser();
+			User user2 = UserTestUtil.addUser();
+
+			Organization organization = OrganizationTestUtil.addOrganization();
+
+			PermissionThreadLocal.setPermissionChecker(
+				PermissionCheckerFactoryUtil.create(user1));
+
+			_userLocalService.addRoleUser(role.getRoleId(), user1.getUserId());
+
+			try {
+				_userService.updateOrganizations(
+					user2.getUserId(),
+					new long[] {organization.getOrganizationId()},
+					ServiceContextTestUtil.getServiceContext());
+
+				Assert.fail();
+			}
+			catch (Exception exception) {
+				String message = exception.getMessage();
+
+				Assert.assertTrue(
+					message.contains(
+						"User " + user1.getUserId() +
+							" must have MANAGE_USERS permission"));
+			}
 		}
 		finally {
 			PermissionThreadLocal.setPermissionChecker(
