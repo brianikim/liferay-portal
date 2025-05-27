@@ -110,7 +110,7 @@ boolean shippable = BeanParamUtil.getBoolean(cpDefinition, request, "shippable",
 						}
 						%>
 
-						<aui:input ignoreRequestValue="<%= true %>" name="minOrderQuantity" type="text" value="<%= minOrderQuantity %>">
+						<aui:input ignoreRequestValue="<%= true %>" name="minOrderQuantity" type="text" value="<%= minOrderQuantity.doubleValue() %>">
 							<aui:validator name="required" />
 
 							<aui:validator errorMessage='<%= LanguageUtil.format(request, "please-enter-a-value-greater-than-x", 0) %>' name="custom">
@@ -154,7 +154,7 @@ boolean shippable = BeanParamUtil.getBoolean(cpDefinition, request, "shippable",
 						}
 						%>
 
-						<aui:input ignoreRequestValue="<%= true %>" label="low-stock-threshold" name="minStockQuantity" type="text" value="<%= minStockQuantity %>">
+						<aui:input ignoreRequestValue="<%= true %>" label="low-stock-threshold" name="minStockQuantity" type="text" value="<%= minStockQuantity.doubleValue() %>">
 							<aui:validator errorMessage='<%= LanguageUtil.format(request, "please-enter-a-value-greater-than-or-equal-to-x", 0) %>' name="custom">
 								function(val) {
 									if (Number(val) >= 0) {
@@ -175,7 +175,7 @@ boolean shippable = BeanParamUtil.getBoolean(cpDefinition, request, "shippable",
 						}
 						%>
 
-						<aui:input ignoreRequestValue="<%= true %>" name="maxOrderQuantity" type="text" value="<%= maxOrderQuantity %>">
+						<aui:input ignoreRequestValue="<%= true %>" name="maxOrderQuantity" type="text" value="<%= maxOrderQuantity.doubleValue() %>">
 							<aui:validator name="required" />
 
 							<aui:validator errorMessage='<%= LanguageUtil.format(request, "please-enter-a-value-greater-than-x", 0) %>' name="custom">
@@ -197,7 +197,7 @@ boolean shippable = BeanParamUtil.getBoolean(cpDefinition, request, "shippable",
 						}
 						%>
 
-						<aui:input ignoreRequestValue="<%= true %>" name="multipleOrderQuantity" type="text" value="<%= multipleOrderQuantity %>">
+						<aui:input ignoreRequestValue="<%= true %>" name="multipleOrderQuantity" type="text" value="<%= multipleOrderQuantity.doubleValue() %>">
 							<aui:validator name="required" />
 
 							<aui:validator errorMessage='<%= LanguageUtil.format(request, "please-enter-a-value-greater-than-x", 0) %>' name="custom">
