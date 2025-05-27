@@ -154,7 +154,7 @@ boolean shippable = BeanParamUtil.getBoolean(cpDefinition, request, "shippable",
 						}
 						%>
 
-						<aui:input ignoreRequestValue="<%= true %>" label="low-stock-threshold" name="minStockQuantity" type="text" value="<%= minStockQuantity.doubleValue() %>">
+						<aui:input data-qa-id="minStockQuantityInput" ignoreRequestValue="<%= true %>" label="low-stock-threshold" name="minStockQuantity" type="text" value="<%= minStockQuantity.doubleValue() %>">
 							<aui:validator errorMessage='<%= LanguageUtil.format(request, "please-enter-a-value-greater-than-or-equal-to-x", 0) %>' name="custom">
 								function(val) {
 									if (Number(val) >= 0) {
