@@ -38,6 +38,7 @@ const ProductOptionUpload = ({
 					if (skuOption.skuOptionKey === productOption.key) {
 						return {
 							key: productOption.key,
+							required: productOption.required,
 							skuOptionKey: productOption.key,
 							skuOptionName: productOption.name,
 							value: [value],
@@ -52,6 +53,7 @@ const ProductOptionUpload = ({
 					...currentSkuOptions,
 					{
 						key: productOption.key,
+						required: productOption.required,
 						skuOptionKey: productOption.key,
 						skuOptionName: productOption.name,
 						value: [value],
@@ -69,6 +71,7 @@ const ProductOptionUpload = ({
 			namespace,
 			productOption.key,
 			productOption.name,
+			productOption.required,
 			skuOptionsAtomState,
 			setSkuOptionsAtomState,
 		]
