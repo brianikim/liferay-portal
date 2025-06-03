@@ -9,6 +9,8 @@ import com.liferay.portal.kernel.exception.ContactNameException;
 import com.liferay.portal.kernel.exception.NoSuchUserException;
 import com.liferay.portal.kernel.exception.UserEmailAddressException;
 import com.liferay.portal.kernel.exception.UserScreenNameException;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Contact;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
@@ -27,6 +29,7 @@ import com.liferay.users.admin.constants.UsersAdminPortletKeys;
 import jakarta.portlet.ActionRequest;
 import jakarta.portlet.ActionResponse;
 
+import java.util.Arrays;
 import java.util.Calendar;
 
 import org.osgi.service.component.annotations.Component;
@@ -71,6 +74,10 @@ public class EditUserOrganizationsMVCActionCommand
 			serviceContext.setAssetCategoryIds(null);
 			serviceContext.setAssetTagNames(null);
 
+			_log.error(
+				"\nUpdateUser is being called with these organizationIds: " +
+					Arrays.toString(organizationIds));
+
 			_userService.updateUser(
 				user.getUserId(), user.getPassword(), null, null,
 				user.isPasswordReset(), null, null, user.getScreenName(),
@@ -86,6 +93,10 @@ public class EditUserOrganizationsMVCActionCommand
 				organizationIds, user.getRoleIds(),
 				UsersAdminUtil.getUserGroupRoles(actionRequest),
 				user.getUserGroupIds(), serviceContext);
+
+			_log.error(
+				"\nUpdateUser was successful with these organizationIds: " +
+					Arrays.toString(organizationIds));
 		}
 		catch (Exception exception) {
 			if (exception instanceof ContactNameException ||
@@ -96,19 +107,34 @@ public class EditUserOrganizationsMVCActionCommand
 
 				SessionErrors.add(actionRequest, exception.getClass());
 
+				_log.error(
+					"\nUpdateUser was not successful with the following exception: " +
+						exception);
+
 				actionResponse.setRenderParameter("mvcPath", "/error.jsp");
 			}
 			else if (exception instanceof MembershipPolicyException) {
 				SessionErrors.add(
 					actionRequest, exception.getClass(), exception);
 
+				_log.error(
+					"\nUpdateUser was not successful with the following MembershipPolicyException: " +
+						exception);
+
 				actionResponse.setRenderParameter("mvcPath", "/edit_user.jsp");
 			}
 			else {
+				_log.error(
+					"\nUpdateUser was not successful with the following exception: " +
+						exception);
+
 				throw exception;
 			}
 		}
 	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		EditUserOrganizationsMVCActionCommand.class);
 
 	@Reference
 	private Portal _portal;

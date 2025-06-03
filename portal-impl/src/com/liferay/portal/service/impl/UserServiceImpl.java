@@ -81,6 +81,7 @@ import com.liferay.portlet.admin.util.OmniadminUtil;
 import com.liferay.portlet.usersadmin.util.UsersAdminUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
@@ -2566,8 +2567,14 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 			ServiceContext serviceContext)
 		throws PortalException {
 
+		_log.error("\nUserPermissionUtil.check being called with these organizationIds: " +
+				   (Arrays.toString(organizationIds)));
+
 		UserPermissionUtil.check(
 			getPermissionChecker(), userId, organizationIds, ActionKeys.UPDATE);
+
+		_log.error("\nUserPermissionUtil.check was successful with these organizationIds: " +
+				   (Arrays.toString(organizationIds)));
 
 		User user = userPersistence.findByPrimaryKey(userId);
 
@@ -2652,7 +2659,13 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 
 			removeOrganizationIds = ListUtil.fromArray(oldOrganizationIds);
 
+			_log.error("\ncheckOrganizations being called with these organizationIds: " +
+					   (Arrays.toString(organizationIds)));
+
 			organizationIds = checkOrganizations(userId, organizationIds);
+
+			_log.error("\ncheckOrganizations was successful with these organizationIds: " +
+					   (Arrays.toString(organizationIds)));
 
 			for (long organizationId : organizationIds) {
 				if (ArrayUtil.contains(oldOrganizationIds, organizationId)) {
@@ -2666,10 +2679,20 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 			if (!addOrganizationIds.isEmpty() ||
 				!removeOrganizationIds.isEmpty()) {
 
+				_log.error("\ncheckMembership being called with these addOrganizationIds: " +
+						   (addOrganizationIds));
+				_log.error("\ncheckMembership being called with these removeOrganizationIds: " +
+						   (removeOrganizationIds));
+
 				OrganizationMembershipPolicyUtil.checkMembership(
 					new long[] {userId},
 					ArrayUtil.toLongArray(addOrganizationIds),
 					ArrayUtil.toLongArray(removeOrganizationIds));
+
+				_log.error("\ncheckMembership was successful with these addOrganizationIds: " +
+						   (addOrganizationIds));
+				_log.error("\ncheckMembership was successful with these removeOrganizationIds: " +
+						   (removeOrganizationIds));
 			}
 		}
 
@@ -2814,10 +2837,21 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 		}
 
 		if (!addOrganizationIds.isEmpty() || !removeOrganizationIds.isEmpty()) {
+
+			_log.error("\npropagateMembership being called with these addOrganizationIds: " +
+					   (addOrganizationIds));
+			_log.error("\npropagateMembership being called with these removeOrganizationIds: " +
+					   (removeOrganizationIds));
+
 			OrganizationMembershipPolicyUtil.propagateMembership(
 				new long[] {user.getUserId()},
 				ArrayUtil.toLongArray(addOrganizationIds),
 				ArrayUtil.toLongArray(removeOrganizationIds));
+
+			_log.error("\npropagateMembership was successful with these addOrganizationIds: " +
+					   (addOrganizationIds));
+			_log.error("\npropagateMembership was successful with these removeOrganizationIds: " +
+					   (removeOrganizationIds));
 		}
 
 		if (!addRoleIds.isEmpty() || !removeRoleIds.isEmpty()) {
