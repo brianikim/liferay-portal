@@ -126,7 +126,7 @@ function AddToCartButton({
 					notAllowed ||
 					(cartAtomState.updating && !isTriggeringCartUpdate),
 			})}
-			disabled={buttonDisabled}
+			disabled={buttonDisabled || cartAtomState.updating}
 			displayType="primary"
 			monospaced={settings.iconOnly && settings.inline}
 			onClick={async (event) => {
