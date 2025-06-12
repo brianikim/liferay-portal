@@ -62,6 +62,9 @@ public class UserFinderImpl extends UserFinderBaseImpl implements UserFinder {
 	public static final String COUNT_BY_USER =
 		UserFinder.class.getName() + ".countByUser";
 
+	public static final String FIND_BY_INHERITED_ROLE_USERS =
+		UserFinder.class.getName() + ".findByInheritedRoleUsers";
+
 	public static final String FIND_BY_NO_ANNOUNCEMENTS_DELIVERIES =
 		UserFinder.class.getName() + ".findByNoAnnouncementsDeliveries";
 
@@ -149,6 +152,27 @@ public class UserFinderImpl extends UserFinderBaseImpl implements UserFinder {
 
 	public static final String JOIN_BY_SOCIAL_RELATION_TYPE =
 		UserFinder.class.getName() + ".joinBySocialRelationType";
+
+	public static final String SELECT_BY_GROUPS_ORGS =
+		UserFinder.class.getName() + ".selectByGroupsOrgs";
+
+	public static final String SELECT_BY_GROUPS_USER_GROUPS =
+		UserFinder.class.getName() + ".selectByGroupsUserGroups";
+
+	public static final String SELECT_BY_USERS_GROUPS =
+		UserFinder.class.getName() + ".selectByUsersGroups";
+
+	public static final String SELECT_BY_USERS_ORGS =
+		UserFinder.class.getName() + ".selectByUsersOrgs";
+
+	public static final String SELECT_BY_USERS_ORGS_TREE =
+		UserFinder.class.getName() + ".selectByUsersOrgsTree";
+
+	public static final String SELECT_BY_USERS_ROLES =
+		UserFinder.class.getName() + ".selectByUsersRoles";
+
+	public static final String SELECT_BY_USERS_USER_GROUPS =
+		UserFinder.class.getName() + ".selectByUsersUserGroups";
 
 	@Override
 	public int countByKeywords(
@@ -451,6 +475,30 @@ public class UserFinderImpl extends UserFinderBaseImpl implements UserFinder {
 	}
 
 	@Override
+	public List<User> findByInheritedRoleUsers(
+		long companyId, int status, LinkedHashMap<String, Object> params,
+		int start, int end, OrderByComparator<User> orderByComparator) {
+
+		try {
+			List<Long> userIds = doFindByInheritedRoleUsers(
+				companyId, status, params, start, end, orderByComparator);
+
+			List<User> users = new ArrayList<>(userIds.size());
+
+			for (Long userId : userIds) {
+				User user = UserUtil.findByPrimaryKey(userId);
+
+				users.add(user);
+			}
+
+			return users;
+		}
+		catch (Exception exception) {
+			throw new SystemException(exception);
+		}
+	}
+
+	@Override
 	public List<User> findByKeywords(
 		long companyId, String keywords, int status,
 		LinkedHashMap<String, Object> params, int start, int end,
@@ -705,6 +753,80 @@ public class UserFinderImpl extends UserFinderBaseImpl implements UserFinder {
 		}
 		catch (Exception exception) {
 			throw new SystemException(exception);
+		}
+	}
+
+	protected List<Long> doFindByInheritedRoleUsers(
+		long companyId, int status, LinkedHashMap<String, Object> params,
+		int start, int end, OrderByComparator<User> orderByComparator) {
+
+		List<LinkedHashMap<String, Object>> paramsList = getParamsList(params);
+
+		Session session = null;
+
+		try {
+			session = openSession();
+
+			String sql = CustomSQLUtil.get(FIND_BY_INHERITED_ROLE_USERS);
+
+			sql = StringUtil.replace(
+				sql, "[$COLUMN_NAMES$]", getColumnNames(orderByComparator));
+
+			if (status == WorkflowConstants.STATUS_ANY) {
+				sql = StringUtil.removeSubstring(sql, _STATUS_SQL);
+			}
+
+			int initialCapacity = (paramsList.size() * 3) - 2;
+
+			if (orderByComparator != null) {
+				initialCapacity += 2;
+			}
+
+			if (initialCapacity > 0) {
+				StringBundler sb = new StringBundler(initialCapacity);
+
+				for (int i = 0; i < paramsList.size(); i++) {
+					if (i == 0) {
+						sb.append(getSelectAndWhere(paramsList.get(i)));
+					}
+					else {
+						sb.append(" UNION ALL ");
+						sb.append(getSelectAndWhere(paramsList.get(i)));
+					}
+				}
+
+				if (orderByComparator != null) {
+					sb.append(" ORDER BY ");
+					sb.append(orderByComparator.toString());
+				}
+
+				sql = StringUtil.replace(sql, "[$SELECT$]", sb.toString());
+			}
+
+			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
+
+			sqlQuery.addScalar("userId", Type.LONG);
+
+			QueryPos queryPos = QueryPos.getInstance(sqlQuery);
+
+			for (LinkedHashMap<String, Object> paramsMap : paramsList) {
+				setJoin(queryPos, paramsMap);
+			}
+
+			queryPos.add(companyId);
+
+			if (status != WorkflowConstants.STATUS_ANY) {
+				queryPos.add(status);
+			}
+
+			return (List<Long>)QueryUtil.list(
+				sqlQuery, getDialect(), start, end);
+		}
+		catch (Exception exception) {
+			throw new SystemException(exception);
+		}
+		finally {
+			closeSession(session);
 		}
 	}
 
@@ -1198,6 +1320,216 @@ public class UserFinderImpl extends UserFinderBaseImpl implements UserFinder {
 		}
 
 		return paramsList;
+	}
+
+	protected String getSelectAndWhere(LinkedHashMap<String, Object> params) {
+		if ((params == null) || params.isEmpty()) {
+			return StringPool.BLANK;
+		}
+
+		StringBundler sb = new StringBundler(params.size());
+
+		for (Map.Entry<String, Object> entry : params.entrySet()) {
+			String key = entry.getKey();
+
+			if (key.equals("expandoAttributes") || key.equals("noLDAPUsers")) {
+				continue;
+			}
+
+			Object value = entry.getValue();
+
+			if (value != null) {
+				sb.append(getSelectAndWhere(key, value));
+			}
+		}
+
+		return sb.toString();
+	}
+
+	protected String getSelectAndWhere(String key, Object value) {
+		String select = StringPool.BLANK;
+
+		if (key.equals("groupsOrgs")) {
+			Long[] groupIds = (Long[])value;
+
+			select = CustomSQLUtil.get(SELECT_BY_GROUPS_ORGS);
+
+			if (groupIds.length > 1) {
+				StringBundler sb = new StringBundler((groupIds.length * 2) + 1);
+
+				sb.append("Groups_Orgs.groupId IN (");
+
+				for (long groupId : groupIds) {
+					sb.append(groupId);
+					sb.append(StringPool.COMMA);
+				}
+
+				sb.setIndex(sb.index() - 1);
+
+				sb.append(StringPool.CLOSE_PARENTHESIS);
+
+				select = StringUtil.replace(
+					select, "Groups_Org	s.groupId = ?", sb.toString());
+			}
+			else {
+				select = StringUtil.replace(
+					select, "Groups_Orgs.groupId = ?",
+					"Groups_Orgs.groupId = " + groupIds[0]);
+			}
+		}
+		else if (key.equals("groupsUserGroups")) {
+			Long[] groupIds = (Long[])value;
+
+			select = CustomSQLUtil.get(SELECT_BY_GROUPS_USER_GROUPS);
+
+			if (groupIds.length > 1) {
+				StringBundler sb = new StringBundler((groupIds.length * 2) + 1);
+
+				sb.append("Groups_UserGroups.groupId IN (");
+
+				for (long groupId : groupIds) {
+					sb.append(groupId);
+					sb.append(StringPool.COMMA);
+				}
+
+				sb.setIndex(sb.index() - 1);
+
+				sb.append(StringPool.CLOSE_PARENTHESIS);
+
+				select = StringUtil.replace(
+					select, "Groups_UserGroups.groupId = ?", sb.toString());
+			}
+			else {
+				select = StringUtil.replace(
+					select, "Groups_UserGroups.groupId = ?",
+					"Groups_UserGroups.groupId = " + groupIds[0]);
+			}
+		}
+		else if (key.equals("usersGroups")) {
+			Long[] groupIds = (Long[])value;
+
+			select = CustomSQLUtil.get(SELECT_BY_USERS_GROUPS);
+
+			if (groupIds.length > 1) {
+				StringBundler sb = new StringBundler((groupIds.length * 2) + 1);
+
+				sb.append("Users_Groups.groupId IN (");
+
+				for (long groupId : groupIds) {
+					sb.append(groupId);
+					sb.append(StringPool.COMMA);
+				}
+
+				sb.setIndex(sb.index() - 1);
+
+				sb.append(StringPool.CLOSE_PARENTHESIS);
+
+				select = StringUtil.replace(
+					select, "Users_Groups.groupId = ?", sb.toString());
+			}
+			else {
+				select = StringUtil.replace(
+					select, "Users_Groups.groupId = ?",
+					"Users_Groups.groupId = " + groupIds[0]);
+			}
+		}
+		else if (key.equals("usersOrgs")) {
+			Long[] organizationIds = (Long[])value;
+
+			select = CustomSQLUtil.get(SELECT_BY_USERS_ORGS);
+
+			if (organizationIds.length > 1) {
+				StringBundler sb = new StringBundler(
+					(organizationIds.length * 2) + 1);
+
+				sb.append("Users_Orgs.organizationId IN (");
+
+				for (long organizationId : organizationIds) {
+					sb.append(organizationId);
+					sb.append(StringPool.COMMA);
+				}
+
+				sb.setIndex(sb.index() - 1);
+
+				sb.append(StringPool.CLOSE_PARENTHESIS);
+
+				select = StringUtil.replace(
+					select, "Users_Orgs.organizationId = ?", sb.toString());
+			}
+			else {
+				select = StringUtil.replace(
+					select, "Users_Orgs.organizationId = ?",
+					"Users_Orgs.organizationId = " + organizationIds[0]);
+			}
+		}
+		else if (key.equals("usersOrgsTree")) {
+			List<Organization> organizationsTree = (List<Organization>)value;
+
+			int size = organizationsTree.size();
+
+			select = CustomSQLUtil.get(SELECT_BY_USERS_ORGS_TREE);
+
+			if (size > 0) {
+				StringBundler sb = new StringBundler((size * 4) + 1);
+
+				sb.append("WHERE (");
+
+				for (Organization organization : organizationsTree) {
+					sb.append("(Organization_.treePath LIKE '%/");
+					sb.append(organization.getOrganizationId());
+					sb.append("/%') ");
+					sb.append("OR ");
+				}
+
+				sb.setIndex(sb.index() - 1);
+
+				sb.append(StringPool.CLOSE_PARENTHESIS);
+
+				select = StringBundler.concat(select, StringPool.BLANK, sb);
+			}
+			else {
+				select = select + " WHERE Organization_.treePath LIKE '%/ /%'";
+			}
+		}
+		else if (key.equals("usersRoles")) {
+			select = CustomSQLUtil.get(SELECT_BY_USERS_ROLES);
+		}
+		else if (key.equals("usersUserGroups")) {
+			Long[] userGroupIds = (Long[])value;
+
+			select = CustomSQLUtil.get(SELECT_BY_USERS_USER_GROUPS);
+
+			if (userGroupIds.length > 1) {
+				StringBundler sb = new StringBundler(
+					(userGroupIds.length * 2) + 1);
+
+				sb.append("Users_UserGroups.userGroupId IN (");
+
+				for (long userGroupId : userGroupIds) {
+					sb.append(userGroupId);
+					sb.append(StringPool.COMMA);
+				}
+
+				sb.setIndex(sb.index() - 1);
+
+				sb.append(StringPool.CLOSE_PARENTHESIS);
+
+				select = StringUtil.replace(
+					select, "Users_UserGroups.userGroupId = ?", sb.toString());
+			}
+			else {
+				select = StringUtil.replace(
+					select, "Users_UserGroups.userGroupId = ?",
+					"Users_UserGroups.userGroupId = " + userGroupIds[0]);
+			}
+		}
+		else if (value instanceof CustomSQLParam) {
+			CustomSQLParam customSQLParam = (CustomSQLParam)value;
+
+			select = customSQLParam.getSQL();
+		}
+
+		return select;
 	}
 
 	protected String getWhere(LinkedHashMap<String, Object> params) {

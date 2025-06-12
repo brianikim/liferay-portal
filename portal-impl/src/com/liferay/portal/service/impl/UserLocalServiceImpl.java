@@ -2513,8 +2513,8 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 
 		Role role = _rolePersistence.findByPrimaryKey(roleId);
 
-		return search(
-			role.getCompanyId(), null, WorkflowConstants.STATUS_APPROVED,
+		return userFinder.findByInheritedRoleUsers(
+			role.getCompanyId(), WorkflowConstants.STATUS_APPROVED,
 			LinkedHashMapBuilder.<String, Object>put(
 				"inherit", Boolean.TRUE
 			).put(

@@ -45,6 +45,13 @@ public interface UserFinder {
 		com.liferay.portal.kernel.util.OrderByComparator
 			<com.liferay.portal.kernel.model.User> orderByComparator);
 
+	public java.util.List<com.liferay.portal.kernel.model.User> findByInheritedRoleUsers(
+		long companyId, int status,
+		java.util.LinkedHashMap<String, Object> params, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator
+			<com.liferay.portal.kernel.model.User> orderByComparator);
+
+
 	public java.util.List<com.liferay.portal.kernel.model.User>
 		findByNoAnnouncementsDeliveries(String type);
 
