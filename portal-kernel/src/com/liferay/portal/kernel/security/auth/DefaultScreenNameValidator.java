@@ -41,7 +41,8 @@ public class DefaultScreenNameValidator implements ScreenNameValidator {
 
 	@Override
 	public boolean validate(long companyId, String screenName) {
-		if (Validator.isEmailAddress(screenName) ||
+		if (screenName.length() >= 70 ||
+			Validator.isEmailAddress(screenName) ||
 			StringUtil.equalsIgnoreCase(screenName, POSTFIX) ||
 			hasInvalidChars(screenName)) {
 
