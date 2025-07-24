@@ -474,6 +474,50 @@ public class CommerceDiscountRelServiceHttp {
 		}
 	}
 
+	public static com.liferay.commerce.discount.model.CommerceDiscountRel
+			fetchCommerceDiscountRel(
+				HttpPrincipal httpPrincipal, long commerceDiscountId,
+				String className, long classPK)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		try {
+			MethodKey methodKey = new MethodKey(
+				CommerceDiscountRelServiceUtil.class,
+				"fetchCommerceDiscountRel",
+				_fetchCommerceDiscountRelParameterTypes10);
+
+			MethodHandler methodHandler = new MethodHandler(
+				methodKey, commerceDiscountId, className, classPK);
+
+			Object returnObj = null;
+
+			try {
+				returnObj = TunnelUtil.invoke(httpPrincipal, methodHandler);
+			}
+			catch (Exception exception) {
+				if (exception instanceof
+						com.liferay.portal.kernel.exception.PortalException) {
+
+					throw (com.liferay.portal.kernel.exception.PortalException)
+						exception;
+				}
+
+				throw new com.liferay.portal.kernel.exception.SystemException(
+					exception);
+			}
+
+			return (com.liferay.commerce.discount.model.CommerceDiscountRel)
+				returnObj;
+		}
+		catch (com.liferay.portal.kernel.exception.SystemException
+					systemException) {
+
+			_log.error(systemException, systemException);
+
+			throw systemException;
+		}
+	}
+
 	public static java.util.List
 		<com.liferay.commerce.discount.model.CommerceDiscountRel>
 				getCommercePricingClassesByCommerceDiscountId(
@@ -485,7 +529,7 @@ public class CommerceDiscountRelServiceHttp {
 			MethodKey methodKey = new MethodKey(
 				CommerceDiscountRelServiceUtil.class,
 				"getCommercePricingClassesByCommerceDiscountId",
-				_getCommercePricingClassesByCommerceDiscountIdParameterTypes10);
+				_getCommercePricingClassesByCommerceDiscountIdParameterTypes11);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, commerceDiscountId, title, start, end);
@@ -528,7 +572,7 @@ public class CommerceDiscountRelServiceHttp {
 			MethodKey methodKey = new MethodKey(
 				CommerceDiscountRelServiceUtil.class,
 				"getCommercePricingClassesByCommerceDiscountIdCount",
-				_getCommercePricingClassesByCommerceDiscountIdCountParameterTypes11);
+				_getCommercePricingClassesByCommerceDiscountIdCountParameterTypes12);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, commerceDiscountId, title);
@@ -572,7 +616,7 @@ public class CommerceDiscountRelServiceHttp {
 			MethodKey methodKey = new MethodKey(
 				CommerceDiscountRelServiceUtil.class,
 				"getCPDefinitionsByCommerceDiscountId",
-				_getCPDefinitionsByCommerceDiscountIdParameterTypes12);
+				_getCPDefinitionsByCommerceDiscountIdParameterTypes13);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, commerceDiscountId, name, languageId, start, end);
@@ -616,7 +660,7 @@ public class CommerceDiscountRelServiceHttp {
 			MethodKey methodKey = new MethodKey(
 				CommerceDiscountRelServiceUtil.class,
 				"getCPDefinitionsByCommerceDiscountIdCount",
-				_getCPDefinitionsByCommerceDiscountIdCountParameterTypes13);
+				_getCPDefinitionsByCommerceDiscountIdCountParameterTypes14);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, commerceDiscountId, name, languageId);
@@ -660,7 +704,7 @@ public class CommerceDiscountRelServiceHttp {
 			MethodKey methodKey = new MethodKey(
 				CommerceDiscountRelServiceUtil.class,
 				"getCPInstancesByCommerceDiscountId",
-				_getCPInstancesByCommerceDiscountIdParameterTypes14);
+				_getCPInstancesByCommerceDiscountIdParameterTypes15);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, commerceDiscountId, sku, start, end);
@@ -703,7 +747,7 @@ public class CommerceDiscountRelServiceHttp {
 			MethodKey methodKey = new MethodKey(
 				CommerceDiscountRelServiceUtil.class,
 				"getCPInstancesByCommerceDiscountIdCount",
-				_getCPInstancesByCommerceDiscountIdCountParameterTypes15);
+				_getCPInstancesByCommerceDiscountIdCountParameterTypes16);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, commerceDiscountId, sku);
@@ -773,25 +817,27 @@ public class CommerceDiscountRelServiceHttp {
 		_getCommerceDiscountRelsCountParameterTypes9 = new Class[] {
 			long.class, String.class
 		};
+	private static final Class<?>[] _fetchCommerceDiscountRelParameterTypes10 =
+		new Class[] {long.class, String.class, long.class};
 	private static final Class<?>[]
-		_getCommercePricingClassesByCommerceDiscountIdParameterTypes10 =
+		_getCommercePricingClassesByCommerceDiscountIdParameterTypes11 =
 			new Class[] {long.class, String.class, int.class, int.class};
 	private static final Class<?>[]
-		_getCommercePricingClassesByCommerceDiscountIdCountParameterTypes11 =
+		_getCommercePricingClassesByCommerceDiscountIdCountParameterTypes12 =
 			new Class[] {long.class, String.class};
 	private static final Class<?>[]
-		_getCPDefinitionsByCommerceDiscountIdParameterTypes12 = new Class[] {
+		_getCPDefinitionsByCommerceDiscountIdParameterTypes13 = new Class[] {
 			long.class, String.class, String.class, int.class, int.class
 		};
 	private static final Class<?>[]
-		_getCPDefinitionsByCommerceDiscountIdCountParameterTypes13 =
+		_getCPDefinitionsByCommerceDiscountIdCountParameterTypes14 =
 			new Class[] {long.class, String.class, String.class};
 	private static final Class<?>[]
-		_getCPInstancesByCommerceDiscountIdParameterTypes14 = new Class[] {
+		_getCPInstancesByCommerceDiscountIdParameterTypes15 = new Class[] {
 			long.class, String.class, int.class, int.class
 		};
 	private static final Class<?>[]
-		_getCPInstancesByCommerceDiscountIdCountParameterTypes15 = new Class[] {
+		_getCPInstancesByCommerceDiscountIdCountParameterTypes16 = new Class[] {
 			long.class, String.class
 		};
 

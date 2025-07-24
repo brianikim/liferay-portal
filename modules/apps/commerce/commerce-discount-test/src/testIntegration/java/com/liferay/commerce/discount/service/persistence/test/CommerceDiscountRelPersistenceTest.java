@@ -193,6 +193,15 @@ public class CommerceDiscountRelPersistenceTest {
 	}
 
 	@Test
+	public void testCountByCD_CN_CPK() throws Exception {
+		_persistence.countByCD_CN_CPK(
+			RandomTestUtil.nextLong(), RandomTestUtil.nextLong(),
+			RandomTestUtil.nextLong());
+
+		_persistence.countByCD_CN_CPK(0L, 0L, 0L);
+	}
+
+	@Test
 	public void testCountByCN_CPK() throws Exception {
 		_persistence.countByCN_CPK(
 			RandomTestUtil.nextLong(), RandomTestUtil.nextLong());
