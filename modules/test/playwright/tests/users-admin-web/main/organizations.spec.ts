@@ -262,3 +262,23 @@ test(
 		).toBeVisible();
 	}
 );
+
+test(
+	'Country and region should not be required for organization.',
+	{tag: '@LPD-63206'},
+	async ({editOrganizationPage, page, usersAndOrganizationsPage}) => {
+		await page.on('dialog', (dialog) => dialog.accept());
+
+		await usersAndOrganizationsPage.goToOrganizations();
+
+		await usersAndOrganizationsPage.addOrganizationButton.click();
+
+		await expect(editOrganizationPage.countrySelect).not.toHaveAttribute(
+			'required'
+		);
+
+		await expect(editOrganizationPage.regionSelect).not.toHaveAttribute(
+			'required'
+		);
+	}
+);
