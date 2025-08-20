@@ -264,11 +264,9 @@ test(
 );
 
 test(
-	'Country and region should not be required for organization.',
+	'Country and region should not be required for a default organization.',
 	{tag: '@LPD-63206'},
-	async ({editOrganizationPage, page, usersAndOrganizationsPage}) => {
-		await page.on('dialog', (dialog) => dialog.accept());
-
+	async ({editOrganizationPage, usersAndOrganizationsPage}) => {
 		await usersAndOrganizationsPage.goToOrganizations();
 
 		await usersAndOrganizationsPage.addOrganizationButton.click();
@@ -276,7 +274,6 @@ test(
 		await expect(editOrganizationPage.countrySelect).not.toHaveAttribute(
 			'required'
 		);
-
 		await expect(editOrganizationPage.regionSelect).not.toHaveAttribute(
 			'required'
 		);
