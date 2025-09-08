@@ -7,6 +7,7 @@ package com.liferay.commerce.internal.order;
 
 import com.liferay.account.constants.AccountConstants;
 import com.liferay.account.model.AccountEntry;
+import com.liferay.account.role.AccountRolePermissionThreadLocal;
 import com.liferay.account.service.AccountEntryService;
 import com.liferay.asset.display.page.util.AssetDisplayPageUtil;
 import com.liferay.commerce.configuration.CommerceOrderCheckoutConfiguration;
@@ -737,6 +738,9 @@ public class CommerceOrderHttpHelperImpl implements CommerceOrderHttpHelper {
 			commerceOrder.getCommerceAccountId());
 
 		if (accountEntry != null) {
+			AccountRolePermissionThreadLocal.setAccountEntryIdWithSafeCloseable(
+				0);
+
 			_commerceAccountHelper.setCurrentCommerceAccount(
 				httpServletRequest, commerceOrder.getGroupId(),
 				accountEntry.getAccountEntryId());
