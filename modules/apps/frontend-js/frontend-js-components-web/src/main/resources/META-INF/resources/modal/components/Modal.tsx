@@ -62,6 +62,7 @@ export interface ModalProps {
 		onEvent: EventHandler;
 	}[];
 	disableAutoClose?: boolean;
+	disableButtonsUntilContentLoad?: boolean;
 	disableHeader?: boolean;
 	footerCssClass?: string;
 	headerCssClass?: string;
@@ -94,6 +95,7 @@ export default function Modal({
 	contentComponent: ContentComponent,
 	customEvents,
 	disableAutoClose,
+	disableButtonsUntilContentLoad,
 	disableHeader,
 	footerCssClass,
 	headerCssClass,
@@ -112,6 +114,7 @@ export default function Modal({
 	zIndex,
 }: ModalProps) {
 	const [loading, setLoading] = useState(true);
+	const [disableButtons, setDisableButtons] = useState(false);
 
 	const {observer, onOpenChange, open} = useModal({
 
@@ -122,6 +125,24 @@ export default function Modal({
 	useEffect(() => {
 		onOpenChange(true);
 	}, [onOpenChange]);
+
+	useEffect(() => {
+		if (!disableButtonsUntilContentLoad) {
+			return;
+		}
+
+		setDisableButtons(true);
+
+		const onIframeLoad = () => {
+			setDisableButtons(false);
+		};
+
+		Liferay.on('modalIframeLoaded', onIframeLoad);
+
+		return () => {
+			Liferay.detach('modalIframeLoaded', onIframeLoad);
+		};
+	}, [disableButtonsUntilContentLoad]);
 
 	const eventHandlersRef = useRef<any[]>([]);
 
@@ -392,6 +413,9 @@ export default function Modal({
 													index
 												) => (
 													<ClayButton
+														disabled={
+															disableButtons
+														}
 														displayType={
 															displayType
 														}
