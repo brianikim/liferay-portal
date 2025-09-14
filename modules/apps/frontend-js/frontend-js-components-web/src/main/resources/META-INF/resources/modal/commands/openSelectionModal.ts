@@ -13,6 +13,7 @@ export interface OpenSelectionModalProps<T> {
 	buttonCancelLabel?: string;
 	containerProps?: {};
 	customSelectEvent?: boolean;
+	disableButtonsUntilContentLoad?: boolean;
 	getSelectedItemsOnly?: boolean;
 	height?: string;
 	id?: string;
@@ -49,6 +50,7 @@ export default function openSelectionModal<
 	buttonCancelLabel = Liferay.Language.get('cancel'),
 	containerProps,
 	customSelectEvent = false,
+	disableButtonsUntilContentLoad = false,
 	getSelectedItemsOnly = true,
 	height,
 	id,
@@ -184,6 +186,7 @@ export default function openSelectionModal<
 				]
 			: undefined,
 		containerProps,
+		disableButtonsUntilContentLoad,
 		height,
 		id: id || selectEventName,
 		iframeBodyCssClass,

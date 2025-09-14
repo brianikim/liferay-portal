@@ -156,6 +156,7 @@ currentURLObj.setParameter("historyKey", liferayPortletResponse.getNamespace() +
 		if (selectOrganizationLink) {
 			selectOrganizationLink.addEventListener('click', (event) => {
 				Liferay.Util.openSelectionModal({
+					disableButtonsUntilContentLoad: true,
 					multiple: true,
 					onSelect(data) {
 						if (data.value && data.value.length) {
