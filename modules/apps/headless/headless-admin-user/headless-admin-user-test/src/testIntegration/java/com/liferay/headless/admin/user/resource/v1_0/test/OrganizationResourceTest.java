@@ -424,7 +424,7 @@ public class OrganizationResourceTest extends BaseOrganizationResourceTestCase {
 
 		_testPostOrganizationBatch();
 		_testPostOrganizationWithCustomFields();
-		_testPostOrganizationWithCommentsOverMaximumLength();
+		_testPostOrganizationWithCommentOverMaximumLength();
 		_testPostOrganizationWithNameOverMaximumLength();
 		_testPostOrganizationWithImageExternalReferenceCode();
 	}
@@ -1534,7 +1534,7 @@ public class OrganizationResourceTest extends BaseOrganizationResourceTestCase {
 			WorkflowConstants.STATUS_EMPTY, assetCategory3.getStatus());
 	}
 
-	private void _testPostOrganizationWithCommentsOverMaximumLength()
+	private void _testPostOrganizationWithCommentOverMaximumLength()
 		throws Exception {
 
 		Organization organization = randomOrganization();
