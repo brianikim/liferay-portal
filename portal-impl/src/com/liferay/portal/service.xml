@@ -328,6 +328,25 @@
 			<finder-column name="active" />
 			<finder-column name="shippingAllowed" />
 		</finder>
+		<finder name="C_A_B_G" return-type="Collection">
+			<finder-column name="countryId" />
+			<finder-column name="active" />
+			<finder-column name="billingAllowed" />
+			<finder-column name="groupFilterEnabled" />
+		</finder>
+		<finder name="C_A_G_S" return-type="Collection">
+			<finder-column name="countryId" />
+			<finder-column name="active" />
+			<finder-column name="groupFilterEnabled" />
+			<finder-column name="shippingAllowed" />
+		</finder>
+		<finder name="C_A_B_G_S" return-type="Collection">
+			<finder-column name="countryId" />
+			<finder-column name="active" />
+			<finder-column name="billingAllowed" />
+			<finder-column name="groupFilterEnabled" />
+			<finder-column name="shippingAllowed" />
+		</finder>
 	</entity>
 	<entity change-tracking-enabled="true" external-reference-code="company" local-service="true" name="EmailAddress" remote-service="true" uuid="true">
 
