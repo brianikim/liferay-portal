@@ -21,6 +21,7 @@ import com.liferay.commerce.product.service.CommerceChannelRelLocalService;
 import com.liferay.commerce.service.base.CommerceAddressLocalServiceBaseImpl;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.sql.dsl.DSLQueryFactoryUtil;
+import com.liferay.petra.sql.dsl.Table;
 import com.liferay.petra.sql.dsl.expression.Predicate;
 import com.liferay.petra.sql.dsl.query.FromStep;
 import com.liferay.petra.sql.dsl.query.GroupByStep;
@@ -233,20 +234,45 @@ public class CommerceAddressLocalServiceImpl
 	public List<CommerceAddress> getBillingCommerceAddresses(
 		long channelId, String className, long classPK, int start, int end) {
 
-		return TransformUtil.transform(
-			_addressLocalService.dslQuery(
-				_getGroupByStep(
-					DSLQueryFactoryUtil.selectDistinct(AddressTable.INSTANCE),
+		Table<AddressTable> tempAddressTable = _getGroupByStep(
+			DSLQueryFactoryUtil.select(AddressTable.INSTANCE),
+			CommerceChannelRelTable.INSTANCE.classPK.eq(
+				AddressTable.INSTANCE.addressId),
+			AddressTable.INSTANCE.listTypeId.eq(
+				CommerceAddressImpl.toAddressTypeId(
+					CommerceAddressConstants.ADDRESS_TYPE_BILLING)
+			).or(
+				AddressTable.INSTANCE.listTypeId.eq(
+					CommerceAddressImpl.toAddressTypeId(
+						CommerceAddressConstants.
+							ADDRESS_TYPE_BILLING_AND_SHIPPING))
+			),
+			channelId, className, classPK, true, false
+		).union(
+			_getGroupByStep(
+				DSLQueryFactoryUtil.select(AddressTable.INSTANCE),
+				CommerceChannelRelTable.INSTANCE.classPK.eq(
+					CountryTable.INSTANCE.countryId),
+				AddressTable.INSTANCE.listTypeId.eq(
+					CommerceAddressImpl.toAddressTypeId(
+						CommerceAddressConstants.ADDRESS_TYPE_BILLING)
+				).or(
 					AddressTable.INSTANCE.listTypeId.eq(
 						CommerceAddressImpl.toAddressTypeId(
-							CommerceAddressConstants.ADDRESS_TYPE_BILLING)
-					).or(
-						AddressTable.INSTANCE.listTypeId.eq(
-							CommerceAddressImpl.toAddressTypeId(
-								CommerceAddressConstants.
-									ADDRESS_TYPE_BILLING_AND_SHIPPING))
-					),
-					channelId, className, classPK, true, false
+							CommerceAddressConstants.
+								ADDRESS_TYPE_BILLING_AND_SHIPPING))
+				),
+				channelId, className, classPK, true, false)
+		).as(
+			"tempAddress", AddressTable.INSTANCE
+		);
+
+		return TransformUtil.transform(
+			_addressLocalService.dslQuery(
+				DSLQueryFactoryUtil.select(
+					tempAddressTable
+				).from(
+					tempAddressTable
 				).limit(
 					start, end
 				)),
@@ -286,9 +312,25 @@ public class CommerceAddressLocalServiceImpl
 	public int getBillingCommerceAddressesCount(
 		long channelId, String className, long classPK, int start, int end) {
 
-		return _addressLocalService.dslQueryCount(
+		Table<AddressTable> tempAddressTable = _getGroupByStep(
+			DSLQueryFactoryUtil.select(AddressTable.INSTANCE),
+			CommerceChannelRelTable.INSTANCE.classPK.eq(
+				AddressTable.INSTANCE.addressId),
+			AddressTable.INSTANCE.listTypeId.eq(
+				CommerceAddressImpl.toAddressTypeId(
+					CommerceAddressConstants.ADDRESS_TYPE_BILLING)
+			).or(
+				AddressTable.INSTANCE.listTypeId.eq(
+					CommerceAddressImpl.toAddressTypeId(
+						CommerceAddressConstants.
+							ADDRESS_TYPE_BILLING_AND_SHIPPING))
+			),
+			channelId, className, classPK, true, false
+		).union(
 			_getGroupByStep(
-				DSLQueryFactoryUtil.selectDistinct(AddressTable.INSTANCE),
+				DSLQueryFactoryUtil.select(AddressTable.INSTANCE),
+				CommerceChannelRelTable.INSTANCE.classPK.eq(
+					CountryTable.INSTANCE.countryId),
 				AddressTable.INSTANCE.listTypeId.eq(
 					CommerceAddressImpl.toAddressTypeId(
 						CommerceAddressConstants.ADDRESS_TYPE_BILLING)
@@ -298,7 +340,16 @@ public class CommerceAddressLocalServiceImpl
 							CommerceAddressConstants.
 								ADDRESS_TYPE_BILLING_AND_SHIPPING))
 				),
-				channelId, className, classPK, true, false
+				channelId, className, classPK, true, false)
+		).as(
+			"tempAddress", AddressTable.INSTANCE
+		);
+
+		return _addressLocalService.dslQueryCount(
+			DSLQueryFactoryUtil.select(
+				tempAddressTable
+			).from(
+				tempAddressTable
 			).limit(
 				start, end
 			));
@@ -454,20 +505,45 @@ public class CommerceAddressLocalServiceImpl
 	public List<CommerceAddress> getShippingCommerceAddresses(
 		long channelId, String className, long classPK, int start, int end) {
 
-		return TransformUtil.transform(
-			_addressLocalService.dslQuery(
-				_getGroupByStep(
-					DSLQueryFactoryUtil.selectDistinct(AddressTable.INSTANCE),
+		Table<AddressTable> tempAddressTable = _getGroupByStep(
+			DSLQueryFactoryUtil.select(AddressTable.INSTANCE),
+			CommerceChannelRelTable.INSTANCE.classPK.eq(
+				AddressTable.INSTANCE.addressId),
+			AddressTable.INSTANCE.listTypeId.eq(
+				CommerceAddressImpl.toAddressTypeId(
+					CommerceAddressConstants.ADDRESS_TYPE_SHIPPING)
+			).or(
+				AddressTable.INSTANCE.listTypeId.eq(
+					CommerceAddressImpl.toAddressTypeId(
+						CommerceAddressConstants.
+							ADDRESS_TYPE_BILLING_AND_SHIPPING))
+			),
+			channelId, className, classPK, false, true
+		).union(
+			_getGroupByStep(
+				DSLQueryFactoryUtil.select(AddressTable.INSTANCE),
+				CommerceChannelRelTable.INSTANCE.classPK.eq(
+					CountryTable.INSTANCE.countryId),
+				AddressTable.INSTANCE.listTypeId.eq(
+					CommerceAddressImpl.toAddressTypeId(
+						CommerceAddressConstants.ADDRESS_TYPE_SHIPPING)
+				).or(
 					AddressTable.INSTANCE.listTypeId.eq(
 						CommerceAddressImpl.toAddressTypeId(
-							CommerceAddressConstants.ADDRESS_TYPE_SHIPPING)
-					).or(
-						AddressTable.INSTANCE.listTypeId.eq(
-							CommerceAddressImpl.toAddressTypeId(
-								CommerceAddressConstants.
-									ADDRESS_TYPE_BILLING_AND_SHIPPING))
-					),
-					channelId, className, classPK, false, true
+							CommerceAddressConstants.
+								ADDRESS_TYPE_BILLING_AND_SHIPPING))
+				),
+				channelId, className, classPK, false, true)
+		).as(
+			"tempAddress", AddressTable.INSTANCE
+		);
+
+		return TransformUtil.transform(
+			_addressLocalService.dslQuery(
+				DSLQueryFactoryUtil.select(
+					tempAddressTable
+				).from(
+					tempAddressTable
 				).limit(
 					start, end
 				)),
@@ -668,6 +744,60 @@ public class CommerceAddressLocalServiceImpl
 		return filteredAddresses.subList(start, end);
 	}
 
+	private Predicate _getAddressFilterPredicate(
+		Predicate listTypeFilterPredicate, long commerceChannelId,
+		String className, long classPK, boolean billingAllowed,
+		boolean shippingAllowed) {
+
+		Predicate predicate = CountryTable.INSTANCE.active.eq(true);
+
+		predicate = predicate.and(
+			AddressTable.INSTANCE.classNameId.eq(
+				_classNameLocalService.getClassNameId(className)
+			).and(
+				AddressTable.INSTANCE.classPK.eq(classPK)
+			));
+
+		predicate = predicate.and(listTypeFilterPredicate.withParentheses());
+
+		Predicate groupFilterPredicate =
+			CountryTable.INSTANCE.groupFilterEnabled.eq(false);
+
+		Predicate channelFilterPredicate =
+			CountryTable.INSTANCE.groupFilterEnabled.eq(true);
+
+		channelFilterPredicate = channelFilterPredicate.and(
+			CommerceChannelRelTable.INSTANCE.classNameId.eq(
+				_classNameLocalService.getClassNameId(Country.class)));
+		channelFilterPredicate = channelFilterPredicate.and(
+			CommerceChannelRelTable.INSTANCE.commerceChannelId.eq(
+				commerceChannelId));
+
+		groupFilterPredicate = groupFilterPredicate.or(
+			channelFilterPredicate.withParentheses());
+
+		predicate = predicate.and(groupFilterPredicate.withParentheses());
+
+		if (billingAllowed) {
+			predicate = predicate.and(
+				CountryTable.INSTANCE.billingAllowed.eq(true));
+		}
+
+		if (shippingAllowed) {
+			predicate = predicate.and(
+				CountryTable.INSTANCE.shippingAllowed.eq(true));
+		}
+
+		Predicate addressFilterPredicate =
+			CommerceChannelRelTable.INSTANCE.commerceChannelId.eq(
+				commerceChannelId);
+
+		addressFilterPredicate = addressFilterPredicate.or(
+			CommerceChannelRelTable.INSTANCE.commerceChannelId.isNull());
+
+		return predicate.and(addressFilterPredicate.withParentheses());
+	}
+
 	private OrderByComparator<Address> _getAddressOrderByComparator(
 		OrderByComparator<CommerceAddress> orderByComparator) {
 
@@ -688,9 +818,10 @@ public class CommerceAddressLocalServiceImpl
 	}
 
 	private GroupByStep _getGroupByStep(
-		FromStep fromStep, Predicate listTypeFilterPredicate,
-		long commerceChannelId, String className, long classPK,
-		boolean billingAllowed, boolean shippingAllowed) {
+		FromStep fromStep, Predicate commerceChannelRelFilterPredicate,
+		Predicate listTypeFilterPredicate, long commerceChannelId,
+		String className, long classPK, boolean billingAllowed,
+		boolean shippingAllowed) {
 
 		JoinStep joinStep = fromStep.from(
 			AddressTable.INSTANCE
@@ -698,68 +829,13 @@ public class CommerceAddressLocalServiceImpl
 			CountryTable.INSTANCE,
 			AddressTable.INSTANCE.countryId.eq(CountryTable.INSTANCE.countryId)
 		).leftJoinOn(
-			CommerceChannelRelTable.INSTANCE,
-			CommerceChannelRelTable.INSTANCE.classPK.eq(
-				AddressTable.INSTANCE.addressId
-			).or(
-				CommerceChannelRelTable.INSTANCE.classPK.eq(
-					CountryTable.INSTANCE.countryId)
-			)
+			CommerceChannelRelTable.INSTANCE, commerceChannelRelFilterPredicate
 		);
 
 		return joinStep.where(
-			() -> {
-				Predicate predicate = CountryTable.INSTANCE.active.eq(true);
-
-				predicate = predicate.and(
-					AddressTable.INSTANCE.classNameId.eq(
-						_classNameLocalService.getClassNameId(className)
-					).and(
-						AddressTable.INSTANCE.classPK.eq(classPK)
-					));
-
-				predicate = predicate.and(
-					listTypeFilterPredicate.withParentheses());
-
-				Predicate groupFilterPredicate =
-					CountryTable.INSTANCE.groupFilterEnabled.eq(false);
-
-				Predicate channelFilterPredicate =
-					CountryTable.INSTANCE.groupFilterEnabled.eq(true);
-
-				channelFilterPredicate = channelFilterPredicate.and(
-					CommerceChannelRelTable.INSTANCE.classNameId.eq(
-						_classNameLocalService.getClassNameId(Country.class)));
-				channelFilterPredicate = channelFilterPredicate.and(
-					CommerceChannelRelTable.INSTANCE.commerceChannelId.eq(
-						commerceChannelId));
-
-				groupFilterPredicate = groupFilterPredicate.or(
-					channelFilterPredicate.withParentheses());
-
-				predicate = predicate.and(
-					groupFilterPredicate.withParentheses());
-
-				if (billingAllowed) {
-					predicate = predicate.and(
-						CountryTable.INSTANCE.billingAllowed.eq(true));
-				}
-
-				if (shippingAllowed) {
-					predicate = predicate.and(
-						CountryTable.INSTANCE.shippingAllowed.eq(true));
-				}
-
-				Predicate addressFilterPredicate =
-					CommerceChannelRelTable.INSTANCE.commerceChannelId.eq(
-						commerceChannelId);
-
-				addressFilterPredicate = addressFilterPredicate.or(
-					CommerceChannelRelTable.INSTANCE.commerceChannelId.
-						isNull());
-
-				return predicate.and(addressFilterPredicate.withParentheses());
-			});
+			_getAddressFilterPredicate(
+				listTypeFilterPredicate, commerceChannelId, className, classPK,
+				billingAllowed, shippingAllowed));
 	}
 
 	private void _validate(
