@@ -56,9 +56,20 @@
 		<finder name="CompanyId" return-type="Collection">
 			<finder-column name="companyId" />
 		</finder>
+		<finder name="Target" return-type="Collection">
+			<finder-column name="target" />
+		</finder>
 		<finder name="C_C" return-type="Collection">
 			<finder-column name="companyId" />
 			<finder-column case-sensitive="false" name="couponCode" />
+		</finder>
+		<finder name="C_S" return-type="Collection">
+			<finder-column name="companyId" />
+			<finder-column name="status" />
+		</finder>
+		<finder name="A_S" return-type="Collection">
+			<finder-column name="active" />
+			<finder-column name="status" />
 		</finder>
 		<finder name="LtD_S" return-type="Collection">
 			<finder-column comparator="&lt;" name="displayDate" />
@@ -72,6 +83,11 @@
 			<finder-column name="companyId" />
 			<finder-column case-sensitive="false" name="couponCode" />
 			<finder-column name="active" />
+		</finder>
+		<finder name="C_A_S" return-type="Collection">
+			<finder-column name="companyId" />
+			<finder-column name="active" />
+			<finder-column name="status" />
 		</finder>
 		<finder name="C_L_A_S" return-type="Collection">
 			<finder-column name="companyId" />
@@ -242,6 +258,11 @@
 			<finder-column name="commerceDiscountId" />
 			<finder-column name="classNameId" />
 			<finder-column name="classPK" />
+		</finder>
+		<finder name="CN_CPK_T" return-type="Collection">
+			<finder-column name="classNameId" />
+			<finder-column name="classPK" />
+			<finder-column name="typeSettings" />
 		</finder>
 	</entity>
 	<entity local-service="true" name="CommerceDiscountRule" remote-service="true">
