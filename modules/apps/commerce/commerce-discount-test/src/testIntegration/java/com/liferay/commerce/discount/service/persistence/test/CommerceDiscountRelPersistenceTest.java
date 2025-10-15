@@ -210,6 +210,16 @@ public class CommerceDiscountRelPersistenceTest {
 	}
 
 	@Test
+	public void testCountByCN_CPK_T() throws Exception {
+		_persistence.countByCN_CPK_T(
+			RandomTestUtil.nextLong(), RandomTestUtil.nextLong(), "");
+
+		_persistence.countByCN_CPK_T(0L, 0L, "null");
+
+		_persistence.countByCN_CPK_T(0L, 0L, (String)null);
+	}
+
+	@Test
 	public void testFindByPrimaryKeyExisting() throws Exception {
 		CommerceDiscountRel newCommerceDiscountRel = addCommerceDiscountRel();
 

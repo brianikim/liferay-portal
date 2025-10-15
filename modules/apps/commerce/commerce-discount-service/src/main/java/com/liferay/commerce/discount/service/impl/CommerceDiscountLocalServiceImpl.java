@@ -1758,13 +1758,14 @@ public class CommerceDiscountLocalServiceImpl
 		if (commerceChannelId != null) {
 			joinStep = joinStep.innerJoinON(
 				CommerceChannelRelTable.INSTANCE,
-				CommerceChannelRelTable.INSTANCE.classPK.eq(
-					CommerceDiscountTable.INSTANCE.commerceDiscountId
+				CommerceChannelRelTable.INSTANCE.classNameId.eq(
+					_classNameLocalService.getClassNameId(
+						CommerceDiscount.class.getName())
 				).and(
-					CommerceChannelRelTable.INSTANCE.classNameId.eq(
-						_classNameLocalService.getClassNameId(
-							CommerceDiscount.class.getName()))
+					CommerceChannelRelTable.INSTANCE.classPK.eq(
+						CommerceDiscountTable.INSTANCE.commerceDiscountId)
 				));
+
 			predicate = predicate.and(
 				CommerceChannelRelTable.INSTANCE.commerceChannelId.eq(
 					commerceChannelId));
@@ -1772,12 +1773,12 @@ public class CommerceDiscountLocalServiceImpl
 		else {
 			joinStep = joinStep.leftJoinOn(
 				CommerceChannelRelTable.INSTANCE,
-				CommerceChannelRelTable.INSTANCE.classPK.eq(
-					CommerceDiscountTable.INSTANCE.commerceDiscountId
+				CommerceChannelRelTable.INSTANCE.classNameId.eq(
+					_classNameLocalService.getClassNameId(
+						CommerceDiscount.class.getName())
 				).and(
-					CommerceChannelRelTable.INSTANCE.classNameId.eq(
-						_classNameLocalService.getClassNameId(
-							CommerceDiscount.class.getName()))
+					CommerceChannelRelTable.INSTANCE.classPK.eq(
+						CommerceDiscountTable.INSTANCE.commerceDiscountId)
 				));
 			predicate = predicate.and(
 				CommerceChannelRelTable.INSTANCE.commerceChannelRelId.isNull());
@@ -1846,21 +1847,21 @@ public class CommerceDiscountLocalServiceImpl
 		Predicate predicate = CommerceDiscountTable.INSTANCE.target.eq(
 			CommerceDiscountConstants.TARGET_PRODUCTS
 		).and(
-			CommerceDiscountRelTable.INSTANCE.classPK.eq(cpDefinitionId)
-		).and(
 			CommerceDiscountRelTable.INSTANCE.classNameId.eq(
 				_classNameLocalService.getClassNameId(
 					CPDefinition.class.getName()))
+		).and(
+			CommerceDiscountRelTable.INSTANCE.classPK.eq(cpDefinitionId)
 		);
 
 		Predicate andPredicate = CommerceDiscountTable.INSTANCE.target.eq(
 			CommerceDiscountConstants.TARGET_SKUS
 		).and(
-			CommerceDiscountRelTable.INSTANCE.classPK.eq(cpInstanceId)
-		).and(
 			CommerceDiscountRelTable.INSTANCE.classNameId.eq(
 				_classNameLocalService.getClassNameId(
 					CPInstance.class.getName()))
+		).and(
+			CommerceDiscountRelTable.INSTANCE.classPK.eq(cpInstanceId)
 		);
 
 		if (!Validator.isBlank(unitOfMeasureKey)) {
@@ -1884,12 +1885,12 @@ public class CommerceDiscountLocalServiceImpl
 				CommerceDiscountTable.INSTANCE.target.eq(
 					CommerceDiscountConstants.TARGET_CATEGORIES
 				).and(
-					CommerceDiscountRelTable.INSTANCE.classPK.in(
-						ArrayUtil.toArray(assetCategoryIds))
-				).and(
 					CommerceDiscountRelTable.INSTANCE.classNameId.eq(
 						_classNameLocalService.getClassNameId(
 							AssetCategory.class.getName()))
+				).and(
+					CommerceDiscountRelTable.INSTANCE.classPK.in(
+						ArrayUtil.toArray(assetCategoryIds))
 				));
 		}
 
@@ -1906,12 +1907,12 @@ public class CommerceDiscountLocalServiceImpl
 				CommerceDiscountTable.INSTANCE.target.eq(
 					CommerceDiscountConstants.TARGET_PRODUCT_GROUPS
 				).and(
-					CommerceDiscountRelTable.INSTANCE.classPK.in(
-						ArrayUtil.toArray(commercePricingClasses))
-				).and(
 					CommerceDiscountRelTable.INSTANCE.classNameId.eq(
 						_classNameLocalService.getClassNameId(
 							CommercePricingClass.class.getName()))
+				).and(
+					CommerceDiscountRelTable.INSTANCE.classPK.in(
+						ArrayUtil.toArray(commercePricingClasses))
 				));
 		}
 

@@ -344,12 +344,37 @@ public class CommerceDiscountPersistenceTest {
 	}
 
 	@Test
+	public void testCountByTarget() throws Exception {
+		_persistence.countByTarget("");
+
+		_persistence.countByTarget("null");
+
+		_persistence.countByTarget((String)null);
+	}
+
+	@Test
 	public void testCountByC_C() throws Exception {
 		_persistence.countByC_C(RandomTestUtil.nextLong(), "");
 
 		_persistence.countByC_C(0L, "null");
 
 		_persistence.countByC_C(0L, (String)null);
+	}
+
+	@Test
+	public void testCountByC_S() throws Exception {
+		_persistence.countByC_S(
+			RandomTestUtil.nextLong(), RandomTestUtil.nextInt());
+
+		_persistence.countByC_S(0L, 0);
+	}
+
+	@Test
+	public void testCountByA_S() throws Exception {
+		_persistence.countByA_S(
+			RandomTestUtil.randomBoolean(), RandomTestUtil.nextInt());
+
+		_persistence.countByA_S(RandomTestUtil.randomBoolean(), 0);
 	}
 
 	@Test
@@ -377,6 +402,15 @@ public class CommerceDiscountPersistenceTest {
 
 		_persistence.countByC_C_A(
 			0L, (String)null, RandomTestUtil.randomBoolean());
+	}
+
+	@Test
+	public void testCountByC_A_S() throws Exception {
+		_persistence.countByC_A_S(
+			RandomTestUtil.nextLong(), RandomTestUtil.randomBoolean(),
+			RandomTestUtil.nextInt());
+
+		_persistence.countByC_A_S(0L, RandomTestUtil.randomBoolean(), 0);
 	}
 
 	@Test

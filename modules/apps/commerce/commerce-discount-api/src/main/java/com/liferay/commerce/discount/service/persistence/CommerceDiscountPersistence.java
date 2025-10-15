@@ -675,6 +675,213 @@ public interface CommerceDiscountPersistence
 	public int filterCountByCompanyId(long companyId);
 
 	/**
+	 * Returns all the commerce discounts where target = &#63;.
+	 *
+	 * @param target the target
+	 * @return the matching commerce discounts
+	 */
+	public java.util.List<CommerceDiscount> findByTarget(String target);
+
+	/**
+	 * Returns a range of all the commerce discounts where target = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceDiscountModelImpl</code>.
+	 * </p>
+	 *
+	 * @param target the target
+	 * @param start the lower bound of the range of commerce discounts
+	 * @param end the upper bound of the range of commerce discounts (not inclusive)
+	 * @return the range of matching commerce discounts
+	 */
+	public java.util.List<CommerceDiscount> findByTarget(
+		String target, int start, int end);
+
+	/**
+	 * Returns an ordered range of all the commerce discounts where target = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceDiscountModelImpl</code>.
+	 * </p>
+	 *
+	 * @param target the target
+	 * @param start the lower bound of the range of commerce discounts
+	 * @param end the upper bound of the range of commerce discounts (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @return the ordered range of matching commerce discounts
+	 */
+	public java.util.List<CommerceDiscount> findByTarget(
+		String target, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+			orderByComparator);
+
+	/**
+	 * Returns an ordered range of all the commerce discounts where target = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceDiscountModelImpl</code>.
+	 * </p>
+	 *
+	 * @param target the target
+	 * @param start the lower bound of the range of commerce discounts
+	 * @param end the upper bound of the range of commerce discounts (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param useFinderCache whether to use the finder cache
+	 * @return the ordered range of matching commerce discounts
+	 */
+	public java.util.List<CommerceDiscount> findByTarget(
+		String target, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+			orderByComparator,
+		boolean useFinderCache);
+
+	/**
+	 * Returns the first commerce discount in the ordered set where target = &#63;.
+	 *
+	 * @param target the target
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching commerce discount
+	 * @throws NoSuchDiscountException if a matching commerce discount could not be found
+	 */
+	public CommerceDiscount findByTarget_First(
+			String target,
+			com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+				orderByComparator)
+		throws NoSuchDiscountException;
+
+	/**
+	 * Returns the first commerce discount in the ordered set where target = &#63;.
+	 *
+	 * @param target the target
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching commerce discount, or <code>null</code> if a matching commerce discount could not be found
+	 */
+	public CommerceDiscount fetchByTarget_First(
+		String target,
+		com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+			orderByComparator);
+
+	/**
+	 * Returns the last commerce discount in the ordered set where target = &#63;.
+	 *
+	 * @param target the target
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching commerce discount
+	 * @throws NoSuchDiscountException if a matching commerce discount could not be found
+	 */
+	public CommerceDiscount findByTarget_Last(
+			String target,
+			com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+				orderByComparator)
+		throws NoSuchDiscountException;
+
+	/**
+	 * Returns the last commerce discount in the ordered set where target = &#63;.
+	 *
+	 * @param target the target
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching commerce discount, or <code>null</code> if a matching commerce discount could not be found
+	 */
+	public CommerceDiscount fetchByTarget_Last(
+		String target,
+		com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+			orderByComparator);
+
+	/**
+	 * Returns the commerce discounts before and after the current commerce discount in the ordered set where target = &#63;.
+	 *
+	 * @param commerceDiscountId the primary key of the current commerce discount
+	 * @param target the target
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the previous, current, and next commerce discount
+	 * @throws NoSuchDiscountException if a commerce discount with the primary key could not be found
+	 */
+	public CommerceDiscount[] findByTarget_PrevAndNext(
+			long commerceDiscountId, String target,
+			com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+				orderByComparator)
+		throws NoSuchDiscountException;
+
+	/**
+	 * Returns all the commerce discounts that the user has permission to view where target = &#63;.
+	 *
+	 * @param target the target
+	 * @return the matching commerce discounts that the user has permission to view
+	 */
+	public java.util.List<CommerceDiscount> filterFindByTarget(String target);
+
+	/**
+	 * Returns a range of all the commerce discounts that the user has permission to view where target = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceDiscountModelImpl</code>.
+	 * </p>
+	 *
+	 * @param target the target
+	 * @param start the lower bound of the range of commerce discounts
+	 * @param end the upper bound of the range of commerce discounts (not inclusive)
+	 * @return the range of matching commerce discounts that the user has permission to view
+	 */
+	public java.util.List<CommerceDiscount> filterFindByTarget(
+		String target, int start, int end);
+
+	/**
+	 * Returns an ordered range of all the commerce discounts that the user has permissions to view where target = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceDiscountModelImpl</code>.
+	 * </p>
+	 *
+	 * @param target the target
+	 * @param start the lower bound of the range of commerce discounts
+	 * @param end the upper bound of the range of commerce discounts (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @return the ordered range of matching commerce discounts that the user has permission to view
+	 */
+	public java.util.List<CommerceDiscount> filterFindByTarget(
+		String target, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+			orderByComparator);
+
+	/**
+	 * Returns the commerce discounts before and after the current commerce discount in the ordered set of commerce discounts that the user has permission to view where target = &#63;.
+	 *
+	 * @param commerceDiscountId the primary key of the current commerce discount
+	 * @param target the target
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the previous, current, and next commerce discount
+	 * @throws NoSuchDiscountException if a commerce discount with the primary key could not be found
+	 */
+	public CommerceDiscount[] filterFindByTarget_PrevAndNext(
+			long commerceDiscountId, String target,
+			com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+				orderByComparator)
+		throws NoSuchDiscountException;
+
+	/**
+	 * Removes all the commerce discounts where target = &#63; from the database.
+	 *
+	 * @param target the target
+	 */
+	public void removeByTarget(String target);
+
+	/**
+	 * Returns the number of commerce discounts where target = &#63;.
+	 *
+	 * @param target the target
+	 * @return the number of matching commerce discounts
+	 */
+	public int countByTarget(String target);
+
+	/**
+	 * Returns the number of commerce discounts that the user has permission to view where target = &#63;.
+	 *
+	 * @param target the target
+	 * @return the number of matching commerce discounts that the user has permission to view
+	 */
+	public int filterCountByTarget(String target);
+
+	/**
 	 * Returns all the commerce discounts where companyId = &#63; and couponCode = &#63;.
 	 *
 	 * @param companyId the company ID
@@ -898,6 +1105,456 @@ public interface CommerceDiscountPersistence
 	 * @return the number of matching commerce discounts that the user has permission to view
 	 */
 	public int filterCountByC_C(long companyId, String couponCode);
+
+	/**
+	 * Returns all the commerce discounts where companyId = &#63; and status = &#63;.
+	 *
+	 * @param companyId the company ID
+	 * @param status the status
+	 * @return the matching commerce discounts
+	 */
+	public java.util.List<CommerceDiscount> findByC_S(
+		long companyId, int status);
+
+	/**
+	 * Returns a range of all the commerce discounts where companyId = &#63; and status = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceDiscountModelImpl</code>.
+	 * </p>
+	 *
+	 * @param companyId the company ID
+	 * @param status the status
+	 * @param start the lower bound of the range of commerce discounts
+	 * @param end the upper bound of the range of commerce discounts (not inclusive)
+	 * @return the range of matching commerce discounts
+	 */
+	public java.util.List<CommerceDiscount> findByC_S(
+		long companyId, int status, int start, int end);
+
+	/**
+	 * Returns an ordered range of all the commerce discounts where companyId = &#63; and status = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceDiscountModelImpl</code>.
+	 * </p>
+	 *
+	 * @param companyId the company ID
+	 * @param status the status
+	 * @param start the lower bound of the range of commerce discounts
+	 * @param end the upper bound of the range of commerce discounts (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @return the ordered range of matching commerce discounts
+	 */
+	public java.util.List<CommerceDiscount> findByC_S(
+		long companyId, int status, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+			orderByComparator);
+
+	/**
+	 * Returns an ordered range of all the commerce discounts where companyId = &#63; and status = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceDiscountModelImpl</code>.
+	 * </p>
+	 *
+	 * @param companyId the company ID
+	 * @param status the status
+	 * @param start the lower bound of the range of commerce discounts
+	 * @param end the upper bound of the range of commerce discounts (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param useFinderCache whether to use the finder cache
+	 * @return the ordered range of matching commerce discounts
+	 */
+	public java.util.List<CommerceDiscount> findByC_S(
+		long companyId, int status, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+			orderByComparator,
+		boolean useFinderCache);
+
+	/**
+	 * Returns the first commerce discount in the ordered set where companyId = &#63; and status = &#63;.
+	 *
+	 * @param companyId the company ID
+	 * @param status the status
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching commerce discount
+	 * @throws NoSuchDiscountException if a matching commerce discount could not be found
+	 */
+	public CommerceDiscount findByC_S_First(
+			long companyId, int status,
+			com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+				orderByComparator)
+		throws NoSuchDiscountException;
+
+	/**
+	 * Returns the first commerce discount in the ordered set where companyId = &#63; and status = &#63;.
+	 *
+	 * @param companyId the company ID
+	 * @param status the status
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching commerce discount, or <code>null</code> if a matching commerce discount could not be found
+	 */
+	public CommerceDiscount fetchByC_S_First(
+		long companyId, int status,
+		com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+			orderByComparator);
+
+	/**
+	 * Returns the last commerce discount in the ordered set where companyId = &#63; and status = &#63;.
+	 *
+	 * @param companyId the company ID
+	 * @param status the status
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching commerce discount
+	 * @throws NoSuchDiscountException if a matching commerce discount could not be found
+	 */
+	public CommerceDiscount findByC_S_Last(
+			long companyId, int status,
+			com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+				orderByComparator)
+		throws NoSuchDiscountException;
+
+	/**
+	 * Returns the last commerce discount in the ordered set where companyId = &#63; and status = &#63;.
+	 *
+	 * @param companyId the company ID
+	 * @param status the status
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching commerce discount, or <code>null</code> if a matching commerce discount could not be found
+	 */
+	public CommerceDiscount fetchByC_S_Last(
+		long companyId, int status,
+		com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+			orderByComparator);
+
+	/**
+	 * Returns the commerce discounts before and after the current commerce discount in the ordered set where companyId = &#63; and status = &#63;.
+	 *
+	 * @param commerceDiscountId the primary key of the current commerce discount
+	 * @param companyId the company ID
+	 * @param status the status
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the previous, current, and next commerce discount
+	 * @throws NoSuchDiscountException if a commerce discount with the primary key could not be found
+	 */
+	public CommerceDiscount[] findByC_S_PrevAndNext(
+			long commerceDiscountId, long companyId, int status,
+			com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+				orderByComparator)
+		throws NoSuchDiscountException;
+
+	/**
+	 * Returns all the commerce discounts that the user has permission to view where companyId = &#63; and status = &#63;.
+	 *
+	 * @param companyId the company ID
+	 * @param status the status
+	 * @return the matching commerce discounts that the user has permission to view
+	 */
+	public java.util.List<CommerceDiscount> filterFindByC_S(
+		long companyId, int status);
+
+	/**
+	 * Returns a range of all the commerce discounts that the user has permission to view where companyId = &#63; and status = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceDiscountModelImpl</code>.
+	 * </p>
+	 *
+	 * @param companyId the company ID
+	 * @param status the status
+	 * @param start the lower bound of the range of commerce discounts
+	 * @param end the upper bound of the range of commerce discounts (not inclusive)
+	 * @return the range of matching commerce discounts that the user has permission to view
+	 */
+	public java.util.List<CommerceDiscount> filterFindByC_S(
+		long companyId, int status, int start, int end);
+
+	/**
+	 * Returns an ordered range of all the commerce discounts that the user has permissions to view where companyId = &#63; and status = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceDiscountModelImpl</code>.
+	 * </p>
+	 *
+	 * @param companyId the company ID
+	 * @param status the status
+	 * @param start the lower bound of the range of commerce discounts
+	 * @param end the upper bound of the range of commerce discounts (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @return the ordered range of matching commerce discounts that the user has permission to view
+	 */
+	public java.util.List<CommerceDiscount> filterFindByC_S(
+		long companyId, int status, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+			orderByComparator);
+
+	/**
+	 * Returns the commerce discounts before and after the current commerce discount in the ordered set of commerce discounts that the user has permission to view where companyId = &#63; and status = &#63;.
+	 *
+	 * @param commerceDiscountId the primary key of the current commerce discount
+	 * @param companyId the company ID
+	 * @param status the status
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the previous, current, and next commerce discount
+	 * @throws NoSuchDiscountException if a commerce discount with the primary key could not be found
+	 */
+	public CommerceDiscount[] filterFindByC_S_PrevAndNext(
+			long commerceDiscountId, long companyId, int status,
+			com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+				orderByComparator)
+		throws NoSuchDiscountException;
+
+	/**
+	 * Removes all the commerce discounts where companyId = &#63; and status = &#63; from the database.
+	 *
+	 * @param companyId the company ID
+	 * @param status the status
+	 */
+	public void removeByC_S(long companyId, int status);
+
+	/**
+	 * Returns the number of commerce discounts where companyId = &#63; and status = &#63;.
+	 *
+	 * @param companyId the company ID
+	 * @param status the status
+	 * @return the number of matching commerce discounts
+	 */
+	public int countByC_S(long companyId, int status);
+
+	/**
+	 * Returns the number of commerce discounts that the user has permission to view where companyId = &#63; and status = &#63;.
+	 *
+	 * @param companyId the company ID
+	 * @param status the status
+	 * @return the number of matching commerce discounts that the user has permission to view
+	 */
+	public int filterCountByC_S(long companyId, int status);
+
+	/**
+	 * Returns all the commerce discounts where active = &#63; and status = &#63;.
+	 *
+	 * @param active the active
+	 * @param status the status
+	 * @return the matching commerce discounts
+	 */
+	public java.util.List<CommerceDiscount> findByA_S(
+		boolean active, int status);
+
+	/**
+	 * Returns a range of all the commerce discounts where active = &#63; and status = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceDiscountModelImpl</code>.
+	 * </p>
+	 *
+	 * @param active the active
+	 * @param status the status
+	 * @param start the lower bound of the range of commerce discounts
+	 * @param end the upper bound of the range of commerce discounts (not inclusive)
+	 * @return the range of matching commerce discounts
+	 */
+	public java.util.List<CommerceDiscount> findByA_S(
+		boolean active, int status, int start, int end);
+
+	/**
+	 * Returns an ordered range of all the commerce discounts where active = &#63; and status = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceDiscountModelImpl</code>.
+	 * </p>
+	 *
+	 * @param active the active
+	 * @param status the status
+	 * @param start the lower bound of the range of commerce discounts
+	 * @param end the upper bound of the range of commerce discounts (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @return the ordered range of matching commerce discounts
+	 */
+	public java.util.List<CommerceDiscount> findByA_S(
+		boolean active, int status, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+			orderByComparator);
+
+	/**
+	 * Returns an ordered range of all the commerce discounts where active = &#63; and status = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceDiscountModelImpl</code>.
+	 * </p>
+	 *
+	 * @param active the active
+	 * @param status the status
+	 * @param start the lower bound of the range of commerce discounts
+	 * @param end the upper bound of the range of commerce discounts (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param useFinderCache whether to use the finder cache
+	 * @return the ordered range of matching commerce discounts
+	 */
+	public java.util.List<CommerceDiscount> findByA_S(
+		boolean active, int status, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+			orderByComparator,
+		boolean useFinderCache);
+
+	/**
+	 * Returns the first commerce discount in the ordered set where active = &#63; and status = &#63;.
+	 *
+	 * @param active the active
+	 * @param status the status
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching commerce discount
+	 * @throws NoSuchDiscountException if a matching commerce discount could not be found
+	 */
+	public CommerceDiscount findByA_S_First(
+			boolean active, int status,
+			com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+				orderByComparator)
+		throws NoSuchDiscountException;
+
+	/**
+	 * Returns the first commerce discount in the ordered set where active = &#63; and status = &#63;.
+	 *
+	 * @param active the active
+	 * @param status the status
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching commerce discount, or <code>null</code> if a matching commerce discount could not be found
+	 */
+	public CommerceDiscount fetchByA_S_First(
+		boolean active, int status,
+		com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+			orderByComparator);
+
+	/**
+	 * Returns the last commerce discount in the ordered set where active = &#63; and status = &#63;.
+	 *
+	 * @param active the active
+	 * @param status the status
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching commerce discount
+	 * @throws NoSuchDiscountException if a matching commerce discount could not be found
+	 */
+	public CommerceDiscount findByA_S_Last(
+			boolean active, int status,
+			com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+				orderByComparator)
+		throws NoSuchDiscountException;
+
+	/**
+	 * Returns the last commerce discount in the ordered set where active = &#63; and status = &#63;.
+	 *
+	 * @param active the active
+	 * @param status the status
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching commerce discount, or <code>null</code> if a matching commerce discount could not be found
+	 */
+	public CommerceDiscount fetchByA_S_Last(
+		boolean active, int status,
+		com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+			orderByComparator);
+
+	/**
+	 * Returns the commerce discounts before and after the current commerce discount in the ordered set where active = &#63; and status = &#63;.
+	 *
+	 * @param commerceDiscountId the primary key of the current commerce discount
+	 * @param active the active
+	 * @param status the status
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the previous, current, and next commerce discount
+	 * @throws NoSuchDiscountException if a commerce discount with the primary key could not be found
+	 */
+	public CommerceDiscount[] findByA_S_PrevAndNext(
+			long commerceDiscountId, boolean active, int status,
+			com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+				orderByComparator)
+		throws NoSuchDiscountException;
+
+	/**
+	 * Returns all the commerce discounts that the user has permission to view where active = &#63; and status = &#63;.
+	 *
+	 * @param active the active
+	 * @param status the status
+	 * @return the matching commerce discounts that the user has permission to view
+	 */
+	public java.util.List<CommerceDiscount> filterFindByA_S(
+		boolean active, int status);
+
+	/**
+	 * Returns a range of all the commerce discounts that the user has permission to view where active = &#63; and status = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceDiscountModelImpl</code>.
+	 * </p>
+	 *
+	 * @param active the active
+	 * @param status the status
+	 * @param start the lower bound of the range of commerce discounts
+	 * @param end the upper bound of the range of commerce discounts (not inclusive)
+	 * @return the range of matching commerce discounts that the user has permission to view
+	 */
+	public java.util.List<CommerceDiscount> filterFindByA_S(
+		boolean active, int status, int start, int end);
+
+	/**
+	 * Returns an ordered range of all the commerce discounts that the user has permissions to view where active = &#63; and status = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceDiscountModelImpl</code>.
+	 * </p>
+	 *
+	 * @param active the active
+	 * @param status the status
+	 * @param start the lower bound of the range of commerce discounts
+	 * @param end the upper bound of the range of commerce discounts (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @return the ordered range of matching commerce discounts that the user has permission to view
+	 */
+	public java.util.List<CommerceDiscount> filterFindByA_S(
+		boolean active, int status, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+			orderByComparator);
+
+	/**
+	 * Returns the commerce discounts before and after the current commerce discount in the ordered set of commerce discounts that the user has permission to view where active = &#63; and status = &#63;.
+	 *
+	 * @param commerceDiscountId the primary key of the current commerce discount
+	 * @param active the active
+	 * @param status the status
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the previous, current, and next commerce discount
+	 * @throws NoSuchDiscountException if a commerce discount with the primary key could not be found
+	 */
+	public CommerceDiscount[] filterFindByA_S_PrevAndNext(
+			long commerceDiscountId, boolean active, int status,
+			com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+				orderByComparator)
+		throws NoSuchDiscountException;
+
+	/**
+	 * Removes all the commerce discounts where active = &#63; and status = &#63; from the database.
+	 *
+	 * @param active the active
+	 * @param status the status
+	 */
+	public void removeByA_S(boolean active, int status);
+
+	/**
+	 * Returns the number of commerce discounts where active = &#63; and status = &#63;.
+	 *
+	 * @param active the active
+	 * @param status the status
+	 * @return the number of matching commerce discounts
+	 */
+	public int countByA_S(boolean active, int status);
+
+	/**
+	 * Returns the number of commerce discounts that the user has permission to view where active = &#63; and status = &#63;.
+	 *
+	 * @param active the active
+	 * @param status the status
+	 * @return the number of matching commerce discounts that the user has permission to view
+	 */
+	public int filterCountByA_S(boolean active, int status);
 
 	/**
 	 * Returns all the commerce discounts where displayDate &lt; &#63; and status = &#63;.
@@ -1407,6 +2064,247 @@ public interface CommerceDiscountPersistence
 	 * @return the number of matching commerce discounts
 	 */
 	public int countByC_C_A(long companyId, String couponCode, boolean active);
+
+	/**
+	 * Returns all the commerce discounts where companyId = &#63; and active = &#63; and status = &#63;.
+	 *
+	 * @param companyId the company ID
+	 * @param active the active
+	 * @param status the status
+	 * @return the matching commerce discounts
+	 */
+	public java.util.List<CommerceDiscount> findByC_A_S(
+		long companyId, boolean active, int status);
+
+	/**
+	 * Returns a range of all the commerce discounts where companyId = &#63; and active = &#63; and status = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceDiscountModelImpl</code>.
+	 * </p>
+	 *
+	 * @param companyId the company ID
+	 * @param active the active
+	 * @param status the status
+	 * @param start the lower bound of the range of commerce discounts
+	 * @param end the upper bound of the range of commerce discounts (not inclusive)
+	 * @return the range of matching commerce discounts
+	 */
+	public java.util.List<CommerceDiscount> findByC_A_S(
+		long companyId, boolean active, int status, int start, int end);
+
+	/**
+	 * Returns an ordered range of all the commerce discounts where companyId = &#63; and active = &#63; and status = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceDiscountModelImpl</code>.
+	 * </p>
+	 *
+	 * @param companyId the company ID
+	 * @param active the active
+	 * @param status the status
+	 * @param start the lower bound of the range of commerce discounts
+	 * @param end the upper bound of the range of commerce discounts (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @return the ordered range of matching commerce discounts
+	 */
+	public java.util.List<CommerceDiscount> findByC_A_S(
+		long companyId, boolean active, int status, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+			orderByComparator);
+
+	/**
+	 * Returns an ordered range of all the commerce discounts where companyId = &#63; and active = &#63; and status = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceDiscountModelImpl</code>.
+	 * </p>
+	 *
+	 * @param companyId the company ID
+	 * @param active the active
+	 * @param status the status
+	 * @param start the lower bound of the range of commerce discounts
+	 * @param end the upper bound of the range of commerce discounts (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param useFinderCache whether to use the finder cache
+	 * @return the ordered range of matching commerce discounts
+	 */
+	public java.util.List<CommerceDiscount> findByC_A_S(
+		long companyId, boolean active, int status, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+			orderByComparator,
+		boolean useFinderCache);
+
+	/**
+	 * Returns the first commerce discount in the ordered set where companyId = &#63; and active = &#63; and status = &#63;.
+	 *
+	 * @param companyId the company ID
+	 * @param active the active
+	 * @param status the status
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching commerce discount
+	 * @throws NoSuchDiscountException if a matching commerce discount could not be found
+	 */
+	public CommerceDiscount findByC_A_S_First(
+			long companyId, boolean active, int status,
+			com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+				orderByComparator)
+		throws NoSuchDiscountException;
+
+	/**
+	 * Returns the first commerce discount in the ordered set where companyId = &#63; and active = &#63; and status = &#63;.
+	 *
+	 * @param companyId the company ID
+	 * @param active the active
+	 * @param status the status
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching commerce discount, or <code>null</code> if a matching commerce discount could not be found
+	 */
+	public CommerceDiscount fetchByC_A_S_First(
+		long companyId, boolean active, int status,
+		com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+			orderByComparator);
+
+	/**
+	 * Returns the last commerce discount in the ordered set where companyId = &#63; and active = &#63; and status = &#63;.
+	 *
+	 * @param companyId the company ID
+	 * @param active the active
+	 * @param status the status
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching commerce discount
+	 * @throws NoSuchDiscountException if a matching commerce discount could not be found
+	 */
+	public CommerceDiscount findByC_A_S_Last(
+			long companyId, boolean active, int status,
+			com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+				orderByComparator)
+		throws NoSuchDiscountException;
+
+	/**
+	 * Returns the last commerce discount in the ordered set where companyId = &#63; and active = &#63; and status = &#63;.
+	 *
+	 * @param companyId the company ID
+	 * @param active the active
+	 * @param status the status
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching commerce discount, or <code>null</code> if a matching commerce discount could not be found
+	 */
+	public CommerceDiscount fetchByC_A_S_Last(
+		long companyId, boolean active, int status,
+		com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+			orderByComparator);
+
+	/**
+	 * Returns the commerce discounts before and after the current commerce discount in the ordered set where companyId = &#63; and active = &#63; and status = &#63;.
+	 *
+	 * @param commerceDiscountId the primary key of the current commerce discount
+	 * @param companyId the company ID
+	 * @param active the active
+	 * @param status the status
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the previous, current, and next commerce discount
+	 * @throws NoSuchDiscountException if a commerce discount with the primary key could not be found
+	 */
+	public CommerceDiscount[] findByC_A_S_PrevAndNext(
+			long commerceDiscountId, long companyId, boolean active, int status,
+			com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+				orderByComparator)
+		throws NoSuchDiscountException;
+
+	/**
+	 * Returns all the commerce discounts that the user has permission to view where companyId = &#63; and active = &#63; and status = &#63;.
+	 *
+	 * @param companyId the company ID
+	 * @param active the active
+	 * @param status the status
+	 * @return the matching commerce discounts that the user has permission to view
+	 */
+	public java.util.List<CommerceDiscount> filterFindByC_A_S(
+		long companyId, boolean active, int status);
+
+	/**
+	 * Returns a range of all the commerce discounts that the user has permission to view where companyId = &#63; and active = &#63; and status = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceDiscountModelImpl</code>.
+	 * </p>
+	 *
+	 * @param companyId the company ID
+	 * @param active the active
+	 * @param status the status
+	 * @param start the lower bound of the range of commerce discounts
+	 * @param end the upper bound of the range of commerce discounts (not inclusive)
+	 * @return the range of matching commerce discounts that the user has permission to view
+	 */
+	public java.util.List<CommerceDiscount> filterFindByC_A_S(
+		long companyId, boolean active, int status, int start, int end);
+
+	/**
+	 * Returns an ordered range of all the commerce discounts that the user has permissions to view where companyId = &#63; and active = &#63; and status = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceDiscountModelImpl</code>.
+	 * </p>
+	 *
+	 * @param companyId the company ID
+	 * @param active the active
+	 * @param status the status
+	 * @param start the lower bound of the range of commerce discounts
+	 * @param end the upper bound of the range of commerce discounts (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @return the ordered range of matching commerce discounts that the user has permission to view
+	 */
+	public java.util.List<CommerceDiscount> filterFindByC_A_S(
+		long companyId, boolean active, int status, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+			orderByComparator);
+
+	/**
+	 * Returns the commerce discounts before and after the current commerce discount in the ordered set of commerce discounts that the user has permission to view where companyId = &#63; and active = &#63; and status = &#63;.
+	 *
+	 * @param commerceDiscountId the primary key of the current commerce discount
+	 * @param companyId the company ID
+	 * @param active the active
+	 * @param status the status
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the previous, current, and next commerce discount
+	 * @throws NoSuchDiscountException if a commerce discount with the primary key could not be found
+	 */
+	public CommerceDiscount[] filterFindByC_A_S_PrevAndNext(
+			long commerceDiscountId, long companyId, boolean active, int status,
+			com.liferay.portal.kernel.util.OrderByComparator<CommerceDiscount>
+				orderByComparator)
+		throws NoSuchDiscountException;
+
+	/**
+	 * Removes all the commerce discounts where companyId = &#63; and active = &#63; and status = &#63; from the database.
+	 *
+	 * @param companyId the company ID
+	 * @param active the active
+	 * @param status the status
+	 */
+	public void removeByC_A_S(long companyId, boolean active, int status);
+
+	/**
+	 * Returns the number of commerce discounts where companyId = &#63; and active = &#63; and status = &#63;.
+	 *
+	 * @param companyId the company ID
+	 * @param active the active
+	 * @param status the status
+	 * @return the number of matching commerce discounts
+	 */
+	public int countByC_A_S(long companyId, boolean active, int status);
+
+	/**
+	 * Returns the number of commerce discounts that the user has permission to view where companyId = &#63; and active = &#63; and status = &#63;.
+	 *
+	 * @param companyId the company ID
+	 * @param active the active
+	 * @param status the status
+	 * @return the number of matching commerce discounts that the user has permission to view
+	 */
+	public int filterCountByC_A_S(long companyId, boolean active, int status);
 
 	/**
 	 * Returns all the commerce discounts where companyId = &#63; and level = &#63; and active = &#63; and status = &#63;.

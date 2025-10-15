@@ -42,6 +42,7 @@ import java.lang.reflect.InvocationHandler;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.sql.DataSource;
@@ -2285,6 +2286,637 @@ public class CommerceDiscountRelPersistenceImpl
 	private static final String _FINDER_COLUMN_CD_CN_CPK_CLASSPK_2 =
 		"commerceDiscountRel.classPK = ?";
 
+	private FinderPath _finderPathWithPaginationFindByCN_CPK_T;
+	private FinderPath _finderPathWithoutPaginationFindByCN_CPK_T;
+	private FinderPath _finderPathCountByCN_CPK_T;
+
+	/**
+	 * Returns all the commerce discount rels where classNameId = &#63; and classPK = &#63; and typeSettings = &#63;.
+	 *
+	 * @param classNameId the class name ID
+	 * @param classPK the class pk
+	 * @param typeSettings the type settings
+	 * @return the matching commerce discount rels
+	 */
+	@Override
+	public List<CommerceDiscountRel> findByCN_CPK_T(
+		long classNameId, long classPK, String typeSettings) {
+
+		return findByCN_CPK_T(
+			classNameId, classPK, typeSettings, QueryUtil.ALL_POS,
+			QueryUtil.ALL_POS, null);
+	}
+
+	/**
+	 * Returns a range of all the commerce discount rels where classNameId = &#63; and classPK = &#63; and typeSettings = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceDiscountRelModelImpl</code>.
+	 * </p>
+	 *
+	 * @param classNameId the class name ID
+	 * @param classPK the class pk
+	 * @param typeSettings the type settings
+	 * @param start the lower bound of the range of commerce discount rels
+	 * @param end the upper bound of the range of commerce discount rels (not inclusive)
+	 * @return the range of matching commerce discount rels
+	 */
+	@Override
+	public List<CommerceDiscountRel> findByCN_CPK_T(
+		long classNameId, long classPK, String typeSettings, int start,
+		int end) {
+
+		return findByCN_CPK_T(
+			classNameId, classPK, typeSettings, start, end, null);
+	}
+
+	/**
+	 * Returns an ordered range of all the commerce discount rels where classNameId = &#63; and classPK = &#63; and typeSettings = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceDiscountRelModelImpl</code>.
+	 * </p>
+	 *
+	 * @param classNameId the class name ID
+	 * @param classPK the class pk
+	 * @param typeSettings the type settings
+	 * @param start the lower bound of the range of commerce discount rels
+	 * @param end the upper bound of the range of commerce discount rels (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @return the ordered range of matching commerce discount rels
+	 */
+	@Override
+	public List<CommerceDiscountRel> findByCN_CPK_T(
+		long classNameId, long classPK, String typeSettings, int start, int end,
+		OrderByComparator<CommerceDiscountRel> orderByComparator) {
+
+		return findByCN_CPK_T(
+			classNameId, classPK, typeSettings, start, end, orderByComparator,
+			true);
+	}
+
+	/**
+	 * Returns an ordered range of all the commerce discount rels where classNameId = &#63; and classPK = &#63; and typeSettings = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent, then the query will include the default ORDER BY logic from <code>CommerceDiscountRelModelImpl</code>.
+	 * </p>
+	 *
+	 * @param classNameId the class name ID
+	 * @param classPK the class pk
+	 * @param typeSettings the type settings
+	 * @param start the lower bound of the range of commerce discount rels
+	 * @param end the upper bound of the range of commerce discount rels (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param useFinderCache whether to use the finder cache
+	 * @return the ordered range of matching commerce discount rels
+	 */
+	@Override
+	public List<CommerceDiscountRel> findByCN_CPK_T(
+		long classNameId, long classPK, String typeSettings, int start, int end,
+		OrderByComparator<CommerceDiscountRel> orderByComparator,
+		boolean useFinderCache) {
+
+		typeSettings = Objects.toString(typeSettings, "");
+
+		FinderPath finderPath = null;
+		Object[] finderArgs = null;
+
+		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
+			(orderByComparator == null)) {
+
+			if (useFinderCache) {
+				finderPath = _finderPathWithoutPaginationFindByCN_CPK_T;
+				finderArgs = new Object[] {classNameId, classPK, typeSettings};
+			}
+		}
+		else if (useFinderCache) {
+			finderPath = _finderPathWithPaginationFindByCN_CPK_T;
+			finderArgs = new Object[] {
+				classNameId, classPK, typeSettings, start, end,
+				orderByComparator
+			};
+		}
+
+		List<CommerceDiscountRel> list = null;
+
+		if (useFinderCache) {
+			list = (List<CommerceDiscountRel>)finderCache.getResult(
+				finderPath, finderArgs, this);
+
+			if ((list != null) && !list.isEmpty()) {
+				for (CommerceDiscountRel commerceDiscountRel : list) {
+					if ((classNameId != commerceDiscountRel.getClassNameId()) ||
+						(classPK != commerceDiscountRel.getClassPK()) ||
+						!typeSettings.equals(
+							commerceDiscountRel.getTypeSettings())) {
+
+						list = null;
+
+						break;
+					}
+				}
+			}
+		}
+
+		if (list == null) {
+			StringBundler sb = null;
+
+			if (orderByComparator != null) {
+				sb = new StringBundler(
+					5 + (orderByComparator.getOrderByFields().length * 2));
+			}
+			else {
+				sb = new StringBundler(5);
+			}
+
+			sb.append(_SQL_SELECT_COMMERCEDISCOUNTREL_WHERE);
+
+			sb.append(_FINDER_COLUMN_CN_CPK_T_CLASSNAMEID_2);
+
+			sb.append(_FINDER_COLUMN_CN_CPK_T_CLASSPK_2);
+
+			boolean bindTypeSettings = false;
+
+			if (typeSettings.isEmpty()) {
+				sb.append(_FINDER_COLUMN_CN_CPK_T_TYPESETTINGS_3);
+			}
+			else {
+				bindTypeSettings = true;
+
+				sb.append(_FINDER_COLUMN_CN_CPK_T_TYPESETTINGS_2);
+			}
+
+			if (orderByComparator != null) {
+				appendOrderByComparator(
+					sb, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
+			}
+			else {
+				sb.append(CommerceDiscountRelModelImpl.ORDER_BY_JPQL);
+			}
+
+			String sql = sb.toString();
+
+			Session session = null;
+
+			try {
+				session = openSession();
+
+				Query query = session.createQuery(sql);
+
+				QueryPos queryPos = QueryPos.getInstance(query);
+
+				queryPos.add(classNameId);
+
+				queryPos.add(classPK);
+
+				if (bindTypeSettings) {
+					queryPos.add(typeSettings);
+				}
+
+				list = (List<CommerceDiscountRel>)QueryUtil.list(
+					query, getDialect(), start, end);
+
+				cacheResult(list);
+
+				if (useFinderCache) {
+					finderCache.putResult(finderPath, finderArgs, list);
+				}
+			}
+			catch (Exception exception) {
+				throw processException(exception);
+			}
+			finally {
+				closeSession(session);
+			}
+		}
+
+		return list;
+	}
+
+	/**
+	 * Returns the first commerce discount rel in the ordered set where classNameId = &#63; and classPK = &#63; and typeSettings = &#63;.
+	 *
+	 * @param classNameId the class name ID
+	 * @param classPK the class pk
+	 * @param typeSettings the type settings
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching commerce discount rel
+	 * @throws NoSuchDiscountRelException if a matching commerce discount rel could not be found
+	 */
+	@Override
+	public CommerceDiscountRel findByCN_CPK_T_First(
+			long classNameId, long classPK, String typeSettings,
+			OrderByComparator<CommerceDiscountRel> orderByComparator)
+		throws NoSuchDiscountRelException {
+
+		CommerceDiscountRel commerceDiscountRel = fetchByCN_CPK_T_First(
+			classNameId, classPK, typeSettings, orderByComparator);
+
+		if (commerceDiscountRel != null) {
+			return commerceDiscountRel;
+		}
+
+		StringBundler sb = new StringBundler(8);
+
+		sb.append(_NO_SUCH_ENTITY_WITH_KEY);
+
+		sb.append("classNameId=");
+		sb.append(classNameId);
+
+		sb.append(", classPK=");
+		sb.append(classPK);
+
+		sb.append(", typeSettings=");
+		sb.append(typeSettings);
+
+		sb.append("}");
+
+		throw new NoSuchDiscountRelException(sb.toString());
+	}
+
+	/**
+	 * Returns the first commerce discount rel in the ordered set where classNameId = &#63; and classPK = &#63; and typeSettings = &#63;.
+	 *
+	 * @param classNameId the class name ID
+	 * @param classPK the class pk
+	 * @param typeSettings the type settings
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching commerce discount rel, or <code>null</code> if a matching commerce discount rel could not be found
+	 */
+	@Override
+	public CommerceDiscountRel fetchByCN_CPK_T_First(
+		long classNameId, long classPK, String typeSettings,
+		OrderByComparator<CommerceDiscountRel> orderByComparator) {
+
+		List<CommerceDiscountRel> list = findByCN_CPK_T(
+			classNameId, classPK, typeSettings, 0, 1, orderByComparator);
+
+		if (!list.isEmpty()) {
+			return list.get(0);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Returns the last commerce discount rel in the ordered set where classNameId = &#63; and classPK = &#63; and typeSettings = &#63;.
+	 *
+	 * @param classNameId the class name ID
+	 * @param classPK the class pk
+	 * @param typeSettings the type settings
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching commerce discount rel
+	 * @throws NoSuchDiscountRelException if a matching commerce discount rel could not be found
+	 */
+	@Override
+	public CommerceDiscountRel findByCN_CPK_T_Last(
+			long classNameId, long classPK, String typeSettings,
+			OrderByComparator<CommerceDiscountRel> orderByComparator)
+		throws NoSuchDiscountRelException {
+
+		CommerceDiscountRel commerceDiscountRel = fetchByCN_CPK_T_Last(
+			classNameId, classPK, typeSettings, orderByComparator);
+
+		if (commerceDiscountRel != null) {
+			return commerceDiscountRel;
+		}
+
+		StringBundler sb = new StringBundler(8);
+
+		sb.append(_NO_SUCH_ENTITY_WITH_KEY);
+
+		sb.append("classNameId=");
+		sb.append(classNameId);
+
+		sb.append(", classPK=");
+		sb.append(classPK);
+
+		sb.append(", typeSettings=");
+		sb.append(typeSettings);
+
+		sb.append("}");
+
+		throw new NoSuchDiscountRelException(sb.toString());
+	}
+
+	/**
+	 * Returns the last commerce discount rel in the ordered set where classNameId = &#63; and classPK = &#63; and typeSettings = &#63;.
+	 *
+	 * @param classNameId the class name ID
+	 * @param classPK the class pk
+	 * @param typeSettings the type settings
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching commerce discount rel, or <code>null</code> if a matching commerce discount rel could not be found
+	 */
+	@Override
+	public CommerceDiscountRel fetchByCN_CPK_T_Last(
+		long classNameId, long classPK, String typeSettings,
+		OrderByComparator<CommerceDiscountRel> orderByComparator) {
+
+		int count = countByCN_CPK_T(classNameId, classPK, typeSettings);
+
+		if (count == 0) {
+			return null;
+		}
+
+		List<CommerceDiscountRel> list = findByCN_CPK_T(
+			classNameId, classPK, typeSettings, count - 1, count,
+			orderByComparator);
+
+		if (!list.isEmpty()) {
+			return list.get(0);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Returns the commerce discount rels before and after the current commerce discount rel in the ordered set where classNameId = &#63; and classPK = &#63; and typeSettings = &#63;.
+	 *
+	 * @param commerceDiscountRelId the primary key of the current commerce discount rel
+	 * @param classNameId the class name ID
+	 * @param classPK the class pk
+	 * @param typeSettings the type settings
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the previous, current, and next commerce discount rel
+	 * @throws NoSuchDiscountRelException if a commerce discount rel with the primary key could not be found
+	 */
+	@Override
+	public CommerceDiscountRel[] findByCN_CPK_T_PrevAndNext(
+			long commerceDiscountRelId, long classNameId, long classPK,
+			String typeSettings,
+			OrderByComparator<CommerceDiscountRel> orderByComparator)
+		throws NoSuchDiscountRelException {
+
+		typeSettings = Objects.toString(typeSettings, "");
+
+		CommerceDiscountRel commerceDiscountRel = findByPrimaryKey(
+			commerceDiscountRelId);
+
+		Session session = null;
+
+		try {
+			session = openSession();
+
+			CommerceDiscountRel[] array = new CommerceDiscountRelImpl[3];
+
+			array[0] = getByCN_CPK_T_PrevAndNext(
+				session, commerceDiscountRel, classNameId, classPK,
+				typeSettings, orderByComparator, true);
+
+			array[1] = commerceDiscountRel;
+
+			array[2] = getByCN_CPK_T_PrevAndNext(
+				session, commerceDiscountRel, classNameId, classPK,
+				typeSettings, orderByComparator, false);
+
+			return array;
+		}
+		catch (Exception exception) {
+			throw processException(exception);
+		}
+		finally {
+			closeSession(session);
+		}
+	}
+
+	protected CommerceDiscountRel getByCN_CPK_T_PrevAndNext(
+		Session session, CommerceDiscountRel commerceDiscountRel,
+		long classNameId, long classPK, String typeSettings,
+		OrderByComparator<CommerceDiscountRel> orderByComparator,
+		boolean previous) {
+
+		StringBundler sb = null;
+
+		if (orderByComparator != null) {
+			sb = new StringBundler(
+				6 + (orderByComparator.getOrderByConditionFields().length * 3) +
+					(orderByComparator.getOrderByFields().length * 3));
+		}
+		else {
+			sb = new StringBundler(5);
+		}
+
+		sb.append(_SQL_SELECT_COMMERCEDISCOUNTREL_WHERE);
+
+		sb.append(_FINDER_COLUMN_CN_CPK_T_CLASSNAMEID_2);
+
+		sb.append(_FINDER_COLUMN_CN_CPK_T_CLASSPK_2);
+
+		boolean bindTypeSettings = false;
+
+		if (typeSettings.isEmpty()) {
+			sb.append(_FINDER_COLUMN_CN_CPK_T_TYPESETTINGS_3);
+		}
+		else {
+			bindTypeSettings = true;
+
+			sb.append(_FINDER_COLUMN_CN_CPK_T_TYPESETTINGS_2);
+		}
+
+		if (orderByComparator != null) {
+			String[] orderByConditionFields =
+				orderByComparator.getOrderByConditionFields();
+
+			if (orderByConditionFields.length > 0) {
+				sb.append(WHERE_AND);
+			}
+
+			for (int i = 0; i < orderByConditionFields.length; i++) {
+				sb.append(_ORDER_BY_ENTITY_ALIAS);
+				sb.append(orderByConditionFields[i]);
+
+				if ((i + 1) < orderByConditionFields.length) {
+					if (orderByComparator.isAscending() ^ previous) {
+						sb.append(WHERE_GREATER_THAN_HAS_NEXT);
+					}
+					else {
+						sb.append(WHERE_LESSER_THAN_HAS_NEXT);
+					}
+				}
+				else {
+					if (orderByComparator.isAscending() ^ previous) {
+						sb.append(WHERE_GREATER_THAN);
+					}
+					else {
+						sb.append(WHERE_LESSER_THAN);
+					}
+				}
+			}
+
+			sb.append(ORDER_BY_CLAUSE);
+
+			String[] orderByFields = orderByComparator.getOrderByFields();
+
+			for (int i = 0; i < orderByFields.length; i++) {
+				sb.append(_ORDER_BY_ENTITY_ALIAS);
+				sb.append(orderByFields[i]);
+
+				if ((i + 1) < orderByFields.length) {
+					if (orderByComparator.isAscending() ^ previous) {
+						sb.append(ORDER_BY_ASC_HAS_NEXT);
+					}
+					else {
+						sb.append(ORDER_BY_DESC_HAS_NEXT);
+					}
+				}
+				else {
+					if (orderByComparator.isAscending() ^ previous) {
+						sb.append(ORDER_BY_ASC);
+					}
+					else {
+						sb.append(ORDER_BY_DESC);
+					}
+				}
+			}
+		}
+		else {
+			sb.append(CommerceDiscountRelModelImpl.ORDER_BY_JPQL);
+		}
+
+		String sql = sb.toString();
+
+		Query query = session.createQuery(sql);
+
+		query.setFirstResult(0);
+		query.setMaxResults(2);
+
+		QueryPos queryPos = QueryPos.getInstance(query);
+
+		queryPos.add(classNameId);
+
+		queryPos.add(classPK);
+
+		if (bindTypeSettings) {
+			queryPos.add(typeSettings);
+		}
+
+		if (orderByComparator != null) {
+			for (Object orderByConditionValue :
+					orderByComparator.getOrderByConditionValues(
+						commerceDiscountRel)) {
+
+				queryPos.add(orderByConditionValue);
+			}
+		}
+
+		List<CommerceDiscountRel> list = query.list();
+
+		if (list.size() == 2) {
+			return list.get(1);
+		}
+		else {
+			return null;
+		}
+	}
+
+	/**
+	 * Removes all the commerce discount rels where classNameId = &#63; and classPK = &#63; and typeSettings = &#63; from the database.
+	 *
+	 * @param classNameId the class name ID
+	 * @param classPK the class pk
+	 * @param typeSettings the type settings
+	 */
+	@Override
+	public void removeByCN_CPK_T(
+		long classNameId, long classPK, String typeSettings) {
+
+		for (CommerceDiscountRel commerceDiscountRel :
+				findByCN_CPK_T(
+					classNameId, classPK, typeSettings, QueryUtil.ALL_POS,
+					QueryUtil.ALL_POS, null)) {
+
+			remove(commerceDiscountRel);
+		}
+	}
+
+	/**
+	 * Returns the number of commerce discount rels where classNameId = &#63; and classPK = &#63; and typeSettings = &#63;.
+	 *
+	 * @param classNameId the class name ID
+	 * @param classPK the class pk
+	 * @param typeSettings the type settings
+	 * @return the number of matching commerce discount rels
+	 */
+	@Override
+	public int countByCN_CPK_T(
+		long classNameId, long classPK, String typeSettings) {
+
+		typeSettings = Objects.toString(typeSettings, "");
+
+		FinderPath finderPath = _finderPathCountByCN_CPK_T;
+
+		Object[] finderArgs = new Object[] {classNameId, classPK, typeSettings};
+
+		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
+
+		if (count == null) {
+			StringBundler sb = new StringBundler(4);
+
+			sb.append(_SQL_COUNT_COMMERCEDISCOUNTREL_WHERE);
+
+			sb.append(_FINDER_COLUMN_CN_CPK_T_CLASSNAMEID_2);
+
+			sb.append(_FINDER_COLUMN_CN_CPK_T_CLASSPK_2);
+
+			boolean bindTypeSettings = false;
+
+			if (typeSettings.isEmpty()) {
+				sb.append(_FINDER_COLUMN_CN_CPK_T_TYPESETTINGS_3);
+			}
+			else {
+				bindTypeSettings = true;
+
+				sb.append(_FINDER_COLUMN_CN_CPK_T_TYPESETTINGS_2);
+			}
+
+			String sql = sb.toString();
+
+			Session session = null;
+
+			try {
+				session = openSession();
+
+				Query query = session.createQuery(sql);
+
+				QueryPos queryPos = QueryPos.getInstance(query);
+
+				queryPos.add(classNameId);
+
+				queryPos.add(classPK);
+
+				if (bindTypeSettings) {
+					queryPos.add(typeSettings);
+				}
+
+				count = (Long)query.uniqueResult();
+
+				finderCache.putResult(finderPath, finderArgs, count);
+			}
+			catch (Exception exception) {
+				throw processException(exception);
+			}
+			finally {
+				closeSession(session);
+			}
+		}
+
+		return count.intValue();
+	}
+
+	private static final String _FINDER_COLUMN_CN_CPK_T_CLASSNAMEID_2 =
+		"commerceDiscountRel.classNameId = ? AND ";
+
+	private static final String _FINDER_COLUMN_CN_CPK_T_CLASSPK_2 =
+		"commerceDiscountRel.classPK = ? AND ";
+
+	private static final String _FINDER_COLUMN_CN_CPK_T_TYPESETTINGS_2 =
+		"CAST_CLOB_TEXT(commerceDiscountRel.typeSettings) = ?";
+
+	private static final String _FINDER_COLUMN_CN_CPK_T_TYPESETTINGS_3 =
+		"(commerceDiscountRel.typeSettings IS NULL OR CAST_CLOB_TEXT(commerceDiscountRel.typeSettings) = '')";
+
 	public CommerceDiscountRelPersistenceImpl() {
 		setModelClass(CommerceDiscountRel.class);
 
@@ -2921,6 +3553,31 @@ public class CommerceDiscountRelPersistenceImpl
 			},
 			new String[] {"commerceDiscountId", "classNameId", "classPK"},
 			false);
+
+		_finderPathWithPaginationFindByCN_CPK_T = new FinderPath(
+			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findByCN_CPK_T",
+			new String[] {
+				Long.class.getName(), Long.class.getName(),
+				String.class.getName(), Integer.class.getName(),
+				Integer.class.getName(), OrderByComparator.class.getName()
+			},
+			new String[] {"classNameId", "classPK", "typeSettings"}, true);
+
+		_finderPathWithoutPaginationFindByCN_CPK_T = new FinderPath(
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findByCN_CPK_T",
+			new String[] {
+				Long.class.getName(), Long.class.getName(),
+				String.class.getName()
+			},
+			new String[] {"classNameId", "classPK", "typeSettings"}, true);
+
+		_finderPathCountByCN_CPK_T = new FinderPath(
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByCN_CPK_T",
+			new String[] {
+				Long.class.getName(), Long.class.getName(),
+				String.class.getName()
+			},
+			new String[] {"classNameId", "classPK", "typeSettings"}, false);
 
 		CommerceDiscountRelUtil.setPersistence(this);
 	}
