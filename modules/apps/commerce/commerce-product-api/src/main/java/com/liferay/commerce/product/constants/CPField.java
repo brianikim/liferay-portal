@@ -120,7 +120,7 @@ public class CPField {
 
 	public static final String OPTION_VALUE_NAME = "optionValueName";
 
-	public static final String PRODUCT_ID = "cpProductId";
+	public static final String PRODUCT_ID = "CPProductId";
 
 	public static final String PRODUCT_TYPE_NAME = "productTypeName";
 
