@@ -656,6 +656,12 @@ public class ProductResourceTest extends BaseProductResourceTestCase {
 				StringBundler.concat(string1, StringPool.SPACE, string2)));
 
 		Page<Product> page = productResource.getProductsPage(
+			String.valueOf(product1.getProductId()), null, Pagination.of(1, 10),
+			null);
+
+		Assert.assertEquals(1, page.getTotalCount());
+
+		page = productResource.getProductsPage(
 			string1, null, Pagination.of(1, 10), null);
 
 		Assert.assertEquals(1, page.getTotalCount());
