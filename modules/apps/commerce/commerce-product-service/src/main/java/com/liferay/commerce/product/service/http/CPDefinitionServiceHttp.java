@@ -155,7 +155,9 @@ public class CPDefinitionServiceHttp {
 				int deliverySubscriptionLength, String deliverySubscriptionType,
 				com.liferay.portal.kernel.util.UnicodeProperties
 					deliverySubscriptionTypeSettingsUnicodeProperties,
-				long deliveryMaxSubscriptionCycles, int status,
+				long deliveryMaxSubscriptionCycles,
+				boolean accountGroupFilterEnabled, boolean channelFilterEnabled,
+				int status,
 				com.liferay.portal.kernel.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
@@ -180,7 +182,8 @@ public class CPDefinitionServiceHttp {
 				maxSubscriptionCycles, deliverySubscriptionEnabled,
 				deliverySubscriptionLength, deliverySubscriptionType,
 				deliverySubscriptionTypeSettingsUnicodeProperties,
-				deliveryMaxSubscriptionCycles, status, serviceContext);
+				deliveryMaxSubscriptionCycles, accountGroupFilterEnabled,
+				channelFilterEnabled, status, serviceContext);
 
 			Object returnObj = null;
 
@@ -1421,7 +1424,8 @@ public class CPDefinitionServiceHttp {
 			com.liferay.portal.kernel.util.UnicodeProperties.class, long.class,
 			boolean.class, int.class, String.class,
 			com.liferay.portal.kernel.util.UnicodeProperties.class, long.class,
-			int.class, com.liferay.portal.kernel.service.ServiceContext.class
+			boolean.class, boolean.class, int.class,
+			com.liferay.portal.kernel.service.ServiceContext.class
 		};
 	private static final Class<?>[] _cloneCPDefinitionParameterTypes2 =
 		new Class[] {

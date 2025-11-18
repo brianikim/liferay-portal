@@ -141,8 +141,9 @@ public interface CPDefinitionLocalService
 			long maxSubscriptionCycles, boolean deliverySubscriptionEnabled,
 			int deliverySubscriptionLength, String deliverySubscriptionType,
 			UnicodeProperties deliverySubscriptionTypeSettingsUnicodeProperties,
-			long deliveryMaxSubscriptionCycles, int status,
-			ServiceContext serviceContext)
+			long deliveryMaxSubscriptionCycles,
+			boolean accountGroupFilterEnabled, boolean channelFilterEnabled,
+			int status, ServiceContext serviceContext)
 		throws PortalException;
 
 	public void checkCPDefinitions() throws PortalException;
