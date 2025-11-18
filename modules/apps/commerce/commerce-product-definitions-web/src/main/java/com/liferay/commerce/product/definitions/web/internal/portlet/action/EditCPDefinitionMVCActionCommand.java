@@ -592,7 +592,8 @@ public class EditCPDefinitionMVCActionCommand extends BaseMVCActionCommand {
 				expirationDateDay, expirationDateYear, expirationDateHour,
 				expirationDateMinute, neverExpire,
 				CPInstanceConstants.DEFAULT_SKU, false, 1, null, null, 0L,
-				WorkflowConstants.STATUS_DRAFT, serviceContext);
+				false, 1, null, null, 0, WorkflowConstants.STATUS_DRAFT,
+				serviceContext);
 		}
 		else {
 			cpDefinition = _cpDefinitionService.updateCPDefinition(
