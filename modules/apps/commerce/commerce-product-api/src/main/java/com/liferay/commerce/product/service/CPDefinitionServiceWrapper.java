@@ -127,49 +127,6 @@ public class CPDefinitionServiceWrapper
 	}
 
 	@Override
-	public CPDefinition addOrUpdateCPDefinition(
-			String externalReferenceCode, long groupId,
-			java.util.Map<java.util.Locale, String> nameMap,
-			java.util.Map<java.util.Locale, String> shortDescriptionMap,
-			java.util.Map<java.util.Locale, String> descriptionMap,
-			java.util.Map<java.util.Locale, String> urlTitleMap,
-			java.util.Map<java.util.Locale, String> metaTitleMap,
-			java.util.Map<java.util.Locale, String> metaDescriptionMap,
-			java.util.Map<java.util.Locale, String> metaKeywordsMap,
-			String productTypeName, boolean ignoreSKUCombinations,
-			boolean shippable, boolean freeShipping, boolean shipSeparately,
-			double shippingExtraPrice, double width, double height,
-			double depth, double weight, long cpTaxCategoryId,
-			boolean taxExempt, boolean telcoOrElectronics,
-			String ddmStructureKey, boolean published, int displayDateMonth,
-			int displayDateDay, int displayDateYear, int displayDateHour,
-			int displayDateMinute, int expirationDateMonth,
-			int expirationDateDay, int expirationDateYear,
-			int expirationDateHour, int expirationDateMinute,
-			boolean neverExpire, String defaultSku, boolean subscriptionEnabled,
-			int subscriptionLength, String subscriptionType,
-			com.liferay.portal.kernel.util.UnicodeProperties
-				subscriptionTypeSettingsUnicodeProperties,
-			long maxSubscriptionCycles, int status,
-			com.liferay.portal.kernel.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException {
-
-		return _cpDefinitionService.addOrUpdateCPDefinition(
-			externalReferenceCode, groupId, nameMap, shortDescriptionMap,
-			descriptionMap, urlTitleMap, metaTitleMap, metaDescriptionMap,
-			metaKeywordsMap, productTypeName, ignoreSKUCombinations, shippable,
-			freeShipping, shipSeparately, shippingExtraPrice, width, height,
-			depth, weight, cpTaxCategoryId, taxExempt, telcoOrElectronics,
-			ddmStructureKey, published, displayDateMonth, displayDateDay,
-			displayDateYear, displayDateHour, displayDateMinute,
-			expirationDateMonth, expirationDateDay, expirationDateYear,
-			expirationDateHour, expirationDateMinute, neverExpire, defaultSku,
-			subscriptionEnabled, subscriptionLength, subscriptionType,
-			subscriptionTypeSettingsUnicodeProperties, maxSubscriptionCycles,
-			status, serviceContext);
-	}
-
-	@Override
 	public CPDefinition cloneCPDefinition(
 			long cpDefinitionId, long groupId,
 			com.liferay.portal.kernel.service.ServiceContext serviceContext)
