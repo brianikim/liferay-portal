@@ -742,8 +742,10 @@ public class ProductResourceImpl extends BaseProductResourceImpl {
 			subscriptionMaxSubscriptionCycles, deliverySubscriptionEnable,
 			deliverySubscriptionLength, deliverySubscriptionTypeValue,
 			deliverySubscriptionTypeSettingsUnicodeProperties,
-			deliverySubscriptionMaxSubscriptionCycles, productStatus,
-			serviceContext);
+			deliverySubscriptionMaxSubscriptionCycles,
+			GetterUtil.getBoolean(product.getProductAccountGroupFilter()),
+			GetterUtil.getBoolean(product.getProductChannelFilter()),
+			productStatus, serviceContext);
 
 		if ((product.getActive() != null) && !product.getActive()) {
 			Map<String, Serializable> workflowContext = new HashMap<>();
