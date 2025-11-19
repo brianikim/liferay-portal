@@ -218,6 +218,7 @@ public interface CPDefinitionService extends BaseService {
 			int displayDateMinute, int expirationDateMonth,
 			int expirationDateDay, int expirationDateYear,
 			int expirationDateHour, int expirationDateMinute,
+			boolean accountGroupFilterEnabled, boolean channelFilterEnabled,
 			boolean neverExpire, ServiceContext serviceContext)
 		throws PortalException;
 

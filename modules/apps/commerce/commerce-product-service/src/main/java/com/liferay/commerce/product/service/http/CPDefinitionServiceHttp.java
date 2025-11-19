@@ -990,6 +990,7 @@ public class CPDefinitionServiceHttp {
 				int displayDateMinute, int expirationDateMonth,
 				int expirationDateDay, int expirationDateYear,
 				int expirationDateHour, int expirationDateMinute,
+				boolean accountGroupFilterEnabled, boolean channelFilterEnabled,
 				boolean neverExpire,
 				com.liferay.portal.kernel.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException {
@@ -1008,7 +1009,8 @@ public class CPDefinitionServiceHttp {
 				ddmStructureKey, published, displayDateMonth, displayDateDay,
 				displayDateYear, displayDateHour, displayDateMinute,
 				expirationDateMonth, expirationDateDay, expirationDateYear,
-				expirationDateHour, expirationDateMinute, neverExpire,
+				expirationDateHour, expirationDateMinute,
+				accountGroupFilterEnabled, channelFilterEnabled, neverExpire,
 				serviceContext);
 
 			Object returnObj = null;
@@ -1508,6 +1510,7 @@ public class CPDefinitionServiceHttp {
 			boolean.class, boolean.class, String.class, boolean.class,
 			int.class, int.class, int.class, int.class, int.class, int.class,
 			int.class, int.class, int.class, int.class, boolean.class,
+			boolean.class, boolean.class,
 			com.liferay.portal.kernel.service.ServiceContext.class
 		};
 	private static final Class<?>[]

@@ -309,6 +309,7 @@ public class CPDefinitionServiceUtil {
 			int displayDateMinute, int expirationDateMonth,
 			int expirationDateDay, int expirationDateYear,
 			int expirationDateHour, int expirationDateMinute,
+			boolean accountGroupFilterEnabled, boolean channelFilterEnabled,
 			boolean neverExpire,
 			com.liferay.portal.kernel.service.ServiceContext serviceContext)
 		throws PortalException {
@@ -322,7 +323,8 @@ public class CPDefinitionServiceUtil {
 			displayDateMonth, displayDateDay, displayDateYear, displayDateHour,
 			displayDateMinute, expirationDateMonth, expirationDateDay,
 			expirationDateYear, expirationDateHour, expirationDateMinute,
-			neverExpire, serviceContext);
+			accountGroupFilterEnabled, channelFilterEnabled, neverExpire,
+			serviceContext);
 	}
 
 	public static CPDefinition updateCPDefinitionAccountGroupFilter(
