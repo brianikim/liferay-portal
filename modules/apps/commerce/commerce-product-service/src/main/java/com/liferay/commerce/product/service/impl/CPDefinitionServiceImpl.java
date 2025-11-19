@@ -381,6 +381,10 @@ public class CPDefinitionServiceImpl extends CPDefinitionServiceBaseImpl {
 			Map<Locale, String> metaTitleMap,
 			Map<Locale, String> metaDescriptionMap,
 			Map<Locale, String> metaKeywordsMap, boolean ignoreSKUCombinations,
+			boolean shippable, boolean freeShipping, boolean shipSeparately,
+			double shippingExtraPrice, double width, double height,
+			double depth, double weight, long cpTaxCategoryId,
+			boolean taxExempt, boolean telcoOrElectronics,
 			String ddmStructureKey, boolean published, int displayDateMonth,
 			int displayDateDay, int displayDateYear, int displayDateHour,
 			int displayDateMinute, int expirationDateMonth,
@@ -395,11 +399,13 @@ public class CPDefinitionServiceImpl extends CPDefinitionServiceBaseImpl {
 		return cpDefinitionLocalService.updateCPDefinition(
 			cpDefinitionId, nameMap, shortDescriptionMap, descriptionMap,
 			urlTitleMap, metaTitleMap, metaDescriptionMap, metaKeywordsMap,
-			ignoreSKUCombinations, ddmStructureKey, published, displayDateMonth,
-			displayDateDay, displayDateYear, displayDateHour, displayDateMinute,
-			expirationDateMonth, expirationDateDay, expirationDateYear,
-			expirationDateHour, expirationDateMinute, neverExpire,
-			serviceContext);
+			ignoreSKUCombinations, shippable, freeShipping, shipSeparately,
+			shippingExtraPrice, width, height, depth, weight, cpTaxCategoryId,
+			taxExempt, telcoOrElectronics, ddmStructureKey, published,
+			displayDateMonth, displayDateDay, displayDateYear, displayDateHour,
+			displayDateMinute, expirationDateMonth, expirationDateDay,
+			expirationDateYear, expirationDateHour, expirationDateMinute,
+			neverExpire, serviceContext);
 	}
 
 	@Override

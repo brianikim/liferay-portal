@@ -2197,41 +2197,6 @@ public class CPDefinitionLocalServiceImpl
 			user.getUserId(), cpDefinition, serviceContext);
 	}
 
-	@Override
-	public CPDefinition updateCPDefinition(
-			long cpDefinitionId, Map<Locale, String> nameMap,
-			Map<Locale, String> shortDescriptionMap,
-			Map<Locale, String> descriptionMap, Map<Locale, String> urlTitleMap,
-			Map<Locale, String> metaTitleMap,
-			Map<Locale, String> metaDescriptionMap,
-			Map<Locale, String> metaKeywordsMap, boolean ignoreSKUCombinations,
-			String ddmStructureKey, boolean published, int displayDateMonth,
-			int displayDateDay, int displayDateYear, int displayDateHour,
-			int displayDateMinute, int expirationDateMonth,
-			int expirationDateDay, int expirationDateYear,
-			int expirationDateHour, int expirationDateMinute,
-			boolean neverExpire, ServiceContext serviceContext)
-		throws PortalException {
-
-		CPDefinition cpDefinition = cpDefinitionPersistence.findByPrimaryKey(
-			cpDefinitionId);
-
-		return cpDefinitionLocalService.updateCPDefinition(
-			cpDefinitionId, nameMap, shortDescriptionMap, descriptionMap,
-			urlTitleMap, metaTitleMap, metaDescriptionMap, metaKeywordsMap,
-			ignoreSKUCombinations, cpDefinition.isShippable(),
-			cpDefinition.isFreeShipping(), cpDefinition.isShipSeparately(),
-			cpDefinition.getShippingExtraPrice(), cpDefinition.getWidth(),
-			cpDefinition.getHeight(), cpDefinition.getDepth(),
-			cpDefinition.getWeight(), cpDefinition.getCPTaxCategoryId(),
-			cpDefinition.isTaxExempt(), cpDefinition.isTelcoOrElectronics(),
-			ddmStructureKey, published, displayDateMonth, displayDateDay,
-			displayDateYear, displayDateHour, displayDateMinute,
-			expirationDateMonth, expirationDateDay, expirationDateYear,
-			expirationDateHour, expirationDateMinute, neverExpire,
-			serviceContext);
-	}
-
 	@Indexable(type = IndexableType.REINDEX)
 	@Override
 	public CPDefinition updateCPDefinitionAccountGroupFilter(
