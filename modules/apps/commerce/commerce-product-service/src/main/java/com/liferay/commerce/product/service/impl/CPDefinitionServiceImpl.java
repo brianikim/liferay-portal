@@ -392,6 +392,7 @@ public class CPDefinitionServiceImpl extends CPDefinitionServiceBaseImpl {
 			int displayDateMinute, int expirationDateMonth,
 			int expirationDateDay, int expirationDateYear,
 			int expirationDateHour, int expirationDateMinute,
+			boolean accountGroupFilterEnabled, boolean channelFilterEnabled,
 			boolean neverExpire, ServiceContext serviceContext)
 		throws PortalException {
 
@@ -407,7 +408,8 @@ public class CPDefinitionServiceImpl extends CPDefinitionServiceBaseImpl {
 			displayDateMonth, displayDateDay, displayDateYear, displayDateHour,
 			displayDateMinute, expirationDateMonth, expirationDateDay,
 			expirationDateYear, expirationDateHour, expirationDateMinute,
-			neverExpire, serviceContext);
+			accountGroupFilterEnabled, channelFilterEnabled, neverExpire,
+			serviceContext);
 	}
 
 	@Override

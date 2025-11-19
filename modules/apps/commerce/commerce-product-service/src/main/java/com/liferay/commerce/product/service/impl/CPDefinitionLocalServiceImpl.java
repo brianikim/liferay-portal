@@ -428,8 +428,9 @@ public class CPDefinitionLocalServiceImpl
 						displayDateMonth, displayDateDay, displayDateYear,
 						displayDateHour, displayDateMinute, expirationDateMonth,
 						expirationDateDay, expirationDateYear,
-						expirationDateHour, expirationDateMinute, neverExpire,
-						serviceContext);
+						expirationDateHour, expirationDateMinute,
+						accountGroupFilterEnabled, channelFilterEnabled,
+						neverExpire, serviceContext);
 
 				return cpDefinitionLocalService.updateSubscriptionInfo(
 					cpDefinition.getCPDefinitionId(), subscriptionEnabled,
@@ -2087,6 +2088,7 @@ public class CPDefinitionLocalServiceImpl
 			int displayDateMinute, int expirationDateMonth,
 			int expirationDateDay, int expirationDateYear,
 			int expirationDateHour, int expirationDateMinute,
+			boolean accountGroupFilterEnabled, boolean channelFilterEnabled,
 			boolean neverExpire, ServiceContext serviceContext)
 		throws PortalException {
 
@@ -2158,6 +2160,8 @@ public class CPDefinitionLocalServiceImpl
 		cpDefinition.setPublished(published);
 		cpDefinition.setDisplayDate(displayDate);
 		cpDefinition.setExpirationDate(expirationDate);
+		cpDefinition.setAccountGroupFilterEnabled(accountGroupFilterEnabled);
+		cpDefinition.setChannelFilterEnabled(channelFilterEnabled);
 
 		if ((expirationDate == null) || expirationDate.after(date)) {
 			cpDefinition.setStatus(WorkflowConstants.STATUS_DRAFT);
