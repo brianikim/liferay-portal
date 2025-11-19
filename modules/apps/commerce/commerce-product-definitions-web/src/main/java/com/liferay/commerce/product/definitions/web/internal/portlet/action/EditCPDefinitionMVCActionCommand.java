@@ -683,7 +683,8 @@ public class EditCPDefinitionMVCActionCommand extends BaseMVCActionCommand {
 			displayCalendar.get(Calendar.YEAR), displayDateHour,
 			displayCalendar.get(Calendar.MINUTE), expirationDateMonth,
 			expirationDateDay, expirationDateYear, expirationDateHour,
-			expirationDateMinute, neverExpire, serviceContext);
+			expirationDateMinute, cpDefinition.isAccountGroupFilterEnabled(),
+			cpDefinition.isChannelFilterEnabled(), neverExpire, serviceContext);
 	}
 
 	private void _updateCPDefinitionInventory(

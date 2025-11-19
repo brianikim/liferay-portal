@@ -1626,6 +1626,8 @@ public class ProductResourceImpl extends BaseProductResourceImpl {
 			displayDateConfig.getMinute(), expirationDateConfig.getMonth(),
 			expirationDateConfig.getDay(), expirationDateConfig.getYear(),
 			expirationDateConfig.getHour(), expirationDateConfig.getMinute(),
+			GetterUtil.getBoolean(product.getProductAccountGroupFilter()),
+			GetterUtil.getBoolean(product.getProductChannelFilter()),
 			GetterUtil.get(
 				product.getNeverExpire(),
 				cpDefinition.getExpirationDate() == null),
