@@ -810,33 +810,6 @@ public class CPDefinitionLocalServiceUtil {
 			neverExpire, serviceContext);
 	}
 
-	public static CPDefinition updateCPDefinition(
-			long cpDefinitionId, Map<java.util.Locale, String> nameMap,
-			Map<java.util.Locale, String> shortDescriptionMap,
-			Map<java.util.Locale, String> descriptionMap,
-			Map<java.util.Locale, String> urlTitleMap,
-			Map<java.util.Locale, String> metaTitleMap,
-			Map<java.util.Locale, String> metaDescriptionMap,
-			Map<java.util.Locale, String> metaKeywordsMap,
-			boolean ignoreSKUCombinations, String ddmStructureKey,
-			boolean published, int displayDateMonth, int displayDateDay,
-			int displayDateYear, int displayDateHour, int displayDateMinute,
-			int expirationDateMonth, int expirationDateDay,
-			int expirationDateYear, int expirationDateHour,
-			int expirationDateMinute, boolean neverExpire,
-			com.liferay.portal.kernel.service.ServiceContext serviceContext)
-		throws PortalException {
-
-		return getService().updateCPDefinition(
-			cpDefinitionId, nameMap, shortDescriptionMap, descriptionMap,
-			urlTitleMap, metaTitleMap, metaDescriptionMap, metaKeywordsMap,
-			ignoreSKUCombinations, ddmStructureKey, published, displayDateMonth,
-			displayDateDay, displayDateYear, displayDateHour, displayDateMinute,
-			expirationDateMonth, expirationDateDay, expirationDateYear,
-			expirationDateHour, expirationDateMinute, neverExpire,
-			serviceContext);
-	}
-
 	public static CPDefinition updateCPDefinitionAccountGroupFilter(
 			long cpDefinitionId, boolean enable)
 		throws PortalException {

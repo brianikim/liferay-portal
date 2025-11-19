@@ -921,35 +921,6 @@ public class CPDefinitionLocalServiceWrapper
 	}
 
 	@Override
-	public CPDefinition updateCPDefinition(
-			long cpDefinitionId,
-			java.util.Map<java.util.Locale, String> nameMap,
-			java.util.Map<java.util.Locale, String> shortDescriptionMap,
-			java.util.Map<java.util.Locale, String> descriptionMap,
-			java.util.Map<java.util.Locale, String> urlTitleMap,
-			java.util.Map<java.util.Locale, String> metaTitleMap,
-			java.util.Map<java.util.Locale, String> metaDescriptionMap,
-			java.util.Map<java.util.Locale, String> metaKeywordsMap,
-			boolean ignoreSKUCombinations, String ddmStructureKey,
-			boolean published, int displayDateMonth, int displayDateDay,
-			int displayDateYear, int displayDateHour, int displayDateMinute,
-			int expirationDateMonth, int expirationDateDay,
-			int expirationDateYear, int expirationDateHour,
-			int expirationDateMinute, boolean neverExpire,
-			com.liferay.portal.kernel.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException {
-
-		return _cpDefinitionLocalService.updateCPDefinition(
-			cpDefinitionId, nameMap, shortDescriptionMap, descriptionMap,
-			urlTitleMap, metaTitleMap, metaDescriptionMap, metaKeywordsMap,
-			ignoreSKUCombinations, ddmStructureKey, published, displayDateMonth,
-			displayDateDay, displayDateYear, displayDateHour, displayDateMinute,
-			expirationDateMonth, expirationDateDay, expirationDateYear,
-			expirationDateHour, expirationDateMinute, neverExpire,
-			serviceContext);
-	}
-
-	@Override
 	public CPDefinition updateCPDefinitionAccountGroupFilter(
 			long cpDefinitionId, boolean enable)
 		throws com.liferay.portal.kernel.exception.PortalException {
