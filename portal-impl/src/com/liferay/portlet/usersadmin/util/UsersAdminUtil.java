@@ -5,6 +5,7 @@
 
 package com.liferay.portlet.usersadmin.util;
 
+import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.configuration.Filter;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -1469,15 +1470,16 @@ public class UsersAdminUtil {
 			addressIds.add(addressId);
 		}
 
-		List<ListType> listTypes = ListTypeServiceUtil.getListTypes(
-			CompanyThreadLocal.getCompanyId(), listTypeType);
+		long[] listTypeIds = TransformUtil.transformToLongArray(
+			ListTypeServiceUtil.getListTypes(
+				CompanyThreadLocal.getCompanyId(), listTypeType),
+			ListType::getListTypeId);
 
 		for (Address address :
-				AddressServiceUtil.getAddresses(className, classPK)) {
+				AddressServiceUtil.getListTypeAddresses(
+					className, classPK, listTypeIds)) {
 
-			if (!addressIds.contains(address.getAddressId()) &&
-				listTypes.contains(address.getListType())) {
-
+			if (!addressIds.contains(address.getAddressId())) {
 				AddressServiceUtil.deleteAddress(address.getAddressId());
 			}
 		}
