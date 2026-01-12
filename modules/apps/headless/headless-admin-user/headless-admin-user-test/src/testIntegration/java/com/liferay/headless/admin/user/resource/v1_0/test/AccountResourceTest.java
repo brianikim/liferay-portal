@@ -420,6 +420,7 @@ public class AccountResourceTest extends BaseAccountResourceTestCase {
 		super.testPatchAccount();
 
 		_testPatchAccountWithContactInformation();
+		_testPatchAccountWithContactInformationAndPostalAddress();
 		_testPatchAccountWithEmptyOrganizationExternalReferenceCodes();
 		_testPatchAccountWithEmptyOrganizationIds();
 		_testPatchAccountWithMoreExternalReferenceCodes();
@@ -1722,6 +1723,41 @@ public class AccountResourceTest extends BaseAccountResourceTestCase {
 		_assertEquals(
 			accountContactInformation,
 			patchAccount.getAccountContactInformation());
+	}
+
+	private void _testPatchAccountWithContactInformationAndPostalAddress()
+		throws Exception {
+
+		Account postAccount = testPatchAccount_addAccount();
+
+		Account randomPatchAccount = randomPatchAccount();
+
+		PostalAddress postalAddress = _randomPostalAddress();
+
+		randomPatchAccount.setPostalAddresses(
+			new PostalAddress[] {postalAddress});
+
+		Account patchAccount = accountResource.patchAccount(
+			postAccount.getId(), randomPatchAccount);
+
+		AccountContactInformation accountContactInformation =
+			_randomAccountContactInformation();
+
+		randomPatchAccount.setAccountContactInformation(
+			accountContactInformation);
+
+		patchAccount = accountResource.patchAccount(
+			patchAccount.getId(), randomPatchAccount);
+
+		_assertEquals(
+			accountContactInformation,
+			patchAccount.getAccountContactInformation());
+
+		List<Address> addresses = _addressLocalService.getAddresses(
+			TestPropsValues.getCompanyId(), AccountEntry.class.getName(),
+			patchAccount.getId());
+
+		Assert.assertEquals(addresses.toString(), 1, addresses.size());
 	}
 
 	private void _testPatchAccountWithEmptyOrganizationExternalReferenceCodes()
