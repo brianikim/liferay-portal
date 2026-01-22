@@ -112,10 +112,10 @@
 		<column name="commerceShippingFixedOptionId" type="long" />
 		<column name="commerceShippingMethodId" type="long" />
 		<column name="countryId" type="long" />
+		<column name="regionId" type="long" />
 		<column name="fixedPrice" type="BigDecimal" />
 		<column name="ratePercentage" type="double" />
 		<column name="rateUnitWeightPrice" type="BigDecimal" />
-		<column name="regionId" type="long" />
 		<column name="weightFrom" type="double" />
 		<column name="weightTo" type="double" />
 		<column name="zip" type="String" />
