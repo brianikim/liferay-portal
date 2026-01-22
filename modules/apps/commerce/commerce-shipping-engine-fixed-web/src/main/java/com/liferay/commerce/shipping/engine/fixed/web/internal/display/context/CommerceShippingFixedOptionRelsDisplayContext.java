@@ -107,27 +107,34 @@ public class CommerceShippingFixedOptionRelsDisplayContext
 	public CommerceShippingFixedOption getCommerceShippingFixedOption()
 		throws PortalException {
 
-		CommerceShippingFixedOption commerceShippingFixedOption =
+		if (_commerceShippingFixedOption != null) {
+			return _commerceShippingFixedOption;
+		}
+
+		_commerceShippingFixedOption =
 			(CommerceShippingFixedOption)renderRequest.getAttribute(
 				CommerceShippingEngineFixedWebKeys.
 					COMMERCE_SHIPPING_FIXED_OPTION);
 
-		if (commerceShippingFixedOption != null) {
-			return commerceShippingFixedOption;
+		if (_commerceShippingFixedOption != null) {
+			return _commerceShippingFixedOption;
 		}
 
 		long commerceShippingFixedOptionId = ParamUtil.getLong(
 			renderRequest, "commerceShippingFixedOptionId");
 
-		commerceShippingFixedOption =
+		_commerceShippingFixedOption =
 			_commerceShippingFixedOptionService.
 				fetchCommerceShippingFixedOption(commerceShippingFixedOptionId);
 
-		renderRequest.setAttribute(
-			CommerceShippingEngineFixedWebKeys.COMMERCE_SHIPPING_FIXED_OPTION,
-			commerceShippingFixedOption);
+		if (_commerceShippingFixedOption != null) {
+			renderRequest.setAttribute(
+				CommerceShippingEngineFixedWebKeys.
+					COMMERCE_SHIPPING_FIXED_OPTION,
+				_commerceShippingFixedOption);
+		}
 
-		return commerceShippingFixedOption;
+		return _commerceShippingFixedOption;
 	}
 
 	public long getCommerceShippingFixedOptionId() throws PortalException {
@@ -261,6 +268,7 @@ public class CommerceShippingFixedOptionRelsDisplayContext
 
 	private final CommerceInventoryWarehouseService
 		_commerceInventoryWarehouseService;
+	private CommerceShippingFixedOption _commerceShippingFixedOption;
 	private final CommerceShippingFixedOptionRelService
 		_commerceShippingFixedOptionRelService;
 	private final CommerceShippingFixedOptionService
