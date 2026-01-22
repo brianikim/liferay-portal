@@ -54,17 +54,18 @@ public interface CommerceShippingFixedOptionRelService extends BaseService {
 	public CommerceShippingFixedOptionRel addCommerceShippingFixedOptionRel(
 			long commerceInventoryWarehouseId,
 			long commerceShippingFixedOptionId, long commerceShippingMethodId,
-			long countryId, BigDecimal fixedPrice, double ratePercentage,
-			BigDecimal rateUnitWeightPrice, long regionId, double weightFrom,
-			double weightTo, String zip, ServiceContext serviceContext)
+			long countryId, long regionId, BigDecimal fixedPrice,
+			double ratePercentage, BigDecimal rateUnitWeightPrice,
+			double weightFrom, double weightTo, String zip,
+			ServiceContext serviceContext)
 		throws PortalException;
 
 	public CommerceShippingFixedOptionRel addCommerceShippingFixedOptionRel(
 			long groupId, long commerceInventoryWarehouseId,
 			long commerceShippingFixedOptionId, long commerceShippingMethodId,
-			long countryId, BigDecimal fixedPrice, double ratePercentage,
-			BigDecimal rateUnitWeightPrice, long regionId, double weightFrom,
-			double weightTo, String zip)
+			long countryId, long regionId, BigDecimal fixedPrice,
+			double ratePercentage, BigDecimal rateUnitWeightPrice,
+			double weightFrom, double weightTo, String zip)
 		throws PortalException;
 
 	public void deleteCommerceShippingFixedOptionRel(
@@ -112,10 +113,10 @@ public interface CommerceShippingFixedOptionRelService extends BaseService {
 
 	public CommerceShippingFixedOptionRel updateCommerceShippingFixedOptionRel(
 			long commerceShippingFixedOptionRelId,
-			long commerceInventoryWarehouseId, long countryId,
+			long commerceInventoryWarehouseId, long countryId, long regionId,
 			BigDecimal fixedPrice, double ratePercentage,
-			BigDecimal rateUnitWeightPrice, long regionId, double weightFrom,
-			double weightTo, String zip)
+			BigDecimal rateUnitWeightPrice, double weightFrom, double weightTo,
+			String zip)
 		throws PortalException;
 
 }

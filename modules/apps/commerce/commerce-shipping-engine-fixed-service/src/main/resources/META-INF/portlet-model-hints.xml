@@ -47,10 +47,10 @@
 		<field name="commerceShippingFixedOptionId" type="long" />
 		<field name="commerceShippingMethodId" type="long" />
 		<field name="countryId" type="long" />
+		<field name="regionId" type="long" />
 		<field name="fixedPrice" type="BigDecimal" />
 		<field name="ratePercentage" type="double" />
 		<field name="rateUnitWeightPrice" type="BigDecimal" />
-		<field name="regionId" type="long" />
 		<field name="weightFrom" type="double" />
 		<field name="weightTo" type="double" />
 		<field name="zip" type="String" />

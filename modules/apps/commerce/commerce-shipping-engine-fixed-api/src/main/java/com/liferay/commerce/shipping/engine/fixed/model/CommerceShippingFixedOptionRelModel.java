@@ -256,6 +256,20 @@ public interface CommerceShippingFixedOptionRelModel
 	public void setCountryId(long countryId);
 
 	/**
+	 * Returns the region ID of this commerce shipping fixed option rel.
+	 *
+	 * @return the region ID of this commerce shipping fixed option rel
+	 */
+	public long getRegionId();
+
+	/**
+	 * Sets the region ID of this commerce shipping fixed option rel.
+	 *
+	 * @param regionId the region ID of this commerce shipping fixed option rel
+	 */
+	public void setRegionId(long regionId);
+
+	/**
 	 * Returns the fixed price of this commerce shipping fixed option rel.
 	 *
 	 * @return the fixed price of this commerce shipping fixed option rel
@@ -296,20 +310,6 @@ public interface CommerceShippingFixedOptionRelModel
 	 * @param rateUnitWeightPrice the rate unit weight price of this commerce shipping fixed option rel
 	 */
 	public void setRateUnitWeightPrice(BigDecimal rateUnitWeightPrice);
-
-	/**
-	 * Returns the region ID of this commerce shipping fixed option rel.
-	 *
-	 * @return the region ID of this commerce shipping fixed option rel
-	 */
-	public long getRegionId();
-
-	/**
-	 * Sets the region ID of this commerce shipping fixed option rel.
-	 *
-	 * @param regionId the region ID of this commerce shipping fixed option rel
-	 */
-	public void setRegionId(long regionId);
 
 	/**
 	 * Returns the weight from of this commerce shipping fixed option rel.

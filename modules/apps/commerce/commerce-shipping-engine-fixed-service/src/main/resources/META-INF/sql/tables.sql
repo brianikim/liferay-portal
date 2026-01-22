@@ -24,10 +24,10 @@ create table CShippingFixedOptionRel (
 	commerceShippingFixedOptionId LONG,
 	commerceShippingMethodId LONG,
 	countryId LONG,
+	regionId LONG,
 	fixedPrice BIGDECIMAL null,
 	ratePercentage DOUBLE,
 	rateUnitWeightPrice BIGDECIMAL null,
-	regionId LONG,
 	weightFrom DOUBLE,
 	weightTo DOUBLE,
 	zip VARCHAR(75) null

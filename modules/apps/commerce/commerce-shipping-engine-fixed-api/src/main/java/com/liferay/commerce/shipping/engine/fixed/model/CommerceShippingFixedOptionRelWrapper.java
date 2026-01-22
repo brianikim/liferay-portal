@@ -56,10 +56,10 @@ public class CommerceShippingFixedOptionRelWrapper
 		attributes.put(
 			"commerceShippingMethodId", getCommerceShippingMethodId());
 		attributes.put("countryId", getCountryId());
+		attributes.put("regionId", getRegionId());
 		attributes.put("fixedPrice", getFixedPrice());
 		attributes.put("ratePercentage", getRatePercentage());
 		attributes.put("rateUnitWeightPrice", getRateUnitWeightPrice());
-		attributes.put("regionId", getRegionId());
 		attributes.put("weightFrom", getWeightFrom());
 		attributes.put("weightTo", getWeightTo());
 		attributes.put("zip", getZip());
@@ -146,6 +146,12 @@ public class CommerceShippingFixedOptionRelWrapper
 			setCountryId(countryId);
 		}
 
+		Long regionId = (Long)attributes.get("regionId");
+
+		if (regionId != null) {
+			setRegionId(regionId);
+		}
+
 		BigDecimal fixedPrice = (BigDecimal)attributes.get("fixedPrice");
 
 		if (fixedPrice != null) {
@@ -163,12 +169,6 @@ public class CommerceShippingFixedOptionRelWrapper
 
 		if (rateUnitWeightPrice != null) {
 			setRateUnitWeightPrice(rateUnitWeightPrice);
-		}
-
-		Long regionId = (Long)attributes.get("regionId");
-
-		if (regionId != null) {
-			setRegionId(regionId);
 		}
 
 		Double weightFrom = (Double)attributes.get("weightFrom");

@@ -45,10 +45,10 @@ public class CommerceShippingFixedOptionRelServiceHttp {
 		CommerceShippingFixedOptionRel addCommerceShippingFixedOptionRel(
 				HttpPrincipal httpPrincipal, long commerceInventoryWarehouseId,
 				long commerceShippingFixedOptionId,
-				long commerceShippingMethodId, long countryId,
+				long commerceShippingMethodId, long countryId, long regionId,
 				java.math.BigDecimal fixedPrice, double ratePercentage,
-				java.math.BigDecimal rateUnitWeightPrice, long regionId,
-				double weightFrom, double weightTo, String zip,
+				java.math.BigDecimal rateUnitWeightPrice, double weightFrom,
+				double weightTo, String zip,
 				com.liferay.portal.kernel.service.ServiceContext serviceContext)
 			throws com.liferay.portal.kernel.exception.PortalException {
 
@@ -61,8 +61,8 @@ public class CommerceShippingFixedOptionRelServiceHttp {
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, commerceInventoryWarehouseId,
 				commerceShippingFixedOptionId, commerceShippingMethodId,
-				countryId, fixedPrice, ratePercentage, rateUnitWeightPrice,
-				regionId, weightFrom, weightTo, zip, serviceContext);
+				countryId, regionId, fixedPrice, ratePercentage,
+				rateUnitWeightPrice, weightFrom, weightTo, zip, serviceContext);
 
 			Object returnObj = null;
 
@@ -98,10 +98,10 @@ public class CommerceShippingFixedOptionRelServiceHttp {
 				HttpPrincipal httpPrincipal, long groupId,
 				long commerceInventoryWarehouseId,
 				long commerceShippingFixedOptionId,
-				long commerceShippingMethodId, long countryId,
+				long commerceShippingMethodId, long countryId, long regionId,
 				java.math.BigDecimal fixedPrice, double ratePercentage,
-				java.math.BigDecimal rateUnitWeightPrice, long regionId,
-				double weightFrom, double weightTo, String zip)
+				java.math.BigDecimal rateUnitWeightPrice, double weightFrom,
+				double weightTo, String zip)
 			throws com.liferay.portal.kernel.exception.PortalException {
 
 		try {
@@ -113,8 +113,8 @@ public class CommerceShippingFixedOptionRelServiceHttp {
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, groupId, commerceInventoryWarehouseId,
 				commerceShippingFixedOptionId, commerceShippingMethodId,
-				countryId, fixedPrice, ratePercentage, rateUnitWeightPrice,
-				regionId, weightFrom, weightTo, zip);
+				countryId, regionId, fixedPrice, ratePercentage,
+				rateUnitWeightPrice, weightFrom, weightTo, zip);
 
 			Object returnObj = null;
 
@@ -418,8 +418,8 @@ public class CommerceShippingFixedOptionRelServiceHttp {
 				HttpPrincipal httpPrincipal,
 				long commerceShippingFixedOptionRelId,
 				long commerceInventoryWarehouseId, long countryId,
-				java.math.BigDecimal fixedPrice, double ratePercentage,
-				java.math.BigDecimal rateUnitWeightPrice, long regionId,
+				long regionId, java.math.BigDecimal fixedPrice,
+				double ratePercentage, java.math.BigDecimal rateUnitWeightPrice,
 				double weightFrom, double weightTo, String zip)
 			throws com.liferay.portal.kernel.exception.PortalException {
 
@@ -431,9 +431,8 @@ public class CommerceShippingFixedOptionRelServiceHttp {
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, commerceShippingFixedOptionRelId,
-				commerceInventoryWarehouseId, countryId, fixedPrice,
-				ratePercentage, rateUnitWeightPrice, regionId, weightFrom,
-				weightTo, zip);
+				commerceInventoryWarehouseId, countryId, regionId, fixedPrice,
+				ratePercentage, rateUnitWeightPrice, weightFrom, weightTo, zip);
 
 			Object returnObj = null;
 
@@ -469,17 +468,16 @@ public class CommerceShippingFixedOptionRelServiceHttp {
 
 	private static final Class<?>[]
 		_addCommerceShippingFixedOptionRelParameterTypes0 = new Class[] {
-			long.class, long.class, long.class, long.class,
+			long.class, long.class, long.class, long.class, long.class,
 			java.math.BigDecimal.class, double.class,
-			java.math.BigDecimal.class, long.class, double.class, double.class,
+			java.math.BigDecimal.class, double.class, double.class,
 			String.class, com.liferay.portal.kernel.service.ServiceContext.class
 		};
 	private static final Class<?>[]
 		_addCommerceShippingFixedOptionRelParameterTypes1 = new Class[] {
 			long.class, long.class, long.class, long.class, long.class,
-			java.math.BigDecimal.class, double.class,
-			java.math.BigDecimal.class, long.class, double.class, double.class,
-			String.class
+			long.class, java.math.BigDecimal.class, double.class,
+			java.math.BigDecimal.class, double.class, double.class, String.class
 		};
 	private static final Class<?>[]
 		_deleteCommerceShippingFixedOptionRelParameterTypes2 = new Class[] {
@@ -508,9 +506,9 @@ public class CommerceShippingFixedOptionRelServiceHttp {
 			new Class[] {long.class};
 	private static final Class<?>[]
 		_updateCommerceShippingFixedOptionRelParameterTypes8 = new Class[] {
-			long.class, long.class, long.class, java.math.BigDecimal.class,
-			double.class, java.math.BigDecimal.class, long.class, double.class,
-			double.class, String.class
+			long.class, long.class, long.class, long.class,
+			java.math.BigDecimal.class, double.class,
+			java.math.BigDecimal.class, double.class, double.class, String.class
 		};
 
 }

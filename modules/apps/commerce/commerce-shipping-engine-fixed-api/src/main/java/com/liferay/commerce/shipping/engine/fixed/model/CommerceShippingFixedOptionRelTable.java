@@ -65,6 +65,8 @@ public class CommerceShippingFixedOptionRelTable
 	public final Column<CommerceShippingFixedOptionRelTable, Long> countryId =
 		createColumn(
 			"countryId", Long.class, Types.BIGINT, Column.FLAG_DEFAULT);
+	public final Column<CommerceShippingFixedOptionRelTable, Long> regionId =
+		createColumn("regionId", Long.class, Types.BIGINT, Column.FLAG_DEFAULT);
 	public final Column<CommerceShippingFixedOptionRelTable, BigDecimal>
 		fixedPrice = createColumn(
 			"fixedPrice", BigDecimal.class, Types.DECIMAL, Column.FLAG_DEFAULT);
@@ -75,8 +77,6 @@ public class CommerceShippingFixedOptionRelTable
 		rateUnitWeightPrice = createColumn(
 			"rateUnitWeightPrice", BigDecimal.class, Types.DECIMAL,
 			Column.FLAG_DEFAULT);
-	public final Column<CommerceShippingFixedOptionRelTable, Long> regionId =
-		createColumn("regionId", Long.class, Types.BIGINT, Column.FLAG_DEFAULT);
 	public final Column<CommerceShippingFixedOptionRelTable, Double>
 		weightFrom = createColumn(
 			"weightFrom", Double.class, Types.DOUBLE, Column.FLAG_DEFAULT);

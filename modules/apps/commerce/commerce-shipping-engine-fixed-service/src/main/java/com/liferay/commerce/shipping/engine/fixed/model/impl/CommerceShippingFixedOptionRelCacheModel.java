@@ -101,14 +101,14 @@ public class CommerceShippingFixedOptionRelCacheModel
 		sb.append(commerceShippingMethodId);
 		sb.append(", countryId=");
 		sb.append(countryId);
+		sb.append(", regionId=");
+		sb.append(regionId);
 		sb.append(", fixedPrice=");
 		sb.append(fixedPrice);
 		sb.append(", ratePercentage=");
 		sb.append(ratePercentage);
 		sb.append(", rateUnitWeightPrice=");
 		sb.append(rateUnitWeightPrice);
-		sb.append(", regionId=");
-		sb.append(regionId);
 		sb.append(", weightFrom=");
 		sb.append(weightFrom);
 		sb.append(", weightTo=");
@@ -162,11 +162,11 @@ public class CommerceShippingFixedOptionRelCacheModel
 		commerceShippingFixedOptionRelImpl.setCommerceShippingMethodId(
 			commerceShippingMethodId);
 		commerceShippingFixedOptionRelImpl.setCountryId(countryId);
+		commerceShippingFixedOptionRelImpl.setRegionId(regionId);
 		commerceShippingFixedOptionRelImpl.setFixedPrice(fixedPrice);
 		commerceShippingFixedOptionRelImpl.setRatePercentage(ratePercentage);
 		commerceShippingFixedOptionRelImpl.setRateUnitWeightPrice(
 			rateUnitWeightPrice);
-		commerceShippingFixedOptionRelImpl.setRegionId(regionId);
 		commerceShippingFixedOptionRelImpl.setWeightFrom(weightFrom);
 		commerceShippingFixedOptionRelImpl.setWeightTo(weightTo);
 
@@ -206,12 +206,12 @@ public class CommerceShippingFixedOptionRelCacheModel
 		commerceShippingMethodId = objectInput.readLong();
 
 		countryId = objectInput.readLong();
+
+		regionId = objectInput.readLong();
 		fixedPrice = (BigDecimal)objectInput.readObject();
 
 		ratePercentage = objectInput.readDouble();
 		rateUnitWeightPrice = (BigDecimal)objectInput.readObject();
-
-		regionId = objectInput.readLong();
 
 		weightFrom = objectInput.readDouble();
 
@@ -248,12 +248,12 @@ public class CommerceShippingFixedOptionRelCacheModel
 		objectOutput.writeLong(commerceShippingMethodId);
 
 		objectOutput.writeLong(countryId);
+
+		objectOutput.writeLong(regionId);
 		objectOutput.writeObject(fixedPrice);
 
 		objectOutput.writeDouble(ratePercentage);
 		objectOutput.writeObject(rateUnitWeightPrice);
-
-		objectOutput.writeLong(regionId);
 
 		objectOutput.writeDouble(weightFrom);
 
@@ -279,10 +279,10 @@ public class CommerceShippingFixedOptionRelCacheModel
 	public long commerceShippingFixedOptionId;
 	public long commerceShippingMethodId;
 	public long countryId;
+	public long regionId;
 	public BigDecimal fixedPrice;
 	public double ratePercentage;
 	public BigDecimal rateUnitWeightPrice;
-	public long regionId;
 	public double weightFrom;
 	public double weightTo;
 	public String zip;
