@@ -111,28 +111,7 @@ public class CommerceShippingFixedOptionRelsDisplayContext
 			return _commerceShippingFixedOption;
 		}
 
-		_commerceShippingFixedOption =
-			(CommerceShippingFixedOption)renderRequest.getAttribute(
-				CommerceShippingEngineFixedWebKeys.
-					COMMERCE_SHIPPING_FIXED_OPTION);
-
-		if (_commerceShippingFixedOption != null) {
-			return _commerceShippingFixedOption;
-		}
-
-		long commerceShippingFixedOptionId = ParamUtil.getLong(
-			renderRequest, "commerceShippingFixedOptionId");
-
-		_commerceShippingFixedOption =
-			_commerceShippingFixedOptionService.
-				fetchCommerceShippingFixedOption(commerceShippingFixedOptionId);
-
-		if (_commerceShippingFixedOption != null) {
-			renderRequest.setAttribute(
-				CommerceShippingEngineFixedWebKeys.
-					COMMERCE_SHIPPING_FIXED_OPTION,
-				_commerceShippingFixedOption);
-		}
+		_commerceShippingFixedOption = _getCommerceShippingFixedOption();
 
 		return _commerceShippingFixedOption;
 	}
