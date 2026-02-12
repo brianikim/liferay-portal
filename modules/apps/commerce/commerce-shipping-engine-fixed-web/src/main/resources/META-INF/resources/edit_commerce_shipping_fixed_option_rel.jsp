@@ -9,20 +9,6 @@
 
 <%
 CommerceShippingFixedOptionRelsDisplayContext commerceShippingFixedOptionRelsDisplayContext = (CommerceShippingFixedOptionRelsDisplayContext)request.getAttribute(WebKeys.PORTLET_DISPLAY_CONTEXT);
-
-long commerceShippingFixedOptionId = commerceShippingFixedOptionRelsDisplayContext.getCommerceShippingFixedOptionId();
-
-long commerceShippingFixedOptionRelId = 0;
-
-CommerceShippingFixedOptionRel commerceShippingFixedOptionRel = commerceShippingFixedOptionRelsDisplayContext.getCommerceShippingFixedOptionRel();
-
-if (commerceShippingFixedOptionRel != null) {
-	commerceShippingFixedOptionRelId = commerceShippingFixedOptionRel.getCommerceShippingFixedOptionRelId();
-}
-
-long commerceShippingMethodId = commerceShippingFixedOptionRelsDisplayContext.getCommerceShippingMethodId();
-long countryId = commerceShippingFixedOptionRelsDisplayContext.getCountryId();
-long regionId = commerceShippingFixedOptionRelsDisplayContext.getRegionId();
 %>
 
 <liferay-frontend:side-panel-content
@@ -33,9 +19,9 @@ long regionId = commerceShippingFixedOptionRelsDisplayContext.getRegionId();
 	<aui:form action="<%= editCommerceShippingFixedOptionRelActionURL %>" method="post" name="fm">
 		<aui:input name="<%= Constants.CMD %>" type="hidden" value="<%= (commerceShippingFixedOptionRel == null) ? Constants.ADD : Constants.UPDATE %>" />
 		<aui:input name="redirect" type="hidden" value="<%= currentURL %>" />
-		<aui:input name="commerceShippingFixedOptionId" type="hidden" value="<%= commerceShippingFixedOptionId %>" />
-		<aui:input name="commerceShippingFixedOptionRelId" type="hidden" value="<%= commerceShippingFixedOptionRelId %>" />
-		<aui:input name="commerceShippingMethodId" type="hidden" value="<%= commerceShippingMethodId %>" />
+		<aui:input name="commerceShippingFixedOptionId" type="hidden" value="<%= commerceShippingFixedOptionRelsDisplayContext.getCommerceShippingFixedOptionId() %>" />
+		<aui:input name="commerceShippingFixedOptionRelId" type="hidden" value="<%= commerceShippingFixedOptionRelsDisplayContext.getCommerceShippingFixedOptionRelId() %>" />
+		<aui:input name="commerceShippingMethodId" type="hidden" value="<%= commerceShippingFixedOptionRelsDisplayContext.getCommerceShippingMethodId() %>" />
 
 		<liferay-ui:error exception="<%= CommerceShippingFixedOptionRelPriceException.class %>" message="please-enter-a-valid-price" />
 
@@ -132,7 +118,8 @@ long regionId = commerceShippingFixedOptionRelsDisplayContext.getRegionId();
 			selectDesc: 'nameCurrentValue',
 			selectId: 'countryId',
 			selectSort: '<%= true %>',
-			selectVal: '<%= countryId %>',
+			selectVal:
+				'<%= commerceShippingFixedOptionRelsDisplayContext.getCountryId() %>',
 		},
 		{
 			select: '<portlet:namespace />regionId',
@@ -148,7 +135,8 @@ long regionId = commerceShippingFixedOptionRelsDisplayContext.getRegionId();
 			},
 			selectDesc: 'name',
 			selectId: 'regionId',
-			selectVal: '<%= regionId %>',
+			selectVal:
+				'<%= commerceShippingFixedOptionRelsDisplayContext.getRegionId() %>',
 		},
 	]);
 </aui:script>

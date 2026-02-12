@@ -135,6 +135,21 @@ public class CommerceShippingFixedOptionRelsDisplayContext
 		return commerceShippingFixedOptionRel;
 	}
 
+	public long getCommerceShippingFixedOptionRelId() throws PortalException {
+		long commerceShippingFixedOptionRelId = 0;
+
+		CommerceShippingFixedOptionRel commerceShippingFixedOptionRel =
+			getCommerceShippingFixedOptionRel();
+
+		if (commerceShippingFixedOptionRel != null) {
+			commerceShippingFixedOptionRelId =
+				commerceShippingFixedOptionRel.
+					getCommerceShippingFixedOptionRelId();
+		}
+
+		return commerceShippingFixedOptionRelId;
+	}
+
 	public List<Country> getCountries() {
 		ThemeDisplay themeDisplay = (ThemeDisplay)renderRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
