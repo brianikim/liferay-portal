@@ -19,17 +19,20 @@ import com.liferay.commerce.model.CPDefinitionInventory;
 import com.liferay.commerce.model.CommerceAddress;
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.model.CommerceOrderItem;
+import com.liferay.commerce.model.CommerceOrderType;
 import com.liferay.commerce.model.CommerceShippingMethod;
 import com.liferay.commerce.payment.model.CommercePaymentMethodGroupRel;
 import com.liferay.commerce.payment.service.CommercePaymentMethodGroupRelLocalServiceUtil;
 import com.liferay.commerce.payment.test.util.TestCommercePaymentMethod;
 import com.liferay.commerce.product.constants.CPConstants;
 import com.liferay.commerce.product.constants.CommerceChannelConstants;
+import com.liferay.commerce.product.model.CPConfigurationList;
 import com.liferay.commerce.product.model.CPDefinition;
 import com.liferay.commerce.product.model.CPInstance;
 import com.liferay.commerce.product.model.CommerceCatalog;
 import com.liferay.commerce.product.model.CommerceChannel;
 import com.liferay.commerce.product.model.CommerceChannelRel;
+import com.liferay.commerce.product.service.CPConfigurationListRelLocalServiceUtil;
 import com.liferay.commerce.product.service.CPInstanceLocalServiceUtil;
 import com.liferay.commerce.product.service.CommerceCatalogLocalServiceUtil;
 import com.liferay.commerce.product.service.CommerceChannelLocalServiceUtil;
@@ -218,6 +221,18 @@ public class CommerceTestUtil {
 		CommerceInventoryTestUtil.addCommerceInventoryWarehouseItem(
 			userId, commerceInventoryWarehouse, BigDecimal.TEN,
 			cpInstance.getSku(), StringPool.BLANK);
+
+		if (commerceOrder.getCommerceOrderTypeId() > 0) {
+			CPDefinition cpDefinition = cpInstance.getCPDefinition();
+
+			CPConfigurationList masterCPConfigurationList =
+				cpDefinition.getMasterCPConfigurationList();
+
+			CPConfigurationListRelLocalServiceUtil.addCPConfigurationListRel(
+				userId, CommerceOrderType.class.getName(),
+				commerceOrder.getCommerceOrderTypeId(),
+				masterCPConfigurationList.getCPConfigurationListId());
+		}
 
 		addCommerceOrderItem(
 			commerceOrder.getCommerceOrderId(), cpInstance.getCPInstanceId(),
