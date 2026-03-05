@@ -160,7 +160,7 @@ public class CommercePriceListLocalServiceTest {
 				commercePriceList.getCommercePriceListId(),
 				commercePriceList.isCatalogBasePriceList(),
 				commercePriceList.getCommerceCurrencyCode(), 1, 12, 0, 1, 2026,
-				1, 12, 0, 1, 2026, commercePriceList.getName(),
+				1, 12, 0, 1, 2100, commercePriceList.getName(),
 				commercePriceList.isNetPrice(), false,
 				commercePriceList.getParentCommercePriceListId(), 10,
 				commercePriceList.getType(), _serviceContext);
@@ -178,7 +178,7 @@ public class CommercePriceListLocalServiceTest {
 				commercePriceList.getCommercePriceListId(),
 				commercePriceList.isCatalogBasePriceList(),
 				commercePriceList.getCommerceCurrencyCode(), 1, 12, 0, 1, 2026,
-				1, 12, 0, 1, 2026, commercePriceList.getName(),
+				1, 12, 0, 1, 2100, commercePriceList.getName(),
 				commercePriceList.isNetPrice(), false,
 				commercePriceList.getParentCommercePriceListId(),
 				commercePriceList.getPriority(), commercePriceList.getType(),
@@ -201,7 +201,7 @@ public class CommercePriceListLocalServiceTest {
 				commercePriceList.getCommercePriceListId(),
 				commercePriceList.isCatalogBasePriceList(),
 				commercePriceList.getCommerceCurrencyCode(), 1, 12, 0, 1, 2026,
-				1, 12, 0, 1, 2026, commercePriceList.getName(),
+				1, 12, 0, 1, 2100, commercePriceList.getName(),
 				commercePriceList.isNetPrice(), false,
 				commercePriceList.getParentCommercePriceListId(), 10,
 				commercePriceList.getType(), _serviceContext);
