@@ -47,7 +47,7 @@ import org.osgi.service.component.annotations.Reference;
 	property = {
 		"application.name=Liferay.Headless.Commerce.Admin.Catalog",
 		"dto.class.name=com.liferay.commerce.product.model.CPDefinition",
-		"version=v1.0"
+		"service.ranking:Integer=" + Integer.MAX_VALUE, "version=v1.0"
 	},
 	service = DTOConverter.class
 )

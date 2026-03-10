@@ -22,7 +22,11 @@ import org.osgi.service.component.annotations.Reference;
  * @author Alessio Antonio Rendina
  */
 @Component(
-	property = "dto.class.name=com.liferay.commerce.product.model.CPDefinitionSpecificationOptionValue",
+	property = {
+		"application.name=Liferay.Headless.Commerce.Admin.Catalog",
+		"dto.class.name=com.liferay.commerce.product.model.CPDefinitionSpecificationOptionValue",
+		"service.ranking:Integer=" + Integer.MAX_VALUE
+	},
 	service = DTOConverter.class
 )
 public class ProductSpecificationDTOConverter
