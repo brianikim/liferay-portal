@@ -13,25 +13,31 @@ import com.liferay.asset.kernel.service.AssetCategoryLocalService;
 import com.liferay.asset.kernel.service.AssetTagService;
 import com.liferay.asset.kernel.service.AssetVocabularyLocalService;
 import com.liferay.commerce.product.model.CPDefinition;
+import com.liferay.commerce.product.model.CPDefinitionSpecificationOptionValue;
 import com.liferay.commerce.product.model.CPInstance;
 import com.liferay.commerce.product.model.CProduct;
 import com.liferay.commerce.product.model.CommerceCatalog;
 import com.liferay.commerce.product.service.CPDefinitionService;
+import com.liferay.commerce.product.service.CPDefinitionSpecificationOptionValueLocalService;
 import com.liferay.commerce.product.type.CPType;
 import com.liferay.commerce.product.type.CPTypeRegistry;
 import com.liferay.expando.kernel.model.ExpandoBridge;
 import com.liferay.headless.commerce.admin.catalog.dto.v1_0.Category;
 import com.liferay.headless.commerce.admin.catalog.dto.v1_0.Product;
+import com.liferay.headless.commerce.admin.catalog.dto.v1_0.ProductSpecification;
 import com.liferay.headless.commerce.admin.catalog.dto.v1_0.Status;
+import com.liferay.headless.commerce.admin.catalog.internal.dto.v1_0.converter.constants.DTOConverterConstants;
 import com.liferay.headless.commerce.core.util.LanguageUtils;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.language.LanguageResources;
 import com.liferay.portal.vulcan.custom.field.CustomFieldsUtil;
 import com.liferay.portal.vulcan.dto.converter.DTOConverter;
 import com.liferay.portal.vulcan.dto.converter.DTOConverterContext;
+import com.liferay.portal.vulcan.dto.converter.DefaultDTOConverterContext;
 
 import java.util.List;
 import java.util.Locale;
@@ -47,7 +53,7 @@ import org.osgi.service.component.annotations.Reference;
 	property = {
 		"application.name=Liferay.Headless.Commerce.Admin.Catalog",
 		"dto.class.name=com.liferay.commerce.product.model.CPDefinition",
-		"version=v1.0"
+		"service.ranking:Integer=" + Integer.MAX_VALUE, "version=v1.0"
 	},
 	service = DTOConverter.class
 )
@@ -134,6 +140,19 @@ public class ProductDTOConverter
 					cpDefinition::isAccountGroupFilterEnabled);
 				setProductChannelFilter(cpDefinition::isChannelFilterEnabled);
 				setProductId(cProduct::getCProductId);
+				setProductSpecifications(
+					() -> TransformUtil.transformToArray(
+						_cpDefinitionSpecificationOptionValueLocalService.
+							getCPDefinitionSpecificationOptionValues(
+								cpDefinition.getCPDefinitionId(), true,
+								QueryUtil.ALL_POS, QueryUtil.ALL_POS, null),
+						cpDefinitionSpecificationOptionValue ->
+							_productSpecificationDTOConverter.toDTO(
+								new DefaultDTOConverterContext(
+									cpDefinitionSpecificationOptionValue.
+										getCPDefinitionSpecificationOptionValueId(),
+									dtoConverterContext.getLocale())),
+						ProductSpecification.class));
 				setProductStatus(cpDefinition::getStatus);
 				setProductType(cpType::getName);
 				setProductTypeI18n(() -> cpType.getLabel(locale));
@@ -258,9 +277,20 @@ public class ProductDTOConverter
 	private CPDefinitionService _cpDefinitionService;
 
 	@Reference
+	private CPDefinitionSpecificationOptionValueLocalService
+		_cpDefinitionSpecificationOptionValueLocalService;
+
+	@Reference
 	private CPTypeRegistry _cpTypeRegistry;
 
 	@Reference
 	private Language _language;
+
+	@Reference(
+		target = DTOConverterConstants.PRODUCT_SPECIFICATION_DTO_CONVERTER
+	)
+	private DTOConverter
+		<CPDefinitionSpecificationOptionValue, ProductSpecification>
+			_productSpecificationDTOConverter;
 
 }

@@ -267,6 +267,10 @@ public class ProductResourceImpl extends BaseProductResourceImpl {
 			_cpDefinitionService.fetchCPDefinitionByCProductId(id, false);
 
 		if (cpDefinition == null) {
+			cpDefinition = _cpDefinitionService.fetchCPDefinition(id);
+		}
+
+		if (cpDefinition == null) {
 			throw new NoSuchCPDefinitionException(
 				"Unable to find product with ID " + id);
 		}
