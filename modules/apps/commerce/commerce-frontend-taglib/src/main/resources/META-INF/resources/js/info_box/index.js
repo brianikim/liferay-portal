@@ -31,6 +31,7 @@ export default function ModalActionContextHandler({
 					type: 'cancel',
 				},
 				{
+					disabled: true,
 					formId,
 					label: Liferay.Language.get('submit'),
 					type: 'submit',
@@ -50,21 +51,51 @@ export default function ModalActionContextHandler({
 				}
 			},
 			onOpen: ({iframeWindow}) => {
-				const formElement = iframeWindow.document.querySelector(
-					`#${formId}`
-				);
+				const handleReadyState = () => {
+					if (iframeWindow.document.readyState === 'complete') {
+						iframeWindow.document.removeEventListener(
+							'readystatechange',
+							handleReadyState
+						);
 
-				if (formElement) {
-					const {
-						[`${namespace}redirect`]: {value: redirect = null} = {},
-					} = formElement;
+						const formElement = iframeWindow.document.querySelector(
+							`#${formId}`
+						);
 
-					formElement.addEventListener('submit', () => {
-						Liferay.fire('closeModal', {
-							id,
-							redirect,
-						});
-					});
+						if (formElement) {
+							const submitButton = document.querySelector(
+								`#${id} button[type="submit"]`
+							);
+
+							if (submitButton) {
+								submitButton.classList.remove('disabled');
+								submitButton.disabled = false;
+							}
+
+							const {
+								[`${namespace}redirect`]: {
+									value: redirect = null,
+								} = {},
+							} = formElement;
+
+							formElement.addEventListener('submit', () => {
+								Liferay.fire('closeModal', {
+									id,
+									redirect,
+								});
+							});
+						}
+					}
+				};
+
+				if (iframeWindow.document.readyState === 'complete') {
+					handleReadyState();
+				}
+				else {
+					iframeWindow.document.addEventListener(
+						'readystatechange',
+						handleReadyState
+					);
 				}
 			},
 			size,
