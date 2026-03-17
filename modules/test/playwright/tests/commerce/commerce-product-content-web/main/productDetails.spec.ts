@@ -16,6 +16,7 @@ import {isolatedSiteTest} from '../../../../fixtures/isolatedSiteTest';
 import {loginTest} from '../../../../fixtures/loginTest';
 import {pageEditorPagesTest} from '../../../../fixtures/pageEditorPagesTest';
 import {pageViewModePagesTest} from '../../../../fixtures/pageViewModePagesTest';
+import {liferayConfig} from '../../../../liferay.config';
 import {getRandomInt} from '../../../../utils/getRandomInt';
 import getRandomString from '../../../../utils/getRandomString';
 import performLogin, {
@@ -1358,5 +1359,153 @@ test(
 				}
 			}
 		}
+	}
+);
+
+test(
+	'Use correct accountEntry for price calculation',
+	{tag: ['@LPD-80554']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelsPage,
+		page,
+		productDetailsPage,
+		site,
+		widgetPagePage,
+	}) => {
+		const layout = await apiHelpers.jsonWebServicesLayout.addLayout({
+			groupId: site.id,
+			title: getRandomString(),
+		});
+
+		const account = await apiHelpers.headlessAdminUser.postAccount({
+			name: getRandomString(),
+			type: 'business',
+		});
+
+		const user = await apiHelpers.headlessAdminUser.postUserAccount();
+
+		userData[user.alternateName] = {
+			name: user.givenName,
+			password: 'test',
+			surname: user.familyName,
+		};
+
+		const role =
+			await apiHelpers.headlessAdminUser.getRoleByName('Administrator');
+
+		await apiHelpers.headlessAdminUser.assignUserToRole(
+			role.externalReferenceCode,
+			user.id
+		);
+
+		const siteRole =
+			await apiHelpers.headlessAdminUser.getRoleByName('Site Member');
+
+		await apiHelpers.headlessAdminUser.assignUserToSite(
+			siteRole.id,
+			site.id,
+			user.id
+		);
+
+		await apiHelpers.headlessAdminUser.assignUserToAccountByEmailAddress(
+			account.id,
+			[user.emailAddress]
+		);
+
+		const channel =
+			await apiHelpers.headlessCommerceAdminChannel.postChannel({
+				siteGroupId: site.id,
+			});
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog({
+				name: getRandomString(),
+			});
+		const product =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				name: {en_US: getRandomString()},
+				skus: [
+					{
+						cost: 0,
+						price: 100,
+						published: true,
+						purchasable: true,
+						sku: 'Sku' + getRandomInt(),
+					},
+				],
+			});
+
+		const sku = product.skus[0];
+
+		await apiHelpers.headlessCommerceAdminCatalog.postSkuUnitOfMeasure(
+			sku.id,
+			{
+				basePrice: 100,
+				incrementalOrderQuantity: 1,
+				name: {en_US: getRandomString()},
+				primary: true,
+				priority: 1,
+			}
+		);
+
+		const currencies =
+			await apiHelpers.headlessCommerceAdminCatalog.getCurrenciesPage(
+				'USD'
+			);
+
+		const priceList =
+			await apiHelpers.headlessCommerceAdminPricing.postPriceList({
+				catalogId: catalog.id,
+				currencyCode: currencies.items[0].code,
+				name: 'Price List' + getRandomInt(),
+				type: 'price-list',
+			});
+
+		await apiHelpers.headlessCommerceAdminPricing.postPriceListAccount({
+			accountId: account.id,
+			priceListId: priceList.id,
+		});
+
+		await apiHelpers.headlessCommerceAdminPricing.postPriceEntry({
+			price: 15,
+			priceListId: priceList.id,
+			skuId: sku.id,
+		});
+
+		await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+			channel.name,
+			'B2B'
+		);
+
+		await waitForAlert(page);
+
+		await page.goto(`/web${site.friendlyUrlPath}${layout.friendlyURL}`);
+
+		await widgetPagePage.addPortlet('Product Details');
+
+		await page.goto(
+			liferayConfig.environment.baseUrl +
+				`/web/${site.name}/p/${product.name['en_US']}`,
+			{waitUntil: 'networkidle'}
+		);
+
+		await expect(
+			await productDetailsPage.priceField('$ 15.00')
+		).toBeVisible();
+
+		await performLogout(page);
+
+		await performLogin(page, user.alternateName);
+
+		await page.goto(
+			liferayConfig.environment.baseUrl +
+				`/web/${site.name}/p/${product.name['en_US']}`,
+			{waitUntil: 'networkidle'}
+		);
+
+		await expect(
+			await productDetailsPage.priceField('$ 15.00')
+		).toBeVisible();
 	}
 );

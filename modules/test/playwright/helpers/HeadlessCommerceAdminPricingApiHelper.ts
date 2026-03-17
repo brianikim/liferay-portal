@@ -73,6 +73,12 @@ class TPriceList {
 	type: string;
 }
 
+type TPriceListAccount = {
+	accountExternalReferenceCode?: string;
+	accountId?: number;
+	priceListId: number;
+};
+
 export class HeadlessCommerceAdminPricingApiHelper {
 	readonly apiHelpers: ApiHelpers;
 	readonly basePath: string;
@@ -233,5 +239,16 @@ export class HeadlessCommerceAdminPricingApiHelper {
 		}
 
 		return priceList;
+	}
+
+	async postPriceListAccount(priceListAccount?: TPriceListAccount) {
+		priceListAccount = await this.apiHelpers.post(
+			`${this.apiHelpers.baseUrl}${this.basePath}/price-lists/${priceListAccount.priceListId}/price-list-accounts`,
+			{
+				data: priceListAccount,
+			}
+		);
+
+		return priceListAccount;
 	}
 }
