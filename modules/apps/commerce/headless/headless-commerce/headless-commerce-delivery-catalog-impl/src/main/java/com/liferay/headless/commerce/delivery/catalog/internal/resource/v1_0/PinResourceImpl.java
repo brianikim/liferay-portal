@@ -25,6 +25,7 @@ import com.liferay.commerce.shop.by.diagram.model.CSDiagramPin;
 import com.liferay.commerce.shop.by.diagram.service.CSDiagramPinLocalService;
 import com.liferay.headless.commerce.delivery.catalog.dto.v1_0.Pin;
 import com.liferay.headless.commerce.delivery.catalog.internal.dto.v1_0.converter.PinDTOConverterContext;
+import com.liferay.headless.commerce.delivery.catalog.internal.util.v1_0.AccountEntryUtil;
 import com.liferay.headless.commerce.delivery.catalog.resource.v1_0.PinResource;
 import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
@@ -113,13 +114,11 @@ public class PinResourceImpl extends BasePinResourceImpl {
 	private Long _getAccountId(Long accountId, CommerceChannel commerceChannel)
 		throws Exception {
 
-		if ((accountId != null) && (accountId > 0)) {
-			AccountEntry accountEntry = _accountEntryService.fetchAccountEntry(
-				accountId);
+		long accountEntryId = AccountEntryUtil.getAccountEntryId(
+			_accountEntryService, accountId);
 
-			if (accountEntry != null) {
-				return accountEntry.getAccountEntryId();
-			}
+		if (accountEntryId > 0) {
+			return accountEntryId;
 		}
 
 		int countUserCommerceAccounts =

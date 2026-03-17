@@ -23,6 +23,7 @@ import com.liferay.commerce.shop.by.diagram.model.CSDiagramEntry;
 import com.liferay.headless.commerce.delivery.catalog.dto.v1_0.MappedProduct;
 import com.liferay.headless.commerce.delivery.catalog.internal.dto.v1_0.converter.MappedProductDTOConverterContext;
 import com.liferay.headless.commerce.delivery.catalog.internal.dto.v1_0.converter.constants.DTOConverterConstants;
+import com.liferay.headless.commerce.delivery.catalog.internal.util.v1_0.AccountEntryUtil;
 import com.liferay.headless.commerce.delivery.catalog.resource.v1_0.MappedProductResource;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.Sort;
@@ -83,13 +84,11 @@ public class MappedProductResourceImpl extends BaseMappedProductResourceImpl {
 	private Long _getAccountId(Long accountId, CommerceChannel commerceChannel)
 		throws Exception {
 
-		if ((accountId != null) && (accountId > 0)) {
-			AccountEntry accountEntry = _accountEntryService.fetchAccountEntry(
-				accountId);
+		long accountEntryId = AccountEntryUtil.getAccountEntryId(
+			_accountEntryService, accountId);
 
-			if (accountEntry != null) {
-				return accountEntry.getAccountEntryId();
-			}
+		if (accountEntryId > 0) {
+			return accountEntryId;
 		}
 
 		int countUserCommerceAccounts =

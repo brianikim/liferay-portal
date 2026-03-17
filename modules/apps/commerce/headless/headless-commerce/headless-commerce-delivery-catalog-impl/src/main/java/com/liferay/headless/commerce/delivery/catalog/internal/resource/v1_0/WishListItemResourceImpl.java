@@ -23,6 +23,7 @@ import com.liferay.commerce.wish.list.service.CommerceWishListItemService;
 import com.liferay.commerce.wish.list.service.CommerceWishListService;
 import com.liferay.headless.commerce.delivery.catalog.dto.v1_0.WishList;
 import com.liferay.headless.commerce.delivery.catalog.dto.v1_0.WishListItem;
+import com.liferay.headless.commerce.delivery.catalog.internal.util.v1_0.AccountEntryUtil;
 import com.liferay.headless.commerce.delivery.catalog.resource.v1_0.WishListItemResource;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -156,13 +157,11 @@ public class WishListItemResourceImpl extends BaseWishListItemResourceImpl {
 			Long accountId, CommerceChannel commerceChannel)
 		throws Exception {
 
-		if ((accountId != null) && (accountId > 0)) {
-			AccountEntry accountEntry = _accountEntryService.fetchAccountEntry(
-				accountId);
+		long accountEntryId = AccountEntryUtil.getAccountEntryId(
+			_accountEntryService, accountId);
 
-			if (accountEntry != null) {
-				return accountEntry.getAccountEntryId();
-			}
+		if (accountEntryId > 0) {
+			return accountEntryId;
 		}
 
 		int countUserCommerceAccounts =

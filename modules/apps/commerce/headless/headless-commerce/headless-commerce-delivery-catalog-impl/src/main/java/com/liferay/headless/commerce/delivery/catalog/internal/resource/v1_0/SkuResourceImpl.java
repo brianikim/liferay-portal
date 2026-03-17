@@ -31,6 +31,7 @@ import com.liferay.headless.commerce.delivery.catalog.dto.v1_0.Product;
 import com.liferay.headless.commerce.delivery.catalog.dto.v1_0.Sku;
 import com.liferay.headless.commerce.delivery.catalog.dto.v1_0.SkuOption;
 import com.liferay.headless.commerce.delivery.catalog.dto.v1_0.converter.SkuDTOConverterContext;
+import com.liferay.headless.commerce.delivery.catalog.internal.util.v1_0.AccountEntryUtil;
 import com.liferay.headless.commerce.delivery.catalog.resource.v1_0.SkuResource;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.change.tracking.CTAware;
@@ -182,19 +183,10 @@ public class SkuResourceImpl extends BaseSkuResourceImpl {
 		CommerceChannel commerceChannel =
 			_commerceChannelLocalService.getCommerceChannel(channelId);
 
-		if ((accountId != null) && (accountId > 0)) {
-			AccountEntry accountEntry = _accountEntryService.fetchAccountEntry(
-				accountId);
+		accountId = AccountEntryUtil.getAccountEntryId(
+			_accountEntryService, accountId);
 
-			if (accountEntry != null) {
-				accountId = accountEntry.getAccountEntryId();
-			}
-			else {
-				accountId = null;
-			}
-		}
-
-		if ((accountId == null) || (accountId <= 0)) {
+		if (accountId <= 0) {
 			int countUserCommerceAccounts =
 				_commerceAccountHelper.countUserCommerceAccounts(
 					contextUser.getUserId(), commerceChannel.getGroupId());
@@ -337,16 +329,13 @@ public class SkuResourceImpl extends BaseSkuResourceImpl {
 			String currencyCode)
 		throws Exception {
 
-		if ((accountId != null) && (accountId > 0)) {
-			AccountEntry accountEntry = _accountEntryService.fetchAccountEntry(
-				accountId);
+		accountId = AccountEntryUtil.getAccountEntryId(
+			_accountEntryService, accountId);
 
-			if (accountEntry != null) {
-				return _commerceContextFactory.create(
-					accountEntry.getAccountEntryId(),
-					commerceChannel.getGroupId(), currencyCode, 0,
-					contextCompany.getCompanyId());
-			}
+		if (accountId > 0) {
+			return _commerceContextFactory.create(
+				accountId, commerceChannel.getGroupId(), currencyCode, 0,
+				contextCompany.getCompanyId());
 		}
 
 		int countUserCommerceAccounts =

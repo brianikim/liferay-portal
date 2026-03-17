@@ -23,6 +23,7 @@ import com.liferay.commerce.shop.by.diagram.service.CSDiagramEntryLocalService;
 import com.liferay.headless.commerce.delivery.catalog.dto.v1_0.LinkedProduct;
 import com.liferay.headless.commerce.delivery.catalog.dto.v1_0.Product;
 import com.liferay.headless.commerce.delivery.catalog.internal.dto.v1_0.converter.LinkedProductDTOConverterContext;
+import com.liferay.headless.commerce.delivery.catalog.internal.util.v1_0.AccountEntryUtil;
 import com.liferay.headless.commerce.delivery.catalog.resource.v1_0.LinkedProductResource;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -112,13 +113,11 @@ public class LinkedProductResourceImpl extends BaseLinkedProductResourceImpl {
 			Long accountId, CommerceChannel commerceChannel)
 		throws Exception {
 
-		if ((accountId != null) && (accountId > 0)) {
-			AccountEntry accountEntry = _accountEntryService.fetchAccountEntry(
-				accountId);
+		long accountEntryId = AccountEntryUtil.getAccountEntryId(
+			_accountEntryService, accountId);
 
-			if (accountEntry != null) {
-				return accountEntry.getAccountEntryId();
-			}
+		if (accountEntryId > 0) {
+			return accountEntryId;
 		}
 
 		int count = _commerceAccountHelper.countUserCommerceAccounts(
