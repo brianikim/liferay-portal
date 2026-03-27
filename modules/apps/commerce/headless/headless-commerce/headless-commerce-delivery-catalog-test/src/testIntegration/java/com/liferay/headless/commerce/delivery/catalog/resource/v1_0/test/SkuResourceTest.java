@@ -5,6 +5,8 @@
 
 package com.liferay.headless.commerce.delivery.catalog.resource.v1_0.test;
 
+import com.liferay.account.model.AccountEntry;
+import com.liferay.account.service.AccountEntryLocalService;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.commerce.currency.model.CommerceCurrency;
 import com.liferay.commerce.currency.service.CommerceCurrencyLocalService;
@@ -12,7 +14,8 @@ import com.liferay.commerce.currency.test.util.CommerceCurrencyTestUtil;
 import com.liferay.commerce.price.list.constants.CommercePriceListConstants;
 import com.liferay.commerce.price.list.model.CommercePriceEntry;
 import com.liferay.commerce.price.list.model.CommercePriceList;
-import com.liferay.commerce.price.list.service.CommercePriceEntryLocalServiceUtil;
+import com.liferay.commerce.price.list.service.CommercePriceEntryLocalService;
+import com.liferay.commerce.price.list.service.CommercePriceListAccountRelLocalService;
 import com.liferay.commerce.price.list.service.CommercePriceListLocalServiceUtil;
 import com.liferay.commerce.product.model.CPDefinition;
 import com.liferay.commerce.product.model.CPDefinitionOptionRel;
@@ -35,14 +38,22 @@ import com.liferay.headless.commerce.delivery.catalog.client.dto.v1_0.TierPrice;
 import com.liferay.headless.commerce.delivery.catalog.client.pagination.Page;
 import com.liferay.headless.commerce.delivery.catalog.client.pagination.Pagination;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.model.UserConstants;
+import com.liferay.portal.kernel.model.role.RoleConstants;
+import com.liferay.portal.kernel.service.RoleLocalService;
+import com.liferay.portal.kernel.service.RoleLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.util.BigDecimalUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.test.rule.Inject;
 
@@ -88,6 +99,23 @@ public class SkuResourceTest extends BaseSkuResourceTestCase {
 		_cpDefinitionOptionRel = CPTestUtil.addCPDefinitionOptionRel(
 			testGroup.getGroupId(), _cpDefinition.getCPDefinitionId(), true,
 			10);
+
+		_commerceUser = UserLocalServiceUtil.addUser(
+			_user.getUserId(), testCompany.getCompanyId(), true,
+			StringPool.BLANK, StringPool.BLANK, true,
+			RandomTestUtil.randomString(),
+			RandomTestUtil.randomString() + "@liferay.com",
+			LocaleUtil.getSiteDefault(), RandomTestUtil.randomString(),
+			RandomTestUtil.randomString(), RandomTestUtil.randomString(), 0, 0,
+			true, 1, 1, 2022, RandomTestUtil.randomString(),
+			UserConstants.TYPE_REGULAR, null, null, null, null, false,
+			_serviceContext);
+
+		Role role = RoleLocalServiceUtil.getRole(
+			testCompany.getCompanyId(), RoleConstants.ADMINISTRATOR);
+
+		UserLocalServiceUtil.addRoleUser(
+			role.getRoleId(), _commerceUser.getUserId());
 	}
 
 	@Override
@@ -98,6 +126,7 @@ public class SkuResourceTest extends BaseSkuResourceTestCase {
 		_testGetChannelProductSkuAllowMultiplePriceEntriesInTheSamePriceList();
 		_testGetChannelProductSkuAllowMultiplePriceEntriesInTheSamePromotion();
 		_testGetChannelProductSkuWithCurrencyCode();
+		_testGetChannelProductSkusPageWithUnitOfMeasureAndDifferentPriceLists();
 	}
 
 	@Override
@@ -357,7 +386,7 @@ public class SkuResourceTest extends BaseSkuResourceTestCase {
 		Calendar calendar = new GregorianCalendar();
 
 		CommercePriceEntry commercePriceEntry =
-			CommercePriceEntryLocalServiceUtil.addCommercePriceEntry(
+			_commercePriceEntryLocalService.addCommercePriceEntry(
 				RandomTestUtil.randomString(), cpDefinition.getCProductId(),
 				cpInstance.getCPInstanceUuid(),
 				commercePriceList.getCommercePriceListId(), true, null, null,
@@ -372,7 +401,7 @@ public class SkuResourceTest extends BaseSkuResourceTestCase {
 
 		_serviceContext.setWorkflowAction(WorkflowConstants.ACTION_SAVE_DRAFT);
 
-		CommercePriceEntryLocalServiceUtil.addCommercePriceEntry(
+		_commercePriceEntryLocalService.addCommercePriceEntry(
 			RandomTestUtil.randomString(), cpDefinition.getCProductId(),
 			cpInstance.getCPInstanceUuid(),
 			commercePriceList.getCommercePriceListId(), true, null, null, null,
@@ -424,7 +453,7 @@ public class SkuResourceTest extends BaseSkuResourceTestCase {
 
 		Calendar calendar = new GregorianCalendar();
 
-		CommercePriceEntryLocalServiceUtil.addCommercePriceEntry(
+		_commercePriceEntryLocalService.addCommercePriceEntry(
 			RandomTestUtil.randomString(), cpDefinition.getCProductId(),
 			cpInstance.getCPInstanceUuid(),
 			catalogBaseCommercePriceList.getCommercePriceListId(), true, null,
@@ -442,7 +471,7 @@ public class SkuResourceTest extends BaseSkuResourceTestCase {
 				CommercePriceListConstants.TYPE_PROMOTION, 1.0);
 
 		CommercePriceEntry commercePriceEntry =
-			CommercePriceEntryLocalServiceUtil.addCommercePriceEntry(
+			_commercePriceEntryLocalService.addCommercePriceEntry(
 				RandomTestUtil.randomString(), cpDefinition.getCProductId(),
 				cpInstance.getCPInstanceUuid(),
 				commercePriceList.getCommercePriceListId(), true, null, null,
@@ -457,7 +486,7 @@ public class SkuResourceTest extends BaseSkuResourceTestCase {
 
 		_serviceContext.setWorkflowAction(WorkflowConstants.ACTION_SAVE_DRAFT);
 
-		CommercePriceEntryLocalServiceUtil.addCommercePriceEntry(
+		_commercePriceEntryLocalService.addCommercePriceEntry(
 			RandomTestUtil.randomString(), cpDefinition.getCProductId(),
 			cpInstance.getCPInstanceUuid(),
 			commercePriceList.getCommercePriceListId(), true, null, null, null,
@@ -481,6 +510,81 @@ public class SkuResourceTest extends BaseSkuResourceTestCase {
 		Assert.assertTrue(
 			Objects.equals(
 				price.getPromoPrice(), commercePriceEntryPrice.doubleValue()));
+	}
+
+	private void _testGetChannelProductSkusPageWithUnitOfMeasureAndDifferentPriceLists()
+		throws Exception {
+
+		CommerceCurrency commerceCurrency =
+			CommerceCurrencyTestUtil.addCommerceCurrency(
+				testCompany.getCompanyId());
+
+		CommerceCatalog commerceCatalog = CommerceTestUtil.addCommerceCatalog(
+			testGroup.getCompanyId(), testGroup.getGroupId(),
+			_commerceUser.getUserId(), commerceCurrency.getCode());
+
+		CPInstance cpInstance = CPTestUtil.addCPInstanceFromCatalog(
+			commerceCatalog.getGroupId());
+
+		CPDefinition cpDefinition = cpInstance.getCPDefinition();
+
+		Sku channelProductSku = skuResource.getChannelProductSku(
+			_commerceChannel.getCommerceChannelId(),
+			cpDefinition.getCProductId(), cpInstance.getCPInstanceId(), -1L,
+			null);
+
+		_addCPInstanceUnitOfMeasure(channelProductSku, true);
+
+		Price price = channelProductSku.getPrice();
+
+		Assert.assertTrue(
+			Objects.equals(
+				price.getPrice(), BigDecimal.ZERO.doubleValue()));
+
+		CommercePriceList commercePriceList =
+			CommercePriceListTestUtil.addCommercePriceList(
+				commerceCatalog.getGroupId(), false,
+				CommercePriceListConstants.TYPE_PRICE_LIST, 0.0);
+
+		AccountEntry accountEntry = _accountEntryLocalService.addAccountEntry(
+			StringPool.BLANK, _commerceUser.getUserId(), 0,
+			RandomTestUtil.randomString(), RandomTestUtil.randomString(), null,
+			RandomTestUtil.randomString() + "@liferay.com", null,
+			RandomTestUtil.randomString(), "business", 1, _serviceContext);
+
+		_commercePriceListAccountRelLocalService.addCommercePriceListAccountRel(
+			_commerceUser.getUserId(),
+			commercePriceList.getCommercePriceListId(),
+			accountEntry.getAccountEntryId(), 0, _serviceContext);
+
+		Calendar calendar = new GregorianCalendar();
+
+		CommercePriceEntry commercePriceEntry =
+			_commercePriceEntryLocalService.addCommercePriceEntry(
+				RandomTestUtil.randomString(), cpDefinition.getCProductId(),
+				cpInstance.getCPInstanceUuid(),
+				commercePriceList.getCommercePriceListId(), true, null, null,
+				null, null, calendar.get(Calendar.MONTH),
+				calendar.get(Calendar.DAY_OF_MONTH),
+				calendar.get(Calendar.YEAR), calendar.get(Calendar.HOUR),
+				calendar.get(Calendar.MINUTE), calendar.get(Calendar.MONTH),
+				calendar.get(Calendar.DAY_OF_MONTH),
+				calendar.get(Calendar.YEAR) - 1, calendar.get(Calendar.HOUR),
+				calendar.get(Calendar.MINUTE), false, BigDecimal.TEN, false,
+				BigDecimal.TEN, StringPool.BLANK, _serviceContext);
+
+		channelProductSku = skuResource.getChannelProductSku(
+			_commerceChannel.getCommerceChannelId(),
+			cpDefinition.getCProductId(), cpInstance.getCPInstanceId(),
+			accountEntry.getAccountEntryId(), null);
+
+		price = channelProductSku.getPrice();
+
+		BigDecimal commercePriceEntryPrice = commercePriceEntry.getPrice();
+
+		Assert.assertTrue(
+			Objects.equals(
+				price.getPrice(), commercePriceEntryPrice.doubleValue()));
 	}
 
 	private void _testGetChannelProductSkusPageWithUnitOfMeasure()
@@ -671,11 +775,24 @@ public class SkuResourceTest extends BaseSkuResourceTestCase {
 			convertedPrice.doubleValue(), tierPrices[0].getPrice(), 0);
 	}
 
+	@Inject
+	private AccountEntryLocalService _accountEntryLocalService;
+
 	@DeleteAfterTestRun
 	private CommerceChannel _commerceChannel;
 
 	@Inject
 	private CommerceCurrencyLocalService _commerceCurrencyLocalService;
+
+	@Inject
+	private CommercePriceEntryLocalService _commercePriceEntryLocalService;
+
+	@Inject
+	private CommercePriceListAccountRelLocalService
+		_commercePriceListAccountRelLocalService;
+
+	@DeleteAfterTestRun
+	private User _commerceUser;
 
 	@DeleteAfterTestRun
 	private CPDefinition _cpDefinition;
@@ -693,9 +810,11 @@ public class SkuResourceTest extends BaseSkuResourceTestCase {
 	private CPInstanceUnitOfMeasureLocalService
 		_cpInstanceUnitOfMeasureLocalService;
 
+
 	private ServiceContext _serviceContext;
 
 	@DeleteAfterTestRun
 	private User _user;
+	
 
 }
