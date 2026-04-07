@@ -10,7 +10,9 @@ import com.liferay.commerce.product.model.CPDefinition;
 import com.liferay.commerce.product.model.CommerceCatalog;
 import com.liferay.commerce.product.service.CPConfigurationEntryLocalService;
 import com.liferay.commerce.product.service.CPConfigurationListLocalService;
+import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.petra.string.StringBundler;
+import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.service.ClassNameLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
@@ -62,7 +64,8 @@ public class CPConfigurationUpgradeProcess extends UpgradeProcess {
 			PreparedStatement configurationEntryPreparedStatement =
 				connection.prepareStatement(
 					StringBundler.concat(
-						"select CPDefinition.CPDefinitionId, ",
+						"select CPDefinition.ctCollectionId, ",
+						"CPDefinition.CPDefinitionId, ",
 						"CPDefinition.CPTaxCategoryId, CPDefinition.depth, ",
 						"CPDefinition.height, CPDefinition.freeShipping, ",
 						"CPDefinition.shippable, ",
@@ -148,44 +151,58 @@ public class CPConfigurationUpgradeProcess extends UpgradeProcess {
 					configurationEntryPreparedStatement.executeQuery();
 
 				while (configurationEntryResultSet.next()) {
-					_cpConfigurationEntryLocalService.addCPConfigurationEntry(
-						null, userId, groupId, cpDefinitionClassNameId,
-						configurationEntryResultSet.getLong("CpDefinitionId"),
-						cpConfigurationListId,
-						configurationEntryResultSet.getLong("CPTaxCategoryId"),
-						configurationEntryResultSet.getString(
-							"allowedOrderQuantities"),
-						configurationEntryResultSet.getBoolean("backOrders"),
-						configurationEntryResultSet.getLong(
-							"commerceAvailabilityEstimateId"),
-						configurationEntryResultSet.getString(
-							"CPDefinitionInventoryEngine"),
-						configurationEntryResultSet.getDouble("depth"),
-						configurationEntryResultSet.getBoolean(
-							"displayAvailability"),
-						configurationEntryResultSet.getBoolean(
-							"displayStockQuantity"),
-						configurationEntryResultSet.getBoolean("freeShipping"),
-						configurationEntryResultSet.getDouble("height"),
-						configurationEntryResultSet.getString(
-							"lowStockActivity"),
-						configurationEntryResultSet.getBigDecimal(
-							"maxOrderQuantity"),
-						configurationEntryResultSet.getBigDecimal(
-							"minOrderQuantity"),
-						configurationEntryResultSet.getBigDecimal(
-							"minStockQuantity"),
-						configurationEntryResultSet.getBigDecimal(
-							"multipleOrderQuantity"),
-						true,
-						configurationEntryResultSet.getBoolean("shippable"),
-						configurationEntryResultSet.getDouble(
-							"shippingExtraPrice"),
-						configurationEntryResultSet.getBoolean(
-							"shipSeparately"),
-						configurationEntryResultSet.getBoolean("taxExempt"),
-						configurationEntryResultSet.getDouble("weight"),
-						configurationEntryResultSet.getDouble("width"));
+					try (SafeCloseable safeCloseable =
+							CTCollectionThreadLocal.
+								setCTCollectionIdWithSafeCloseable(
+									configurationEntryResultSet.getLong(
+										"ctCollectionId"))) {
+
+						_cpConfigurationEntryLocalService.
+							addCPConfigurationEntry(
+								null, userId, groupId, cpDefinitionClassNameId,
+								configurationEntryResultSet.getLong(
+									"CpDefinitionId"),
+								cpConfigurationListId,
+								configurationEntryResultSet.getLong(
+									"CPTaxCategoryId"),
+								configurationEntryResultSet.getString(
+									"allowedOrderQuantities"),
+								configurationEntryResultSet.getBoolean(
+									"backOrders"),
+								configurationEntryResultSet.getLong(
+									"commerceAvailabilityEstimateId"),
+								configurationEntryResultSet.getString(
+									"CPDefinitionInventoryEngine"),
+								configurationEntryResultSet.getDouble("depth"),
+								configurationEntryResultSet.getBoolean(
+									"displayAvailability"),
+								configurationEntryResultSet.getBoolean(
+									"displayStockQuantity"),
+								configurationEntryResultSet.getBoolean(
+									"freeShipping"),
+								configurationEntryResultSet.getDouble("height"),
+								configurationEntryResultSet.getString(
+									"lowStockActivity"),
+								configurationEntryResultSet.getBigDecimal(
+									"maxOrderQuantity"),
+								configurationEntryResultSet.getBigDecimal(
+									"minOrderQuantity"),
+								configurationEntryResultSet.getBigDecimal(
+									"minStockQuantity"),
+								configurationEntryResultSet.getBigDecimal(
+									"multipleOrderQuantity"),
+								true,
+								configurationEntryResultSet.getBoolean(
+									"shippable"),
+								configurationEntryResultSet.getDouble(
+									"shippingExtraPrice"),
+								configurationEntryResultSet.getBoolean(
+									"shipSeparately"),
+								configurationEntryResultSet.getBoolean(
+									"taxExempt"),
+								configurationEntryResultSet.getDouble("weight"),
+								configurationEntryResultSet.getDouble("width"));
+					}
 				}
 			}
 		}
