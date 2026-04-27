@@ -16,6 +16,7 @@ import com.liferay.commerce.price.list.portlet.action.CommercePriceListActionHel
 import com.liferay.commerce.price.list.service.CommercePriceEntryService;
 import com.liferay.commerce.price.list.service.CommercePriceListService;
 import com.liferay.commerce.pricing.web.internal.constants.CommercePricingFDSNames;
+import com.liferay.commerce.pricing.web.internal.util.CommercePricingUtil;
 import com.liferay.commerce.product.display.context.BaseCPDefinitionsDisplayContext;
 import com.liferay.commerce.product.model.CPInstance;
 import com.liferay.commerce.product.model.CPInstanceUnitOfMeasure;
@@ -173,18 +174,20 @@ public class CPInstanceCommercePriceEntryDisplayContext
 		).build();
 	}
 
-	public String getFormattedDiscount(BigDecimal discount)
+	public String getFormattedDiscount(
+			CommerceCurrency commerceCurrency, BigDecimal discount)
 		throws PortalException {
 
-		return _commercePriceFormatter.format(
-			discount, cpRequestHelper.getLocale());
+		return CommercePricingUtil.getFormattedValue(commerceCurrency, _commercePriceFormatter, false, cpRequestHelper.getLocale(), discount);
 	}
 
-	public String getFormattedPrice() throws PortalException {
+	public String getFormattedPrice(CommerceCurrency commerceCurrency)
+		throws PortalException {
+
 		CommercePriceEntry commercePriceEntry = getCommercePriceEntry();
 
-		return _commercePriceFormatter.format(
-			commercePriceEntry.getPrice(), cpRequestHelper.getLocale());
+		return CommercePricingUtil.getFormattedValue(commerceCurrency, _commercePriceFormatter, false, cpRequestHelper.getLocale(), commercePriceEntry.getPrice());
+
 	}
 
 	public String getItemSelectorUrl(String unitOfMeasureKey)

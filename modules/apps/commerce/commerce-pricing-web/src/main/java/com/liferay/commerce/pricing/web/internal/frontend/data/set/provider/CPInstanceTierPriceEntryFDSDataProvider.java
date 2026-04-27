@@ -7,6 +7,7 @@ package com.liferay.commerce.pricing.web.internal.frontend.data.set.provider;
 
 import com.liferay.commerce.currency.model.CommerceCurrency;
 import com.liferay.commerce.currency.model.CommerceMoney;
+import com.liferay.commerce.currency.util.CommercePriceFormatter;
 import com.liferay.commerce.price.list.model.CommercePriceEntry;
 import com.liferay.commerce.price.list.model.CommercePriceList;
 import com.liferay.commerce.price.list.model.CommerceTierPriceEntry;
@@ -166,6 +167,9 @@ public class CPInstanceTierPriceEntryFDSDataProvider
 
 	@Reference
 	private CommerceQuantityFormatter _commerceQuantityFormatter;
+
+	@Reference
+	private CommercePriceFormatter _commercePriceFormatter;
 
 	@Reference
 	private CommerceTierPriceEntryService _commerceTierPriceEntryService;

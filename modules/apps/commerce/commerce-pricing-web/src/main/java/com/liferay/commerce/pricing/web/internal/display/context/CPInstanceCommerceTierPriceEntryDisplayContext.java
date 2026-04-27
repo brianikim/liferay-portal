@@ -5,11 +5,13 @@
 
 package com.liferay.commerce.pricing.web.internal.display.context;
 
+import com.liferay.commerce.currency.model.CommerceCurrency;
 import com.liferay.commerce.currency.util.CommercePriceFormatter;
 import com.liferay.commerce.price.list.model.CommercePriceEntry;
 import com.liferay.commerce.price.list.model.CommercePriceList;
 import com.liferay.commerce.price.list.model.CommerceTierPriceEntry;
 import com.liferay.commerce.price.list.portlet.action.CommercePriceListActionHelper;
+import com.liferay.commerce.pricing.web.internal.util.CommercePricingUtil;
 import com.liferay.commerce.product.display.context.BaseCPDefinitionsDisplayContext;
 import com.liferay.commerce.product.model.CPDefinition;
 import com.liferay.commerce.product.model.CPInstance;
@@ -173,7 +175,7 @@ public class CPInstanceCommerceTierPriceEntryDisplayContext
 		).build();
 	}
 
-	public String getFormattedPrice() throws PortalException {
+	public String getFormattedPrice(CommerceCurrency commerceCurrency) throws PortalException {
 		CommerceTierPriceEntry commerceTierPriceEntry =
 			getCommerceTierPriceEntry();
 
@@ -181,8 +183,7 @@ public class CPInstanceCommerceTierPriceEntryDisplayContext
 			return StringPool.BLANK;
 		}
 
-		return _commercePriceFormatter.format(
-			commerceTierPriceEntry.getPrice(), cpRequestHelper.getLocale());
+		return CommercePricingUtil.getFormattedValue(commerceCurrency, _commercePriceFormatter, false, cpRequestHelper.getLocale(), commerceTierPriceEntry.getPrice());
 	}
 
 	@Override

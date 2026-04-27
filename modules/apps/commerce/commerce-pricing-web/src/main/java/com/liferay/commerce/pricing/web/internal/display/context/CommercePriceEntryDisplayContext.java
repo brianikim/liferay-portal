@@ -37,6 +37,7 @@ import jakarta.portlet.WindowStateException;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -189,43 +190,23 @@ public class CommercePriceEntryDisplayContext
 		return creationMenu;
 	}
 
-	public String getDiscountLevel1() throws PortalException {
-		CommercePriceEntry commercePriceEntry = getCommercePriceEntry();
+	public String getFormattedDiscount(CommerceCurrency commerceCurrency, BigDecimal discount)
+		throws PortalException {
 
 		return _commercePriceFormatter.format(
-			commercePriceEntry.getDiscountLevel1(),
+			commerceCurrency, discount,
 			cpRequestHelper.getLocale());
 	}
 
-	public String getDiscountLevel2() throws PortalException {
+
+	public String getFormattedPrice(CommerceCurrency commerceCurrency)
+		throws PortalException {
+
 		CommercePriceEntry commercePriceEntry = getCommercePriceEntry();
 
 		return _commercePriceFormatter.format(
-			commercePriceEntry.getDiscountLevel2(),
+			commerceCurrency, commercePriceEntry.getPrice(),
 			cpRequestHelper.getLocale());
-	}
-
-	public String getDiscountLevel3() throws PortalException {
-		CommercePriceEntry commercePriceEntry = getCommercePriceEntry();
-
-		return _commercePriceFormatter.format(
-			commercePriceEntry.getDiscountLevel3(),
-			cpRequestHelper.getLocale());
-	}
-
-	public String getDiscountLevel4() throws PortalException {
-		CommercePriceEntry commercePriceEntry = getCommercePriceEntry();
-
-		return _commercePriceFormatter.format(
-			commercePriceEntry.getDiscountLevel4(),
-			cpRequestHelper.getLocale());
-	}
-
-	public String getPrice() throws PortalException {
-		CommercePriceEntry commercePriceEntry = getCommercePriceEntry();
-
-		return _commercePriceFormatter.format(
-			commercePriceEntry.getPrice(), cpRequestHelper.getLocale());
 	}
 
 	public List<FDSActionDropdownItem> getPriceEntriesFDSActionDropdownItems()

@@ -64,7 +64,7 @@ CPInstance cpInstance = cpInstanceCommerceTierPriceEntryDisplayContext.getCPInst
 
 				<aui:model-context bean="<%= commerceTierPriceEntry %>" model="<%= CommerceTierPriceEntry.class %>" />
 
-				<aui:input label="tier-price" name="price" required="<%= true %>" suffix="<%= HtmlUtil.escape(commerceCurrency.getCode()) %>" type="currency" value="<%= cpInstanceCommerceTierPriceEntryDisplayContext.getFormattedPrice() %>">
+				<aui:input label="tier-price" name="price" required="<%= true %>" suffix="<%= HtmlUtil.escape(commerceCurrency.getCode()) %>" type="currency" value="<%= cpInstanceCommerceTierPriceEntryDisplayContext.getFormattedPrice(commerceCurrency) %>">
 					<aui:validator name="max"><%= CommercePriceConstants.PRICE_VALUE_MAX %></aui:validator>
 					<aui:validator name="number" />
 				</aui:input>
