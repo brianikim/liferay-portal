@@ -3031,8 +3031,8 @@ public class CPDefinitionLocalServiceImpl
 					CPDefinitionTable.INSTANCE.CPDefinitionId.eq(-1L));
 		}
 
-		return accountGroupFilterPredicate.or(
-			accountGroupFilterEnablePredicate);
+		return Predicate.withParentheses(
+			accountGroupFilterPredicate.or(accountGroupFilterEnablePredicate));
 	}
 
 	private Predicate _getCommerceChannelPredicate(
@@ -3121,7 +3121,8 @@ public class CPDefinitionLocalServiceImpl
 			}
 		}
 
-		return channelFilterPredicate.or(channelFilterEnablePredicate);
+		return Predicate.withParentheses(
+			channelFilterPredicate.or(channelFilterEnablePredicate));
 	}
 
 	private List<CPDefinition> _getCPDefinitions(Hits hits)
