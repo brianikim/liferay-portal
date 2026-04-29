@@ -260,8 +260,7 @@ public class CommerceChannelAccountEntryRelLocalServiceImpl
 		return dslQuery(
 			_getGroupByStep(
 				DSLQueryFactoryUtil.selectDistinct(
-					CommerceChannelAccountEntryRelTable.INSTANCE.
-						commerceChannelAccountEntryRelId
+					CommerceChannelAccountEntryRelTable.INSTANCE
 				).from(
 					CommerceChannelAccountEntryRelTable.INSTANCE
 				),
