@@ -5,7 +5,13 @@
 
 package com.liferay.commerce.product.service.test;
 
+import com.liferay.account.model.AccountEntry;
+import com.liferay.account.model.AccountGroup;
+import com.liferay.account.model.AccountGroupRel;
+import com.liferay.account.service.AccountGroupLocalService;
+import com.liferay.account.service.AccountGroupRelLocalService;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.commerce.account.test.util.CommerceAccountTestUtil;
 import com.liferay.commerce.price.list.model.CommercePriceEntry;
 import com.liferay.commerce.price.list.model.CommercePriceList;
 import com.liferay.commerce.price.list.service.CommercePriceEntryLocalService;
@@ -24,6 +30,8 @@ import com.liferay.commerce.product.model.CPOption;
 import com.liferay.commerce.product.model.CPSpecificationOption;
 import com.liferay.commerce.product.model.CProduct;
 import com.liferay.commerce.product.model.CommerceCatalog;
+import com.liferay.commerce.product.model.CommerceChannel;
+import com.liferay.commerce.product.model.CommerceChannelRel;
 import com.liferay.commerce.product.service.CPConfigurationEntryLocalService;
 import com.liferay.commerce.product.service.CPConfigurationListLocalService;
 import com.liferay.commerce.product.service.CPDefinitionLocalService;
@@ -34,9 +42,11 @@ import com.liferay.commerce.product.service.CPInstanceLocalService;
 import com.liferay.commerce.product.service.CPInstanceOptionValueRelLocalService;
 import com.liferay.commerce.product.service.CPOptionLocalService;
 import com.liferay.commerce.product.service.CommerceCatalogLocalServiceUtil;
+import com.liferay.commerce.product.service.CommerceChannelRelLocalService;
 import com.liferay.commerce.product.test.util.CPTestUtil;
 import com.liferay.commerce.product.type.simple.constants.SimpleCPTypeConstants;
 import com.liferay.commerce.service.CPDefinitionInventoryLocalService;
+import com.liferay.commerce.test.util.CommerceTestUtil;
 import com.liferay.friendly.url.service.FriendlyURLEntryLocalService;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
@@ -862,6 +872,165 @@ public class CPDefinitionLocalServiceTest {
 	}
 
 	@Test
+	public void testGetCPDefinitions() throws Exception {
+		AccountEntry accountEntry =
+			CommerceAccountTestUtil.addBusinessAccountEntry(
+				TestPropsValues.getUserId(), RandomTestUtil.randomString(),
+				RandomTestUtil.randomString() + "@liferay.com",
+				RandomTestUtil.randomString(),
+				new long[] {TestPropsValues.getUserId()}, null,
+				_serviceContext);
+
+		AccountGroup accountGroup = _accountGroupLocalService.addAccountGroup(
+			StringPool.BLANK, _serviceContext.getUserId(), null,
+			RandomTestUtil.randomString(), _serviceContext);
+
+		_accountGroupRelLocalService.addAccountGroupRel(
+			accountGroup.getAccountGroupId(), AccountEntry.class.getName(),
+			accountEntry.getAccountEntryId());
+
+		CommerceChannel commerceChannel = CommerceTestUtil.addCommerceChannel(
+			_commerceCatalog.getGroupId(), null);
+
+		CPDefinition cpDefinition = CPTestUtil.addCPDefinitionFromCatalog(
+			_commerceCatalog.getGroupId(), SimpleCPTypeConstants.NAME, false,
+			false);
+
+		long companyId = TestPropsValues.getCompanyId();
+		long accountEntryId = accountEntry.getAccountEntryId();
+		long[] accountGroupIds = {accountGroup.getAccountGroupId()};
+		long[] commerceChannelGroupIds = {commerceChannel.getGroupId()};
+		int[] statuses = {WorkflowConstants.STATUS_APPROVED};
+
+		// Both filters disabled
+
+		List<CPDefinition> cpDefinitions =
+			_cpDefinitionLocalService.getCPDefinitions(
+				companyId, accountEntryId, accountGroupIds,
+				commerceChannelGroupIds, false, true, true, statuses,
+				QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
+
+		Assert.assertEquals(cpDefinitions.toString(), 1, cpDefinitions.size());
+
+		// Both filters enabled and relationships exist
+
+		cpDefinition.setAccountGroupFilterEnabled(true);
+		cpDefinition.setChannelFilterEnabled(true);
+
+		cpDefinition = _cpDefinitionLocalService.updateCPDefinition(
+			cpDefinition);
+
+		AccountGroupRel accountGroupRel =
+			_accountGroupRelLocalService.addAccountGroupRel(
+				accountGroup.getAccountGroupId(), CPDefinition.class.getName(),
+				cpDefinition.getCPDefinitionId());
+
+		CommerceChannelRel commerceChannelRel =
+			_commerceChannelRelLocalService.addCommerceChannelRel(
+				CPDefinition.class.getName(), cpDefinition.getCPDefinitionId(),
+				commerceChannel.getCommerceChannelId(), _serviceContext);
+
+		cpDefinitions = _cpDefinitionLocalService.getCPDefinitions(
+			companyId, accountEntryId, accountGroupIds, commerceChannelGroupIds,
+			false, true, true, statuses, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+			null);
+
+		Assert.assertEquals(cpDefinitions.toString(), 1, cpDefinitions.size());
+
+		// AccountGroupFilter enabled, ChannelFilter disabled
+		// accountGroupRel exists
+
+		cpDefinition.setChannelFilterEnabled(false);
+
+		cpDefinition = _cpDefinitionLocalService.updateCPDefinition(
+			cpDefinition);
+
+		cpDefinitions = _cpDefinitionLocalService.getCPDefinitions(
+			companyId, accountEntryId, accountGroupIds, commerceChannelGroupIds,
+			false, true, true, statuses, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+			null);
+
+		Assert.assertEquals(cpDefinitions.toString(), 1, cpDefinitions.size());
+
+		// AccountGroupFilter enabled, ChannelFilter disabled
+		// accountGroupRel does not exist
+
+		_accountGroupRelLocalService.deleteAccountGroupRel(
+			accountGroupRel.getAccountGroupRelId());
+
+		cpDefinitions = _cpDefinitionLocalService.getCPDefinitions(
+			companyId, accountEntryId, accountGroupIds, commerceChannelGroupIds,
+			false, true, true, statuses, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+			null);
+
+		Assert.assertEquals(cpDefinitions.toString(), 0, cpDefinitions.size());
+
+		// AccountGroupFilter disabled, ChannelFilter enabled
+		// commerceChannelRel exists
+
+		cpDefinition.setAccountGroupFilterEnabled(false);
+		cpDefinition.setChannelFilterEnabled(true);
+
+		cpDefinition = _cpDefinitionLocalService.updateCPDefinition(
+			cpDefinition);
+
+		cpDefinitions = _cpDefinitionLocalService.getCPDefinitions(
+			companyId, accountEntryId, accountGroupIds, commerceChannelGroupIds,
+			false, true, true, statuses, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+			null);
+
+		Assert.assertEquals(cpDefinitions.toString(), 1, cpDefinitions.size());
+
+		// AccountGroupFilter disabled, ChannelFilter enabled
+		// commerceChannelRel does not exist
+
+		_commerceChannelRelLocalService.deleteCommerceChannelRel(
+			commerceChannelRel);
+
+		cpDefinitions = _cpDefinitionLocalService.getCPDefinitions(
+			companyId, accountEntryId, accountGroupIds, commerceChannelGroupIds,
+			false, true, true, statuses, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+			null);
+
+		Assert.assertEquals(cpDefinitions.toString(), 0, cpDefinitions.size());
+
+		// Both filters enabled, accountGroupRel exists
+
+		cpDefinition.setAccountGroupFilterEnabled(true);
+		cpDefinition.setChannelFilterEnabled(true);
+
+		cpDefinition = _cpDefinitionLocalService.updateCPDefinition(
+			cpDefinition);
+
+		accountGroupRel = _accountGroupRelLocalService.addAccountGroupRel(
+			accountGroup.getAccountGroupId(), CPDefinition.class.getName(),
+			cpDefinition.getCPDefinitionId());
+
+		cpDefinitions = _cpDefinitionLocalService.getCPDefinitions(
+			companyId, accountEntryId, accountGroupIds, commerceChannelGroupIds,
+			false, true, true, statuses, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+			null);
+
+		Assert.assertEquals(cpDefinitions.toString(), 0, cpDefinitions.size());
+
+		// Both filters enabled, commerceChannelRel exists
+
+		_accountGroupRelLocalService.deleteAccountGroupRel(
+			accountGroupRel.getAccountGroupRelId());
+
+		_commerceChannelRelLocalService.addCommerceChannelRel(
+			CPDefinition.class.getName(), cpDefinition.getCPDefinitionId(),
+			commerceChannel.getCommerceChannelId(), _serviceContext);
+
+		cpDefinitions = _cpDefinitionLocalService.getCPDefinitions(
+			companyId, accountEntryId, accountGroupIds, commerceChannelGroupIds,
+			false, true, true, statuses, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+			null);
+
+		Assert.assertEquals(cpDefinitions.toString(), 0, cpDefinitions.size());
+	}
+
+	@Test
 	public void testUpdateCPDefinitionExternalReferenceCode() throws Exception {
 		frutillaRule.scenario(
 			"Update product definition external reference code"
@@ -1358,9 +1527,18 @@ public class CPDefinitionLocalServiceTest {
 	public final FrutillaRule frutillaRule = new FrutillaRule();
 
 	@Inject
+	private AccountGroupLocalService _accountGroupLocalService;
+
+	@Inject
+	private AccountGroupRelLocalService _accountGroupRelLocalService;
+
+	@Inject
 	private ClassNameLocalService _classNameLocalService;
 
 	private CommerceCatalog _commerceCatalog;
+
+	@Inject
+	private CommerceChannelRelLocalService _commerceChannelRelLocalService;
 
 	@Inject
 	private CommercePriceEntryLocalService _commercePriceEntryLocalService;
