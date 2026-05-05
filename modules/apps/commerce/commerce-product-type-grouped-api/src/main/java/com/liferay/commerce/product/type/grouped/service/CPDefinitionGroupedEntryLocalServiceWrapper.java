@@ -161,6 +161,12 @@ public class CPDefinitionGroupedEntryLocalServiceWrapper
 			deleteCPDefinitionGroupedEntry(CPDefinitionGroupedEntryId);
 	}
 
+	@Override
+	public void deleteEntryCProductCPDefinitionGroupedEntries(long cProductId) {
+		_cpDefinitionGroupedEntryLocalService.
+			deleteEntryCProductCPDefinitionGroupedEntries(cProductId);
+	}
+
 	/**
 	 * @throws PortalException
 	 */
@@ -631,4 +637,4 @@ public class CPDefinitionGroupedEntryLocalServiceWrapper
 		_cpDefinitionGroupedEntryLocalService;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-569886602
+// LIFERAY-SERVICE-BUILDER-HASH:235370553

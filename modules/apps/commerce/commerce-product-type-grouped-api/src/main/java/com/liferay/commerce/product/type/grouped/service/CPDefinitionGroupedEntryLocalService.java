@@ -134,6 +134,8 @@ public interface CPDefinitionGroupedEntryLocalService
 			long CPDefinitionGroupedEntryId)
 		throws PortalException;
 
+	public void deleteEntryCProductCPDefinitionGroupedEntries(long cProductId);
+
 	/**
 	 * @throws PortalException
 	 */
@@ -398,4 +400,4 @@ public interface CPDefinitionGroupedEntryLocalService
 		throws PortalException;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:2074928756
+// LIFERAY-SERVICE-BUILDER-HASH:-1343755652
