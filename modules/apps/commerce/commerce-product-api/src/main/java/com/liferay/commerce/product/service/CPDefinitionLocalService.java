@@ -419,6 +419,13 @@ public interface CPDefinitionLocalService
 		long groupId, int status, int start, int end,
 		OrderByComparator<CPDefinition> orderByComparator);
 
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public List<CPDefinition> getCPDefinitions(
+		long companyId, long accountEntryId, long[] accountGroupIds,
+		long[] commerceChannelGroupIds, boolean ignoreCommerceAccountGroup,
+		boolean published, boolean secure, int[] statuses, int start, int end,
+		OrderByComparator<CPDefinition> orderByComparator);
+
 	/**
 	 * Returns all the cp definitions matching the UUID and company.
 	 *
@@ -692,4 +699,4 @@ public interface CPDefinitionLocalService
 		throws E;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:597099655
+// LIFERAY-SERVICE-BUILDER-HASH:933759387
