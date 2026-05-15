@@ -25,7 +25,7 @@ List<CommerceCurrency> commerceCurrencies = commerceCatalogDisplayContext.getCom
 		<aui:input bean="<%= commerceCatalog %>" model="<%= CommerceCatalog.class %>" name="name" required="<%= true %>" />
 
 		<%
-		boolean hasManageLinkSupplierPermission = commerceCatalogDisplayContext.hasManageLinkSupplierPermission(Constants.ADD);
+		boolean hasManageLinkSupplierPermission = commerceCatalogDisplayContext.hasManageLinkSupplierPermission();
 		%>
 
 		<div class="row">
@@ -76,16 +76,6 @@ List<CommerceCurrency> commerceCurrencies = commerceCatalogDisplayContext.getCom
 				<div class="col-12">
 					<label class="control-label" for="accountEntryId">
 						<liferay-ui:message key="link-catalog-to-a-supplier" />
-
-						<span class="reference-mark">
-							<clay:icon
-								symbol="asterisk"
-							/>
-
-							<span class="hide-accessible sr-only">
-								<liferay-ui:message key="required" />
-							</span>
-						</span>
 					</label>
 
 					<div class="mb-4" id="link-account-entry-autocomplete-root"></div>

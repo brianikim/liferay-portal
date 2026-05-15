@@ -157,7 +157,7 @@ boolean viewOnly = !commerceCatalogDisplayContext.hasModelResourcePermission(com
 					%>
 
 					<c:choose>
-						<c:when test="<%= commerceCatalogDisplayContext.hasManageLinkSupplierPermission(Constants.UPDATE) && !viewOnly %>">
+						<c:when test="<%= commerceCatalogDisplayContext.hasManageLinkSupplierPermission() && !viewOnly %>">
 							<label class="control-label" for="accountEntryId"><liferay-ui:message key="link-catalog-to-a-supplier" /></label>
 
 							<div class="mb-4" id="link-account-entry-autocomplete-root"></div>

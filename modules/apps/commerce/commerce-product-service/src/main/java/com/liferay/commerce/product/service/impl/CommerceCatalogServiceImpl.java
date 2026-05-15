@@ -5,7 +5,6 @@
 
 package com.liferay.commerce.product.service.impl;
 
-import com.liferay.account.exception.AccountEntryTypeException;
 import com.liferay.account.model.AccountEntry;
 import com.liferay.account.service.AccountEntryLocalService;
 import com.liferay.commerce.product.constants.CPActionKeys;
@@ -51,10 +50,6 @@ public class CommerceCatalogServiceImpl extends CommerceCatalogServiceBaseImpl {
 
 		portletResourcePermission.check(
 			getPermissionChecker(), null, CPActionKeys.ADD_COMMERCE_CATALOG);
-
-		if ((accountEntryId == 0) && !_hasViewCommerceCatalogsPermission()) {
-			throw new AccountEntryTypeException();
-		}
 
 		_checkAccountEntry(accountEntryId);
 

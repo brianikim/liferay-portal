@@ -22,6 +22,6 @@ export default function addCommerceCatalogAutocomplete({
 		inputName,
 		itemsKey,
 		itemsLabel,
-		required: true,
+		required: false,
 	});
 }

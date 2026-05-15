@@ -388,21 +388,9 @@ public class CommerceCatalogDisplayContext {
 			encodedFilter;
 	}
 
-	public boolean hasManageLinkSupplierPermission(String command) {
-		if (_hasPortletResourcePermission(
-				CPActionKeys.VIEW_COMMERCE_CATALOGS)) {
-
-			if (Constants.UPDATE.equals(command)) {
-				return true;
-			}
-		}
-		else {
-			if (Constants.ADD.equals(command)) {
-				return true;
-			}
-		}
-
-		return false;
+	public boolean hasManageLinkSupplierPermission() {
+		return _hasPortletResourcePermission(
+			CPActionKeys.VIEW_COMMERCE_CATALOGS);
 	}
 
 	public boolean hasModelResourcePermission(
