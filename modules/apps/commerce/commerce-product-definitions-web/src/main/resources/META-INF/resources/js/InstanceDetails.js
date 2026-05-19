@@ -103,50 +103,50 @@ function handlePublish({WORKFLOW_ACTION_PUBLISH, namespace}) {
 
 		const skuInput = document.getElementById(`${namespace}sku`);
 
-		let isDuplicate = false;
-
-		if (skuInput?.value) {
-			try {
-				const response = await Liferay.Util.fetch(
-					`/o/headless-commerce-admin-catalog/v1.0/skus?search=${encodeURIComponent(skuInput.value)}`
-				);
-
-				if (!response.ok) {
-					throw new Error(response.statusText);
-				}
-
-				const {items} = await response.json();
-
-				if (items?.length) {
-					const cpInstanceId = Number(
-						document.getElementById(`${namespace}cpInstanceId`)
-							?.value || 0
-					);
-
-					isDuplicate = items.some(
-						({id, sku}) =>
-							id !== cpInstanceId && sku === skuInput.value
-					);
-				}
-			}
-			catch (error) {
-				openToast({
-					message: Liferay.Language.get(
-						'an-unexpected-error-occurred'
-					),
-					type: 'danger',
-				});
-			}
-		}
-
-		if (!isDuplicate) {
+		if (!skuInput?.value) {
 			return handleSubmit();
 		}
 
-		openConfirmModal({
-			message: Liferay.Language.get('the-sku-is-already-in-use'),
-			onConfirm: (isConfirmed) => isConfirmed && handleSubmit(),
-		});
+		try {
+			const response = await Liferay.Util.fetch(
+				`/o/headless-commerce-admin-catalog/v1.0/skus?search=${encodeURIComponent(skuInput.value)}`
+			);
+
+			if (!response.ok) {
+				throw new Error(response.statusText);
+			}
+
+			const {items} = await response.json();
+
+			let isDuplicate = false;
+
+			if (items?.length) {
+				const cpInstanceId = Number(
+					document.getElementById(`${namespace}cpInstanceId`)
+						?.value || 0
+				);
+
+				isDuplicate = items.some(
+					({id, sku}) => id !== cpInstanceId && sku === skuInput.value
+				);
+			}
+
+			if (!isDuplicate) {
+				handleSubmit();
+			}
+			else {
+				openConfirmModal({
+					message: Liferay.Language.get('the-sku-is-already-in-use'),
+					onConfirm: (isConfirmed) => isConfirmed && handleSubmit(),
+				});
+			}
+		}
+		catch (error) {
+			openToast({
+				message: Liferay.Language.get('an-unexpected-error-occurred'),
+				type: 'danger',
+			});
+		}
 	});
 }
 
