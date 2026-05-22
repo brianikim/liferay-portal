@@ -450,6 +450,10 @@ components:
                     items:
                         $ref: "#/components/schemas/SkuOption"
                     type: array
+                skuUnitOfMeasures:
+                    items:
+                        $ref: "#/components/schemas/SkuUnitOfMeasure"
+                    type: array
                 thumbnail:
                     example: simple
                     readOnly: true
