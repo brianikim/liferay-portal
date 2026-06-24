@@ -7,6 +7,17 @@ import {onGooglePayLoaded} from './googlepay.js';
 import {onPaypalLoaded} from './paypal.js';
 
 export default function CommerceCheckoutStep() {
+	const commerceCheckoutStepContainer = document.getElementById(
+		'_com_liferay_commerce_checkout_web_internal_portlet_CommerceCheckoutPortlet_commerceCheckoutStepContainer'
+	);
+
+	if (
+		!commerceCheckoutStepContainer ||
+		document.getElementById('paypal-button-container')
+	) {
+		return Promise.resolve();
+	}
+
 	const clientId = document.getElementById('payment-client-id').value;
 
 	const payPalSDKScript = document.createElement('script');
@@ -21,10 +32,6 @@ export default function CommerceCheckoutStep() {
 
 	const payPalSDKPromise = loadScript(payPalSDKScript);
 	const googleSDKPromise = loadScript(googleSDKScript);
-
-	const commerceCheckoutStepContainer = document.getElementById(
-		'_com_liferay_commerce_checkout_web_internal_portlet_CommerceCheckoutPortlet_commerceCheckoutStepContainer'
-	);
 
 	const payPalButtonContainerDivElement = document.createElement('div');
 	payPalButtonContainerDivElement.setAttribute(

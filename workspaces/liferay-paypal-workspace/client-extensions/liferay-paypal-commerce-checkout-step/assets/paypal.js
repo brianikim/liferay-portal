@@ -14,37 +14,29 @@ export async function onPaypalLoaded() {
 
 	const payPalButton = paypal.Buttons({
 		async createOrder(data) {
-			try {
-				const cartPaymentResource = await payPalOAuth.fetch('/render', {
-					body: JSON.stringify({
-						fundingSource: data.paymentSource,
-						orderId,
-						redirect: false,
-					}),
-					method: 'POST',
-				});
+			const cartPaymentResource = await payPalOAuth.fetch('/render', {
+				body: JSON.stringify({
+					fundingSource: data.paymentSource,
+					orderId,
+					redirect: false,
+				}),
+				method: 'POST',
+			});
 
-				const cartPaymentURLJson = await cartPaymentResource.json();
-				const cartPaymentURL = cartPaymentURLJson.url;
-				const resource = await fetch(cartPaymentURL);
+			const cartPaymentURLJson = await cartPaymentResource.json();
+			const resource = await fetch(cartPaymentURLJson.url);
 
-				if (resource.ok) {
-					const orderData = await payPalOAuth.fetch(
-						'/set-up-payment/get-paypal-order/' + orderId
-					);
-
-					if (orderData) {
-						const orderDataJson = await orderData.json();
-
-						return orderDataJson.id;
-					}
-				}
+			if (!resource.ok) {
+				throw new Error('Unable to set up the PayPal order.');
 			}
-			catch (error) {
-				resultMessage(
-					`Could not initiate PayPal Checkout...<br><br>${error}`
-				);
-			}
+
+			const orderData = await payPalOAuth.fetch(
+				'/set-up-payment/get-paypal-order/' + orderId
+			);
+
+			const orderDataJson = await orderData.json();
+
+			return orderDataJson.id;
 		},
 		async onApprove(data) {
 			try {
@@ -58,11 +50,15 @@ export async function onPaypalLoaded() {
 
 				const cartPaymentResourceJSON =
 					await cartPaymentResource.json();
-				const cartPaymentURL = cartPaymentResourceJSON.url;
-				const response = await fetch(cartPaymentURL);
+				const response = await fetch(cartPaymentResourceJSON.url);
 
 				if (response.ok) {
 					window.location.href = response.url;
+				}
+				else {
+					resultMessage(
+						'Sorry, your transaction could not be processed.'
+					);
 				}
 			}
 			catch (error) {
@@ -72,19 +68,25 @@ export async function onPaypalLoaded() {
 			}
 		},
 		async onCancel(data) {
-			const cartPaymentResource = await payPalOAuth.fetch('/render', {
-				body: JSON.stringify({
-					cancel: true,
-					orderId,
-					redirect: false,
-					transactionCode: data.orderID,
-				}),
-				method: 'POST',
-			});
+			try {
+				const cartPaymentResource = await payPalOAuth.fetch('/render', {
+					body: JSON.stringify({
+						cancel: true,
+						orderId,
+						redirect: false,
+						transactionCode: data.orderID,
+					}),
+					method: 'POST',
+				});
 
-			const cartPaymentResourceJSON = await cartPaymentResource.json();
-			const cartPaymentURL = cartPaymentResourceJSON.url;
-			await fetch(cartPaymentURL);
+				const cartPaymentResourceJSON =
+					await cartPaymentResource.json();
+
+				await fetch(cartPaymentResourceJSON.url);
+			}
+			catch (error) {
+				console.error(error);
+			}
 		},
 		async onError(error) {
 			resultMessage(
