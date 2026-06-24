@@ -104,36 +104,49 @@ public class CaptureRestController extends BaseRestController {
 
 				transactionCode = capturesJSONObject.getString("id");
 
-				post(
-					"Bearer " + jwt.getTokenValue(),
-					new JSONObject(
-					).put(
-						"clientId", typeSettingsJSONObject.getString("clientId")
-					).put(
-						"clientSecret",
-						typeSettingsJSONObject.getString("clientSecret")
-					).put(
-						"externalReferenceCode", transactionCode
-					).put(
-						"mode", typeSettingsJSONObject.getString("mode")
-					).put(
-						"paymentEntryId",
-						commercePaymentEntryJSONObject.getLong(
-							"commercePaymentEntryId")
-					).put(
-						"webhookId",
-						typeSettingsJSONObject.getString("webhookId")
-					).toString(),
-					UriComponentsBuilder.fromPath(
-						"/o/c/b9k3paypalwebhooks"
-					).build(
-					).toUri());
+				// The payment has already been captured at PayPal. Persisting
+				// the webhook record is best effort: a failure here must not
+				// turn a successful capture into a reported failure.
+
+				try {
+					post(
+						"Bearer " + jwt.getTokenValue(),
+						new JSONObject(
+						).put(
+							"clientId",
+							typeSettingsJSONObject.getString("clientId")
+						).put(
+							"clientSecret",
+							typeSettingsJSONObject.getString("clientSecret")
+						).put(
+							"externalReferenceCode", transactionCode
+						).put(
+							"mode", typeSettingsJSONObject.getString("mode")
+						).put(
+							"paymentEntryId",
+							commercePaymentEntryJSONObject.getLong(
+								"commercePaymentEntryId")
+						).put(
+							"webhookId",
+							typeSettingsJSONObject.getString("webhookId")
+						).toString(),
+						UriComponentsBuilder.fromPath(
+							"/o/c/b9k3paypalwebhooks"
+						).build(
+						).toUri());
+				}
+				catch (Exception exception) {
+					_log.error(
+						"Captured payment " + transactionCode +
+							" but unable to persist the webhook record",
+						exception);
+				}
 			}
 		}
 		catch (Exception exception) {
 			errorMessages = ExceptionUtils.getMessage(exception);
 
-			_log.error(errorMessages);
+			_log.error(errorMessages, exception);
 		}
 
 		return new ResponseEntity<>(
