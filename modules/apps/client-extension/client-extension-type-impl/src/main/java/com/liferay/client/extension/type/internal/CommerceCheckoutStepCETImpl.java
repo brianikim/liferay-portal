@@ -47,7 +47,7 @@ public class CommerceCheckoutStepCETImpl
 
 	@Override
 	public int getCheckoutStepOrder() {
-		return Integer.valueOf(getString("checkoutStepOrder"));
+		return getInteger("checkoutStepOrder");
 	}
 
 	@Override

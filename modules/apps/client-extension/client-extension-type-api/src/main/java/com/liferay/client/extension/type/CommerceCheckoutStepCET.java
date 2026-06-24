@@ -13,12 +13,15 @@ import org.osgi.annotation.versioning.ProviderType;
 /**
  * @author Andrea Sbarra
  */
-@CETType(description = "This is a description.", name = "commerceCheckoutStep")
+@CETType(
+	description = "Defines a commerce checkout step backed by a client extension.",
+	name = "commerceCheckoutStep"
+)
 @ProviderType
 public interface CommerceCheckoutStepCET extends CET {
 
 	@CETProperty(
-		defaultValue = "", name = "active", type = CETProperty.Type.Boolean
+		defaultValue = "false", name = "active", type = CETProperty.Type.Boolean
 	)
 	public boolean getActive();
 
@@ -35,7 +38,7 @@ public interface CommerceCheckoutStepCET extends CET {
 	public String getCheckoutStepName();
 
 	@CETProperty(
-		defaultValue = "", name = "checkoutStepOrder",
+		defaultValue = "1", name = "checkoutStepOrder",
 		type = CETProperty.Type.String
 	)
 	public int getCheckoutStepOrder();
@@ -47,7 +50,7 @@ public interface CommerceCheckoutStepCET extends CET {
 	public String getOAuth2ApplicationExternalReferenceCode();
 
 	@CETProperty(
-		defaultValue = "", name = "order", type = CETProperty.Type.Boolean
+		defaultValue = "false", name = "order", type = CETProperty.Type.Boolean
 	)
 	public boolean getOrder();
 
@@ -58,19 +61,20 @@ public interface CommerceCheckoutStepCET extends CET {
 	public String getPaymentMethodKey();
 
 	@CETProperty(
-		defaultValue = "", name = "sennaDisabled",
+		defaultValue = "false", name = "sennaDisabled",
 		type = CETProperty.Type.Boolean
 	)
 	public boolean getSennaDisabled();
 
 	@CETProperty(
-		defaultValue = "", name = "showControls",
+		defaultValue = "false", name = "showControls",
 		type = CETProperty.Type.Boolean
 	)
 	public boolean getShowControls();
 
 	@CETProperty(
-		defaultValue = "", name = "visible", type = CETProperty.Type.Boolean
+		defaultValue = "false", name = "visible",
+		type = CETProperty.Type.Boolean
 	)
 	public boolean getVisible();
 

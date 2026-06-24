@@ -33,11 +33,11 @@
 		]
 	},
 	{
-		"description": "This is a description.",
+		"description": "Defines a commerce checkout step backed by a client extension.",
 		"name": "commerceCheckoutStep",
 		"properties": [
 			{
-				"default": "",
+				"default": "false",
 				"name": "active",
 				"type": "CETProperty.Type.Boolean"
 			},
@@ -52,7 +52,7 @@
 				"type": "CETProperty.Type.String"
 			},
 			{
-				"default": "",
+				"default": "1",
 				"name": "checkoutStepOrder",
 				"type": "CETProperty.Type.String"
 			},
@@ -70,7 +70,7 @@
 				"type": "CETProperty.Type.String"
 			},
 			{
-				"default": "",
+				"default": "false",
 				"name": "order",
 				"type": "CETProperty.Type.Boolean"
 			},
@@ -80,12 +80,12 @@
 				"type": "CETProperty.Type.String"
 			},
 			{
-				"default": "",
+				"default": "false",
 				"name": "sennaDisabled",
 				"type": "CETProperty.Type.Boolean"
 			},
 			{
-				"default": "",
+				"default": "false",
 				"name": "showControls",
 				"type": "CETProperty.Type.Boolean"
 			},
@@ -99,7 +99,7 @@
 				"type": "CETProperty.Type.String"
 			},
 			{
-				"default": "",
+				"default": "false",
 				"name": "visible",
 				"type": "CETProperty.Type.Boolean"
 			}

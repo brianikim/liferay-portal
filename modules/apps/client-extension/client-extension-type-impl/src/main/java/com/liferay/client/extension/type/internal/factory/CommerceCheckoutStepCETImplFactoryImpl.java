@@ -5,12 +5,14 @@
 
 package com.liferay.client.extension.type.internal.factory;
 
+import com.liferay.client.extension.exception.ClientExtensionEntryTypeSettingsException;
 import com.liferay.client.extension.type.CommerceCheckoutStepCET;
 import com.liferay.client.extension.type.internal.CommerceCheckoutStepCETImpl;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.UnicodePropertiesBuilder;
+import com.liferay.portal.kernel.util.Validator;
 
 import jakarta.portlet.PortletRequest;
 
@@ -66,7 +68,7 @@ public class CommerceCheckoutStepCETImplFactoryImpl
 			"order", ParamUtil.getBoolean(portletRequest, "order")
 		).put(
 			"paymentMethodKey",
-			ParamUtil.getBoolean(portletRequest, "paymentMethodKey")
+			ParamUtil.getString(portletRequest, "paymentMethodKey")
 		).put(
 			"sennaDisabled",
 			ParamUtil.getBoolean(portletRequest, "sennaDisabled")
@@ -81,6 +83,20 @@ public class CommerceCheckoutStepCETImplFactoryImpl
 	public void validate(
 			CommerceCheckoutStepCET newCET, CommerceCheckoutStepCET oldCET)
 		throws PortalException {
+
+		if (Validator.isNull(newCET.getCheckoutStepName())) {
+			throw new ClientExtensionEntryTypeSettingsException(
+				"Checkout step name is required", "the-x-field-is-required",
+				"checkout-step-name");
+		}
+
+		if (Validator.isNull(
+				newCET.getOAuth2ApplicationExternalReferenceCode())) {
+
+			throw new ClientExtensionEntryTypeSettingsException(
+				"OAuth 2 application external reference code is required",
+				"the-x-field-is-required", "external-reference-code");
+		}
 	}
 
 }

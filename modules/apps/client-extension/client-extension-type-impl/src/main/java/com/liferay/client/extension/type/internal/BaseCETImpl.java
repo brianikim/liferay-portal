@@ -117,6 +117,11 @@ public abstract class BaseCETImpl implements CET, Cloneable {
 			_typeSettingsUnicodeProperties.getProperty(key));
 	}
 
+	protected int getInteger(String key) {
+		return GetterUtil.getInteger(
+			_typeSettingsUnicodeProperties.getProperty(key));
+	}
+
 	protected String getString(String key) {
 		return GetterUtil.getString(
 			_typeSettingsUnicodeProperties.getProperty(key));
