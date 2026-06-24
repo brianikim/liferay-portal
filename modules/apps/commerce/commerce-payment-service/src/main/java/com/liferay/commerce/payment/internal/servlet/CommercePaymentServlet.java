@@ -83,6 +83,8 @@ public class CommercePaymentServlet extends HttpServlet {
 			HttpServletResponse httpServletResponse)
 		throws IOException, ServletException {
 
+		long commerceOrderId = 0;
+
 		try {
 			if (PortalSessionThreadLocal.getHttpSession() == null) {
 				PortalSessionThreadLocal.setHttpSession(
@@ -94,43 +96,58 @@ public class CommercePaymentServlet extends HttpServlet {
 			String entryKey = ParamUtil.getString(
 				httpServletRequest, "entryKey");
 
+			long commerceChannelId = 0;
+
+			CommercePaymentIntegration commercePaymentIntegration = null;
+
 			if (Validator.isBlank(entryKey)) {
 				CommerceOrder commerceOrder =
 					_commercePaymentHttpHelper.getCommerceOrder(
 						httpServletRequest);
 
-				_commerceOrderId = commerceOrder.getCommerceOrderId();
+				commerceOrderId = commerceOrder.getCommerceOrderId();
 
 				CommerceChannel commerceChannel =
 					_commerceChannelLocalService.
 						getCommerceChannelByOrderGroupId(
 							commerceOrder.getGroupId());
 
-				_commerceChannelId = commerceChannel.getCommerceChannelId();
+				commerceChannelId = commerceChannel.getCommerceChannelId();
 
-				_commercePaymentIntegration =
+				commercePaymentIntegration =
 					_commercePaymentHelper.getCommercePaymentIntegration(
-						_commerceChannelId,
+						commerceChannelId,
 						commerceOrder.getCommercePaymentMethodKey());
 			}
 			else {
-				_commercePaymentIntegration =
+				CommercePaymentEntry commercePaymentEntry =
+					_commercePaymentEntryLocalService.fetchCommercePaymentEntry(
+						ParamUtil.getLong(httpServletRequest, "entryId"));
+
+				if (commercePaymentEntry != null) {
+					commerceOrderId = commercePaymentEntry.getClassPK();
+					commerceChannelId =
+						commercePaymentEntry.getCommerceChannelId();
+				}
+
+				commercePaymentIntegration =
 					_commercePaymentHelper.getCommercePaymentIntegration(
-						_commerceChannelId, entryKey);
+						commerceChannelId, entryKey);
 			}
 
 			CommerceOrder commerceOrder =
-				_commerceOrderLocalService.getCommerceOrder(_commerceOrderId);
+				_commerceOrderLocalService.getCommerceOrder(commerceOrderId);
 
-			if (_commercePaymentIntegration != null) {
+			if (commercePaymentIntegration != null) {
 				_managePaymentIntegration(
-					httpServletRequest, httpServletResponse, _commerceChannelId,
-					commerceOrder, _commercePaymentIntegration, portalURL);
+					httpServletRequest, httpServletResponse, commerceChannelId,
+					commerceOrderId, commerceOrder, commercePaymentIntegration,
+					portalURL);
 			}
 			else {
 				_managePaymentMethod(
-					httpServletRequest, httpServletResponse, commerceOrder,
-					portalURL);
+					httpServletRequest, httpServletResponse, commerceOrderId,
+					commerceOrder, portalURL);
 			}
 		}
 		catch (Exception exception) {
@@ -139,7 +156,7 @@ public class CommercePaymentServlet extends HttpServlet {
 			try {
 				CommerceOrder commerceOrder =
 					_commerceOrderLocalService.fetchCommerceOrder(
-						_commerceOrderId);
+						commerceOrderId);
 
 				if ((commerceOrder != null) &&
 					!(commerceOrder.getPaymentStatus() ==
@@ -150,7 +167,7 @@ public class CommercePaymentServlet extends HttpServlet {
 							_getUser(commerceOrder, httpServletRequest)));
 
 					_commercePaymentEngine.updateOrderPaymentStatus(
-						_commerceOrderId,
+						commerceOrderId,
 						CommerceOrderPaymentConstants.STATUS_FAILED,
 						StringPool.BLANK, StringPool.BLANK);
 				}
@@ -192,18 +209,23 @@ public class CommercePaymentServlet extends HttpServlet {
 	}
 
 	private Map<String, String> _getQueryMap(String query) {
-		String[] params = query.split(StringPool.AMPERSAND);
-
 		Map<String, String> map = new HashMap<>();
 
-		for (String param : params) {
-			String name = param.split(StringPool.EQUAL)[0];
-			String value = param.split(StringPool.EQUAL)[1];
+		if (Validator.isNull(query)) {
+			return map;
+		}
+
+		for (String param : query.split(StringPool.AMPERSAND)) {
+			String[] parts = param.split(StringPool.EQUAL, 2);
+
+			if (parts.length < 2) {
+				continue;
+			}
 
 			map.put(
 				StringUtil.toUpperCase(
-					CamelCaseUtil.fromCamelCase(name, CharPool.UNDERLINE)),
-				value);
+					CamelCaseUtil.fromCamelCase(parts[0], CharPool.UNDERLINE)),
+				URLCodec.decodeURL(parts[1]));
 		}
 
 		return map;
@@ -225,10 +247,16 @@ public class CommercePaymentServlet extends HttpServlet {
 	private void _managePaymentIntegration(
 			HttpServletRequest httpServletRequest,
 			HttpServletResponse httpServletResponse, long commerceChannelId,
-			CommerceOrder commerceOrder,
+			long commerceOrderId, CommerceOrder commerceOrder,
 			CommercePaymentIntegration commercePaymentIntegration,
 			URL portalURL)
 		throws Exception {
+
+		String redirect = ParamUtil.getString(httpServletRequest, "nextStep");
+
+		if (Validator.isBlank(redirect)) {
+			redirect = ParamUtil.getString(httpServletRequest, "redirect");
+		}
 
 		long entryId = ParamUtil.getLong(httpServletRequest, "entryId");
 
@@ -237,9 +265,7 @@ public class CommercePaymentServlet extends HttpServlet {
 				entryId);
 
 		if (commercePaymentEntry == null) {
-			_redirect = ParamUtil.getString(httpServletRequest, "nextStep");
-
-			URL url = new URL(_redirect);
+			URL url = new URL(redirect);
 
 			if (!Objects.equals(portalURL.getHost(), url.getHost())) {
 				throw new ServletException();
@@ -272,12 +298,12 @@ public class CommercePaymentServlet extends HttpServlet {
 				_getApplicationContextURL(
 					commercePaymentEntry.getCommercePaymentEntryId(),
 					commercePaymentIntegration.getKey(), httpServletRequest,
-					"&orderType=normal", _redirect));
+					"&orderType=normal", redirect));
 			commercePaymentEntry.setCancelURL(
 				_getApplicationContextURL(
 					commercePaymentEntry.getCommercePaymentEntryId(),
 					commercePaymentIntegration.getKey(), httpServletRequest,
-					"&cancel=true", _redirect));
+					"&cancel=true", redirect));
 
 			commercePaymentEntry =
 				_commercePaymentEntryLocalService.updateCommercePaymentEntry(
@@ -296,7 +322,7 @@ public class CommercePaymentServlet extends HttpServlet {
 							_getUser(commerceOrder, httpServletRequest)));
 
 					_commercePaymentEngine.updateOrderPaymentStatus(
-						_commerceOrderId,
+						commerceOrderId,
 						CommerceOrderPaymentConstants.STATUS_CANCELLED,
 						StringPool.BLANK, StringPool.BLANK);
 
@@ -310,7 +336,7 @@ public class CommercePaymentServlet extends HttpServlet {
 					if (ParamUtil.getBoolean(
 							httpServletRequest, "redirect", true)) {
 
-						httpServletResponse.sendRedirect(_redirect);
+						httpServletResponse.sendRedirect(redirect);
 					}
 
 					return;
@@ -343,7 +369,7 @@ public class CommercePaymentServlet extends HttpServlet {
 		int paymentStatus = commercePaymentEntry.getPaymentStatus();
 
 		if (CommercePaymentEntryConstants.STATUS_FAILED == paymentStatus) {
-			httpServletResponse.sendRedirect(_redirect);
+			httpServletResponse.sendRedirect(redirect);
 
 			return;
 		}
@@ -374,7 +400,7 @@ public class CommercePaymentServlet extends HttpServlet {
 					if (CommercePaymentEntryConstants.STATUS_FAILED ==
 							commercePaymentEntry.getPaymentStatus()) {
 
-						httpServletResponse.sendRedirect(_redirect);
+						httpServletResponse.sendRedirect(redirect);
 
 						return;
 					}
@@ -383,7 +409,7 @@ public class CommercePaymentServlet extends HttpServlet {
 					_commercePaymentGateway.capture(
 						httpServletRequest, commercePaymentEntry);
 
-					httpServletResponse.sendRedirect(_redirect);
+					httpServletResponse.sendRedirect(redirect);
 
 					return;
 				}
@@ -442,18 +468,18 @@ public class CommercePaymentServlet extends HttpServlet {
 			}
 		}
 
-		httpServletResponse.sendRedirect(_redirect);
+		httpServletResponse.sendRedirect(redirect);
 	}
 
 	private void _managePaymentMethod(
 			HttpServletRequest httpServletRequest,
-			HttpServletResponse httpServletResponse,
+			HttpServletResponse httpServletResponse, long commerceOrderId,
 			CommerceOrder commerceOrder, URL portalURL)
 		throws Exception {
 
-		_redirect = ParamUtil.getString(httpServletRequest, "nextStep");
+		String redirect = ParamUtil.getString(httpServletRequest, "nextStep");
 
-		URL url = new URL(_redirect);
+		URL url = new URL(redirect);
 
 		if (!Objects.equals(portalURL.getHost(), url.getHost())) {
 			throw new ServletException();
@@ -463,15 +489,15 @@ public class CommercePaymentServlet extends HttpServlet {
 				httpServletRequest, commerceOrder)) {
 
 			_commercePaymentEngine.completePayment(
-				_commerceOrderId, null, httpServletRequest);
+				commerceOrderId, null, httpServletRequest);
 
-			httpServletResponse.sendRedirect(_redirect);
+			httpServletResponse.sendRedirect(redirect);
 
 			return;
 		}
 
 		CommercePaymentResult commercePaymentResult = _startPayment(
-			httpServletRequest);
+			httpServletRequest, commerceOrderId, redirect);
 
 		if (commercePaymentResult.isSuccess() &&
 			commercePaymentResult.isOnlineRedirect()) {
@@ -505,16 +531,16 @@ public class CommercePaymentServlet extends HttpServlet {
 
 		int commercePaymentMethodType =
 			_commercePaymentEngine.getCommercePaymentMethodType(
-				_commerceOrderId);
+				commerceOrderId);
 
 		if ((CommercePaymentMethodConstants.TYPE_OFFLINE ==
 				commercePaymentMethodType) ||
 			(commercePaymentMethodType == -1)) {
 
 			_commercePaymentEngine.completePayment(
-				_commerceOrderId, null, httpServletRequest);
+				commerceOrderId, null, httpServletRequest);
 
-			httpServletResponse.sendRedirect(_redirect);
+			httpServletResponse.sendRedirect(redirect);
 		}
 
 		if (commercePaymentResult.isSuccess() &&
@@ -523,57 +549,54 @@ public class CommercePaymentServlet extends HttpServlet {
 
 			if (commerceOrder.isSubscriptionOrder()) {
 				_commerceSubscriptionEngine.completeRecurringPayment(
-					_commerceOrderId,
+					commerceOrderId,
 					commercePaymentResult.getAuthTransactionId(),
 					httpServletRequest);
 			}
 			else {
 				_commercePaymentEngine.completePayment(
-					_commerceOrderId,
+					commerceOrderId,
 					commercePaymentResult.getAuthTransactionId(),
 					httpServletRequest);
 			}
 
-			httpServletResponse.sendRedirect(_redirect);
+			httpServletResponse.sendRedirect(redirect);
 		}
 
 		if (!commercePaymentResult.isSuccess() &&
 			!httpServletResponse.isCommitted()) {
 
-			httpServletResponse.sendRedirect(_redirect);
+			httpServletResponse.sendRedirect(redirect);
 		}
 	}
 
 	private CommercePaymentResult _startPayment(
-			HttpServletRequest httpServletRequest)
+			HttpServletRequest httpServletRequest, long commerceOrderId,
+			String redirect)
 		throws Exception {
 
 		CommerceOrder commerceOrder = _commerceOrderService.getCommerceOrder(
-			_commerceOrderId);
+			commerceOrderId);
 
 		if (commerceOrder.isSubscriptionOrder() &&
 			!_commercePaymentHelper.isDeliveryOnlySubscription(commerceOrder)) {
 
 			return _commerceSubscriptionEngine.processRecurringPayment(
-				_commerceOrderId, _redirect, httpServletRequest);
+				commerceOrderId, redirect, httpServletRequest);
 		}
 
 		return _commercePaymentEngine.processPayment(
-			_commerceOrderId, _redirect, httpServletRequest);
+			commerceOrderId, redirect, httpServletRequest);
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		CommercePaymentServlet.class);
-
-	private long _commerceChannelId;
 
 	@Reference
 	private CommerceChannelLocalService _commerceChannelLocalService;
 
 	@Reference
 	private CommerceCheckoutStepHttpHelper _commerceCheckoutStepHttpHelper;
-
-	private long _commerceOrderId;
 
 	@Reference
 	private CommerceOrderLocalService _commerceOrderLocalService;
@@ -596,8 +619,6 @@ public class CommercePaymentServlet extends HttpServlet {
 	@Reference
 	private CommercePaymentHttpHelper _commercePaymentHttpHelper;
 
-	private CommercePaymentIntegration _commercePaymentIntegration;
-
 	@Reference
 	private CommerceSubscriptionEngine _commerceSubscriptionEngine;
 
@@ -606,8 +627,6 @@ public class CommercePaymentServlet extends HttpServlet {
 
 	@Reference
 	private Portal _portal;
-
-	private String _redirect;
 
 	@Reference
 	private UserLocalService _userLocalService;
