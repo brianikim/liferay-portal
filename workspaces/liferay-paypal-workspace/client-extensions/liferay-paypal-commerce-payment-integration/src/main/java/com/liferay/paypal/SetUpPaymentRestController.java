@@ -11,6 +11,7 @@ import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import java.util.Objects;
 
@@ -50,7 +51,7 @@ public class SetUpPaymentRestController extends BaseRestController {
 
 		String mode = "TEST";
 
-		if (StringUtils.equals(clientId.substring(0, 3), "li_")) {
+		if (StringUtils.startsWith(clientId, "li_")) {
 			mode = "PRODUCTION";
 		}
 
@@ -266,9 +267,9 @@ public class SetUpPaymentRestController extends BaseRestController {
 				).toUri());
 		}
 		catch (Exception exception) {
-			errorMessages = ExceptionUtils.getStackTrace(exception);
+			errorMessages = ExceptionUtils.getMessage(exception);
 
-			_log.error(errorMessages);
+			_log.error(errorMessages, exception);
 		}
 
 		return new ResponseEntity<>(
@@ -299,9 +300,7 @@ public class SetUpPaymentRestController extends BaseRestController {
 					"currency_code", currencyCode
 				).put(
 					"value",
-					BigDecimal.valueOf(
-						orderJSONObject.getDouble("subtotalAmount")
-					).longValue()
+					_toAmountValue(orderJSONObject.getDouble("subtotalAmount"))
 				)
 			).put(
 				"shipping",
@@ -310,9 +309,8 @@ public class SetUpPaymentRestController extends BaseRestController {
 					"currency_code", currencyCode
 				).put(
 					"value",
-					BigDecimal.valueOf(
-						orderJSONObject.getDouble("shippingAmountValue")
-					).longValue()
+					_toAmountValue(
+						orderJSONObject.getDouble("shippingAmountValue"))
 				)
 			).put(
 				"tax_total",
@@ -321,18 +319,13 @@ public class SetUpPaymentRestController extends BaseRestController {
 					"currency_code", currencyCode
 				).put(
 					"value",
-					BigDecimal.valueOf(
-						orderJSONObject.getDouble("taxAmount")
-					).longValue()
+					_toAmountValue(orderJSONObject.getDouble("taxAmount"))
 				)
 			)
 		).put(
 			"currency_code", currencyCode
 		).put(
-			"value",
-			BigDecimal.valueOf(
-				orderJSONObject.getDouble("totalAmount")
-			).longValue()
+			"value", _toAmountValue(orderJSONObject.getDouble("totalAmount"))
 		);
 	}
 
@@ -387,24 +380,33 @@ public class SetUpPaymentRestController extends BaseRestController {
 			JSONObject orderItemJSONObject = orderItemsJSONArray.getJSONObject(
 				i);
 
-			BigDecimal quantity = BigDecimal.valueOf(
-				orderItemJSONObject.getLong("quantity"));
+			long quantityLong = orderItemJSONObject.optLong("quantity", 1);
+
+			if (quantityLong <= 0) {
+				quantityLong = 1;
+			}
+
+			BigDecimal quantity = BigDecimal.valueOf(quantityLong);
+
+			JSONObject nameJSONObject = orderItemJSONObject.optJSONObject(
+				"name");
+
+			String name = StringPool.BLANK;
+
+			if (nameJSONObject != null) {
+				name = nameJSONObject.optString(languageId);
+			}
 
 			itemsJSONArray.put(
 				new JSONObject(
 				).put(
-					"name",
-					orderItemJSONObject.getJSONObject(
-						"name"
-					).getString(
-						languageId
-					)
+					"name", name
 				).put(
 					"quantity",
 					quantity.stripTrailingZeros(
 					).toPlainString()
 				).put(
-					"sku", orderItemJSONObject.getString("sku")
+					"sku", orderItemJSONObject.optString("sku")
 				).put(
 					"unit_amount",
 					new JSONObject(
@@ -413,10 +415,10 @@ public class SetUpPaymentRestController extends BaseRestController {
 					).put(
 						"value",
 						BigDecimal.valueOf(
-							orderItemJSONObject.getDouble("finalPrice")
+							orderItemJSONObject.optDouble("finalPrice", 0)
 						).divide(
-							quantity
-						).longValue()
+							quantity, 2, RoundingMode.HALF_UP
+						).toPlainString()
 					)
 				));
 		}
@@ -566,6 +568,14 @@ public class SetUpPaymentRestController extends BaseRestController {
 				"full_name", shippingAddressJSONObject.getString("name")
 			)
 		);
+	}
+
+	private String _toAmountValue(double value) {
+		return BigDecimal.valueOf(
+			value
+		).setScale(
+			2, RoundingMode.HALF_UP
+		).toPlainString();
 	}
 
 	private static final String[] _FUNDING_SOURCES = {
