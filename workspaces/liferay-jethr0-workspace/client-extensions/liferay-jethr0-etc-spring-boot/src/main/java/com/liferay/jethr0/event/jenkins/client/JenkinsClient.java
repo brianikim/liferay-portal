@@ -42,7 +42,7 @@ public class JenkinsClient extends BaseRestController {
 					if (_log.isWarnEnabled()) {
 						_log.warn(
 							StringUtil.combine(
-								"Unable to post to ", jenkinsURL,
+								"Unable to request ", jenkinsURL,
 								". Retry attempt ", retryCount, " of ",
 								maxRetries));
 					}
@@ -77,7 +77,7 @@ public class JenkinsClient extends BaseRestController {
 					if (_log.isWarnEnabled()) {
 						_log.warn(
 							StringUtil.combine(
-								"Unable to post to ", jenkinsURL,
+								"Unable to request ", jenkinsURL,
 								". Retry attempt ", retryCount, " of ",
 								maxRetries));
 					}
@@ -115,7 +115,7 @@ public class JenkinsClient extends BaseRestController {
 					if (_log.isWarnEnabled()) {
 						_log.warn(
 							StringUtil.combine(
-								"Unable to post to ", jenkinsURL,
+								"Unable to request ", jenkinsURL,
 								". Retry attempt ", retryCount, " of ",
 								maxRetries));
 					}
@@ -151,7 +151,7 @@ public class JenkinsClient extends BaseRestController {
 					if (_log.isWarnEnabled()) {
 						_log.warn(
 							StringUtil.combine(
-								"Unable to post to ", remoteJenkinsURI,
+								"Unable to request ", remoteJenkinsURI,
 								". Retry attempt ", retryCount, " of ",
 								maxRetries));
 					}

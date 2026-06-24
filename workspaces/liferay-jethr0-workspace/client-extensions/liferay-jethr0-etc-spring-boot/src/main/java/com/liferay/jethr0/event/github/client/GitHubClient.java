@@ -82,7 +82,7 @@ public class GitHubClient extends BaseRestController {
 					if (_log.isWarnEnabled()) {
 						_log.warn(
 							StringUtil.combine(
-								"Unable to post to ", url, ". Retry attempt ",
+								"Unable to request ", url, ". Retry attempt ",
 								retryCount, " of ", maxRetries));
 					}
 				},
@@ -107,7 +107,7 @@ public class GitHubClient extends BaseRestController {
 					if (_log.isWarnEnabled()) {
 						_log.warn(
 							StringUtil.combine(
-								"Unable to post to ", url, ". Retry attempt ",
+								"Unable to request ", url, ". Retry attempt ",
 								retryCount, " of ", maxRetries));
 					}
 				},
@@ -133,7 +133,7 @@ public class GitHubClient extends BaseRestController {
 					if (_log.isWarnEnabled()) {
 						_log.warn(
 							StringUtil.combine(
-								"Unable to post to ", url, ". Retry attempt ",
+								"Unable to request ", url, ". Retry attempt ",
 								retryCount, " of ", maxRetries));
 					}
 				},
@@ -159,7 +159,7 @@ public class GitHubClient extends BaseRestController {
 					if (_log.isWarnEnabled()) {
 						_log.warn(
 							StringUtil.combine(
-								"Unable to post to ", url, ". Retry attempt ",
+								"Unable to request ", url, ". Retry attempt ",
 								retryCount, " of ", maxRetries));
 					}
 				},
