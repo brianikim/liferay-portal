@@ -45,9 +45,7 @@ public class RetryableUnsafeSupplier<T, E extends Throwable>
 
 				previousThrowable = exception;
 
-				_errorHandler.onError(exception, _maxRetries, ++retryCount);
-
-				if (retryCount > _maxRetries) {
+				if (++retryCount > _maxRetries) {
 					if (_exceptionOnFailure) {
 						throw exception;
 					}
@@ -55,11 +53,16 @@ public class RetryableUnsafeSupplier<T, E extends Throwable>
 					return null;
 				}
 
+				_errorHandler.onError(exception, _maxRetries, retryCount);
+
 				try {
 					Thread.sleep(_retryInterval);
 				}
 				catch (InterruptedException interruptedException) {
 					exception.addSuppressed(interruptedException);
+
+					Thread.currentThread(
+					).interrupt();
 
 					throw exception;
 				}
