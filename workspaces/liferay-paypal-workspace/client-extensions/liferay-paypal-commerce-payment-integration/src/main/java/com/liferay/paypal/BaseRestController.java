@@ -24,8 +24,10 @@ public class BaseRestController
 	extends com.liferay.client.extension.util.spring.boot3.BaseRestController {
 
 	protected String getAuthorization(JSONObject jsonObject) {
-		JSONObject authorizationRequestJSONObject = new JSONObject(
-			post(
+		String response = null;
+
+		try {
+			response = post(
 				"grant_type=client_credentials",
 				HashMapBuilder.put(
 					HttpHeaders.AUTHORIZATION,
@@ -46,7 +48,20 @@ public class BaseRestController
 				).path(
 					"/v1/oauth2/token"
 				).build(
-				).toUri()));
+				).toUri());
+		}
+		catch (Exception exception) {
+			throw new RuntimeException(
+				"Unable to authenticate with PayPal", exception);
+		}
+
+		JSONObject authorizationRequestJSONObject = new JSONObject(response);
+
+		if (!authorizationRequestJSONObject.has("access_token")) {
+			throw new RuntimeException(
+				"PayPal authentication response did not contain an access " +
+					"token");
+		}
 
 		return authorizationRequestJSONObject.getString("access_token");
 	}
