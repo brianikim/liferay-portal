@@ -8,6 +8,10 @@ package com.liferay.paypal;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 
+import java.net.URLEncoder;
+
+import java.nio.charset.StandardCharsets;
+
 import java.util.Objects;
 
 import org.apache.commons.logging.Log;
@@ -41,13 +45,15 @@ public class RenderRestController extends BaseRestController {
 
 		log(jwt, _log);
 
-		StringBuilder sb = new StringBuilder();
-
 		JSONObject jsonObject = new JSONObject(json);
+
+		if (!jsonObject.has("orderId")) {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
 
 		long orderId = jsonObject.getLong("orderId");
 
-		sb.append(
+		StringBuilder sb = new StringBuilder(
 			get(
 				HashMapBuilder.put(
 					HttpHeaders.ACCEPT, MediaType.TEXT_PLAIN_VALUE
@@ -61,37 +67,51 @@ public class RenderRestController extends BaseRestController {
 				).toUri()));
 
 		if (jsonObject.has("callbackURL")) {
-			sb.append("&callbackURL=");
-			sb.append(jsonObject.getString("callbackURL"));
+			_appendQueryParameter(
+				sb, "callbackURL", jsonObject.getString("callbackURL"));
 		}
 
 		if (jsonObject.has("cancel")) {
-			sb.append("&cancel=");
-			sb.append(jsonObject.getBoolean("cancel"));
-			delete(
-				"Bearer " + jwt.getTokenValue(), StringPool.BLANK,
-				UriComponentsBuilder.fromPath(
-					"/o/c/b9k3paypalwebhooks/by-external-reference-code/" +
-						jsonObject.getString("transactionCode")
-				).build(
-				).toUri());
+			_appendQueryParameter(
+				sb, "cancel", String.valueOf(jsonObject.getBoolean("cancel")));
+
+			String transactionCode = jsonObject.getString("transactionCode");
+
+			try {
+				delete(
+					"Bearer " + jwt.getTokenValue(), StringPool.BLANK,
+					UriComponentsBuilder.fromPath(
+						"/o/c/b9k3paypalwebhooks/by-external-reference-code/" +
+							transactionCode
+					).build(
+					).toUri());
+			}
+			catch (Exception exception) {
+				if (_log.isWarnEnabled()) {
+					_log.warn(
+						"Unable to delete the webhook record for transaction " +
+							transactionCode,
+						exception);
+				}
+			}
 		}
 
 		if (jsonObject.has("transactionCode")) {
-			sb.append("&entryId=");
-			sb.append(
+			_appendQueryParameter(
+				sb, "entryId",
 				_getPaymentEntryId(
 					jwt, orderId, jsonObject.getString("transactionCode")));
 		}
 
 		if (jsonObject.has("fundingSource")) {
-			sb.append("&fundingSource=");
-			sb.append(jsonObject.getString("fundingSource"));
+			_appendQueryParameter(
+				sb, "fundingSource", jsonObject.getString("fundingSource"));
 		}
 
 		if (jsonObject.has("redirect")) {
-			sb.append("&redirect=");
-			sb.append(jsonObject.getBoolean("redirect"));
+			_appendQueryParameter(
+				sb, "redirect",
+				String.valueOf(jsonObject.getBoolean("redirect")));
 		}
 
 		return new ResponseEntity<>(
@@ -100,6 +120,21 @@ public class RenderRestController extends BaseRestController {
 				"url", sb.toString()
 			).toString(),
 			HttpStatus.OK);
+	}
+
+	private void _appendQueryParameter(
+		StringBuilder sb, String name, String value) {
+
+		if (sb.indexOf(StringPool.QUESTION) < 0) {
+			sb.append(StringPool.QUESTION);
+		}
+		else {
+			sb.append(StringPool.AMPERSAND);
+		}
+
+		sb.append(name);
+		sb.append(StringPool.EQUAL);
+		sb.append(URLEncoder.encode(value, StandardCharsets.UTF_8));
 	}
 
 	private String _getPaymentEntryId(
