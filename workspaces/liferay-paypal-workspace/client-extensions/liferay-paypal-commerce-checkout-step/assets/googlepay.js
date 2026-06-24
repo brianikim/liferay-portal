@@ -111,15 +111,7 @@ export async function onGooglePayLoaded() {
 }
 
 function onPaymentAuthorized(paymentData) {
-	return new Promise((resolve) => {
-		processPayment(paymentData)
-			.then(() => {
-				resolve({transactionState: 'SUCCESS'});
-			})
-			.catch(() => {
-				resolve({transactionState: 'ERROR'});
-			});
-	});
+	return processPayment(paymentData);
 }
 
 async function processPayment(paymentData) {
@@ -140,81 +132,48 @@ async function processPayment(paymentData) {
 		});
 
 		const setUpPaymentURLJson = await setUpPaymentResource.json();
-		const setUpPaymentURL = setUpPaymentURLJson.url;
-		const resource = await fetch(setUpPaymentURL);
+		const resource = await fetch(setUpPaymentURLJson.url);
 
-		if (resource.ok) {
-			const orderData = await payPalOAuth.fetch(
-				'/set-up-payment/get-paypal-order/' + orderId
-			);
-
-			if (orderData) {
-				const orderDataJson = await orderData.json();
-
-				const id = orderDataJson.id;
-
-				const {status} = await paypal.Googlepay().confirmOrder({
-					orderId: id,
-					paymentMethodData: paymentData.paymentMethodData,
-				});
-
-				if (status === 'PAYER_ACTION_REQUIRED') {
-					paypal
-						.Googlepay()
-						.initiatePayerAction({orderId: id})
-						.then(async () => {
-							await fetch(`/api/orders/${id}`, {
-								method: 'GET',
-							}).then((res) => res.json());
-
-							const capturePaymentResource =
-								await payPalOAuth.fetch('/render', {
-									body: JSON.stringify({
-										orderId,
-										transactionCode: id,
-									}),
-									method: 'POST',
-								});
-
-							const capturePaymentResourceJSON =
-								await capturePaymentResource.json();
-							const capturePaymentURL =
-								capturePaymentResourceJSON.url;
-							const response = await fetch(capturePaymentURL);
-
-							if (response.ok) {
-								window.location.href = response.url;
-							}
-						})
-						.catch((error) => {
-							console.error(error);
-						});
-				}
-				else {
-					const capturePaymentResource = await payPalOAuth.fetch(
-						'/render',
-						{
-							body: JSON.stringify({
-								orderId,
-								transactionCode: id,
-							}),
-							method: 'POST',
-						}
-					);
-
-					const capturePaymentResourceJSON =
-						await capturePaymentResource.json();
-					const capturePaymentURL = capturePaymentResourceJSON.url;
-					const response = await fetch(capturePaymentURL);
-
-					if (response.ok) {
-						window.location.href = response.url;
-					}
-				}
-
-				return {transactionState: 'FAIL'};
-			}
+		if (!resource.ok) {
+			return {transactionState: 'FAIL'};
 		}
+
+		const orderData = await payPalOAuth.fetch(
+			'/set-up-payment/get-paypal-order/' + orderId
+		);
+
+		const orderDataJson = await orderData.json();
+
+		const id = orderDataJson.id;
+
+		const {status} = await paypal.Googlepay().confirmOrder({
+			orderId: id,
+			paymentMethodData: paymentData.paymentMethodData,
+		});
+
+		if (status === 'PAYER_ACTION_REQUIRED') {
+			await paypal.Googlepay().initiatePayerAction({orderId: id});
+		}
+
+		const capturePaymentResource = await payPalOAuth.fetch('/render', {
+			body: JSON.stringify({
+				orderId,
+				transactionCode: id,
+			}),
+			method: 'POST',
+		});
+
+		const capturePaymentResourceJSON =
+			await capturePaymentResource.json();
+		const response = await fetch(capturePaymentResourceJSON.url);
+
+		if (response.ok) {
+			window.location.href = response.url;
+
+			return {transactionState: 'SUCCESS'};
+		}
+
+		return {transactionState: 'FAIL'};
 	}
 	catch (error) {
 		return {
