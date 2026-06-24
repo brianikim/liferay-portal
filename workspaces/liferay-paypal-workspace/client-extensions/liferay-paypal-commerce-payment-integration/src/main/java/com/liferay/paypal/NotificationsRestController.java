@@ -56,7 +56,7 @@ public class NotificationsRestController extends BaseRestController {
 			}
 			else if (StringUtils.equals(eventType, "PAYMENT.CAPTURE.DENIED")) {
 				paymentStatus = "4";
-				errorMessages = jsonObject.getString("summary");
+				errorMessages = jsonObject.optString("summary");
 			}
 			else {
 				return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
