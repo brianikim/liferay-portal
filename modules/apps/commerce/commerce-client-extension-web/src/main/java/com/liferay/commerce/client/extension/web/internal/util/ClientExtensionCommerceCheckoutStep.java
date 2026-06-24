@@ -130,9 +130,10 @@ public class ClientExtensionCommerceCheckoutStep
 			(CommerceOrder)httpServletRequest.getAttribute(
 				CommerceCheckoutWebKeys.COMMERCE_ORDER);
 
-		if (Validator.isNotNull(_paymentMethodKey) &&
-			!_paymentMethodKey.equals(
-				commerceOrder.getCommercePaymentMethodKey())) {
+		if ((commerceOrder == null) ||
+			(Validator.isNotNull(_paymentMethodKey) &&
+			 !_paymentMethodKey.equals(
+				 commerceOrder.getCommercePaymentMethodKey()))) {
 
 			return false;
 		}
@@ -348,7 +349,7 @@ public class ClientExtensionCommerceCheckoutStep
 			if (Validator.isNotNull(clientId)) {
 				String mode = typeSettingsUnicodeProperties.get("mode");
 
-				if (mode.equals("live")) {
+				if (Objects.equals(mode, "live")) {
 					httpServletRequest.setAttribute(
 						"clientId", "li_" + clientId);
 				}
