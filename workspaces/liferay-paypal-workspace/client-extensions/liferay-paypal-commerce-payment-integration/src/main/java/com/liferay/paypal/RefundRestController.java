@@ -8,6 +8,7 @@ package com.liferay.paypal;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import java.util.Objects;
 
@@ -54,6 +55,10 @@ public class RefundRestController extends BaseRestController {
 			JSONObject typeSettingsJSONObject = jsonObject.getJSONObject(
 				"typeSettings");
 
+			String commercePaymentEntryId =
+				commercePaymentEntryJSONObject.getString(
+					"commercePaymentEntryId");
+
 			JSONObject refundResponseJSONObject = new JSONObject(
 				post(
 					new JSONObject(
@@ -69,7 +74,9 @@ public class RefundRestController extends BaseRestController {
 							BigDecimal.valueOf(
 								commercePaymentEntryJSONObject.getDouble(
 									"amount")
-							).longValue()
+							).setScale(
+								2, RoundingMode.HALF_UP
+							).toPlainString()
 						)
 					).toString(),
 					HashMapBuilder.put(
@@ -77,6 +84,8 @@ public class RefundRestController extends BaseRestController {
 						"Bearer " + getAuthorization(typeSettingsJSONObject)
 					).put(
 						"PayPal-Partner-Attribution-Id", "Liferay_SP_PPCP_API"
+					).put(
+						"PayPal-Request-Id", "refund-" + commercePaymentEntryId
 					).put(
 						"Prefer", "return=representation"
 					).build(),
@@ -101,9 +110,9 @@ public class RefundRestController extends BaseRestController {
 			}
 		}
 		catch (Exception exception) {
-			errorMessages = ExceptionUtils.getStackTrace(exception);
+			errorMessages = ExceptionUtils.getMessage(exception);
 
-			_log.error(errorMessages);
+			_log.error(errorMessages, exception);
 		}
 
 		return new ResponseEntity<>(
