@@ -64,6 +64,10 @@ public class EditDocumentLibraryExtraSettingsMVCActionCommand
 			ParamUtil.getString(actionRequest, "keys"));
 
 		for (String key : keys) {
+			if (expandoBridge.hasAttribute(key)) {
+				continue;
+			}
+
 			int type = ParamUtil.getInteger(actionRequest, "type_" + key);
 
 			expandoBridge.addAttribute(key, type);
