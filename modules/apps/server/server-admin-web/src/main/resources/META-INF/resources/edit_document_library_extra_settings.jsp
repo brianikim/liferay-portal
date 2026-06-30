@@ -54,13 +54,13 @@ if (!dlFileEntries.isEmpty()) {
 	</c:when>
 	<c:otherwise>
 		<c:if test="<%= (expandoBridgeAttributeNames != null) && !expandoBridgeAttributeNames.isEmpty() %>">
-			<div class="alert alert-danger">
+			<div class="alert alert-info">
 				<liferay-ui:message arguments="<%= StringUtil.merge(expandoBridgeAttributeNames) %>" key="custom-fields-already-exist-for-these-extra-settings-x" translateArguments="<%= false %>" />
 			</div>
 		</c:if>
 
 		<aui:input name="<%= Constants.CMD %>" type="hidden" />
-		<aui:input name="keys" type="hidden" value="<%= StringUtil.merge(keys) %>" />
+		<aui:input name="keys" type="hidden" value="<%= StringUtil.merge(ListUtil.concat(keys, expandoBridgeAttributeNames)) %>" />
 
 		<%
 		for (String key : keys) {

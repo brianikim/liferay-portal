@@ -2728,7 +2728,10 @@ public class DLFileEntryLocalServiceImpl
 		for (String key : keys) {
 			String value = extraSettingsUnicodeProperties.remove(key);
 
-			if (Validator.isNull(value)) {
+			if (Validator.isNull(value) ||
+				Validator.isNotNull(
+					GetterUtil.getString(expandoBridge.getAttribute(key)))) {
+
 				continue;
 			}
 
