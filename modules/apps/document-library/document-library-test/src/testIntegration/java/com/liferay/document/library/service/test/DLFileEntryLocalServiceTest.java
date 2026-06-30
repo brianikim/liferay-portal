@@ -94,6 +94,7 @@ import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Time;
+import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
@@ -923,6 +924,96 @@ public class DLFileEntryLocalServiceTest {
 			DLStoreUtil.hasFile(
 				dlFileEntry.getCompanyId(), dlFileEntry.getDataRepositoryId(),
 				dlFileEntry.getName(), dlFileVersion.getStoreFileName()));
+	}
+
+	@Test
+	public void testConvertExtraSettingsBackfillsEmptyCustomField()
+		throws Exception {
+
+		String key = "test-extra-setting-" + RandomTestUtil.randomString();
+		String value = RandomTestUtil.randomString();
+
+		DLFileEntry dlFileEntry = _addFileEntryWithExtraSettings(key, value);
+
+		ExpandoBridge expandoBridge = dlFileEntry.getExpandoBridge();
+
+		expandoBridge.addAttribute(key, ExpandoColumnConstants.STRING);
+
+		try {
+			int extraSettingsFileEntriesCount =
+				DLFileEntryLocalServiceUtil.getExtraSettingsFileEntriesCount();
+
+			DLFileEntryLocalServiceUtil.convertExtraSettings(
+				new String[] {key});
+
+			DLFileEntry convertedDLFileEntry =
+				DLFileEntryLocalServiceUtil.getDLFileEntry(
+					dlFileEntry.getFileEntryId());
+
+			UnicodeProperties extraSettingsUnicodeProperties =
+				convertedDLFileEntry.getExtraSettingsProperties();
+
+			Assert.assertFalse(extraSettingsUnicodeProperties.containsKey(key));
+
+			Assert.assertEquals(
+				extraSettingsFileEntriesCount - 1,
+				DLFileEntryLocalServiceUtil.getExtraSettingsFileEntriesCount());
+
+			ExpandoBridge convertedExpandoBridge =
+				convertedDLFileEntry.getExpandoBridge();
+
+			Assert.assertEquals(
+				value, convertedExpandoBridge.getAttribute(key));
+		}
+		finally {
+			expandoBridge.deleteAttribute(key);
+		}
+	}
+
+	@Test
+	public void testConvertExtraSettingsDoesNotOverwriteExistingCustomFieldValue()
+		throws Exception {
+
+		String key = "test-extra-setting-" + RandomTestUtil.randomString();
+		String existingValue = RandomTestUtil.randomString();
+
+		DLFileEntry dlFileEntry = _addFileEntryWithExtraSettings(
+			key, RandomTestUtil.randomString());
+
+		ExpandoBridge expandoBridge = dlFileEntry.getExpandoBridge();
+
+		expandoBridge.addAttribute(key, ExpandoColumnConstants.STRING);
+		expandoBridge.setAttribute(key, existingValue);
+
+		try {
+			int extraSettingsFileEntriesCount =
+				DLFileEntryLocalServiceUtil.getExtraSettingsFileEntriesCount();
+
+			DLFileEntryLocalServiceUtil.convertExtraSettings(
+				new String[] {key});
+
+			DLFileEntry convertedDLFileEntry =
+				DLFileEntryLocalServiceUtil.getDLFileEntry(
+					dlFileEntry.getFileEntryId());
+
+			UnicodeProperties extraSettingsUnicodeProperties =
+				convertedDLFileEntry.getExtraSettingsProperties();
+
+			Assert.assertFalse(extraSettingsUnicodeProperties.containsKey(key));
+
+			Assert.assertEquals(
+				extraSettingsFileEntriesCount - 1,
+				DLFileEntryLocalServiceUtil.getExtraSettingsFileEntriesCount());
+
+			ExpandoBridge convertedExpandoBridge =
+				convertedDLFileEntry.getExpandoBridge();
+
+			Assert.assertEquals(
+				existingValue, convertedExpandoBridge.getAttribute(key));
+		}
+		finally {
+			expandoBridge.deleteAttribute(key);
+		}
 	}
 
 	@Test
@@ -2497,6 +2588,24 @@ public class DLFileEntryLocalServiceTest {
 		DLFileVersionLocalServiceUtil.updateDLFileVersion(dlFileVersion);
 
 		return dlFileEntry;
+	}
+
+	private DLFileEntry _addFileEntryWithExtraSettings(String key, String value)
+		throws Exception {
+
+		DLFileEntry dlFileEntry = DLFileEntryLocalServiceUtil.addFileEntry(
+			null, TestPropsValues.getUserId(), _group.getGroupId(),
+			_group.getGroupId(), DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
+			"file.txt", ContentTypes.TEXT_PLAIN, "file.txt",
+			StringUtil.randomString(), StringPool.BLANK, StringPool.BLANK, -1,
+			new HashMap<>(), null, new ByteArrayInputStream(new byte[0]), 0,
+			null, null, null,
+			ServiceContextTestUtil.getServiceContext(
+				_group.getGroupId(), TestPropsValues.getUserId()));
+
+		dlFileEntry.setExtraSettings(key + StringPool.EQUAL + value);
+
+		return DLFileEntryLocalServiceUtil.updateDLFileEntry(dlFileEntry);
 	}
 
 	@Inject
