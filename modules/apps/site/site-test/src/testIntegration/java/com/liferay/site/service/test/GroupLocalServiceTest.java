@@ -16,10 +16,18 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.GroupConstants;
+import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.ResourceConstants;
+import com.liferay.portal.kernel.model.ResourcePermission;
+import com.liferay.portal.kernel.model.Role;
+import com.liferay.portal.kernel.model.role.RoleConstants;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.service.ClassNameLocalService;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.GroupLocalService;
+import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
+import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.test.AssertUtils;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.CompanyTestUtil;
@@ -191,6 +199,58 @@ public class GroupLocalServiceTest {
 		}
 	}
 
+	@Test
+	public void testDeleteGroupPreservesCollidingLayoutPermission()
+		throws Exception {
+
+		Group group = GroupTestUtil.addGroup();
+
+		long companyId = group.getCompanyId();
+		long groupId = group.getGroupId();
+
+		Role guestRole = _roleLocalService.getRole(
+			companyId, RoleConstants.GUEST);
+
+		String layoutClassName = Layout.class.getName();
+		String primKey = String.valueOf(groupId);
+
+		_resourcePermissionLocalService.setResourcePermissions(
+			companyId, layoutClassName, ResourceConstants.SCOPE_INDIVIDUAL,
+			primKey, guestRole.getRoleId(), new String[] {ActionKeys.VIEW});
+
+		_resourcePermissionLocalService.setResourcePermissions(
+			companyId, layoutClassName, ResourceConstants.SCOPE_GROUP, primKey,
+			guestRole.getRoleId(), new String[] {ActionKeys.VIEW});
+
+		Assert.assertEquals(
+			1,
+			_resourcePermissionLocalService.getResourcePermissionsCount(
+				companyId, layoutClassName, ResourceConstants.SCOPE_INDIVIDUAL,
+				primKey));
+
+		_groupLocalService.deleteGroup(group);
+
+		Assert.assertEquals(
+			1,
+			_resourcePermissionLocalService.getResourcePermissionsCount(
+				companyId, layoutClassName, ResourceConstants.SCOPE_INDIVIDUAL,
+				primKey));
+		Assert.assertEquals(
+			0,
+			_resourcePermissionLocalService.getResourcePermissionsCount(
+				companyId, layoutClassName, ResourceConstants.SCOPE_GROUP,
+				primKey));
+
+		for (ResourcePermission resourcePermission :
+				_resourcePermissionLocalService.getResourcePermissions(
+					companyId, layoutClassName,
+					ResourceConstants.SCOPE_INDIVIDUAL, primKey)) {
+
+			_resourcePermissionLocalService.deleteResourcePermission(
+				resourcePermission);
+		}
+	}
+
 	@FeatureFlag("LPD-82960")
 	@Test
 	public void testEnablingMaintenanceModeDeactivatesSite() throws Exception {
@@ -353,5 +413,11 @@ public class GroupLocalServiceTest {
 
 	@Inject
 	private GroupLocalService _groupLocalService;
+
+	@Inject
+	private ResourcePermissionLocalService _resourcePermissionLocalService;
+
+	@Inject
+	private RoleLocalService _roleLocalService;
 
 }
