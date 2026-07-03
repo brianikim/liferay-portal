@@ -1199,11 +1199,18 @@ public class GroupLocalServiceImpl extends GroupLocalServiceBaseImpl {
 						group.getCompanyId(),
 						String.valueOf(group.getGroupId()));
 
+				String groupClassName = Group.class.getName();
+
 				for (ResourcePermission resourcePermission :
 						resourcePermissions) {
 
-					_resourcePermissionLocalService.deleteResourcePermission(
-						resourcePermission);
+					if ((resourcePermission.getScope() ==
+							ResourceConstants.SCOPE_GROUP) ||
+						groupClassName.equals(resourcePermission.getName())) {
+
+						_resourcePermissionLocalService.
+							deleteResourcePermission(resourcePermission);
+					}
 				}
 
 				// Indexer
