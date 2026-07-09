@@ -1,0 +1,71 @@
+{
+	"configuration": {
+		"className": "com.liferay.headless.admin.list.type.dto.v1_0.ListTypeDefinition",
+		"multiCompany": true,
+		"parameters": {
+			"containsHeaders": "true",
+			"createStrategy": "UPSERT",
+			"featureFlag": "LPD-69290",
+			"importStrategy": "ON_ERROR_FAIL",
+			"updateStrategy": "UPDATE"
+		},
+		"taskItemDelegateName": "DEFAULT"
+	},
+	"items": [
+		{
+			"externalReferenceCode": "DS_STATUS",
+			"listTypeEntries": [
+				{
+					"externalReferenceCode": "COMPLETED",
+					"key": "completed",
+					"name": "Completed",
+					"system": false
+				},
+				{
+					"externalReferenceCode": "DECLINED",
+					"key": "declined",
+					"name": "Declined",
+					"system": false
+				},
+				{
+					"externalReferenceCode": "DELIVERED",
+					"key": "delivered",
+					"name": "Delivered",
+					"system": false
+				},
+				{
+					"externalReferenceCode": "DRAFT",
+					"key": "draft",
+					"name": "Draft",
+					"system": false
+				},
+				{
+					"externalReferenceCode": "EXPIRED",
+					"key": "expired",
+					"name": "Expired",
+					"system": false
+				},
+				{
+					"externalReferenceCode": "SENT",
+					"key": "sent",
+					"name": "Sent",
+					"system": false
+				},
+				{
+					"externalReferenceCode": "VIEWED",
+					"key": "viewed",
+					"name": "Viewed",
+					"system": false
+				},
+				{
+					"externalReferenceCode": "VOIDED",
+					"key": "voided",
+					"name": "Voided",
+					"system": false
+				}
+			],
+			"name": "Signature Status",
+			"system": false
+		}
+	]
+}
