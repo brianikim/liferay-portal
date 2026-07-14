@@ -91,4 +91,6 @@ public interface DestinationNames {
 
 	public static final String USER_LOGIN = "liferay/user_login";
 
+	public static final String USER_REINDEX = "liferay/user_reindex";
+
 }

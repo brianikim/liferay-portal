@@ -26,6 +26,9 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.RequiredUserGroupException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.exception.UserGroupNameException;
+import com.liferay.portal.kernel.messaging.DestinationNames;
+import com.liferay.portal.kernel.messaging.Message;
+import com.liferay.portal.kernel.messaging.MessageBusUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.GroupConstants;
 import com.liferay.portal.kernel.model.ResourceConstants;
@@ -1417,7 +1420,7 @@ public class UserGroupLocalServiceImpl extends UserGroupLocalServiceBaseImpl {
 					}
 
 					if (!userIdsSet.isEmpty()) {
-						reindex(
+						_sendUserReindexMessage(
 							entry.getKey(),
 							ArrayUtil.toArray(userIdsSet.toArray(new Long[0])));
 					}
@@ -1445,7 +1448,7 @@ public class UserGroupLocalServiceImpl extends UserGroupLocalServiceBaseImpl {
 				long[] userIds = getUserPrimaryKeys(userGroupId);
 
 				if (ArrayUtil.isNotEmpty(userIds)) {
-					reindex(companyId, userIds);
+					_sendUserReindexMessage(companyId, userIds);
 				}
 
 				return null;
@@ -1474,6 +1477,15 @@ public class UserGroupLocalServiceImpl extends UserGroupLocalServiceBaseImpl {
 
 			throw new DuplicateUserGroupException("{name=" + name + "}");
 		}
+	}
+
+	private void _sendUserReindexMessage(long companyId, long[] userIds) {
+		Message message = new Message();
+
+		message.put("companyId", companyId);
+		message.put("userIds", userIds);
+
+		MessageBusUtil.sendMessage(DestinationNames.USER_REINDEX, message);
 	}
 
 	private void _validateExternalReferenceCode(

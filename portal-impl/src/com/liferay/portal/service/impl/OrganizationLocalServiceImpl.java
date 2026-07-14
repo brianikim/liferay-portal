@@ -22,6 +22,9 @@ import com.liferay.portal.kernel.exception.OrganizationTypeException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.RequiredOrganizationException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.messaging.DestinationNames;
+import com.liferay.portal.kernel.messaging.Message;
+import com.liferay.portal.kernel.messaging.MessageBusUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Country;
 import com.liferay.portal.kernel.model.Group;
@@ -52,7 +55,6 @@ import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.SearchException;
 import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.search.SortFactoryUtil;
-import com.liferay.portal.kernel.search.reindexer.ReindexerBridge;
 import com.liferay.portal.kernel.service.AddressLocalService;
 import com.liferay.portal.kernel.service.EmailAddressLocalService;
 import com.liferay.portal.kernel.service.GroupLocalService;
@@ -2568,14 +2570,6 @@ public class OrganizationLocalServiceImpl
 		return MapUtil.isNotEmpty(params);
 	}
 
-	protected void reindex(long companyId, long[] userIds)
-		throws PortalException {
-
-		ReindexerBridge reindexerBridge = _reindexerBridgeSnapshot.get();
-
-		reindexerBridge.reindex(companyId, User.class.getName(), userIds);
-	}
-
 	protected void reindexUsers(List<Organization> organizations)
 		throws PortalException {
 
@@ -2604,7 +2598,7 @@ public class OrganizationLocalServiceImpl
 
 			TransactionCallbackUtil.registerCommitCallback(
 				() -> {
-					reindex(companyId, userIds);
+					_sendUserReindexMessage(companyId, userIds);
 
 					return null;
 				});
@@ -2740,6 +2734,15 @@ public class OrganizationLocalServiceImpl
 		return sorts;
 	}
 
+	private void _sendUserReindexMessage(long companyId, long[] userIds) {
+		Message message = new Message();
+
+		message.put("companyId", companyId);
+		message.put("userIds", userIds);
+
+		MessageBusUtil.sendMessage(DestinationNames.USER_REINDEX, message);
+	}
+
 	private static final String _TYPE_FIELD_NAME = Field.getSortableFieldName(
 		Field.TYPE + "_String");
 
@@ -2747,9 +2750,6 @@ public class OrganizationLocalServiceImpl
 		_organizationTypesSettingsSnapshot = new Snapshot<>(
 			OrganizationLocalServiceImpl.class,
 			OrganizationTypesSettings.class);
-	private static final Snapshot<ReindexerBridge> _reindexerBridgeSnapshot =
-		new Snapshot<>(
-			OrganizationLocalServiceImpl.class, ReindexerBridge.class);
 	private static final Snapshot<UserFileUploadsSettings>
 		_userFileUploadsSettingsSnapshot = new Snapshot<>(
 			OrganizationLocalServiceImpl.class, UserFileUploadsSettings.class);
