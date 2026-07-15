@@ -51,6 +51,7 @@
 										"document-type",
 										"size",
 										"status",
+										"signature-status",
 										"modified-date",
 										"action",
 										"downloads",

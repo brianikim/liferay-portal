@@ -13,6 +13,7 @@ import com.liferay.document.library.kernel.util.DLUtil;
 import com.liferay.document.library.web.internal.settings.DLPortletInstanceSettings;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Repository;
@@ -101,6 +102,12 @@ public class DLPortletInstanceSettingsHelper {
 			_dlRequestHelper.getDLPortletInstanceSettings();
 
 		String[] entryColumns = dlPortletInstanceSettings.getEntryColumns();
+
+		if (!FeatureFlagManagerUtil.isEnabled(
+				_dlRequestHelper.getCompanyId(), "LPD-69290")) {
+
+			entryColumns = ArrayUtil.remove(entryColumns, "signature-status");
+		}
 
 		String portletName = _dlRequestHelper.getPortletName();
 
@@ -228,6 +235,12 @@ public class DLPortletInstanceSettingsHelper {
 
 	private String[] _getAllEntryColumns() {
 		String allEntryColumns = "name,description,document-type,size,status";
+
+		if (FeatureFlagManagerUtil.isEnabled(
+				_dlRequestHelper.getCompanyId(), "LPD-69290")) {
+
+			allEntryColumns += ",signature-status";
+		}
 
 		if (ViewCountManagerUtil.isViewCountEnabled(
 				ClassNameLocalServiceUtil.getClassNameId(

@@ -369,6 +369,24 @@ DLViewEntriesDisplayContext dlViewEntriesDisplayContext = new DLViewEntriesDispl
 											</c:if>
 										</liferay-ui:search-container-column-text>
 									</c:when>
+									<c:when test='<%= curEntryColumn.equals("signature-status") %>'>
+										<liferay-ui:search-container-column-text
+											cssClass="table-cell-expand-smallest"
+											name="signature-status"
+										>
+
+											<%
+											String signatureStatus = dlViewEntriesDisplayContext.getSignatureStatus(fileEntry);
+											%>
+
+											<c:if test="<%= Validator.isNotNull(signatureStatus) %>">
+												<clay:label
+													displayType="<%= dlViewEntriesDisplayContext.getSignatureStatusDisplayType(signatureStatus) %>"
+													label="<%= LanguageUtil.get(request, signatureStatus) %>"
+												/>
+											</c:if>
+										</liferay-ui:search-container-column-text>
+									</c:when>
 									<c:when test='<%= curEntryColumn.equals("downloads") %>'>
 										<c:if test="<%= ViewCountManagerUtil.isViewCountEnabled(PortalUtil.getClassNameId(DLFileEntryConstants.getClassName())) %>">
 											<liferay-ui:search-container-column-text
@@ -540,6 +558,13 @@ DLViewEntriesDisplayContext dlViewEntriesDisplayContext = new DLViewEntriesDispl
 										<liferay-ui:search-container-column-text
 											cssClass="table-cell-expand-smallest"
 											name="status"
+											value="--"
+										/>
+									</c:when>
+									<c:when test='<%= curEntryColumn.equals("signature-status") %>'>
+										<liferay-ui:search-container-column-text
+											cssClass="table-cell-expand-smallest"
+											name="signature-status"
 											value="--"
 										/>
 									</c:when>

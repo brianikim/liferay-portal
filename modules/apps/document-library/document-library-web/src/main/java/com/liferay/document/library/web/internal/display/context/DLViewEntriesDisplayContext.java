@@ -9,6 +9,7 @@ import com.liferay.asset.kernel.model.AssetVocabulary;
 import com.liferay.asset.kernel.service.AssetCategoryServiceUtil;
 import com.liferay.asset.kernel.service.AssetVocabularyServiceUtil;
 import com.liferay.depot.util.SiteConnectedGroupGroupProviderUtil;
+import com.liferay.digital.signature.provider.DSRequestStatusProvider;
 import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.model.DLFileVersion;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
@@ -23,6 +24,7 @@ import com.liferay.document.library.web.internal.search.EntriesChecker;
 import com.liferay.document.library.web.internal.search.EntriesMover;
 import com.liferay.document.library.web.internal.security.permission.resource.DLFileEntryPermission;
 import com.liferay.document.library.web.internal.security.permission.resource.DLFolderPermission;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.ResourceConstants;
@@ -57,6 +59,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -85,6 +88,10 @@ public class DLViewEntriesDisplayContext {
 
 		_dlPortletInstanceSettingsHelper = new DLPortletInstanceSettingsHelper(
 			_dlRequestHelper);
+
+		_dsRequestStatusProvider =
+			(DSRequestStatusProvider)_httpServletRequest.getAttribute(
+				DSRequestStatusProvider.class.getName());
 	}
 
 	public List<String> getAvailableActions(FileEntry fileEntry)
@@ -270,6 +277,41 @@ public class DLViewEntriesDisplayContext {
 		return searchContainer;
 	}
 
+	public String getSignatureStatus(FileEntry fileEntry) {
+		if (_dsRequestStatusProvider == null) {
+			return StringPool.BLANK;
+		}
+
+		if (_signatureStatuses == null) {
+			_signatureStatuses = _getSignatureStatuses();
+		}
+
+		return _signatureStatuses.getOrDefault(
+			fileEntry.getFileEntryId(), StringPool.BLANK);
+	}
+
+	public String getSignatureStatusDisplayType(String signatureStatus) {
+		if (Objects.equals(signatureStatus, "completed")) {
+			return "success";
+		}
+
+		if (Objects.equals(signatureStatus, "declined") ||
+			Objects.equals(signatureStatus, "voided")) {
+
+			return "danger";
+		}
+
+		if (Objects.equals(signatureStatus, "expired")) {
+			return "warning";
+		}
+
+		if (Objects.equals(signatureStatus, "draft")) {
+			return "secondary";
+		}
+
+		return "info";
+	}
+
 	public String getThumbnailSrc(FileVersion fileVersion) throws Exception {
 		return _addDoAsUserIdParameter(
 			DLURLHelperUtil.getThumbnailSrc(
@@ -387,6 +429,24 @@ public class DLViewEntriesDisplayContext {
 			_liferayPortletRequest.getAttribute("view.jsp-repositoryId"));
 	}
 
+	private Map<Long, String> _getSignatureStatuses() {
+		SearchContainer<RepositoryEntry> searchContainer =
+			_dlAdminDisplayContext.getSearchContainer();
+
+		List<Long> fileEntryIds = new ArrayList<>();
+
+		for (RepositoryEntry repositoryEntry : searchContainer.getResults()) {
+			if (repositoryEntry instanceof FileEntry) {
+				FileEntry fileEntry = (FileEntry)repositoryEntry;
+
+				fileEntryIds.add(fileEntry.getFileEntryId());
+			}
+		}
+
+		return _dsRequestStatusProvider.getRequestStatuses(
+			_themeDisplay.getCompanyId(), fileEntryIds);
+	}
+
 	private boolean _hasValidAssetVocabularies(long scopeGroupId)
 		throws PortalException {
 
@@ -455,12 +515,14 @@ public class DLViewEntriesDisplayContext {
 		_dlPortletInstanceSettingsHelper;
 	private final DLRequestHelper _dlRequestHelper;
 	private final DLTrashHelper _dlTrashHelper;
+	private final DSRequestStatusProvider _dsRequestStatusProvider;
 	private Role _guestRole;
 	private Boolean _hasValidAssetVocabularies;
 	private final HttpServletRequest _httpServletRequest;
 	private final LiferayPortletRequest _liferayPortletRequest;
 	private final LiferayPortletResponse _liferayPortletResponse;
 	private String _redirect;
+	private Map<Long, String> _signatureStatuses;
 	private final ThemeDisplay _themeDisplay;
 
 }
