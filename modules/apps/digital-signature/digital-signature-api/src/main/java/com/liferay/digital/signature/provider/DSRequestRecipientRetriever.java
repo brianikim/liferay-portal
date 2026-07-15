@@ -30,6 +30,9 @@ public interface DSRequestRecipientRetriever {
 	public int getPendingDocumentCount(
 		long companyId, long userId, String... statusKeys);
 
+	public Map<Long, Map<Long, String>> getRecipientStatusesByFileEntryId(
+		long companyId, Collection<Long> fileEntryIds);
+
 	public Map<Long, Set<Long>> getUserIdsByFileEntryId(
 		long companyId, Collection<Long> fileEntryIds, String... statusKeys);
 

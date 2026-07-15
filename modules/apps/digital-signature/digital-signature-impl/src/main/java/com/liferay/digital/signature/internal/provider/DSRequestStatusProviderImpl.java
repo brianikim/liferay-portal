@@ -7,6 +7,7 @@ package com.liferay.digital.signature.internal.provider;
 
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfigurationUtil;
+import com.liferay.digital.signature.provider.DSRequestRecipientRetriever;
 import com.liferay.digital.signature.provider.DSRequestStatusProvider;
 import com.liferay.object.constants.ObjectDefinitionConstants;
 import com.liferay.object.model.ObjectDefinition;
@@ -38,6 +39,48 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = DSRequestStatusProvider.class)
 public class DSRequestStatusProviderImpl implements DSRequestStatusProvider {
+
+	@Override
+	public Map<Long, String> getRecipientStatuses(
+		long companyId, long userId, Collection<Long> fileEntryIds) {
+
+		if ((fileEntryIds == null) || fileEntryIds.isEmpty() ||
+			!FeatureFlagManagerUtil.isEnabled(companyId, "LPD-69290")) {
+
+			return Collections.emptyMap();
+		}
+
+		DigitalSignatureConfiguration digitalSignatureConfiguration =
+			DigitalSignatureConfigurationUtil.getDigitalSignatureConfiguration(
+				companyId, 0);
+
+		if ((digitalSignatureConfiguration == null) ||
+			!digitalSignatureConfiguration.enabled()) {
+
+			return Collections.emptyMap();
+		}
+
+		Map<Long, Map<Long, String>> recipientStatusesByFileEntryId =
+			_dsRequestRecipientRetriever.getRecipientStatusesByFileEntryId(
+				companyId, fileEntryIds);
+
+		Map<Long, String> recipientStatuses = new HashMap<>();
+
+		for (Map.Entry<Long, Map<Long, String>> entry :
+				recipientStatusesByFileEntryId.entrySet()) {
+
+			String recipientStatus = entry.getValue(
+			).get(
+				userId
+			);
+
+			if (recipientStatus != null) {
+				recipientStatuses.put(entry.getKey(), recipientStatus);
+			}
+		}
+
+		return recipientStatuses;
+	}
 
 	@Override
 	public Map<Long, String> getRequestStatuses(
@@ -112,6 +155,9 @@ public class DSRequestStatusProviderImpl implements DSRequestStatusProvider {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		DSRequestStatusProviderImpl.class);
+
+	@Reference
+	private DSRequestRecipientRetriever _dsRequestRecipientRetriever;
 
 	@Reference(
 		target = "(filter.factory.key=" + ObjectDefinitionConstants.STORAGE_TYPE_DEFAULT + ")"

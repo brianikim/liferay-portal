@@ -10,6 +10,7 @@ import com.liferay.asset.auto.tagger.configuration.AssetAutoTaggerConfigurationF
 import com.liferay.asset.kernel.service.AssetVocabularyService;
 import com.liferay.depot.group.provider.SiteConnectedGroupGroupProvider;
 import com.liferay.digital.signature.provider.DSRequestStatusProvider;
+import com.liferay.digital.signature.provider.DSSignatureRequiredProvider;
 import com.liferay.document.library.configuration.DLFileOrderConfigurationProvider;
 import com.liferay.document.library.kernel.service.DLFileEntryTypeService;
 import com.liferay.document.library.kernel.versioning.VersioningStrategy;
@@ -51,6 +52,15 @@ public class DLAdminDisplayContextProvider {
 			httpServletRequest.setAttribute(
 				DSRequestStatusProvider.class.getName(),
 				dsRequestStatusProvider);
+		}
+
+		DSSignatureRequiredProvider dsSignatureRequiredProvider =
+			_dsSignatureRequiredProviderSnapshot.get();
+
+		if (dsSignatureRequiredProvider != null) {
+			httpServletRequest.setAttribute(
+				DSSignatureRequiredProvider.class.getName(),
+				dsSignatureRequiredProvider);
 		}
 
 		DLRequestHelper dlRequestHelper = new DLRequestHelper(
@@ -99,6 +109,10 @@ public class DLAdminDisplayContextProvider {
 		_dsRequestStatusProviderSnapshot = new Snapshot<>(
 			DLAdminDisplayContextProvider.class, DSRequestStatusProvider.class,
 			null, true);
+	private static final Snapshot<DSSignatureRequiredProvider>
+		_dsSignatureRequiredProviderSnapshot = new Snapshot<>(
+			DLAdminDisplayContextProvider.class,
+			DSSignatureRequiredProvider.class, null, true);
 
 	@Reference
 	private AssetAutoTaggerConfigurationFactory

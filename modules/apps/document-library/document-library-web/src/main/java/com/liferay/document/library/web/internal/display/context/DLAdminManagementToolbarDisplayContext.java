@@ -45,6 +45,7 @@ import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.petra.string.StringUtil;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -354,6 +355,15 @@ public class DLAdminManagementToolbarDisplayContext
 				dropdownGroupItem.setLabel(
 					LanguageUtil.get(_httpServletRequest, "signature-status"));
 			}
+		).addGroup(
+			() -> FeatureFlagManagerUtil.isEnabled(
+				_themeDisplay.getCompanyId(), "LPD-69290"),
+			dropdownGroupItem -> {
+				dropdownGroupItem.setDropdownItems(
+					_getSignatureRecipientStatusFilterDropdownItems());
+				dropdownGroupItem.setLabel(
+					LanguageUtil.get(_httpServletRequest, "signature"));
+			}
 		).build();
 	}
 
@@ -568,6 +578,37 @@ public class DLAdminManagementToolbarDisplayContext
 		}
 	}
 
+	private void _addSignatureRecipientStatusFilterLabelItems(
+		LabelItemListBuilder.LabelItemListWrapper labelItemListWrapper) {
+
+		String[] signatureRecipientStatuses =
+			_dlAdminDisplayContext.getSignatureRecipientStatuses();
+
+		if (ArrayUtil.isEmpty(signatureRecipientStatuses)) {
+			return;
+		}
+
+		for (String signatureRecipientStatus : signatureRecipientStatuses) {
+			labelItemListWrapper.add(
+				labelItem -> {
+					labelItem.putData(
+						"removeLabelURL",
+						_getRemoveLabelURL(
+							"signatureRecipientStatus",
+							() -> ArrayUtil.remove(
+								signatureRecipientStatuses,
+								signatureRecipientStatus)));
+					labelItem.setCloseable(true);
+					labelItem.setLabel(
+						_getLabel(
+							"signature",
+							LanguageUtil.get(
+								_httpServletRequest,
+								signatureRecipientStatus)));
+				});
+		}
+	}
+
 	private void _addSignatureStatusFilterLabelItems(
 		LabelItemListBuilder.LabelItemListWrapper labelItemListWrapper) {
 
@@ -738,6 +779,8 @@ public class DLAdminManagementToolbarDisplayContext
 		_addAssetCategoriesFilterLabelItems(labelItemListWrapper);
 
 		_addExtensionFilterLabelItems(labelItemListWrapper);
+
+		_addSignatureRecipientStatusFilterLabelItems(labelItemListWrapper);
 
 		_addSignatureStatusFilterLabelItems(labelItemListWrapper);
 
@@ -1049,6 +1092,56 @@ public class DLAdminManagementToolbarDisplayContext
 		).buildString();
 	}
 
+	private List<DropdownItem>
+		_getSignatureRecipientStatusFilterDropdownItems() {
+
+		String[] signatureRecipientStatuses =
+			_dlAdminDisplayContext.getSignatureRecipientStatuses();
+
+		DropdownItemListBuilder.DropdownItemListWrapper
+			dropdownItemListWrapper =
+				new DropdownItemListBuilder.DropdownItemListWrapper();
+
+		for (String signatureRecipientStatus : _SIGNATURE_RECIPIENT_STATUSES) {
+			boolean active = ArrayUtil.contains(
+				signatureRecipientStatuses, signatureRecipientStatus);
+
+			String[] newSignatureRecipientStatuses = null;
+
+			if (active) {
+				newSignatureRecipientStatuses = ArrayUtil.remove(
+					signatureRecipientStatuses, signatureRecipientStatus);
+			}
+			else {
+				newSignatureRecipientStatuses = ArrayUtil.append(
+					signatureRecipientStatuses, signatureRecipientStatus);
+			}
+
+			String[] hrefSignatureRecipientStatuses =
+				newSignatureRecipientStatuses;
+
+			dropdownItemListWrapper.add(
+				dropdownItem -> {
+					dropdownItem.setActive(active);
+					dropdownItem.setHref(
+						PortletURLBuilder.create(
+							PortletURLUtil.clone(
+								_currentURLObj, _liferayPortletResponse)
+						).setMVCRenderCommandName(
+							"/document_library/view"
+						).setParameter(
+							"signatureRecipientStatus",
+							hrefSignatureRecipientStatuses
+						).buildPortletURL());
+					dropdownItem.setLabel(
+						LanguageUtil.get(
+							_httpServletRequest, signatureRecipientStatus));
+				});
+		}
+
+		return dropdownItemListWrapper.build();
+	}
+
 	private List<DropdownItem> _getSignatureStatusFilterDropdownItems() {
 		String[] signatureStatuses =
 			_dlAdminDisplayContext.getSignatureStatuses();
@@ -1159,8 +1252,13 @@ public class DLAdminManagementToolbarDisplayContext
 		return false;
 	}
 
+	private static final String[] _SIGNATURE_RECIPIENT_STATUSES = {
+		"action-required", "signed"
+	};
+
 	private static final String[] _SIGNATURE_STATUSES = {
-		"draft", "sent", "viewed", "completed", "declined", "expired", "voided"
+		"draft", "sent", "viewed", "signed", "completed", "declined", "expired",
+		"voided"
 	};
 
 	private static final Log _log = LogFactoryUtil.getLog(

@@ -9,6 +9,7 @@ import com.liferay.asset.kernel.model.AssetCategory;
 import com.liferay.asset.kernel.model.AssetVocabulary;
 import com.liferay.asset.kernel.service.AssetVocabularyServiceUtil;
 import com.liferay.depot.util.SiteConnectedGroupGroupProviderUtil;
+import com.liferay.digital.signature.provider.DSSignatureRequiredProvider;
 import com.liferay.document.library.constants.DLPortletKeys;
 import com.liferay.document.library.kernel.model.DLFileEntryConstants;
 import com.liferay.document.library.kernel.model.DLFileEntryTypeConstants;
@@ -31,6 +32,7 @@ import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
 import com.liferay.portal.kernel.theme.PortletDisplay;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.servlet.BrowserSnifferUtil;
@@ -278,6 +280,32 @@ public class DLViewDisplayContext {
 		return resourceURL.toString();
 	}
 
+	public int getSignatureRequiredCount() {
+		if (_signatureRequiredCount != null) {
+			return _signatureRequiredCount;
+		}
+
+		DSSignatureRequiredProvider dsSignatureRequiredProvider =
+			(DSSignatureRequiredProvider)_httpServletRequest.getAttribute(
+				DSSignatureRequiredProvider.class.getName());
+
+		if (dsSignatureRequiredProvider == null) {
+			_signatureRequiredCount = 0;
+
+			return _signatureRequiredCount;
+		}
+
+		ThemeDisplay themeDisplay =
+			(ThemeDisplay)_httpServletRequest.getAttribute(
+				WebKeys.THEME_DISPLAY);
+
+		_signatureRequiredCount =
+			dsSignatureRequiredProvider.getSignatureRequiredCount(
+				themeDisplay.getCompanyId(), themeDisplay.getUserId());
+
+		return _signatureRequiredCount;
+	}
+
 	public String getUploadURL() throws PortalException {
 		if (!isUploadable()) {
 			return StringPool.BLANK;
@@ -386,6 +414,24 @@ public class DLViewDisplayContext {
 		return false;
 	}
 
+	public boolean isSignatureRequiredNoticeVisible() {
+		if (getSignatureRequiredCount() <= 0) {
+			return false;
+		}
+
+		// Show the notice only when the list is unfiltered (the entire display)
+		// or filtered specifically to the documents awaiting the user's
+		// signature, so the count always matches what the user sees.
+
+		if (!_dlAdminDisplayContext.hasFilterParameters()) {
+			return true;
+		}
+
+		return ArrayUtil.contains(
+			_dlAdminDisplayContext.getSignatureRecipientStatuses(),
+			"action-required");
+	}
+
 	public boolean isUploadable() throws PortalException {
 		ThemeDisplay themeDisplay =
 			(ThemeDisplay)_httpServletRequest.getAttribute(
@@ -445,5 +491,6 @@ public class DLViewDisplayContext {
 	private final HttpServletRequest _httpServletRequest;
 	private final RenderRequest _renderRequest;
 	private final RenderResponse _renderResponse;
+	private Integer _signatureRequiredCount;
 
 }

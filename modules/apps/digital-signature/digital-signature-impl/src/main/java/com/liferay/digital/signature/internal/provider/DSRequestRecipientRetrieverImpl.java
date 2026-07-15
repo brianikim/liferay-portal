@@ -150,6 +150,94 @@ public class DSRequestRecipientRetrieverImpl
 	}
 
 	@Override
+	public Map<Long, Map<Long, String>> getRecipientStatusesByFileEntryId(
+		long companyId, Collection<Long> fileEntryIds) {
+
+		if ((fileEntryIds == null) || fileEntryIds.isEmpty()) {
+			return Collections.emptyMap();
+		}
+
+		ObjectDefinition recipientObjectDefinition =
+			_objectDefinitionLocalService.
+				fetchObjectDefinitionByExternalReferenceCode(
+					"L_DS_REQUEST_RECIPIENT", companyId);
+		ObjectDefinition requestObjectDefinition =
+			_objectDefinitionLocalService.
+				fetchObjectDefinitionByExternalReferenceCode(
+					"L_DS_REQUEST", companyId);
+
+		if ((recipientObjectDefinition == null) ||
+			(requestObjectDefinition == null)) {
+
+			return Collections.emptyMap();
+		}
+
+		try {
+			String fieldName = _getRelationshipFieldName(
+				requestObjectDefinition);
+
+			if (fieldName == null) {
+				return Collections.emptyMap();
+			}
+
+			Map<Long, Long> fileEntryIdsByRequestId = new HashMap<>();
+
+			for (Map<String, Serializable> values :
+					_getValuesList(
+						companyId, requestObjectDefinition,
+						_getOrPredicateString(
+							"fileEntryId", fileEntryIds, false))) {
+
+				fileEntryIdsByRequestId.put(
+					GetterUtil.getLong(
+						values.get(
+							requestObjectDefinition.getPKObjectFieldName())),
+					GetterUtil.getLong(values.get("fileEntryId")));
+			}
+
+			if (fileEntryIdsByRequestId.isEmpty()) {
+				return Collections.emptyMap();
+			}
+
+			Map<Long, Map<Long, String>> recipientStatusesByFileEntryId =
+				new HashMap<>();
+
+			for (Map<String, Serializable> values :
+					_getValuesList(
+						companyId, recipientObjectDefinition,
+						_getOrPredicateString(
+							fieldName, fileEntryIdsByRequestId.keySet(),
+							true))) {
+
+				Long fileEntryId = fileEntryIdsByRequestId.get(
+					GetterUtil.getLong(values.get(fieldName)));
+
+				if (fileEntryId == null) {
+					continue;
+				}
+
+				Map<Long, String> statusesByUserId =
+					recipientStatusesByFileEntryId.computeIfAbsent(
+						fileEntryId, key -> new HashMap<>());
+
+				statusesByUserId.put(
+					GetterUtil.getLong(values.get("recipientUserId")),
+					GetterUtil.getString(values.get("requestRecipientStatus")));
+			}
+
+			return recipientStatusesByFileEntryId;
+		}
+		catch (Exception exception) {
+			_log.error(
+				"Unable to load signature recipient statuses for company " +
+					companyId,
+				exception);
+
+			return Collections.emptyMap();
+		}
+	}
+
+	@Override
 	public Map<Long, Set<Long>> getUserIdsByFileEntryId(
 		long companyId, Collection<Long> fileEntryIds, String... statusKeys) {
 

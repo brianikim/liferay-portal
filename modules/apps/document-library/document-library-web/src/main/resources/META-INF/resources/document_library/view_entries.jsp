@@ -291,6 +291,15 @@ DLViewEntriesDisplayContext dlViewEntriesDisplayContext = new DLViewEntriesDispl
 															/>
 														</c:if>
 													</div>
+
+													<c:if test="<%= dlViewEntriesDisplayContext.isSignatureRequired(fileEntry) %>">
+														<div class="c-mt-1">
+															<clay:label
+																displayType="warning"
+																label='<%= LanguageUtil.get(request, "action-required") %>'
+															/>
+														</div>
+													</c:if>
 												</div>
 											</div>
 										</liferay-ui:search-container-column-text>

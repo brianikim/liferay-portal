@@ -10,6 +10,7 @@ import com.liferay.asset.kernel.service.AssetCategoryServiceUtil;
 import com.liferay.asset.kernel.service.AssetVocabularyServiceUtil;
 import com.liferay.depot.util.SiteConnectedGroupGroupProviderUtil;
 import com.liferay.digital.signature.provider.DSRequestStatusProvider;
+import com.liferay.digital.signature.provider.DSSignatureRequiredProvider;
 import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.model.DLFileVersion;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
@@ -61,6 +62,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * @author Adolfo Pérez
@@ -92,6 +94,9 @@ public class DLViewEntriesDisplayContext {
 		_dsRequestStatusProvider =
 			(DSRequestStatusProvider)_httpServletRequest.getAttribute(
 				DSRequestStatusProvider.class.getName());
+		_dsSignatureRequiredProvider =
+			(DSSignatureRequiredProvider)_httpServletRequest.getAttribute(
+				DSSignatureRequiredProvider.class.getName());
 	}
 
 	public List<String> getAvailableActions(FileEntry fileEntry)
@@ -282,6 +287,22 @@ public class DLViewEntriesDisplayContext {
 			return StringPool.BLANK;
 		}
 
+		// Show the viewer's own recipient status when they are a recipient, so
+		// each recipient sees where they personally stand. Otherwise fall back
+		// to the request-level roll-up, which is the sender's or observer's
+		// view.
+
+		if (_recipientStatuses == null) {
+			_recipientStatuses = _getRecipientStatuses();
+		}
+
+		String recipientStatus = _recipientStatuses.get(
+			fileEntry.getFileEntryId());
+
+		if (Validator.isNotNull(recipientStatus)) {
+			return recipientStatus;
+		}
+
 		if (_signatureStatuses == null) {
 			_signatureStatuses = _getSignatureStatuses();
 		}
@@ -291,7 +312,9 @@ public class DLViewEntriesDisplayContext {
 	}
 
 	public String getSignatureStatusDisplayType(String signatureStatus) {
-		if (Objects.equals(signatureStatus, "completed")) {
+		if (Objects.equals(signatureStatus, "completed") ||
+			Objects.equals(signatureStatus, "signed")) {
+
 			return "success";
 		}
 
@@ -409,6 +432,20 @@ public class DLViewEntriesDisplayContext {
 		return true;
 	}
 
+	public boolean isSignatureRequired(FileEntry fileEntry) {
+		if (_dsSignatureRequiredProvider == null) {
+			return false;
+		}
+
+		if (_signatureRequiredFileEntryIds == null) {
+			_signatureRequiredFileEntryIds =
+				_getSignatureRequiredFileEntryIds();
+		}
+
+		return _signatureRequiredFileEntryIds.contains(
+			fileEntry.getFileEntryId());
+	}
+
 	public boolean isVersioningStrategyOverridable() {
 		return _dlAdminDisplayContext.isVersioningStrategyOverridable();
 	}
@@ -424,12 +461,7 @@ public class DLViewEntriesDisplayContext {
 			url, "doAsUserId", _themeDisplay.getDoAsUserId());
 	}
 
-	private long _getRepositoryId() {
-		return GetterUtil.getLong(
-			_liferayPortletRequest.getAttribute("view.jsp-repositoryId"));
-	}
-
-	private Map<Long, String> _getSignatureStatuses() {
+	private List<Long> _getPageFileEntryIds() {
 		SearchContainer<RepositoryEntry> searchContainer =
 			_dlAdminDisplayContext.getSearchContainer();
 
@@ -443,8 +475,29 @@ public class DLViewEntriesDisplayContext {
 			}
 		}
 
+		return fileEntryIds;
+	}
+
+	private Map<Long, String> _getRecipientStatuses() {
+		return _dsRequestStatusProvider.getRecipientStatuses(
+			_themeDisplay.getCompanyId(), _themeDisplay.getUserId(),
+			_getPageFileEntryIds());
+	}
+
+	private long _getRepositoryId() {
+		return GetterUtil.getLong(
+			_liferayPortletRequest.getAttribute("view.jsp-repositoryId"));
+	}
+
+	private Set<Long> _getSignatureRequiredFileEntryIds() {
+		return _dsSignatureRequiredProvider.getSignatureRequiredFileEntryIds(
+			_themeDisplay.getCompanyId(), _themeDisplay.getUserId(),
+			_getPageFileEntryIds());
+	}
+
+	private Map<Long, String> _getSignatureStatuses() {
 		return _dsRequestStatusProvider.getRequestStatuses(
-			_themeDisplay.getCompanyId(), fileEntryIds);
+			_themeDisplay.getCompanyId(), _getPageFileEntryIds());
 	}
 
 	private boolean _hasValidAssetVocabularies(long scopeGroupId)
@@ -516,12 +569,15 @@ public class DLViewEntriesDisplayContext {
 	private final DLRequestHelper _dlRequestHelper;
 	private final DLTrashHelper _dlTrashHelper;
 	private final DSRequestStatusProvider _dsRequestStatusProvider;
+	private final DSSignatureRequiredProvider _dsSignatureRequiredProvider;
 	private Role _guestRole;
 	private Boolean _hasValidAssetVocabularies;
 	private final HttpServletRequest _httpServletRequest;
 	private final LiferayPortletRequest _liferayPortletRequest;
 	private final LiferayPortletResponse _liferayPortletResponse;
+	private Map<Long, String> _recipientStatuses;
 	private String _redirect;
+	private Set<Long> _signatureRequiredFileEntryIds;
 	private Map<Long, String> _signatureStatuses;
 	private final ThemeDisplay _themeDisplay;
 

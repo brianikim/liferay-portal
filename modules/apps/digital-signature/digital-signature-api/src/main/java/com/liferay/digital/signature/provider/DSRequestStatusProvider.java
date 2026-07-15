@@ -21,6 +21,22 @@ import org.osgi.annotation.versioning.ProviderType;
 public interface DSRequestStatusProvider {
 
 	/**
+	 * Returns the current user's recipient status keyed by file entry ID for the
+	 * given file entries. Entries where the user is not a recipient are omitted
+	 * from the map. The returned values are the canonical DSRequestRecipient
+	 * statuses (draft, sent, viewed, signed, completed, declined). Returns an
+	 * empty map when the digital signature feature is disabled.
+	 *
+	 * @param  companyId the company to look up requests in
+	 * @param  userId the recipient to resolve statuses for
+	 * @param  fileEntryIds the file entry IDs to resolve, typically one page of
+	 *         the Document Library table
+	 * @return the current user's recipient status by file entry ID
+	 */
+	public Map<Long, String> getRecipientStatuses(
+		long companyId, long userId, Collection<Long> fileEntryIds);
+
+	/**
 	 * Returns the request status keyed by file entry ID for the given file
 	 * entries. Entries with no signature request are omitted from the map. The
 	 * returned values are the canonical DSRequest statuses (draft, sent, viewed,
