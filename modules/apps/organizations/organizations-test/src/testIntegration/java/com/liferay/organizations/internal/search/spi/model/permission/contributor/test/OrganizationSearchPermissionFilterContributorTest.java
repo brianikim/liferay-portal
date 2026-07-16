@@ -13,7 +13,6 @@ import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.test.TestInfo;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
-import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.OrganizationTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
@@ -50,16 +49,16 @@ public class OrganizationSearchPermissionFilterContributorTest {
 	@Test
 	@TestInfo("LPD-97608")
 	public void testWhenHasOrganizationMembershipSearch() throws Exception {
-		_organization = OrganizationTestUtil.addOrganization();
+		Organization organization = OrganizationTestUtil.addOrganization();
 
-		_user = UserTestUtil.addUser();
+		User user = UserTestUtil.addUser();
 
-		_assertSearch(_user);
+		_assertSearch(user);
 
 		_userLocalService.addOrganizationUser(
-			_organization.getOrganizationId(), _user);
+			organization.getOrganizationId(), user);
 
-		_assertSearch(_user, _uidFactory.getUID(_organization));
+		_assertSearch(user, _uidFactory.getUID(organization));
 	}
 
 	private void _assertSearch(User user, String... expectedUIDs)
@@ -95,9 +94,6 @@ public class OrganizationSearchPermissionFilterContributorTest {
 				"[", StringUtil.merge(expectedUIDs, ", "), "]"));
 	}
 
-	@DeleteAfterTestRun
-	private Organization _organization;
-
 	@Inject
 	private Searcher _searcher;
 
@@ -106,9 +102,6 @@ public class OrganizationSearchPermissionFilterContributorTest {
 
 	@Inject
 	private UIDFactory _uidFactory;
-
-	@DeleteAfterTestRun
-	private User _user;
 
 	@Inject
 	private UserLocalService _userLocalService;

@@ -23,7 +23,6 @@ import com.liferay.portal.kernel.service.OrganizationLocalService;
 import com.liferay.portal.kernel.test.AssertUtils;
 import com.liferay.portal.kernel.test.TestInfo;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
-import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.OrganizationTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
@@ -235,22 +234,22 @@ public class OrganizationSystemObjectDefinitionManagerTest
 
 		setUser(TestPropsValues.getUser());
 
-		_organization = OrganizationTestUtil.addOrganization();
+		Organization organization = OrganizationTestUtil.addOrganization();
 
-		_user = UserTestUtil.addUser();
+		User user = UserTestUtil.addUser();
 
 		_organizationLocalService.addUserOrganization(
-			_user.getUserId(), _organization);
+			user.getUserId(), organization);
 
-		setUser(_user);
+		setUser(user);
 
-		Organization organization =
+		Organization retrievedOrganization =
 			(Organization)systemObjectDefinitionManager.getOrAddEmptyBaseModel(
-				_organization.getExternalReferenceCode(), _user);
+				organization.getExternalReferenceCode(), user);
 
 		Assert.assertEquals(
-			_organization.getOrganizationId(),
-			organization.getOrganizationId());
+			organization.getOrganizationId(),
+			retrievedOrganization.getOrganizationId());
 	}
 
 	@Test
@@ -382,13 +381,7 @@ public class OrganizationSystemObjectDefinitionManagerTest
 	@Inject
 	private ObjectDefinitionLocalService _objectDefinitionLocalService;
 
-	@DeleteAfterTestRun
-	private Organization _organization;
-
 	@Inject
 	private OrganizationLocalService _organizationLocalService;
-
-	@DeleteAfterTestRun
-	private User _user;
 
 }
