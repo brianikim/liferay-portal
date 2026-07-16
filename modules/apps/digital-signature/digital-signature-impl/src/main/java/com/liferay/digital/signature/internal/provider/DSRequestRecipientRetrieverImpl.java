@@ -273,10 +273,13 @@ public class DSRequestRecipientRetrieverImpl
 			for (Map<String, Serializable> values :
 					_getValuesList(
 						companyId, requestObjectDefinition,
-						_getOrPredicateString("fileEntryId", fileEntryIds))) {
+						_getOrPredicateString(
+							"fileEntryId", fileEntryIds, false))) {
 
 				fileEntryIdsByRequestId.put(
-					GetterUtil.getLong(values.get("id")),
+					GetterUtil.getLong(
+						values.get(
+							requestObjectDefinition.getPKObjectFieldName())),
 					GetterUtil.getLong(values.get("fileEntryId")));
 			}
 
@@ -292,8 +295,8 @@ public class DSRequestRecipientRetrieverImpl
 						StringUtil.merge(
 							new String[] {
 								_getOrPredicateString(
-									fieldName,
-									fileEntryIdsByRequestId.keySet()),
+									fieldName, fileEntryIdsByRequestId.keySet(),
+									true),
 								_getStatusPredicateString(
 									"requestRecipientStatus", statusKeys)
 							},
@@ -324,13 +327,19 @@ public class DSRequestRecipientRetrieverImpl
 	}
 
 	private String _getOrPredicateString(
-		String fieldName, Collection<Long> values) {
+		String fieldName, Collection<Long> values, boolean quote) {
 
 		List<String> predicateStrings = new ArrayList<>(values.size());
 
 		for (Long value : values) {
-			predicateStrings.add(
-				StringBundler.concat("(", fieldName, " eq ", value, ")"));
+			if (quote) {
+				predicateStrings.add(
+					StringBundler.concat("(", fieldName, " eq '", value, "')"));
+			}
+			else {
+				predicateStrings.add(
+					StringBundler.concat("(", fieldName, " eq ", value, ")"));
+			}
 		}
 
 		return "(" + StringUtil.merge(predicateStrings, " or ") + ")";
