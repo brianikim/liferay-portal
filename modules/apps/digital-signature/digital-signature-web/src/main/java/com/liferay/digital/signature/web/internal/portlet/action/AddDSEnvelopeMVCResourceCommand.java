@@ -10,6 +10,7 @@ import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.model.DSDocument;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
+import com.liferay.digital.signature.request.DSRequestManager;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.portal.kernel.json.JSONFactory;
@@ -74,6 +75,10 @@ public class AddDSEnvelopeMVCResourceCommand extends BaseMVCResourceCommand {
 				}
 			});
 
+		_dsRequestManager.addDSRequests(
+			themeDisplay.getCompanyId(), themeDisplay.getSiteGroupId(),
+			user.getUserId(), dsEnvelope);
+
 		JSONPortletResponseUtil.writeJSON(
 			resourceRequest, resourceResponse,
 			JSONUtil.put("dsEnvelopeId", dsEnvelope.getDSEnvelopeId()));
@@ -124,6 +129,9 @@ public class AddDSEnvelopeMVCResourceCommand extends BaseMVCResourceCommand {
 
 	@Reference
 	private DSEnvelopeManager _dsEnvelopeManager;
+
+	@Reference
+	private DSRequestManager _dsRequestManager;
 
 	@Reference
 	private JSONFactory _jsonFactory;
