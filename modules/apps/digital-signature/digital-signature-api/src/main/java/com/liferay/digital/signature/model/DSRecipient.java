@@ -8,6 +8,8 @@ package com.liferay.digital.signature.model;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
 
+import java.time.LocalDateTime;
+
 /**
  * @author Brian Wing Shun Chan
  */
@@ -33,8 +35,16 @@ public class DSRecipient {
 		return routingOrder;
 	}
 
+	public LocalDateTime getSentLocalDateTime() {
+		return sentLocalDateTime;
+	}
+
 	public String getStatus() {
 		return status;
+	}
+
+	public LocalDateTime getStatusLocalDateTime() {
+		return statusLocalDateTime;
 	}
 
 	public JSONObject getTabsJSONObject() {
@@ -61,8 +71,16 @@ public class DSRecipient {
 		this.routingOrder = routingOrder;
 	}
 
+	public void setSentLocalDateTime(LocalDateTime sentLocalDateTime) {
+		this.sentLocalDateTime = sentLocalDateTime;
+	}
+
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public void setStatusLocalDateTime(LocalDateTime statusLocalDateTime) {
+		this.statusLocalDateTime = statusLocalDateTime;
 	}
 
 	public void setTabsJSONObject(JSONObject tabsJSONObject) {
@@ -96,7 +114,9 @@ public class DSRecipient {
 	protected String emailAddress;
 	protected String name;
 	protected int routingOrder;
+	protected LocalDateTime sentLocalDateTime;
 	protected String status;
+	protected LocalDateTime statusLocalDateTime;
 	protected JSONObject tabsJSONObject;
 
 }
