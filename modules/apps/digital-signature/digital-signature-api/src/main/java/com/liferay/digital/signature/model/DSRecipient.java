@@ -29,6 +29,10 @@ public class DSRecipient {
 		return name;
 	}
 
+	public int getRoutingOrder() {
+		return routingOrder;
+	}
+
 	public String getStatus() {
 		return status;
 	}
@@ -53,6 +57,10 @@ public class DSRecipient {
 		this.name = name;
 	}
 
+	public void setRoutingOrder(int routingOrder) {
+		this.routingOrder = routingOrder;
+	}
+
 	public void setStatus(String status) {
 		this.status = status;
 	}
@@ -62,7 +70,7 @@ public class DSRecipient {
 	}
 
 	public JSONObject toJSONObject() {
-		return JSONUtil.put(
+		JSONObject jsonObject = JSONUtil.put(
 			"clientUserId", dsClientUserId
 		).put(
 			"email", emailAddress
@@ -75,12 +83,19 @@ public class DSRecipient {
 		).put(
 			"tabs", tabsJSONObject
 		);
+
+		if (routingOrder > 0) {
+			jsonObject.put("routingOrder", String.valueOf(routingOrder));
+		}
+
+		return jsonObject;
 	}
 
 	protected String dsClientUserId;
 	protected String dsRecipientId;
 	protected String emailAddress;
 	protected String name;
+	protected int routingOrder;
 	protected String status;
 	protected JSONObject tabsJSONObject;
 
