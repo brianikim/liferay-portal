@@ -74,4 +74,17 @@ public class DigitalSignatureConfigurationUtil {
 		}
 	}
 
+	public static boolean isEmbeddedViewEnabled(long companyId, long groupId) {
+		DigitalSignatureConfiguration digitalSignatureConfiguration =
+			getDigitalSignatureConfiguration(companyId, groupId);
+
+		if (digitalSignatureConfiguration.enabled() &&
+			digitalSignatureConfiguration.enableEmbeddedView()) {
+
+			return true;
+		}
+
+		return false;
+	}
+
 }
