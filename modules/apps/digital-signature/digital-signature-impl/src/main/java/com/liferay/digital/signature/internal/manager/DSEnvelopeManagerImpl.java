@@ -5,7 +5,9 @@
 
 package com.liferay.digital.signature.internal.manager;
 
+import com.liferay.digital.signature.configuration.DigitalSignatureConfigurationUtil;
 import com.liferay.digital.signature.internal.http.DSHttp;
+import com.liferay.digital.signature.mail.DSEnvelopeEmailNotificationSender;
 import com.liferay.digital.signature.manager.DSCustomFieldManager;
 import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.model.DSCustomField;
@@ -19,10 +21,13 @@ import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
+import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.vulcan.pagination.Page;
 import com.liferay.portal.vulcan.pagination.Pagination;
@@ -53,6 +58,8 @@ public class DSEnvelopeManagerImpl implements DSEnvelopeManager {
 		String dsEnvelopeSenderEmailAddress =
 			dsEnvelope.getSenderEmailAddress();
 
+		_setDSRecipientUsers(companyId, groupId, dsEnvelope);
+
 		dsEnvelope = _toDSEnvelope(
 			_dsHttp.post(
 				companyId, groupId, "envelopes", dsEnvelope.toJSONObject()));
@@ -80,9 +87,13 @@ public class DSEnvelopeManagerImpl implements DSEnvelopeManager {
 				}
 			});
 
-		return getDSEnvelope(
+		dsEnvelope = getDSEnvelope(
 			companyId, groupId, dsEnvelope.getDSEnvelopeId(),
 			"custom_fields,recipients");
+
+		_sendDSRecipientEmails(companyId, groupId, dsEnvelope);
+
+		return dsEnvelope;
 	}
 
 	@Override
@@ -196,6 +207,7 @@ public class DSEnvelopeManagerImpl implements DSEnvelopeManager {
 			jsonObject.getJSONArray("signers"),
 			signerJSONObject -> new DSRecipient() {
 				{
+					dsClientUserId = signerJSONObject.getString("clientUserId");
 					dsRecipientId = signerJSONObject.getString("recipientId");
 					emailAddress = signerJSONObject.getString("email");
 					name = signerJSONObject.getString("name");
@@ -218,6 +230,29 @@ public class DSEnvelopeManagerImpl implements DSEnvelopeManager {
 		}
 
 		return _toLocalDateTime(signerJSONObject.getString("declinedDateTime"));
+	}
+
+	private void _sendDSRecipientEmails(
+		long companyId, long groupId, DSEnvelope dsEnvelope) {
+
+		if (!DigitalSignatureConfigurationUtil.isEmbeddedViewEnabled(
+				companyId, groupId) ||
+			!Objects.equals(dsEnvelope.getStatus(), "sent")) {
+
+			return;
+		}
+
+		for (DSRecipient dsRecipient : dsEnvelope.getDSRecipients()) {
+			if (Validator.isNotNull(dsRecipient.getDSClientUserId()) &&
+				Objects.equals(
+					StringUtil.toLowerCase(dsRecipient.getStatus()), "sent")) {
+
+				_dsEnvelopeEmailNotificationSender.sendNotification(
+					companyId, groupId, dsEnvelope.getDSEnvelopeId(),
+					dsRecipient, dsEnvelope.getEmailSubject(),
+					dsEnvelope.getEmailBlurb());
+			}
+		}
 	}
 
 	private void _setDSEnvelopeCustomField(
@@ -246,6 +281,26 @@ public class DSEnvelopeManagerImpl implements DSEnvelopeManager {
 		jsonArray.forEach(
 			element -> _setDSEnvelopeCustomField(
 				dsEnvelope, (JSONObject)element));
+	}
+
+	private void _setDSRecipientUsers(
+		long companyId, long groupId, DSEnvelope dsEnvelope) {
+
+		if (!DigitalSignatureConfigurationUtil.isEmbeddedViewEnabled(
+				companyId, groupId)) {
+
+			return;
+		}
+
+		for (DSRecipient dsRecipient : dsEnvelope.getDSRecipients()) {
+			User user = _userLocalService.fetchUserByEmailAddress(
+				companyId, dsRecipient.getEmailAddress());
+
+			if (user != null) {
+				dsRecipient.setDSClientUserId(String.valueOf(user.getUserId()));
+				dsRecipient.setName(user.getFullName());
+			}
+		}
 	}
 
 	private DSEnvelope _toDSEnvelope(JSONObject jsonObject) {
@@ -310,6 +365,13 @@ public class DSEnvelopeManagerImpl implements DSEnvelopeManager {
 	private DSCustomFieldManager _dsCustomFieldManager;
 
 	@Reference
+	private DSEnvelopeEmailNotificationSender
+		_dsEnvelopeEmailNotificationSender;
+
+	@Reference
 	private DSHttp _dsHttp;
+
+	@Reference
+	private UserLocalService _userLocalService;
 
 }
