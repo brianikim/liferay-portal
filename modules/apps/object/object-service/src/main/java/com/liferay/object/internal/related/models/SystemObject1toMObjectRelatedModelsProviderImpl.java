@@ -34,9 +34,14 @@ import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.BaseModel;
+import com.liferay.portal.kernel.model.Organization;
 import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.security.permission.InlineSQLHelper;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
+import com.liferay.portal.kernel.security.permission.UserBag;
 import com.liferay.portal.kernel.service.PersistedModelLocalService;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.service.PersistedModelLocalServiceRegistryUtil;
@@ -488,8 +493,8 @@ public class SystemObject1toMObjectRelatedModelsProviderImpl
 					return companyIdColumn.eq(objectField.getCompanyId());
 				}
 			).and(
-				ObjectEntryPermissionUtil.getPermissionWherePredicate(
-					dynamicObjectDefinitionTable, groupId, _inlineSQLHelper)
+				_getRelatedModelsPermissionWherePredicate(
+					dynamicObjectDefinitionTable, groupId, objectDefinition2)
 			).and(
 				() -> {
 					ObjectField titleObjectField =
@@ -507,6 +512,57 @@ public class SystemObject1toMObjectRelatedModelsProviderImpl
 						dynamicObjectDefinitionTable);
 				}
 			));
+	}
+
+	private Predicate _getRelatedModelsPermissionWherePredicate(
+			DynamicObjectDefinitionTable dynamicObjectDefinitionTable,
+			long groupId, ObjectDefinition objectDefinition2)
+		throws PortalException {
+
+		Predicate permissionWherePredicate =
+			ObjectEntryPermissionUtil.getPermissionWherePredicate(
+				dynamicObjectDefinitionTable, groupId, _inlineSQLHelper);
+
+		if (!Objects.equals(
+				Organization.class.getName(),
+				objectDefinition2.getClassName())) {
+
+			return permissionWherePredicate;
+		}
+
+		PermissionChecker permissionChecker =
+			PermissionThreadLocal.getPermissionChecker();
+
+		if (permissionChecker == null) {
+			return permissionWherePredicate;
+		}
+
+		long[] userOrgIds = null;
+
+		try {
+			UserBag userBag = permissionChecker.getUserBag();
+
+			userOrgIds = userBag.getUserOrgIds();
+		}
+		catch (Exception exception) {
+			throw new PortalException(exception);
+		}
+
+		if (userOrgIds.length == 0) {
+			return permissionWherePredicate;
+		}
+
+		Predicate membershipPredicate =
+			dynamicObjectDefinitionTable.getPrimaryKeyColumn(
+			).in(
+				ArrayUtil.toArray(userOrgIds)
+			);
+
+		if (permissionWherePredicate == null) {
+			return membershipPredicate;
+		}
+
+		return permissionWherePredicate.or(membershipPredicate);
 	}
 
 	private GroupByStep _getUnrelatedModelsGroupByStep(
