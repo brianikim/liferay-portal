@@ -15,6 +15,9 @@ taglib uri="http://liferay.com/tld/user" prefix="liferay-user" %>
 page import="com.liferay.bulk.selection.util.BulkSelectionRunnerUtil" %><%@
 page import="com.liferay.depot.util.SiteConnectedGroupGroupProviderUtil" %><%@
 page import="com.liferay.digital.signature.constants.DigitalSignaturePortletKeys" %><%@
+page import="com.liferay.digital.signature.provider.DSRequestDetail" %><%@
+page import="com.liferay.digital.signature.provider.DSRequestDetailProvider" %><%@
+page import="com.liferay.digital.signature.provider.DSRequestRecipientDetail" %><%@
 page import="com.liferay.document.library.configuration.DLConfiguration" %><%@
 page import="com.liferay.document.library.exception.DLStorageQuotaExceededException" %><%@
 page import="com.liferay.document.library.kernel.antivirus.AntivirusVirusFoundException" %><%@
@@ -37,6 +40,7 @@ page import="com.liferay.document.library.web.internal.display.context.DLFileEnt
 page import="com.liferay.document.library.web.internal.display.context.DLFileEntryConfigurationDisplayContext" %><%@
 page import="com.liferay.document.library.web.internal.display.context.DLFileEntryTypeDetailsDisplayContext" %><%@
 page import="com.liferay.document.library.web.internal.display.context.DLInfoPanelDisplayContext" %><%@
+page import="com.liferay.document.library.web.internal.display.context.DLSignatureDetailDisplayContext" %><%@
 page import="com.liferay.document.library.web.internal.display.context.DLSizeLimitConfigurationDisplayContext" %><%@
 page import="com.liferay.document.library.web.internal.display.context.DLViewDisplayContext" %><%@
 page import="com.liferay.document.library.web.internal.display.context.DLViewEntriesDisplayContext" %><%@

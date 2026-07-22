@@ -79,7 +79,15 @@ long assetClassPK = DLAssetHelperUtil.getAssetClassPK(fileEntry, fileVersion);
 <div class="sidebar-body">
 
 	<%
+	DSRequestDetailProvider dsRequestDetailProvider = (DSRequestDetailProvider)request.getAttribute(DSRequestDetailProvider.class.getName());
+
+	DLSignatureDetailDisplayContext dlSignatureDetailDisplayContext = new DLSignatureDetailDisplayContext(themeDisplay.getCompanyId(), dsRequestDetailProvider, fileEntry.getFileEntryId(), request, locale, themeDisplay.getTimeZone());
+
 	String tabsNames = "details";
+
+	if (dlSignatureDetailDisplayContext.isSignatureDetailVisible()) {
+		tabsNames += ",signature";
+	}
 
 	if (dlViewFileVersionDisplayContext.isVersionInfoVisible()) {
 		tabsNames += ",versions";
@@ -567,6 +575,17 @@ long assetClassPK = DLAssetHelperUtil.getAssetClassPK(fileEntry, fileVersion);
 
 			</clay:panel-group>
 		</liferay-ui:section>
+
+		<c:if test="<%= dlSignatureDetailDisplayContext.isSignatureDetailVisible() %>">
+			<liferay-ui:section>
+
+				<%
+				request.setAttribute("info_panel_signature.jsp-dlSignatureDetailDisplayContext", dlSignatureDetailDisplayContext);
+				%>
+
+				<liferay-util:include page="/document_library/info_panel_signature.jsp" servletContext="<%= application %>" />
+			</liferay-ui:section>
+		</c:if>
 
 		<c:if test="<%= dlViewFileVersionDisplayContext.isVersionInfoVisible() %>">
 			<liferay-ui:section>

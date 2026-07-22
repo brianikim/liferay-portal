@@ -389,10 +389,12 @@ DLViewEntriesDisplayContext dlViewEntriesDisplayContext = new DLViewEntriesDispl
 											%>
 
 											<c:if test="<%= Validator.isNotNull(signatureStatus) %>">
-												<clay:label
-													displayType="<%= dlViewEntriesDisplayContext.getSignatureStatusDisplayType(signatureStatus) %>"
-													label="<%= LanguageUtil.get(request, signatureStatus) %>"
-												/>
+												<a class="ds-signature-status-trigger" data-file-entry-id="<%= fileEntry.getFileEntryId() %>" href="javascript:void(0);" role="button" title="<%= LanguageUtil.get(request, "view-signature-status-detail") %>">
+													<clay:label
+														displayType="<%= dlViewEntriesDisplayContext.getSignatureStatusDisplayType(signatureStatus) %>"
+														label="<%= LanguageUtil.get(request, signatureStatus) %>"
+													/>
+												</a>
 											</c:if>
 										</liferay-ui:search-container-column-text>
 									</c:when>
@@ -631,4 +633,17 @@ request.setAttribute("edit_file_entry.jsp-checkedOut", true);
 
 <c:if test="<%= dlViewEntriesDisplayContext.isVersioningStrategyOverridable() %>">
 	<liferay-util:include page="/document_library/version_details.jsp" servletContext="<%= application %>" />
+</c:if>
+
+<c:if test="<%= dlViewEntriesDisplayContext.hasSignatureStatusColumn() %>">
+	<liferay-frontend:component
+		context='<%=
+			HashMapBuilder.<String, Object>put(
+				"infoPanelId", "infoPanelId"
+			).put(
+				"namespace", liferayPortletResponse.getNamespace()
+			).build()
+		%>'
+		module="{SignatureStatusDrilldown} from document-library-web"
+	/>
 </c:if>

@@ -7,9 +7,11 @@ package com.liferay.document.library.web.internal.portlet.action;
 
 import com.liferay.bulk.selection.BulkSelection;
 import com.liferay.bulk.selection.BulkSelectionFactory;
+import com.liferay.digital.signature.provider.DSRequestDetailProvider;
 import com.liferay.document.library.constants.DLPortletKeys;
 import com.liferay.document.library.web.internal.constants.DLWebKeys;
 import com.liferay.document.library.web.internal.helper.DLTrashHelper;
+import com.liferay.portal.kernel.module.service.Snapshot;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCResourceCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
 import com.liferay.portal.kernel.repository.model.RepositoryModel;
@@ -56,6 +58,15 @@ public class InfoPanelMVCResourceCommand extends BaseMVCResourceCommand {
 			return;
 		}
 
+		DSRequestDetailProvider dsRequestDetailProvider =
+			_dsRequestDetailProviderSnapshot.get();
+
+		if (dsRequestDetailProvider != null) {
+			resourceRequest.setAttribute(
+				DSRequestDetailProvider.class.getName(),
+				dsRequestDetailProvider);
+		}
+
 		resourceRequest.setAttribute(
 			DLWebKeys.DOCUMENT_LIBRARY_TRASH_HELPER, _dlTrashHelper);
 		resourceRequest.setAttribute(
@@ -72,6 +83,11 @@ public class InfoPanelMVCResourceCommand extends BaseMVCResourceCommand {
 			resourceRequest, resourceResponse,
 			"/document_library/info_panel.jsp");
 	}
+
+	private static final Snapshot<DSRequestDetailProvider>
+		_dsRequestDetailProviderSnapshot = new Snapshot<>(
+			InfoPanelMVCResourceCommand.class, DSRequestDetailProvider.class,
+			null, true);
 
 	@Reference
 	private DLTrashHelper _dlTrashHelper;

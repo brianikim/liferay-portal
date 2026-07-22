@@ -45,6 +45,7 @@ import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
 import com.liferay.portal.kernel.service.ResourcePermissionLocalServiceUtil;
 import com.liferay.portal.kernel.service.RoleLocalServiceUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HttpComponentsUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
@@ -380,6 +381,10 @@ public class DLViewEntriesDisplayContext {
 			ResourceConstants.SCOPE_INDIVIDUAL,
 			String.valueOf(fileEntry.getFileEntryId()), _guestRole.getRoleId(),
 			ActionKeys.VIEW);
+	}
+
+	public boolean hasSignatureStatusColumn() {
+		return ArrayUtil.contains(getEntryColumns(), "signature-status");
 	}
 
 	public boolean isDescriptiveDisplayStyle() {
