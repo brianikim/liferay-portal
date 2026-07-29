@@ -35,6 +35,8 @@ public interface DigitalSignatureConfiguration {
 
 	public String integrationKey();
 
+	public boolean requireSignInBeforeSigning();
+
 	public String rsaPrivateKey();
 
 	public String siteSettingsStrategy();

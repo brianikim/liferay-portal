@@ -10,9 +10,12 @@ import com.liferay.digital.signature.manager.DSRecipientViewDefinitionManager;
 import com.liferay.digital.signature.model.DSRecipientViewDefinition;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
+
+import java.util.Objects;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -33,10 +36,18 @@ public class DSRecipientViewDefinitionManagerImpl
 		PermissionChecker permissionChecker =
 			PermissionThreadLocal.getPermissionChecker();
 
-		if ((permissionChecker == null) ||
-			!permissionChecker.isCompanyAdmin(companyId)) {
+		// A company administrator may request any recipient view, and a
+		// signed-in user may request the embedded signing ceremony URL for
+		// their own recipient view (their email), but no one may request a
+		// signing URL on another recipient's behalf.
 
-			throw new PrincipalException.MustBeCompanyAdmin(permissionChecker);
+		if ((permissionChecker == null) ||
+			(!permissionChecker.isCompanyAdmin(companyId) &&
+			 !_isOwnRecipientView(
+				 permissionChecker, dsRecipientViewDefinition))) {
+
+			throw new PrincipalException(
+				"User is neither a company administrator nor the recipient");
 		}
 
 		JSONObject jsonObject = _dsHttp.post(
@@ -46,6 +57,21 @@ public class DSRecipientViewDefinitionManagerImpl
 			dsRecipientViewDefinition.toJSONObject());
 
 		return jsonObject.getString("url");
+	}
+
+	private boolean _isOwnRecipientView(
+		PermissionChecker permissionChecker,
+		DSRecipientViewDefinition dsRecipientViewDefinition) {
+
+		User user = permissionChecker.getUser();
+
+		if (user == null) {
+			return false;
+		}
+
+		return Objects.equals(
+			user.getEmailAddress(),
+			dsRecipientViewDefinition.getEmailAddress());
 	}
 
 	@Reference

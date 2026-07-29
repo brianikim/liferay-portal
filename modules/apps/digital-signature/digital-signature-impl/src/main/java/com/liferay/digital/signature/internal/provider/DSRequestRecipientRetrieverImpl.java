@@ -5,6 +5,7 @@
 
 package com.liferay.digital.signature.internal.provider;
 
+import com.liferay.digital.signature.provider.DSActiveRequestResolver;
 import com.liferay.digital.signature.provider.DSRequestRecipientRetriever;
 import com.liferay.object.constants.ObjectDefinitionConstants;
 import com.liferay.object.model.ObjectDefinition;
@@ -137,7 +138,42 @@ public class DSRequestRecipientRetrieverImpl
 				requestIds.add(GetterUtil.getLong(values.get(fieldName)));
 			}
 
-			return requestIds.size();
+			if (requestIds.isEmpty()) {
+				return 0;
+			}
+
+			// Count documents whose active request still awaits this user, not
+			// raw requests: a superseded request must not inflate the count.
+
+			Set<Long> fileEntryIds = new HashSet<>();
+
+			for (Long requestId : requestIds) {
+				ObjectEntry requestObjectEntry =
+					_objectEntryLocalService.fetchObjectEntry(requestId);
+
+				if (requestObjectEntry != null) {
+					fileEntryIds.add(
+						GetterUtil.getLong(
+							requestObjectEntry.getValues(
+							).get(
+								"fileEntryId"
+							)));
+				}
+			}
+
+			Set<Long> pendingFileEntryIds = new HashSet<>();
+
+			for (Map.Entry<Long, Long> entry :
+					_dsActiveRequestResolver.getActiveFileEntryIdsByRequestId(
+						companyId, fileEntryIds
+					).entrySet()) {
+
+				if (requestIds.contains(entry.getKey())) {
+					pendingFileEntryIds.add(entry.getValue());
+				}
+			}
+
+			return pendingFileEntryIds.size();
 		}
 		catch (Exception exception) {
 			_log.error(
@@ -180,20 +216,9 @@ public class DSRequestRecipientRetrieverImpl
 				return Collections.emptyMap();
 			}
 
-			Map<Long, Long> fileEntryIdsByRequestId = new HashMap<>();
-
-			for (Map<String, Serializable> values :
-					_getValuesList(
-						companyId, requestObjectDefinition,
-						_getOrPredicateString(
-							"fileEntryId", fileEntryIds, false))) {
-
-				fileEntryIdsByRequestId.put(
-					GetterUtil.getLong(
-						values.get(
-							requestObjectDefinition.getPKObjectFieldName())),
-					GetterUtil.getLong(values.get("fileEntryId")));
-			}
+			Map<Long, Long> fileEntryIdsByRequestId =
+				_dsActiveRequestResolver.getActiveFileEntryIdsByRequestId(
+					companyId, fileEntryIds);
 
 			if (fileEntryIdsByRequestId.isEmpty()) {
 				return Collections.emptyMap();
@@ -268,20 +293,9 @@ public class DSRequestRecipientRetrieverImpl
 				return Collections.emptyMap();
 			}
 
-			Map<Long, Long> fileEntryIdsByRequestId = new HashMap<>();
-
-			for (Map<String, Serializable> values :
-					_getValuesList(
-						companyId, requestObjectDefinition,
-						_getOrPredicateString(
-							"fileEntryId", fileEntryIds, false))) {
-
-				fileEntryIdsByRequestId.put(
-					GetterUtil.getLong(
-						values.get(
-							requestObjectDefinition.getPKObjectFieldName())),
-					GetterUtil.getLong(values.get("fileEntryId")));
-			}
+			Map<Long, Long> fileEntryIdsByRequestId =
+				_dsActiveRequestResolver.getActiveFileEntryIdsByRequestId(
+					companyId, fileEntryIds);
 
 			if (fileEntryIdsByRequestId.isEmpty()) {
 				return Collections.emptyMap();
@@ -391,6 +405,9 @@ public class DSRequestRecipientRetrieverImpl
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		DSRequestRecipientRetrieverImpl.class);
+
+	@Reference
+	private DSActiveRequestResolver _dsActiveRequestResolver;
 
 	@Reference(
 		target = "(filter.factory.key=" + ObjectDefinitionConstants.STORAGE_TYPE_DEFAULT + ")"

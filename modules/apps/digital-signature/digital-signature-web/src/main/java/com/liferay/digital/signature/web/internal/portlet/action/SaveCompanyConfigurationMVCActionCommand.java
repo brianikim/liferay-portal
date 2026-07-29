@@ -75,6 +75,10 @@ public class SaveCompanyConfigurationMVCActionCommand
 				"integrationKey",
 				ParamUtil.getString(actionRequest, "integrationKey")
 			).put(
+				"requireSignInBeforeSigning",
+				ParamUtil.getBoolean(
+					actionRequest, "requireSignInBeforeSigning")
+			).put(
 				"rsaPrivateKey",
 				ParamUtil.getString(actionRequest, "rsaPrivateKey")
 			).put(

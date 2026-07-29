@@ -17,6 +17,12 @@ DigitalSignatureConfiguration digitalSignatureConfiguration = (DigitalSignatureC
 	</div>
 </div>
 
+<div class="row">
+	<div class="col-md-12">
+		<aui:input checked="<%= digitalSignatureConfiguration.requireSignInBeforeSigning() %>" inlineLabel="right" label='<%= LanguageUtil.get(resourceBundle, "require-sign-in-before-signing") %>' labelCssClass="simple-toggle-switch" name="requireSignInBeforeSigning" type="toggle-switch" value="<%= digitalSignatureConfiguration.requireSignInBeforeSigning() %>" />
+	</div>
+</div>
+
 <div class="form-group row">
 	<div class="col-md-12">
 		<aui:select label="site-settings-strategy" name="siteSettingsStrategy" onchange='<%= liferayPortletResponse.getNamespace() + "onChangeDigitalSignatureSiteSettingsStrategy(event);" %>' required="<%= true %>" value="<%= digitalSignatureConfiguration.siteSettingsStrategy() %>">

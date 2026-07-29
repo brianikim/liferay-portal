@@ -20,6 +20,7 @@ import com.liferay.portal.kernel.portlet.JSONPortletResponseUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCResourceCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
 import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.Base64;
@@ -64,7 +65,8 @@ public class AddDSEnvelopeMVCResourceCommand extends BaseMVCResourceCommand {
 			new DSEnvelope() {
 				{
 					dsDocuments = _getDSDocuments(resourceRequest);
-					dsRecipients = _getDSRecipients(resourceRequest);
+					dsRecipients = _getDSRecipients(
+						themeDisplay.getCompanyId(), resourceRequest);
 					emailBlurb = ParamUtil.getString(
 						resourceRequest, "emailMessage");
 					emailSubject = ParamUtil.getString(
@@ -84,6 +86,22 @@ public class AddDSEnvelopeMVCResourceCommand extends BaseMVCResourceCommand {
 			JSONUtil.put("dsEnvelopeId", dsEnvelope.getDSEnvelopeId()));
 	}
 
+	private String _getDSClientUserId(long companyId, String emailAddress) {
+
+		// Bind the recipient to a logged-in Liferay user so the provider treats
+		// them as a captive recipient and signing happens embedded in Liferay
+		// rather than through a provider email link.
+
+		User user = _userLocalService.fetchUserByEmailAddress(
+			companyId, emailAddress);
+
+		if (user == null) {
+			return null;
+		}
+
+		return String.valueOf(user.getUserId());
+	}
+
 	private List<DSDocument> _getDSDocuments(ResourceRequest resourceRequest)
 		throws Exception {
 
@@ -93,7 +111,8 @@ public class AddDSEnvelopeMVCResourceCommand extends BaseMVCResourceCommand {
 			fileEntryId -> _toDSDocument(fileEntryId));
 	}
 
-	private List<DSRecipient> _getDSRecipients(ResourceRequest resourceRequest)
+	private List<DSRecipient> _getDSRecipients(
+			long companyId, ResourceRequest resourceRequest)
 		throws Exception {
 
 		IntegerWrapper integerWrapper = new IntegerWrapper();
@@ -103,6 +122,8 @@ public class AddDSEnvelopeMVCResourceCommand extends BaseMVCResourceCommand {
 				ParamUtil.getString(resourceRequest, "recipients")),
 			recipientJSONObject -> new DSRecipient() {
 				{
+					dsClientUserId = _getDSClientUserId(
+						companyId, recipientJSONObject.getString("email"));
 					dsRecipientId = String.valueOf(integerWrapper.increment());
 					emailAddress = recipientJSONObject.getString("email");
 					name = recipientJSONObject.getString("fullName");
@@ -135,5 +156,8 @@ public class AddDSEnvelopeMVCResourceCommand extends BaseMVCResourceCommand {
 
 	@Reference
 	private JSONFactory _jsonFactory;
+
+	@Reference
+	private UserLocalService _userLocalService;
 
 }

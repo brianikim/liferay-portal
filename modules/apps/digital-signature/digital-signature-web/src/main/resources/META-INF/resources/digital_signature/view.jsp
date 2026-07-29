@@ -9,6 +9,10 @@
 
 <liferay-portlet:resourceURL copyCurrentRenderParameters="<%= false %>" var="baseResourceURL" />
 
+<%
+DigitalSignatureConfiguration digitalSignatureConfiguration = DigitalSignatureConfigurationUtil.getDigitalSignatureConfiguration(themeDisplay.getCompanyId(), themeDisplay.getScopeGroupId());
+%>
+
 <div class="digital-signature">
 	<react:component
 		module="{DigitalSignature} from digital-signature-web"
@@ -17,6 +21,8 @@
 				"allowedFileExtensions", StringUtil.merge(DigitalSignatureConstants.ALLOWED_FILE_EXTENSIONS)
 			).put(
 				"baseResourceURL", String.valueOf(baseResourceURL)
+			).put(
+				"requireSignInBeforeSigning", digitalSignatureConfiguration.requireSignInBeforeSigning()
 			).build()
 		%>'
 	/>

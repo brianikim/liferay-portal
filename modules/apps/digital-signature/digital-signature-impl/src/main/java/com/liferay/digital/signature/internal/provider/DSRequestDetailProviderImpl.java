@@ -7,6 +7,7 @@ package com.liferay.digital.signature.internal.provider;
 
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfigurationUtil;
+import com.liferay.digital.signature.provider.DSActiveRequestResolver;
 import com.liferay.digital.signature.provider.DSRequestDetail;
 import com.liferay.digital.signature.provider.DSRequestDetailProvider;
 import com.liferay.digital.signature.provider.DSRequestRecipientDetail;
@@ -33,6 +34,7 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import java.io.Serializable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -79,18 +81,19 @@ public class DSRequestDetailProviderImpl implements DSRequestDetailProvider {
 
 		try {
 
-			// Assumes at most one signature request per document, which is the
-			// request-level roll-up model in LPD-97581.
+			// A document can have more than one signature request over time;
+			// show the active one.
 
-			List<Map<String, Serializable>> requestValuesList = _getValuesList(
-				companyId, requestObjectDefinition,
-				"(fileEntryId eq " + fileEntryId + ")");
+			Map<String, Serializable> requestValues =
+				_dsActiveRequestResolver.getActiveRequestValuesByFileEntryId(
+					companyId, Collections.singletonList(fileEntryId)
+				).get(
+					fileEntryId
+				);
 
-			if (requestValuesList.isEmpty()) {
+			if (requestValues == null) {
 				return null;
 			}
-
-			Map<String, Serializable> requestValues = requestValuesList.get(0);
 
 			long requestId = GetterUtil.getLong(
 				requestValues.get(
@@ -231,6 +234,9 @@ public class DSRequestDetailProviderImpl implements DSRequestDetailProvider {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		DSRequestDetailProviderImpl.class);
+
+	@Reference
+	private DSActiveRequestResolver _dsActiveRequestResolver;
 
 	@Reference(
 		target = "(filter.factory.key=" + ObjectDefinitionConstants.STORAGE_TYPE_DEFAULT + ")"
