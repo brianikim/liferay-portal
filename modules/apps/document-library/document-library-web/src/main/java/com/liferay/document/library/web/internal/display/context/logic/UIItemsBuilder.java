@@ -9,6 +9,7 @@ import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration
 import com.liferay.digital.signature.configuration.DigitalSignatureConfigurationUtil;
 import com.liferay.digital.signature.constants.DigitalSignatureConstants;
 import com.liferay.digital.signature.constants.DigitalSignaturePortletKeys;
+import com.liferay.digital.signature.request.DSRequestManager;
 import com.liferay.document.library.constants.DLPortletKeys;
 import com.liferay.document.library.display.context.DLUIItemKeys;
 import com.liferay.document.library.kernel.document.conversion.DocumentConversionUtil;
@@ -85,6 +86,8 @@ import jakarta.portlet.WindowStateException;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -569,6 +572,33 @@ public class UIItemsBuilder {
 		).build();
 	}
 
+	public DropdownItem createSignatureDetailsDropdownItem()
+		throws PortalException {
+
+		PortletURL signatureDetailsURL = _getRenderURL(
+			"/document_library/signature_details", null);
+
+		try {
+			signatureDetailsURL.setWindowState(LiferayWindowState.POP_UP);
+		}
+		catch (WindowStateException windowStateException) {
+			throw new PortalException(windowStateException);
+		}
+
+		signatureDetailsURL.setParameter(
+			"fileEntryId", String.valueOf(_fileEntry.getFileEntryId()));
+
+		return DropdownItemBuilder.putData(
+			"action", "signatureDetails"
+		).putData(
+			"signatureDetailsURL", signatureDetailsURL.toString()
+		).setKey(
+			DLUIItemKeys.SIGNATURE_DETAILS
+		).setLabel(
+			LanguageUtil.get(_httpServletRequest, "signatures")
+		).build();
+	}
+
 	public DropdownItem createSubscribeDropdownItem() {
 		return DropdownItemBuilder.putData(
 			"action", "subscribeFileEntry"
@@ -909,6 +939,22 @@ public class UIItemsBuilder {
 
 		return !Objects.equals(
 			latestFileVersion.getVersion(), _fileVersion.getVersion());
+	}
+
+	public boolean isSignatureDetailsActionAvailable() {
+		DSRequestManager dsRequestManager = _dsRequestManagerSnapshot.get();
+
+		if (dsRequestManager == null) {
+			return false;
+		}
+
+		Map<Long, String> requestStatusesByFileEntryId =
+			dsRequestManager.getRequestStatusesByFileEntryId(
+				_fileEntry.getCompanyId(),
+				Collections.singletonList(_fileEntry.getFileEntryId()));
+
+		return requestStatusesByFileEntryId.containsKey(
+			_fileEntry.getFileEntryId());
 	}
 
 	public boolean isSubscribeActionAvailable() throws PortalException {
@@ -1388,6 +1434,9 @@ public class UIItemsBuilder {
 	private static final Snapshot<DDMFormValuesValidator>
 		_ddmFormValuesValidatorSnapshot = new Snapshot<>(
 			UIItemsBuilder.class, DDMFormValuesValidator.class);
+	private static final Snapshot<DSRequestManager> _dsRequestManagerSnapshot =
+		new Snapshot<>(
+			UIItemsBuilder.class, DSRequestManager.class, null, true);
 
 	private String _currentURL;
 	private final DLTrashHelper _dlTrashHelper;

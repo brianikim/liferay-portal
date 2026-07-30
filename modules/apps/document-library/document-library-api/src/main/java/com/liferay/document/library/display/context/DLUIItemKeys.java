@@ -63,6 +63,9 @@ public class DLUIItemKeys {
 	public static final String REVERT =
 		DLUIItemKeys.class.getName() + "#revert";
 
+	public static final String SIGNATURE_DETAILS =
+		DLUIItemKeys.class.getName() + "#signature-details";
+
 	public static final String UPLOAD =
 		DLUIItemKeys.class.getName() + "#upload";
 

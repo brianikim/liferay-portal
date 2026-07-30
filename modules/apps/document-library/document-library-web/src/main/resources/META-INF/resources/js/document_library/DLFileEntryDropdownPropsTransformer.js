@@ -145,6 +145,13 @@ const ACTIONS = {
 		});
 	},
 
+	signatureDetails({signatureDetailsURL}) {
+		openModal({
+			title: Liferay.Language.get('signatures'),
+			url: signatureDetailsURL,
+		});
+	},
+
 	subscribeFileEntry({subscribeFileEntryURL}) {
 		location.href = subscribeFileEntryURL;
 	},

@@ -143,6 +143,9 @@ public class DefaultDLViewFileVersionDisplayContext
 						_uiItemsBuilder.
 							createCollectDigitalSignatureDropdownItem()
 					).add(
+						_uiItemsBuilder::isSignatureDetailsActionAvailable,
+						_uiItemsBuilder.createSignatureDetailsDropdownItem()
+					).add(
 						_uiItemsBuilder::isHistoryActionAvailable,
 						_uiItemsBuilder.createHistoryDropdownItem()
 					).add(
