@@ -10,7 +10,9 @@ import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration
 import com.liferay.digital.signature.model.DSDocument;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
+import com.liferay.digital.signature.request.DSRequestDetail;
 import com.liferay.digital.signature.request.DSRequestManager;
+import com.liferay.digital.signature.request.DSRequestRecipientDetail;
 import com.liferay.object.constants.ObjectDefinitionConstants;
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.model.ObjectEntry;
@@ -219,54 +221,88 @@ public class DSRequestManagerTest {
 	}
 
 	@Test
-	public void testGetRequestStatuses() throws Exception {
+	public void testGetRequestDetail() throws Exception {
 		long companyId = TestPropsValues.getCompanyId();
+		long userId = TestPropsValues.getUserId();
 
-		ObjectDefinition objectDefinition =
+		ObjectDefinition requestObjectDefinition =
 			_objectDefinitionLocalService.
 				fetchObjectDefinitionByExternalReferenceCode(
 					"L_DS_REQUEST", companyId);
-
-		Assert.assertNotNull(
-			"The L_DS_REQUEST object definition must exist when the feature " +
-				"flag is enabled",
-			objectDefinition);
+		ObjectDefinition recipientObjectDefinition =
+			_objectDefinitionLocalService.
+				fetchObjectDefinitionByExternalReferenceCode(
+					"L_DS_REQUEST_RECIPIENT", companyId);
 
 		long fileEntryId = RandomTestUtil.randomInt();
 
+		String languageId = LocaleUtil.toLanguageId(
+			LocaleUtil.getSiteDefault());
+
+		ObjectEntry requestObjectEntry =
+			_objectEntryLocalService.addObjectEntry(
+				0, userId, requestObjectDefinition.getObjectDefinitionId(), 0,
+				languageId,
+				HashMapBuilder.<String, Serializable>put(
+					"emailSubject", "Please sign"
+				).put(
+					"fileEntryId", fileEntryId
+				).put(
+					"providerKey", "docusign"
+				).put(
+					"providerRequestId", "env-" + fileEntryId
+				).put(
+					"requestStatus", "sent"
+				).build(),
+				ServiceContextTestUtil.getServiceContext(
+					_group.getGroupId(), userId));
+
+		ObjectRelationship objectRelationship =
+			_objectRelationshipLocalService.fetchObjectRelationship(
+				requestObjectDefinition.getObjectDefinitionId(),
+				"dsRequestToDSRequestRecipients");
+
+		ObjectField objectField = _objectFieldLocalService.getObjectField(
+			objectRelationship.getObjectFieldId2());
+
 		_objectEntryLocalService.addObjectEntry(
-			0, TestPropsValues.getUserId(),
-			objectDefinition.getObjectDefinitionId(), 0,
-			LocaleUtil.toLanguageId(LocaleUtil.getSiteDefault()),
+			0, userId, recipientObjectDefinition.getObjectDefinitionId(), 0,
+			languageId,
 			HashMapBuilder.<String, Serializable>put(
-				"fileEntryId", fileEntryId
+				objectField.getName(), requestObjectEntry.getObjectEntryId()
 			).put(
-				"providerKey", "docusign"
+				"emailAddress", "ray.chen@liferay.com"
 			).put(
-				"providerRequestId", "test-" + fileEntryId
+				"name", "Ray Chen"
 			).put(
-				"requestStatus", "completed"
+				"recipientUserId", userId
+			).put(
+				"requestRecipientStatus", "sent"
 			).build(),
 			ServiceContextTestUtil.getServiceContext(
-				_group.getGroupId(), TestPropsValues.getUserId()));
+				_group.getGroupId(), userId));
 
-		Map<Long, String> requestStatuses =
-			_dsRequestManager.getRequestStatuses(
-				companyId, Collections.singletonList(fileEntryId));
+		DSRequestDetail dsRequestDetail = _dsRequestManager.getRequestDetail(
+			companyId, fileEntryId);
 
-		Assert.assertEquals("completed", requestStatuses.get(fileEntryId));
-	}
+		Assert.assertNotNull(dsRequestDetail);
+		Assert.assertEquals("sent", dsRequestDetail.getRequestStatus());
+		Assert.assertEquals(
+			"env-" + fileEntryId, dsRequestDetail.getProviderRequestId());
+		Assert.assertEquals("Please sign", dsRequestDetail.getEmailSubject());
 
-	@Test
-	public void testGetRequestStatusesReturnsEmptyForMissingRequest()
-		throws Exception {
+		List<DSRequestRecipientDetail> recipientDetails =
+			dsRequestDetail.getRecipientDetails();
 
-		Map<Long, String> requestStatuses =
-			_dsRequestManager.getRequestStatuses(
-				TestPropsValues.getCompanyId(),
-				Collections.singletonList(RandomTestUtil.randomLong()));
+		Assert.assertEquals(
+			recipientDetails.toString(), 1, recipientDetails.size());
 
-		Assert.assertTrue(requestStatuses.isEmpty());
+		DSRequestRecipientDetail dsRequestRecipientDetail =
+			recipientDetails.get(0);
+
+		Assert.assertEquals("Ray Chen", dsRequestRecipientDetail.getName());
+		Assert.assertEquals(
+			"sent", dsRequestRecipientDetail.getRequestRecipientStatus());
 	}
 
 	@Test
