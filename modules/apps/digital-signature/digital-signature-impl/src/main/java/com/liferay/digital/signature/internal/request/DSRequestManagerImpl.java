@@ -7,18 +7,24 @@ package com.liferay.digital.signature.internal.request;
 
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfigurationUtil;
+import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.model.DSDocument;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.digital.signature.request.DSRequestManager;
+import com.liferay.object.constants.ObjectDefinitionConstants;
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.model.ObjectEntry;
 import com.liferay.object.model.ObjectField;
 import com.liferay.object.model.ObjectRelationship;
+import com.liferay.object.rest.filter.factory.FilterFactory;
 import com.liferay.object.service.ObjectDefinitionLocalService;
 import com.liferay.object.service.ObjectEntryLocalService;
 import com.liferay.object.service.ObjectFieldLocalService;
 import com.liferay.object.service.ObjectRelationshipLocalService;
+import com.liferay.petra.sql.dsl.expression.Predicate;
+import com.liferay.petra.string.StringBundler;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -32,6 +38,10 @@ import com.liferay.portal.kernel.util.Validator;
 
 import java.io.Serializable;
 
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.osgi.service.component.annotations.Component;
@@ -131,6 +141,75 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 	}
 
+	@Override
+	public void syncDSRequest(
+		long companyId, long groupId, String providerRequestId) {
+
+		if (!_isEnabled(companyId) || Validator.isNull(providerRequestId)) {
+			return;
+		}
+
+		ObjectDefinition requestObjectDefinition = _fetchObjectDefinition(
+			companyId, "L_DS_REQUEST");
+		ObjectDefinition recipientObjectDefinition = _fetchObjectDefinition(
+			companyId, "L_DS_REQUEST_RECIPIENT");
+
+		if ((requestObjectDefinition == null) ||
+			(recipientObjectDefinition == null)) {
+
+			return;
+		}
+
+		try {
+			DSEnvelope dsEnvelope = _dsEnvelopeManager.getDSEnvelope(
+				companyId, groupId, providerRequestId);
+
+			if (dsEnvelope == null) {
+				return;
+			}
+
+			String fieldName = _getRelationshipFieldName(
+				requestObjectDefinition);
+
+			if (fieldName == null) {
+				return;
+			}
+
+			Map<String, String> recipientStatuses = new HashMap<>();
+
+			for (DSRecipient dsRecipient : dsEnvelope.getDSRecipients()) {
+				recipientStatuses.put(
+					dsRecipient.getDSRecipientId(),
+					_toRecipientStatus(dsRecipient.getStatus()));
+			}
+
+			String requestStatus = _toRequestStatus(dsEnvelope.getStatus());
+
+			for (Map<String, Serializable> requestValues :
+					_getValuesList(
+						companyId, requestObjectDefinition,
+						"(providerRequestId eq '" + providerRequestId + "')")) {
+
+				long requestId = GetterUtil.getLong(
+					requestValues.get(
+						requestObjectDefinition.getPKObjectFieldName()));
+
+				_updateRequestStatus(
+					companyId, groupId, requestId, requestStatus);
+
+				_updateRecipientStatuses(
+					companyId, groupId, recipientObjectDefinition, fieldName,
+					requestId, recipientStatuses);
+			}
+		}
+		catch (Exception exception) {
+			_log.error(
+				"Unable to sync the signature request for envelope " +
+					providerRequestId,
+				exception);
+		}
+	}
+
 	private ServiceContext _createServiceContext(
 		long companyId, long groupId, long userId) {
 
@@ -183,6 +262,18 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			objectRelationship.getObjectFieldId2());
 
 		return objectField.getName();
+	}
+
+	private List<Map<String, Serializable>> _getValuesList(
+			long companyId, ObjectDefinition objectDefinition,
+			String filterString)
+		throws Exception {
+
+		return _objectEntryLocalService.getValuesList(
+			0, companyId, _userLocalService.getGuestUserId(companyId),
+			objectDefinition.getObjectDefinitionId(),
+			_filterFactory.create(filterString, objectDefinition), null,
+			QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
 	}
 
 	private boolean _isEnabled(long companyId) {
@@ -256,10 +347,93 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		return "sent";
 	}
 
+	private void _updateRecipientStatuses(
+			long companyId, long groupId,
+			ObjectDefinition recipientObjectDefinition, String fieldName,
+			long requestId, Map<String, String> recipientStatuses)
+		throws Exception {
+
+		for (Map<String, Serializable> recipientValues :
+				_getValuesList(
+					companyId, recipientObjectDefinition,
+					StringBundler.concat(
+						"(", fieldName, " eq '", requestId, "')"))) {
+
+			String recipientStatus = recipientStatuses.get(
+				GetterUtil.getString(
+					recipientValues.get("providerRecipientId")));
+
+			if (recipientStatus == null) {
+				continue;
+			}
+
+			long recipientId = GetterUtil.getLong(
+				recipientValues.get(
+					recipientObjectDefinition.getPKObjectFieldName()));
+
+			ObjectEntry objectEntry = _objectEntryLocalService.fetchObjectEntry(
+				recipientId);
+
+			if (objectEntry == null) {
+				continue;
+			}
+
+			_objectEntryLocalService.updateObjectEntry(
+				objectEntry.getUserId(), recipientId, 0,
+				HashMapBuilder.putAll(
+					objectEntry.getValues()
+				).put(
+					"requestRecipientStatus", recipientStatus
+				).build(),
+				_createServiceContext(
+					companyId, groupId, objectEntry.getUserId()));
+		}
+	}
+
+	private void _updateRequestStatus(
+			long companyId, long groupId, long requestId, String requestStatus)
+		throws Exception {
+
+		ObjectEntry objectEntry = _objectEntryLocalService.fetchObjectEntry(
+			requestId);
+
+		if (objectEntry == null) {
+			return;
+		}
+
+		Serializable completionDate = objectEntry.getValues(
+		).get(
+			"completionDate"
+		);
+
+		if (Objects.equals(requestStatus, "completed")) {
+			completionDate = new Date();
+		}
+
+		_objectEntryLocalService.updateObjectEntry(
+			objectEntry.getUserId(), requestId, 0,
+			HashMapBuilder.<String, Serializable>putAll(
+				objectEntry.getValues()
+			).put(
+				"completionDate", completionDate
+			).put(
+				"requestStatus", requestStatus
+			).build(),
+			_createServiceContext(companyId, groupId, objectEntry.getUserId()));
+	}
+
 	private static final String _PROVIDER_KEY = "docusign";
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		DSRequestManagerImpl.class);
+
+	@Reference
+	private DSEnvelopeManager _dsEnvelopeManager;
+
+	@Reference(
+		target = "(filter.factory.key=" + ObjectDefinitionConstants.STORAGE_TYPE_DEFAULT + ")"
+	)
+	private FilterFactory<Predicate> _filterFactory;
 
 	@Reference
 	private ObjectDefinitionLocalService _objectDefinitionLocalService;

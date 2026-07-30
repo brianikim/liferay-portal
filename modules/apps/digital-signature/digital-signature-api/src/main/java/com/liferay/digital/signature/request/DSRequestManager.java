@@ -33,4 +33,18 @@ public interface DSRequestManager {
 	public void addDSRequests(
 		long companyId, long groupId, long userId, DSEnvelope dsEnvelope);
 
+	/**
+	 * Refreshes the stored signature request and its recipients for a provider
+	 * envelope from the provider's current state. This is how status stays
+	 * current without a provider webhook: callers invoke it at the points where
+	 * they already talk to the provider, such as when a signer returns from the
+	 * embedded signing ceremony.
+	 *
+	 * @param companyId the company the envelope belongs to
+	 * @param groupId the site to resolve the provider configuration from
+	 * @param providerRequestId the provider envelope identifier
+	 */
+	public void syncDSRequest(
+		long companyId, long groupId, String providerRequestId);
+
 }
