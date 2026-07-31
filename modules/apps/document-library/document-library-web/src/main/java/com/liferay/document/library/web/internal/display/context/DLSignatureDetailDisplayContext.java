@@ -9,8 +9,10 @@ import com.liferay.digital.signature.request.DSRequestDetail;
 import com.liferay.digital.signature.request.DSRequestManager;
 import com.liferay.digital.signature.request.DSRequestRecipientDetail;
 import com.liferay.petra.string.StringBundler;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.util.FastDateFormatFactoryUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -56,6 +58,38 @@ public class DLSignatureDetailDisplayContext {
 			_companyId, _fileEntryId);
 
 		return _dsRequestDetail;
+	}
+
+	public String getActivityColor(String displayType) {
+		if (Objects.equals(displayType, "primary")) {
+			return "#0b5fff";
+		}
+
+		if (Objects.equals(displayType, "success")) {
+			return "#287d3c";
+		}
+
+		if (Objects.equals(displayType, "info")) {
+			return "#2e5aac";
+		}
+
+		if (Objects.equals(displayType, "warning")) {
+			return "#b95000";
+		}
+
+		if (Objects.equals(displayType, "danger")) {
+			return "#da1414";
+		}
+
+		return "#6b6c7e";
+	}
+
+	public String getInitials(String name) {
+		if (Validator.isNull(name)) {
+			return StringPool.BLANK;
+		}
+
+		return StringUtil.toUpperCase(name.substring(0, 1));
 	}
 
 	public List<SignatureActivity> getSignatureActivities() {
