@@ -21,6 +21,8 @@ public interface DSRequestManager {
 			long[] fileEntryIds)
 		throws PortalException;
 
+	public int sendSignatureReminders(long companyId);
+
 	public void updateDSRequest(
 		long companyId, long groupId, String providerRequestId);
 
