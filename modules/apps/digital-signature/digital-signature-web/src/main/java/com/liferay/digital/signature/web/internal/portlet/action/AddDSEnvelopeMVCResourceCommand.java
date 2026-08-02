@@ -13,6 +13,8 @@ import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.petra.function.transform.TransformUtil;
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.User;
@@ -56,26 +58,46 @@ public class AddDSEnvelopeMVCResourceCommand extends BaseMVCResourceCommand {
 		ThemeDisplay themeDisplay = (ThemeDisplay)resourceRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		User user = themeDisplay.getUser();
+		int expireAfter = 0;
+		int expireWarn = 0;
+
+		if (FeatureFlagManagerUtil.isEnabled(
+				themeDisplay.getCompanyId(), "LPD-69290")) {
+
+			expireAfter = ParamUtil.getInteger(resourceRequest, "expireAfter");
+			expireWarn = ParamUtil.getInteger(resourceRequest, "expireWarn");
+
+			if ((expireAfter > 0) && (expireWarn >= expireAfter)) {
+				throw new PortalException(
+					"Days to warn signers must be fewer than days until " +
+						"expiration");
+			}
+		}
 
 		long[] fileEntryIds = ParamUtil.getLongValues(
 			resourceRequest, "fileEntryIds");
+		User user = themeDisplay.getUser();
 
-		DSEnvelope dsEnvelope = _dsEnvelopeManager.addDSEnvelope(
+		DSEnvelope dsEnvelope = new DSEnvelope() {
+			{
+				dsDocuments = _getDSDocuments(fileEntryIds);
+				dsRecipients = _getDSRecipients(resourceRequest);
+				emailBlurb = ParamUtil.getString(
+					resourceRequest, "emailMessage");
+				emailSubject = ParamUtil.getString(
+					resourceRequest, "emailSubject");
+				name = ParamUtil.getString(resourceRequest, "envelopeName");
+				senderEmailAddress = user.getEmailAddress();
+				status = "sent";
+			}
+		};
+
+		dsEnvelope.setExpireAfter(expireAfter);
+		dsEnvelope.setExpireWarn(expireWarn);
+
+		dsEnvelope = _dsEnvelopeManager.addDSEnvelope(
 			themeDisplay.getCompanyId(), themeDisplay.getSiteGroupId(),
-			new DSEnvelope() {
-				{
-					dsDocuments = _getDSDocuments(fileEntryIds);
-					dsRecipients = _getDSRecipients(resourceRequest);
-					emailBlurb = ParamUtil.getString(
-						resourceRequest, "emailMessage");
-					emailSubject = ParamUtil.getString(
-						resourceRequest, "emailSubject");
-					name = ParamUtil.getString(resourceRequest, "envelopeName");
-					senderEmailAddress = user.getEmailAddress();
-					status = "sent";
-				}
-			});
+			dsEnvelope);
 
 		_dsRequestManager.addDSRequest(
 			themeDisplay.getCompanyId(), themeDisplay.getSiteGroupId(),
