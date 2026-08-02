@@ -7,6 +7,7 @@ package com.liferay.digital.signature.internal.request;
 
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfigurationUtil;
+import com.liferay.digital.signature.mail.DSEnvelopeEmailNotificationSender;
 import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
@@ -413,6 +414,97 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	}
 
 	@Override
+	public int sendSignatureReminders(long companyId) {
+		if (!_isEnabled(companyId, 0)) {
+			return 0;
+		}
+
+		DigitalSignatureConfiguration digitalSignatureConfiguration =
+			DigitalSignatureConfigurationUtil.getDigitalSignatureConfiguration(
+				companyId, 0);
+
+		if (!digitalSignatureConfiguration.signatureReminderEnabled()) {
+			return 0;
+		}
+
+		ObjectDefinition recipientObjectDefinition = _fetchObjectDefinition(
+			companyId, "L_DS_REQUEST_RECIPIENT");
+		ObjectDefinition requestObjectDefinition = _fetchObjectDefinition(
+			companyId, "L_DS_REQUEST");
+
+		if ((recipientObjectDefinition == null) ||
+			(requestObjectDefinition == null)) {
+
+			return 0;
+		}
+
+		int count = 0;
+
+		try {
+			String recipientFieldName = _getRelationshipFieldName(
+				requestObjectDefinition, "dsRequestToDSRequestRecipients");
+
+			if (recipientFieldName == null) {
+				return 0;
+			}
+
+			for (Map<String, Serializable> recipientValues :
+					_getValuesList(
+						companyId, recipientObjectDefinition,
+						"(requestRecipientStatus eq 'sent')", null)) {
+
+				ObjectEntry requestObjectEntry =
+					_objectEntryLocalService.fetchObjectEntry(
+						GetterUtil.getLong(
+							recipientValues.get(recipientFieldName)));
+
+				if (requestObjectEntry == null) {
+					continue;
+				}
+
+				Map<String, Serializable> requestValues =
+					requestObjectEntry.getValues();
+
+				if (ArrayUtil.contains(
+						_TERMINAL_REQUEST_STATUSES,
+						GetterUtil.getString(
+							requestValues.get("requestStatus")))) {
+
+					continue;
+				}
+
+				String emailAddress = GetterUtil.getString(
+					recipientValues.get("emailAddress"));
+
+				if (Validator.isNull(emailAddress)) {
+					continue;
+				}
+
+				DSRecipient dsRecipient = new DSRecipient();
+
+				dsRecipient.setEmailAddress(emailAddress);
+
+				_dsEnvelopeEmailNotificationSender.sendNotification(
+					companyId, 0,
+					GetterUtil.getString(
+						requestValues.get("providerRequestId")),
+					dsRecipient,
+					GetterUtil.getString(requestValues.get("emailSubject")),
+					null);
+
+				count++;
+			}
+		}
+		catch (Exception exception) {
+			_log.error(
+				"Unable to send signature reminders for company " + companyId,
+				exception);
+		}
+
+		return count;
+	}
+
+	@Override
 	public void updateDSRequest(
 		long companyId, long groupId, String providerRequestId) {
 
@@ -475,7 +567,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 				_updateRecipientStatuses(
 					companyId, groupId, recipientObjectDefinition, fieldName,
-					requestId, dsRecipients);
+					requestId, dsRecipients, providerRequestId,
+					GetterUtil.getString(requestValues.get("emailSubject")));
 
 				_reindexRequestDocuments(
 					companyId, documentObjectDefinition,
@@ -718,7 +811,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	private void _updateRecipientStatuses(
 			long companyId, long groupId,
 			ObjectDefinition recipientObjectDefinition, String fieldName,
-			long requestId, Map<String, DSRecipient> dsRecipients)
+			long requestId, Map<String, DSRecipient> dsRecipients,
+			String providerRequestId, String emailSubject)
 		throws Exception {
 
 		for (Map<String, Serializable> recipientValues :
@@ -747,12 +841,14 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				continue;
 			}
 
+			String requestRecipientStatus = _toRecipientStatus(
+				dsRecipient.getStatus());
+
 			Map<String, Serializable> values =
 				HashMapBuilder.<String, Serializable>putAll(
 					objectEntry.getValues()
 				).put(
-					"requestRecipientStatus",
-					_toRecipientStatus(dsRecipient.getStatus())
+					"requestRecipientStatus", requestRecipientStatus
 				).build();
 
 			_putIfNotNull(
@@ -766,6 +862,18 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				objectEntry.getUserId(), recipientId, 0, values,
 				_createServiceContext(
 					companyId, groupId, objectEntry.getUserId()));
+
+			if (Objects.equals(
+					GetterUtil.getString(
+						recipientValues.get("requestRecipientStatus")),
+					"created") &&
+				Objects.equals(requestRecipientStatus, "sent") &&
+				Validator.isNotNull(dsRecipient.getDSClientUserId())) {
+
+				_dsEnvelopeEmailNotificationSender.sendNotification(
+					companyId, groupId, providerRequestId, dsRecipient,
+					emailSubject, null);
+			}
 		}
 	}
 
@@ -810,8 +918,16 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 	private static final String _PROVIDER_KEY = "docusign";
 
+	private static final String[] _TERMINAL_REQUEST_STATUSES = {
+		"completed", "declined", "voided"
+	};
+
 	private static final Log _log = LogFactoryUtil.getLog(
 		DSRequestManagerImpl.class);
+
+	@Reference
+	private DSEnvelopeEmailNotificationSender
+		_dsEnvelopeEmailNotificationSender;
 
 	@Reference
 	private DSEnvelopeManager _dsEnvelopeManager;
