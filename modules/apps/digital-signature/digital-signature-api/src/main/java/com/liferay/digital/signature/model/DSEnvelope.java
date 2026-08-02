@@ -44,6 +44,14 @@ public class DSEnvelope {
 		return emailSubject;
 	}
 
+	public int getExpireAfter() {
+		return expireAfter;
+	}
+
+	public int getExpireWarn() {
+		return expireWarn;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -80,6 +88,14 @@ public class DSEnvelope {
 		this.emailSubject = emailSubject;
 	}
 
+	public void setExpireAfter(int expireAfter) {
+		this.expireAfter = expireAfter;
+	}
+
+	public void setExpireWarn(int expireWarn) {
+		this.expireWarn = expireWarn;
+	}
+
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -93,7 +109,7 @@ public class DSEnvelope {
 	}
 
 	public JSONObject toJSONObject() {
-		return JSONUtil.put(
+		JSONObject jsonObject = JSONUtil.put(
 			"createdLocalDateTime", getCreatedLocalDateTime()
 		).put(
 			"documents",
@@ -119,6 +135,25 @@ public class DSEnvelope {
 		).put(
 			"status", getStatus()
 		);
+
+		if (expireAfter > 0) {
+			jsonObject.put(
+				"notification",
+				JSONUtil.put(
+					"expirations",
+					JSONUtil.put(
+						"expireAfter", String.valueOf(expireAfter)
+					).put(
+						"expireEnabled", "true"
+					).put(
+						"expireWarn", String.valueOf(expireWarn)
+					)
+				).put(
+					"useAccountDefaults", "false"
+				));
+		}
+
+		return jsonObject;
 	}
 
 	@Override
@@ -132,6 +167,8 @@ public class DSEnvelope {
 	protected List<DSRecipient> dsRecipients;
 	protected String emailBlurb;
 	protected String emailSubject;
+	protected int expireAfter;
+	protected int expireWarn;
 	protected String name;
 	protected String senderEmailAddress;
 	protected String status;
