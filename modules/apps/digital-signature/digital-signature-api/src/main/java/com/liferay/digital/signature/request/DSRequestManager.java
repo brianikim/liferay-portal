@@ -37,6 +37,8 @@ public interface DSRequestManager {
 	public Set<Long> getSignatureRequiredFileEntryIds(
 		long companyId, long userId, Collection<Long> fileEntryIds);
 
+	public int remindPendingSignatureRecipients(long companyId);
+
 	public void updateDSRequests(
 		long companyId, long groupId, String providerRequestId);
 
