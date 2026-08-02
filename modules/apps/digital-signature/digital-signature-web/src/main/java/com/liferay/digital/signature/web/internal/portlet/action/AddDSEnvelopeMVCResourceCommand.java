@@ -10,9 +10,11 @@ import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.model.DSDocument;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
+import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.digital.signature.request.DSRequestManager;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.petra.function.transform.TransformUtil;
+import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONUtil;
@@ -26,6 +28,7 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Base64;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.IntegerWrapper;
+import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 
@@ -33,6 +36,7 @@ import jakarta.portlet.ResourceRequest;
 import jakarta.portlet.ResourceResponse;
 
 import java.util.List;
+import java.util.Map;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -58,6 +62,24 @@ public class AddDSEnvelopeMVCResourceCommand extends BaseMVCResourceCommand {
 		ThemeDisplay themeDisplay = (ThemeDisplay)resourceRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
+		long[] fileEntryIds = ParamUtil.getLongValues(
+			resourceRequest, "fileEntryIds");
+
+		Map<Long, DSRequest> dsRequests = _dsRequestManager.getDSRequests(
+			themeDisplay.getCompanyId(), ListUtil.fromArray(fileEntryIds));
+
+		for (Map.Entry<Long, DSRequest> entry : dsRequests.entrySet()) {
+			DSRequest dsRequest = entry.getValue();
+
+			if (!dsRequest.isRequestable()) {
+				throw new PortalException(
+					StringBundler.concat(
+						"File entry ", entry.getKey(),
+						" already has a signature request with status \"",
+						dsRequest.getStatus(), "\""));
+			}
+		}
+
 		int expireAfterDays = ParamUtil.getInteger(
 			resourceRequest, "expireAfter");
 		int expireWarnDays = ParamUtil.getInteger(
@@ -70,9 +92,6 @@ public class AddDSEnvelopeMVCResourceCommand extends BaseMVCResourceCommand {
 					"days-to-warn-signers-must-be-fewer-than-days-until-" +
 						"expiration"));
 		}
-
-		long[] fileEntryIds = ParamUtil.getLongValues(
-			resourceRequest, "fileEntryIds");
 
 		User user = themeDisplay.getUser();
 
