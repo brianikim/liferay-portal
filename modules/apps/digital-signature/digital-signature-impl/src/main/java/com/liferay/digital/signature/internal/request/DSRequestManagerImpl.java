@@ -121,8 +121,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					).put(
 						"providerRequestId", dsEnvelope.getDSEnvelopeId()
 					).put(
-						"requestStatus",
-						_toRequestStatus(dsEnvelope.getStatus())
+						"requestStatus", _toRequestStatus(dsEnvelope)
 					).build(),
 					serviceContext);
 
@@ -458,7 +457,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				dsRecipients.put(dsRecipient.getDSRecipientId(), dsRecipient);
 			}
 
-			String requestStatus = _toRequestStatus(dsEnvelope.getStatus());
+			String requestStatus = _toRequestStatus(dsEnvelope);
 
 			for (Map<String, Serializable> requestValues :
 					_getValuesList(
@@ -691,8 +690,23 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		return "sent";
 	}
 
-	private String _toRequestStatus(String status) {
-		status = StringUtil.toLowerCase(GetterUtil.getString(status));
+	private String _toRequestStatus(DSEnvelope dsEnvelope) {
+		String status = StringUtil.toLowerCase(
+			GetterUtil.getString(dsEnvelope.getStatus()));
+
+		if (Objects.equals(status, "voided")) {
+			LocalDateTime expireLocalDateTime =
+				dsEnvelope.getExpireLocalDateTime();
+			LocalDateTime statusChangedLocalDateTime =
+				dsEnvelope.getStatusChangedLocalDateTime();
+
+			if ((expireLocalDateTime != null) &&
+				(statusChangedLocalDateTime != null) &&
+				!statusChangedLocalDateTime.isBefore(expireLocalDateTime)) {
+
+				return "expired";
+			}
+		}
 
 		if (ArrayUtil.contains(_DS_ENVELOPE_STATUSES, status)) {
 			return status;
@@ -787,7 +801,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	}
 
 	private static final String[] _DS_ENVELOPE_STATUSES = {
-		"completed", "created", "declined", "sent", "voided"
+		"completed", "created", "declined", "expired", "sent", "voided"
 	};
 
 	private static final String[] _DS_RECIPIENT_STATUSES = {
