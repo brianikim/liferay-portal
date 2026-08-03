@@ -292,7 +292,9 @@ public class DLViewEntriesDisplayContext {
 	}
 
 	public String getSignatureStatusDisplayType(String signatureStatus) {
-		if (Objects.equals(signatureStatus, "completed")) {
+		if (Objects.equals(signatureStatus, "completed") ||
+			Objects.equals(signatureStatus, "signed")) {
+
 			return "success";
 		}
 
@@ -300,6 +302,10 @@ public class DLViewEntriesDisplayContext {
 			Objects.equals(signatureStatus, "voided")) {
 
 			return "danger";
+		}
+
+		if (Objects.equals(signatureStatus, "expired")) {
+			return "warning";
 		}
 
 		return "info";
@@ -456,8 +462,33 @@ public class DLViewEntriesDisplayContext {
 	}
 
 	private Map<Long, String> _getSignatureStatuses() {
-		return _dsRequestManager.getRequestStatusesByFileEntryId(
-			_themeDisplay.getCompanyId(), _getPageFileEntryIds());
+		List<Long> fileEntryIds = _getPageFileEntryIds();
+
+		Map<Long, String> signatureStatuses =
+			_dsRequestManager.getRequestStatusesByFileEntryId(
+				_themeDisplay.getCompanyId(), fileEntryIds);
+
+		long userId = _themeDisplay.getUserId();
+
+		Map<Long, Map<Long, String>> recipientStatusesByFileEntryId =
+			_dsRequestManager.getRecipientStatusesByFileEntryId(
+				_themeDisplay.getCompanyId(), fileEntryIds);
+
+		for (Map.Entry<Long, Map<Long, String>> entry :
+				recipientStatusesByFileEntryId.entrySet()) {
+
+			String recipientStatus = entry.getValue(
+			).get(
+				userId
+			);
+
+			if (recipientStatus != null) {
+				signatureStatuses.put(
+					entry.getKey(), _toRecipientStatusLabel(recipientStatus));
+			}
+		}
+
+		return signatureStatuses;
 	}
 
 	private boolean _hasValidAssetVocabularies(long scopeGroupId)
@@ -521,6 +552,16 @@ public class DLViewEntriesDisplayContext {
 		}
 
 		return false;
+	}
+
+	private String _toRecipientStatusLabel(String recipientStatus) {
+		if (Objects.equals(recipientStatus, "completed") ||
+			Objects.equals(recipientStatus, "signed")) {
+
+			return "signed";
+		}
+
+		return recipientStatus;
 	}
 
 	private final DLAdminDisplayContext _dlAdminDisplayContext;

@@ -116,7 +116,9 @@ public class DSRequestManagerImpl implements DSRequestManager {
 						"providerRequestId", dsEnvelope.getDSEnvelopeId()
 					).put(
 						"requestStatus",
-						_toRequestStatus(dsEnvelope.getStatus())
+						_toRequestStatus(
+							dsEnvelope.getStatus(),
+							dsEnvelope.getVoidedReason())
 					).build(),
 					serviceContext);
 
@@ -646,7 +648,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					_toRecipientStatus(dsRecipient.getStatus()));
 			}
 
-			String requestStatus = _toRequestStatus(dsEnvelope.getStatus());
+			String requestStatus = _toRequestStatus(
+				dsEnvelope.getStatus(), dsEnvelope.getVoidedReason());
 
 			for (Map<String, Serializable> requestValues :
 					_getValuesList(
@@ -845,8 +848,17 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		return "sent";
 	}
 
-	private String _toRequestStatus(String status) {
+	private String _toRequestStatus(String status, String voidedReason) {
 		status = StringUtil.toLowerCase(GetterUtil.getString(status));
+
+		voidedReason = StringUtil.toLowerCase(
+			GetterUtil.getString(voidedReason));
+
+		if (Objects.equals(status, "voided") &&
+			voidedReason.contains("expire")) {
+
+			return "expired";
+		}
 
 		if (ArrayUtil.contains(_DS_ENVELOPE_STATUSES, status)) {
 			return status;
@@ -934,7 +946,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	}
 
 	private static final String[] _DS_ENVELOPE_STATUSES = {
-		"completed", "created", "declined", "delivered", "sent", "voided"
+		"completed", "created", "declined", "delivered", "expired", "sent",
+		"voided"
 	};
 
 	private static final String[] _DS_RECIPIENT_STATUSES = {

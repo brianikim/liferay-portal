@@ -306,6 +306,7 @@ public class DSEnvelopeManagerImpl implements DSEnvelopeManager {
 				emailBlurb = jsonObject.getString("emailBlurb");
 				emailSubject = jsonObject.getString("emailSubject");
 				status = jsonObject.getString("status");
+				voidedReason = jsonObject.getString("voidedReason");
 			}
 		};
 

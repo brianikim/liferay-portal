@@ -28,12 +28,6 @@
 					"system": true
 				},
 				{
-					"externalReferenceCode": "DELIVERED",
-					"key": "delivered",
-					"name": "Delivered",
-					"system": true
-				},
-				{
 					"externalReferenceCode": "COMPLETED",
 					"key": "completed",
 					"name": "Completed",
@@ -49,6 +43,12 @@
 					"externalReferenceCode": "VOIDED",
 					"key": "voided",
 					"name": "Voided",
+					"system": true
+				},
+				{
+					"externalReferenceCode": "EXPIRED",
+					"key": "expired",
+					"name": "Expired",
 					"system": true
 				}
 			],
@@ -68,12 +68,6 @@
 					"externalReferenceCode": "SENT",
 					"key": "sent",
 					"name": "Sent",
-					"system": true
-				},
-				{
-					"externalReferenceCode": "DELIVERED",
-					"key": "delivered",
-					"name": "Delivered",
 					"system": true
 				},
 				{
