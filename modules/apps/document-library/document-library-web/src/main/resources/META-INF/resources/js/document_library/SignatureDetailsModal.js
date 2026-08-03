@@ -144,7 +144,7 @@ function SignatureDetailsContent({detail}) {
 					<div className="timeline-item" key={index}>
 						<div className="timeline-increment">
 							<span
-								className={`signature-details-dot bg-${activity.type}`}
+								className={`timeline-icon bg-${activity.type}`}
 							/>
 						</div>
 
