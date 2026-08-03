@@ -19,6 +19,7 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HttpComponentsUtil;
 import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 
 import jakarta.portlet.ResourceURL;
@@ -64,26 +65,28 @@ public class SignatureDLViewFileVersionDisplayContext
 			dropdownItems = new ArrayList<>();
 		}
 
-		DropdownItem dropdownItem = DropdownItemBuilder.setHref(
-			() -> {
-				String portletNamespace = PortalUtil.getPortletNamespace(
-					DigitalSignaturePortletKeys.SIGN_DIGITAL_SIGNATURE);
+		if (Validator.isNotNull(_providerRequestId)) {
+			DropdownItem dropdownItem = DropdownItemBuilder.setHref(
+				() -> {
+					String portletNamespace = PortalUtil.getPortletNamespace(
+						DigitalSignaturePortletKeys.SIGN_DIGITAL_SIGNATURE);
 
-				return HttpComponentsUtil.addParameter(
-					_signDSURLProvider.getURL(
-						_themeDisplay.getCompanyId(), _providerRequestId),
-					portletNamespace + "backURL",
-					_themeDisplay.getURLCurrent());
-			}
-		).setIcon(
-			"pencil"
-		).setKey(
-			"sign"
-		).setLabel(
-			LanguageUtil.get(_httpServletRequest, "sign")
-		).build();
+					return HttpComponentsUtil.addParameter(
+						_signDSURLProvider.getURL(
+							_themeDisplay.getCompanyId(), _providerRequestId),
+						portletNamespace + "backURL",
+						_themeDisplay.getURLCurrent());
+				}
+			).setIcon(
+				"pencil"
+			).setKey(
+				"sign"
+			).setLabel(
+				LanguageUtil.get(_httpServletRequest, "sign")
+			).build();
 
-		dropdownItems.add(dropdownItem);
+			dropdownItems.add(dropdownItem);
+		}
 
 		dropdownItems.add(_getViewSignatureStatusDropdownItem());
 
