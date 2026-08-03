@@ -253,7 +253,7 @@ public class DSRequestManagerTest {
 				_group.getGroupId(), TestPropsValues.getUserId()));
 
 		Map<Long, String> requestStatuses =
-			_dsRequestManager.getRequestStatuses(
+			_dsRequestManager.getRequestStatusesByFileEntryId(
 				companyId, Collections.singletonList(fileEntryId));
 
 		Assert.assertEquals("completed", requestStatuses.get(fileEntryId));
@@ -264,7 +264,7 @@ public class DSRequestManagerTest {
 		throws Exception {
 
 		Map<Long, String> requestStatuses =
-			_dsRequestManager.getRequestStatuses(
+			_dsRequestManager.getRequestStatusesByFileEntryId(
 				TestPropsValues.getCompanyId(),
 				Collections.singletonList(RandomTestUtil.randomLong()));
 
