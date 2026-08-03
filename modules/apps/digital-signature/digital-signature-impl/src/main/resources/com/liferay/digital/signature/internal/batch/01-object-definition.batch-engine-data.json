@@ -33,6 +33,27 @@
 			],
 			"objectFields": [
 				{
+					"DBType": "DateTime",
+					"businessType": "DateTime",
+					"externalReferenceCode": "DELIVERED_DATE",
+					"indexed": false,
+					"indexedAsKeyword": false,
+					"label": {
+						"en_US": "Delivered Date"
+					},
+					"name": "deliveredDate",
+					"objectFieldSettings": [
+						{
+							"name": "timeStorage",
+							"value": "convertToUTC"
+						}
+					],
+					"required": false,
+					"state": false,
+					"system": true,
+					"type": "DateTime"
+				},
+				{
 					"DBType": "String",
 					"businessType": "Text",
 					"externalReferenceCode": "EMAIL_ADDRESS",
@@ -79,6 +100,21 @@
 				},
 				{
 					"DBType": "String",
+					"businessType": "Text",
+					"externalReferenceCode": "RECIPIENT_TYPE",
+					"indexed": false,
+					"indexedAsKeyword": false,
+					"label": {
+						"en_US": "Recipient Type"
+					},
+					"name": "recipientType",
+					"required": false,
+					"state": false,
+					"system": true,
+					"type": "String"
+				},
+				{
+					"DBType": "String",
 					"businessType": "Picklist",
 					"defaultValue": "sent",
 					"externalReferenceCode": "REQUEST_RECIPIENT_STATUS",
@@ -93,6 +129,63 @@
 					"state": true,
 					"system": true,
 					"type": "String"
+				},
+				{
+					"DBType": "DateTime",
+					"businessType": "DateTime",
+					"externalReferenceCode": "SENT_DATE",
+					"indexed": false,
+					"indexedAsKeyword": false,
+					"label": {
+						"en_US": "Sent Date"
+					},
+					"name": "sentDate",
+					"objectFieldSettings": [
+						{
+							"name": "timeStorage",
+							"value": "convertToUTC"
+						}
+					],
+					"required": false,
+					"state": false,
+					"system": true,
+					"type": "DateTime"
+				},
+				{
+					"DBType": "DateTime",
+					"businessType": "DateTime",
+					"externalReferenceCode": "SIGNED_DATE",
+					"indexed": false,
+					"indexedAsKeyword": false,
+					"label": {
+						"en_US": "Signed Date"
+					},
+					"name": "signedDate",
+					"objectFieldSettings": [
+						{
+							"name": "timeStorage",
+							"value": "convertToUTC"
+						}
+					],
+					"required": false,
+					"state": false,
+					"system": true,
+					"type": "DateTime"
+				},
+				{
+					"DBType": "Integer",
+					"businessType": "Integer",
+					"externalReferenceCode": "SIGNING_ORDER",
+					"indexed": false,
+					"indexedAsKeyword": false,
+					"label": {
+						"en_US": "Signing Order"
+					},
+					"name": "signingOrder",
+					"required": false,
+					"state": false,
+					"system": true,
+					"type": "Integer"
 				},
 				{
 					"DBType": "Long",
@@ -241,6 +334,27 @@
 					"type": "String"
 				},
 				{
+					"DBType": "DateTime",
+					"businessType": "DateTime",
+					"externalReferenceCode": "EXPIRATION_DATE",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"label": {
+						"en_US": "Expiration Date"
+					},
+					"name": "expirationDate",
+					"objectFieldSettings": [
+						{
+							"name": "timeStorage",
+							"value": "convertToUTC"
+						}
+					],
+					"required": false,
+					"state": false,
+					"system": true,
+					"type": "DateTime"
+				},
+				{
 					"DBType": "String",
 					"businessType": "Text",
 					"externalReferenceCode": "PROVIDER_KEY",
@@ -284,6 +398,36 @@
 					"name": "requestStatus",
 					"required": true,
 					"state": true,
+					"system": true,
+					"type": "String"
+				},
+				{
+					"DBType": "Long",
+					"businessType": "LongInteger",
+					"externalReferenceCode": "SIGNED_FILE_ENTRY_ID",
+					"indexed": false,
+					"indexedAsKeyword": false,
+					"label": {
+						"en_US": "Signed File Entry ID"
+					},
+					"name": "signedFileEntryId",
+					"required": false,
+					"state": false,
+					"system": true,
+					"type": "Long"
+				},
+				{
+					"DBType": "String",
+					"businessType": "Text",
+					"externalReferenceCode": "VOIDED_REASON",
+					"indexed": false,
+					"indexedAsKeyword": false,
+					"label": {
+						"en_US": "Voided Reason"
+					},
+					"name": "voidedReason",
+					"required": false,
+					"state": false,
 					"system": true,
 					"type": "String"
 				}
