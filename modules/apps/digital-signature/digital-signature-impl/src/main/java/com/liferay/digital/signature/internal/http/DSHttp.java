@@ -140,8 +140,9 @@ public class DSHttp {
 
 		byte[] bytes = _http.URLtoByteArray(options);
 
-		int responseCode = options.getResponse(
-		).getResponseCode();
+		Http.Response response = options.getResponse();
+
+		int responseCode = response.getResponseCode();
 
 		if ((responseCode < 200) || (responseCode >= 300)) {
 			throw new PortalException(
