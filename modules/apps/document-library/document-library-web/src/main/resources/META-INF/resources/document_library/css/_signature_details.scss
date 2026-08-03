@@ -42,16 +42,25 @@
 		border-left: 2px solid var(--border-color);
 		display: flex;
 		flex-direction: column;
-		padding: 0 0 1rem 1rem;
+		padding: 0 0 1rem 1.25rem;
+		position: relative;
+	}
+
+	.signature-details-timeline-item:last-child {
+		border-left-color: transparent;
+		padding-bottom: 0;
+	}
+
+	.signature-details-timeline-dot {
+		border-radius: 50%;
+		height: 0.75rem;
+		left: -0.4375rem;
+		position: absolute;
+		top: 0.125rem;
+		width: 0.75rem;
 	}
 
 	.signature-details-timeline-title {
 		font-weight: 600;
-	}
-
-	.signature-details-linked {
-		border-top: 1px solid var(--border-color);
-		font-size: 0.875rem;
-		padding-top: 1rem;
 	}
 }

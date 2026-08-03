@@ -12,8 +12,11 @@ const DISPLAY_TYPES = {
 	completed: 'success',
 	declined: 'danger',
 	expired: 'warning',
+	signed: 'success',
 	voided: 'danger',
 };
+
+const SEPARATOR = ` ${String.fromCharCode(183)} `;
 
 function getDisplayType(status) {
 	return DISPLAY_TYPES[status] || 'info';
@@ -25,6 +28,40 @@ function formatDate(time) {
 	}
 
 	return new Date(time).toLocaleString();
+}
+
+function getActivities(detail) {
+	const activities = [
+		{
+			detail:
+				detail.requesterName +
+				SEPARATOR +
+				formatDate(detail.createDate),
+			title: Liferay.Language.get('envelope-created'),
+			type: 'success',
+		},
+	];
+
+	detail.recipients.forEach((recipient) => {
+		activities.push({
+			detail:
+				Liferay.Language.get(recipient.requestRecipientStatus) +
+				SEPARATOR +
+				formatDate(recipient.statusDate),
+			title: recipient.name,
+			type: getDisplayType(recipient.requestRecipientStatus),
+		});
+	});
+
+	if (detail.completionDate) {
+		activities.push({
+			detail: formatDate(detail.completionDate),
+			title: Liferay.Language.get('completed'),
+			type: 'success',
+		});
+	}
+
+	return activities;
 }
 
 function StatusLabel({status}) {
@@ -101,36 +138,22 @@ function SignatureDetailsContent({detail}) {
 			<h5>{Liferay.Language.get('activity')}</h5>
 
 			<ul className="signature-details-timeline">
-				<li className="signature-details-timeline-item">
-					<span className="signature-details-timeline-title">
-						{Liferay.Language.get('envelope-created')}
-					</span>
+				{getActivities(detail).map((activity, index) => (
+					<li className="signature-details-timeline-item" key={index}>
+						<span
+							className={`signature-details-timeline-dot bg-${activity.type}`}
+						/>
 
-					<span className="text-secondary">
-						{detail.requesterName} {String.fromCharCode(183)}{' '}
-
-						{formatDate(detail.createDate)}
-					</span>
-				</li>
-
-				{detail.completionDate ? (
-					<li className="signature-details-timeline-item">
 						<span className="signature-details-timeline-title">
-							{Liferay.Language.get('completed')}
+							{activity.title}
 						</span>
 
 						<span className="text-secondary">
-							{formatDate(detail.completionDate)}
+							{activity.detail}
 						</span>
 					</li>
-				) : null}
+				))}
 			</ul>
-
-			<div className="signature-details-linked text-secondary">
-				{Liferay.Language.get(
-					'contract-quote-order-linking-is-planned-for-a-later-phase'
-				)}
-			</div>
 		</div>
 	);
 }
