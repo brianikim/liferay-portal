@@ -22,6 +22,7 @@ import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 
+import jakarta.portlet.PortletResponse;
 import jakarta.portlet.ResourceURL;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -94,9 +95,12 @@ public class SignatureDLViewFileVersionDisplayContext
 	}
 
 	private DropdownItem _getViewSignatureStatusDropdownItem() {
-		LiferayPortletResponse liferayPortletResponse =
-			(LiferayPortletResponse)_httpServletRequest.getAttribute(
+		PortletResponse portletResponse =
+			(PortletResponse)_httpServletRequest.getAttribute(
 				JavaConstants.JAKARTA_PORTLET_RESPONSE);
+
+		LiferayPortletResponse liferayPortletResponse =
+			PortalUtil.getLiferayPortletResponse(portletResponse);
 
 		ResourceURL resourceURL = liferayPortletResponse.createResourceURL();
 

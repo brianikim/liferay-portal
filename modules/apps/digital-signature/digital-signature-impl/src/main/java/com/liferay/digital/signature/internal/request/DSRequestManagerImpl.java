@@ -811,7 +811,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					GetterUtil.getString(recipientValues.get("emailAddress")),
 					GetterUtil.getString(recipientValues.get("name")),
 					GetterUtil.getLong(
-						recipientValues.get("r_userToDSRequestRecipient_userId")),
+						recipientValues.get(
+							"r_userToDSRequestRecipient_userId")),
 					GetterUtil.getString(
 						recipientValues.get("requestRecipientStatus")),
 					_toDate(recipientValues.get("sentDate")),
@@ -820,8 +821,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 						recipientValues.get("signingOrder")))));
 
 		recipientDetails.sort(
-			Comparator.comparingInt(
-				DSRequestRecipientDetail::getSigningOrder));
+			Comparator.comparingInt(DSRequestRecipientDetail::getSigningOrder));
 
 		return recipientDetails;
 	}
