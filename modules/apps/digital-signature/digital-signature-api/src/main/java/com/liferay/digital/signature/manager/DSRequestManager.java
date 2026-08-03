@@ -27,9 +27,15 @@ public interface DSRequestManager {
 	public Map<Long, String> getRequestStatusesByFileEntryId(
 		long companyId, Collection<Long> fileEntryIds);
 
+	public void resendDSRequestNotifications(
+		long companyId, long groupId, String providerRequestId);
+
 	public int sendSignatureReminders(long companyId);
 
 	public void updateDSRequest(
 		long companyId, long groupId, String providerRequestId);
+
+	public void voidDSRequest(
+		long companyId, long groupId, String providerRequestId, String reason);
 
 }
