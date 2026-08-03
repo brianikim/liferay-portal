@@ -79,31 +79,33 @@ function StatusLabel({status}) {
 function SignatureDetailsContent({detail}) {
 	return (
 		<div className="signature-details">
-			<div className="signature-details-header">
+			<div className="mb-4">
 				<StatusLabel status={detail.requestStatus} />
-
-				<span className="signature-details-envelope text-secondary">
-					{detail.providerRequestId}
-				</span>
 			</div>
 
-			<div className="signature-details-card">
-				<div className="signature-details-card-label text-secondary">
+			<div className="bg-light border mb-4 p-3 rounded">
+				<div className="small text-secondary text-uppercase">
 					{Liferay.Language.get('requester')}
 				</div>
 
-				<div className="signature-details-card-value">
+				<div className="font-weight-semi-bold">
 					{detail.requesterName}
 				</div>
 
-				<div className="signature-details-card-value text-secondary">
+				<div className="mb-3 text-secondary">
 					{detail.requesterEmailAddress}
 				</div>
+
+				<div className="small text-secondary text-uppercase">
+					{Liferay.Language.get('envelope-id')}
+				</div>
+
+				<div>{detail.providerRequestId}</div>
 			</div>
 
 			<h5>{Liferay.Language.get('recipients')}</h5>
 
-			<table className="signature-details-table table table-list">
+			<table className="mb-4 table table-list">
 				<thead>
 					<tr>
 						<th>{Liferay.Language.get('name')}</th>
@@ -137,23 +139,27 @@ function SignatureDetailsContent({detail}) {
 
 			<h5>{Liferay.Language.get('activity')}</h5>
 
-			<ul className="signature-details-timeline">
+			<div className="timeline">
 				{getActivities(detail).map((activity, index) => (
-					<li className="signature-details-timeline-item" key={index}>
-						<span
-							className={`signature-details-timeline-dot bg-${activity.type}`}
-						/>
+					<div className="timeline-item" key={index}>
+						<div className="timeline-increment">
+							<span
+								className={`signature-details-dot bg-${activity.type}`}
+							/>
+						</div>
 
-						<span className="signature-details-timeline-title">
-							{activity.title}
-						</span>
+						<div className="timeline-item-label">
+							<div className="font-weight-semi-bold">
+								{activity.title}
+							</div>
 
-						<span className="text-secondary">
-							{activity.detail}
-						</span>
-					</li>
+							<div className="text-secondary">
+								{activity.detail}
+							</div>
+						</div>
+					</div>
 				))}
-			</ul>
+			</div>
 		</div>
 	);
 }
