@@ -24,6 +24,10 @@ public class DSEnvelope {
 		return createdLocalDateTime;
 	}
 
+	public String getDocumentsCombinedURI() {
+		return documentsCombinedURI;
+	}
+
 	public List<DSDocument> getDSDocuments() {
 		return dsDocuments;
 	}
@@ -48,6 +52,10 @@ public class DSEnvelope {
 		return expireAfter;
 	}
 
+	public LocalDateTime getExpireLocalDateTime() {
+		return expireLocalDateTime;
+	}
+
 	public int getExpireWarn() {
 		return expireWarn;
 	}
@@ -64,12 +72,20 @@ public class DSEnvelope {
 		return status;
 	}
 
+	public LocalDateTime getStatusChangedLocalDateTime() {
+		return statusChangedLocalDateTime;
+	}
+
 	public String getVoidedReason() {
 		return voidedReason;
 	}
 
 	public void setCreatedLocalDateTime(LocalDateTime createdLocalDateTime) {
 		this.createdLocalDateTime = createdLocalDateTime;
+	}
+
+	public void setDocumentsCombinedURI(String documentsCombinedURI) {
+		this.documentsCombinedURI = documentsCombinedURI;
 	}
 
 	public void setDSDocuments(List<DSDocument> dsDocuments) {
@@ -96,6 +112,10 @@ public class DSEnvelope {
 		this.expireAfter = expireAfter;
 	}
 
+	public void setExpireLocalDateTime(LocalDateTime expireLocalDateTime) {
+		this.expireLocalDateTime = expireLocalDateTime;
+	}
+
 	public void setExpireWarn(int expireWarn) {
 		this.expireWarn = expireWarn;
 	}
@@ -110,6 +130,12 @@ public class DSEnvelope {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public void setStatusChangedLocalDateTime(
+		LocalDateTime statusChangedLocalDateTime) {
+
+		this.statusChangedLocalDateTime = statusChangedLocalDateTime;
 	}
 
 	public void setVoidedReason(String voidedReason) {
@@ -170,16 +196,19 @@ public class DSEnvelope {
 	}
 
 	protected LocalDateTime createdLocalDateTime;
+	protected String documentsCombinedURI;
 	protected List<DSDocument> dsDocuments;
 	protected String dsEnvelopeId;
 	protected List<DSRecipient> dsRecipients;
 	protected String emailBlurb;
 	protected String emailSubject;
 	protected int expireAfter;
+	protected LocalDateTime expireLocalDateTime;
 	protected int expireWarn;
 	protected String name;
 	protected String senderEmailAddress;
 	protected String status;
+	protected LocalDateTime statusChangedLocalDateTime;
 	protected String voidedReason;
 
 	private static final Log _log = LogFactoryUtil.getLog(DSEnvelope.class);

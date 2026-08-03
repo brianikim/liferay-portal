@@ -205,10 +205,19 @@ public class DSEnvelopeManagerImpl implements DSEnvelopeManager {
 			jsonObject.getJSONArray("signers"),
 			signerJSONObject -> new DSRecipient() {
 				{
+					deliveredLocalDateTime = _toLocalDateTime(
+						signerJSONObject.getString("deliveredDateTime"));
 					dsClientUserId = signerJSONObject.getString("clientUserId");
 					dsRecipientId = signerJSONObject.getString("recipientId");
 					emailAddress = signerJSONObject.getString("email");
 					name = signerJSONObject.getString("name");
+					recipientType = signerJSONObject.getString("recipientType");
+					routingOrder = GetterUtil.getInteger(
+						signerJSONObject.getString("routingOrder"));
+					sentLocalDateTime = _toLocalDateTime(
+						signerJSONObject.getString("sentDateTime"));
+					signedLocalDateTime = _toLocalDateTime(
+						signerJSONObject.getString("signedDateTime"));
 					status = signerJSONObject.getString("status");
 					tabsJSONObject = signerJSONObject.getJSONObject("tabs");
 				}
@@ -305,6 +314,8 @@ public class DSEnvelopeManagerImpl implements DSEnvelopeManager {
 			{
 				createdLocalDateTime = _toLocalDateTime(
 					jsonObject.getString("createdDateTime"));
+				documentsCombinedURI = jsonObject.getString(
+					"documentsCombinedUri");
 				dsDocuments = _getDSDocuments(
 					jsonObject.getJSONArray("envelopeDocuments"));
 				dsEnvelopeId = jsonObject.getString("envelopeId");
@@ -312,7 +323,11 @@ public class DSEnvelopeManagerImpl implements DSEnvelopeManager {
 					jsonObject.getJSONObject("recipients"));
 				emailBlurb = jsonObject.getString("emailBlurb");
 				emailSubject = jsonObject.getString("emailSubject");
+				expireLocalDateTime = _toLocalDateTime(
+					jsonObject.getString("expireDateTime"));
 				status = jsonObject.getString("status");
+				statusChangedLocalDateTime = _toLocalDateTime(
+					jsonObject.getString("statusChangedDateTime"));
 				voidedReason = jsonObject.getString("voidedReason");
 			}
 		};

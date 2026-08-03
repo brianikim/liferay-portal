@@ -8,10 +8,16 @@ package com.liferay.digital.signature.model;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
 
+import java.time.LocalDateTime;
+
 /**
  * @author Brian Wing Shun Chan
  */
 public class DSRecipient {
+
+	public LocalDateTime getDeliveredLocalDateTime() {
+		return deliveredLocalDateTime;
+	}
 
 	public String getDSClientUserId() {
 		return dsClientUserId;
@@ -29,12 +35,34 @@ public class DSRecipient {
 		return name;
 	}
 
+	public String getRecipientType() {
+		return recipientType;
+	}
+
+	public int getRoutingOrder() {
+		return routingOrder;
+	}
+
+	public LocalDateTime getSentLocalDateTime() {
+		return sentLocalDateTime;
+	}
+
+	public LocalDateTime getSignedLocalDateTime() {
+		return signedLocalDateTime;
+	}
+
 	public String getStatus() {
 		return status;
 	}
 
 	public JSONObject getTabsJSONObject() {
 		return tabsJSONObject;
+	}
+
+	public void setDeliveredLocalDateTime(
+		LocalDateTime deliveredLocalDateTime) {
+
+		this.deliveredLocalDateTime = deliveredLocalDateTime;
 	}
 
 	public void setDSClientUserId(String dsClientUserId) {
@@ -51,6 +79,22 @@ public class DSRecipient {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public void setRecipientType(String recipientType) {
+		this.recipientType = recipientType;
+	}
+
+	public void setRoutingOrder(int routingOrder) {
+		this.routingOrder = routingOrder;
+	}
+
+	public void setSentLocalDateTime(LocalDateTime sentLocalDateTime) {
+		this.sentLocalDateTime = sentLocalDateTime;
+	}
+
+	public void setSignedLocalDateTime(LocalDateTime signedLocalDateTime) {
+		this.signedLocalDateTime = signedLocalDateTime;
 	}
 
 	public void setStatus(String status) {
@@ -77,10 +121,15 @@ public class DSRecipient {
 		);
 	}
 
+	protected LocalDateTime deliveredLocalDateTime;
 	protected String dsClientUserId;
 	protected String dsRecipientId;
 	protected String emailAddress;
 	protected String name;
+	protected String recipientType;
+	protected int routingOrder;
+	protected LocalDateTime sentLocalDateTime;
+	protected LocalDateTime signedLocalDateTime;
 	protected String status;
 	protected JSONObject tabsJSONObject;
 
