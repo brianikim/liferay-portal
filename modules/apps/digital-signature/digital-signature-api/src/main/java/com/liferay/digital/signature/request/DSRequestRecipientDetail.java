@@ -13,14 +13,26 @@ import java.util.Date;
 public class DSRequestRecipientDetail {
 
 	public DSRequestRecipientDetail(
-		String emailAddress, String name, long recipientUserId,
-		String requestRecipientStatus, Date statusDate) {
+		Date deliveredDate, String emailAddress, String name,
+		long recipientUserId, String requestRecipientStatus, Date sentDate,
+		Date signedDate, int signingOrder) {
 
+		_deliveredDate = deliveredDate;
 		_emailAddress = emailAddress;
 		_name = name;
 		_recipientUserId = recipientUserId;
 		_requestRecipientStatus = requestRecipientStatus;
-		_statusDate = statusDate;
+		_sentDate = sentDate;
+		_signedDate = signedDate;
+		_signingOrder = signingOrder;
+	}
+
+	public Date getDeliveredDate() {
+		if (_deliveredDate == null) {
+			return null;
+		}
+
+		return new Date(_deliveredDate.getTime());
 	}
 
 	public String getEmailAddress() {
@@ -39,18 +51,33 @@ public class DSRequestRecipientDetail {
 		return _requestRecipientStatus;
 	}
 
-	public Date getStatusDate() {
-		if (_statusDate == null) {
+	public Date getSentDate() {
+		if (_sentDate == null) {
 			return null;
 		}
 
-		return new Date(_statusDate.getTime());
+		return new Date(_sentDate.getTime());
 	}
 
+	public Date getSignedDate() {
+		if (_signedDate == null) {
+			return null;
+		}
+
+		return new Date(_signedDate.getTime());
+	}
+
+	public int getSigningOrder() {
+		return _signingOrder;
+	}
+
+	private final Date _deliveredDate;
 	private final String _emailAddress;
 	private final String _name;
 	private final long _recipientUserId;
 	private final String _requestRecipientStatus;
-	private final Date _statusDate;
+	private final Date _sentDate;
+	private final Date _signedDate;
+	private final int _signingOrder;
 
 }

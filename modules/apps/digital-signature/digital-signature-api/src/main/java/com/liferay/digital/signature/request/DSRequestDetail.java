@@ -16,20 +16,22 @@ public class DSRequestDetail {
 
 	public DSRequestDetail(
 		Date completionDate, Date createDate, String emailSubject,
-		String providerRequestId,
+		Date expirationDate, String providerRequestId,
 		List<DSRequestRecipientDetail> recipientDetails,
 		String requesterEmailAddress, String requesterName,
-		long requesterUserId, String requestStatus) {
+		long requesterUserId, String requestStatus, String voidedReason) {
 
 		_completionDate = completionDate;
 		_createDate = createDate;
 		_emailSubject = emailSubject;
+		_expirationDate = expirationDate;
 		_providerRequestId = providerRequestId;
 		_recipientDetails = recipientDetails;
 		_requesterEmailAddress = requesterEmailAddress;
 		_requesterName = requesterName;
 		_requesterUserId = requesterUserId;
 		_requestStatus = requestStatus;
+		_voidedReason = voidedReason;
 	}
 
 	public Date getCompletionDate() {
@@ -50,6 +52,14 @@ public class DSRequestDetail {
 
 	public String getEmailSubject() {
 		return _emailSubject;
+	}
+
+	public Date getExpirationDate() {
+		if (_expirationDate == null) {
+			return null;
+		}
+
+		return new Date(_expirationDate.getTime());
 	}
 
 	public String getProviderRequestId() {
@@ -80,14 +90,20 @@ public class DSRequestDetail {
 		return _requestStatus;
 	}
 
+	public String getVoidedReason() {
+		return _voidedReason;
+	}
+
 	private final Date _completionDate;
 	private final Date _createDate;
 	private final String _emailSubject;
+	private final Date _expirationDate;
 	private final String _providerRequestId;
 	private final List<DSRequestRecipientDetail> _recipientDetails;
 	private final String _requesterEmailAddress;
 	private final String _requesterName;
 	private final long _requesterUserId;
 	private final String _requestStatus;
+	private final String _voidedReason;
 
 }

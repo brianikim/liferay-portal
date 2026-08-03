@@ -11,16 +11,14 @@ import React, {useEffect, useState} from 'react';
 const DISPLAY_TYPES = {
 	completed: 'success',
 	declined: 'danger',
+	delivered: 'info',
 	expired: 'warning',
+	sent: 'info',
 	signed: 'success',
 	voided: 'danger',
 };
 
 const SEPARATOR = ` ${String.fromCharCode(183)} `;
-
-function getDisplayType(status) {
-	return DISPLAY_TYPES[status] || 'info';
-}
 
 function formatDate(time) {
 	if (!time) {
@@ -33,35 +31,72 @@ function formatDate(time) {
 function getActivities(detail) {
 	const activities = [
 		{
-			detail:
-				detail.requesterName +
-				SEPARATOR +
-				formatDate(detail.createDate),
+			detail: detail.requesterName,
+			time: detail.createDate,
 			title: Liferay.Language.get('envelope-created'),
 			type: 'success',
 		},
 	];
 
 	detail.recipients.forEach((recipient) => {
-		activities.push({
-			detail:
-				Liferay.Language.get(recipient.requestRecipientStatus) +
-				SEPARATOR +
-				formatDate(recipient.statusDate),
-			title: recipient.name,
-			type: getDisplayType(recipient.requestRecipientStatus),
-		});
+		if (recipient.sentDate) {
+			activities.push({
+				detail: recipient.name,
+				time: recipient.sentDate,
+				title: Liferay.Language.get('sent'),
+				type: 'info',
+			});
+		}
+
+		if (recipient.deliveredDate) {
+			activities.push({
+				detail: recipient.name,
+				time: recipient.deliveredDate,
+				title: Liferay.Language.get('viewed'),
+				type: 'info',
+			});
+		}
+
+		if (recipient.signedDate) {
+			activities.push({
+				detail: recipient.name,
+				time: recipient.signedDate,
+				title: Liferay.Language.get('signed'),
+				type: 'success',
+			});
+		}
 	});
 
 	if (detail.completionDate) {
 		activities.push({
-			detail: formatDate(detail.completionDate),
+			detail: '',
+			time: detail.completionDate,
 			title: Liferay.Language.get('completed'),
 			type: 'success',
 		});
 	}
 
+	activities.sort((a, b) => (a.time || 0) - (b.time || 0));
+
 	return activities;
+}
+
+function getDisplayType(status) {
+	return DISPLAY_TYPES[status] || 'info';
+}
+
+function getRecipientDate(recipient) {
+	return (
+		recipient.signedDate || recipient.deliveredDate || recipient.sentDate
+	);
+}
+
+function getRecipientStatus(recipient) {
+	if (recipient.requestRecipientStatus === 'completed') {
+		return 'signed';
+	}
+
+	return recipient.requestRecipientStatus;
 }
 
 function StatusLabel({status}) {
@@ -83,6 +118,12 @@ function SignatureDetailsContent({detail}) {
 				<StatusLabel status={detail.requestStatus} />
 			</div>
 
+			{detail.voidedReason ? (
+				<div className="alert alert-warning" role="alert">
+					{detail.voidedReason}
+				</div>
+			) : null}
+
 			<div className="bg-light border mb-4 p-3 rounded">
 				<div className="small text-secondary text-uppercase">
 					{Liferay.Language.get('requester')}
@@ -100,7 +141,19 @@ function SignatureDetailsContent({detail}) {
 					{Liferay.Language.get('envelope-id')}
 				</div>
 
-				<div>{detail.providerRequestId}</div>
+				<div className={detail.expirationDate ? 'mb-3' : ''}>
+					{detail.providerRequestId}
+				</div>
+
+				{detail.expirationDate ? (
+					<>
+						<div className="small text-secondary text-uppercase">
+							{Liferay.Language.get('expiration-date')}
+						</div>
+
+						<div>{formatDate(detail.expirationDate)}</div>
+					</>
+				) : null}
 			</div>
 
 			<h5>{Liferay.Language.get('recipients')}</h5>
@@ -127,11 +180,11 @@ function SignatureDetailsContent({detail}) {
 
 							<td>
 								<StatusLabel
-									status={recipient.requestRecipientStatus}
+									status={getRecipientStatus(recipient)}
 								/>
 							</td>
 
-							<td>{formatDate(recipient.statusDate)}</td>
+							<td>{formatDate(getRecipientDate(recipient))}</td>
 						</tr>
 					))}
 				</tbody>
@@ -139,27 +192,34 @@ function SignatureDetailsContent({detail}) {
 
 			<h5>{Liferay.Language.get('activity')}</h5>
 
-			<div className="timeline">
+			<ul className="timeline">
 				{getActivities(detail).map((activity, index) => (
-					<div className="timeline-item" key={index}>
-						<div className="timeline-increment">
-							<span
-								className={`timeline-icon bg-${activity.type}`}
-							/>
-						</div>
-
-						<div className="timeline-item-label">
-							<div className="font-weight-semi-bold">
-								{activity.title}
+					<li className="timeline-item" key={index}>
+						<div className="panel panel-secondary">
+							<div className="timeline-increment">
+								<span
+									className={`timeline-icon bg-${activity.type}`}
+								/>
 							</div>
 
-							<div className="text-secondary">
-								{activity.detail}
+							<div className="panel-body">
+								<div className="font-weight-semi-bold">
+									{activity.title}
+								</div>
+
+								<div className="text-secondary">
+									{[
+										activity.detail,
+										formatDate(activity.time),
+									]
+										.filter(Boolean)
+										.join(SEPARATOR)}
+								</div>
 							</div>
 						</div>
-					</div>
+					</li>
 				))}
-			</div>
+			</ul>
 		</div>
 	);
 }

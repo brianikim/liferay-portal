@@ -50,8 +50,10 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -420,6 +422,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				_toDate(requestValues.get("completionDate")),
 				requestObjectEntry.getCreateDate(),
 				GetterUtil.getString(requestValues.get("emailSubject")),
+				_toDate(requestValues.get("expirationDate")),
 				GetterUtil.getString(requestValues.get("providerRequestId")),
 				_getRecipientDetails(
 					companyId, recipientObjectDefinition,
@@ -427,7 +430,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				_getRequesterEmailAddress(requestObjectEntry),
 				_getRequesterName(requestObjectEntry),
 				requestObjectEntry.getUserId(),
-				GetterUtil.getString(requestValues.get("requestStatus")));
+				GetterUtil.getString(requestValues.get("requestStatus")),
+				GetterUtil.getString(requestValues.get("voidedReason")));
 		}
 		catch (Exception exception) {
 			_log.error(
@@ -795,30 +799,31 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			return Collections.emptyList();
 		}
 
-		return TransformUtil.transform(
-			_getValuesList(
-				companyId, recipientObjectDefinition,
-				StringBundler.concat("(", fieldName, " eq '", requestId, "')"),
-				null),
-			recipientValues -> {
-				ObjectEntry recipientObjectEntry =
-					_objectEntryLocalService.fetchObjectEntry(
-						GetterUtil.getLong(
-							recipientValues.get(
-								recipientObjectDefinition.
-									getPKObjectFieldName())));
-
-				return new DSRequestRecipientDetail(
+		List<DSRequestRecipientDetail> recipientDetails = new ArrayList<>(
+			TransformUtil.transform(
+				_getValuesList(
+					companyId, recipientObjectDefinition,
+					StringBundler.concat(
+						"(", fieldName, " eq '", requestId, "')"),
+					null),
+				recipientValues -> new DSRequestRecipientDetail(
+					_toDate(recipientValues.get("deliveredDate")),
 					GetterUtil.getString(recipientValues.get("emailAddress")),
 					GetterUtil.getString(recipientValues.get("name")),
 					GetterUtil.getLong(
-						recipientValues.get(
-							"r_userToDSRequestRecipient_userId")),
+						recipientValues.get("r_userToDSRequestRecipient_userId")),
 					GetterUtil.getString(
 						recipientValues.get("requestRecipientStatus")),
-					(recipientObjectEntry == null) ? null :
-						recipientObjectEntry.getModifiedDate());
-			});
+					_toDate(recipientValues.get("sentDate")),
+					_toDate(recipientValues.get("signedDate")),
+					GetterUtil.getInteger(
+						recipientValues.get("signingOrder")))));
+
+		recipientDetails.sort(
+			Comparator.comparingInt(
+				DSRequestRecipientDetail::getSigningOrder));
+
+		return recipientDetails;
 	}
 
 	private long _getRecipientUserId(long companyId, String emailAddress) {

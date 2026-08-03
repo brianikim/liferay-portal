@@ -70,6 +70,8 @@ public class GetSignatureDetailsMVCResourceCommand
 			).put(
 				"emailSubject", dsRequestDetail.getEmailSubject()
 			).put(
+				"expirationDate", _toTime(dsRequestDetail.getExpirationDate())
+			).put(
 				"providerRequestId", dsRequestDetail.getProviderRequestId()
 			).put(
 				"recipients",
@@ -83,6 +85,8 @@ public class GetSignatureDetailsMVCResourceCommand
 				"requesterName", dsRequestDetail.getRequesterName()
 			).put(
 				"requestStatus", dsRequestDetail.getRequestStatus()
+			).put(
+				"voidedReason", dsRequestDetail.getVoidedReason()
 			));
 	}
 
@@ -90,6 +94,9 @@ public class GetSignatureDetailsMVCResourceCommand
 		DSRequestRecipientDetail dsRequestRecipientDetail) {
 
 		return JSONUtil.put(
+			"deliveredDate",
+			_toTime(dsRequestRecipientDetail.getDeliveredDate())
+		).put(
 			"emailAddress", dsRequestRecipientDetail.getEmailAddress()
 		).put(
 			"name", dsRequestRecipientDetail.getName()
@@ -97,7 +104,11 @@ public class GetSignatureDetailsMVCResourceCommand
 			"requestRecipientStatus",
 			dsRequestRecipientDetail.getRequestRecipientStatus()
 		).put(
-			"statusDate", _toTime(dsRequestRecipientDetail.getStatusDate())
+			"sentDate", _toTime(dsRequestRecipientDetail.getSentDate())
+		).put(
+			"signedDate", _toTime(dsRequestRecipientDetail.getSignedDate())
+		).put(
+			"signingOrder", dsRequestRecipientDetail.getSigningOrder()
 		);
 	}
 
