@@ -138,7 +138,20 @@ public class DSHttp {
 				digitalSignatureConfiguration.apiAccountId(), "/", location));
 		options.setMethod(method);
 
-		return _http.URLtoByteArray(options);
+		byte[] bytes = _http.URLtoByteArray(options);
+
+		int responseCode = options.getResponse(
+		).getResponseCode();
+
+		if ((responseCode < 200) || (responseCode >= 300)) {
+			throw new PortalException(
+				StringBundler.concat(
+					"DocuSign ", method, " ", location, " returned status ",
+					responseCode, ": ",
+					(bytes == null) ? StringPool.BLANK : new String(bytes)));
+		}
+
+		return bytes;
 	}
 
 	@Reference
