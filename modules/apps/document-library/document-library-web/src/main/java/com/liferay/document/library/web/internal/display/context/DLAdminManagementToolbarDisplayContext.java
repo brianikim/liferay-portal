@@ -45,7 +45,6 @@ import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.petra.string.StringUtil;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -135,15 +134,12 @@ public class DLAdminManagementToolbarDisplayContext
 			return null;
 		}
 
-		DigitalSignatureConfiguration digitalSignatureConfiguration =
-			DigitalSignatureConfigurationUtil.getDigitalSignatureConfiguration(
-				_themeDisplay.getCompanyId(), _themeDisplay.getSiteGroupId());
 		boolean enableOnBulk = _isEnableOnBulk();
 		boolean stagedActions = _isStagedActions();
 		User user = _themeDisplay.getUser();
 
 		return DropdownItemListBuilder.add(
-			() -> digitalSignatureConfiguration.enabled() && stagedActions,
+			() -> _isDigitalSignatureEnabled() && stagedActions,
 			dropdownItem -> {
 				dropdownItem.putData("action", "collectDigitalSignature");
 				dropdownItem.setIcon("signature");
@@ -346,8 +342,7 @@ public class DLAdminManagementToolbarDisplayContext
 					LanguageUtil.get(_httpServletRequest, "filter-by"));
 			}
 		).addGroup(
-			() -> FeatureFlagManagerUtil.isEnabled(
-				_themeDisplay.getCompanyId(), "LPD-69290"),
+			() -> _isDigitalSignatureEnabled(),
 			dropdownGroupItem -> {
 				dropdownGroupItem.setDropdownItems(
 					_getSignatureRecipientStatusFilterDropdownItems());
@@ -1133,12 +1128,15 @@ public class DLAdminManagementToolbarDisplayContext
 							"signatureRecipientStatus",
 							hrefSignatureRecipientStatuses
 						).buildPortletURL());
+
+					String label = signatureRecipientStatus;
+
+					if (signatureRecipientStatus.equals("signature-required")) {
+						label = "required";
+					}
+
 					dropdownItem.setLabel(
-						LanguageUtil.get(
-							_httpServletRequest,
-							signatureRecipientStatus.equals(
-								"signature-required") ? "required" :
-									signatureRecipientStatus));
+						LanguageUtil.get(_httpServletRequest, label));
 				});
 		}
 
@@ -1229,6 +1227,24 @@ public class DLAdminManagementToolbarDisplayContext
 			folderId, fileEntryTypeId);
 	}
 
+	private boolean _isDigitalSignatureEnabled() {
+		DigitalSignatureConfiguration digitalSignatureConfiguration =
+			DigitalSignatureConfigurationUtil.getDigitalSignatureConfiguration(
+				_themeDisplay.getCompanyId(), _themeDisplay.getSiteGroupId());
+
+		if (digitalSignatureConfiguration == null) {
+			return false;
+		}
+
+		if (digitalSignatureConfiguration.enabled() &&
+			digitalSignatureConfiguration.enableEmbeddedView()) {
+
+			return true;
+		}
+
+		return false;
+	}
+
 	private boolean _isEnableOnBulk() {
 		long folderId = ParamUtil.getLong(_httpServletRequest, "folderId");
 
@@ -1260,7 +1276,7 @@ public class DLAdminManagementToolbarDisplayContext
 	};
 
 	private static final String[] _SIGNATURE_STATUSES = {
-		"sent", "delivered", "completed", "declined", "voided", "expired"
+		"sent", "completed", "declined", "voided", "expired"
 	};
 
 	private static final Log _log = LogFactoryUtil.getLog(
