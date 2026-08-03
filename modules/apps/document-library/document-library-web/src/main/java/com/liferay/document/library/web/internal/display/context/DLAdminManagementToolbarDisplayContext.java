@@ -1135,7 +1135,10 @@ public class DLAdminManagementToolbarDisplayContext
 						).buildPortletURL());
 					dropdownItem.setLabel(
 						LanguageUtil.get(
-							_httpServletRequest, signatureRecipientStatus));
+							_httpServletRequest,
+							signatureRecipientStatus.equals(
+								"signature-required") ? "required" :
+									signatureRecipientStatus));
 				});
 		}
 
