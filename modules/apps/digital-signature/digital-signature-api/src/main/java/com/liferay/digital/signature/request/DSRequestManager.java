@@ -41,7 +41,13 @@ public interface DSRequestManager {
 
 	public int remindPendingSignatureRecipients(long companyId);
 
+	public void resendDSRequestNotifications(
+		long companyId, long groupId, String providerRequestId);
+
 	public void updateDSRequests(
 		long companyId, long groupId, String providerRequestId);
+
+	public void voidDSRequest(
+		long companyId, long groupId, String providerRequestId, String reason);
 
 }
