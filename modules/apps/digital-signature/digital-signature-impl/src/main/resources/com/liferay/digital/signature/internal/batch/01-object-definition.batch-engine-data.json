@@ -13,6 +13,7 @@
 	},
 	"items": [
 		{
+			"accountEntryRestricted": false,
 			"active": true,
 			"className": "com.liferay.object.model.ObjectDefinition#D5S2",
 			"enableCategorization": false,
@@ -135,6 +136,7 @@
 			"titleObjectFieldName": "emailAddress"
 		},
 		{
+			"accountEntryRestricted": false,
 			"active": true,
 			"className": "com.liferay.object.model.ObjectDefinition#D5S3",
 			"enableCategorization": false,
@@ -183,6 +185,7 @@
 			"titleObjectFieldName": "fileEntryId"
 		},
 		{
+			"accountEntryRestricted": false,
 			"active": true,
 			"className": "com.liferay.object.model.ObjectDefinition#D5S1",
 			"enableCategorization": false,
