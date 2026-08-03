@@ -5,14 +5,13 @@
 
 package com.liferay.digital.signature.internal.scheduler;
 
-import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.digital.signature.request.DSRequestManager;
 import com.liferay.petra.function.UnsafeRunnable;
-import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.scheduler.SchedulerJobConfiguration;
 import com.liferay.portal.kernel.scheduler.TimeUnit;
 import com.liferay.portal.kernel.scheduler.TriggerConfiguration;
 import com.liferay.portal.kernel.service.CompanyLocalService;
+import com.liferay.portal.kernel.util.GetterUtil;
 
 import java.util.Map;
 
@@ -44,12 +43,9 @@ public class DSSignatureReminderSchedulerJobConfiguration
 
 	@Activate
 	protected void activate(Map<String, Object> properties) {
-		DigitalSignatureConfiguration digitalSignatureConfiguration =
-			ConfigurableUtil.createConfigurable(
-				DigitalSignatureConfiguration.class, properties);
-
 		_triggerConfiguration = TriggerConfiguration.createTriggerConfiguration(
-			digitalSignatureConfiguration.signatureReminderCheckInterval(),
+			GetterUtil.getInteger(
+				properties.get("signatureReminderCheckInterval"), 3),
 			TimeUnit.DAY);
 	}
 
