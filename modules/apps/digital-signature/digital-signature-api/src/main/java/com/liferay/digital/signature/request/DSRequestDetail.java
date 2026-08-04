@@ -15,13 +15,12 @@ import java.util.List;
 public class DSRequestDetail {
 
 	public DSRequestDetail(
-		Date completionDate, Date createDate, String emailSubject,
-		Date expirationDate, String providerRequestId,
+		Date createDate, String emailSubject, Date expirationDate,
+		String providerRequestId,
 		List<DSRequestRecipientDetail> recipientDetails,
 		String requesterEmailAddress, String requesterName,
-		long requesterUserId, String requestStatus, String voidedReason) {
+		long requesterUserId, String requestStatus, Date statusDate) {
 
-		_completionDate = completionDate;
 		_createDate = createDate;
 		_emailSubject = emailSubject;
 		_expirationDate = expirationDate;
@@ -31,15 +30,7 @@ public class DSRequestDetail {
 		_requesterName = requesterName;
 		_requesterUserId = requesterUserId;
 		_requestStatus = requestStatus;
-		_voidedReason = voidedReason;
-	}
-
-	public Date getCompletionDate() {
-		if (_completionDate == null) {
-			return null;
-		}
-
-		return new Date(_completionDate.getTime());
+		_statusDate = statusDate;
 	}
 
 	public Date getCreateDate() {
@@ -90,11 +81,14 @@ public class DSRequestDetail {
 		return _requestStatus;
 	}
 
-	public String getVoidedReason() {
-		return _voidedReason;
+	public Date getStatusDate() {
+		if (_statusDate == null) {
+			return null;
+		}
+
+		return new Date(_statusDate.getTime());
 	}
 
-	private final Date _completionDate;
 	private final Date _createDate;
 	private final String _emailSubject;
 	private final Date _expirationDate;
@@ -104,6 +98,6 @@ public class DSRequestDetail {
 	private final String _requesterName;
 	private final long _requesterUserId;
 	private final String _requestStatus;
-	private final String _voidedReason;
+	private final Date _statusDate;
 
 }

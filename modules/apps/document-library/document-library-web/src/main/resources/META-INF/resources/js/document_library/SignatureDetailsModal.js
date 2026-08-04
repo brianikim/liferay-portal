@@ -11,11 +11,19 @@ import React, {useEffect, useState} from 'react';
 const DISPLAY_TYPES = {
 	completed: 'success',
 	declined: 'danger',
-	delivered: 'info',
 	expired: 'warning',
 	sent: 'info',
 	signed: 'success',
 	voided: 'danger',
+};
+
+const STATUS_LABELS = {
+	completed: Liferay.Language.get('completed'),
+	declined: Liferay.Language.get('declined'),
+	expired: Liferay.Language.get('expired'),
+	sent: Liferay.Language.get('sent'),
+	signed: Liferay.Language.get('signed'),
+	voided: Liferay.Language.get('voided'),
 };
 
 const SEPARATOR = ` ${String.fromCharCode(183)} `;
@@ -29,14 +37,7 @@ function formatDate(time) {
 }
 
 function getActivities(detail) {
-	const activities = [
-		{
-			detail: detail.requesterName,
-			time: detail.createDate,
-			title: Liferay.Language.get('envelope-created'),
-			type: 'success',
-		},
-	];
+	const activities = [];
 
 	detail.recipients.forEach((recipient) => {
 		if (recipient.sentDate) {
@@ -48,35 +49,39 @@ function getActivities(detail) {
 			});
 		}
 
-		if (recipient.deliveredDate) {
-			activities.push({
-				detail: recipient.name,
-				time: recipient.deliveredDate,
-				title: Liferay.Language.get('viewed'),
-				type: 'info',
-			});
-		}
+		if (recipient.statusDate) {
+			const status = getRecipientStatus(recipient);
 
-		if (recipient.signedDate) {
 			activities.push({
 				detail: recipient.name,
-				time: recipient.signedDate,
-				title: Liferay.Language.get('signed'),
-				type: 'success',
+				time: recipient.statusDate,
+				title: getStatusLabel(status),
+				type: getDisplayType(status),
 			});
 		}
 	});
 
-	if (detail.completionDate) {
+	if (
+		(detail.requestStatus === 'voided' ||
+			detail.requestStatus === 'expired') &&
+		detail.statusDate
+	) {
 		activities.push({
 			detail: '',
-			time: detail.completionDate,
-			title: Liferay.Language.get('completed'),
-			type: 'success',
+			time: detail.statusDate,
+			title: getStatusLabel(detail.requestStatus),
+			type: getDisplayType(detail.requestStatus),
 		});
 	}
 
 	activities.sort((a, b) => (a.time || 0) - (b.time || 0));
+
+	activities.unshift({
+		detail: detail.requesterName,
+		time: detail.createDate,
+		title: Liferay.Language.get('envelope-created'),
+		type: 'info',
+	});
 
 	return activities;
 }
@@ -85,10 +90,12 @@ function getDisplayType(status) {
 	return DISPLAY_TYPES[status] || 'info';
 }
 
+function getStatusLabel(status) {
+	return STATUS_LABELS[status] || status;
+}
+
 function getRecipientDate(recipient) {
-	return (
-		recipient.signedDate || recipient.deliveredDate || recipient.sentDate
-	);
+	return recipient.statusDate || recipient.sentDate;
 }
 
 function getRecipientStatus(recipient) {
@@ -106,7 +113,7 @@ function StatusLabel({status}) {
 
 	return (
 		<span className={`label label-${getDisplayType(status)}`}>
-			{Liferay.Language.get(status)}
+			{getStatusLabel(status)}
 		</span>
 	);
 }
@@ -114,17 +121,15 @@ function StatusLabel({status}) {
 function SignatureDetailsContent({detail}) {
 	return (
 		<div className="signature-details">
-			<div className="mb-4">
-				<StatusLabel status={detail.requestStatus} />
-			</div>
-
-			{detail.voidedReason ? (
-				<div className="alert alert-warning" role="alert">
-					{detail.voidedReason}
-				</div>
-			) : null}
-
 			<div className="bg-light border mb-4 p-3 rounded">
+				<div className="small text-secondary text-uppercase">
+					{Liferay.Language.get('status')}
+				</div>
+
+				<div className="mb-3">
+					<StatusLabel status={detail.requestStatus} />
+				</div>
+
 				<div className="small text-secondary text-uppercase">
 					{Liferay.Language.get('requester')}
 				</div>
@@ -199,6 +204,11 @@ function SignatureDetailsContent({detail}) {
 							<div className="timeline-increment">
 								<span
 									className={`timeline-icon bg-${activity.type}`}
+									style={{
+										height: '1.25rem',
+										minWidth: '1.25rem',
+										width: '1.25rem',
+									}}
 								/>
 							</div>
 

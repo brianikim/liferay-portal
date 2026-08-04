@@ -13,26 +13,15 @@ import java.util.Date;
 public class DSRequestRecipientDetail {
 
 	public DSRequestRecipientDetail(
-		Date deliveredDate, String emailAddress, String name,
-		long recipientUserId, String requestRecipientStatus, Date sentDate,
-		Date signedDate, int signingOrder) {
+		String emailAddress, String name, long recipientUserId,
+		String requestRecipientStatus, Date sentDate, Date statusDate) {
 
-		_deliveredDate = deliveredDate;
 		_emailAddress = emailAddress;
 		_name = name;
 		_recipientUserId = recipientUserId;
 		_requestRecipientStatus = requestRecipientStatus;
 		_sentDate = sentDate;
-		_signedDate = signedDate;
-		_signingOrder = signingOrder;
-	}
-
-	public Date getDeliveredDate() {
-		if (_deliveredDate == null) {
-			return null;
-		}
-
-		return new Date(_deliveredDate.getTime());
+		_statusDate = statusDate;
 	}
 
 	public String getEmailAddress() {
@@ -59,25 +48,19 @@ public class DSRequestRecipientDetail {
 		return new Date(_sentDate.getTime());
 	}
 
-	public Date getSignedDate() {
-		if (_signedDate == null) {
+	public Date getStatusDate() {
+		if (_statusDate == null) {
 			return null;
 		}
 
-		return new Date(_signedDate.getTime());
+		return new Date(_statusDate.getTime());
 	}
 
-	public int getSigningOrder() {
-		return _signingOrder;
-	}
-
-	private final Date _deliveredDate;
 	private final String _emailAddress;
 	private final String _name;
 	private final long _recipientUserId;
 	private final String _requestRecipientStatus;
 	private final Date _sentDate;
-	private final Date _signedDate;
-	private final int _signingOrder;
+	private final Date _statusDate;
 
 }

@@ -64,8 +64,6 @@ public class GetSignatureDetailsMVCResourceCommand
 		JSONPortletResponseUtil.writeJSON(
 			resourceRequest, resourceResponse,
 			JSONUtil.put(
-				"completionDate", _toTime(dsRequestDetail.getCompletionDate())
-			).put(
 				"createDate", _toTime(dsRequestDetail.getCreateDate())
 			).put(
 				"emailSubject", dsRequestDetail.getEmailSubject()
@@ -86,7 +84,7 @@ public class GetSignatureDetailsMVCResourceCommand
 			).put(
 				"requestStatus", dsRequestDetail.getRequestStatus()
 			).put(
-				"voidedReason", dsRequestDetail.getVoidedReason()
+				"statusDate", _toTime(dsRequestDetail.getStatusDate())
 			));
 	}
 
@@ -94,9 +92,6 @@ public class GetSignatureDetailsMVCResourceCommand
 		DSRequestRecipientDetail dsRequestRecipientDetail) {
 
 		return JSONUtil.put(
-			"deliveredDate",
-			_toTime(dsRequestRecipientDetail.getDeliveredDate())
-		).put(
 			"emailAddress", dsRequestRecipientDetail.getEmailAddress()
 		).put(
 			"name", dsRequestRecipientDetail.getName()
@@ -106,9 +101,7 @@ public class GetSignatureDetailsMVCResourceCommand
 		).put(
 			"sentDate", _toTime(dsRequestRecipientDetail.getSentDate())
 		).put(
-			"signedDate", _toTime(dsRequestRecipientDetail.getSignedDate())
-		).put(
-			"signingOrder", dsRequestRecipientDetail.getSigningOrder()
+			"statusDate", _toTime(dsRequestRecipientDetail.getStatusDate())
 		);
 	}
 
