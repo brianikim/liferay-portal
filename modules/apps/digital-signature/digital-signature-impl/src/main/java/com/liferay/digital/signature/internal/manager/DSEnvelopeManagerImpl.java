@@ -234,7 +234,6 @@ public class DSEnvelopeManagerImpl implements DSEnvelopeManager {
 					dsRecipientId = signerJSONObject.getString("recipientId");
 					emailAddress = signerJSONObject.getString("email");
 					name = signerJSONObject.getString("name");
-					recipientType = signerJSONObject.getString("recipientType");
 					sentLocalDateTime = _toLocalDateTime(
 						signerJSONObject.getString("sentDateTime"));
 					status = signerJSONObject.getString("status");

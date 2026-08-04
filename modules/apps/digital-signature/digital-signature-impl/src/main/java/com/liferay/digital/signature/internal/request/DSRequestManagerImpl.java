@@ -121,7 +121,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					HashMapBuilder.<String, Serializable>put(
 						"emailSubject", dsEnvelope.getEmailSubject()
 					).put(
-						"expirationDate",
+						"expirationDateTime",
 						_toDate(dsEnvelope.getExpireLocalDateTime())
 					).put(
 						"providerKey", _PROVIDER_KEY
@@ -153,9 +153,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 						recipientFieldName,
 						requestObjectEntry.getObjectEntryId()
 					).put(
-						"deliveredDate",
-						_toDate(dsRecipient.getDeliveredLocalDateTime())
-					).put(
 						"emailAddress", dsRecipient.getEmailAddress()
 					).put(
 						"name", dsRecipient.getName()
@@ -165,8 +162,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 						"r_userToDSRequestRecipient_userId",
 						_getRecipientUserId(
 							companyId, dsRecipient.getEmailAddress())
-					).put(
-						"recipientType", dsRecipient.getRecipientType()
 					).put(
 						"requestRecipientStatus",
 						_toRecipientStatus(dsRecipient.getStatus())
@@ -418,7 +413,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			return new DSRequestDetail(
 				requestObjectEntry.getCreateDate(),
 				GetterUtil.getString(requestValues.get("emailSubject")),
-				_toDate(requestValues.get("expirationDate")),
+				_toDate(requestValues.get("expirationDateTime")),
 				GetterUtil.getString(requestValues.get("providerRequestId")),
 				_getRecipientDetails(
 					companyId, recipientObjectDefinition,
@@ -427,7 +422,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				_getRequesterName(requestObjectEntry),
 				requestObjectEntry.getUserId(),
 				GetterUtil.getString(requestValues.get("requestStatus")),
-				_toDate(requestValues.get("statusDate")));
+				_toDate(requestValues.get("statusDateTime")));
 		}
 		catch (Exception exception) {
 			_log.error(
@@ -946,7 +941,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				StringBundler.concat("(", fieldName, " eq '", requestId, "')"),
 				null),
 			recipientValues -> new DSRequestRecipientDetail(
-				_toDate(recipientValues.get("deliveredDate")),
 				GetterUtil.getString(recipientValues.get("emailAddress")),
 				GetterUtil.getString(recipientValues.get("name")),
 				GetterUtil.getLong(
@@ -954,7 +948,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				GetterUtil.getString(
 					recipientValues.get("requestRecipientStatus")),
 				_toDate(recipientValues.get("sentDate")),
-				_toDate(recipientValues.get("statusDate"))));
+				_toDate(recipientValues.get("statusDateTime"))));
 	}
 
 	private long _getRecipientUserId(long companyId, String emailAddress) {
@@ -1104,14 +1098,17 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			DigitalSignatureConfigurationUtil.getDigitalSignatureConfiguration(
 				companyId, groupId);
 
-		if ((digitalSignatureConfiguration == null) ||
-			!digitalSignatureConfiguration.enabled() ||
-			!digitalSignatureConfiguration.enableEmbeddedView()) {
-
+		if (digitalSignatureConfiguration == null) {
 			return false;
 		}
 
-		return true;
+		if (digitalSignatureConfiguration.enabled() &&
+			digitalSignatureConfiguration.enableEmbeddedView()) {
+
+			return true;
+		}
+
+		return false;
 	}
 
 	private void _putIfNotNull(
@@ -1253,15 +1250,10 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				).build();
 
 			_putIfNotNull(
-				values, "deliveredDate",
-				_toDate(dsRecipient.getDeliveredLocalDateTime()));
-			_putIfNotNull(
-				values, "recipientType", dsRecipient.getRecipientType());
-			_putIfNotNull(
 				values, "sentDate",
 				_toDate(dsRecipient.getSentLocalDateTime()));
 			_putIfNotNull(
-				values, "statusDate",
+				values, "statusDateTime",
 				_toDate(dsRecipient.getStatusLocalDateTime()));
 
 			_objectEntryLocalService.updateObjectEntry(
@@ -1291,10 +1283,10 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			).build();
 
 		_putIfNotNull(
-			values, "expirationDate",
+			values, "expirationDateTime",
 			_toDate(dsEnvelope.getExpireLocalDateTime()));
 		_putIfNotNull(
-			values, "statusDate",
+			values, "statusDateTime",
 			_toDate(dsEnvelope.getStatusChangedLocalDateTime()));
 
 		_objectEntryLocalService.updateObjectEntry(
@@ -1303,17 +1295,14 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	}
 
 	private static final String[] _DS_ENVELOPE_STATUSES = {
-		"completed", "created", "declined", "delivered", "expired", "sent",
-		"voided"
+		"completed", "created", "declined", "expired", "sent", "voided"
 	};
 
 	private static final String[] _DS_RECIPIENT_STATUSES = {
-		"completed", "created", "declined", "delivered", "sent", "signed"
+		"completed", "created", "declined", "sent", "signed"
 	};
 
-	private static final String[] _PENDING_RECIPIENT_STATUSES = {
-		"delivered", "sent"
-	};
+	private static final String[] _PENDING_RECIPIENT_STATUSES = {"sent"};
 
 	private static final String _PROVIDER_KEY = "docusign";
 

@@ -35,10 +35,6 @@ public class DSRecipient {
 		return name;
 	}
 
-	public String getRecipientType() {
-		return recipientType;
-	}
-
 	public LocalDateTime getSentLocalDateTime() {
 		return sentLocalDateTime;
 	}
@@ -75,10 +71,6 @@ public class DSRecipient {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public void setRecipientType(String recipientType) {
-		this.recipientType = recipientType;
 	}
 
 	public void setSentLocalDateTime(LocalDateTime sentLocalDateTime) {
@@ -118,7 +110,6 @@ public class DSRecipient {
 	protected String dsRecipientId;
 	protected String emailAddress;
 	protected String name;
-	protected String recipientType;
 	protected LocalDateTime sentLocalDateTime;
 	protected String status;
 	protected LocalDateTime statusLocalDateTime;

@@ -33,27 +33,6 @@
 			],
 			"objectFields": [
 				{
-					"DBType": "DateTime",
-					"businessType": "DateTime",
-					"externalReferenceCode": "DELIVERED_DATE",
-					"indexed": false,
-					"indexedAsKeyword": false,
-					"label": {
-						"en_US": "Delivered Date"
-					},
-					"name": "deliveredDate",
-					"objectFieldSettings": [
-						{
-							"name": "timeStorage",
-							"value": "convertToUTC"
-						}
-					],
-					"required": false,
-					"state": false,
-					"system": true,
-					"type": "DateTime"
-				},
-				{
 					"DBType": "String",
 					"businessType": "Text",
 					"externalReferenceCode": "EMAIL_ADDRESS",
@@ -94,21 +73,6 @@
 					},
 					"name": "providerRecipientId",
 					"required": true,
-					"state": false,
-					"system": true,
-					"type": "String"
-				},
-				{
-					"DBType": "String",
-					"businessType": "Text",
-					"externalReferenceCode": "RECIPIENT_TYPE",
-					"indexed": false,
-					"indexedAsKeyword": false,
-					"label": {
-						"en_US": "Recipient Type"
-					},
-					"name": "recipientType",
-					"required": false,
 					"state": false,
 					"system": true,
 					"type": "String"
@@ -160,7 +124,7 @@
 					"label": {
 						"en_US": "Status Date"
 					},
-					"name": "statusDate",
+					"name": "statusDateTime",
 					"objectFieldSettings": [
 						{
 							"name": "timeStorage",
@@ -306,7 +270,7 @@
 					"label": {
 						"en_US": "Expiration Date"
 					},
-					"name": "expirationDate",
+					"name": "expirationDateTime",
 					"objectFieldSettings": [
 						{
 							"name": "timeStorage",
@@ -374,7 +338,7 @@
 					"label": {
 						"en_US": "Status Date"
 					},
-					"name": "statusDate",
+					"name": "statusDateTime",
 					"objectFieldSettings": [
 						{
 							"name": "timeStorage",
