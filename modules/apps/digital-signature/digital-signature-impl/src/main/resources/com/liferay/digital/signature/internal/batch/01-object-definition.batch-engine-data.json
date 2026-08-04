@@ -154,13 +154,13 @@
 				{
 					"DBType": "DateTime",
 					"businessType": "DateTime",
-					"externalReferenceCode": "SIGNED_DATE",
+					"externalReferenceCode": "STATUS_DATE",
 					"indexed": false,
 					"indexedAsKeyword": false,
 					"label": {
-						"en_US": "Signed Date"
+						"en_US": "Status Date"
 					},
-					"name": "signedDate",
+					"name": "statusDate",
 					"objectFieldSettings": [
 						{
 							"name": "timeStorage",
@@ -171,21 +171,6 @@
 					"state": false,
 					"system": true,
 					"type": "DateTime"
-				},
-				{
-					"DBType": "Integer",
-					"businessType": "Integer",
-					"externalReferenceCode": "SIGNING_ORDER",
-					"indexed": false,
-					"indexedAsKeyword": false,
-					"label": {
-						"en_US": "Signing Order"
-					},
-					"name": "signingOrder",
-					"required": false,
-					"state": false,
-					"system": true,
-					"type": "Integer"
 				},
 				{
 					"DBType": "Long",
@@ -298,27 +283,6 @@
 			],
 			"objectFields": [
 				{
-					"DBType": "DateTime",
-					"businessType": "DateTime",
-					"externalReferenceCode": "COMPLETION_DATE",
-					"indexed": true,
-					"indexedAsKeyword": false,
-					"label": {
-						"en_US": "Completion Date"
-					},
-					"name": "completionDate",
-					"objectFieldSettings": [
-						{
-							"name": "timeStorage",
-							"value": "convertToUTC"
-						}
-					],
-					"required": false,
-					"state": false,
-					"system": true,
-					"type": "DateTime"
-				},
-				{
 					"DBType": "String",
 					"businessType": "Text",
 					"externalReferenceCode": "EMAIL_SUBJECT",
@@ -402,34 +366,25 @@
 					"type": "String"
 				},
 				{
-					"DBType": "Long",
-					"businessType": "LongInteger",
-					"externalReferenceCode": "SIGNED_FILE_ENTRY_ID",
+					"DBType": "DateTime",
+					"businessType": "DateTime",
+					"externalReferenceCode": "STATUS_DATE",
 					"indexed": false,
 					"indexedAsKeyword": false,
 					"label": {
-						"en_US": "Signed File Entry ID"
+						"en_US": "Status Date"
 					},
-					"name": "signedFileEntryId",
+					"name": "statusDate",
+					"objectFieldSettings": [
+						{
+							"name": "timeStorage",
+							"value": "convertToUTC"
+						}
+					],
 					"required": false,
 					"state": false,
 					"system": true,
-					"type": "Long"
-				},
-				{
-					"DBType": "String",
-					"businessType": "Text",
-					"externalReferenceCode": "VOIDED_REASON",
-					"indexed": false,
-					"indexedAsKeyword": false,
-					"label": {
-						"en_US": "Voided Reason"
-					},
-					"name": "voidedReason",
-					"required": false,
-					"state": false,
-					"system": true,
-					"type": "String"
+					"type": "DateTime"
 				}
 			],
 			"objectRelationships": [

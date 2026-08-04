@@ -14,6 +14,7 @@ import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.digital.signature.request.DSRequestDetail;
 import com.liferay.digital.signature.request.DSRequestManager;
 import com.liferay.digital.signature.request.DSRequestRecipientDetail;
+import com.liferay.document.library.kernel.model.DLVersionNumberIncrease;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.object.constants.ObjectDefinitionConstants;
 import com.liferay.object.model.ObjectDefinition;
@@ -29,7 +30,6 @@ import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.sql.dsl.expression.Predicate;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
-import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.User;
@@ -38,6 +38,8 @@ import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.IndexerRegistryUtil;
 import com.liferay.portal.kernel.search.Sort;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.ArrayUtil;
@@ -52,10 +54,8 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -172,11 +172,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 						_toRecipientStatus(dsRecipient.getStatus())
 					).put(
 						"sentDate", _toDate(dsRecipient.getSentLocalDateTime())
-					).put(
-						"signedDate",
-						_toDate(dsRecipient.getSignedLocalDateTime())
-					).put(
-						"signingOrder", dsRecipient.getRoutingOrder()
 					).build(),
 					serviceContext);
 			}
@@ -421,7 +416,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				requestObjectEntry.getValues();
 
 			return new DSRequestDetail(
-				_toDate(requestValues.get("completionDate")),
 				requestObjectEntry.getCreateDate(),
 				GetterUtil.getString(requestValues.get("emailSubject")),
 				_toDate(requestValues.get("expirationDate")),
@@ -433,7 +427,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				_getRequesterName(requestObjectEntry),
 				requestObjectEntry.getUserId(),
 				GetterUtil.getString(requestValues.get("requestStatus")),
-				GetterUtil.getString(requestValues.get("voidedReason")));
+				_toDate(requestValues.get("statusDate")));
 		}
 		catch (Exception exception) {
 			_log.error(
@@ -839,7 +833,12 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					companyId, documentObjectDefinition,
 					requestObjectDefinition, requestId);
 
-				if (Objects.equals(requestStatus, "completed")) {
+				if (Objects.equals(requestStatus, "completed") &&
+					!Objects.equals(
+						GetterUtil.getString(
+							requestValues.get("requestStatus")),
+						"completed")) {
+
 					_archiveSignedDocument(
 						companyId, groupId, documentObjectDefinition,
 						dsEnvelope, requestObjectDefinition, requestId);
@@ -876,20 +875,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			ObjectDefinition requestObjectDefinition, long requestId)
 		throws Exception {
 
-		ObjectEntry requestObjectEntry =
-			_objectEntryLocalService.fetchObjectEntry(requestId);
-
-		if (requestObjectEntry == null) {
-			return;
-		}
-
-		Map<String, Serializable> requestValues =
-			requestObjectEntry.getValues();
-
-		if (GetterUtil.getLong(requestValues.get("signedFileEntryId")) > 0) {
-			return;
-		}
-
 		long fileEntryId = _getRequestFileEntryId(
 			companyId, documentObjectDefinition, requestObjectDefinition,
 			requestId);
@@ -905,37 +890,22 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			return;
 		}
 
-		FileEntry fileEntry = _dlAppLocalService.getFileEntry(fileEntryId);
+		ObjectEntry requestObjectEntry =
+			_objectEntryLocalService.fetchObjectEntry(requestId);
 
-		String fileName = fileEntry.getFileName();
-
-		int index = fileName.lastIndexOf(".");
-
-		String baseName = fileName;
-
-		if (index > 0) {
-			baseName = fileName.substring(0, index);
+		if (requestObjectEntry == null) {
+			return;
 		}
-
-		String signedFileName = baseName + " (signed).pdf";
 
 		long userId = requestObjectEntry.getUserId();
 
-		_objectEntryLocalService.updateObjectEntry(
-			userId, requestId, 0,
-			HashMapBuilder.<String, Serializable>putAll(
-				requestValues
-			).put(
-				"signedFileEntryId",
-				_dlAppLocalService.addFileEntry(
-					null, userId, fileEntry.getRepositoryId(),
-					fileEntry.getFolderId(), signedFileName, "application/pdf",
-					signedFileName, null, null, null, bytes, null, null, null,
-					_createServiceContext(
-						companyId, fileEntry.getGroupId(), userId)
-				).getFileEntryId()
-			).build(),
-			_createServiceContext(companyId, groupId, userId));
+		FileEntry fileEntry = _dlAppLocalService.getFileEntry(fileEntryId);
+
+		_dlAppLocalService.updateFileEntry(
+			userId, fileEntryId, fileEntry.getFileName(), "application/pdf",
+			fileEntry.getTitle(), null, null, null,
+			DLVersionNumberIncrease.MAJOR, bytes, null, null, null,
+			_createServiceContext(companyId, fileEntry.getGroupId(), userId));
 	}
 
 	private ServiceContext _createServiceContext(
@@ -970,31 +940,21 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			return Collections.emptyList();
 		}
 
-		List<DSRequestRecipientDetail> recipientDetails = new ArrayList<>(
-			TransformUtil.transform(
-				_getValuesList(
-					companyId, recipientObjectDefinition,
-					StringBundler.concat(
-						"(", fieldName, " eq '", requestId, "')"),
-					null),
-				recipientValues -> new DSRequestRecipientDetail(
-					_toDate(recipientValues.get("deliveredDate")),
-					GetterUtil.getString(recipientValues.get("emailAddress")),
-					GetterUtil.getString(recipientValues.get("name")),
-					GetterUtil.getLong(
-						recipientValues.get(
-							"r_userToDSRequestRecipient_userId")),
-					GetterUtil.getString(
-						recipientValues.get("requestRecipientStatus")),
-					_toDate(recipientValues.get("sentDate")),
-					_toDate(recipientValues.get("signedDate")),
-					GetterUtil.getInteger(
-						recipientValues.get("signingOrder")))));
-
-		recipientDetails.sort(
-			Comparator.comparingInt(DSRequestRecipientDetail::getSigningOrder));
-
-		return recipientDetails;
+		return TransformUtil.transform(
+			_getValuesList(
+				companyId, recipientObjectDefinition,
+				StringBundler.concat("(", fieldName, " eq '", requestId, "')"),
+				null),
+			recipientValues -> new DSRequestRecipientDetail(
+				_toDate(recipientValues.get("deliveredDate")),
+				GetterUtil.getString(recipientValues.get("emailAddress")),
+				GetterUtil.getString(recipientValues.get("name")),
+				GetterUtil.getLong(
+					recipientValues.get("r_userToDSRequestRecipient_userId")),
+				GetterUtil.getString(
+					recipientValues.get("requestRecipientStatus")),
+				_toDate(recipientValues.get("sentDate")),
+				_toDate(recipientValues.get("statusDate"))));
 	}
 
 	private long _getRecipientUserId(long companyId, String emailAddress) {
@@ -1122,24 +1082,31 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			String filterString, Sort[] sorts)
 		throws Exception {
 
-		return _objectEntryLocalService.getValuesList(
-			0, companyId, objectDefinition.getUserId(),
-			objectDefinition.getObjectDefinitionId(),
-			_filterFactory.create(filterString, objectDefinition), null,
-			QueryUtil.ALL_POS, QueryUtil.ALL_POS, sorts);
+		PermissionChecker permissionChecker =
+			PermissionThreadLocal.getPermissionChecker();
+
+		try {
+			PermissionThreadLocal.setPermissionChecker(null);
+
+			return _objectEntryLocalService.getValuesList(
+				0, companyId, objectDefinition.getUserId(),
+				objectDefinition.getObjectDefinitionId(),
+				_filterFactory.create(filterString, objectDefinition), null,
+				QueryUtil.ALL_POS, QueryUtil.ALL_POS, sorts);
+		}
+		finally {
+			PermissionThreadLocal.setPermissionChecker(permissionChecker);
+		}
 	}
 
 	private boolean _isEnabled(long companyId, long groupId) {
-		if (!FeatureFlagManagerUtil.isEnabled(companyId, "LPD-69290")) {
-			return false;
-		}
-
 		DigitalSignatureConfiguration digitalSignatureConfiguration =
 			DigitalSignatureConfigurationUtil.getDigitalSignatureConfiguration(
 				companyId, groupId);
 
 		if ((digitalSignatureConfiguration == null) ||
-			!digitalSignatureConfiguration.enabled()) {
+			!digitalSignatureConfiguration.enabled() ||
+			!digitalSignatureConfiguration.enableEmbeddedView()) {
 
 			return false;
 		}
@@ -1277,8 +1244,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				continue;
 			}
 
-			int routingOrder = dsRecipient.getRoutingOrder();
-
 			Map<String, Serializable> values =
 				HashMapBuilder.<String, Serializable>putAll(
 					objectEntry.getValues()
@@ -1296,11 +1261,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				values, "sentDate",
 				_toDate(dsRecipient.getSentLocalDateTime()));
 			_putIfNotNull(
-				values, "signedDate",
-				_toDate(dsRecipient.getSignedLocalDateTime()));
-			_putIfNotNull(
-				values, "signingOrder",
-				(routingOrder > 0) ? routingOrder : null);
+				values, "statusDate",
+				_toDate(dsRecipient.getStatusLocalDateTime()));
 
 			_objectEntryLocalService.updateObjectEntry(
 				objectEntry.getUserId(), recipientId, 0, values,
@@ -1328,28 +1290,12 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				"requestStatus", requestStatus
 			).build();
 
-		Date completionDate = null;
-
-		if (Objects.equals(requestStatus, "completed") &&
-			(values.get("completionDate") == null)) {
-
-			completionDate = _toDate(
-				dsEnvelope.getStatusChangedLocalDateTime());
-
-			if (completionDate == null) {
-				completionDate = new Date();
-			}
-		}
-
-		String voidedReason = dsEnvelope.getVoidedReason();
-
-		_putIfNotNull(values, "completionDate", completionDate);
 		_putIfNotNull(
 			values, "expirationDate",
 			_toDate(dsEnvelope.getExpireLocalDateTime()));
 		_putIfNotNull(
-			values, "voidedReason",
-			Validator.isNotNull(voidedReason) ? voidedReason : null);
+			values, "statusDate",
+			_toDate(dsEnvelope.getStatusChangedLocalDateTime()));
 
 		_objectEntryLocalService.updateObjectEntry(
 			objectEntry.getUserId(), requestId, 0, values,

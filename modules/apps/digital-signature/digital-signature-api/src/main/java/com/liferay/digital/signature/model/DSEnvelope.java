@@ -76,10 +76,6 @@ public class DSEnvelope {
 		return statusChangedLocalDateTime;
 	}
 
-	public String getVoidedReason() {
-		return voidedReason;
-	}
-
 	public void setCreatedLocalDateTime(LocalDateTime createdLocalDateTime) {
 		this.createdLocalDateTime = createdLocalDateTime;
 	}
@@ -136,10 +132,6 @@ public class DSEnvelope {
 		LocalDateTime statusChangedLocalDateTime) {
 
 		this.statusChangedLocalDateTime = statusChangedLocalDateTime;
-	}
-
-	public void setVoidedReason(String voidedReason) {
-		this.voidedReason = voidedReason;
 	}
 
 	public JSONObject toJSONObject() {
@@ -209,7 +201,6 @@ public class DSEnvelope {
 	protected String senderEmailAddress;
 	protected String status;
 	protected LocalDateTime statusChangedLocalDateTime;
-	protected String voidedReason;
 
 	private static final Log _log = LogFactoryUtil.getLog(DSEnvelope.class);
 

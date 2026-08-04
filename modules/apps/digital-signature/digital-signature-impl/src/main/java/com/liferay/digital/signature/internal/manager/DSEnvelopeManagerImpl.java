@@ -235,17 +235,25 @@ public class DSEnvelopeManagerImpl implements DSEnvelopeManager {
 					emailAddress = signerJSONObject.getString("email");
 					name = signerJSONObject.getString("name");
 					recipientType = signerJSONObject.getString("recipientType");
-					routingOrder = GetterUtil.getInteger(
-						signerJSONObject.getString("routingOrder"));
 					sentLocalDateTime = _toLocalDateTime(
 						signerJSONObject.getString("sentDateTime"));
-					signedLocalDateTime = _toLocalDateTime(
-						signerJSONObject.getString("signedDateTime"));
 					status = signerJSONObject.getString("status");
+					statusLocalDateTime = _getStatusLocalDateTime(
+						signerJSONObject);
 					tabsJSONObject = signerJSONObject.getJSONObject("tabs");
 				}
 			},
 			_log);
+	}
+
+	private LocalDateTime _getStatusLocalDateTime(JSONObject signerJSONObject) {
+		String signedDateTime = signerJSONObject.getString("signedDateTime");
+
+		if (Validator.isNotNull(signedDateTime)) {
+			return _toLocalDateTime(signedDateTime);
+		}
+
+		return _toLocalDateTime(signerJSONObject.getString("declinedDateTime"));
 	}
 
 	private void _sendDSRecipientEmails(
@@ -351,7 +359,6 @@ public class DSEnvelopeManagerImpl implements DSEnvelopeManager {
 				status = jsonObject.getString("status");
 				statusChangedLocalDateTime = _toLocalDateTime(
 					jsonObject.getString("statusChangedDateTime"));
-				voidedReason = jsonObject.getString("voidedReason");
 			}
 		};
 

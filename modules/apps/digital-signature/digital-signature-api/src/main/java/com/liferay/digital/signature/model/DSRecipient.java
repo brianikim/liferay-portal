@@ -39,20 +39,16 @@ public class DSRecipient {
 		return recipientType;
 	}
 
-	public int getRoutingOrder() {
-		return routingOrder;
-	}
-
 	public LocalDateTime getSentLocalDateTime() {
 		return sentLocalDateTime;
 	}
 
-	public LocalDateTime getSignedLocalDateTime() {
-		return signedLocalDateTime;
-	}
-
 	public String getStatus() {
 		return status;
+	}
+
+	public LocalDateTime getStatusLocalDateTime() {
+		return statusLocalDateTime;
 	}
 
 	public JSONObject getTabsJSONObject() {
@@ -85,20 +81,16 @@ public class DSRecipient {
 		this.recipientType = recipientType;
 	}
 
-	public void setRoutingOrder(int routingOrder) {
-		this.routingOrder = routingOrder;
-	}
-
 	public void setSentLocalDateTime(LocalDateTime sentLocalDateTime) {
 		this.sentLocalDateTime = sentLocalDateTime;
 	}
 
-	public void setSignedLocalDateTime(LocalDateTime signedLocalDateTime) {
-		this.signedLocalDateTime = signedLocalDateTime;
-	}
-
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public void setStatusLocalDateTime(LocalDateTime statusLocalDateTime) {
+		this.statusLocalDateTime = statusLocalDateTime;
 	}
 
 	public void setTabsJSONObject(JSONObject tabsJSONObject) {
@@ -127,10 +119,9 @@ public class DSRecipient {
 	protected String emailAddress;
 	protected String name;
 	protected String recipientType;
-	protected int routingOrder;
 	protected LocalDateTime sentLocalDateTime;
-	protected LocalDateTime signedLocalDateTime;
 	protected String status;
+	protected LocalDateTime statusLocalDateTime;
 	protected JSONObject tabsJSONObject;
 
 }
