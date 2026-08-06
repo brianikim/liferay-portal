@@ -28,6 +28,7 @@ import com.liferay.object.service.ObjectDefinitionLocalService;
 import com.liferay.object.service.ObjectEntryLocalService;
 import com.liferay.object.service.ObjectFieldLocalService;
 import com.liferay.object.service.ObjectRelationshipLocalService;
+import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.sql.dsl.expression.Predicate;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
@@ -56,6 +57,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -571,18 +573,11 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			ObjectDefinition dsRequestObjectDefinition, long requestId)
 		throws Exception {
 
-		long fileEntryId = _getRequestFileEntryId(
+		List<Long> fileEntryIds = _getRequestFileEntryIds(
 			companyId, dsRequestDocumentObjectDefinition,
 			dsRequestObjectDefinition, requestId);
 
-		if (fileEntryId <= 0) {
-			return;
-		}
-
-		byte[] bytes = _dsEnvelopeManager.getSignedDocument(
-			companyId, groupId, dsEnvelope.getDSEnvelopeId());
-
-		if (ArrayUtil.isEmpty(bytes)) {
+		if (fileEntryIds.isEmpty()) {
 			return;
 		}
 
@@ -595,13 +590,23 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 		long userId = dsRequestObjectEntry.getUserId();
 
-		FileEntry fileEntry = _dlAppLocalService.getFileEntry(fileEntryId);
+		for (long fileEntryId : fileEntryIds) {
+			byte[] bytes = _dsEnvelopeManager.getSignedDocument(
+				companyId, groupId, dsEnvelope.getDSEnvelopeId(),
+				String.valueOf(fileEntryId));
 
-		_dlAppLocalService.updateFileEntry(
-			userId, fileEntryId, fileEntry.getFileName(),
-			ContentTypes.APPLICATION_PDF, fileEntry.getTitle(), null, null,
-			null, DLVersionNumberIncrease.MAJOR, bytes, null, null, null,
-			_getServiceContext(companyId, fileEntry.getGroupId(), userId));
+			if (ArrayUtil.isEmpty(bytes)) {
+				continue;
+			}
+
+			FileEntry fileEntry = _dlAppLocalService.getFileEntry(fileEntryId);
+
+			_dlAppLocalService.updateFileEntry(
+				userId, fileEntryId, fileEntry.getFileName(),
+				ContentTypes.APPLICATION_PDF, fileEntry.getTitle(), null, null,
+				null, DLVersionNumberIncrease.MAJOR, bytes, null, null, null,
+				_getServiceContext(companyId, fileEntry.getGroupId(), userId));
+		}
 	}
 
 	private long _getRecipientUserId(long companyId, String emailAddress) {
@@ -637,7 +642,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		return objectField.getName();
 	}
 
-	private long _getRequestFileEntryId(
+	private List<Long> _getRequestFileEntryIds(
 			long companyId, ObjectDefinition dsRequestDocumentObjectDefinition,
 			ObjectDefinition dsRequestObjectDefinition, long requestId)
 		throws Exception {
@@ -646,25 +651,17 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			dsRequestObjectDefinition, "dsRequestToDSRequestDocuments");
 
 		if (documentFieldName == null) {
-			return 0;
+			return Collections.emptyList();
 		}
 
-		List<Map<String, Serializable>> documentValuesList = _getValuesList(
-			companyId,
-			StringBundler.concat(
-				"(", documentFieldName, " eq '", requestId, "')"),
-			dsRequestDocumentObjectDefinition, null);
-
-		if (documentValuesList.isEmpty()) {
-			return 0;
-		}
-
-		return GetterUtil.getLong(
-			documentValuesList.get(
-				0
-			).get(
-				"fileEntryId"
-			));
+		return TransformUtil.transform(
+			_getValuesList(
+				companyId,
+				StringBundler.concat(
+					"(", documentFieldName, " eq '", requestId, "')"),
+				dsRequestDocumentObjectDefinition, null),
+			documentValues -> GetterUtil.getLong(
+				documentValues.get("fileEntryId")));
 	}
 
 	private Map<Long, Long> _getRequestIdsByFileEntryId(
