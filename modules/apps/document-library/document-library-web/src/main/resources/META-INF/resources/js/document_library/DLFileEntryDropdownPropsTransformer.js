@@ -159,6 +159,14 @@ const ACTIONS = {
 		});
 	},
 
+	sign({fileEntryTitle, signURL}) {
+		openModal({
+			size: 'lg',
+			title: fileEntryTitle,
+			url: signURL,
+		});
+	},
+
 	subscribeFileEntry({subscribeFileEntryURL}) {
 		location.href = subscribeFileEntryURL;
 	},
