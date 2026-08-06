@@ -7,6 +7,7 @@ package com.liferay.digital.signature.internal.manager;
 
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfigurationUtil;
+import com.liferay.digital.signature.constants.DigitalSignatureConstants;
 import com.liferay.digital.signature.internal.http.DSHttp;
 import com.liferay.digital.signature.mail.DSEnvelopeEmailNotificationSender;
 import com.liferay.digital.signature.manager.DSCustomFieldManager;
@@ -27,6 +28,7 @@ import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -274,8 +276,10 @@ public class DSEnvelopeManagerImpl implements DSEnvelopeManager {
 
 		for (DSRecipient dsRecipient : dsRecipients) {
 			if (Validator.isNotNull(dsRecipient.getDSClientUserId()) &&
-				Objects.equals(
-					StringUtil.toLowerCase(dsRecipient.getStatus()), "sent")) {
+				ArrayUtil.contains(
+					DigitalSignatureConstants.
+						REQUEST_RECIPIENT_STATUSES_PENDING,
+					StringUtil.toLowerCase(dsRecipient.getStatus()))) {
 
 				_dsEnvelopeEmailNotificationSender.sendNotification(
 					companyId, groupId, dsEnvelope.getDSEnvelopeId(),

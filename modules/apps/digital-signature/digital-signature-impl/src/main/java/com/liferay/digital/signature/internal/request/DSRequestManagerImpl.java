@@ -7,12 +7,14 @@ package com.liferay.digital.signature.internal.request;
 
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfigurationUtil;
+import com.liferay.digital.signature.constants.DigitalSignatureConstants;
 import com.liferay.digital.signature.mail.DSEnvelopeEmailNotificationSender;
 import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
+import com.liferay.digital.signature.model.DSRequest;
+import com.liferay.digital.signature.model.DSRequestRecipient;
 import com.liferay.digital.signature.request.DSRequestManager;
-import com.liferay.digital.signature.request.DSRequestRecipientDetail;
 import com.liferay.document.library.kernel.model.DLVersionNumberIncrease;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.object.constants.ObjectDefinitionConstants;
@@ -54,6 +56,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -184,6 +188,65 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	}
 
 	@Override
+	public DSRequest fetchDSRequest(long companyId, long fileEntryId) {
+		if (!_isEnabled(companyId, 0)) {
+			return null;
+		}
+
+		ObjectDefinition documentObjectDefinition = _fetchObjectDefinition(
+			companyId, "L_DS_REQUEST_DOCUMENT");
+		ObjectDefinition recipientObjectDefinition = _fetchObjectDefinition(
+			companyId, "L_DS_REQUEST_RECIPIENT");
+		ObjectDefinition requestObjectDefinition = _fetchObjectDefinition(
+			companyId, "L_DS_REQUEST");
+
+		if ((documentObjectDefinition == null) ||
+			(recipientObjectDefinition == null) ||
+			(requestObjectDefinition == null)) {
+
+			return null;
+		}
+
+		try {
+			Map<Long, Long> requestIdsByFileEntryId =
+				_getRequestIdsByFileEntryId(
+					companyId, documentObjectDefinition,
+					requestObjectDefinition,
+					Collections.singleton(fileEntryId));
+
+			Long requestId = requestIdsByFileEntryId.get(fileEntryId);
+
+			if (requestId == null) {
+				return null;
+			}
+
+			ObjectEntry requestObjectEntry =
+				_objectEntryLocalService.fetchObjectEntry(requestId);
+
+			if (requestObjectEntry == null) {
+				return null;
+			}
+
+			return new DSRequest(
+				requestObjectEntry.getCreateDate(),
+				_getDSRequestRecipients(
+					companyId, recipientObjectDefinition,
+					requestObjectDefinition, requestId),
+				_getRequesterEmailAddress(requestObjectEntry),
+				_getRequesterName(requestObjectEntry),
+				requestObjectEntry.getUserId(), requestObjectEntry.getValues());
+		}
+		catch (Exception exception) {
+			_log.error(
+				"Unable to load the signature request detail for file entry " +
+					fileEntryId,
+				exception);
+
+			return null;
+		}
+	}
+
+	@Override
 	public Map<Long, String> getProviderRequestIds(
 		long companyId, long userId, Collection<String> statuses) {
 
@@ -242,7 +305,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					_objectEntryLocalService.getValues(requestId);
 
 				if (ArrayUtil.contains(
-						_TERMINAL_REQUEST_STATUSES,
+						DigitalSignatureConstants.REQUEST_STATUSES_TERMINAL,
 						GetterUtil.getString(
 							requestValues.get("requestStatus")))) {
 
@@ -488,7 +551,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					_objectEntryLocalService.getValues(requestId);
 
 				if (!ArrayUtil.contains(
-						_TERMINAL_REQUEST_STATUSES,
+						DigitalSignatureConstants.REQUEST_STATUSES_TERMINAL,
 						GetterUtil.getString(
 							requestValues.get("requestStatus")))) {
 
@@ -533,7 +596,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				recipientStatusesByFileEntryId.entrySet(),
 				entry -> {
 					if (ArrayUtil.contains(
-							_TERMINAL_REQUEST_STATUSES,
+							DigitalSignatureConstants.REQUEST_STATUSES_TERMINAL,
 							requestStatusesByFileEntryId.get(entry.getKey()))) {
 
 						return null;
@@ -541,7 +604,11 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 					Map<Long, String> statusesByUserId = entry.getValue();
 
-					if (Objects.equals(statusesByUserId.get(userId), "sent")) {
+					if (ArrayUtil.contains(
+							DigitalSignatureConstants.
+								REQUEST_RECIPIENT_STATUSES_PENDING,
+							statusesByUserId.get(userId))) {
+
 						return entry.getKey();
 					}
 
@@ -678,7 +745,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					requestObjectEntry.getValues();
 
 				if (ArrayUtil.contains(
-						_TERMINAL_REQUEST_STATUSES,
+						DigitalSignatureConstants.REQUEST_STATUSES_TERMINAL,
 						GetterUtil.getString(
 							requestValues.get("requestStatus")))) {
 
@@ -881,6 +948,31 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				externalReferenceCode, companyId);
 	}
 
+	private List<DSRequestRecipient> _getDSRequestRecipients(
+			long companyId, ObjectDefinition recipientObjectDefinition,
+			ObjectDefinition requestObjectDefinition, long requestId)
+		throws Exception {
+
+		String fieldName = _getRelationshipFieldName(
+			requestObjectDefinition, "dsRequestToDSRequestRecipients");
+
+		if (fieldName == null) {
+			return Collections.emptyList();
+		}
+
+		List<DSRequestRecipient> dsRequestRecipients = TransformUtil.transform(
+			_getValuesList(
+				companyId, recipientObjectDefinition,
+				StringBundler.concat("(", fieldName, " eq '", requestId, "')"),
+				null),
+			recipientValues -> new DSRequestRecipient(recipientValues));
+
+		dsRequestRecipients.sort(
+			Comparator.comparingInt(DSRequestRecipient::getSigningOrder));
+
+		return dsRequestRecipients;
+	}
+
 	private long _getRecipientUserId(long companyId, String emailAddress) {
 		if (Validator.isNull(emailAddress)) {
 			return 0;
@@ -916,10 +1008,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	}
 
 	private String _getRequesterEmailAddress(ObjectEntry requestObjectEntry) {
-		if (requestObjectEntry == null) {
-			return null;
-		}
-
 		User user = _userLocalService.fetchUser(requestObjectEntry.getUserId());
 
 		if (user == null) {
@@ -930,10 +1018,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	}
 
 	private String _getRequesterName(ObjectEntry requestObjectEntry) {
-		if (requestObjectEntry == null) {
-			return null;
-		}
-
 		User user = _userLocalService.fetchUser(requestObjectEntry.getUserId());
 
 		if (user == null) {
@@ -1112,7 +1196,9 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	private String _toRecipientStatus(String status) {
 		status = StringUtil.toLowerCase(GetterUtil.getString(status));
 
-		if (ArrayUtil.contains(_DS_RECIPIENT_STATUSES, status)) {
+		if (ArrayUtil.contains(
+				DigitalSignatureConstants.REQUEST_RECIPIENT_STATUSES, status)) {
+
 			return status;
 		}
 
@@ -1137,7 +1223,9 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			}
 		}
 
-		if (ArrayUtil.contains(_DS_ENVELOPE_STATUSES, status)) {
+		if (ArrayUtil.contains(
+				DigitalSignatureConstants.REQUEST_STATUSES, status)) {
+
 			return status;
 		}
 
@@ -1244,19 +1332,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			_createServiceContext(companyId, groupId, objectEntry.getUserId()));
 	}
 
-	private static final String[] _DS_ENVELOPE_STATUSES = {
-		"completed", "created", "declined", "expired", "sent", "voided"
-	};
-
-	private static final String[] _DS_RECIPIENT_STATUSES = {
-		"completed", "created", "declined", "sent", "signed"
-	};
-
 	private static final String _PROVIDER_KEY = "docusign";
-
-	private static final String[] _TERMINAL_REQUEST_STATUSES = {
-		"completed", "declined", "expired", "voided"
-	};
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		DSRequestManagerImpl.class);
