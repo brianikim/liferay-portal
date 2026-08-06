@@ -184,6 +184,106 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	}
 
 	@Override
+	public Map<Long, String> getProviderRequestIds(
+		long companyId, long userId, Collection<String> statuses) {
+
+		Map<Long, String> providerRequestIds = new HashMap<>();
+
+		if (!_isEnabled(companyId, 0) || (statuses == null) ||
+			statuses.isEmpty()) {
+
+			return providerRequestIds;
+		}
+
+		ObjectDefinition documentObjectDefinition = _fetchObjectDefinition(
+			companyId, "L_DS_REQUEST_DOCUMENT");
+		ObjectDefinition recipientObjectDefinition = _fetchObjectDefinition(
+			companyId, "L_DS_REQUEST_RECIPIENT");
+		ObjectDefinition requestObjectDefinition = _fetchObjectDefinition(
+			companyId, "L_DS_REQUEST");
+
+		if ((documentObjectDefinition == null) ||
+			(recipientObjectDefinition == null) ||
+			(requestObjectDefinition == null)) {
+
+			return providerRequestIds;
+		}
+
+		try {
+			String documentFieldName = _getRelationshipFieldName(
+				requestObjectDefinition, "dsRequestToDSRequestDocuments");
+			String recipientFieldName = _getRelationshipFieldName(
+				requestObjectDefinition, "dsRequestToDSRequestRecipients");
+
+			if ((documentFieldName == null) || (recipientFieldName == null)) {
+				return providerRequestIds;
+			}
+
+			Set<Long> requestIds = new HashSet<>(
+				TransformUtil.transform(
+					_getValuesList(
+						companyId, recipientObjectDefinition,
+						StringBundler.concat(
+							"(r_userToDSRequestRecipient_userId eq '", userId,
+							"') and (requestRecipientStatus in ('",
+							StringUtil.merge(statuses, "', '"), "'))"),
+						null),
+					recipientValues -> GetterUtil.getLong(
+						recipientValues.get(recipientFieldName))));
+
+			if (requestIds.isEmpty()) {
+				return providerRequestIds;
+			}
+
+			Map<Long, String> providerRequestIdsByRequestId = new HashMap<>();
+
+			for (long requestId : requestIds) {
+				Map<String, Serializable> requestValues =
+					_objectEntryLocalService.getValues(requestId);
+
+				if (ArrayUtil.contains(
+						_TERMINAL_REQUEST_STATUSES,
+						GetterUtil.getString(
+							requestValues.get("requestStatus")))) {
+
+					continue;
+				}
+
+				providerRequestIdsByRequestId.put(
+					requestId,
+					GetterUtil.getString(
+						requestValues.get("providerRequestId")));
+			}
+
+			for (Map<String, Serializable> documentValues :
+					_getValuesList(
+						companyId, documentObjectDefinition,
+						StringBundler.concat(
+							"(", documentFieldName, " in ('",
+							StringUtil.merge(requestIds, "', '"), "'))"),
+						null)) {
+
+				String providerRequestId = providerRequestIdsByRequestId.get(
+					GetterUtil.getLong(documentValues.get(documentFieldName)));
+
+				if (Validator.isNotNull(providerRequestId)) {
+					providerRequestIds.put(
+						GetterUtil.getLong(documentValues.get("fileEntryId")),
+						providerRequestId);
+				}
+			}
+		}
+		catch (Exception exception) {
+			_log.error(
+				"Unable to load the signature requests awaiting the " +
+					"signature of user " + userId,
+				exception);
+		}
+
+		return providerRequestIds;
+	}
+
+	@Override
 	public Map<Long, Map<Long, String>> getRecipientStatusesByFileEntryId(
 		long companyId, Collection<Long> fileEntryIds) {
 
@@ -227,13 +327,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				return recipientStatusesByFileEntryId;
 			}
 
-			Map<Long, Long> fileEntryIdsByRequestId = new HashMap<>();
-
-			for (Map.Entry<Long, Long> entry :
-					requestIdsByFileEntryId.entrySet()) {
-
-				fileEntryIdsByRequestId.put(entry.getValue(), entry.getKey());
-			}
+			Map<Long, Map<Long, String>> statusesByUserIdByRequestId =
+				new HashMap<>();
 
 			for (Map<String, Serializable> recipientValues :
 					_getValuesList(
@@ -241,21 +336,16 @@ public class DSRequestManagerImpl implements DSRequestManager {
 						StringBundler.concat(
 							"(", recipientFieldName, " in ('",
 							StringUtil.merge(
-								fileEntryIdsByRequestId.keySet(), "', '"),
+								new HashSet<>(requestIdsByFileEntryId.values()),
+								"', '"),
 							"'))"),
 						null)) {
 
-				Long fileEntryId = fileEntryIdsByRequestId.get(
-					GetterUtil.getLong(
-						recipientValues.get(recipientFieldName)));
-
-				if (fileEntryId == null) {
-					continue;
-				}
-
 				Map<Long, String> statusesByUserId =
-					recipientStatusesByFileEntryId.computeIfAbsent(
-						fileEntryId, key -> new HashMap<>());
+					statusesByUserIdByRequestId.computeIfAbsent(
+						GetterUtil.getLong(
+							recipientValues.get(recipientFieldName)),
+						requestId -> new HashMap<>());
 
 				statusesByUserId.put(
 					GetterUtil.getLong(
@@ -263,6 +353,20 @@ public class DSRequestManagerImpl implements DSRequestManager {
 							"r_userToDSRequestRecipient_userId")),
 					GetterUtil.getString(
 						recipientValues.get("requestRecipientStatus")));
+			}
+
+			for (Map.Entry<Long, Long> entry :
+					requestIdsByFileEntryId.entrySet()) {
+
+				Map<Long, String> statusesByUserId =
+					statusesByUserIdByRequestId.get(entry.getValue());
+
+				if (statusesByUserId == null) {
+					continue;
+				}
+
+				recipientStatusesByFileEntryId.put(
+					entry.getKey(), new HashMap<>(statusesByUserId));
 			}
 		}
 		catch (Exception exception) {
@@ -377,11 +481,30 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				return 0;
 			}
 
+			Set<Long> activeRequestIds = new HashSet<>();
+
+			for (long requestId : requestIds) {
+				Map<String, Serializable> requestValues =
+					_objectEntryLocalService.getValues(requestId);
+
+				if (!ArrayUtil.contains(
+						_TERMINAL_REQUEST_STATUSES,
+						GetterUtil.getString(
+							requestValues.get("requestStatus")))) {
+
+					activeRequestIds.add(requestId);
+				}
+			}
+
+			if (activeRequestIds.isEmpty()) {
+				return 0;
+			}
+
 			List<Map<String, Serializable>> documentValuesList = _getValuesList(
 				companyId, documentObjectDefinition,
 				StringBundler.concat(
 					"(", documentFieldName, " in ('",
-					StringUtil.merge(requestIds, "', '"), "'))"),
+					StringUtil.merge(activeRequestIds, "', '"), "'))"),
 				null);
 
 			return documentValuesList.size();
@@ -402,11 +525,20 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 		Map<Long, Map<Long, String>> recipientStatusesByFileEntryId =
 			getRecipientStatusesByFileEntryId(companyId, fileEntryIds);
+		Map<Long, String> requestStatusesByFileEntryId =
+			getRequestStatusesByFileEntryId(companyId, fileEntryIds);
 
 		return new HashSet<>(
 			TransformUtil.transform(
 				recipientStatusesByFileEntryId.entrySet(),
 				entry -> {
+					if (ArrayUtil.contains(
+							_TERMINAL_REQUEST_STATUSES,
+							requestStatusesByFileEntryId.get(entry.getKey()))) {
+
+						return null;
+					}
+
 					Map<Long, String> statusesByUserId = entry.getValue();
 
 					if (Objects.equals(statusesByUserId.get(userId), "sent")) {
@@ -1123,7 +1255,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	private static final String _PROVIDER_KEY = "docusign";
 
 	private static final String[] _TERMINAL_REQUEST_STATUSES = {
-		"completed", "declined", "voided"
+		"completed", "declined", "expired", "voided"
 	};
 
 	private static final Log _log = LogFactoryUtil.getLog(
