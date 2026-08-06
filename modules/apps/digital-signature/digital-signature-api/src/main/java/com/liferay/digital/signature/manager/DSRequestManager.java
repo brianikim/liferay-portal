@@ -25,6 +25,9 @@ public interface DSRequestManager {
 			long[] fileEntryIds)
 		throws PortalException;
 
+	public Map<Long, String> getProviderRequestIds(
+		long companyId, long userId, Collection<String> statuses);
+
 	public Map<Long, Map<Long, String>> getRecipientStatusesByFileEntryId(
 		long companyId, Collection<Long> fileEntryIds);
 
