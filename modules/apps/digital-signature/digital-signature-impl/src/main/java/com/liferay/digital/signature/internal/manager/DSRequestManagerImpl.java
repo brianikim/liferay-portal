@@ -14,6 +14,8 @@ import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
+import com.liferay.digital.signature.model.DSRequest;
+import com.liferay.digital.signature.model.DSRequestRecipient;
 import com.liferay.document.library.kernel.model.DLVersionNumberIncrease;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.object.constants.ObjectDefinitionConstants;
@@ -58,6 +60,7 @@ import java.time.ZoneOffset;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -226,6 +229,71 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	}
 
 	@Override
+	public DSRequest fetchDSRequest(long companyId, long fileEntryId) {
+		if (!_isEnabled(companyId, 0)) {
+			return null;
+		}
+
+		ObjectDefinition dsRequestDocumentObjectDefinition =
+			_objectDefinitionLocalService.
+				fetchObjectDefinitionByExternalReferenceCode(
+					"L_DS_REQUEST_DOCUMENT", companyId);
+		ObjectDefinition dsRequestRecipientObjectDefinition =
+			_objectDefinitionLocalService.
+				fetchObjectDefinitionByExternalReferenceCode(
+					"L_DS_REQUEST_RECIPIENT", companyId);
+		ObjectDefinition dsRequestObjectDefinition =
+			_objectDefinitionLocalService.
+				fetchObjectDefinitionByExternalReferenceCode(
+					"L_DS_REQUEST", companyId);
+
+		if ((dsRequestDocumentObjectDefinition == null) ||
+			(dsRequestRecipientObjectDefinition == null) ||
+			(dsRequestObjectDefinition == null)) {
+
+			return null;
+		}
+
+		try {
+			Map<Long, Long> requestIdsByFileEntryId =
+				_getRequestIdsByFileEntryId(
+					companyId, dsRequestDocumentObjectDefinition,
+					dsRequestObjectDefinition,
+					Collections.singleton(fileEntryId));
+
+			Long requestId = requestIdsByFileEntryId.get(fileEntryId);
+
+			if (requestId == null) {
+				return null;
+			}
+
+			ObjectEntry dsRequestObjectEntry =
+				_objectEntryLocalService.fetchObjectEntry(requestId);
+
+			if (dsRequestObjectEntry == null) {
+				return null;
+			}
+
+			return new DSRequest(
+				dsRequestObjectEntry.getCreateDate(),
+				_getDSRequestRecipients(
+					companyId, dsRequestObjectDefinition,
+					dsRequestRecipientObjectDefinition, requestId),
+				_getRequesterEmailAddress(dsRequestObjectEntry),
+				_getRequesterName(dsRequestObjectEntry),
+				dsRequestObjectEntry.getValues());
+		}
+		catch (Exception exception) {
+			_log.error(
+				"Unable to load the signature request detail for file entry " +
+					fileEntryId,
+				exception);
+
+			return null;
+		}
+	}
+
+	@Override
 	public Map<Long, String> getProviderRequestIds(
 		long companyId, long userId, Collection<String> statuses) {
 
@@ -290,7 +358,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					_objectEntryLocalService.getValues(requestId);
 
 				if (ArrayUtil.contains(
-						_TERMINAL_REQUEST_STATUSES,
+						DSRequestConstants.STATUSES_TERMINAL,
 						GetterUtil.getString(
 							requestValues.get("requestStatus")))) {
 
@@ -552,7 +620,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					_objectEntryLocalService.getValues(requestId);
 
 				if (!ArrayUtil.contains(
-						_TERMINAL_REQUEST_STATUSES,
+						DSRequestConstants.STATUSES_TERMINAL,
 						GetterUtil.getString(
 							requestValues.get("requestStatus")))) {
 
@@ -597,7 +665,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				recipientStatusesByFileEntryId.entrySet(),
 				entry -> {
 					if (ArrayUtil.contains(
-							_TERMINAL_REQUEST_STATUSES,
+							DSRequestConstants.STATUSES_TERMINAL,
 							requestStatusesByFileEntryId.get(entry.getKey()))) {
 
 						return null;
@@ -750,7 +818,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					dsRequestObjectEntry.getValues();
 
 				if (ArrayUtil.contains(
-						_TERMINAL_REQUEST_STATUSES,
+						DSRequestConstants.STATUSES_TERMINAL,
 						GetterUtil.getString(
 							requestValues.get("requestStatus")))) {
 
@@ -938,6 +1006,31 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 	}
 
+	private List<DSRequestRecipient> _getDSRequestRecipients(
+			long companyId, ObjectDefinition dsRequestObjectDefinition,
+			ObjectDefinition dsRequestRecipientObjectDefinition, long requestId)
+		throws Exception {
+
+		String fieldName = _getRelationshipFieldName(
+			dsRequestObjectDefinition, "dsRequestToDSRequestRecipients");
+
+		if (fieldName == null) {
+			return Collections.emptyList();
+		}
+
+		List<DSRequestRecipient> dsRequestRecipients = TransformUtil.transform(
+			_getValuesList(
+				companyId,
+				StringBundler.concat("(", fieldName, " eq '", requestId, "')"),
+				dsRequestRecipientObjectDefinition, null),
+			recipientValues -> new DSRequestRecipient(recipientValues));
+
+		dsRequestRecipients.sort(
+			Comparator.comparingInt(DSRequestRecipient::getSigningOrder));
+
+		return dsRequestRecipients;
+	}
+
 	private long _getRecipientUserId(long companyId, String emailAddress) {
 		if (Validator.isNull(emailAddress)) {
 			return 0;
@@ -1063,10 +1156,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	}
 
 	private String _getRequesterEmailAddress(ObjectEntry dsRequestObjectEntry) {
-		if (dsRequestObjectEntry == null) {
-			return null;
-		}
-
 		User user = _userLocalService.fetchUser(
 			dsRequestObjectEntry.getUserId());
 
@@ -1078,10 +1167,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	}
 
 	private String _getRequesterName(ObjectEntry dsRequestObjectEntry) {
-		if (dsRequestObjectEntry == null) {
-			return null;
-		}
-
 		User user = _userLocalService.fetchUser(
 			dsRequestObjectEntry.getUserId());
 
@@ -1239,10 +1324,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			values,
 			_getServiceContext(companyId, groupId, objectEntry.getUserId()));
 	}
-
-	private static final String[] _TERMINAL_REQUEST_STATUSES = {
-		"completed", "declined", "expired", "voided"
-	};
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		DSRequestManagerImpl.class);
