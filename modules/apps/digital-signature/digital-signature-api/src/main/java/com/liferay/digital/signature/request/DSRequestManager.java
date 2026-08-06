@@ -6,6 +6,7 @@
 package com.liferay.digital.signature.request;
 
 import com.liferay.digital.signature.model.DSEnvelope;
+import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.portal.kernel.exception.PortalException;
 
 import java.util.Collection;
@@ -24,6 +25,8 @@ public interface DSRequestManager {
 			long companyId, long groupId, long userId, DSEnvelope dsEnvelope,
 			long[] fileEntryIds)
 		throws PortalException;
+
+	public DSRequest fetchDSRequest(long companyId, long fileEntryId);
 
 	public Map<Long, String> getProviderRequestIds(
 		long companyId, long userId, Collection<String> statuses);
