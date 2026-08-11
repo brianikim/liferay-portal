@@ -228,6 +228,38 @@ public class PriceEntryResourceImpl extends BasePriceEntryResourceImpl {
 		return _toPriceEntry(commercePriceEntry.getCommercePriceEntryId());
 	}
 
+	@Override
+	public PriceEntry putPriceEntryByExternalReferenceCode(
+			String externalReferenceCode, PriceEntry priceEntry)
+		throws Exception {
+
+		CommercePriceEntry commercePriceEntry =
+			_commercePriceEntryService.
+				fetchCommercePriceEntryByExternalReferenceCode(
+					externalReferenceCode, contextCompany.getCompanyId());
+
+		if (commercePriceEntry == null) {
+			CommercePriceList commercePriceList =
+				_commercePriceListService.
+					fetchCommercePriceListByExternalReferenceCode(
+						priceEntry.getPriceListExternalReferenceCode(),
+						contextCompany.getCompanyId());
+
+			if (commercePriceList == null) {
+				throw new NoSuchPriceListException(
+					"Unable to find price list with external reference code " +
+						priceEntry.getPriceListExternalReferenceCode());
+			}
+
+			priceEntry.setExternalReferenceCode(() -> externalReferenceCode);
+
+			return _toPriceEntry(
+				_addOrUpdateCommercePriceEntry(commercePriceList, priceEntry));
+		}
+
+		return _toPriceEntry(_updatePriceEntry(commercePriceEntry, priceEntry));
+	}
+
 	private CommercePriceEntry _addOrUpdateCommercePriceEntry(
 			CommercePriceList commercePriceList, PriceEntry priceEntry)
 		throws Exception {
