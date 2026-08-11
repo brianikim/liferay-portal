@@ -228,6 +228,22 @@ public class PriceEntryResourceImpl extends BasePriceEntryResourceImpl {
 		return _toPriceEntry(commercePriceEntry.getCommercePriceEntryId());
 	}
 
+	@Override
+	public PriceEntry putPriceEntryByExternalReferenceCode(
+			String externalReferenceCode, PriceEntry priceEntry)
+		throws Exception {
+
+		CommercePriceList commercePriceList = _fetchParentCommercePriceList(
+			priceEntry);
+
+		priceEntry.setExternalReferenceCode(() -> externalReferenceCode);
+
+		CommercePriceEntry commercePriceEntry = _addOrUpdateCommercePriceEntry(
+			commercePriceList, priceEntry);
+
+		return _toPriceEntry(commercePriceEntry.getCommercePriceEntryId());
+	}
+
 	private CommercePriceEntry _addOrUpdateCommercePriceEntry(
 			CommercePriceList commercePriceList, PriceEntry priceEntry)
 		throws Exception {
@@ -292,6 +308,40 @@ public class PriceEntryResourceImpl extends BasePriceEntryResourceImpl {
 		_updateNestedResources(priceEntry, commercePriceEntry);
 
 		return commercePriceEntry;
+	}
+
+	private CommercePriceList _fetchParentCommercePriceList(
+			PriceEntry priceEntry)
+		throws Exception {
+
+		Long priceListId = priceEntry.getPriceListId();
+
+		if ((priceListId != null) && (priceListId > 0)) {
+			return _commercePriceListService.getCommercePriceList(priceListId);
+		}
+
+		String priceListExternalReferenceCode =
+			priceEntry.getPriceListExternalReferenceCode();
+
+		if (Validator.isNotNull(priceListExternalReferenceCode)) {
+			CommercePriceList commercePriceList =
+				_commercePriceListService.
+					fetchCommercePriceListByExternalReferenceCode(
+						priceListExternalReferenceCode,
+						contextCompany.getCompanyId());
+
+			if (commercePriceList == null) {
+				throw new NoSuchPriceListException(
+					"Unable to find price list with external reference code " +
+						priceListExternalReferenceCode);
+			}
+
+			return commercePriceList;
+		}
+
+		throw new NoSuchPriceListException(
+			"One of the following parameters must be specified: " +
+				"[priceListExternalReferenceCode, priceListId]");
 	}
 
 	private Map<String, Map<String, String>> _getActions(
