@@ -178,6 +178,45 @@ public class PriceEntryResourceTest extends BasePriceEntryResourceTestCase {
 		_testPostPriceListIdPriceEntryWithPriceOnApplicationOnPriceList();
 	}
 
+	@Override
+	@Test
+	public void testPutPriceEntryByExternalReferenceCode() throws Exception {
+		PriceEntry randomPriceEntry = randomPriceEntry();
+
+		randomPriceEntry.setPrice(9.99);
+		randomPriceEntry.setPriceOnApplication(false);
+
+		PriceEntry putPriceEntry =
+			priceEntryResource.putPriceEntryByExternalReferenceCode(
+				randomPriceEntry.getExternalReferenceCode(), randomPriceEntry);
+
+		Assert.assertEquals(
+			Long.valueOf(_commercePriceList.getCommercePriceListId()),
+			putPriceEntry.getPriceListId());
+		Assert.assertEquals(9.99, putPriceEntry.getPrice(), 0.001);
+
+		PriceEntry updatePriceEntry = randomPriceEntry();
+
+		updatePriceEntry.setExternalReferenceCode(
+			randomPriceEntry.getExternalReferenceCode());
+		updatePriceEntry.setPrice(19.99);
+		updatePriceEntry.setPriceListExternalReferenceCode((String)null);
+		updatePriceEntry.setPriceListId((Long)null);
+		updatePriceEntry.setPriceOnApplication(false);
+
+		PriceEntry updatedPriceEntry =
+			priceEntryResource.putPriceEntryByExternalReferenceCode(
+				randomPriceEntry.getExternalReferenceCode(), updatePriceEntry);
+
+		Assert.assertEquals(
+			putPriceEntry.getPriceEntryId(),
+			updatedPriceEntry.getPriceEntryId());
+		Assert.assertEquals(
+			Long.valueOf(_commercePriceList.getCommercePriceListId()),
+			updatedPriceEntry.getPriceListId());
+		Assert.assertEquals(19.99, updatedPriceEntry.getPrice(), 0.001);
+	}
+
 	@Ignore
 	@Override
 	@Test
