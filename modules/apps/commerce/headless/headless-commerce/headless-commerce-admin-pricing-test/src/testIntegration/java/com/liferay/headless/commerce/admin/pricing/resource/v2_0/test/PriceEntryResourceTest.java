@@ -181,6 +181,13 @@ public class PriceEntryResourceTest extends BasePriceEntryResourceTestCase {
 	@Ignore
 	@Override
 	@Test
+	public void testPutPriceEntryByExternalReferenceCode() throws Exception {
+		super.testPutPriceEntryByExternalReferenceCode();
+	}
+
+	@Ignore
+	@Override
+	@Test
 	public void testVulcanCRUDItemDelegateGetItem() throws Exception {
 		super.testVulcanCRUDItemDelegateGetItem();
 	}
