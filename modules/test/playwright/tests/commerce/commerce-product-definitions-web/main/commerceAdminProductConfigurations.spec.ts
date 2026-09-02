@@ -307,7 +307,8 @@ test(
 		await clickAndExpectToBeVisible({
 			target: commerceAdminProductConfigurationListPage.ercInput,
 			timeout: 5000,
-			trigger: commerceAdminProductConfigurationListPage.ercModalOpenerButton,
+			trigger:
+				commerceAdminProductConfigurationListPage.ercModalOpenerButton,
 		});
 
 		await commerceAdminProductConfigurationListPage.ercInput.fill(
