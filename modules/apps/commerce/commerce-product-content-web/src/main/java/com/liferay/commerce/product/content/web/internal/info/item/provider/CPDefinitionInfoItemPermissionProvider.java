@@ -15,8 +15,15 @@ import com.liferay.info.item.ClassPKInfoItemIdentifier;
 import com.liferay.info.item.InfoItemIdentifier;
 import com.liferay.info.item.InfoItemReference;
 import com.liferay.info.item.provider.InfoItemPermissionProvider;
+import com.liferay.layout.page.template.model.LayoutPageTemplateEntry;
+import com.liferay.layout.page.template.service.LayoutPageTemplateEntryLocalService;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -42,11 +49,18 @@ public class CPDefinitionInfoItemPermissionProvider
 		}
 
 		try {
-			return _commerceProductViewPermission.contains(
-				permissionChecker,
-				CommerceUtil.getCommerceAccountId(commerceContext),
-				commerceContext.getCommerceChannelGroupId(),
-				cpDefinition.getCPDefinitionId());
+			if (_commerceProductViewPermission.contains(
+					permissionChecker,
+					CommerceUtil.getCommerceAccountId(commerceContext),
+					commerceContext.getCommerceChannelGroupId(),
+					cpDefinition.getCPDefinitionId()) &&
+				_hasLayoutPageTemplateEntryPermission(
+					permissionChecker, actionId)) {
+
+				return true;
+			}
+
+			return false;
 		}
 		catch (PortalException portalException) {
 			throw new InfoItemPermissionException(
@@ -77,11 +91,18 @@ public class CPDefinitionInfoItemPermissionProvider
 			(ClassPKInfoItemIdentifier)infoItemIdentifier;
 
 		try {
-			return _commerceProductViewPermission.contains(
-				permissionChecker,
-				CommerceUtil.getCommerceAccountId(commerceContext),
-				commerceContext.getCommerceChannelGroupId(),
-				classPKInfoItemIdentifier.getClassPK());
+			if (_commerceProductViewPermission.contains(
+					permissionChecker,
+					CommerceUtil.getCommerceAccountId(commerceContext),
+					commerceContext.getCommerceChannelGroupId(),
+					classPKInfoItemIdentifier.getClassPK()) &&
+				_hasLayoutPageTemplateEntryPermission(
+					permissionChecker, actionId)) {
+
+				return true;
+			}
+
+			return false;
 		}
 		catch (PortalException portalException) {
 			throw new InfoItemPermissionException(
@@ -89,7 +110,52 @@ public class CPDefinitionInfoItemPermissionProvider
 		}
 	}
 
+	private boolean _hasLayoutPageTemplateEntryPermission(
+			PermissionChecker permissionChecker, String actionId)
+		throws PortalException {
+
+		ServiceContext serviceContext =
+			ServiceContextThreadLocal.getServiceContext();
+
+		if (serviceContext == null) {
+			return true;
+		}
+
+		ThemeDisplay themeDisplay = serviceContext.getThemeDisplay();
+
+		if (themeDisplay == null) {
+			return true;
+		}
+
+		Layout layout = themeDisplay.getLayout();
+
+		if (layout == null) {
+			return true;
+		}
+
+		LayoutPageTemplateEntry layoutPageTemplateEntry =
+			_layoutPageTemplateEntryLocalService.
+				fetchLayoutPageTemplateEntryByPlid(layout.getPlid());
+
+		if (layoutPageTemplateEntry == null) {
+			return true;
+		}
+
+		return _layoutPageTemplateEntryModelResourcePermission.contains(
+			permissionChecker, layoutPageTemplateEntry, actionId);
+	}
+
 	@Reference
 	private CommerceProductViewPermission _commerceProductViewPermission;
+
+	@Reference
+	private LayoutPageTemplateEntryLocalService
+		_layoutPageTemplateEntryLocalService;
+
+	@Reference(
+		target = "(model.class.name=com.liferay.layout.page.template.model.LayoutPageTemplateEntry)"
+	)
+	private ModelResourcePermission<LayoutPageTemplateEntry>
+		_layoutPageTemplateEntryModelResourcePermission;
 
 }
