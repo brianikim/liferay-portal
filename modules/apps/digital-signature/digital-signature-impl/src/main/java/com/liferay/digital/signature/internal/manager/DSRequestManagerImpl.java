@@ -58,6 +58,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -230,8 +231,22 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 	@Override
 	public DSRequest fetchDSRequest(long companyId, long fileEntryId) {
-		if (!_isEnabled(companyId, 0)) {
-			return null;
+		Map<Long, DSRequest> dsRequests = getDSRequests(
+			companyId, Collections.singleton(fileEntryId));
+
+		return dsRequests.get(fileEntryId);
+	}
+
+	@Override
+	public Map<Long, DSRequest> getDSRequests(
+		long companyId, Collection<Long> fileEntryIds) {
+
+		Map<Long, DSRequest> dsRequests = new HashMap<>();
+
+		if (!_isEnabled(companyId, 0) || (fileEntryIds == null) ||
+			fileEntryIds.isEmpty()) {
+
+			return dsRequests;
 		}
 
 		ObjectDefinition dsRequestDocumentObjectDefinition =
@@ -251,513 +266,80 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			(dsRequestRecipientObjectDefinition == null) ||
 			(dsRequestObjectDefinition == null)) {
 
-			return null;
+			return dsRequests;
 		}
 
 		try {
 			Map<Long, Long> requestIdsByFileEntryId =
 				_getRequestIdsByFileEntryId(
 					companyId, dsRequestDocumentObjectDefinition,
-					dsRequestObjectDefinition,
-					Collections.singleton(fileEntryId));
+					dsRequestObjectDefinition, fileEntryIds);
 
-			Long requestId = requestIdsByFileEntryId.get(fileEntryId);
-
-			if (requestId == null) {
-				return null;
+			if (requestIdsByFileEntryId.isEmpty()) {
+				return dsRequests;
 			}
 
-			ObjectEntry dsRequestObjectEntry =
-				_objectEntryLocalService.fetchObjectEntry(requestId);
-
-			if (dsRequestObjectEntry == null) {
-				return null;
-			}
-
-			return new DSRequest(
-				dsRequestObjectEntry.getCreateDate(),
-				_getDSRequestRecipients(
+			Map<Long, DSRequest> dsRequestsByRequestId =
+				_getDSRequestsByRequestId(
 					companyId, dsRequestObjectDefinition,
-					dsRequestRecipientObjectDefinition, requestId),
-				_getRequesterEmailAddress(dsRequestObjectEntry),
-				_getRequesterName(dsRequestObjectEntry),
-				dsRequestObjectEntry.getValues());
-		}
-		catch (Exception exception) {
-			_log.error(
-				"Unable to load the signature request detail for file entry " +
-					fileEntryId,
-				exception);
-
-			return null;
-		}
-	}
-
-	@Override
-	public Map<Long, String> getProviderRequestIds(
-		long companyId, long userId, Collection<String> statuses) {
-
-		Map<Long, String> providerRequestIds = new HashMap<>();
-
-		if (!_isEnabled(companyId, 0) || (statuses == null) ||
-			statuses.isEmpty()) {
-
-			return providerRequestIds;
-		}
-
-		ObjectDefinition dsRequestDocumentObjectDefinition =
-			_objectDefinitionLocalService.
-				fetchObjectDefinitionByExternalReferenceCode(
-					"L_DS_REQUEST_DOCUMENT", companyId);
-		ObjectDefinition dsRequestRecipientObjectDefinition =
-			_objectDefinitionLocalService.
-				fetchObjectDefinitionByExternalReferenceCode(
-					"L_DS_REQUEST_RECIPIENT", companyId);
-		ObjectDefinition dsRequestObjectDefinition =
-			_objectDefinitionLocalService.
-				fetchObjectDefinitionByExternalReferenceCode(
-					"L_DS_REQUEST", companyId);
-
-		if ((dsRequestDocumentObjectDefinition == null) ||
-			(dsRequestRecipientObjectDefinition == null) ||
-			(dsRequestObjectDefinition == null)) {
-
-			return providerRequestIds;
-		}
-
-		try {
-			String documentFieldName = _getRelationshipFieldName(
-				dsRequestObjectDefinition, "dsRequestToDSRequestDocuments");
-			String recipientFieldName = _getRelationshipFieldName(
-				dsRequestObjectDefinition, "dsRequestToDSRequestRecipients");
-
-			if ((documentFieldName == null) || (recipientFieldName == null)) {
-				return providerRequestIds;
-			}
-
-			Set<Long> requestIds = new HashSet<>(
-				TransformUtil.transform(
-					_getValuesList(
-						companyId,
-						StringBundler.concat(
-							"(r_userToDSRequestRecipients_userId eq '", userId,
-							"') and (requestRecipientStatus in ('",
-							StringUtil.merge(statuses, "', '"), "'))"),
-						dsRequestRecipientObjectDefinition, null),
-					recipientValues -> GetterUtil.getLong(
-						recipientValues.get(recipientFieldName))));
-
-			if (requestIds.isEmpty()) {
-				return providerRequestIds;
-			}
-
-			Map<Long, String> providerRequestIdsByRequestId = new HashMap<>();
-
-			for (long requestId : requestIds) {
-				Map<String, Serializable> requestValues =
-					_objectEntryLocalService.getValues(requestId);
-
-				if (ArrayUtil.contains(
-						DSRequestConstants.STATUSES_TERMINAL,
-						GetterUtil.getString(
-							requestValues.get("requestStatus")))) {
-
-					continue;
-				}
-
-				providerRequestIdsByRequestId.put(
-					requestId,
-					GetterUtil.getString(
-						requestValues.get("providerRequestId")));
-			}
-
-			for (Map<String, Serializable> documentValues :
-					_getValuesList(
-						companyId,
-						StringBundler.concat(
-							"(", documentFieldName, " in ('",
-							StringUtil.merge(requestIds, "', '"), "'))"),
-						dsRequestDocumentObjectDefinition, null)) {
-
-				String providerRequestId = providerRequestIdsByRequestId.get(
-					GetterUtil.getLong(documentValues.get(documentFieldName)));
-
-				if (Validator.isNotNull(providerRequestId)) {
-					providerRequestIds.put(
-						GetterUtil.getLong(documentValues.get("fileEntryId")),
-						providerRequestId);
-				}
-			}
-		}
-		catch (Exception exception) {
-			_log.error(
-				"Unable to load the signature requests awaiting the " +
-					"signature of user " + userId,
-				exception);
-		}
-
-		return providerRequestIds;
-	}
-
-	@Override
-	public Map<Long, Map<Long, String>> getRecipientStatusesByFileEntryId(
-		long companyId, Collection<Long> fileEntryIds) {
-
-		Map<Long, Map<Long, String>> recipientStatusesByFileEntryId =
-			new HashMap<>();
-
-		if (!_isEnabled(companyId, 0) || (fileEntryIds == null) ||
-			fileEntryIds.isEmpty()) {
-
-			return recipientStatusesByFileEntryId;
-		}
-
-		ObjectDefinition dsRequestDocumentObjectDefinition =
-			_objectDefinitionLocalService.
-				fetchObjectDefinitionByExternalReferenceCode(
-					"L_DS_REQUEST_DOCUMENT", companyId);
-		ObjectDefinition dsRequestRecipientObjectDefinition =
-			_objectDefinitionLocalService.
-				fetchObjectDefinitionByExternalReferenceCode(
-					"L_DS_REQUEST_RECIPIENT", companyId);
-		ObjectDefinition dsRequestObjectDefinition =
-			_objectDefinitionLocalService.
-				fetchObjectDefinitionByExternalReferenceCode(
-					"L_DS_REQUEST", companyId);
-
-		if ((dsRequestDocumentObjectDefinition == null) ||
-			(dsRequestRecipientObjectDefinition == null) ||
-			(dsRequestObjectDefinition == null)) {
-
-			return recipientStatusesByFileEntryId;
-		}
-
-		try {
-			String recipientFieldName = _getRelationshipFieldName(
-				dsRequestObjectDefinition, "dsRequestToDSRequestRecipients");
-
-			if (recipientFieldName == null) {
-				return recipientStatusesByFileEntryId;
-			}
-
-			Map<Long, Long> requestIdsByFileEntryId =
-				_getRequestIdsByFileEntryId(
-					companyId, dsRequestDocumentObjectDefinition,
-					dsRequestObjectDefinition, fileEntryIds);
-
-			if (requestIdsByFileEntryId.isEmpty()) {
-				return recipientStatusesByFileEntryId;
-			}
-
-			Map<Long, Map<Long, String>> statusesByUserIdByRequestId =
-				new HashMap<>();
-
-			for (Map<String, Serializable> recipientValues :
-					_getValuesList(
-						companyId,
-						StringBundler.concat(
-							"(", recipientFieldName, " in ('",
-							StringUtil.merge(
-								new HashSet<>(requestIdsByFileEntryId.values()),
-								"', '"),
-							"'))"),
-						dsRequestRecipientObjectDefinition, null)) {
-
-				Map<Long, String> statusesByUserId =
-					statusesByUserIdByRequestId.computeIfAbsent(
-						GetterUtil.getLong(
-							recipientValues.get(recipientFieldName)),
-						requestId -> new HashMap<>());
-
-				statusesByUserId.put(
-					GetterUtil.getLong(
-						recipientValues.get(
-							"r_userToDSRequestRecipients_userId")),
-					GetterUtil.getString(
-						recipientValues.get("requestRecipientStatus")));
-			}
+					dsRequestRecipientObjectDefinition,
+					new HashSet<>(requestIdsByFileEntryId.values()));
 
 			for (Map.Entry<Long, Long> entry :
 					requestIdsByFileEntryId.entrySet()) {
 
-				Map<Long, String> statusesByUserId =
-					statusesByUserIdByRequestId.get(entry.getValue());
+				DSRequest dsRequest = dsRequestsByRequestId.get(
+					entry.getValue());
 
-				if (statusesByUserId == null) {
-					continue;
+				if (dsRequest != null) {
+					dsRequests.put(entry.getKey(), dsRequest);
 				}
-
-				recipientStatusesByFileEntryId.put(
-					entry.getKey(), new HashMap<>(statusesByUserId));
 			}
 		}
 		catch (Exception exception) {
 			_log.error(
-				"Unable to load signature recipient statuses for company " +
+				"Unable to load the signature requests for company " +
 					companyId,
 				exception);
 		}
 
-		return recipientStatusesByFileEntryId;
-	}
-
-	@Override
-	public Map<Long, String> getRequestStatusesByFileEntryId(
-		long companyId, Collection<Long> fileEntryIds) {
-
-		Map<Long, String> requestStatusesByFileEntryId = new HashMap<>();
-
-		if (!_isEnabled(companyId, 0) || (fileEntryIds == null) ||
-			fileEntryIds.isEmpty()) {
-
-			return requestStatusesByFileEntryId;
-		}
-
-		ObjectDefinition dsRequestDocumentObjectDefinition =
-			_objectDefinitionLocalService.
-				fetchObjectDefinitionByExternalReferenceCode(
-					"L_DS_REQUEST_DOCUMENT", companyId);
-		ObjectDefinition dsRequestObjectDefinition =
-			_objectDefinitionLocalService.
-				fetchObjectDefinitionByExternalReferenceCode(
-					"L_DS_REQUEST", companyId);
-
-		if ((dsRequestDocumentObjectDefinition == null) ||
-			(dsRequestObjectDefinition == null)) {
-
-			return requestStatusesByFileEntryId;
-		}
-
-		try {
-			Map<Long, Long> requestIdsByFileEntryId =
-				_getRequestIdsByFileEntryId(
-					companyId, dsRequestDocumentObjectDefinition,
-					dsRequestObjectDefinition, fileEntryIds);
-
-			for (Map.Entry<Long, Long> entry :
-					requestIdsByFileEntryId.entrySet()) {
-
-				ObjectEntry dsRequestObjectEntry =
-					_objectEntryLocalService.fetchObjectEntry(entry.getValue());
-
-				if (dsRequestObjectEntry == null) {
-					continue;
-				}
-
-				Map<String, Serializable> requestValues =
-					dsRequestObjectEntry.getValues();
-
-				requestStatusesByFileEntryId.put(
-					entry.getKey(),
-					GetterUtil.getString(requestValues.get("requestStatus")));
-			}
-		}
-		catch (Exception exception) {
-			_log.error(
-				"Unable to load signature request statuses for company " +
-					companyId,
-				exception);
-		}
-
-		return requestStatusesByFileEntryId;
-	}
-
-	@Override
-	public int getSignatureRequiredCount(long companyId, long userId) {
-		if (!_isEnabled(companyId, 0)) {
-			return 0;
-		}
-
-		ObjectDefinition dsRequestDocumentObjectDefinition =
-			_objectDefinitionLocalService.
-				fetchObjectDefinitionByExternalReferenceCode(
-					"L_DS_REQUEST_DOCUMENT", companyId);
-		ObjectDefinition dsRequestRecipientObjectDefinition =
-			_objectDefinitionLocalService.
-				fetchObjectDefinitionByExternalReferenceCode(
-					"L_DS_REQUEST_RECIPIENT", companyId);
-		ObjectDefinition dsRequestObjectDefinition =
-			_objectDefinitionLocalService.
-				fetchObjectDefinitionByExternalReferenceCode(
-					"L_DS_REQUEST", companyId);
-
-		if ((dsRequestDocumentObjectDefinition == null) ||
-			(dsRequestRecipientObjectDefinition == null) ||
-			(dsRequestObjectDefinition == null)) {
-
-			return 0;
-		}
-
-		try {
-			String documentFieldName = _getRelationshipFieldName(
-				dsRequestObjectDefinition, "dsRequestToDSRequestDocuments");
-			String recipientFieldName = _getRelationshipFieldName(
-				dsRequestObjectDefinition, "dsRequestToDSRequestRecipients");
-
-			if ((documentFieldName == null) || (recipientFieldName == null)) {
-				return 0;
-			}
-
-			Set<Long> requestIds = new HashSet<>(
-				TransformUtil.transform(
-					_getValuesList(
-						companyId,
-						StringBundler.concat(
-							"(r_userToDSRequestRecipients_userId eq '", userId,
-							"') and (requestRecipientStatus eq 'sent')"),
-						dsRequestRecipientObjectDefinition, null),
-					recipientValues -> GetterUtil.getLong(
-						recipientValues.get(recipientFieldName))));
-
-			if (requestIds.isEmpty()) {
-				return 0;
-			}
-
-			Set<Long> activeRequestIds = new HashSet<>();
-
-			for (long requestId : requestIds) {
-				Map<String, Serializable> requestValues =
-					_objectEntryLocalService.getValues(requestId);
-
-				if (!ArrayUtil.contains(
-						DSRequestConstants.STATUSES_TERMINAL,
-						GetterUtil.getString(
-							requestValues.get("requestStatus")))) {
-
-					activeRequestIds.add(requestId);
-				}
-			}
-
-			if (activeRequestIds.isEmpty()) {
-				return 0;
-			}
-
-			List<Map<String, Serializable>> documentValuesList = _getValuesList(
-				companyId,
-				StringBundler.concat(
-					"(", documentFieldName, " in ('",
-					StringUtil.merge(activeRequestIds, "', '"), "'))"),
-				dsRequestDocumentObjectDefinition, null);
-
-			return documentValuesList.size();
-		}
-		catch (Exception exception) {
-			_log.error(
-				"Unable to count documents awaiting the signature of user " +
-					userId,
-				exception);
-
-			return 0;
-		}
-	}
-
-	@Override
-	public Set<Long> getSignatureRequiredFileEntryIds(
-		long companyId, long userId, Collection<Long> fileEntryIds) {
-
-		Map<Long, Map<Long, String>> recipientStatusesByFileEntryId =
-			getRecipientStatusesByFileEntryId(companyId, fileEntryIds);
-		Map<Long, String> requestStatusesByFileEntryId =
-			getRequestStatusesByFileEntryId(companyId, fileEntryIds);
-
-		return new HashSet<>(
-			TransformUtil.transform(
-				recipientStatusesByFileEntryId.entrySet(),
-				entry -> {
-					if (ArrayUtil.contains(
-							DSRequestConstants.STATUSES_TERMINAL,
-							requestStatusesByFileEntryId.get(entry.getKey()))) {
-
-						return null;
-					}
-
-					Map<Long, String> statusesByUserId = entry.getValue();
-
-					if (Objects.equals(statusesByUserId.get(userId), "sent")) {
-						return entry.getKey();
-					}
-
-					return null;
-				}));
+		return dsRequests;
 	}
 
 	@Override
 	public void resendDSRequestNotifications(
-		long companyId, long groupId, String providerRequestId) {
+		long companyId, long groupId, DSRequest dsRequest) {
 
-		if (!_isEnabled(companyId, groupId) ||
-			Validator.isNull(providerRequestId)) {
-
+		if (!_isEnabled(companyId, groupId) || (dsRequest == null)) {
 			return;
 		}
 
-		ObjectDefinition dsRequestRecipientObjectDefinition =
-			_objectDefinitionLocalService.
-				fetchObjectDefinitionByExternalReferenceCode(
-					"L_DS_REQUEST_RECIPIENT", companyId);
-		ObjectDefinition dsRequestObjectDefinition =
-			_objectDefinitionLocalService.
-				fetchObjectDefinitionByExternalReferenceCode(
-					"L_DS_REQUEST", companyId);
+		String providerRequestId = dsRequest.getProviderRequestId();
 
-		if ((dsRequestRecipientObjectDefinition == null) ||
-			(dsRequestObjectDefinition == null)) {
-
+		if (Validator.isNull(providerRequestId)) {
 			return;
 		}
 
-		try {
-			String recipientFieldName = _getRelationshipFieldName(
-				dsRequestObjectDefinition, "dsRequestToDSRequestRecipients");
+		for (DSRequestRecipient dsRequestRecipient :
+				dsRequest.getDSRequestRecipients()) {
 
-			if (recipientFieldName == null) {
-				return;
+			if (!Objects.equals(dsRequestRecipient.getStatus(), "sent")) {
+				continue;
 			}
 
-			for (Map<String, Serializable> requestValues :
-					_getValuesList(
-						companyId,
-						StringBundler.concat(
-							"(providerRequestId eq '", providerRequestId, "')"),
-						dsRequestObjectDefinition, null)) {
+			String emailAddress = dsRequestRecipient.getEmailAddress();
 
-				long requestId = GetterUtil.getLong(
-					requestValues.get(
-						dsRequestObjectDefinition.getPKObjectFieldName()));
-
-				String emailSubject = GetterUtil.getString(
-					requestValues.get("emailSubject"));
-
-				for (Map<String, Serializable> recipientValues :
-						_getValuesList(
-							companyId,
-							StringBundler.concat(
-								"(", recipientFieldName, " eq '", requestId,
-								"') and (requestRecipientStatus eq 'sent')"),
-							dsRequestRecipientObjectDefinition, null)) {
-
-					String emailAddress = GetterUtil.getString(
-						recipientValues.get("emailAddress"));
-
-					if (Validator.isNull(emailAddress)) {
-						continue;
-					}
-
-					DSRecipient dsRecipient = new DSRecipient();
-
-					dsRecipient.setEmailAddress(emailAddress);
-
-					_dsEnvelopeEmailNotificationSender.sendNotification(
-						companyId, groupId, providerRequestId, dsRecipient,
-						emailSubject, null);
-				}
+			if (Validator.isNull(emailAddress)) {
+				continue;
 			}
-		}
-		catch (Exception exception) {
-			_log.error(
-				"Unable to resend the signature request for envelope " +
-					providerRequestId,
-				exception);
+
+			DSRecipient dsRecipient = new DSRecipient();
+
+			dsRecipient.setEmailAddress(emailAddress);
+
+			_dsEnvelopeEmailNotificationSender.sendNotification(
+				companyId, groupId, providerRequestId, dsRecipient,
+				dsRequest.getEmailSubject(), null);
 		}
 	}
 
@@ -950,11 +532,15 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 	@Override
 	public void voidDSRequest(
-		long companyId, long groupId, String providerRequestId, String reason) {
+		long companyId, long groupId, DSRequest dsRequest, String reason) {
 
-		if (!_isEnabled(companyId, groupId) ||
-			Validator.isNull(providerRequestId)) {
+		if (!_isEnabled(companyId, groupId) || (dsRequest == null)) {
+			return;
+		}
 
+		String providerRequestId = dsRequest.getProviderRequestId();
+
+		if (Validator.isNull(providerRequestId)) {
 			return;
 		}
 
@@ -1006,29 +592,77 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 	}
 
-	private List<DSRequestRecipient> _getDSRequestRecipients(
+	private Map<Long, DSRequest> _getDSRequestsByRequestId(
 			long companyId, ObjectDefinition dsRequestObjectDefinition,
-			ObjectDefinition dsRequestRecipientObjectDefinition, long requestId)
+			ObjectDefinition dsRequestRecipientObjectDefinition,
+			Set<Long> requestIds)
 		throws Exception {
 
-		String fieldName = _getRelationshipFieldName(
+		Map<Long, DSRequest> dsRequestsByRequestId = new HashMap<>();
+
+		String recipientFieldName = _getRelationshipFieldName(
 			dsRequestObjectDefinition, "dsRequestToDSRequestRecipients");
 
-		if (fieldName == null) {
-			return Collections.emptyList();
+		if (recipientFieldName == null) {
+			return dsRequestsByRequestId;
 		}
 
-		List<DSRequestRecipient> dsRequestRecipients = TransformUtil.transform(
-			_getValuesList(
-				companyId,
-				StringBundler.concat("(", fieldName, " eq '", requestId, "')"),
-				dsRequestRecipientObjectDefinition, null),
-			recipientValues -> new DSRequestRecipient(recipientValues));
+		Map<Long, List<DSRequestRecipient>> dsRequestRecipientsByRequestId =
+			new HashMap<>();
 
-		dsRequestRecipients.sort(
-			Comparator.comparingInt(DSRequestRecipient::getSigningOrder));
+		for (Map<String, Serializable> recipientValues :
+				_getValuesList(
+					companyId,
+					StringBundler.concat(
+						"(", recipientFieldName, " in ('",
+						StringUtil.merge(requestIds, "', '"), "'))"),
+					dsRequestRecipientObjectDefinition, null)) {
 
-		return dsRequestRecipients;
+			List<DSRequestRecipient> dsRequestRecipients =
+				dsRequestRecipientsByRequestId.computeIfAbsent(
+					GetterUtil.getLong(recipientValues.get(recipientFieldName)),
+					requestId -> new ArrayList<>());
+
+			dsRequestRecipients.add(new DSRequestRecipient(recipientValues));
+		}
+
+		for (List<DSRequestRecipient> dsRequestRecipients :
+				dsRequestRecipientsByRequestId.values()) {
+
+			dsRequestRecipients.sort(
+				Comparator.comparingInt(DSRequestRecipient::getSigningOrder));
+		}
+
+		for (long requestId : requestIds) {
+			ObjectEntry dsRequestObjectEntry =
+				_objectEntryLocalService.fetchObjectEntry(requestId);
+
+			if (dsRequestObjectEntry == null) {
+				continue;
+			}
+
+			String requesterEmailAddress = null;
+			String requesterName = dsRequestObjectEntry.getUserName();
+
+			User user = _userLocalService.fetchUser(
+				dsRequestObjectEntry.getUserId());
+
+			if (user != null) {
+				requesterEmailAddress = user.getEmailAddress();
+				requesterName = user.getFullName();
+			}
+
+			dsRequestsByRequestId.put(
+				requestId,
+				new DSRequest(
+					dsRequestObjectEntry.getCreateDate(),
+					dsRequestRecipientsByRequestId.getOrDefault(
+						requestId, Collections.emptyList()),
+					requesterEmailAddress, requesterName,
+					dsRequestObjectEntry.getValues()));
+		}
+
+		return dsRequestsByRequestId;
 	}
 
 	private long _getRecipientUserId(long companyId, String emailAddress) {
@@ -1153,28 +787,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 
 		return DSRequestConstants.STATUS_SENT;
-	}
-
-	private String _getRequesterEmailAddress(ObjectEntry dsRequestObjectEntry) {
-		User user = _userLocalService.fetchUser(
-			dsRequestObjectEntry.getUserId());
-
-		if (user == null) {
-			return null;
-		}
-
-		return user.getEmailAddress();
-	}
-
-	private String _getRequesterName(ObjectEntry dsRequestObjectEntry) {
-		User user = _userLocalService.fetchUser(
-			dsRequestObjectEntry.getUserId());
-
-		if (user == null) {
-			return dsRequestObjectEntry.getUserName();
-		}
-
-		return user.getFullName();
 	}
 
 	private ServiceContext _getServiceContext(
