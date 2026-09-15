@@ -1,6 +1,6 @@
 {
 	"contentType": {
-		"className": "com.liferay.object.model.ObjectDefinition#Y8H4"
+		"className": "[$OBJECT_DEFINITION_CLASS_NAME:CMSBlog$]"
 	},
 	"defaultTemplate": true,
 	"name": "Blog"

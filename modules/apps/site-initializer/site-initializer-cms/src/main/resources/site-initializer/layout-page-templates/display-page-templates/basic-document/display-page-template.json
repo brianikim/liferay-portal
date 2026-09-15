@@ -1,6 +1,6 @@
 {
 	"contentType": {
-		"className": "com.liferay.object.model.ObjectDefinition#Z7P5"
+		"className": "[$OBJECT_DEFINITION_CLASS_NAME:CMSBasicDocument$]"
 	},
 	"defaultTemplate": true,
 	"name": "Basic Document"

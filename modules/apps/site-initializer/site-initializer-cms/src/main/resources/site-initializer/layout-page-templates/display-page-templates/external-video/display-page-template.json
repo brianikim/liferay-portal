@@ -1,6 +1,6 @@
 {
 	"contentType": {
-		"className": "com.liferay.object.model.ObjectDefinition#S1T1"
+		"className": "[$OBJECT_DEFINITION_CLASS_NAME:CMSExternalVideo$]"
 	},
 	"defaultTemplate": true,
 	"name": "External Video"
