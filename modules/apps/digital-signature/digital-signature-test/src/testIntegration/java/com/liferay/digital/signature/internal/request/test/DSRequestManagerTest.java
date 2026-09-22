@@ -170,7 +170,8 @@ public class DSRequestManagerTest {
 			companyId, fileEntryId);
 
 		Assert.assertEquals("completed", dsRequest.getStatus());
-		Assert.assertFalse(dsRequest.isSignatureRequired(userId));
+		Assert.assertFalse(
+			dsRequest.isSignatureRequired(_RECIPIENT_EMAIL_ADDRESS));
 		Assert.assertTrue(dsRequest.isTerminal());
 	}
 
@@ -223,9 +224,10 @@ public class DSRequestManagerTest {
 		DSRequest dsRequest = _dsRequestManager.fetchDSRequest(
 			companyId, fileEntryId);
 
-		Assert.assertTrue(dsRequest.isSignatureRequired(userId));
+		Assert.assertTrue(
+			dsRequest.isSignatureRequired(_RECIPIENT_EMAIL_ADDRESS));
 		Assert.assertFalse(
-			dsRequest.isSignatureRequired(RandomTestUtil.randomLong()));
+			dsRequest.isSignatureRequired(RandomTestUtil.randomString()));
 	}
 
 	private void _addDSRequestObjectEntries(
@@ -288,7 +290,7 @@ public class DSRequestManagerTest {
 					requestObjectDefinition, "dsRequestToDSRequestRecipients"),
 				requestObjectEntry.getObjectEntryId()
 			).put(
-				"emailAddress", "ray.chen@liferay.com"
+				"emailAddress", _RECIPIENT_EMAIL_ADDRESS
 			).put(
 				"name", "Ray Chen"
 			).put(
@@ -348,6 +350,9 @@ public class DSRequestManagerTest {
 
 		return objectField.getName();
 	}
+
+	private static final String _RECIPIENT_EMAIL_ADDRESS =
+		"ray.chen@liferay.com";
 
 	@Inject
 	private ConfigurationProvider _configurationProvider;
