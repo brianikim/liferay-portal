@@ -8,6 +8,9 @@ package com.liferay.digital.signature.request;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.portal.kernel.exception.PortalException;
 
+import java.util.Collection;
+import java.util.Map;
+
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -20,6 +23,9 @@ public interface DSRequestManager {
 			long companyId, long groupId, long userId, DSEnvelope dsEnvelope,
 			long[] fileEntryIds)
 		throws PortalException;
+
+	public Map<Long, String> getRequestStatusesByFileEntryId(
+		long companyId, Collection<Long> fileEntryIds);
 
 	public int sendSignatureReminders(long companyId);
 
