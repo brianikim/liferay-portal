@@ -224,9 +224,9 @@ public class DSRequestManagerTest {
 		DSRequest dsRequest = _dsRequestManager.fetchDSRequest(
 			companyId, fileEntryId);
 
-		Assert.assertTrue(dsRequest.isSignatureRequired(userId));
+		Assert.assertTrue(dsRequest.isSignatureRequired(emailAddress));
 		Assert.assertFalse(
-			dsRequest.isSignatureRequired(RandomTestUtil.randomLong()));
+			dsRequest.isSignatureRequired(RandomTestUtil.randomString()));
 
 		fileEntryId = RandomTestUtil.randomInt();
 
@@ -236,7 +236,7 @@ public class DSRequestManagerTest {
 
 		dsRequest = _dsRequestManager.fetchDSRequest(companyId, fileEntryId);
 
-		Assert.assertFalse(dsRequest.isSignatureRequired(userId));
+		Assert.assertFalse(dsRequest.isSignatureRequired(emailAddress));
 	}
 
 	private void _addDSRequestObjectEntries(
