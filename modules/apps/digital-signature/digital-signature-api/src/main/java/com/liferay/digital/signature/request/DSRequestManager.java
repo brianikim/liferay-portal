@@ -10,6 +10,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -24,8 +25,16 @@ public interface DSRequestManager {
 			long[] fileEntryIds)
 		throws PortalException;
 
+	public Map<Long, Map<Long, String>> getRecipientStatusesByFileEntryId(
+		long companyId, Collection<Long> fileEntryIds);
+
 	public Map<Long, String> getRequestStatusesByFileEntryId(
 		long companyId, Collection<Long> fileEntryIds);
+
+	public int getSignatureRequiredCount(long companyId, long userId);
+
+	public Set<Long> getSignatureRequiredFileEntryIds(
+		long companyId, long userId, Collection<Long> fileEntryIds);
 
 	public void resendDSRequestNotifications(
 		long companyId, long groupId, String providerRequestId);
