@@ -28,6 +28,34 @@ export class DisplayPageTemplatesPage {
 		this.publishButton = page.getByLabel('Publish', {exact: true});
 	}
 
+	async addDefaultTemplate(className: string, site: Site) {
+		const name = `DPT ${getRandomString()}`;
+
+		const {classNameId} =
+			await this.apiHelpers.jsonWebServicesClassName.fetchClassName(
+				className
+			);
+
+		const {layoutPageTemplateEntryId} =
+			await this.apiHelpers.jsonWebServicesLayoutPageTemplateEntry.addDisplayPageLayoutPageTemplateEntry(
+				{
+					classNameId,
+					groupId: String(site.id),
+					name,
+				}
+			);
+
+		await this.apiHelpers.jsonWebServicesLayoutPageTemplateEntry.markAsDefaultDisplayPageLayoutPageTemplateEntry(
+			{layoutPageTemplateEntryId}
+		);
+
+		await this.goto(site.friendlyUrlPath);
+
+		await this.editTemplate(name);
+
+		return name;
+	}
+
 	/**
 	 * Creates the default display page template of an item type and maps a
 	 * Heading fragment to one of its fields, so an item of that type renders
@@ -47,7 +75,7 @@ export class DisplayPageTemplatesPage {
 		pageEditorPage: PageEditorPage;
 		site: Site;
 	}) {
-		const name = await this._addDefaultTemplate(className, site);
+		const name = await this.addDefaultTemplate(className, site);
 
 		await pageEditorPage.addFragment(
 			'Basic Components',
@@ -81,7 +109,7 @@ export class DisplayPageTemplatesPage {
 		pageEditorPage: PageEditorPage;
 		site: Site;
 	}) {
-		const name = await this._addDefaultTemplate(className, site);
+		const name = await this.addDefaultTemplate(className, site);
 
 		for (const {collectionName, fragmentName} of fragments) {
 			await pageEditorPage.addFragment(collectionName, fragmentName);
@@ -378,33 +406,5 @@ export class DisplayPageTemplatesPage {
 			this.page,
 			'Success:The display page template was published successfully.'
 		);
-	}
-
-	private async _addDefaultTemplate(className: string, site: Site) {
-		const name = `DPT ${getRandomString()}`;
-
-		const {classNameId} =
-			await this.apiHelpers.jsonWebServicesClassName.fetchClassName(
-				className
-			);
-
-		const {layoutPageTemplateEntryId} =
-			await this.apiHelpers.jsonWebServicesLayoutPageTemplateEntry.addDisplayPageLayoutPageTemplateEntry(
-				{
-					classNameId,
-					groupId: String(site.id),
-					name,
-				}
-			);
-
-		await this.apiHelpers.jsonWebServicesLayoutPageTemplateEntry.markAsDefaultDisplayPageLayoutPageTemplateEntry(
-			{layoutPageTemplateEntryId}
-		);
-
-		await this.goto(site.friendlyUrlPath);
-
-		await this.editTemplate(name);
-
-		return name;
 	}
 }
