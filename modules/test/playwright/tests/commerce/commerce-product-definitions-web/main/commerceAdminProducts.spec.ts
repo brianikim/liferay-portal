@@ -476,3 +476,43 @@ test(
 		).toHaveText('es-ES');
 	}
 );
+
+test('Publish a simple product', async ({
+	apiHelpers,
+	commerceAdminProductPage,
+	page,
+}) => {
+	const catalog = await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+	const productName = getRandomString();
+
+	try {
+		await commerceAdminProductPage.goto();
+
+		await commerceAdminProductPage.addButton.click();
+		await commerceAdminProductPage.menuItemProductType('Simple').click();
+
+		await commerceAdminProductPage.modalFieldName.fill(productName);
+		await commerceAdminProductPage.modalPlaceHolder.fill(catalog.name);
+		await commerceAdminProductPage.modalMenuItem(catalog.name).click();
+		await commerceAdminProductPage.modalSubmitButton.click();
+
+		await expect(page.getByText(productName)).toBeVisible();
+	}
+	finally {
+		const product = (
+			await apiHelpers.headlessCommerceAdminCatalog.getProducts(
+				new URLSearchParams({
+					filter: `name eq '${productName}'`,
+				})
+			)
+		).items[0];
+
+		if (product) {
+			apiHelpers.data.push({
+				id: product.productId,
+				type: 'product',
+			});
+		}
+	}
+});
