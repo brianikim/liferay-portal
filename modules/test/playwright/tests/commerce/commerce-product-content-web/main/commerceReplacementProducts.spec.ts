@@ -493,3 +493,94 @@ test(
 		).toBeVisible();
 	}
 );
+
+test(
+	'Replacement product information is displayed in a discontinued product details page',
+	{tag: ['@COMMERCE-9347']},
+	async ({apiHelpers, page, productDetailsPage, site}) => {
+		await apiHelpers.headlessCommerceAdminChannel.postChannel({
+			siteGroupId: site.id,
+			type: 'b2b',
+		});
+
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		const {buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id
+		);
+
+		const suffix = getRandomString();
+
+		const discontinuedProductName = `Test Simple Product ${suffix}`;
+		const discontinuedSku = `SKU1002-${suffix}`;
+		const replacementSku = `SKU1001-${suffix}`;
+
+		const replacementProduct =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				name: {en_US: `Test Simple Product Replacement ${suffix}`},
+				productType: 'simple',
+				skus: [
+					{
+						cost: 0,
+						price: 0,
+						published: true,
+						purchasable: true,
+						sku: replacementSku,
+					},
+				],
+			});
+
+		await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+			catalogId: catalog.id,
+			name: {en_US: discontinuedProductName},
+			productType: 'simple',
+			skus: [
+				{
+					cost: 0,
+					discontinued: true,
+					price: 0,
+					published: true,
+					purchasable: true,
+					replacementSkuId: replacementProduct.skus[0].id,
+					sku: discontinuedSku,
+				},
+			],
+		});
+
+		await apiHelpers.headlessDelivery.createSitePage({
+			pageDefinition: getPageDefinition([
+				getWidgetDefinition({
+					id: getRandomString(),
+					widgetName:
+						'com_liferay_commerce_product_content_web_internal_portlet_CPContentPortlet',
+				}),
+			]),
+			siteId: site.id,
+			title: getRandomString(),
+		});
+
+		await performLogout(page);
+		await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+		await page.goto(
+			`/web/${site.name}/p/${discontinuedProductName
+				.toLowerCase()
+				.replace(/ /g, '-')}`,
+			{waitUntil: 'networkidle'}
+		);
+
+		await expect(
+			page.getByText('Discontinued', {exact: true})
+		).toBeVisible();
+		await expect(page.getByText('End of Life')).toBeVisible();
+
+		await expect(productDetailsPage.replacementProductButton).toBeHidden();
+		await expect(
+			productDetailsPage.replacementsTableCell(replacementSku)
+		).toBeHidden();
+	}
+);
+
