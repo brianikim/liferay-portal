@@ -463,6 +463,117 @@ test(
 );
 
 test(
+	'User can see the SKU price on the storefront product details page when an option value is selected',
+	{tag: '@LPD-106244'},
+	async ({
+		apiHelpers,
+		commerceAdminProductPage,
+		globalMenuPage,
+		page,
+		productDetailsPage,
+		site,
+		widgetPagePage,
+	}) => {
+		const layout = await apiHelpers.jsonWebServicesLayout.addLayout({
+			groupId: site.id,
+			title: getRandomString(),
+		});
+
+		await apiHelpers.headlessCommerceAdminChannel.postChannel({
+			siteGroupId: site.id,
+		});
+
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog({
+				name: getRandomString(),
+			});
+
+		const option = await apiHelpers.headlessCommerceAdminCatalog.postOption(
+			'select',
+			'color',
+			'Color',
+			1
+		);
+
+		const productName = 'Product' + getRandomInt();
+
+		const product =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				name: {en_US: productName},
+				productOptions: [
+					{
+						fieldType: 'select',
+						key: 'color',
+						name: {en_US: 'Color'},
+						optionId: option.id,
+						priority: 1,
+						productOptionValues: [
+							{key: 'black', name: {en_US: 'Black'}, priority: 1},
+							{key: 'blue', name: {en_US: 'Blue'}, priority: 2},
+							{key: 'white', name: {en_US: 'White'}, priority: 3},
+						],
+						skuContributor: true,
+					},
+				],
+			});
+
+		await globalMenuPage.goToCommerce('Products');
+
+		await commerceAdminProductPage.gotoProduct(productName);
+
+		await commerceAdminProductPage.generateSkus();
+
+		const basePriceListId =
+			await apiHelpers.headlessCommerceAdminPricing.getBasePriceListId(
+				catalog.id
+			);
+
+		const skus = await apiHelpers.headlessCommerceAdminCatalog
+			.getProduct(product.productId)
+			.then((product) => product.skus);
+
+		const skuPrices = {BLACK: 10, BLUE: 20, WHITE: 30};
+
+		for (const sku of skus) {
+			await apiHelpers.headlessCommerceAdminPricing.postPriceEntry({
+				price: skuPrices[sku.sku],
+				priceListId: basePriceListId.items[0].id,
+				skuId: sku.id,
+			});
+		}
+
+		await page.goto(`/web${site.friendlyUrlPath}${layout.friendlyURL}`);
+
+		await widgetPagePage.addPortlet('Product Details');
+
+		await page.goto(`/web/${site.name}/p/${productName}`);
+
+		await expect(
+			await productDetailsPage.optionSelector('Color')
+		).toBeVisible();
+
+		await productDetailsPage.selectOption('Black', 'Color');
+
+		await expect(
+			await productDetailsPage.priceField('$ 10.00')
+		).toBeVisible();
+
+		await productDetailsPage.selectOption('Blue', 'Color');
+
+		await expect(
+			await productDetailsPage.priceField('$ 20.00')
+		).toBeVisible();
+
+		await productDetailsPage.selectOption('White', 'Color');
+
+		await expect(
+			await productDetailsPage.priceField('$ 30.00')
+		).toBeVisible();
+	}
+);
+
+test(
 	'Unit of measure table is rendered for the resolved combination SKU on the product details page',
 	{tag: '@COMMERCE-12167'},
 	async ({
