@@ -9,6 +9,8 @@ export class CommerceThemeMiniumCatalogPage {
 	readonly accountSelectorAccount: (accountName: string) => Locator;
 	readonly accountSelectorBackButton: Locator;
 	readonly accountSelectorButton: Locator;
+	readonly accountSelectorButtonAccountName: Locator;
+	readonly accountSelectorButtonOrderId: Locator;
 	readonly accountSelectorDropdownMenu: Locator;
 	readonly accountSelectorNoAccountsMessage: Locator;
 	readonly accountSelectorOrdersList: Locator;
@@ -64,6 +66,10 @@ export class CommerceThemeMiniumCatalogPage {
 		this.accountSelectorButton = page
 			.locator('.account-selector-dropdown')
 			.getByRole('button');
+		this.accountSelectorButtonAccountName =
+			this.accountSelectorButton.locator('.account-name');
+		this.accountSelectorButtonOrderId =
+			this.accountSelectorButton.locator('.order-id');
 		this.accountSelectorDropdownMenu = page.locator(
 			'.account-selector-dropdown-menu'
 		);
