@@ -1693,3 +1693,61 @@ for (const variant of [
 	);
 }
 
+test(
+	'The Request a Quote button is visible in the Mini Cart fragment and in the order details page',
+	{tag: ['@COMMERCE-11030']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelDetailsPage,
+		commerceAdminChannelsPage,
+		commerceMiniCartPage,
+		commerceThemeMiniumCatalogPage,
+		orderDetailsPage,
+		page,
+	}) => {
+		const {channel, site} = await miniumSetUp(apiHelpers);
+
+		const layout = await apiHelpers.headlessDelivery.createSitePage({
+			pageDefinition: getPageDefinition([
+				getFragmentDefinition({
+					id: getRandomString(),
+					key: 'COMMERCE_CART_FRAGMENTS-mini-cart',
+				}),
+			]),
+			siteId: site.id,
+			title: getRandomString(),
+		});
+
+		const {buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id
+		);
+
+		await commerceAdminChannelsPage.goto();
+		await (
+			await commerceAdminChannelsPage.channelsTableRowLink(channel.name)
+		).click();
+		await commerceAdminChannelDetailsPage.allowRequestAQuote.click();
+		await commerceAdminChannelDetailsPage.saveButton.click();
+
+		await waitForAlert(page);
+
+		await performLogout(page);
+		await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+		await page.goto(`/web/${site.name}`, {waitUntil: 'networkidle'});
+
+		await commerceThemeMiniumCatalogPage.addToCart('U-Joint');
+
+		await page.goto(`/web${site.friendlyUrlPath}${layout.friendlyUrlPath}`);
+
+		await commerceMiniCartPage.miniCartButton.click();
+
+		await expect(commerceMiniCartPage.requestAQuoteButton).toBeVisible();
+
+		await commerceMiniCartPage.requestAQuoteButton.click();
+
+		await expect(orderDetailsPage.requestAQuoteButton).toBeVisible();
+	}
+);
+
