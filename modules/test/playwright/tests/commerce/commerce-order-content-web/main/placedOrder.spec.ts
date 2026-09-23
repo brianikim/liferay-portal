@@ -2324,3 +2324,85 @@ test(
 		await performLoginViaApi({page, screenName: 'test'});
 	}
 );
+
+test(
+	'Terms are not editable in the placed order details page',
+	{tag: '@LPD-106244-Grouped-4'},
+	async ({
+		apiHelpers,
+		commerceAdminChannelsPage,
+		page,
+		placedOrdersPage,
+		site,
+	}) => {
+		const layout = await apiHelpers.headlessDelivery.createSitePage({
+			pageDefinition: getPageDefinition([
+				getWidgetDefinition({
+					id: getRandomString(),
+					widgetName:
+						'com_liferay_commerce_order_content_web_internal_portlet_CommerceOrderContentPortlet',
+				}),
+			]),
+			siteId: site.id,
+			title: getRandomString(),
+		});
+
+		const channel =
+			await apiHelpers.headlessCommerceAdminChannel.postChannel({
+				siteGroupId: site.id,
+			});
+
+		await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+			channel.name,
+			'B2B'
+		);
+
+		const {account, buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id
+		);
+
+		const deliveryTerm =
+			await apiHelpers.headlessCommerceAdminOrder.postTerm({
+				type: 'delivery-terms',
+			});
+		const paymentTerm =
+			await apiHelpers.headlessCommerceAdminOrder.postTerm({
+				type: 'payment-terms',
+			});
+
+		await apiHelpers.headlessCommerceAdminOrder.postOrder({
+			accountId: account.id,
+			channelId: channel.id,
+			deliveryTermId: deliveryTerm.id,
+			orderStatus: '1',
+			paymentTermId: paymentTerm.id,
+		});
+
+		await performLogout(page);
+		await performLogin(page, buyerUser.alternateName);
+
+		await page.goto(
+			`${liferayConfig.environment.baseUrl}/web${site.friendlyUrlPath}${layout.friendlyUrlPath}`,
+			{waitUntil: 'networkidle'}
+		);
+
+		await expect(placedOrdersPage.table).toBeVisible();
+
+		await placedOrdersPage.viewButton.click();
+
+		for (const term of [deliveryTerm, paymentTerm]) {
+			await expect(
+				page.getByRole('link', {exact: true, name: term.label['en_US']})
+			).toBeVisible();
+		}
+
+		await expect(
+			page
+				.locator(
+					'#portlet_com_liferay_commerce_order_content_web_internal_portlet_CommerceOrderContentPortlet'
+				)
+				.getByText('Edit', {exact: true})
+		).toHaveCount(0);
+	}
+);
