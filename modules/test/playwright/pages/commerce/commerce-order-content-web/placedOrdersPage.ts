@@ -5,12 +5,14 @@
 
 import {FrameLocator, Locator, Page} from '@playwright/test';
 
+import {clickAndExpectToBeVisible} from '../../../utils/clickAndExpectToBeVisible';
 import {CommerceDNDTablePage} from '../commerceDNDTablePage';
 import {CommerceLayoutsPage} from './commerceLayoutsPage';
 
 export class PlacedOrdersPage extends CommerceDNDTablePage {
 	readonly commerceBillingAddress: Locator;
 	readonly configurationIFrame: FrameLocator;
+	readonly configurationIFrameDisplayTemplateSelect: Locator;
 	readonly configurationIFrameSaveButton: Locator;
 	readonly configurationIFrameShowFullAddressToggle: Locator;
 	readonly configurationIFrameShowPhoneNumberToggle: Locator;
@@ -48,6 +50,8 @@ export class PlacedOrdersPage extends CommerceDNDTablePage {
 		this.configurationIFrame = page.frameLocator(
 			'iframe[id="modalIframe"]'
 		);
+		this.configurationIFrameDisplayTemplateSelect =
+			this.configurationIFrame.getByLabel('Display Template');
 		this.configurationIFrameSaveButton = this.configurationIFrame.getByRole(
 			'button',
 			{name: 'Save'}
@@ -141,6 +145,17 @@ export class PlacedOrdersPage extends CommerceDNDTablePage {
 
 		throw new Error(`Cannot locate table row with value ${value}`);
 	};
+
+	async selectDisplayTemplate(displayTemplate: string) {
+		await clickAndExpectToBeVisible({
+			autoClick: true,
+			target: this.configurationIFrame.getByRole('option', {
+				exact: true,
+				name: displayTemplate,
+			}),
+			trigger: this.configurationIFrameDisplayTemplateSelect,
+		});
+	}
 
 	async goto() {
 		await this.layoutsPage.goto();
