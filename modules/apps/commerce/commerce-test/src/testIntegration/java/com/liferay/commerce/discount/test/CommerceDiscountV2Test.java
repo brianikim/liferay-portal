@@ -948,6 +948,102 @@ public class CommerceDiscountV2Test {
 	}
 
 	@Test
+	public void testCommercePercentageDiscountsWithInactiveDiscount()
+		throws Exception {
+
+		frutillaRule.scenario(
+			"When two percentage discounts on the same level are available " +
+				"and the best one is deactivated"
+		).given(
+			"A product with a base price"
+		).and(
+			"Two percentage discounts on the same level targeting the product"
+		).when(
+			"I deactivate the discount with the higher percentage"
+		).then(
+			"The final price is calculated with the remaining discount"
+		);
+
+		CommerceCatalog commerceCatalog =
+			_commerceCatalogLocalService.addCommerceCatalog(
+				null, RandomTestUtil.randomString(),
+				_commerceCurrency.getCode(), LocaleUtil.US.getDisplayLanguage(),
+				ServiceContextTestUtil.getServiceContext(_group.getGroupId()));
+
+		CPInstance cpInstance = CPTestUtil.addCPInstanceFromCatalog(
+			commerceCatalog.getGroupId());
+
+		CPDefinition cpDefinition = cpInstance.getCPDefinition();
+
+		CommercePriceList commercePriceList =
+			_commercePriceListLocalService.fetchCatalogBaseCommercePriceList(
+				commerceCatalog.getGroupId());
+
+		CommercePriceEntry commercePriceEntry =
+			CommercePriceEntryTestUtil.addCommercePriceEntry(
+				StringPool.BLANK, cpDefinition.getCProductId(),
+				cpInstance.getCPInstanceUuid(),
+				commercePriceList.getCommercePriceListId(),
+				BigDecimal.valueOf(50));
+
+		CommerceDiscount commerceDiscount1 =
+			CommerceDiscountTestUtil.addPercentageCommerceDiscount(
+				_group.getGroupId(), BigDecimal.valueOf(20),
+				CommerceDiscountConstants.LEVEL_L1,
+				CommerceDiscountConstants.TARGET_PRODUCTS,
+				cpDefinition.getCPDefinitionId());
+
+		CommerceDiscount commerceDiscount2 =
+			CommerceDiscountTestUtil.addPercentageCommerceDiscount(
+				_group.getGroupId(), BigDecimal.valueOf(30),
+				CommerceDiscountConstants.LEVEL_L1,
+				CommerceDiscountConstants.TARGET_PRODUCTS,
+				cpDefinition.getCPDefinitionId());
+
+		CommerceContext commerceContext = new TestCommerceContext(
+			_accountEntry, _commerceCurrency, _commerceChannel, _user, _group,
+			null);
+
+		CommerceProductPrice commerceProductPrice1 =
+			_commerceProductPriceCalculation.getCommerceProductPrice(
+				cpInstance.getCPInstanceId(), BigDecimal.ONE, StringPool.BLANK,
+				commerceContext);
+
+		BigDecimal expectedPrice1 = _subtractPercentage(
+			commercePriceEntry.getPrice(), commerceDiscount2.getLevel1());
+
+		CommerceMoney finalPriceCommerceMoney1 =
+			commerceProductPrice1.getFinalPrice();
+
+		BigDecimal actualPrice1 = finalPriceCommerceMoney1.getPrice();
+
+		Assert.assertEquals(
+			expectedPrice1.stripTrailingZeros(),
+			actualPrice1.stripTrailingZeros());
+
+		commerceDiscount2.setActive(false);
+
+		_commerceDiscountLocalService.updateCommerceDiscount(commerceDiscount2);
+
+		CommerceProductPrice commerceProductPrice2 =
+			_commerceProductPriceCalculation.getCommerceProductPrice(
+				cpInstance.getCPInstanceId(), BigDecimal.ONE, StringPool.BLANK,
+				commerceContext);
+
+		BigDecimal expectedPrice2 = _subtractPercentage(
+			commercePriceEntry.getPrice(), commerceDiscount1.getLevel1());
+
+		CommerceMoney finalPriceCommerceMoney2 =
+			commerceProductPrice2.getFinalPrice();
+
+		BigDecimal actualPrice2 = finalPriceCommerceMoney2.getPrice();
+
+		Assert.assertEquals(
+			expectedPrice2.stripTrailingZeros(),
+			actualPrice2.stripTrailingZeros());
+	}
+
+	@Test
 	public void testCouponCodeDiscount() throws Exception {
 		frutillaRule.scenario(
 			"Discounts can be applied by coupon code"
