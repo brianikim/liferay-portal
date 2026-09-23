@@ -385,3 +385,81 @@ test(
 		});
 	}
 );
+
+test(
+	'Create new specification label and specification group',
+	{tag: '@LPD-106244-Grouped-1'},
+	async ({apiHelpers, commerceSpecificationsPage, globalMenuPage}) => {
+		const specificationTitle = getRandomString();
+		const specificationGroupTitle = getRandomString();
+
+		try {
+			await globalMenuPage.goToCommerce('Specifications');
+
+			await commerceSpecificationsPage.createNewSpecificationsProduct.click();
+			await commerceSpecificationsPage.waitForKey(specificationTitle);
+			await commerceSpecificationsPage.addDescriptionSpecifications.fill(
+				`${specificationTitle} Description`
+			);
+			await commerceSpecificationsPage.saveButton.click();
+
+			await expect(
+				commerceSpecificationsPage.successMessage
+			).toBeVisible();
+
+			await commerceSpecificationsPage.goBack.click();
+			await commerceSpecificationsPage
+				.specificationNameLink(specificationTitle)
+				.click();
+
+			await expect(commerceSpecificationsPage.keyContent).toHaveValue(
+				specificationTitle
+			);
+
+			await globalMenuPage.goToCommerce('Specifications');
+			await commerceSpecificationsPage.goToSpecificationGroup.click();
+			await commerceSpecificationsPage.createNewSpecificationsProductGroup.click();
+			await commerceSpecificationsPage.groupTitle.fill(
+				specificationGroupTitle
+			);
+			await commerceSpecificationsPage.addDescriptionSpecificationsGroup.fill(
+				`${specificationGroupTitle} Description`
+			);
+			await commerceSpecificationsPage.saveButton.click();
+
+			await expect(
+				commerceSpecificationsPage.successMessage
+			).toBeVisible();
+		}
+		finally {
+			const specifications =
+				await apiHelpers.headlessCommerceAdminCatalog.getSpecifications();
+
+			for (let i = 0; i < specifications.totalCount; i++) {
+				if (
+					specifications.items[i].title.en_US === specificationTitle
+				) {
+					apiHelpers.data.push({
+						id: specifications.items[i].id,
+						type: 'specification',
+					});
+				}
+			}
+
+			const optionCategory =
+				await apiHelpers.headlessCommerceAdminCatalog.getOptionCategories();
+
+			for (let i = 0; i < optionCategory.totalCount; i++) {
+				if (
+					optionCategory.items[i].title.en_US ===
+					specificationGroupTitle
+				) {
+					apiHelpers.data.push({
+						id: optionCategory.items[i].id,
+						type: 'optionCategory',
+					});
+				}
+			}
+		}
+	}
+);
