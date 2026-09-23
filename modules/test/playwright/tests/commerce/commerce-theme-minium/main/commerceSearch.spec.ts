@@ -12,8 +12,11 @@ import {globalMenuPagesTest} from '../../../../fixtures/globalMenuPagesTest';
 import {loginTest} from '../../../../fixtures/loginTest';
 import {getRandomInt} from '../../../../utils/getRandomInt';
 import getRandomString from '../../../../utils/getRandomString';
-import performLogin, {performLogout} from '../../../../utils/performLogin';
-import {miniumSetUp} from '../../utils/commerce';
+import performLogin, {
+	performLoginViaApi,
+	performLogout,
+} from '../../../../utils/performLogin';
+import {enableGuestPageView, miniumSetUp} from '../../utils/commerce';
 
 export const test = mergeTests(
 	apiHelpersTest,
@@ -277,6 +280,67 @@ test('COMMERCE-6322 As a buyer, I want to be able to search an entry in Catalog 
 		commerceThemeMiniumCatalogPage.productLink('Ball Joints')
 	).toBeVisible();
 });
+
+test(
+	'COMMERCE-11398 As a B2X site guest user, I want to be able to search for a product',
+	{tag: ['@COMMERCE-11398', '@LPD-106244']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelsPage,
+		commerceThemeMiniumCatalogPage,
+		page,
+	}) => {
+		test.setTimeout(120000);
+
+		const {channel, site} = await miniumSetUp(apiHelpers);
+
+		await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+			channel.name,
+			'B2X'
+		);
+
+		await enableGuestPageView(page, site);
+
+		try {
+			await performLogout(page);
+
+			await page.goto(`/web${site.friendlyUrlPath}/catalog`, {
+				waitUntil: 'networkidle',
+			});
+
+			await commerceThemeMiniumCatalogPage.catalogSearch.fill('U-Joint');
+			await commerceThemeMiniumCatalogPage.catalogSearch.press('Enter');
+
+			await page.waitForLoadState('networkidle');
+
+			await expect(
+				commerceThemeMiniumCatalogPage.productLink('U-Joint')
+			).toBeVisible();
+			await expect(
+				commerceThemeMiniumCatalogPage.productLink('Ball Joints')
+			).toBeVisible();
+			await expect(page.locator('.product-card')).toHaveCount(2);
+
+			await commerceThemeMiniumCatalogPage.catalogSearch.fill(
+				'"U-Joint"'
+			);
+			await commerceThemeMiniumCatalogPage.catalogSearch.press('Enter');
+
+			await page.waitForLoadState('networkidle');
+
+			await expect(
+				commerceThemeMiniumCatalogPage.productLink('U-Joint')
+			).toBeVisible();
+			await expect(
+				commerceThemeMiniumCatalogPage.productLink('Ball Joints')
+			).toHaveCount(0);
+			await expect(page.locator('.product-card')).toHaveCount(1);
+		}
+		finally {
+			await performLoginViaApi({page, screenName: 'test'});
+		}
+	}
+);
 
 test('COMMERCE-6326 As a buyer, I want to be able to search an entry in All Content using Global Search and the results should be visible on Search page', async ({
 	apiHelpers,
