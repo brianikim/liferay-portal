@@ -8,14 +8,19 @@
 import {expect, mergeTests} from '@playwright/test';
 
 import {commercePagesTest} from '../../../../fixtures/commercePagesTest';
+import {customFieldsPagesTest} from '../../../../fixtures/customFieldsPagesTest';
 import {dataApiHelpersTest} from '../../../../fixtures/dataApiHelpersTest';
+import {globalMenuPagesTest} from '../../../../fixtures/globalMenuPagesTest';
 import {loginTest} from '../../../../fixtures/loginTest';
+import {TCustomField} from '../../../../helpers/CustomFieldTypesHelper';
 import getRandomString from '../../../../utils/getRandomString';
 import {waitForAlert} from '../../../../utils/waitForAlert';
 
 export const test = mergeTests(
 	commercePagesTest,
+	customFieldsPagesTest,
 	dataApiHelpersTest,
+	globalMenuPagesTest,
 	loginTest()
 );
 
@@ -238,5 +243,38 @@ test(
 		await commerceAdminProductDetailsProductOptionsPage.deleteMenuItem.click();
 
 		await waitForAlert(page);
+	}
+);
+
+test(
+	'Create an option from the standalone options portlet',
+	{tag: '@LPD-106244-Grouped-3'},
+	async ({apiHelpers, commerceAdminOptionsPage, globalMenuPage}) => {
+		const optionName = 'Color-' + getRandomString();
+		const optionKey = 'color-' + getRandomString();
+
+		try {
+			await globalMenuPage.goToCommerce('Options');
+
+			await commerceAdminOptionsPage.createOption(
+				optionName,
+				'Text',
+				optionKey
+			);
+
+			await expect(commerceAdminOptionsPage.optionNameInput).toHaveValue(
+				optionName
+			);
+		}
+		finally {
+			const options =
+				await apiHelpers.headlessCommerceAdminCatalog.getOptions();
+
+			for (const option of options?.items ?? []) {
+				if (option.key === optionKey) {
+					apiHelpers.data.push({id: option.id, type: 'option'});
+				}
+			}
+		}
 	}
 );
