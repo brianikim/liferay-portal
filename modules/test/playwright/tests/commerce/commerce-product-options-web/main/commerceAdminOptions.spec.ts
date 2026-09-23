@@ -8,14 +8,19 @@
 import {expect, mergeTests} from '@playwright/test';
 
 import {commercePagesTest} from '../../../../fixtures/commercePagesTest';
+import {customFieldsPagesTest} from '../../../../fixtures/customFieldsPagesTest';
 import {dataApiHelpersTest} from '../../../../fixtures/dataApiHelpersTest';
+import {globalMenuPagesTest} from '../../../../fixtures/globalMenuPagesTest';
 import {loginTest} from '../../../../fixtures/loginTest';
+import {TCustomField} from '../../../../helpers/CustomFieldTypesHelper';
 import getRandomString from '../../../../utils/getRandomString';
 import {waitForAlert} from '../../../../utils/waitForAlert';
 
 export const test = mergeTests(
 	commercePagesTest,
+	customFieldsPagesTest,
 	dataApiHelpersTest,
+	globalMenuPagesTest,
 	loginTest()
 );
 
@@ -236,5 +241,147 @@ test(
 		await commerceAdminProductDetailsProductOptionsPage.deleteMenuItem.click();
 
 		await waitForAlert(page);
+	}
+);
+
+test(
+	'Create an option from the standalone options portlet',
+	{tag: ['@LPD-106244']},
+	async ({apiHelpers, commerceAdminOptionsPage, globalMenuPage}) => {
+		const optionName = 'Color-' + getRandomString();
+		const optionKey = 'color-' + getRandomString();
+
+		try {
+			await globalMenuPage.goToCommerce('Options');
+
+			await commerceAdminOptionsPage.createOption(
+				optionName,
+				'Text',
+				optionKey
+			);
+
+			await expect(commerceAdminOptionsPage.optionNameInput).toHaveValue(
+				optionName
+			);
+		}
+		finally {
+			const options =
+				await apiHelpers.headlessCommerceAdminCatalog.getOptions();
+
+			for (const option of options?.items ?? []) {
+				if (option.key === optionKey) {
+					apiHelpers.data.push({id: option.id, type: 'option'});
+				}
+			}
+		}
+	}
+);
+
+test(
+	'Remove an option from the standalone options portlet',
+	{tag: ['@COMMERCE-6280', '@LPD-106244']},
+	async ({apiHelpers, commerceAdminOptionsPage, globalMenuPage}) => {
+		const optionName = 'Color-' + getRandomString();
+		const optionKey = 'color-' + getRandomString();
+
+		try {
+			await globalMenuPage.goToCommerce('Options');
+
+			await commerceAdminOptionsPage.createOption(
+				optionName,
+				'Select from List',
+				optionKey
+			);
+
+			await globalMenuPage.goToCommerce('Options');
+
+			await commerceAdminOptionsPage.deleteOption(optionName);
+
+			await expect(
+				commerceAdminOptionsPage.optionLink(optionName)
+			).toBeHidden();
+		}
+		finally {
+			const options =
+				await apiHelpers.headlessCommerceAdminCatalog.getOptions();
+
+			for (const option of options?.items ?? []) {
+				if (option.key === optionKey) {
+					apiHelpers.data.push({id: option.id, type: 'option'});
+				}
+			}
+		}
+	}
+);
+
+test(
+	'Custom fields can be returned from the option value API',
+	{tag: ['@COMMERCE-11715', '@LPD-106244']},
+	async ({
+		addCustomFieldPage,
+		apiHelpers,
+		commerceAdminOptionsPage,
+		globalMenuPage,
+		viewAttributesPage,
+	}) => {
+		const customFieldName = 'CF-' + getRandomString();
+		const customFieldValue = 'Test Custom Value';
+		const optionValueName = 'value1-' + getRandomString();
+
+		const customField: TCustomField = {
+			fieldName: customFieldName,
+			fieldType: 'inputField',
+			resource: 'Product Option Value',
+		};
+
+		const option = await apiHelpers.headlessCommerceAdminCatalog.postOption(
+			'select',
+			'option-' + getRandomString(),
+			'Option-' + getRandomString(),
+			1
+		);
+
+		const optionValue =
+			await apiHelpers.headlessCommerceAdminCatalog.postOptionValue(
+				option.id,
+				'value1-' + getRandomString(),
+				optionValueName,
+				1
+			);
+
+		try {
+			await addCustomFieldPage.addCustomField(customField);
+
+			await globalMenuPage.goToCommerce('Options');
+
+			await commerceAdminOptionsPage
+				.optionLink(option.name.en_US)
+				.click();
+
+			await commerceAdminOptionsPage.setOptionValueCustomField(
+				optionValueName,
+				customFieldName,
+				customFieldValue
+			);
+
+			const optionValues =
+				await apiHelpers.headlessCommerceAdminCatalog.getOptionValues(
+					option.id
+				);
+
+			const returnedOptionValue = optionValues.items.find(
+				(item: {id: number}) => item.id === optionValue.id
+			);
+
+			expect(JSON.stringify(returnedOptionValue.customFields)).toContain(
+				customFieldValue
+			);
+		}
+		finally {
+			await viewAttributesPage.deleteCustomField(
+				customFieldName,
+				'Product Option Value'
+			);
+		}
 	}
 );

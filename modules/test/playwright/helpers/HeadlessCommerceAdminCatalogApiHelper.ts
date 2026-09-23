@@ -355,6 +355,12 @@ export class HeadlessCommerceAdminCatalogApiHelper {
 		);
 	}
 
+	async getOptionValues(optionId: string) {
+		return this.apiHelpers.get(
+			`${this.apiHelpers.baseUrl}${this.basePath}/options/${optionId}/optionValues`
+		);
+	}
+
 	async getPins(productId: number) {
 		return this.apiHelpers.get(
 			`${this.apiHelpers.baseUrl}${this.basePath}/products/${productId}/pins`
@@ -609,6 +615,26 @@ export class HeadlessCommerceAdminCatalogApiHelper {
 		}
 
 		return postOption;
+	}
+
+	async postOptionValue(
+		optionId: string,
+		key: string = 'key-' + getRandomInt(),
+		name: string = 'OptionValue' + getRandomInt(),
+		priority: number = getRandomInt()
+	) {
+		return this.apiHelpers.post(
+			`${this.apiHelpers.baseUrl}${this.basePath}/options/${optionId}/optionValues`,
+			{
+				data: {
+					key,
+					name: {
+						en_US: name,
+					},
+					priority,
+				},
+			}
+		);
 	}
 
 	async postOptionCategory(
