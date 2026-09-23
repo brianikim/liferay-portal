@@ -196,3 +196,88 @@ test(
 		await expect(commerceSpecificationsPage.visibleToggle).toBeChecked();
 	}
 );
+
+test(
+	'Create new specification label and specification group',
+	{tag: ['@COMMERCE-4052', '@LPD-106244']},
+	async ({apiHelpers, commerceSpecificationsPage, globalMenuPage}) => {
+		const specificationTitle = getRandomString();
+		const specificationGroupTitle = getRandomString();
+
+		try {
+
+			// Create a specification label
+
+			await globalMenuPage.goToCommerce('Specifications');
+
+			await commerceSpecificationsPage.createNewSpecificationsProduct.click();
+			await commerceSpecificationsPage.waitForKey(specificationTitle);
+			await commerceSpecificationsPage.addDescriptionSpecifications.fill(
+				`${specificationTitle} Description`
+			);
+			await commerceSpecificationsPage.saveButton.click();
+
+			await expect(
+				commerceSpecificationsPage.successMessage
+			).toBeVisible();
+
+			// Reopen the specification label and verify its key
+
+			await commerceSpecificationsPage.goBack.click();
+			await commerceSpecificationsPage
+				.specificationNameLink(specificationTitle)
+				.click();
+
+			await expect(commerceSpecificationsPage.keyContent).toHaveValue(
+				specificationTitle
+			);
+
+			// Create a specification group
+
+			await globalMenuPage.goToCommerce('Specifications');
+			await commerceSpecificationsPage.goToSpecificationGroup.click();
+			await commerceSpecificationsPage.createNewSpecificationsProductGroup.click();
+			await commerceSpecificationsPage.addNewProductSpecificationsGroup.fill(
+				specificationGroupTitle
+			);
+			await commerceSpecificationsPage.addDescriptionSpecificationsGroup.fill(
+				`${specificationGroupTitle} Description`
+			);
+			await commerceSpecificationsPage.saveButton.click();
+
+			await expect(
+				commerceSpecificationsPage.successMessage
+			).toBeVisible();
+		}
+		finally {
+			const specifications =
+				await apiHelpers.headlessCommerceAdminCatalog.getSpecifications();
+
+			for (let i = 0; i < specifications.totalCount; i++) {
+				if (
+					specifications.items[i].title.en_US === specificationTitle
+				) {
+					apiHelpers.data.push({
+						id: specifications.items[i].id,
+						type: 'specification',
+					});
+				}
+			}
+
+			const optionCategory =
+				await apiHelpers.headlessCommerceAdminCatalog.getOptionCategories();
+
+			for (let i = 0; i < optionCategory.totalCount; i++) {
+				if (
+					optionCategory.items[i].title.en_US ===
+					specificationGroupTitle
+				) {
+					apiHelpers.data.push({
+						id: optionCategory.items[i].id,
+						type: 'optionCategory',
+					});
+				}
+			}
+		}
+	}
+);
