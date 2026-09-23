@@ -68,6 +68,7 @@ import {CommerceAdminProductDetailsProductRelationsPage} from '../pages/commerce
 import {CommerceAdminProductDetailsSkusPage} from '../pages/commerce/commerce-product-definitions-web/commerceAdminProductDetailsSkusPage';
 import {CommerceAdminProductDetailsVisibilityPage} from '../pages/commerce/commerce-product-definitions-web/commerceAdminProductDetailsVisibilityPage';
 import {CommerceAdminProductPage} from '../pages/commerce/commerce-product-definitions-web/commerceAdminProductPage';
+import {CommerceAdminOptionsPage} from '../pages/commerce/commerce-product-options-web/commerceAdminOptionsPage';
 import {CommerceSpecificationsPage} from '../pages/commerce/commerce-product-options-web/commerceSpecificationsPage';
 import {CommerceAdminShipmentsPage} from '../pages/commerce/commerce-shipment-web/commerceAdminShipmentsPage';
 import {TermsAndConditionDetailsPage} from '../pages/commerce/commerce-term-web/termsAndConditionDetailsPage';
@@ -103,6 +104,7 @@ const commercePagesTest = test.extend<{
 	commerceAdminHealthCheckPage: CommerceAdminHealthCheckPage;
 	commerceAdminInventoryItemPage: CommerceAdminInventoryItemPage;
 	commerceAdminInventoryPage: CommerceAdminInventoryPage;
+	commerceAdminOptionsPage: CommerceAdminOptionsPage;
 	commerceAdminOrderAttachmentsPage: CommerceAdminOrderAttachmentsPage;
 	commerceAdminOrderDetailsPage: CommerceAdminOrderDetailsPage;
 	commerceAdminOrderNotesPage: CommerceAdminOrderNotesPage;
@@ -222,6 +224,9 @@ const commercePagesTest = test.extend<{
 	},
 	commerceAdminInventoryPage: async ({page}, use) => {
 		await use(new CommerceAdminInventoryPage(page));
+	},
+	commerceAdminOptionsPage: async ({page}, use) => {
+		await use(new CommerceAdminOptionsPage(page));
 	},
 	commerceAdminOrderAttachmentsPage: async ({page}, use) => {
 		await use(new CommerceAdminOrderAttachmentsPage(page));
