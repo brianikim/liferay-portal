@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import {expect, mergeTests} from '@playwright/test';
+import {Page, expect, mergeTests} from '@playwright/test';
 
 import {accountsPagesTest} from '../../../../fixtures/accountsPagesTest';
 import {commercePagesTest} from '../../../../fixtures/commercePagesTest';
@@ -19,19 +19,30 @@ import {pageViewModePagesTest} from '../../../../fixtures/pageViewModePagesTest'
 import {productMenuPageTest} from '../../../../fixtures/productMenuPageTest';
 import {systemSettingsPageTest} from '../../../../fixtures/systemSettingsPageTest';
 import {DataApiHelpers} from '../../../../helpers/ApiHelpers';
+import {TRole} from '../../../../helpers/HeadlessAdminUserApiHelper';
 import {liferayConfig} from '../../../../liferay.config';
+import {CommerceAdminChannelDetailsPage} from '../../../../pages/commerce/commerce-channel-web/commerceAdminChannelDetailsPage';
+import {CommerceAdminChannelsPage} from '../../../../pages/commerce/commerce-channel-web/commerceAdminChannelsPage';
+import {CheckoutPage} from '../../../../pages/commerce/commerce-checkout-web/checkoutPage';
+import {OrderDetailsPage} from '../../../../pages/commerce/commerce-order-content-web/orderDetailsPage';
+import {PendingOrdersPage} from '../../../../pages/commerce/commerce-order-content-web/pendingOrdersPage';
 import {getRandomInt} from '../../../../utils/getRandomInt';
 import getRandomString from '../../../../utils/getRandomString';
 import {
 	performLoginViaApi,
 	performLogout,
+	performUserSwitch,
 	userData,
 } from '../../../../utils/performLogin';
 import {waitForAlert} from '../../../../utils/waitForAlert';
 import getFragmentDefinition from '../../../layout-content-page-editor-web/main/utils/getFragmentDefinition';
 import getPageDefinition from '../../../layout-content-page-editor-web/main/utils/getPageDefinition';
 import getWidgetDefinition from '../../../layout-content-page-editor-web/main/utils/getWidgetDefinition';
-import {createAccountWithBuyerUser, miniumSetUp} from '../../utils/commerce';
+import {
+	apiStorefrontSetUp,
+	createAccountWithBuyerUser,
+	miniumSetUp,
+} from '../../utils/commerce';
 import {getDateFormatted, setFutureDate} from '../../utils/date';
 
 export const test = mergeTests(
@@ -52,6 +63,192 @@ export const test = mergeTests(
 	productMenuPageTest,
 	systemSettingsPageTest
 );
+
+async function setUpTermsCheckout({
+	apiHelpers,
+	checkoutPage,
+	commerceAdminChannelDetailsPage,
+	commerceAdminChannelsPage,
+	orderDetailsPage,
+	page,
+	pendingOrdersPage,
+	rolePermissions,
+	termTypes,
+}: {
+	apiHelpers: DataApiHelpers;
+	checkoutPage: CheckoutPage;
+	commerceAdminChannelDetailsPage: CommerceAdminChannelDetailsPage;
+	commerceAdminChannelsPage: CommerceAdminChannelsPage;
+	orderDetailsPage: OrderDetailsPage;
+	page: Page;
+	pendingOrdersPage: PendingOrdersPage;
+	rolePermissions?: TRole['rolePermissions'];
+	termTypes: Array<'delivery-terms' | 'payment-terms'>;
+}) {
+	const {channel, product, site} = await apiStorefrontSetUp(apiHelpers, [
+		{
+			title: 'Checkout',
+			widgetName:
+				'com_liferay_commerce_checkout_web_internal_portlet_CommerceCheckoutPortlet',
+		},
+		{
+			title: 'Pending Orders',
+			widgetName:
+				'com_liferay_commerce_order_content_web_internal_portlet_CommerceOpenOrderContentPortlet',
+		},
+	]);
+
+	await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+		channel.name,
+		'B2B'
+	);
+
+	await waitForAlert(page);
+
+	await (
+		await commerceAdminChannelDetailsPage.generalCommerceAdminChannelTableLink(
+			'Flat Rate'
+		)
+	).click();
+	await commerceAdminChannelDetailsPage.activateChannelConfiguration(
+		'Flat Rate',
+		'Shipping Methods'
+	);
+	await commerceAdminChannelDetailsPage.addFlatRateShippingOption(
+		'Standard Delivery'
+	);
+
+	const terms = {};
+
+	for (const termType of termTypes) {
+		terms[termType] = [
+			await apiHelpers.headlessCommerceAdminOrder.postTerm({
+				type: termType,
+			}),
+			await apiHelpers.headlessCommerceAdminOrder.postTerm({
+				type: termType,
+			}),
+		];
+
+		if (termType === 'payment-terms') {
+			await commerceAdminChannelsPage.goto();
+
+			await (
+				await commerceAdminChannelsPage.channelsTableRowLink(
+					channel.name
+				)
+			).click();
+			await commerceAdminChannelDetailsPage.activateChannelConfiguration(
+				'Money Order',
+				'Payment Methods'
+			);
+		}
+
+		for (const term of terms[termType]) {
+			if (termType === 'delivery-terms') {
+				await commerceAdminChannelsPage.addFlatRateDeliveryTermEligibility(
+					commerceAdminChannelDetailsPage,
+					channel.name,
+					term.label['en_US']
+				);
+			}
+			else {
+				await commerceAdminChannelsPage.addMoneyOrderPaymentTermEligibility(
+					commerceAdminChannelDetailsPage,
+					channel.name,
+					term.label['en_US']
+				);
+			}
+		}
+	}
+
+	let account: {id?: number};
+	let buyerUser: {alternateName?: string};
+
+	if (rolePermissions) {
+		account = await apiHelpers.headlessAdminUser.postAccount({
+			name: 'Commerce Account ' + getRandomString(),
+			type: 'business',
+		});
+
+		const role = await apiHelpers.headlessAdminUser.postRole({
+			name: 'Test Buyer ' + getRandomString(),
+			rolePermissions,
+		});
+
+		const user = await apiHelpers.headlessAdminUser.postUserAccount();
+
+		userData[user.alternateName] = {
+			name: user.givenName,
+			password: 'test',
+			surname: user.familyName,
+		};
+
+		await apiHelpers.headlessAdminUser.assignUserToAccountByEmailAddress(
+			account.id,
+			[user.emailAddress]
+		);
+
+		const siteMemberRole =
+			await apiHelpers.headlessAdminUser.getRoleByName('Site Member');
+
+		await apiHelpers.headlessAdminUser.assignUserToSite(
+			siteMemberRole.id,
+			site.id,
+			user.id
+		);
+
+		await apiHelpers.headlessAdminUser.postRoleByExternalReferenceCodeUserAccountAssociation(
+			role.externalReferenceCode,
+			user.id
+		);
+
+		buyerUser = user;
+	}
+	else {
+		({account, buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id
+		));
+	}
+
+	const cart = await apiHelpers.headlessCommerceDeliveryCart.postCart(
+		{
+			accountId: account.id,
+			cartItems: [
+				{
+					options: '[]',
+					quantity: 1,
+					skuId: product.skus[0].id,
+				},
+			],
+		},
+		channel.id
+	);
+
+	await performUserSwitch(page, buyerUser.alternateName);
+
+	await pendingOrdersPage.gotoOrder(site.friendlyUrlPath, cart.id);
+
+	await orderDetailsPage.checkoutButton.click();
+
+	await checkoutPage.addAddress({
+		city: 'Test City',
+		countryLabel: 'United States',
+		name: 'Test Name',
+		regionLabel: 'Florida',
+		street: 'Test Street',
+		zip: '12345',
+	});
+	await checkoutPage.continueButton.click();
+
+	await page.waitForURL((url) => url.href.includes('shipping-method'));
+
+	await checkoutPage.shippingMethodRadio('Standard Delivery').check();
+	await checkoutPage.continueButton.click();
+
+	return terms;
+}
 
 test(
 	'Checkout widget configuration to display full addresses and phone number',
@@ -2720,3 +2917,80 @@ test(
 		});
 	}
 );
+
+for (const variant of [
+	{
+		linkKey: 'deliveryTermLink',
+		name: 'delivery',
+		optionKey: 'deliveryTermOption',
+		termType: 'delivery-terms',
+	},
+	{
+		linkKey: 'paymentTermLink',
+		name: 'payment',
+		optionKey: 'paymentTermOption',
+		termType: 'payment-terms',
+	},
+] as const) {
+	test(
+		`Buyer can view every eligible ${variant.name} term and change it before completing checkout`,
+		{tag: '@LPD-106244-Grouped-4'},
+		async ({
+			apiHelpers,
+			checkoutPage,
+			commerceAdminChannelDetailsPage,
+			commerceAdminChannelsPage,
+			orderDetailsPage,
+			page,
+			pendingOrdersPage,
+		}) => {
+			test.setTimeout(600000);
+
+			const terms = await setUpTermsCheckout({
+				apiHelpers,
+				checkoutPage,
+				commerceAdminChannelDetailsPage,
+				commerceAdminChannelsPage,
+				orderDetailsPage,
+				page,
+				pendingOrdersPage,
+				termTypes: [variant.termType],
+			});
+
+			const [term1, term2] = terms[variant.termType];
+
+			await page.waitForURL((url) => url.href.includes(variant.termType));
+
+			for (const term of [term1, term2]) {
+				await expect(
+					checkoutPage[variant.optionKey](term.label['en_US'])
+				).toBeVisible();
+			}
+
+			await checkoutPage[variant.optionKey](term1.label['en_US']).check();
+			await checkoutPage.continueButton.click();
+
+			await page.waitForURL((url) => url.href.includes('order-summary'));
+
+			await expect(
+				checkoutPage[variant.linkKey](term1.label['en_US'])
+			).toBeVisible();
+
+			await checkoutPage.previousButton.click();
+
+			await page.waitForURL((url) => url.href.includes(variant.termType));
+
+			await checkoutPage[variant.optionKey](term2.label['en_US']).check();
+			await checkoutPage.continueButton.click();
+
+			await page.waitForURL((url) => url.href.includes('order-summary'));
+
+			await expect(
+				checkoutPage[variant.linkKey](term2.label['en_US'])
+			).toBeVisible();
+			await expect(
+				checkoutPage[variant.linkKey](term1.label['en_US'])
+			).toHaveCount(0);
+		}
+	);
+}
