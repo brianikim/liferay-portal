@@ -11,6 +11,7 @@ import {dataApiHelpersTest} from '../../../../fixtures/dataApiHelpersTest';
 import {globalMenuPagesTest} from '../../../../fixtures/globalMenuPagesTest';
 import {isolatedSiteTest} from '../../../../fixtures/isolatedSiteTest';
 import {loginTest} from '../../../../fixtures/loginTest';
+import {clickAndExpectToBeVisible} from '../../../../utils/clickAndExpectToBeVisible';
 import {getRandomInt} from '../../../../utils/getRandomInt';
 import getRandomString from '../../../../utils/getRandomString';
 import {
@@ -1548,5 +1549,129 @@ test(
 				await expect(row).toContainText(value);
 			}
 		});
+	}
+);
+
+test(
+	'Admin can change the delivery and payment terms attached to an order',
+	{tag: '@LPD-106244-Grouped-4'},
+	async ({
+		apiHelpers,
+		commerceAdminOrderDetailsPage,
+		commerceAdminOrdersPage,
+		site,
+	}) => {
+		const channel =
+			await apiHelpers.headlessCommerceAdminChannel.postChannel({
+				siteGroupId: site.id,
+			});
+
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		const product =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				name: {en_US: 'Product ' + getRandomString()},
+			});
+
+		const productSkus = await apiHelpers.headlessCommerceAdminCatalog
+			.getProduct(product.productId)
+			.then((product) => {
+				return product.skus;
+			});
+
+		const account = await apiHelpers.headlessAdminUser.postAccount({
+			name: getRandomString(),
+			type: 'business',
+		});
+
+		const address =
+			await apiHelpers.headlessCommerceAdminAccount.postAddress(
+				account.id,
+				{regionISOCode: 'AL'}
+			);
+
+		const deliveryTerm1 =
+			await apiHelpers.headlessCommerceAdminOrder.postTerm({
+				type: 'delivery-terms',
+			});
+		const deliveryTerm2 =
+			await apiHelpers.headlessCommerceAdminOrder.postTerm({
+				type: 'delivery-terms',
+			});
+		const paymentTerm1 =
+			await apiHelpers.headlessCommerceAdminOrder.postTerm({
+				type: 'payment-terms',
+			});
+		const paymentTerm2 =
+			await apiHelpers.headlessCommerceAdminOrder.postTerm({
+				type: 'payment-terms',
+			});
+
+		const order = await apiHelpers.headlessCommerceAdminOrder.postOrder({
+			accountId: account.id,
+			billingAddressId: address.id,
+			channelId: channel.id,
+			deliveryTermId: deliveryTerm1.id,
+			orderItems: [
+				{
+					quantity: 2,
+					skuId: productSkus[0].id,
+				},
+			],
+			orderStatus: '1',
+			paymentTermId: paymentTerm1.id,
+			shippingAddressId: address.id,
+		});
+
+		await commerceAdminOrdersPage.goto();
+
+		await (
+			await commerceAdminOrdersPage.tableRowLink({
+				colIndex: 1,
+				rowValue: order.id,
+			})
+		).click();
+
+		for (const {label, newTerm, oldTerm, select} of [
+			{
+				label: 'Payment Terms',
+				newTerm: paymentTerm2,
+				oldTerm: paymentTerm1,
+				select: commerceAdminOrderDetailsPage.selectPaymentTerms,
+			},
+			{
+				label: 'Delivery Terms',
+				newTerm: deliveryTerm2,
+				oldTerm: deliveryTerm1,
+				select: commerceAdminOrderDetailsPage.selectDeliveryTerms,
+			},
+		]) {
+			await expect(
+				await commerceAdminOrderDetailsPage.orderDetailsEntryDescription(
+					label
+				)
+			).toContainText(oldTerm.label['en_US']);
+
+			await clickAndExpectToBeVisible({
+				target: select,
+				timeout: 5000,
+				trigger:
+					await commerceAdminOrderDetailsPage.editEntryActionLink(
+						`${label} Edit`,
+						'Edit'
+					),
+			});
+
+			await select.selectOption(newTerm.id.toString());
+			await commerceAdminOrderDetailsPage.submitModalButton.click();
+
+			await expect(
+				await commerceAdminOrderDetailsPage.orderDetailsEntryDescription(
+					label
+				)
+			).toContainText(newTerm.label['en_US']);
+		}
 	}
 );
