@@ -528,6 +528,151 @@ test(
 	}
 );
 
+test(
+	'Mini Cart fragment updates following Account Selector changes',
+	{tag: ['@COMMERCE-10947']},
+	async ({
+		apiHelpers,
+		commerceMiniCartPage,
+		commerceThemeMiniumCatalogPage,
+		page,
+	}) => {
+		const {channel, site} = await miniumSetUp(apiHelpers);
+
+		const firstAccountName = `Commerce Account 1 ${getRandomString()}`;
+		const secondAccountName = `Commerce Account 2 ${getRandomString()}`;
+
+		const {account: firstAccount, buyerUser} =
+			await createAccountWithBuyerUser(apiHelpers, site.id, {
+				accountName: firstAccountName,
+			});
+
+		const secondAccount = await addBuyerToAccount(
+			apiHelpers,
+			buyerUser.emailAddress,
+			secondAccountName
+		);
+
+		const uJoint =
+			await apiHelpers.headlessCommerceAdminCatalog.getProductByName(
+				'U-Joint'
+			);
+		const absSensor =
+			await apiHelpers.headlessCommerceAdminCatalog.getProductByName(
+				'ABS Sensor'
+			);
+		const mount =
+			await apiHelpers.headlessCommerceAdminCatalog.getProductByName(
+				'Mount'
+			);
+
+		await apiHelpers.headlessCommerceAdminOrder.postOrder({
+			accountId: firstAccount.id,
+			channelId: channel.id,
+			orderItems: [{quantity: 3, skuId: String(uJoint.skus[0].id)}],
+			orderStatus: '2',
+		});
+
+		const secondAccountFirstOrder =
+			await apiHelpers.headlessCommerceAdminOrder.postOrder({
+				accountId: secondAccount.id,
+				channelId: channel.id,
+				orderItems: [
+					{quantity: 2, skuId: String(absSensor.skus[0].id)},
+				],
+				orderStatus: '2',
+			});
+
+		await apiHelpers.headlessCommerceAdminOrder.postOrder({
+			accountId: secondAccount.id,
+			channelId: channel.id,
+			orderItems: [{quantity: 5, skuId: String(mount.skus[0].id)}],
+			orderStatus: '2',
+		});
+
+		await performLogout(page);
+		await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+		await page.goto(`/web/${site.name}`, {waitUntil: 'networkidle'});
+
+		await expect(
+			commerceThemeMiniumCatalogPage.accountSelectorButtonAccountName
+		).toHaveText(firstAccountName);
+
+		await commerceMiniCartPage.miniCartButton.click();
+
+		await expect(
+			commerceMiniCartPage.miniCartItem('U-Joint')
+		).toBeVisible();
+		await expect(
+			commerceMiniCartPage.miniCartSku('MIN55861')
+		).toBeVisible();
+		await expect(
+			commerceMiniCartPage.miniCartSummaryItem('Quantity')
+		).toHaveText('3');
+
+		await clickAndExpectToBeHidden({
+			target: commerceMiniCartPage.miniCartItemsContainer,
+			trigger: commerceMiniCartPage.miniCartButtonClose,
+		});
+
+		await commerceThemeMiniumCatalogPage.openAccountSelectorDropdown();
+
+		await commerceThemeMiniumCatalogPage
+			.accountSelectorAccount(secondAccountName)
+			.click();
+
+		await page.waitForLoadState('networkidle');
+
+		await expect(
+			commerceThemeMiniumCatalogPage.accountSelectorButtonAccountName
+		).toHaveText(secondAccountName);
+
+		await commerceMiniCartPage.miniCartButton.click();
+
+		await expect(commerceMiniCartPage.miniCartItem('Mount')).toBeVisible();
+		await expect(
+			commerceMiniCartPage.miniCartSku('MIN55857')
+		).toBeVisible();
+		await expect(
+			commerceMiniCartPage.miniCartSummaryItem('Quantity')
+		).toHaveText('5');
+
+		await clickAndExpectToBeHidden({
+			target: commerceMiniCartPage.miniCartItemsContainer,
+			trigger: commerceMiniCartPage.miniCartButtonClose,
+		});
+
+		await commerceThemeMiniumCatalogPage.accountSelectorButton.click();
+
+		await commerceThemeMiniumCatalogPage.accountSelectorSearchOrderInput.fill(
+			String(secondAccountFirstOrder.id)
+		);
+
+		await commerceThemeMiniumCatalogPage.accountSelectorOrdersList
+			.getByText(String(secondAccountFirstOrder.id), {exact: true})
+			.click();
+
+		await page.goto(`/web/${site.name}`, {waitUntil: 'networkidle'});
+
+		await expect(
+			commerceThemeMiniumCatalogPage.accountSelectorButtonOrderId
+		).toHaveText(String(secondAccountFirstOrder.id));
+
+		await commerceMiniCartPage.miniCartButton.click();
+
+		await expect(
+			commerceMiniCartPage.miniCartItem('ABS Sensor')
+		).toBeVisible();
+		await expect(
+			commerceMiniCartPage.miniCartSku('MIN93015')
+		).toBeVisible();
+		await expect(
+			commerceMiniCartPage.miniCartSummaryItem('Quantity')
+		).toHaveText('2');
+	}
+);
+
 async function addBuyerToAccount(
 	apiHelpers: DataApiHelpers,
 	buyerEmailAddress: string,
