@@ -30,6 +30,7 @@ export class CheckoutPage extends CommerceDNDTablePage {
 	readonly activeCheckoutStep: Locator;
 	readonly assertDataDeliveryGroupModal: (data: string) => Locator;
 	readonly addressInput: Locator;
+	readonly checkoutStepLabel: (label: string) => Locator;
 	readonly cityInput: Locator;
 	readonly commerceAddressOptions: Locator;
 	readonly commerceAddressSelect: Locator;
@@ -102,6 +103,8 @@ export class CheckoutPage extends CommerceDNDTablePage {
 			'.multi-step-item.active .multi-step-indicator-label'
 		);
 		this.addressInput = page.getByPlaceholder('Address', {exact: true});
+		this.checkoutStepLabel = (label: string) =>
+			page.locator('.multi-step-indicator-label', {hasText: label});
 		this.cityInput = page.getByPlaceholder('City', {exact: true});
 		this.commerceAddressSelect = page.locator(
 			'select[id$="_commerceAddress"]'
