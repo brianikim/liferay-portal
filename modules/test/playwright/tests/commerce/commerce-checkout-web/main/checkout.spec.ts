@@ -2994,3 +2994,72 @@ for (const variant of [
 		}
 	);
 }
+
+test(
+	'Delivery and payment terms checkout steps are hidden without the manage terms permissions',
+	{tag: '@LPD-106244-Grouped-4'},
+	async ({
+		apiHelpers,
+		checkoutPage,
+		commerceAdminChannelDetailsPage,
+		commerceAdminChannelsPage,
+		orderDetailsPage,
+		page,
+		pendingOrdersPage,
+	}) => {
+		test.setTimeout(600000);
+
+		const companyId = await page.evaluate(() => {
+			return Liferay.ThemeDisplay.getCompanyId();
+		});
+
+		await setUpTermsCheckout({
+			apiHelpers,
+			checkoutPage,
+			commerceAdminChannelDetailsPage,
+			commerceAdminChannelsPage,
+			orderDetailsPage,
+			page,
+			pendingOrdersPage,
+			rolePermissions: [
+				{
+					actionIds: ['VIEW'],
+					primaryKey: companyId,
+					resourceName:
+						'com.liferay.commerce.model.CommerceOrderType',
+					scope: 1,
+				},
+				{
+					actionIds: [
+						'ADD_COMMERCE_ORDER',
+						'CHECKOUT_OPEN_COMMERCE_ORDERS',
+						'MANAGE_COMMERCE_ORDER_PAYMENT_METHODS',
+						'MANAGE_COMMERCE_ORDER_SHIPPING_OPTIONS',
+						'VIEW_BILLING_ADDRESS',
+						'VIEW_COMMERCE_ORDERS',
+						'VIEW_OPEN_COMMERCE_ORDERS',
+					],
+					primaryKey: '0',
+					resourceName: 'com.liferay.commerce.order',
+					scope: 3,
+				},
+				{
+					actionIds: ['MANAGE_ADDRESSES', 'VIEW_ADDRESSES'],
+					primaryKey: '0',
+					resourceName: 'com.liferay.account.model.AccountEntry',
+					scope: 3,
+				},
+			],
+			termTypes: ['delivery-terms', 'payment-terms'],
+		});
+
+		await page.waitForURL((url) => url.href.includes('order-summary'));
+
+		await expect(
+			checkoutPage.checkoutStepLabel('Delivery Terms')
+		).toHaveCount(0);
+		await expect(
+			checkoutPage.checkoutStepLabel('Payment Terms')
+		).toHaveCount(0);
+	}
+);
