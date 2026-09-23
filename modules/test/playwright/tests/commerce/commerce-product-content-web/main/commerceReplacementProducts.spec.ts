@@ -493,3 +493,185 @@ test(
 		).toBeVisible();
 	}
 );
+
+test(
+	'Replacement product information is displayed in a discontinued product details page',
+	{tag: ['@COMMERCE-9347', '@LPD-106244']},
+	async ({apiHelpers, page, productDetailsPage, site}) => {
+		await apiHelpers.headlessCommerceAdminChannel.postChannel({
+			siteGroupId: site.id,
+			type: 'b2b',
+		});
+
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		const {buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id
+		);
+
+		const suffix = getRandomString();
+
+		const discontinuedProductName = `Test Simple Product ${suffix}`;
+		const discontinuedSku = `SKU1002-${suffix}`;
+		const replacementSku = `SKU1001-${suffix}`;
+
+		const replacementProduct =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				name: {en_US: `Test Simple Product Replacement ${suffix}`},
+				productType: 'simple',
+				skus: [
+					{
+						cost: 0,
+						price: 0,
+						published: true,
+						purchasable: true,
+						sku: replacementSku,
+					},
+				],
+			});
+
+		await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+			catalogId: catalog.id,
+			name: {en_US: discontinuedProductName},
+			productType: 'simple',
+			skus: [
+				{
+					cost: 0,
+					discontinued: true,
+					price: 0,
+					published: true,
+					purchasable: true,
+					replacementSkuId: replacementProduct.skus[0].id,
+					sku: discontinuedSku,
+				},
+			],
+		});
+
+		await apiHelpers.headlessDelivery.createSitePage({
+			pageDefinition: getPageDefinition([
+				getWidgetDefinition({
+					id: getRandomString(),
+					widgetName:
+						'com_liferay_commerce_product_content_web_internal_portlet_CPContentPortlet',
+				}),
+			]),
+			siteId: site.id,
+			title: getRandomString(),
+		});
+
+		await performLogout(page);
+		await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+		await page.goto(
+			`/web/${site.name}/p/${discontinuedProductName
+				.toLowerCase()
+				.replace(/ /g, '-')}`,
+			{waitUntil: 'networkidle'}
+		);
+
+		await expect(
+			page.getByText('Discontinued', {exact: true})
+		).toBeVisible();
+		await expect(page.getByText('End of Life')).toBeVisible();
+
+		await expect(productDetailsPage.replacementProductButton).toBeHidden();
+		await expect(
+			productDetailsPage.replacementsTableCell(replacementSku)
+		).toBeHidden();
+	}
+);
+
+test(
+	'A discontinued SKU cannot be set as the replacement of another discontinued SKU',
+	{tag: ['@COMMERCE-8164', '@LPD-106244']},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsSkusPage,
+		commerceAdminProductPage,
+		site,
+	}) => {
+		test.setTimeout(120000);
+
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		await apiHelpers.headlessCommerceAdminChannel.postChannel({
+			siteGroupId: site.id,
+		});
+
+		const suffix = getRandomString();
+
+		const products = [];
+
+		for (const index of [0, 1, 2]) {
+			const productName = `Discontinued Product ${index} ${suffix}`;
+			const skuName = `SKU-${index}-${suffix}`;
+
+			const product =
+				await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+					catalogId: catalog.id,
+					name: {en_US: productName},
+					productType: 'simple',
+					skus: [
+						{
+							cost: 0,
+							price: 0,
+							published: true,
+							purchasable: true,
+							sku: skuName,
+						},
+					],
+				});
+
+			products.push({
+				productName,
+				skuId: product.skus[0].id,
+				skuName,
+			});
+		}
+
+		await apiHelpers.headlessCommerceAdminCatalog.patchSku(
+			products[0].skuId,
+			{
+				discontinued: true,
+				published: true,
+				replacementSkuId: products[1].skuId,
+				sku: products[0].skuName,
+			}
+		);
+
+		await apiHelpers.headlessCommerceAdminCatalog.patchSku(
+			products[1].skuId,
+			{
+				discontinued: true,
+				published: true,
+				replacementSkuId: products[2].skuId,
+				sku: products[1].skuName,
+			}
+		);
+
+		await apiHelpers.headlessCommerceAdminCatalog.patchSku(
+			products[2].skuId,
+			{
+				discontinued: true,
+				published: true,
+				sku: products[2].skuName,
+			}
+		);
+
+		await commerceAdminProductPage.gotoProduct(products[2].productName);
+
+		await commerceAdminProductDetailsSkusPage.openSku(products[2].skuName);
+
+		await commerceAdminProductDetailsSkusPage.setReplacementSku(
+			products[0].skuName
+		);
+
+		await expect(
+			commerceAdminProductDetailsSkusPage.sidePanelDetailsReplacementErrorAlert
+		).toBeVisible();
+	}
+);

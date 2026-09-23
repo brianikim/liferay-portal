@@ -22,6 +22,10 @@ export class CommerceAdminProductDetailsSkusPage extends CommerceDNDTablePage {
 	readonly inventoryTableRowAction: (pageName: string) => Promise<Locator>;
 	readonly page: Page;
 	readonly pricinQuantity: Locator;
+	readonly sidePanelDetailsReplacementErrorAlert: Locator;
+	readonly sidePanelDetailsReplacementInput: Locator;
+	readonly sidePanelDetailsReplacementItem: (skuName: string) => Locator;
+	readonly sidePanelDetailsSkuDiscontinuedToggle: Locator;
 	readonly sidePanelDetailsSkuFieldName: Locator;
 	readonly sidePanelDetailsSkuPublishButton: Locator;
 	readonly sidePanelFrame: FrameLocator;
@@ -126,6 +130,17 @@ export class CommerceAdminProductDetailsSkusPage extends CommerceDNDTablePage {
 			.first()
 			.frameLocator('iframe')
 			.getByLabel('Pricing Quantity');
+		this.sidePanelDetailsReplacementErrorAlert =
+			this.sidePanelFrame.getByText('Please enter a valid replacement.');
+		this.sidePanelDetailsReplacementInput = this.sidePanelFrame
+			.locator('#autocomplete-root')
+			.getByPlaceholder('Type Here');
+		this.sidePanelDetailsReplacementItem = (skuName: string) =>
+			this.sidePanelFrame
+				.locator('.autocomplete-items')
+				.getByRole('option', {exact: true, name: skuName});
+		this.sidePanelDetailsSkuDiscontinuedToggle =
+			this.sidePanelFrame.getByLabel('Mark the SKU as Discontinued');
 		this.sidePanelDetailsSkuFieldName =
 			this.sidePanelFrame.getByLabel('SKU Required');
 		this.sidePanelDetailsSkuPublishButton = this.sidePanelFrame.getByRole(
@@ -320,5 +335,34 @@ export class CommerceAdminProductDetailsSkusPage extends CommerceDNDTablePage {
 
 	async goToSkuTab(skuTab: string) {
 		await this.skuTab(skuTab).click();
+	}
+
+	async openSku(skuName: string) {
+		await this.skusLink.click();
+		await this.skusTableRowLink(skuName).click();
+
+		await expect(this.sidePanelDetailsSkuFieldName).toBeVisible();
+	}
+
+	async setReplacementSku(replacementSkuName: string) {
+		if (!(await this.sidePanelDetailsSkuDiscontinuedToggle.isChecked())) {
+			await this.sidePanelDetailsSkuDiscontinuedToggle.check();
+		}
+
+		await expect(this.sidePanelDetailsReplacementInput).toBeVisible();
+
+		await expect(async () => {
+			await this.sidePanelDetailsReplacementInput.fill(
+				replacementSkuName
+			);
+
+			await expect(
+				this.sidePanelDetailsReplacementItem(replacementSkuName)
+			).toBeVisible({timeout: 5000});
+		}).toPass();
+
+		await this.sidePanelDetailsReplacementItem(replacementSkuName).click();
+
+		await this.sidePanelDetailsSkuPublishButton.click();
 	}
 }
