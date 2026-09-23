@@ -584,3 +584,94 @@ test(
 	}
 );
 
+test(
+	'A discontinued SKU cannot be set as the replacement of another discontinued SKU',
+	{tag: ['@COMMERCE-8164']},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsSkusPage,
+		commerceAdminProductPage,
+		site,
+	}) => {
+		test.setTimeout(120000);
+
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		await apiHelpers.headlessCommerceAdminChannel.postChannel({
+			siteGroupId: site.id,
+		});
+
+		const suffix = getRandomString();
+
+		const products = [];
+
+		for (const index of [0, 1, 2]) {
+			const productName = `Discontinued Product ${index} ${suffix}`;
+			const skuName = `SKU-${index}-${suffix}`;
+
+			const product =
+				await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+					catalogId: catalog.id,
+					name: {en_US: productName},
+					productType: 'simple',
+					skus: [
+						{
+							cost: 0,
+							price: 0,
+							published: true,
+							purchasable: true,
+							sku: skuName,
+						},
+					],
+				});
+
+			products.push({
+				productName,
+				skuId: product.skus[0].id,
+				skuName,
+			});
+		}
+
+		await apiHelpers.headlessCommerceAdminCatalog.patchSku(
+			products[0].skuId,
+			{
+				discontinued: true,
+				published: true,
+				replacementSkuId: products[1].skuId,
+				sku: products[0].skuName,
+			}
+		);
+
+		await apiHelpers.headlessCommerceAdminCatalog.patchSku(
+			products[1].skuId,
+			{
+				discontinued: true,
+				published: true,
+				replacementSkuId: products[2].skuId,
+				sku: products[1].skuName,
+			}
+		);
+
+		await apiHelpers.headlessCommerceAdminCatalog.patchSku(
+			products[2].skuId,
+			{
+				discontinued: true,
+				published: true,
+				sku: products[2].skuName,
+			}
+		);
+
+		await commerceAdminProductPage.gotoProduct(products[2].productName);
+
+		await commerceAdminProductDetailsSkusPage.openSku(products[2].skuName);
+
+		await commerceAdminProductDetailsSkusPage.setReplacementSku(
+			products[0].skuName
+		);
+
+		await expect(
+			commerceAdminProductDetailsSkusPage.sidePanelDetailsReplacementErrorAlert
+		).toBeVisible();
+	}
+);
