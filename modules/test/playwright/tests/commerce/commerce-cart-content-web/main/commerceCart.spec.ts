@@ -191,6 +191,36 @@ test('LPD-29864 Cart updates when order is open', async ({apiHelpers}) => {
 });
 
 test(
+	'COMMERCE-9738 Cannot create a cart via the JSON delivery API without a skuId',
+	{tag: ['@COMMERCE-9738', '@LPD-106244']},
+	async ({apiHelpers, site}) => {
+		const account = await apiHelpers.headlessAdminUser.postAccount({
+			name: getRandomString(),
+			type: 'business',
+		});
+
+		const channel =
+			await apiHelpers.headlessCommerceAdminChannel.postChannel({
+				siteGroupId: site.id,
+			});
+
+		const response = await apiHelpers.postResponse(
+			`${apiHelpers.baseUrl}headless-commerce-delivery-cart/v1.0/channels/${channel.id}/carts?nestedFields=cartItems`,
+			{
+				data: {
+					accountId: account.id,
+					cartItems: [{quantity: 5}],
+					currencyCode: 'USD',
+				},
+				failOnStatusCode: false,
+			}
+		);
+
+		expect(response.status()).toBe(400);
+	}
+);
+
+test(
 	'COMMERCE-7695 Clicking a cart item in the Cart widget redirects to the product details page',
 	{tag: '@COMMERCE-7695'},
 	async ({
