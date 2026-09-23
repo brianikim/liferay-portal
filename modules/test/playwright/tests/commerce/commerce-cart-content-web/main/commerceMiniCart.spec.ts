@@ -1751,3 +1751,86 @@ test(
 	}
 );
 
+test(
+	'Products added to the cart are shown in the Mini Cart fragment and can be checked out',
+	{tag: ['@COMMERCE-10778']},
+	async ({
+		apiHelpers,
+		checkoutPage,
+		commerceMiniCartPage,
+		commerceThemeMiniumCatalogPage,
+		page,
+	}) => {
+		const {site} = await miniumSetUp(apiHelpers);
+
+		const {account, buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id
+		);
+
+		await apiHelpers.headlessCommerceAdminAccount.postAddress(account.id, {
+			phoneNumber: '12345',
+			regionISOCode: 'AL',
+		});
+
+		const layout = await apiHelpers.headlessDelivery.createSitePage({
+			pageDefinition: getPageDefinition([
+				getFragmentDefinition({
+					id: getRandomString(),
+					key: 'COMMERCE_CART_FRAGMENTS-mini-cart',
+				}),
+			]),
+			siteId: site.id,
+			title: getRandomString(),
+		});
+
+		await performLogout(page);
+		await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+		try {
+			await page.goto(`/web/${site.name}`, {waitUntil: 'networkidle'});
+
+			await commerceThemeMiniumCatalogPage.addToCart('U-Joint');
+
+			await page.goto(
+				`/web${site.friendlyUrlPath}${layout.friendlyUrlPath}`
+			);
+
+			await commerceMiniCartPage.miniCartButton.click();
+
+			await expect(
+				commerceMiniCartPage.miniCartItem('U-Joint')
+			).toBeVisible();
+			await expect(
+				commerceMiniCartPage.miniCartSku('MIN55861')
+			).toBeVisible();
+			await expect(
+				commerceMiniCartPage.miniCartSummaryItem('Quantity')
+			).toHaveText('1');
+
+			await commerceMiniCartPage.submitButton.click();
+
+			await checkoutPage.performCheckout({
+				shippingAddress: {
+					city: 'Test City',
+					countryLabel: 'United States',
+					name: 'Address Name',
+					phoneNumber: '12345',
+					regionLabel: 'Alabama',
+					street: 'Test Address',
+					zip: 'Test Zip Code',
+				},
+			});
+
+			await expect(checkoutPage.orderSuccessMessage).toBeVisible();
+		}
+		finally {
+			const orders =
+				await apiHelpers.headlessCommerceAdminOrder.getOrdersPage();
+
+			if (orders.items[0]) {
+				apiHelpers.data.push({id: orders.items[0].id, type: 'order'});
+			}
+		}
+	}
+);
