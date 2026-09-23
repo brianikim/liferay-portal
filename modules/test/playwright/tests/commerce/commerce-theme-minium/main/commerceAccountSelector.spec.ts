@@ -12,6 +12,7 @@ import {featureFlagsTest} from '../../../../fixtures/featureFlagsTest';
 import {isolatedSiteTest} from '../../../../fixtures/isolatedSiteTest';
 import {loginTest} from '../../../../fixtures/loginTest';
 import {usersAndOrganizationsPagesTest} from '../../../../fixtures/usersAndOrganizationsPagesTest';
+import {DataApiHelpers} from '../../../../helpers/ApiHelpers';
 import {clickAndExpectToBeHidden} from '../../../../utils/clickAndExpectToBeHidden';
 import {clickAndExpectToBeVisible} from '../../../../utils/clickAndExpectToBeVisible';
 import getRandomString from '../../../../utils/getRandomString';
@@ -23,7 +24,7 @@ import {waitForAlert} from '../../../../utils/waitForAlert';
 import getFragmentDefinition from '../../../layout-content-page-editor-web/main/utils/getFragmentDefinition';
 import getPageDefinition from '../../../layout-content-page-editor-web/main/utils/getPageDefinition';
 import getWidgetDefinition from '../../../layout-content-page-editor-web/main/utils/getWidgetDefinition';
-import {miniumSetUp} from '../../utils/commerce';
+import {createAccountWithBuyerUser, miniumSetUp} from '../../utils/commerce';
 
 export const test = mergeTests(
 	apiHelpersTest,
@@ -469,3 +470,94 @@ test(
 		await expect(accountNameField).not.toBeVisible();
 	}
 );
+
+test(
+	'Account Selector fragment lets the buyer switch the active account',
+	{tag: ['@COMMERCE-10946']},
+	async ({apiHelpers, commerceThemeMiniumCatalogPage, page}) => {
+		const {site} = await miniumSetUp(apiHelpers);
+
+		const firstAccountName = `Commerce Account 1 ${getRandomString()}`;
+		const secondAccountName = `Commerce Account 2 ${getRandomString()}`;
+
+		const {buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id,
+			{
+				accountName: firstAccountName,
+			}
+		);
+
+		await addBuyerToAccount(
+			apiHelpers,
+			buyerUser.emailAddress,
+			secondAccountName
+		);
+
+		await performLogout(page);
+		await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+		await page.goto(`/web/${site.name}`, {waitUntil: 'networkidle'});
+
+		await expect(
+			commerceThemeMiniumCatalogPage.accountSelectorButtonAccountName
+		).toHaveText(firstAccountName);
+
+		await commerceThemeMiniumCatalogPage.openAccountSelectorDropdown();
+
+		await expect(
+			commerceThemeMiniumCatalogPage.accountSelectorAccount(
+				firstAccountName
+			)
+		).toBeVisible();
+		await expect(
+			commerceThemeMiniumCatalogPage.accountSelectorAccount(
+				secondAccountName
+			)
+		).toBeVisible();
+
+		await commerceThemeMiniumCatalogPage
+			.accountSelectorAccount(secondAccountName)
+			.click();
+
+		await page.waitForLoadState('networkidle');
+
+		await expect(
+			commerceThemeMiniumCatalogPage.accountSelectorButtonAccountName
+		).toHaveText(secondAccountName);
+	}
+);
+
+async function addBuyerToAccount(
+	apiHelpers: DataApiHelpers,
+	buyerEmailAddress: string,
+	accountName: string
+) {
+	const account = await apiHelpers.headlessAdminUser.postAccount({
+		name: accountName,
+		type: 'business',
+	});
+
+	await apiHelpers.headlessAdminUser.assignUserToAccountByEmailAddress(
+		account.id,
+		[buyerEmailAddress]
+	);
+
+	const rolesResponse = await apiHelpers.headlessAdminUser.getAccountRoles(
+		account.id
+	);
+
+	const buyerRole = rolesResponse?.items?.find(
+		(role: {name: string}) => role.name === 'Buyer'
+	);
+
+	if (buyerRole) {
+		await apiHelpers.headlessAdminUser.assignAccountRoles(
+			account.externalReferenceCode,
+			buyerRole.id,
+			buyerEmailAddress
+		);
+	}
+
+	return account;
+}
