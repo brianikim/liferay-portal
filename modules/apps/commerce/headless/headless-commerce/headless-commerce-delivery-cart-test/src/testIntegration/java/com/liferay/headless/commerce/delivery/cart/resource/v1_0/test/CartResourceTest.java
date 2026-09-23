@@ -392,6 +392,7 @@ public class CartResourceTest extends BaseCartResourceTestCase {
 
 		_testPostChannelCartByGuestWithGuestCheckoutDisabledOnB2BChannel();
 		_testPostChannelCartWithMoreExternalReferenceCodes();
+		_testPostChannelCartWithoutSkuId();
 	}
 
 	@Override
@@ -1208,6 +1209,29 @@ public class CartResourceTest extends BaseCartResourceTestCase {
 		Assert.assertEquals(
 			serviceBuilderAddress.getExternalReferenceCode(),
 			postCart.getShippingAddressExternalReferenceCode());
+	}
+
+	private void _testPostChannelCartWithoutSkuId() throws Exception {
+		Cart randomCart = randomCart();
+
+		randomCart.setCartItems(
+			new CartItem[] {
+				new CartItem() {
+					{
+						quantity = BigDecimal.valueOf(
+							RandomTestUtil.randomInt(1, 10));
+					}
+				}
+			});
+
+		Problem.ProblemException problemException = Assert.assertThrows(
+			Problem.ProblemException.class,
+			() -> cartResource.postChannelCart(
+				_commerceChannel.getCommerceChannelId(), randomCart));
+
+		Problem problem = problemException.getProblem();
+
+		Assert.assertEquals("BAD_REQUEST", problem.getStatus());
 	}
 
 	private void _testPutCartByExternalReferenceCodeWithMoreExternalReferenceCodes()

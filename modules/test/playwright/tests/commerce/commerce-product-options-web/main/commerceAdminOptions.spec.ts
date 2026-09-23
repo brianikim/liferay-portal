@@ -244,42 +244,42 @@ test(
 	}
 );
 
-test(
-	'Create an option from the standalone options portlet',
-	{tag: ['@LPD-106244']},
-	async ({apiHelpers, commerceAdminOptionsPage, globalMenuPage}) => {
-		const optionName = 'Color-' + getRandomString();
-		const optionKey = 'color-' + getRandomString();
+test('Create an option from the standalone options portlet', async ({
+	apiHelpers,
+	commerceAdminOptionsPage,
+	globalMenuPage,
+}) => {
+	const optionName = 'Color-' + getRandomString();
+	const optionKey = 'color-' + getRandomString();
 
-		try {
-			await globalMenuPage.goToCommerce('Options');
+	try {
+		await globalMenuPage.goToCommerce('Options');
 
-			await commerceAdminOptionsPage.createOption(
-				optionName,
-				'Text',
-				optionKey
-			);
+		await commerceAdminOptionsPage.createOption(
+			optionName,
+			'Text',
+			optionKey
+		);
 
-			await expect(commerceAdminOptionsPage.optionNameInput).toHaveValue(
-				optionName
-			);
-		}
-		finally {
-			const options =
-				await apiHelpers.headlessCommerceAdminCatalog.getOptions();
+		await expect(commerceAdminOptionsPage.optionNameInput).toHaveValue(
+			optionName
+		);
+	}
+	finally {
+		const options =
+			await apiHelpers.headlessCommerceAdminCatalog.getOptions();
 
-			for (const option of options?.items ?? []) {
-				if (option.key === optionKey) {
-					apiHelpers.data.push({id: option.id, type: 'option'});
-				}
+		for (const option of options?.items ?? []) {
+			if (option.key === optionKey) {
+				apiHelpers.data.push({id: option.id, type: 'option'});
 			}
 		}
 	}
-);
+});
 
 test(
 	'Remove an option from the standalone options portlet',
-	{tag: ['@COMMERCE-6280', '@LPD-106244']},
+	{tag: ['@COMMERCE-6280']},
 	async ({apiHelpers, commerceAdminOptionsPage, globalMenuPage}) => {
 		const optionName = 'Color-' + getRandomString();
 		const optionKey = 'color-' + getRandomString();
@@ -316,7 +316,7 @@ test(
 
 test(
 	'Custom fields can be returned from the option value API',
-	{tag: ['@COMMERCE-11715', '@LPD-106244']},
+	{tag: ['@COMMERCE-11715']},
 	async ({
 		addCustomFieldPage,
 		apiHelpers,

@@ -2075,11 +2075,9 @@ test(
 
 test(
 	'Can use a different display template for the placed orders widget',
-	{tag: ['@COMMERCE-12266', '@LPD-106244']},
+	{tag: ['@COMMERCE-12266']},
 	async ({apiHelpers, page, placedOrdersPage, site, templatesPage}) => {
 		const widgetTemplateName = getRandomString();
-
-		// Create a Placed Orders widget template
 
 		await templatesPage.gotoWidgetTemplates(site.friendlyUrlPath);
 
@@ -2101,8 +2099,6 @@ test(
 				title: getRandomString(),
 			});
 
-			// Select the created template in the widget configuration
-
 			await page.goto(
 				`${liferayConfig.environment.baseUrl}/web${site.friendlyUrlPath}${layout.friendlyUrlPath}`
 			);
@@ -2121,8 +2117,6 @@ test(
 				placedOrdersPage.configurationIFrame,
 				'Success:You have successfully updated the setup'
 			);
-
-			// Reopen the configuration and assert the template persists
 
 			await page.reload();
 
@@ -2147,3 +2141,78 @@ test(
 		}
 	}
 );
+
+test('Terms are not editable in the placed order details page', async ({
+	apiHelpers,
+	commerceAdminChannelsPage,
+	page,
+	placedOrdersPage,
+	site,
+}) => {
+	const layout = await apiHelpers.headlessDelivery.createSitePage({
+		pageDefinition: getPageDefinition([
+			getWidgetDefinition({
+				id: getRandomString(),
+				widgetName:
+					'com_liferay_commerce_order_content_web_internal_portlet_CommerceOrderContentPortlet',
+			}),
+		]),
+		siteId: site.id,
+		title: getRandomString(),
+	});
+
+	const channel = await apiHelpers.headlessCommerceAdminChannel.postChannel({
+		siteGroupId: site.id,
+	});
+
+	await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+		channel.name,
+		'B2B'
+	);
+
+	const {account, buyerUser} = await createAccountWithBuyerUser(
+		apiHelpers,
+		site.id
+	);
+
+	const deliveryTerm = await apiHelpers.headlessCommerceAdminOrder.postTerm({
+		type: 'delivery-terms',
+	});
+	const paymentTerm = await apiHelpers.headlessCommerceAdminOrder.postTerm({
+		type: 'payment-terms',
+	});
+
+	await apiHelpers.headlessCommerceAdminOrder.postOrder({
+		accountId: account.id,
+		channelId: channel.id,
+		deliveryTermId: deliveryTerm.id,
+		orderStatus: '1',
+		paymentTermId: paymentTerm.id,
+	});
+
+	await performLogout(page);
+	await performLogin(page, buyerUser.alternateName);
+
+	await page.goto(
+		`${liferayConfig.environment.baseUrl}/web${site.friendlyUrlPath}${layout.friendlyUrlPath}`,
+		{waitUntil: 'networkidle'}
+	);
+
+	await expect(placedOrdersPage.table).toBeVisible();
+
+	await placedOrdersPage.viewButton.click();
+
+	for (const term of [deliveryTerm, paymentTerm]) {
+		await expect(
+			page.getByRole('link', {exact: true, name: term.label['en_US']})
+		).toBeVisible();
+	}
+
+	await expect(
+		page
+			.locator(
+				'#portlet_com_liferay_commerce_order_content_web_internal_portlet_CommerceOrderContentPortlet'
+			)
+			.getByText('Edit', {exact: true})
+	).toHaveCount(0);
+});

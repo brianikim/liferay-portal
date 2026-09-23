@@ -1734,12 +1734,11 @@ test(
 
 test(
 	'Option Selector fragment mapped in a display page template shows the option value delta prices',
-	{tag: ['@COMMERCE-9383', '@LPD-106244']},
+	{tag: ['@COMMERCE-9383']},
 	async ({
 		apiHelpers,
 		commerceAdminChannelsPage,
 		commerceAdminProductPage,
-		commerceLayoutsPage,
 		displayPageTemplatesPage,
 		page,
 		pageEditorPage,
@@ -1825,33 +1824,17 @@ test(
 		});
 
 		await test.step('Map the Option Selector fragment in a default display page template', async () => {
-			const displayPageTemplateName = getRandomString();
-
-			await displayPageTemplatesPage.goto(site.friendlyUrlPath);
-
-			await displayPageTemplatesPage.createTemplate({
-				contentType: 'Product',
-				name: displayPageTemplateName,
+			await displayPageTemplatesPage.createDefaultTemplateWithFragments({
+				className: 'com.liferay.commerce.product.model.CPDefinition',
+				fragments: [
+					{
+						collectionName: 'Product',
+						fragmentName: 'Option Selector',
+					},
+				],
+				pageEditorPage,
+				site,
 			});
-
-			await displayPageTemplatesPage.editTemplate(
-				displayPageTemplateName
-			);
-
-			await pageEditorPage.addFragment('Product', 'Option Selector');
-
-			await pageEditorPage.waitForChangesSaved();
-
-			await displayPageTemplatesPage.publishTemplate();
-
-			await displayPageTemplatesPage.clickMoreActions(
-				displayPageTemplateName,
-				'Mark as Default'
-			);
-
-			await expect(
-				commerceLayoutsPage.defaultDisplayPageTemplateIcon
-			).toBeVisible();
 		});
 
 		await test.step('As a buyer, the option values show their delta prices', async () => {
@@ -1885,12 +1868,11 @@ test(
 
 test(
 	'Option Selector and Availability fragments reflect the dependent option value selections',
-	{tag: ['@COMMERCE-9383', '@LPD-106244']},
+	{tag: ['@COMMERCE-9383']},
 	async ({
 		apiHelpers,
 		commerceAdminChannelsPage,
 		commerceAdminProductPage,
-		commerceLayoutsPage,
 		displayPageTemplatesPage,
 		page,
 		pageEditorPage,
@@ -2017,34 +1999,18 @@ test(
 		});
 
 		await test.step('Map the Option Selector and Availability fragments in a default display page template', async () => {
-			const displayPageTemplateName = getRandomString();
-
-			await displayPageTemplatesPage.goto(site.friendlyUrlPath);
-
-			await displayPageTemplatesPage.createTemplate({
-				contentType: 'Product',
-				name: displayPageTemplateName,
+			await displayPageTemplatesPage.createDefaultTemplateWithFragments({
+				className: 'com.liferay.commerce.product.model.CPDefinition',
+				fragments: [
+					{
+						collectionName: 'Product',
+						fragmentName: 'Option Selector',
+					},
+					{collectionName: 'Product', fragmentName: 'Availability'},
+				],
+				pageEditorPage,
+				site,
 			});
-
-			await displayPageTemplatesPage.editTemplate(
-				displayPageTemplateName
-			);
-
-			await pageEditorPage.addFragment('Product', 'Option Selector');
-			await pageEditorPage.addFragment('Product', 'Availability');
-
-			await pageEditorPage.waitForChangesSaved();
-
-			await displayPageTemplatesPage.publishTemplate();
-
-			await displayPageTemplatesPage.clickMoreActions(
-				displayPageTemplateName,
-				'Mark as Default'
-			);
-
-			await expect(
-				commerceLayoutsPage.defaultDisplayPageTemplateIcon
-			).toBeVisible();
 		});
 
 		await test.step('As a buyer, selecting the second values leaves the combination unavailable', async () => {

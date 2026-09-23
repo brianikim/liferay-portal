@@ -29,7 +29,7 @@ export const test = mergeTests(
 
 test(
 	'Buyer sees the Request A Quote button and Price on Application label from the Request Quote and Price fragments on a default product display page template',
-	{tag: ['@COMMERCE-11324', '@LPD-106244']},
+	{tag: ['@COMMERCE-11324']},
 	async ({
 		apiHelpers,
 		displayPageTemplatesPage,
@@ -38,9 +38,6 @@ test(
 		productDetailsPage,
 		site,
 	}) => {
-
-		// Create the channel, catalog and products
-
 		await apiHelpers.headlessCommerceAdminChannel.postChannel({
 			siteGroupId: site.id,
 		});
@@ -68,8 +65,6 @@ test(
 			)
 		).items[0].id;
 
-		// Set one product's SKU to Price on Application and give the other a list price
-
 		await apiHelpers.headlessCommerceAdminPricing.postPriceEntry({
 			price: 0,
 			priceListId: basePriceListId,
@@ -83,40 +78,15 @@ test(
 			skuId: listPriceProduct.skus[0].id,
 		});
 
-		// Create a default product display page template with the Request Quote and Price fragments
-
-		const displayPageTemplateName = getRandomString();
-
-		const {classNameId} =
-			await apiHelpers.jsonWebServicesClassName.fetchClassName(
-				'com.liferay.commerce.product.model.CPDefinition'
-			);
-
-		const {layoutPageTemplateEntryId} =
-			await apiHelpers.jsonWebServicesLayoutPageTemplateEntry.addDisplayPageLayoutPageTemplateEntry(
-				{
-					classNameId,
-					groupId: String(site.id),
-					name: displayPageTemplateName,
-				}
-			);
-
-		await apiHelpers.jsonWebServicesLayoutPageTemplateEntry.markAsDefaultDisplayPageLayoutPageTemplateEntry(
-			{layoutPageTemplateEntryId}
-		);
-
-		await displayPageTemplatesPage.goto(site.friendlyUrlPath);
-
-		await displayPageTemplatesPage.editTemplate(displayPageTemplateName);
-
-		await pageEditorPage.addFragment('Product', 'Request Quote');
-		await pageEditorPage.addFragment('Product', 'Price');
-
-		await pageEditorPage.waitForChangesSaved();
-
-		await displayPageTemplatesPage.publishTemplate();
-
-		// View the storefront as a buyer
+		await displayPageTemplatesPage.createDefaultTemplateWithFragments({
+			className: 'com.liferay.commerce.product.model.CPDefinition',
+			fragments: [
+				{collectionName: 'Product', fragmentName: 'Request Quote'},
+				{collectionName: 'Product', fragmentName: 'Price'},
+			],
+			pageEditorPage,
+			site,
+		});
 
 		const {buyerUser} = await createAccountWithBuyerUser(
 			apiHelpers,
@@ -125,8 +95,6 @@ test(
 
 		await performLogout(page);
 		await performLoginViaApi({page, screenName: buyerUser.alternateName});
-
-		// Verify the Price on Application product shows the Request A Quote button and the Price on Application label
 
 		await page.goto(
 			`/web${site.friendlyUrlPath}/p/${priceOnApplicationProduct.name['en_US']}`
@@ -142,8 +110,6 @@ test(
 				}
 			)
 		).toBeVisible();
-
-		// Verify the list price product shows its price without the Request A Quote button
 
 		await page.goto(
 			`/web${site.friendlyUrlPath}/p/${listPriceProduct.name['en_US']}`

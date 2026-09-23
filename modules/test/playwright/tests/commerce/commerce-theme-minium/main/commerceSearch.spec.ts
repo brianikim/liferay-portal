@@ -283,7 +283,7 @@ test('COMMERCE-6322 As a buyer, I want to be able to search an entry in Catalog 
 
 test(
 	'COMMERCE-11398 As a B2X site guest user, I want to be able to search for a product',
-	{tag: ['@COMMERCE-11398', '@LPD-106244']},
+	{tag: ['@COMMERCE-11398']},
 	async ({
 		apiHelpers,
 		commerceAdminChannelsPage,

@@ -496,7 +496,7 @@ test(
 
 test(
 	'Replacement product information is displayed in a discontinued product details page',
-	{tag: ['@COMMERCE-9347', '@LPD-106244']},
+	{tag: ['@COMMERCE-9347']},
 	async ({apiHelpers, page, productDetailsPage, site}) => {
 		await apiHelpers.headlessCommerceAdminChannel.postChannel({
 			siteGroupId: site.id,
@@ -586,7 +586,7 @@ test(
 
 test(
 	'A discontinued SKU cannot be set as the replacement of another discontinued SKU',
-	{tag: ['@COMMERCE-8164', '@LPD-106244']},
+	{tag: ['@COMMERCE-8164']},
 	async ({
 		apiHelpers,
 		commerceAdminProductDetailsSkusPage,

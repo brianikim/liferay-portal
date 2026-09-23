@@ -96,7 +96,7 @@ test('LPD-30188 Product publisher tag filters can be added and removed', async (
 
 test(
 	'Product Publisher Configuration shows Product Entries panel when Manual source is selected',
-	{tag: ['@COMMERCE-10454', '@LPD-106244']},
+	{tag: ['@COMMERCE-10454']},
 	async ({apiHelpers, page, productPublisherPage, site, widgetPagePage}) => {
 		const layout = await apiHelpers.jsonWebServicesLayout.addLayout({
 			groupId: site.id,

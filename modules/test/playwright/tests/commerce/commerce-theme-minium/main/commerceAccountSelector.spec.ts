@@ -473,7 +473,7 @@ test(
 
 test(
 	'Account Selector fragment lets the buyer switch the active account',
-	{tag: ['@COMMERCE-10946', '@LPD-106244']},
+	{tag: ['@COMMERCE-10946']},
 	async ({apiHelpers, commerceThemeMiniumCatalogPage, page}) => {
 		const {site} = await miniumSetUp(apiHelpers);
 
@@ -530,7 +530,7 @@ test(
 
 test(
 	'Mini Cart fragment updates following Account Selector changes',
-	{tag: ['@COMMERCE-10947', '@LPD-106244']},
+	{tag: ['@COMMERCE-10947']},
 	async ({
 		apiHelpers,
 		commerceMiniCartPage,
