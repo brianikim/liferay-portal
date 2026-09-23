@@ -11,6 +11,7 @@ import com.liferay.commerce.order.CommerceOrderAttachmentFDSActionContributor;
 import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.frontend.data.set.model.FDSActionDropdownItem;
 import com.liferay.frontend.data.set.model.FDSActionDropdownItemBuilder;
+import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.model.User;
@@ -53,18 +54,24 @@ public class CommerceOrderAttachmentFDSActionContributorImpl
 
 		User user = themeDisplay.getUser();
 
-		List<String> signableIds = new ArrayList<>();
-
-		for (Map.Entry<Long, DSRequest> entry : dsRequests.entrySet()) {
-			DSRequest dsRequest = entry.getValue();
-
-			if (dsRequest.isSignatureRequired(user.getEmailAddress())) {
-				signableIds.add(String.valueOf(entry.getKey()));
-			}
-		}
-
 		return HashMapBuilder.<String, Object>put(
-			"signableIds", signableIds
+			"signableIds",
+			TransformUtil.transform(
+				dsRequests.entrySet(),
+				entry -> {
+					DSRequest dsRequest = entry.getValue();
+
+					if (!dsRequest.isSignatureRequired(
+							user.getEmailAddress())) {
+
+						return null;
+					}
+
+					return String.valueOf(entry.getKey());
+				})
+		).put(
+			"signatureStatuses",
+			DSCommerceOrderAttachmentUtil.getSignatureStatuses(dsRequests)
 		).build();
 	}
 
@@ -114,6 +121,22 @@ public class CommerceOrderAttachmentFDSActionContributorImpl
 					"sign"
 				));
 		}
+
+		fdsActionDropdownItems.add(
+			FDSActionDropdownItemBuilder.putData(
+				"signatureStatusURL",
+				DSCommerceOrderAttachmentUtil.getActionURL(
+					"/commerce-digital-signature/signature-status",
+					themeDisplay)
+			).setHref(
+				StringPool.POUND
+			).setIcon(
+				"list-ul"
+			).setLabel(
+				_language.get(httpServletRequest, "view-signature-status")
+			).build(
+				"view-signature-status"
+			));
 
 		return fdsActionDropdownItems;
 	}
