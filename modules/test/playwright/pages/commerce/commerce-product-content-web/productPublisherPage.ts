@@ -33,9 +33,11 @@ export class ProductPublisherPage {
 		productName: string,
 		productPrice: string
 	) => Locator;
+	readonly productEntriesPanel: Locator;
 	readonly productLink: (productName: string) => Promise<Locator>;
 	readonly productSku: (productSku: string) => Promise<Locator>;
 	readonly removeTagNameButton: (tagName: string) => Promise<Locator>;
+	readonly selectionStyleManualRadio: Locator;
 	readonly tagsInput: Locator;
 
 	constructor(page: Page) {
@@ -107,6 +109,10 @@ export class ProductPublisherPage {
 			this.productCard(productName).getByText(productPrice, {
 				exact: true,
 			});
+		this.productEntriesPanel = this.configurationFrame.getByText(
+			'Product Entries',
+			{exact: true}
+		);
 		this.productLink = async (productName: string) => {
 			return page.getByRole('link', {exact: true, name: productName});
 		};
@@ -116,10 +122,23 @@ export class ProductPublisherPage {
 		this.removeTagNameButton = async (tagName: string) => {
 			return this.configurationFrame.getByLabel(`Remove ${tagName}`);
 		};
+		this.selectionStyleManualRadio = this.configurationFrame.getByLabel(
+			'Manual',
+			{exact: true}
+		);
 		this.tagsInput = this.configurationFrame.getByRole('combobox', {
 			exact: true,
 			name: 'Tags',
 		});
+	}
+
+	async openConfigurationModal() {
+		await expect(async () => {
+			await this.optionsButton.click();
+			await this.configurationMenuItem.click({timeout: 1000});
+		}).toPass();
+
+		await expect(this.configurationSaveButton).toBeVisible();
 	}
 
 	async addProductPublisherTagFilter(tagName: string) {
