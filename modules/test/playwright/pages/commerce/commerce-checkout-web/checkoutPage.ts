@@ -31,6 +31,7 @@ export class CheckoutPage extends CommerceDNDTablePage {
 	readonly checkoutStepLabels: Locator;
 	readonly assertDataDeliveryGroupModal: (data: string) => Locator;
 	readonly addressInput: Locator;
+	readonly checkoutStepLabel: (label: string) => Locator;
 	readonly cityInput: Locator;
 	readonly commerceAddressOptions: Locator;
 	readonly commerceAddressSelect: Locator;
@@ -54,6 +55,7 @@ export class CheckoutPage extends CommerceDNDTablePage {
 	readonly layoutsPage: CommerceLayoutsPage;
 	readonly multishippingTabLink: Locator;
 	readonly multishippingTableLocator: Locator;
+	readonly multiStepNav: Locator;
 	readonly nameInput: Locator;
 	readonly optionsButton: Locator;
 	readonly orderConfirmationContainer: Locator;
@@ -115,6 +117,8 @@ export class CheckoutPage extends CommerceDNDTablePage {
 		);
 		this.checkoutStepLabels = page.locator('.multi-step-indicator-label');
 		this.addressInput = page.getByPlaceholder('Address', {exact: true});
+		this.checkoutStepLabel = (label: string) =>
+			page.locator('.multi-step-indicator-label', {hasText: label});
 		this.cityInput = page.getByPlaceholder('City', {exact: true});
 		this.commerceAddressSelect = page.locator(
 			'select[id$="_commerceAddress"]'
@@ -174,6 +178,7 @@ export class CheckoutPage extends CommerceDNDTablePage {
 		this.multishippingTableLocator = page.locator(
 			'div.multishipping-container'
 		);
+		this.multiStepNav = page.locator('.commerce-multi-step-nav');
 		this.nameInput = page.getByPlaceholder('Name', {exact: true});
 		this.optionsButton = page
 			.locator(
