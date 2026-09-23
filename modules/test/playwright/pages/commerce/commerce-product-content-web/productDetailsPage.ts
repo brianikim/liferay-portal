@@ -12,6 +12,7 @@ export class ProductDetailsPage {
 	readonly attachments: Locator;
 	readonly attachmentItem: (title: string) => Promise<Locator>;
 	readonly attachmentItems: Locator;
+	readonly availabilityLabel: (availability: string) => Locator;
 	readonly diagramPin: (pinSequence: string) => Promise<Locator>;
 	readonly breadcrumb: Locator;
 	readonly breadcrumbLink: (name: string) => Locator;
@@ -101,6 +102,10 @@ export class ProductDetailsPage {
 			return page.getByText(title);
 		};
 		this.attachmentItems = this.attachments.locator('li.list-group-item');
+		this.availabilityLabel = (availability: string) =>
+			page
+				.locator('.availability-label')
+				.getByText(availability, {exact: true});
 		this.diagramPin = async (pinSequence: string) => {
 			return page
 				.locator("[class='pin-node-text']")
