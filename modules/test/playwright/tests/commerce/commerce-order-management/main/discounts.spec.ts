@@ -1279,6 +1279,172 @@ test(
 );
 
 test(
+	'Two overlapping product discounts on the same level apply the lower discount at checkout',
+	{tag: ['@COMMERCE-10343', '@LPD-106244']},
+	async ({
+		apiHelpers,
+		checkoutPage,
+		orderDetailsPage,
+		page,
+		pendingOrdersPage,
+	}) => {
+		const productsPage =
+			await apiHelpers.headlessCommerceAdminCatalog.getProductsPage(
+				100,
+				`name eq 'ABS Sensor'`
+			);
+
+		const absSensorProduct = productsPage.items[0];
+
+		await apiHelpers.headlessCommerceAdminPricing.postDiscount({
+			active: true,
+			discountProducts: [{productId: absSensorProduct.productId}],
+			level: 'L1',
+			percentageLevel1: 20,
+			target: 'products',
+			title: `Discount 20% off ${getRandomString()}`,
+			usePercentage: true,
+		} as any);
+
+		await apiHelpers.headlessCommerceAdminPricing.postDiscount({
+			active: true,
+			discountProducts: [{productId: absSensorProduct.productId}],
+			level: 'L1',
+			percentageLevel1: 30,
+			target: 'products',
+			title: `Discount 30% off ${getRandomString()}`,
+			usePercentage: true,
+		} as any);
+
+		const {account, buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id
+		);
+
+		await apiHelpers.headlessCommerceDeliveryCart.postCart(
+			{
+				accountId: account.id,
+				cartItems: [{options: '[]', quantity: 1, skuId: sku1}],
+			},
+			channel.id
+		);
+
+		await performUserSwitch(page, buyerUser.alternateName);
+
+		await page.goto(`/web${site.friendlyUrlPath}/pending-orders`);
+
+		await pendingOrdersPage.viewButton.click();
+
+		await orderDetailsPage.checkoutButton.click();
+
+		await checkoutPage.addAddress({
+			city: 'Test City',
+			countryLabel: 'United States',
+			name: buyerUser.alternateName,
+			regionLabel: 'Florida',
+			street: 'Test Address',
+			zip: '12345',
+		});
+
+		await checkoutPage.continueButton.click();
+
+		await checkoutPage.shippingMethodRadio('Standard').check();
+
+		await checkoutPage.continueButton.click();
+
+		await expect(checkoutPage.summaryAmount('$ 50.00')).toBeVisible();
+		await expect(checkoutPage.summaryAmount('$ 40.00')).toBeVisible();
+
+		await checkoutPage.continueButton.click();
+
+		await expect(checkoutPage.orderSuccessMessage).toBeVisible();
+	}
+);
+
+test(
+	'Two product discounts on different levels stack at checkout',
+	{tag: ['@COMMERCE-10344', '@LPD-106244']},
+	async ({
+		apiHelpers,
+		checkoutPage,
+		orderDetailsPage,
+		page,
+		pendingOrdersPage,
+	}) => {
+		const productsPage =
+			await apiHelpers.headlessCommerceAdminCatalog.getProductsPage(
+				100,
+				`name eq 'ABS Sensor'`
+			);
+
+		const absSensorProduct = productsPage.items[0];
+
+		await apiHelpers.headlessCommerceAdminPricing.postDiscount({
+			active: true,
+			discountProducts: [{productId: absSensorProduct.productId}],
+			level: 'L1',
+			percentageLevel1: 20,
+			target: 'products',
+			title: `Discount 20% off ${getRandomString()}`,
+			usePercentage: true,
+		} as any);
+
+		await apiHelpers.headlessCommerceAdminPricing.postDiscount({
+			active: true,
+			discountProducts: [{productId: absSensorProduct.productId}],
+			level: 'L2',
+			percentageLevel1: 30,
+			target: 'products',
+			title: `Discount 30% off ${getRandomString()}`,
+			usePercentage: true,
+		} as any);
+
+		const {account, buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id
+		);
+
+		await apiHelpers.headlessCommerceDeliveryCart.postCart(
+			{
+				accountId: account.id,
+				cartItems: [{options: '[]', quantity: 1, skuId: sku1}],
+			},
+			channel.id
+		);
+
+		await performUserSwitch(page, buyerUser.alternateName);
+
+		await page.goto(`/web${site.friendlyUrlPath}/pending-orders`);
+
+		await pendingOrdersPage.viewButton.click();
+
+		await orderDetailsPage.checkoutButton.click();
+
+		await checkoutPage.addAddress({
+			city: 'Test City',
+			countryLabel: 'United States',
+			name: buyerUser.alternateName,
+			regionLabel: 'Florida',
+			street: 'Test Address',
+			zip: '12345',
+		});
+
+		await checkoutPage.continueButton.click();
+
+		await checkoutPage.shippingMethodRadio('Standard').check();
+
+		await checkoutPage.continueButton.click();
+
+		await expect(checkoutPage.summaryAmount('$ 50.00')).toBeVisible();
+		await expect(checkoutPage.summaryAmount('$ 28.00')).toBeVisible();
+
+		await checkoutPage.continueButton.click();
+
+		await expect(checkoutPage.orderSuccessMessage).toBeVisible();
+	}
+);
+
+test(
 	'Single Approver workflow moves a draft discount to Pending on submit',
 	{tag: ['@COMMERCE-10663', '@LPD-85008']},
 	async ({
