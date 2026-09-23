@@ -95,6 +95,29 @@ test('LPD-30188 Product publisher tag filters can be added and removed', async (
 });
 
 test(
+	'Product Publisher Configuration shows Product Entries panel when Manual source is selected',
+	{tag: ['@COMMERCE-10454']},
+	async ({apiHelpers, page, productPublisherPage, site, widgetPagePage}) => {
+		const layout = await apiHelpers.jsonWebServicesLayout.addLayout({
+			groupId: site.id,
+			title: getRandomString(),
+		});
+
+		await page.goto(`/web${site.friendlyUrlPath}${layout.friendlyURL}`);
+
+		await widgetPagePage.addPortlet('Product Publisher');
+
+		await productPublisherPage.openConfigurationModal();
+
+		await expect(productPublisherPage.productEntriesPanel).toBeHidden();
+
+		await productPublisherPage.selectionStyleManualRadio.click();
+
+		await expect(productPublisherPage.productEntriesPanel).toBeVisible();
+	}
+);
+
+test(
 	'Preview data source for product relations in page templates',
 	{tag: ['@LPD-70139']},
 	async ({
