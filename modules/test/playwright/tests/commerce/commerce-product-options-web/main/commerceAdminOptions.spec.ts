@@ -279,3 +279,40 @@ test('Create an option from the standalone options portlet', async ({
 	}
 });
 
+test(
+	'Remove an option from the standalone options portlet',
+	{tag: ['@COMMERCE-6280']},
+	async ({apiHelpers, commerceAdminOptionsPage, globalMenuPage}) => {
+		const optionName = 'Color-' + getRandomString();
+		const optionKey = 'color-' + getRandomString();
+
+		try {
+			await globalMenuPage.goToCommerce('Options');
+
+			await commerceAdminOptionsPage.createOption(
+				optionName,
+				'Select from List',
+				optionKey
+			);
+
+			await globalMenuPage.goToCommerce('Options');
+
+			await commerceAdminOptionsPage.deleteOption(optionName);
+
+			await expect(
+				commerceAdminOptionsPage.optionLink(optionName)
+			).toBeHidden();
+		}
+		finally {
+			const options =
+				await apiHelpers.headlessCommerceAdminCatalog.getOptions();
+
+			for (const option of options?.items ?? []) {
+				if (option.key === optionKey) {
+					apiHelpers.data.push({id: option.id, type: 'option'});
+				}
+			}
+		}
+	}
+);
+
