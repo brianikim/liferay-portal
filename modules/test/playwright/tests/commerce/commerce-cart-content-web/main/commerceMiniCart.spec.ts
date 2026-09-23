@@ -1648,3 +1648,423 @@ test(
 		}
 	}
 );
+
+test(
+	'Integer unit of measure promotional prices are shown for a dynamic price bundled product in the mini cart',
+	{tag: ['@COMMERCE-12545', '@LPD-106244']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelsPage,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductDetailsProductOptionsPage,
+		commerceAdminProductPage,
+		commerceMiniCartPage,
+		page,
+		productDetailsPage,
+	}) => {
+		const site = await apiHelpers.headlessAdminSite.postSite({
+			name: getRandomString(),
+		});
+
+		await apiHelpers.headlessDelivery.createSitePage({
+			pageDefinition: getPageDefinition([
+				getWidgetDefinition({
+					id: getRandomString(),
+					widgetName:
+						'com_liferay_commerce_product_content_web_internal_portlet_CPContentPortlet',
+				}),
+				getFragmentDefinition({
+					id: getRandomString(),
+					key: 'COMMERCE_CART_FRAGMENTS-mini-cart',
+				}),
+			]),
+			siteId: site.id,
+			title: getRandomString(),
+		});
+
+		const channel =
+			await apiHelpers.headlessCommerceAdminChannel.postChannel({
+				siteGroupId: site.id,
+			});
+
+		await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+			channel.name,
+			'B2B'
+		);
+
+		await waitForAlert(page);
+
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog({
+				name: getRandomString(),
+			});
+
+		const {account, buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id
+		);
+
+		await apiHelpers.headlessCommerceAdminAccount.postAddress(account.id, {
+			phoneNumber: '12345',
+			regionISOCode: 'LA',
+		});
+
+		const product =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				name: {en_US: getRandomString()},
+			});
+
+		const sku = product.skus[0];
+
+		const unitOfMeasure1 =
+			await apiHelpers.headlessCommerceAdminCatalog.postSkuUnitOfMeasure(
+				sku.id,
+				{
+					basePrice: 30,
+					incrementalOrderQuantity: 1,
+					name: {en_US: 'UOM1'},
+					primary: true,
+					priority: 1,
+					rate: 1,
+				}
+			);
+
+		const unitOfMeasure2 =
+			await apiHelpers.headlessCommerceAdminCatalog.postSkuUnitOfMeasure(
+				sku.id,
+				{
+					basePrice: 30,
+					incrementalOrderQuantity: 1,
+					name: {en_US: 'UOM2'},
+					priority: 2,
+					promoPrice: 20,
+					rate: 1,
+				}
+			);
+
+		const optionKey = getRandomString();
+
+		const option = await apiHelpers.headlessCommerceAdminCatalog.postOption(
+			'select',
+			optionKey,
+			'Color',
+			1
+		);
+
+		const bundleProduct =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				name: {en_US: getRandomString()},
+				productConfiguration: {
+					allowBackOrder: true,
+				},
+				productOptions: [
+					{
+						fieldType: 'select',
+						key: optionKey,
+						name: {en_US: 'Color'},
+						optionId: option.id,
+						priceType: 'dynamic',
+						priority: 1,
+						productOptionValues: [
+							{
+								key: 'blue',
+								name: {en_US: 'Blue'},
+								priority: 1,
+							},
+							{
+								key: 'white',
+								name: {en_US: 'White'},
+								priority: 2,
+							},
+						],
+						required: true,
+						skuContributor: true,
+					},
+				],
+			});
+
+		await test.step('Link each option value to the same SKU at a different unit of measure', async () => {
+			await commerceAdminProductPage.gotoProduct(
+				bundleProduct.name['en_US']
+			);
+
+			await commerceAdminProductDetailsPage.goToProductOptions();
+
+			await commerceAdminProductDetailsProductOptionsPage.openOption(
+				'Color'
+			);
+			await commerceAdminProductDetailsProductOptionsPage.editOptionValue(
+				'Blue',
+				{
+					quantity: '1',
+					sku: sku.sku,
+					unitOfMeasureKey: unitOfMeasure1.key,
+				}
+			);
+			await commerceAdminProductDetailsProductOptionsPage.editOptionValue(
+				'White',
+				{
+					quantity: '1',
+					sku: sku.sku,
+					unitOfMeasureKey: unitOfMeasure2.key,
+				}
+			);
+			await commerceAdminProductDetailsProductOptionsPage.closeOption();
+
+			await commerceAdminProductPage.generateSkus();
+
+			await expect(
+				page.getByText('Showing 1 to 3 of 3 entries.')
+			).toBeVisible();
+		});
+
+		await performLogout(page);
+		await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+		try {
+			await test.step('The product details page shows the list and promotional prices for each option value', async () => {
+				await page.goto(
+					`/web/${site.name}/p/${bundleProduct.name['en_US']}`,
+					{
+						waitUntil: 'networkidle',
+					}
+				);
+
+				await productDetailsPage.selectOption('Blue', 'Color');
+
+				await expect(
+					await productDetailsPage.skuField('BLUE')
+				).toBeVisible();
+				await expect(
+					await productDetailsPage.priceField(
+						'$ 30.00',
+						productDetailsPage.priceContainer
+					)
+				).toBeVisible();
+
+				await productDetailsPage.addToCartButton.click();
+
+				await page.waitForLoadState('networkidle');
+
+				await commerceMiniCartPage.miniCartButton.click();
+
+				await expect(
+					commerceMiniCartPage.miniCartSku('BLUE')
+				).toBeVisible();
+
+				await clickAndExpectToBeHidden({
+					target: commerceMiniCartPage.miniCartItemsContainer,
+					trigger: commerceMiniCartPage.miniCartButtonClose,
+				});
+
+				await productDetailsPage.selectOption('White', 'Color');
+
+				await expect(
+					await productDetailsPage.skuField('WHITE')
+				).toBeVisible();
+				await expect(
+					await productDetailsPage.priceField(
+						'$ 30.00',
+						productDetailsPage.priceContainer
+					)
+				).toBeVisible();
+				await expect(
+					await productDetailsPage.promoPriceField(
+						'$ 20.00',
+						productDetailsPage.priceContainer
+					)
+				).toBeVisible();
+
+				await productDetailsPage.addToCartButton.click();
+
+				await page.waitForLoadState('networkidle');
+			});
+
+			await test.step('The mini cart shows both bundled order items with their respective prices', async () => {
+				await commerceMiniCartPage.miniCartButton.click();
+
+				for (const [skuName, bundledItem, price] of [
+					[
+						'BLUE',
+						`Blue(1 × ${product.name['en_US']} ${unitOfMeasure1.key})`,
+						'$ 30.00',
+					],
+					[
+						'WHITE',
+						`White(1 × ${product.name['en_US']} ${unitOfMeasure2.key})`,
+						'$ 20.00',
+					],
+				]) {
+					await clickAndExpectToBeVisible({
+						target: commerceMiniCartPage
+							.miniCartItem(skuName)
+							.getByText(bundledItem),
+						trigger:
+							commerceMiniCartPage.miniCartItemShowOptionsButton(
+								skuName
+							),
+					});
+
+					await expect(
+						commerceMiniCartPage
+							.miniCartItem(skuName)
+							.getByText(price)
+							.first()
+					).toBeVisible();
+				}
+			});
+		}
+		finally {
+			const orders =
+				await apiHelpers.headlessCommerceAdminOrder.getOrdersPage();
+
+			if (orders.items[0]) {
+				apiHelpers.data.push({id: orders.items[0].id, type: 'order'});
+			}
+		}
+	}
+);
+
+test(
+	'The Request a Quote button is visible in the Mini Cart fragment and in the order details page',
+	{tag: ['@COMMERCE-11030', '@LPD-106244']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelDetailsPage,
+		commerceAdminChannelsPage,
+		commerceMiniCartPage,
+		commerceThemeMiniumCatalogPage,
+		orderDetailsPage,
+		page,
+	}) => {
+		const {channel, site} = await miniumSetUp(apiHelpers);
+
+		const layout = await apiHelpers.headlessDelivery.createSitePage({
+			pageDefinition: getPageDefinition([
+				getFragmentDefinition({
+					id: getRandomString(),
+					key: 'COMMERCE_CART_FRAGMENTS-mini-cart',
+				}),
+			]),
+			siteId: site.id,
+			title: getRandomString(),
+		});
+
+		const {buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id
+		);
+
+		await commerceAdminChannelsPage.goto();
+		await (
+			await commerceAdminChannelsPage.channelsTableRowLink(channel.name)
+		).click();
+		await commerceAdminChannelDetailsPage.allowRequestAQuote.click();
+		await commerceAdminChannelDetailsPage.saveButton.click();
+
+		await waitForAlert(page);
+
+		await performLogout(page);
+		await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+		await page.goto(`/web/${site.name}`, {waitUntil: 'networkidle'});
+
+		await commerceThemeMiniumCatalogPage.addToCart('U-Joint');
+
+		await page.goto(`/web${site.friendlyUrlPath}${layout.friendlyUrlPath}`);
+
+		await commerceMiniCartPage.miniCartButton.click();
+
+		await expect(commerceMiniCartPage.requestAQuoteButton).toBeVisible();
+
+		await commerceMiniCartPage.requestAQuoteButton.click();
+
+		await expect(orderDetailsPage.requestAQuoteButton).toBeVisible();
+	}
+);
+
+test(
+	'Products added to the cart are shown in the Mini Cart fragment and can be checked out',
+	{tag: ['@COMMERCE-10778', '@LPD-106244']},
+	async ({
+		apiHelpers,
+		checkoutPage,
+		commerceMiniCartPage,
+		commerceThemeMiniumCatalogPage,
+		page,
+	}) => {
+		const {site} = await miniumSetUp(apiHelpers);
+
+		const {account, buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id
+		);
+
+		await apiHelpers.headlessCommerceAdminAccount.postAddress(account.id, {
+			phoneNumber: '12345',
+			regionISOCode: 'AL',
+		});
+
+		const layout = await apiHelpers.headlessDelivery.createSitePage({
+			pageDefinition: getPageDefinition([
+				getFragmentDefinition({
+					id: getRandomString(),
+					key: 'COMMERCE_CART_FRAGMENTS-mini-cart',
+				}),
+			]),
+			siteId: site.id,
+			title: getRandomString(),
+		});
+
+		await performLogout(page);
+		await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+		try {
+			await page.goto(`/web/${site.name}`, {waitUntil: 'networkidle'});
+
+			await commerceThemeMiniumCatalogPage.addToCart('U-Joint');
+
+			await page.goto(
+				`/web${site.friendlyUrlPath}${layout.friendlyUrlPath}`
+			);
+
+			await commerceMiniCartPage.miniCartButton.click();
+
+			await expect(
+				commerceMiniCartPage.miniCartItem('U-Joint')
+			).toBeVisible();
+			await expect(
+				commerceMiniCartPage.miniCartSku('MIN55861')
+			).toBeVisible();
+			await expect(
+				commerceMiniCartPage.miniCartSummaryItem('Quantity')
+			).toHaveText('1');
+
+			await commerceMiniCartPage.submitButton.click();
+
+			await checkoutPage.performCheckout({
+				shippingAddress: {
+					city: 'Test City',
+					countryLabel: 'United States',
+					name: 'Address Name',
+					phoneNumber: '12345',
+					regionLabel: 'Alabama',
+					street: 'Test Address',
+					zip: 'Test Zip Code',
+				},
+			});
+
+			await expect(checkoutPage.orderSuccessMessage).toBeVisible();
+		}
+		finally {
+			const orders =
+				await apiHelpers.headlessCommerceAdminOrder.getOrdersPage();
+
+			if (orders.items[0]) {
+				apiHelpers.data.push({id: orders.items[0].id, type: 'order'});
+			}
+		}
+	}
+);
