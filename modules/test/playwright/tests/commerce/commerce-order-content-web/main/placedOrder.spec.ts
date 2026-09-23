@@ -27,6 +27,7 @@ import performLogin, {
 import {waitForAlert} from '../../../../utils/waitForAlert';
 import getPageDefinition from '../../../layout-content-page-editor-web/main/utils/getPageDefinition';
 import getWidgetDefinition from '../../../layout-content-page-editor-web/main/utils/getWidgetDefinition';
+import {templatesPageTest} from '../../../template-web/main/fixtures/templatesPageTest';
 import {
 	createAccountWithBuyerUser,
 	miniumSetUp,
@@ -54,6 +55,7 @@ export const test = mergeTests(
 	pageEditorPagesTest,
 	pageViewModePagesTest,
 	systemSettingsPageTest,
+	templatesPageTest,
 	usersAndOrganizationsPagesTest
 );
 
@@ -2068,5 +2070,80 @@ test(
 		await expect(placedOrdersPage.orderDetailsValue('ERC')).toHaveText(
 			externalReferenceCode
 		);
+	}
+);
+
+test(
+	'Can use a different display template for the placed orders widget',
+	{tag: ['@COMMERCE-12266', '@LPD-106244']},
+	async ({apiHelpers, page, placedOrdersPage, site, templatesPage}) => {
+		const widgetTemplateName = getRandomString();
+
+		// Create a Placed Orders widget template
+
+		await templatesPage.gotoWidgetTemplates(site.friendlyUrlPath);
+
+		await templatesPage.createWidgetTemplate(
+			widgetTemplateName,
+			'Placed Orders Template'
+		);
+
+		try {
+			const layout = await apiHelpers.headlessDelivery.createSitePage({
+				pageDefinition: getPageDefinition([
+					getWidgetDefinition({
+						id: getRandomString(),
+						widgetName:
+							'com_liferay_commerce_order_content_web_internal_portlet_CommerceOrderContentPortlet',
+					}),
+				]),
+				siteId: site.id,
+				title: getRandomString(),
+			});
+
+			// Select the created template in the widget configuration
+
+			await page.goto(
+				`${liferayConfig.environment.baseUrl}/web${site.friendlyUrlPath}${layout.friendlyUrlPath}`
+			);
+
+			await placedOrdersPage.optionsButton.click();
+
+			await expect(placedOrdersPage.configurationMenuItem).toBeVisible();
+
+			await placedOrdersPage.configurationMenuItem.click();
+
+			await placedOrdersPage.selectDisplayTemplate(widgetTemplateName);
+
+			await placedOrdersPage.configurationIFrameSaveButton.click();
+
+			await waitForAlert(
+				placedOrdersPage.configurationIFrame,
+				'Success:You have successfully updated the setup'
+			);
+
+			// Reopen the configuration and assert the template persists
+
+			await page.reload();
+
+			await placedOrdersPage.optionsButton.click();
+
+			await expect(placedOrdersPage.configurationMenuItem).toBeVisible();
+
+			await placedOrdersPage.configurationMenuItem.click();
+
+			await expect(
+				placedOrdersPage.configurationIFrameDisplayTemplateSelect
+			).toHaveText(widgetTemplateName);
+		}
+		finally {
+			await templatesPage.gotoWidgetTemplates(site.friendlyUrlPath);
+
+			await templatesPage.clickAction('Delete', widgetTemplateName);
+
+			await page.getByRole('button', {name: 'Delete'}).click();
+
+			await waitForAlert(page);
+		}
 	}
 );
