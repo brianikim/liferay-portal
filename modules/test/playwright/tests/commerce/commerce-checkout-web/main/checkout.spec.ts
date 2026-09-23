@@ -3004,3 +3004,96 @@ test('Delivery and payment terms checkout steps are hidden without the manage te
 		0
 	);
 });
+
+test(
+	'The list price is shown at checkout when the promotion price is higher',
+	{tag: ['@COMMERCE-10279']},
+	async ({
+		apiHelpers,
+		checkoutPage,
+		commerceMiniCartPage,
+		commerceThemeMiniumCatalogPage,
+		page,
+	}) => {
+		const {catalog, site} = await miniumSetUp(apiHelpers);
+
+		const sku =
+			await apiHelpers.headlessCommerceAdminCatalog.getSkuByName(
+				'MIN55861'
+			);
+
+		const basePromoPriceList =
+			await apiHelpers.headlessCommerceAdminPricing.getBasePromoPriceListId(
+				catalog.id
+			);
+
+		await apiHelpers.headlessCommerceAdminPricing.postPriceEntry({
+			price: 40,
+			priceListId: basePromoPriceList.items[0].id,
+			skuId: sku.id,
+		});
+
+		const {account, buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id
+		);
+
+		await apiHelpers.headlessCommerceAdminAccount.postAddress(account.id, {
+			phoneNumber: '12345',
+			regionISOCode: 'AL',
+		});
+
+		await performLogout(page);
+		await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+		try {
+			await page.goto(`/web/${site.name}/catalog`);
+
+			await expect(
+				commerceThemeMiniumCatalogPage
+					.productCard('U-Joint')
+					.getByText('$ 24.00')
+			).toBeVisible();
+
+			await commerceThemeMiniumCatalogPage.addToCart('U-Joint');
+
+			await commerceMiniCartPage.miniCartButton.click();
+			await commerceMiniCartPage.submitButton.click();
+
+			await checkoutPage.performCheckout(
+				{
+					shippingAddress: {
+						city: 'Test City',
+						countryLabel: 'United States',
+						name: 'Address Name',
+						phoneNumber: '12345',
+						regionLabel: 'Alabama',
+						street: 'Test Address',
+						zip: 'Test Zip Code',
+					},
+				},
+				async (activeStep) => {
+					if (!activeStep.includes('Order Summary')) {
+						return;
+					}
+
+					await expect(
+						(await checkoutPage.orderSummaryTableRow(4, '$ 24.00'))
+							.row
+					).toBeVisible();
+					await expect(
+						checkoutPage.orderItemsTableLocator.getByText('$ 40.00')
+					).toHaveCount(0);
+				}
+			);
+		}
+		finally {
+			const orders =
+				await apiHelpers.headlessCommerceAdminOrder.getOrdersPage();
+
+			if (orders.items[0]) {
+				apiHelpers.data.push({id: orders.items[0].id, type: 'order'});
+			}
+		}
+	}
+);
