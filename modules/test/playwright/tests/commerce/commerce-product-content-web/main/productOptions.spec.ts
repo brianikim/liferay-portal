@@ -1731,3 +1731,138 @@ test(
 		}
 	}
 );
+
+test(
+	'Option Selector fragment mapped in a display page template shows the option value delta prices',
+	{tag: ['@COMMERCE-9383']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelsPage,
+		commerceAdminProductPage,
+		displayPageTemplatesPage,
+		page,
+		pageEditorPage,
+		productDetailsPage,
+		site,
+	}) => {
+		let buyerUser;
+		let product;
+
+		const optionValues = [
+			{deltaPrice: 0, key: 'value1', name: 'Value 1'},
+			{deltaPrice: 10, key: 'value2', name: 'Value 2'},
+			{deltaPrice: 20, key: 'value3', name: 'Value 3'},
+		];
+
+		await test.step('Create a channel, catalog and buyer user', async () => {
+			const channel =
+				await apiHelpers.headlessCommerceAdminChannel.postChannel({
+					siteGroupId: site.id,
+				});
+
+			await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+				channel.name,
+				'B2B'
+			);
+
+			const account = await apiHelpers.headlessAdminUser.postAccount({
+				name: getRandomString(),
+				type: 'business',
+			});
+
+			buyerUser = await configureBuyerUserForSite(
+				account,
+				apiHelpers,
+				site,
+				'demo.unprivileged@liferay.com'
+			);
+		});
+
+		await test.step('Create a product with a SKU contributor select option carrying delta prices', async () => {
+			const catalog =
+				await apiHelpers.headlessCommerceAdminCatalog.postCatalog({
+					name: getRandomString(),
+				});
+
+			const option =
+				await apiHelpers.headlessCommerceAdminCatalog.postOption(
+					'select',
+					getRandomString(),
+					'Option Select from List',
+					1
+				);
+
+			product = await apiHelpers.headlessCommerceAdminCatalog.postProduct(
+				{
+					catalogId: catalog.id,
+					name: {en_US: 'Product' + getRandomInt()},
+					productOptions: [
+						{
+							fieldType: 'select',
+							key: option.key,
+							name: {en_US: 'Option Select from List'},
+							optionId: option.id,
+							priceType: 'static',
+							priority: 1,
+							productOptionValues: optionValues.map(
+								(optionValue, index) => ({
+									deltaPrice: optionValue.deltaPrice,
+									key: optionValue.key,
+									name: {en_US: optionValue.name},
+									priority: index + 1,
+									quantity: 1,
+								})
+							),
+							skuContributor: true,
+						},
+					],
+				}
+			);
+
+			await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+			await commerceAdminProductPage.generateSkus();
+		});
+
+		await test.step('Map the Option Selector fragment in a default display page template', async () => {
+			await displayPageTemplatesPage.createDefaultTemplateWithFragments({
+				className: 'com.liferay.commerce.product.model.CPDefinition',
+				fragments: [
+					{
+						collectionName: 'Product',
+						fragmentName: 'Option Selector',
+					},
+				],
+				pageEditorPage,
+				site,
+			});
+		});
+
+		await test.step('As a buyer, the option values show their delta prices', async () => {
+			await performLogout(page);
+			await performLoginViaApi({
+				page,
+				screenName: buyerUser.alternateName,
+			});
+
+			await page.goto(`/web/${site.name}/p/${product.name['en_US']}`, {
+				waitUntil: 'networkidle',
+			});
+
+			await productDetailsPage
+				.optionSelector('Option Select from List')
+				.click();
+
+			await expect(
+				productDetailsPage
+					.optionSelector('Option Select from List')
+					.locator('option')
+			).toHaveText([
+				'Choose an Option',
+				'Value 1',
+				'Value 2 + $ 10.00',
+				'Value 3 + $ 20.00',
+			]);
+		});
+	}
+);
+
