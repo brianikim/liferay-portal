@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import java.util.Date;
+import java.util.List;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -85,7 +86,7 @@ public class DSCommerceOrderSignatureStatusServlet extends HttpServlet {
 
 			printWriter.write(
 				_getSignatureStatusJSON(
-					_dsRequestManager.fetchDSRequest(
+					_dsRequestManager.getFileEntryDSRequests(
 						user.getCompanyId(),
 						commerceOrderAttachment.getFileEntryId())));
 		}
@@ -96,6 +97,18 @@ public class DSCommerceOrderSignatureStatusServlet extends HttpServlet {
 			PermissionThreadLocal.setPermissionChecker(permissionChecker);
 			PrincipalThreadLocal.setName(name);
 		}
+	}
+
+	private JSONObject _getHistoryJSONObject(DSRequest dsRequest) {
+		return JSONUtil.put(
+			"createDate", _toTime(dsRequest.getCreateDate())
+		).put(
+			"providerRequestId", dsRequest.getProviderRequestId()
+		).put(
+			"requestStatus", dsRequest.getStatus()
+		).put(
+			"statusDate", _toTime(dsRequest.getStatusDate())
+		);
 	}
 
 	private JSONObject _getRecipientJSONObject(
@@ -116,13 +129,22 @@ public class DSCommerceOrderSignatureStatusServlet extends HttpServlet {
 		);
 	}
 
-	private String _getSignatureStatusJSON(DSRequest dsRequest) throws Exception {
-		if (dsRequest == null) {
+	private String _getSignatureStatusJSON(List<DSRequest> dsRequests)
+		throws Exception {
+
+		if (dsRequests.isEmpty()) {
 			return "{}";
 		}
 
+		DSRequest dsRequest = dsRequests.get(0);
+
 		return JSONUtil.put(
 			"expirationDate", _toTime(dsRequest.getExpirationDate())
+		).put(
+			"history",
+			JSONUtil.toJSONArray(
+				dsRequests.subList(1, dsRequests.size()),
+				this::_getHistoryJSONObject)
 		).put(
 			"providerRequestId", dsRequest.getProviderRequestId()
 		).put(

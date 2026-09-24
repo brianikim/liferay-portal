@@ -215,6 +215,60 @@ function SignatureDetailsContent({detail}) {
 					</li>
 				))}
 			</ul>
+
+			{detail.history?.length ? (
+				<>
+					<h5>{Liferay.Language.get('history')}</h5>
+
+					<ClayTable>
+						<ClayTable.Head>
+							<ClayTable.Row>
+								<ClayTable.Cell headingCell>
+									{Liferay.Language.get('envelope-id')}
+								</ClayTable.Cell>
+
+								<ClayTable.Cell headingCell>
+									{Liferay.Language.get('status')}
+								</ClayTable.Cell>
+
+								<ClayTable.Cell headingCell>
+									{Liferay.Language.get('create-date')}
+								</ClayTable.Cell>
+
+								<ClayTable.Cell headingCell>
+									{Liferay.Language.get('date')}
+								</ClayTable.Cell>
+							</ClayTable.Row>
+						</ClayTable.Head>
+
+						<ClayTable.Body>
+							{detail.history.map((historyEntry) => (
+								<ClayTable.Row
+									key={historyEntry.providerRequestId}
+								>
+									<ClayTable.Cell>
+										{historyEntry.providerRequestId}
+									</ClayTable.Cell>
+
+									<ClayTable.Cell>
+										<SignatureStatusLabel
+											status={historyEntry.requestStatus}
+										/>
+									</ClayTable.Cell>
+
+									<ClayTable.Cell>
+										{formatDate(historyEntry.createDate)}
+									</ClayTable.Cell>
+
+									<ClayTable.Cell>
+										{formatDate(historyEntry.statusDate)}
+									</ClayTable.Cell>
+								</ClayTable.Row>
+							))}
+						</ClayTable.Body>
+					</ClayTable>
+				</>
+			) : null}
 		</div>
 	);
 }

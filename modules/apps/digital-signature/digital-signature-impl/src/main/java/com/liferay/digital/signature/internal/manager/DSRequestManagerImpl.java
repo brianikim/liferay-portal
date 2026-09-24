@@ -65,6 +65,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -300,6 +301,85 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			_log.error(
 				"Unable to load the signature requests for company " +
 					companyId,
+				exception);
+		}
+
+		return dsRequests;
+	}
+
+	@Override
+	public List<DSRequest> getFileEntryDSRequests(
+		long companyId, long fileEntryId) {
+
+		List<DSRequest> dsRequests = new ArrayList<>();
+
+		if (!_isEnabled(companyId, 0)) {
+			return dsRequests;
+		}
+
+		ObjectDefinition dsRequestDocumentObjectDefinition =
+			_objectDefinitionLocalService.
+				fetchObjectDefinitionByExternalReferenceCode(
+					"L_DS_REQUEST_DOCUMENT", companyId);
+		ObjectDefinition dsRequestRecipientObjectDefinition =
+			_objectDefinitionLocalService.
+				fetchObjectDefinitionByExternalReferenceCode(
+					"L_DS_REQUEST_RECIPIENT", companyId);
+		ObjectDefinition dsRequestObjectDefinition =
+			_objectDefinitionLocalService.
+				fetchObjectDefinitionByExternalReferenceCode(
+					"L_DS_REQUEST", companyId);
+
+		if ((dsRequestDocumentObjectDefinition == null) ||
+			(dsRequestRecipientObjectDefinition == null) ||
+			(dsRequestObjectDefinition == null)) {
+
+			return dsRequests;
+		}
+
+		try {
+			String documentFieldName = _getRelationshipFieldName(
+				dsRequestObjectDefinition, "dsRequestToDSRequestDocuments");
+
+			if (documentFieldName == null) {
+				return dsRequests;
+			}
+
+			Set<Long> requestIds = new LinkedHashSet<>();
+
+			for (Map<String, Serializable> documentValues :
+					_getValuesList(
+						companyId, "(fileEntryId eq " + fileEntryId + ")",
+						dsRequestDocumentObjectDefinition,
+						new Sort[] {
+							new Sort(Field.CREATE_DATE, Sort.LONG_TYPE, true)
+						})) {
+
+				requestIds.add(
+					GetterUtil.getLong(documentValues.get(documentFieldName)));
+			}
+
+			if (requestIds.isEmpty()) {
+				return dsRequests;
+			}
+
+			Map<Long, DSRequest> dsRequestsByRequestId =
+				_getDSRequestsByRequestId(
+					companyId, dsRequestObjectDefinition,
+					dsRequestRecipientObjectDefinition, requestIds);
+
+			for (long requestId : requestIds) {
+				DSRequest dsRequest = dsRequestsByRequestId.get(requestId);
+
+				if (dsRequest != null) {
+					dsRequests.add(dsRequest);
+				}
+			}
+		}
+		catch (Exception exception) {
+			_log.error(
+				"Unable to load the signature requests for file entry " +
+					fileEntryId,
 				exception);
 		}
 
