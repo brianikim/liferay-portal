@@ -176,6 +176,45 @@ public class DSRequestManagerTest {
 	}
 
 	@Test
+	public void testFetchDSRequestSortsRecipientsBySigningOrder()
+		throws Exception {
+
+		long companyId = TestPropsValues.getCompanyId();
+
+		long fileEntryId = RandomTestUtil.randomInt();
+
+		DSEnvelope dsEnvelope = _createDSEnvelope(fileEntryId);
+
+		List<DSRecipient> dsRecipients = dsEnvelope.getDSRecipients();
+
+		DSRecipient dsRecipient1 = dsRecipients.get(0);
+		DSRecipient dsRecipient2 = dsRecipients.get(1);
+
+		dsRecipient1.setRoutingOrder(2);
+		dsRecipient2.setRoutingOrder(1);
+
+		_dsRequestManager.addDSRequest(
+			companyId, _group.getGroupId(), TestPropsValues.getUserId(),
+			dsEnvelope, new long[] {fileEntryId});
+
+		DSRequest dsRequest = _dsRequestManager.fetchDSRequest(
+			companyId, fileEntryId);
+
+		List<DSRequestRecipient> dsRequestRecipients =
+			dsRequest.getDSRequestRecipients();
+
+		DSRequestRecipient dsRequestRecipient1 = dsRequestRecipients.get(0);
+		DSRequestRecipient dsRequestRecipient2 = dsRequestRecipients.get(1);
+
+		Assert.assertEquals(
+			"mei.lin@liferay.com", dsRequestRecipient1.getEmailAddress());
+		Assert.assertEquals(1, dsRequestRecipient1.getSigningOrder());
+		Assert.assertEquals(
+			"ray.chen@liferay.com", dsRequestRecipient2.getEmailAddress());
+		Assert.assertEquals(2, dsRequestRecipient2.getSigningOrder());
+	}
+
+	@Test
 	public void testGetDSRequestsForMultipleDocuments() throws Exception {
 		long companyId = TestPropsValues.getCompanyId();
 
@@ -228,6 +267,25 @@ public class DSRequestManagerTest {
 			dsRequest.isSignatureRequired(_RECIPIENT_EMAIL_ADDRESS));
 		Assert.assertFalse(
 			dsRequest.isSignatureRequired(RandomTestUtil.randomString()));
+	}
+
+	@Test
+	public void testIsSignatureRequiredWhenRecipientStatusIsCreated()
+		throws Exception {
+
+		long companyId = TestPropsValues.getCompanyId();
+
+		long fileEntryId = RandomTestUtil.randomInt();
+
+		_addDSRequestObjectEntries(
+			companyId, TestPropsValues.getUserId(), fileEntryId, "created",
+			"sent");
+
+		DSRequest dsRequest = _dsRequestManager.fetchDSRequest(
+			companyId, fileEntryId);
+
+		Assert.assertFalse(
+			dsRequest.isSignatureRequired(_RECIPIENT_EMAIL_ADDRESS));
 	}
 
 	private void _addDSRequestObjectEntries(
