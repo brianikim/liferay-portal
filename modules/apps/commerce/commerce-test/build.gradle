@@ -34,6 +34,7 @@ dependencies {
 	testIntegrationImplementation project(":apps:commerce:commerce-tax-engine-fixed-api")
 	testIntegrationImplementation project(":apps:commerce:commerce-term-api")
 	testIntegrationImplementation project(":apps:commerce:commerce-test-util")
+	testIntegrationImplementation project(":apps:digital-signature:digital-signature-api")
 	testIntegrationImplementation project(":apps:export-import:export-import-test-util")
 	testIntegrationImplementation project(":apps:fragment:fragment-api")
 	testIntegrationImplementation project(":apps:friendly-url:friendly-url-api")
