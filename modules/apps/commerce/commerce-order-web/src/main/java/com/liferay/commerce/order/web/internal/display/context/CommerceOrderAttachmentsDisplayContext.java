@@ -5,6 +5,8 @@
 
 package com.liferay.commerce.order.web.internal.display.context;
 
+import com.liferay.commerce.model.CommerceOrder;
+import com.liferay.commerce.order.CommerceOrderAttachmentAdminFDSActionContributor;
 import com.liferay.commerce.order.web.internal.display.context.helper.CommerceOrderRequestHelper;
 import com.liferay.frontend.data.set.model.FDSActionDropdownItem;
 import com.liferay.frontend.data.set.model.FDSActionDropdownItemBuilder;
@@ -17,10 +19,12 @@ import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.portlet.url.builder.PortletURLBuilder;
 import com.liferay.portal.kernel.util.HashMapBuilder;
+import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.Portal;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -30,10 +34,14 @@ import java.util.Map;
 public class CommerceOrderAttachmentsDisplayContext {
 
 	public CommerceOrderAttachmentsDisplayContext(
-		long commerceOrderId, HttpServletRequest httpServletRequest,
-		Language language) {
+		CommerceOrder commerceOrder,
+		List<CommerceOrderAttachmentAdminFDSActionContributor>
+			commerceOrderAttachmentAdminFDSActionContributors,
+		HttpServletRequest httpServletRequest, Language language) {
 
-		_commerceOrderId = commerceOrderId;
+		_commerceOrder = commerceOrder;
+		_commerceOrderAttachmentAdminFDSActionContributors =
+			commerceOrderAttachmentAdminFDSActionContributors;
 		_httpServletRequest = httpServletRequest;
 		_language = language;
 
@@ -42,17 +50,46 @@ public class CommerceOrderAttachmentsDisplayContext {
 	}
 
 	public Map<String, Object> getAdditionalProps() {
-		return HashMapBuilder.<String, Object>put(
-			"commerceOrderId", _commerceOrderId
-		).build();
+		Map<String, Object> additionalProps =
+			HashMapBuilder.<String, Object>put(
+				"commerceOrderId", _commerceOrder.getCommerceOrderId()
+			).build();
+
+		for (CommerceOrderAttachmentAdminFDSActionContributor
+				commerceOrderAttachmentAdminFDSActionContributor :
+					_commerceOrderAttachmentAdminFDSActionContributors) {
+
+			additionalProps.putAll(
+				commerceOrderAttachmentAdminFDSActionContributor.
+					getAdditionalProps(_commerceOrder, _httpServletRequest));
+		}
+
+		return additionalProps;
 	}
 
 	public String getAPIURL() {
 		return _getBaseAPIURL();
 	}
 
+	public List<FDSActionDropdownItem> getBulkFDSActionDropdownItems() {
+		List<FDSActionDropdownItem> bulkFDSActionDropdownItems =
+			new ArrayList<>();
+
+		for (CommerceOrderAttachmentAdminFDSActionContributor
+				commerceOrderAttachmentAdminFDSActionContributor :
+					_commerceOrderAttachmentAdminFDSActionContributors) {
+
+			bulkFDSActionDropdownItems.addAll(
+				commerceOrderAttachmentAdminFDSActionContributor.
+					getBulkFDSActionDropdownItems(
+						_commerceOrder, _httpServletRequest));
+		}
+
+		return bulkFDSActionDropdownItems;
+	}
+
 	public long getCommerceOrderId() {
-		return _commerceOrderId;
+		return _commerceOrder.getCommerceOrderId();
 	}
 
 	public CreationMenu getCreationMenu() {
@@ -64,7 +101,7 @@ public class CommerceOrderAttachmentsDisplayContext {
 					).setMVCRenderCommandName(
 						"/commerce_order/edit_commerce_order_attachment"
 					).setParameter(
-						"commerceOrderId", _commerceOrderId
+						"commerceOrderId", _commerceOrder.getCommerceOrderId()
 					).setWindowState(
 						LiferayWindowState.POP_UP
 					).buildString());
@@ -76,46 +113,67 @@ public class CommerceOrderAttachmentsDisplayContext {
 	}
 
 	public List<FDSActionDropdownItem> getFDSActionDropdownItems() {
-		return FDSActionDropdownItemList.of(
-			FDSActionDropdownItemBuilder.setHref(
-				_getEditURL()
-			).setIcon(
-				"pencil"
-			).setLabel(
-				_language.get(_httpServletRequest, "edit")
-			).setPermissionKey(
-				"update"
-			).setTarget(
-				"sidePanel"
-			).build(
-				"edit"
-			),
-			FDSActionDropdownItemBuilder.setHref(
-				StringPool.POUND
-			).setIcon(
-				"download"
-			).setLabel(
-				_language.get(_httpServletRequest, "download")
-			).build(
-				"download"
-			),
-			FDSActionDropdownItemBuilder.setHref(
-				StringPool.POUND
-			).setIcon(
-				"trash"
-			).setLabel(
-				_language.get(_httpServletRequest, "delete")
-			).setPermissionKey(
-				"delete"
-			).build(
-				"delete"
-			));
+		List<FDSActionDropdownItem> fdsActionDropdownItems =
+			FDSActionDropdownItemList.of(
+				FDSActionDropdownItemBuilder.setHref(
+					_getEditURL()
+				).setIcon(
+					"pencil"
+				).setLabel(
+					_language.get(_httpServletRequest, "edit")
+				).setPermissionKey(
+					"update"
+				).setTarget(
+					"sidePanel"
+				).build(
+					"edit"
+				),
+				FDSActionDropdownItemBuilder.setHref(
+					StringPool.POUND
+				).setIcon(
+					"download"
+				).setLabel(
+					_language.get(_httpServletRequest, "download")
+				).build(
+					"download"
+				),
+				FDSActionDropdownItemBuilder.setHref(
+					StringPool.POUND
+				).setIcon(
+					"trash"
+				).setLabel(
+					_language.get(_httpServletRequest, "delete")
+				).setPermissionKey(
+					"delete"
+				).build(
+					"delete"
+				));
+
+		for (CommerceOrderAttachmentAdminFDSActionContributor
+				commerceOrderAttachmentAdminFDSActionContributor :
+					_commerceOrderAttachmentAdminFDSActionContributors) {
+
+			fdsActionDropdownItems.addAll(
+				commerceOrderAttachmentAdminFDSActionContributor.
+					getFDSActionDropdownItems(
+						_commerceOrder, _httpServletRequest));
+		}
+
+		return fdsActionDropdownItems;
+	}
+
+	public String getSelectionType() {
+		if (ListUtil.isEmpty(getBulkFDSActionDropdownItems())) {
+			return null;
+		}
+
+		return "multiple";
 	}
 
 	private String _getBaseAPIURL() {
 		return StringBundler.concat(
 			Portal.PATH_MODULE, "/headless-commerce-admin-order/v1.0/orders/",
-			_commerceOrderId, "/attachments");
+			_commerceOrder.getCommerceOrderId(), "/attachments");
 	}
 
 	private String _getEditURL() {
@@ -126,13 +184,15 @@ public class CommerceOrderAttachmentsDisplayContext {
 		).setParameter(
 			"commerceOrderAttachmentId", "{id}"
 		).setParameter(
-			"commerceOrderId", _commerceOrderId
+			"commerceOrderId", _commerceOrder.getCommerceOrderId()
 		).setWindowState(
 			LiferayWindowState.POP_UP
 		).buildString();
 	}
 
-	private final long _commerceOrderId;
+	private final CommerceOrder _commerceOrder;
+	private final List<CommerceOrderAttachmentAdminFDSActionContributor>
+		_commerceOrderAttachmentAdminFDSActionContributors;
 	private final CommerceOrderRequestHelper _commerceOrderRequestHelper;
 	private final HttpServletRequest _httpServletRequest;
 	private final Language _language;

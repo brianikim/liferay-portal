@@ -5,6 +5,8 @@
 
 package com.liferay.commerce.digital.signature.internal.helper;
 
+import com.liferay.account.model.AccountEntryUserRel;
+import com.liferay.account.service.AccountEntryUserRelLocalService;
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.model.CommerceOrderAttachment;
 import com.liferay.commerce.service.CommerceOrderAttachmentLocalService;
@@ -14,17 +16,21 @@ import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.digital.signature.request.DSRequestManager;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
+import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HttpComponentsUtil;
 import com.liferay.portal.kernel.util.Portal;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -34,6 +40,25 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = {})
 public class DSCommerceOrderAttachmentHelper {
+
+	public List<User> getAccountUsers(CommerceOrder commerceOrder) {
+		List<User> users = new ArrayList<>();
+
+		for (AccountEntryUserRel accountEntryUserRel :
+				_accountEntryUserRelLocalService.
+					getAccountEntryUserRelsByAccountEntryId(
+						commerceOrder.getCommerceAccountId())) {
+
+			User user = _userLocalService.fetchUser(
+				accountEntryUserRel.getAccountUserId());
+
+			if ((user != null) && user.isActive()) {
+				users.add(user);
+			}
+		}
+
+		return users;
+	}
 
 	public String getActionURL(String path, ThemeDisplay themeDisplay) {
 		String url = HttpComponentsUtil.addParameter(
@@ -132,11 +157,29 @@ public class DSCommerceOrderAttachmentHelper {
 		return false;
 	}
 
+	public boolean isRequestable(DSRequest dsRequest) {
+		if ((dsRequest == null) ||
+			Objects.equals(dsRequest.getStatus(), "declined") ||
+			Objects.equals(dsRequest.getStatus(), "expired") ||
+			Objects.equals(dsRequest.getStatus(), "voided")) {
+
+			return true;
+		}
+
+		return false;
+	}
+
+	@Reference
+	private AccountEntryUserRelLocalService _accountEntryUserRelLocalService;
+
 	@Reference
 	private CommerceOrderAttachmentLocalService
 		_commerceOrderAttachmentLocalService;
 
 	@Reference
 	private DSRequestManager _dsRequestManager;
+
+	@Reference
+	private UserLocalService _userLocalService;
 
 }

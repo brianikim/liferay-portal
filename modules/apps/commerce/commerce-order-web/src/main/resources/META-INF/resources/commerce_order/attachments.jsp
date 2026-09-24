@@ -14,9 +14,12 @@ CommerceOrderAttachmentsDisplayContext commerceOrderAttachmentsDisplayContext = 
 <frontend-data-set:headless-display
 	additionalProps="<%= commerceOrderAttachmentsDisplayContext.getAdditionalProps() %>"
 	apiURL="<%= commerceOrderAttachmentsDisplayContext.getAPIURL() %>"
+	bulkActionDropdownItems="<%= commerceOrderAttachmentsDisplayContext.getBulkFDSActionDropdownItems() %>"
 	creationMenu="<%= commerceOrderAttachmentsDisplayContext.getCreationMenu() %>"
 	fdsActionDropdownItems="<%= commerceOrderAttachmentsDisplayContext.getFDSActionDropdownItems() %>"
 	id="<%= CommerceOrderFDSNames.ATTACHMENTS %>"
 	propsTransformer="{AttachmentsFDSPropsTransformer} from commerce-order-web"
+	selectedItemsKey="id"
+	selectionType="<%= commerceOrderAttachmentsDisplayContext.getSelectionType() %>"
 	style="stacked"
 />
