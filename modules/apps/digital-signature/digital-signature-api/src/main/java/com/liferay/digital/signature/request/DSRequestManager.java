@@ -10,6 +10,7 @@ import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.portal.kernel.exception.PortalException;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import org.osgi.annotation.versioning.ProviderType;
@@ -29,6 +30,9 @@ public interface DSRequestManager {
 
 	public Map<Long, DSRequest> getDSRequests(
 		long companyId, Collection<Long> fileEntryIds);
+
+	public List<DSRequest> getFileEntryDSRequests(
+		long companyId, long fileEntryId);
 
 	public void resendDSRequestNotifications(
 		long companyId, long groupId, DSRequest dsRequest);
