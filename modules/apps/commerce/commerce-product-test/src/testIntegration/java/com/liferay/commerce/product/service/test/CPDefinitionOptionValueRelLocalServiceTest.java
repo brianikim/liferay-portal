@@ -909,6 +909,33 @@ public class CPDefinitionOptionValueRelLocalServiceTest {
 		Assert.assertFalse(
 			"Option value preselected",
 			preselectedCPDefinitionOptionValueRel.isPreselected());
+
+		_updateCPDefinitionOptionValueRel(
+			targetCPDefinitionOptionValueRel, 0, true,
+			targetCPDefinitionOptionValueRel.getPrice(),
+			targetCPDefinitionOptionValueRel.getQuantity());
+
+		Assert.assertTrue(
+			"preselected option value exists",
+			_cpDefinitionOptionValueRelLocalService.
+				hasPreselectedCPDefinitionOptionValueRel(
+					cpDefinitionOptionRel.getCPDefinitionOptionRelId()));
+
+		preselectedCPDefinitionOptionValueRel =
+			_updateCPDefinitionOptionValueRel(
+				targetCPDefinitionOptionValueRel, 0, false,
+				targetCPDefinitionOptionValueRel.getPrice(),
+				targetCPDefinitionOptionValueRel.getQuantity());
+
+		Assert.assertFalse(
+			"preselected option value exists",
+			_cpDefinitionOptionValueRelLocalService.
+				hasPreselectedCPDefinitionOptionValueRel(
+					cpDefinitionOptionRel.getCPDefinitionOptionRelId()));
+
+		Assert.assertFalse(
+			"Option value preselected",
+			preselectedCPDefinitionOptionValueRel.isPreselected());
 	}
 
 	@Test
