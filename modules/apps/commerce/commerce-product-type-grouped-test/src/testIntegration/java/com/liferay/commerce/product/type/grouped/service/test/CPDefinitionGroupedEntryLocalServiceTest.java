@@ -14,6 +14,8 @@ import com.liferay.commerce.product.type.grouped.constants.GroupedCPTypeConstant
 import com.liferay.commerce.product.type.grouped.model.CPDefinitionGroupedEntry;
 import com.liferay.commerce.product.type.grouped.service.CPDefinitionGroupedEntryLocalService;
 import com.liferay.commerce.product.type.simple.constants.SimpleCPTypeConstants;
+import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
@@ -22,10 +24,12 @@ import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Assert;
@@ -110,6 +114,57 @@ public class CPDefinitionGroupedEntryLocalServiceTest {
 		Assert.assertEquals(
 			cpDefinition3.getCPDefinitionId(),
 			cpDefinitionGroupedEntry.getEntryCPDefinitionId());
+	}
+
+	@Test
+	public void testGetCPDefinitionGroupedEntries() throws Exception {
+		CPDefinition cpDefinition = CPTestUtil.addCPDefinitionFromCatalog(
+			_commerceCatalog.getGroupId(), GroupedCPTypeConstants.NAME, true,
+			true);
+
+		CPDefinition entryCPDefinition1 = CPTestUtil.addCPDefinitionFromCatalog(
+			_commerceCatalog.getGroupId(), SimpleCPTypeConstants.NAME, true,
+			true);
+
+		CPDefinitionGroupedEntry cpDefinitionGroupedEntry1 =
+			_cpDefinitionGroupedEntryLocalService.addCPDefinitionGroupedEntry(
+				cpDefinition.getCPDefinitionId(),
+				entryCPDefinition1.getCProductId(), 0, 1, _serviceContext);
+
+		CPDefinition entryCPDefinition2 = CPTestUtil.addCPDefinitionFromCatalog(
+			_commerceCatalog.getGroupId(), SimpleCPTypeConstants.NAME, true,
+			true);
+
+		CPDefinitionGroupedEntry cpDefinitionGroupedEntry2 =
+			_cpDefinitionGroupedEntryLocalService.addCPDefinitionGroupedEntry(
+				cpDefinition.getCPDefinitionId(),
+				entryCPDefinition2.getCProductId(), 0, 1, _serviceContext);
+
+		CPDefinition entryCPDefinition3 = CPTestUtil.addCPDefinitionFromCatalog(
+			_commerceCatalog.getGroupId(), SimpleCPTypeConstants.NAME, true,
+			true);
+
+		CPDefinitionGroupedEntry cpDefinitionGroupedEntry3 =
+			_cpDefinitionGroupedEntryLocalService.addCPDefinitionGroupedEntry(
+				cpDefinition.getCPDefinitionId(),
+				entryCPDefinition3.getCProductId(), 0, 1, _serviceContext);
+
+		Assert.assertEquals(
+			Collections.singletonList(cpDefinitionGroupedEntry1),
+			_cpDefinitionGroupedEntryLocalService.getCPDefinitionGroupedEntries(
+				_commerceCatalog.getCompanyId(),
+				cpDefinition.getCPDefinitionId(), entryCPDefinition1.getName(),
+				QueryUtil.ALL_POS, QueryUtil.ALL_POS, null));
+		Assert.assertEquals(
+			SetUtil.fromArray(
+				cpDefinitionGroupedEntry1, cpDefinitionGroupedEntry2,
+				cpDefinitionGroupedEntry3),
+			SetUtil.fromList(
+				_cpDefinitionGroupedEntryLocalService.
+					getCPDefinitionGroupedEntries(
+						_commerceCatalog.getCompanyId(),
+						cpDefinition.getCPDefinitionId(), StringPool.BLANK,
+						QueryUtil.ALL_POS, QueryUtil.ALL_POS, null)));
 	}
 
 	private CommerceCatalog _commerceCatalog;
