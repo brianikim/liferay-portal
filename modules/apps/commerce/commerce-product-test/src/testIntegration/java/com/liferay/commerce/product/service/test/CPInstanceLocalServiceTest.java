@@ -738,6 +738,18 @@ public class CPInstanceLocalServiceTest {
 		}
 	}
 
+	@Test(expected = CPInstanceReplacementCPInstanceUuidException.class)
+	public void testUpdateCPInstanceWithOwnReplacement() throws Exception {
+		CPInstance cpInstance = CPTestUtil.addCPInstanceFromCatalog(
+			_commerceCatalog.getGroupId());
+
+		CPDefinition cpDefinition = cpInstance.getCPDefinition();
+
+		_updateCPInstance(
+			cpInstance, cpInstance.getCPInstanceUuid(),
+			cpDefinition.getCProductId());
+	}
+
 	@Rule
 	public final FrutillaRule frutillaRule = new FrutillaRule();
 
