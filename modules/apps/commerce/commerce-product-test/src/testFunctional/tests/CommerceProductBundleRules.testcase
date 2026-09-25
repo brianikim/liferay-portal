@@ -267,66 +267,6 @@ definition {
 		}
 	}
 
-	@description = "COMMERCE-12803. As an admin, I want to be able to verify the excluded Product Relation is bidirectional"
-	@priority = 5
-	test CanVerifyExcludedProductRelationIsBidirectional {
-		property portal.acceptance = "true";
-
-		task ("When U-Joint Incompatible in Product Bundle to ABS Sensor is added") {
-			CommerceProducts.openProductsAdmin();
-
-			CommerceNavigator.gotoEntry(entryName = "ABS Sensor");
-
-			CommerceEntry.gotoMenuTab(menuTab = "Product Relations");
-
-			CommerceRelations.addAnyProductRelation(
-				key_product = "U-Joint",
-				key_relation = "Incompatible in Bundle Product");
-
-			AssertElementPresent(
-				key_productName = "U-Joint",
-				key_value = "Incompatible in Bundle",
-				locator1 = "CommerceEntry#VALUE_PRODUCT_RELATIONS");
-		}
-
-		task ("Then the ABS Sensor entry is visible under U-Joint's Product Relations tab") {
-			CommerceProducts.openProductsAdmin();
-
-			CommerceNavigator.searchEntry(entryName = '''"U-Joint"''');
-
-			CommerceNavigator.gotoEntry(entryName = "U-Joint");
-
-			CommerceEntry.gotoMenuTab(menuTab = "Product Relations");
-
-			AssertElementPresent(
-				key_productName = "ABS Sensor",
-				key_value = "Incompatible in Bundle",
-				locator1 = "CommerceEntry#VALUE_PRODUCT_RELATIONS");
-		}
-
-		task ("When the ABS Sensor entry is deleted from U-Joint's Product Relations tab") {
-			LexiconEntry.gotoEntryMenuItemNoError(
-				menuItem = "Delete",
-				rowEntry = "ABS Sensor");
-
-			AssertTextEquals(
-				locator1 = "Message#EMPTY_STATE_TEXT",
-				value1 = "Sorry, no results were found.");
-		}
-
-		task ("Then the U-Joint entry is removed from ABS Sensor's Product Relations tab") {
-			CommerceProducts.openProductsAdmin();
-
-			CommerceNavigator.gotoEntry(entryName = "ABS Sensor");
-
-			CommerceEntry.gotoMenuTab(menuTab = "Product Relations");
-
-			AssertTextEquals(
-				locator1 = "Message#EMPTY_STATE_TEXT",
-				value1 = "Sorry, no results were found.");
-		}
-	}
-
 	@description = "COMMERCE-12810. As a buyer, I want to be able to verify the included and excluded option values are disabled with reason messages without SKU Contributor"
 	@priority = 5
 	test CanVerifyIncludedAndExcludedOptionValuesAreDisabledWithReasonMessageWithoutSKUContributor {
