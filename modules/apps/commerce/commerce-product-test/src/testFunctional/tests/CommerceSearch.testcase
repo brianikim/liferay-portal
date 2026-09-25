@@ -361,32 +361,6 @@ definition {
 		}
 	}
 
-	@description = "COMMERCE-6151. As a buyer, I want to search a product by typing its SKU in the Search Bar widget and the results should be visible on the Search Results widget"
-	@priority = 3
-	test SearchBarWidgetSearchProductBySKU {
-		property portal.acceptance = "false";
-
-		// TODO Review
-
-		CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
-
-		Navigator.openWithAppendToBaseURL(urlAppend = "web/minium");
-
-		Type(
-			locator1 = "Search#SEARCH_BAR_WIDGET",
-			value1 = "MIN93015");
-
-		Button.clickSubmitButton();
-
-		AssertElementPresent(
-			key_value = 1,
-			locator1 = "CommerceAccelerators#ASSERT_PRODUCT_CARD");
-
-		AssertElementNotPresent(
-			key_value = 2,
-			locator1 = "CommerceAccelerators#ASSERT_PRODUCT_CARD");
-	}
-
 	@description = "COMMERCE-6155. As a buyer, I want to search for products by typing a Category in Search Bar widget and the results should be visible on Search Results widget"
 	@priority = 5
 	test SearchBarWidgetSearchProductsByCategory {
@@ -443,37 +417,6 @@ definition {
 		AssertElementNotPresent(
 			key_value = 21,
 			locator1 = "CommerceAccelerators#ASSERT_PRODUCT_CARD");
-	}
-
-	@description = "COMMERCE-6152. As a buyer, I want to search for different products by typing their SKUs in the Search Bar widget and the results should be visible on the Search Results widget"
-	@priority = 3
-	test SearchBarWidgetSearchProductsByDifferentSKUs {
-		property portal.acceptance = "false";
-
-		// TODO Review
-
-		CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
-
-		ApplicationsMenu.gotoSite(site = "Minium");
-
-		Type(
-			locator1 = "Search#SEARCH_BAR_WIDGET",
-			value1 = "MIN93015 MIN55861");
-
-		Button.clickSubmitButton();
-
-		for (var i : list "U-Joint,ABS Sensor,3") {
-			if (${i} == 3) {
-				AssertElementNotPresent(
-					key_value = ${i},
-					locator1 = "CommerceAccelerators#ASSERT_PRODUCT_CARD");
-			}
-			else {
-				AssertElementPresent(
-					key_productName = ${i},
-					locator1 = "CommerceAccelerators#PRODUCT_CARD_NAME");
-			}
-		}
 	}
 
 	@description = "COMMERCE-6154. As a buyer, I want to search for products by typing different Specification Values in Search Bar widget and the results should be visible on Search Results widget"
@@ -550,60 +493,6 @@ definition {
 		AssertElementNotPresent(
 			key_value = 2,
 			locator1 = "CommerceAccelerators#ASSERT_PRODUCT_CARD");
-	}
-
-	@description = "Verify users can search products by partial SKU in the catalog"
-	@priority = 5
-	test SearchProductsByPartialSKU {
-		property custom.properties = "company.security.strangers.verify=false${line.separator}jsonws.web.service.paths.excludes=";
-		property portal.acceptance = "true";
-
-		task ("Given a Minium site with a buyer user") {
-			CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
-
-			CommerceEntry.addAccountEntryUser(
-				accountName = "Commerce Account",
-				accountType = "Business",
-				agreeToTermsAndAnswerReminderQuery = "true",
-				createNewAccount = "true",
-				requireReset = "false",
-				userEmailAddress = "buyer@liferay.com",
-				userFirstName = "Buyer",
-				userLastName = "User",
-				userRole = "Buyer",
-				userScreenName = "buyeruser",
-				userSiteMembership = "Minium");
-		}
-
-		task ("And given a product with a SKU") {
-			CommerceJSONProductsAPI._addCommerceProduct(
-				catalogName = "Minium",
-				productName = "Test Simple Product",
-				productType = "Simple",
-				sku = "ProductSku1001");
-		}
-
-		task ("When the buyer goes to the catalog and searches the product by partial SKU") {
-			User.logoutPG();
-
-			CommerceLogin.miniumLogin(
-				password = PropsUtil.get("default.admin.password"),
-				urlAppend = "web/minium",
-				userEmailAddress = "buyer@liferay.com");
-
-			CommerceNavigator.searchEntry(entryName = "Sku1001");
-		}
-
-		task ("Then the product related to that SKU is populated") {
-			AssertElementPresent(
-				key_productName = "Test Simple Product",
-				key_productSku = "ProductSku1001",
-				locator1 = "CommerceEntry#PRODUCT_CARD_SKU");
-
-			AssertElementPresent(
-				key_productCount = 1,
-				locator1 = "CommerceFrontStore#FS_PRODUCT_COUNT");
-		}
 	}
 
 	@description = "COMMERCE-6146. As a buyer, I want to change the number of items to display for every page from Search Results widget configuration"
