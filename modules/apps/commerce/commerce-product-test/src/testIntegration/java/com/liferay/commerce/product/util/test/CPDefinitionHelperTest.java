@@ -24,10 +24,12 @@ import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.search.SearchContext;
+import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.CompanyTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
+import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.SetUtil;
@@ -299,6 +301,44 @@ public class CPDefinitionHelperTest {
 		Assert.assertEquals(
 			Collections.singleton(cpInstance3.getCPDefinitionId()),
 			_searchCPDefinitionIds(sku.substring(3)));
+	}
+
+	@Test
+	public void testSearchCPDefinitionsByStatus() throws Exception {
+		frutillaRule.scenario(
+			"Search for CPDefinitions by status"
+		).given(
+			"A draft CPDefinition"
+		).when(
+			"I search for approved CPDefinitions given its name as keywords"
+		).then(
+			"The results will contain the product only after it is approved"
+		);
+
+		CPInstance cpInstance = CPTestUtil.addCPInstanceFromCatalog(
+			_commerceCatalog.getGroupId());
+
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(
+				_commerceCatalog.getGroupId());
+
+		CPDefinition cpDefinition = _cpDefinitionLocalService.updateStatus(
+			TestPropsValues.getUserId(), cpInstance.getCPDefinitionId(),
+			WorkflowConstants.STATUS_DRAFT, serviceContext,
+			Collections.emptyMap());
+
+		Assert.assertEquals(
+			Collections.emptySet(),
+			_searchCPDefinitionIds(cpDefinition.getName()));
+
+		_cpDefinitionLocalService.updateStatus(
+			TestPropsValues.getUserId(), cpDefinition.getCPDefinitionId(),
+			WorkflowConstants.STATUS_APPROVED, serviceContext,
+			Collections.emptyMap());
+
+		Assert.assertEquals(
+			Collections.singleton(cpDefinition.getCPDefinitionId()),
+			_searchCPDefinitionIds(cpDefinition.getName()));
 	}
 
 	@Rule
