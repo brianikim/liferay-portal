@@ -67,6 +67,7 @@ async function setUpTermsCheckout({
 	commerceMiniCartPage,
 	page,
 	rolePermissions,
+	termDescription,
 	termTypes,
 }: {
 	apiHelpers: DataApiHelpers;
@@ -76,6 +77,7 @@ async function setUpTermsCheckout({
 	commerceMiniCartPage: CommerceMiniCartPage;
 	page: Page;
 	rolePermissions?: TRole['rolePermissions'];
+	termDescription?: string;
 	termTypes: Array<'delivery-terms' | 'payment-terms'>;
 }) {
 	const {channel, site} = await miniumSetUp(apiHelpers);
@@ -83,13 +85,18 @@ async function setUpTermsCheckout({
 	const terms = {};
 
 	for (const termType of termTypes) {
+		const termProperties = {
+			...(termDescription && {description: {en_US: termDescription}}),
+			type: termType,
+		};
+
 		terms[termType] = [
-			await apiHelpers.headlessCommerceAdminOrder.postTerm({
-				type: termType,
-			}),
-			await apiHelpers.headlessCommerceAdminOrder.postTerm({
-				type: termType,
-			}),
+			await apiHelpers.headlessCommerceAdminOrder.postTerm(
+				termProperties
+			),
+			await apiHelpers.headlessCommerceAdminOrder.postTerm(
+				termProperties
+			),
 		];
 
 		if (termType === 'payment-terms') {
