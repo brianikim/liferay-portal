@@ -39,6 +39,7 @@ import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -373,6 +374,37 @@ public class CPInstanceUnitOfMeasureLocalServiceTest {
 	}
 
 	@Test
+	public void testGetActiveCPInstanceUnitOfMeasuresSortedByPriority()
+		throws PortalException {
+
+		CPDefinition cpDefinition = CPTestUtil.addCPDefinitionFromCatalog(
+			_commerceCatalog.getGroupId(), SimpleCPTypeConstants.NAME, true,
+			true);
+
+		List<CPInstance> cpInstances = cpDefinition.getCPInstances();
+
+		CPInstance cpInstance = cpInstances.get(0);
+
+		CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure4 =
+			_addCPInstanceUnitOfMeasure(cpInstance, true, 4);
+		CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure1 =
+			_addCPInstanceUnitOfMeasure(cpInstance, true, 1);
+
+		_addCPInstanceUnitOfMeasure(cpInstance, false, 2);
+
+		CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure3 =
+			_addCPInstanceUnitOfMeasure(cpInstance, true, 3);
+
+		Assert.assertEquals(
+			Arrays.asList(
+				cpInstanceUnitOfMeasure1, cpInstanceUnitOfMeasure3,
+				cpInstanceUnitOfMeasure4),
+			_cpInstanceUnitOfMeasureLocalService.
+				getActiveCPInstanceUnitOfMeasures(
+					cpInstance.getCPInstanceId()));
+	}
+
+	@Test
 	public void testOnlyOneCPInstanceUnitOfMeasureIsPrimary()
 		throws PortalException {
 
@@ -697,6 +729,17 @@ public class CPInstanceUnitOfMeasureLocalServiceTest {
 
 	@Rule
 	public final FrutillaRule frutillaRule = new FrutillaRule();
+
+	private CPInstanceUnitOfMeasure _addCPInstanceUnitOfMeasure(
+			CPInstance cpInstance, boolean active, double priority)
+		throws PortalException {
+
+		return _cpInstanceUnitOfMeasureLocalService.addCPInstanceUnitOfMeasure(
+			_user.getUserId(), cpInstance.getCPInstanceId(), active,
+			BigDecimal.ONE, RandomTestUtil.randomString(),
+			RandomTestUtil.randomLocaleStringMap(), 2, BigDecimal.ZERO, false,
+			priority, BigDecimal.ONE, cpInstance.getSku());
+	}
 
 	private CPInstanceUnitOfMeasure _getCpInstanceUnitOfMeasure(
 			CPInstance cpInstance)
