@@ -620,9 +620,13 @@ public class CPDefinitionLocalServiceTest {
 			"A product definition and its clone"
 		).when(
 			"changing the price of the cloned"
+		).and(
+			"changing the price of the parent"
 		).then(
 			"the product price of the parent product is different from " +
 				"cloned product"
+		).and(
+			"the product price of the cloned product is unchanged"
 		);
 
 		CPInstance cpInstance = CPTestUtil.addCPInstanceWithRandomSku(
@@ -665,6 +669,19 @@ public class CPDefinitionLocalServiceTest {
 		Assert.assertNotEquals(
 			commercePriceEntry.getPrice(),
 			duplicateCommercePriceEntry.getPrice());
+
+		_commercePriceEntryLocalService.updatePricingInfo(
+			commercePriceEntry.getCommercePriceEntryId(),
+			commercePriceEntry.isBulkPricing(), new BigDecimal(60), false,
+			BigDecimal.ZERO, null, _serviceContext);
+
+		duplicateCommercePriceEntry =
+			_commercePriceEntryLocalService.getCommercePriceEntry(
+				duplicateCommercePriceEntry.getCommercePriceEntryId());
+
+		Assert.assertEquals(
+			0,
+			BigDecimal.TEN.compareTo(duplicateCommercePriceEntry.getPrice()));
 	}
 
 	@Test
