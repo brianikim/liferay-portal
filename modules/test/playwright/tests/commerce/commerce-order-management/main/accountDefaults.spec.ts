@@ -1581,7 +1581,7 @@ test(
 
 test(
 	'Cannot use disabled default delivery term',
-	{tag: ['@COMMERCE-9725', '@LPD-85008']},
+	{tag: ['@COMMERCE-8334', '@COMMERCE-9725', '@LPD-85008']},
 	async ({
 		accountsPage,
 		apiHelpers,
@@ -1658,9 +1658,25 @@ test(
 			).toBeVisible({timeout: 500});
 		}).toPass({timeout: 5000});
 
+		const term2Row =
+			commerceChannelDefaultsPage.defaultDeliveryCommerceTermEntriesRow(
+				term2.label['en_US']
+			);
+
+		await expect(
+			term2Row.getByRole('cell', {exact: true, name: 'Yes'})
+		).toBeVisible();
+
 		await apiHelpers.headlessCommerceAdminOrder.patchTerm(term2.id, {
 			active: false,
 		});
+
+		await page.reload();
+
+		await expect(term2Row).toBeVisible();
+		await expect(
+			term2Row.getByRole('cell', {exact: true, name: 'Yes'})
+		).toHaveCount(0);
 
 		await performUserSwitch(page, buyerUser.alternateName);
 
@@ -2186,7 +2202,7 @@ test(
 
 test(
 	'Cannot use disabled default payment terms',
-	{tag: ['@COMMERCE-9726', '@LPD-85008']},
+	{tag: ['@COMMERCE-8328', '@COMMERCE-9726', '@LPD-85008']},
 	async ({
 		accountsPage,
 		apiHelpers,
@@ -2263,9 +2279,25 @@ test(
 			).toBeVisible({timeout: 500});
 		}).toPass({timeout: 5000});
 
+		const term2Row =
+			commerceChannelDefaultsPage.defaultPaymentCommerceTermEntriesRow(
+				term2.label['en_US']
+			);
+
+		await expect(
+			term2Row.getByRole('cell', {exact: true, name: 'Yes'})
+		).toBeVisible();
+
 		await apiHelpers.headlessCommerceAdminOrder.patchTerm(term2.id, {
 			active: false,
 		});
+
+		await page.reload();
+
+		await expect(term2Row).toBeVisible();
+		await expect(
+			term2Row.getByRole('cell', {exact: true, name: 'Yes'})
+		).toHaveCount(0);
 
 		await performUserSwitch(page, buyerUser.alternateName);
 
