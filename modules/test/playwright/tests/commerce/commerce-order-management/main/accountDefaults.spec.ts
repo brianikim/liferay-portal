@@ -1437,7 +1437,7 @@ test(
 
 test(
 	'Can have all channels linked to a delivery term',
-	{tag: ['@COMMERCE-9729', '@LPD-85008']},
+	{tag: ['@COMMERCE-8332', '@COMMERCE-9729', '@LPD-85008']},
 	async ({
 		accountsPage,
 		apiHelpers,
@@ -1447,10 +1447,14 @@ test(
 	}) => {
 		const {account} = await createAccountWithBuyerUser(apiHelpers, site.id);
 
+		const priority = getRandomInt();
+
 		const term1 = await apiHelpers.headlessCommerceAdminOrder.postTerm({
+			priority,
 			type: 'delivery-terms',
 		});
 		const term2 = await apiHelpers.headlessCommerceAdminOrder.postTerm({
+			priority: priority + 1,
 			type: 'delivery-terms',
 		});
 
@@ -1459,11 +1463,27 @@ test(
 		await accountsPage.accountsTable.search(account.name);
 		await accountsPage.accountNameLink(account.name).click();
 		await editAccountPage.channelDefaultsLink.click();
+
+		await expect(
+			commerceChannelDefaultsPage.defaultDeliveryCommerceTermEntries.getByText(
+				'No Results Found'
+			)
+		).toBeVisible();
+
 		await commerceChannelDefaultsPage.defaultDeliveryCommerceTermEntriesButton.click();
 
 		await expect(
 			commerceChannelDefaultsPage.editFrameChannelSelect
 		).toBeVisible();
+
+		const termOptions = (
+			await commerceChannelDefaultsPage.editFrameTermOptions.allTextContents()
+		).map((s) => s.trim());
+
+		expect(termOptions).toContain(term1.label['en_US']);
+		expect(termOptions.indexOf(term2.label['en_US'])).toBeLessThan(
+			termOptions.indexOf(term1.label['en_US'])
+		);
 
 		const optionsBefore = (
 			await commerceChannelDefaultsPage.editFrameChannelOptions.allTextContents()
@@ -1511,6 +1531,12 @@ test(
 
 		await commerceChannelDefaultsPage.defaultDeliveryCommerceTermEntriesActionsButton.click();
 		await commerceChannelDefaultsPage.deleteMenuItem.click();
+
+		await expect(
+			commerceChannelDefaultsPage.defaultDeliveryCommerceTermEntries.getByText(
+				'No Results Found'
+			)
+		).toBeVisible();
 
 		await expect(async () => {
 			await commerceChannelDefaultsPage.defaultDeliveryCommerceTermEntriesButton.click();
@@ -2016,7 +2042,7 @@ test(
 
 test(
 	'Can have all channels linked to a payment term',
-	{tag: ['@COMMERCE-9730', '@LPD-85008']},
+	{tag: ['@COMMERCE-8319', '@COMMERCE-9730', '@LPD-85008']},
 	async ({
 		accountsPage,
 		apiHelpers,
@@ -2026,10 +2052,14 @@ test(
 	}) => {
 		const {account} = await createAccountWithBuyerUser(apiHelpers, site.id);
 
+		const priority = getRandomInt();
+
 		const term1 = await apiHelpers.headlessCommerceAdminOrder.postTerm({
+			priority,
 			type: 'payment-terms',
 		});
 		const term2 = await apiHelpers.headlessCommerceAdminOrder.postTerm({
+			priority: priority + 1,
 			type: 'payment-terms',
 		});
 
@@ -2038,11 +2068,27 @@ test(
 		await accountsPage.accountsTable.search(account.name);
 		await accountsPage.accountNameLink(account.name).click();
 		await editAccountPage.channelDefaultsLink.click();
+
+		await expect(
+			commerceChannelDefaultsPage.defaultPaymentCommerceTermEntries.getByText(
+				'No Results Found'
+			)
+		).toBeVisible();
+
 		await commerceChannelDefaultsPage.defaultPaymentCommerceTermEntriesButton.click();
 
 		await expect(
 			commerceChannelDefaultsPage.editFrameChannelSelect
 		).toBeVisible();
+
+		const termOptions = (
+			await commerceChannelDefaultsPage.editFrameTermOptions.allTextContents()
+		).map((s) => s.trim());
+
+		expect(termOptions).toContain(term1.label['en_US']);
+		expect(termOptions.indexOf(term2.label['en_US'])).toBeLessThan(
+			termOptions.indexOf(term1.label['en_US'])
+		);
 
 		const optionsBefore = (
 			await commerceChannelDefaultsPage.editFrameChannelOptions.allTextContents()
@@ -2090,6 +2136,12 @@ test(
 
 		await commerceChannelDefaultsPage.defaultPaymentCommerceTermEntriesActionsButton.click();
 		await commerceChannelDefaultsPage.deleteMenuItem.click();
+
+		await expect(
+			commerceChannelDefaultsPage.defaultPaymentCommerceTermEntries.getByText(
+				'No Results Found'
+			)
+		).toBeVisible();
 
 		await expect(async () => {
 			await commerceChannelDefaultsPage.defaultPaymentCommerceTermEntriesButton.click();
