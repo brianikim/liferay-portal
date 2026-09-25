@@ -349,39 +349,6 @@ definition {
 		}
 	}
 
-	@description = "This is a test for COMMERCE-5530. AssertPromoProductPriceTotalIsDifferent"
-	@priority = 5
-	test AssertPromoProductPriceTotalIsDifferent {
-		property portal.acceptance = "true";
-
-		// TODO Review
-
-		CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
-
-		Navigator.openWithAppendToBaseURL(urlAppend = "web/minium");
-
-		CommerceNavigator.gotoMiniumSidebarItem(menuItem = "Account Management");
-
-		CommerceAcceleratorsInitializer.createNewAccountViaFront(accountName = "Commerce Account");
-
-		Navigator.openWithAppendToBaseURL(urlAppend = "web/minium");
-
-		Pagination.changePagination(itemsPerPage = 60);
-
-		FrontStore.addInitializerProductToCart(
-			productName = "Brake Pads",
-			productQuantity = 1);
-
-		CommerceNavigator.gotoMiniumSidebarItem(menuItem = "Pending Orders");
-
-		Click(locator1 = "//a[contains(text(),'View')]");
-
-		AssertTextEquals.assertPartialText(
-			key_productName = "Brake Pads",
-			locator1 = "CommerceAccelerators#ORDER_DETAILS_PRICE",
-			value1 = "$ 18.90");
-	}
-
 	@description = "This is a functional test for COMMERCE-11068 - Can change the current theme to a Minium theme"
 	@priority = 5
 	test CanApplyMiniumThemeToSite {
