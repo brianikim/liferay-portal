@@ -18,6 +18,7 @@ import com.liferay.commerce.notification.CommerceNotificationSender;
 import com.liferay.commerce.notification.model.CommerceNotificationQueueEntry;
 import com.liferay.commerce.notification.model.CommerceNotificationTemplate;
 import com.liferay.commerce.notification.service.CommerceNotificationQueueEntryLocalService;
+import com.liferay.commerce.notification.service.CommerceNotificationTemplateLocalService;
 import com.liferay.commerce.notification.test.util.CommerceNotificationTestUtil;
 import com.liferay.commerce.product.constants.CommerceChannelConstants;
 import com.liferay.commerce.product.model.CommerceChannel;
@@ -166,6 +167,24 @@ public class CommerceNotificationTest {
 			1,
 			_commerceNotificationQueueEntryLocalService.
 				getCommerceNotificationQueueEntriesCount(_group.getGroupId()));
+	}
+
+	@Test
+	public void testLongEmailAddressRecipient() throws Exception {
+		String to = RandomTestUtil.randomString(80) + "@liferay.com";
+
+		_commerceNotificationTemplate =
+			CommerceNotificationTestUtil.addNotificationTemplate(
+				to, CommerceOrderConstants.ORDER_NOTIFICATION_PLACED,
+				_serviceContext);
+
+		_commerceNotificationTemplate =
+			_commerceNotificationTemplateLocalService.
+				getCommerceNotificationTemplate(
+					_commerceNotificationTemplate.
+						getCommerceNotificationTemplateId());
+
+		Assert.assertEquals(to, _commerceNotificationTemplate.getTo());
 	}
 
 	@Test
@@ -651,6 +670,10 @@ public class CommerceNotificationTest {
 
 	@DeleteAfterTestRun
 	private CommerceNotificationTemplate _commerceNotificationTemplate;
+
+	@Inject
+	private CommerceNotificationTemplateLocalService
+		_commerceNotificationTemplateLocalService;
 
 	@DeleteAfterTestRun
 	private CommerceOrder _commerceOrder;
