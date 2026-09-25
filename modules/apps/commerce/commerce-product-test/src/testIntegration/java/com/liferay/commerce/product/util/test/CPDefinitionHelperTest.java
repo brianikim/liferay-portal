@@ -19,6 +19,7 @@ import com.liferay.commerce.product.service.CPDefinitionLocalService;
 import com.liferay.commerce.product.service.CommerceCatalogLocalService;
 import com.liferay.commerce.product.test.util.CPTestUtil;
 import com.liferay.petra.function.transform.TransformUtil;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Company;
@@ -28,12 +29,15 @@ import com.liferay.portal.kernel.test.util.CompanyTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.frutilla.FrutillaRule;
 
@@ -238,6 +242,51 @@ public class CPDefinitionHelperTest {
 			cpCatalogEntry.getCPDefinitionId());
 	}
 
+	@Test
+	public void testSearchCPDefinitionsBySku() throws PortalException {
+		frutillaRule.scenario(
+			"Search for CPDefinitions by SKU"
+		).given(
+			"A collection of CPDefinitions with random SKUs"
+		).when(
+			"I search for CPDefinitions given full or partial SKUs as keywords"
+		).then(
+			"The results will contain only the products with matching SKUs"
+		);
+
+		CPInstance cpInstance1 =
+			CPTestUtil.addCPInstanceWithRandomSkuFromCatalog(
+				_commerceCatalog.getGroupId());
+
+		Assert.assertEquals(
+			Collections.singleton(cpInstance1.getCPDefinitionId()),
+			_searchCPDefinitionIds(cpInstance1.getSku()));
+
+		CPInstance cpInstance2 =
+			CPTestUtil.addCPInstanceWithRandomSkuFromCatalog(
+				_commerceCatalog.getGroupId());
+
+		Assert.assertEquals(
+			SetUtil.fromArray(
+				new long[] {
+					cpInstance1.getCPDefinitionId(),
+					cpInstance2.getCPDefinitionId()
+				}),
+			_searchCPDefinitionIds(
+				cpInstance1.getSku() + StringPool.SPACE +
+					cpInstance2.getSku()));
+
+		CPInstance cpInstance3 =
+			CPTestUtil.addCPInstanceWithRandomSkuFromCatalog(
+				_commerceCatalog.getGroupId());
+
+		String sku = cpInstance3.getSku();
+
+		Assert.assertEquals(
+			Collections.singleton(cpInstance3.getCPDefinitionId()),
+			_searchCPDefinitionIds(sku.substring(3)));
+	}
+
 	@Rule
 	public final FrutillaRule frutillaRule = new FrutillaRule();
 
@@ -251,6 +300,22 @@ public class CPDefinitionHelperTest {
 		}
 
 		return cpInstances;
+	}
+
+	private Set<Long> _searchCPDefinitionIds(String keywords)
+		throws PortalException {
+
+		CPDataSourceResult cpDataSourceResult = _cpDefinitionHelper.search(
+			_commerceCatalog.getGroupId(),
+			CPTestUtil.getSearchContext(
+				keywords, WorkflowConstants.STATUS_APPROVED,
+				_commerceCatalog.getGroup()),
+			new CPQuery(), QueryUtil.ALL_POS, QueryUtil.ALL_POS);
+
+		return SetUtil.fromList(
+			TransformUtil.transform(
+				cpDataSourceResult.getCPCatalogEntries(),
+				cpCatalogEntry -> cpCatalogEntry.getCPDefinitionId()));
 	}
 
 	private static final int _CP_INSTANCES_COUNT = 10;
