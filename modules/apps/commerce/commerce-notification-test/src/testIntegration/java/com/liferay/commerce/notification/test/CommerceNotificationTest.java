@@ -144,6 +144,64 @@ public class CommerceNotificationTest {
 	}
 
 	@Test
+	public void testDeleteCommerceNotificationQueueEntry() throws Exception {
+		_commerceNotificationTemplate =
+			CommerceNotificationTestUtil.addNotificationTemplate(
+				"[%ORDER_CREATOR%]",
+				CommerceOrderConstants.ORDER_NOTIFICATION_PLACED,
+				_serviceContext);
+
+		_commerceOrder = CommerceTestUtil.addB2CCommerceOrder(
+			_user.getUserId(), _commerceChannel.getGroupId(),
+			_commerceCurrency.getCommerceCurrencyId());
+
+		_commerceNotificationSender.sendNotifications(
+			_group.getGroupId(), _user.getUserId(),
+			CommerceOrderConstants.ORDER_NOTIFICATION_PLACED, _commerceOrder);
+
+		List<CommerceNotificationQueueEntry> commerceNotificationQueueEntries =
+			_commerceNotificationQueueEntryLocalService.
+				getCommerceNotificationQueueEntries(
+					_group.getGroupId(), QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+					null);
+
+		Assert.assertEquals(
+			commerceNotificationQueueEntries.toString(), 1,
+			commerceNotificationQueueEntries.size());
+
+		CommerceNotificationQueueEntry commerceNotificationQueueEntry =
+			commerceNotificationQueueEntries.get(0);
+
+		_commerceNotificationQueueEntryLocalService.
+			deleteCommerceNotificationQueueEntry(
+				commerceNotificationQueueEntry.
+					getCommerceNotificationQueueEntryId());
+
+		Assert.assertEquals(
+			0,
+			_commerceNotificationQueueEntryLocalService.
+				getCommerceNotificationQueueEntriesCount(_group.getGroupId()));
+	}
+
+	@Test
+	public void testDeleteCommerceNotificationTemplate() throws Exception {
+		CommerceNotificationTemplate commerceNotificationTemplate =
+			CommerceNotificationTestUtil.addNotificationTemplate(
+				"[%ACCOUNT_ROLE_ADMINISTRATOR%]",
+				CommerceOrderConstants.ORDER_NOTIFICATION_PLACED,
+				_serviceContext);
+
+		_commerceNotificationTemplateLocalService.
+			deleteCommerceNotificationTemplate(commerceNotificationTemplate);
+
+		Assert.assertNull(
+			_commerceNotificationTemplateLocalService.
+				fetchCommerceNotificationTemplate(
+					commerceNotificationTemplate.
+						getCommerceNotificationTemplateId()));
+	}
+
+	@Test
 	public void testEmailAddressRecipient() throws Exception {
 		_user.setEmailAddress("mail@mail.com");
 
