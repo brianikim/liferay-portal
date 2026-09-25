@@ -909,6 +909,76 @@ public class CPDefinitionOptionValueRelLocalServiceTest {
 		Assert.assertFalse(
 			"Option value preselected",
 			preselectedCPDefinitionOptionValueRel.isPreselected());
+
+		_updateCPDefinitionOptionValueRel(
+			targetCPDefinitionOptionValueRel, 0, true,
+			targetCPDefinitionOptionValueRel.getPrice(),
+			targetCPDefinitionOptionValueRel.getQuantity());
+
+		Assert.assertTrue(
+			"preselected option value exists",
+			_cpDefinitionOptionValueRelLocalService.
+				hasPreselectedCPDefinitionOptionValueRel(
+					cpDefinitionOptionRel.getCPDefinitionOptionRelId()));
+
+		preselectedCPDefinitionOptionValueRel =
+			_updateCPDefinitionOptionValueRel(
+				targetCPDefinitionOptionValueRel, 0, false,
+				targetCPDefinitionOptionValueRel.getPrice(),
+				targetCPDefinitionOptionValueRel.getQuantity());
+
+		Assert.assertFalse(
+			"preselected option value exists",
+			_cpDefinitionOptionValueRelLocalService.
+				hasPreselectedCPDefinitionOptionValueRel(
+					cpDefinitionOptionRel.getCPDefinitionOptionRelId()));
+
+		Assert.assertFalse(
+			"Option value preselected",
+			preselectedCPDefinitionOptionValueRel.isPreselected());
+	}
+
+	@Test(expected = CPDefinitionOptionValueRelPriceException.class)
+	public void testUpdateStaticPriceTypeCPDefinitionOptionValueRelWithoutPrice()
+		throws Exception {
+
+		frutillaRule.scenario(
+			"Update an option value without passing price"
+		).given(
+			"An option with static price type set"
+		).when(
+			"The option value is updated"
+		).then(
+			"price is required, cpInstanceUUID and cProductId are optional"
+		);
+
+		CPDefinitionOptionValueRel cpDefinitionOptionValueRel =
+			_addCPDefinitionWithOptionValue();
+
+		CPInstance cpInstance = CPTestUtil.addCPInstanceFromCatalog(
+			_commerceCatalog.getGroupId());
+
+		CPDefinitionOptionRel cpDefinitionOptionRel =
+			cpDefinitionOptionValueRel.getCPDefinitionOptionRel();
+
+		_cpDefinitionOptionRelLocalService.updateCPDefinitionOptionRel(
+			cpDefinitionOptionRel.getCPDefinitionOptionRelId(),
+			cpDefinitionOptionRel.getCPOptionId(),
+			cpDefinitionOptionRel.getNameMap(),
+			cpDefinitionOptionRel.getDescriptionMap(),
+			cpDefinitionOptionRel.getCommerceOptionTypeKey(),
+			cpDefinitionOptionRel.getInfoItemServiceKey(),
+			cpDefinitionOptionRel.getPriority(),
+			cpDefinitionOptionRel.isDefinedExternally(),
+			cpDefinitionOptionRel.isFacetable(),
+			cpDefinitionOptionRel.isRequired(),
+			cpDefinitionOptionRel.isSkuContributor(),
+			CPConstants.PRODUCT_OPTION_PRICE_TYPE_STATIC,
+			cpDefinitionOptionRel.getTypeSettings(), _serviceContext);
+
+		_updateCPDefinitionOptionValueRel(
+			cpDefinitionOptionValueRel, cpInstance.getCPInstanceId(),
+			cpDefinitionOptionValueRel.isPreselected(), null, BigDecimal.ONE);
 	}
 
 	@Test
@@ -958,49 +1028,6 @@ public class CPDefinitionOptionValueRelLocalServiceTest {
 			BigDecimal.TEN, cpDefinitionOptionValueRel.getPrice());
 		Assert.assertNotEquals(
 			cpInstance.getPrice(), cpDefinitionOptionValueRel.getPrice());
-	}
-
-	@Test(expected = CPDefinitionOptionValueRelPriceException.class)
-	public void testUpdateStaticPriceTypeCPDefinitionOptionValueRelWithoutPrice()
-		throws Exception {
-
-		frutillaRule.scenario(
-			"Update an option value without passing price"
-		).given(
-			"An option with static price type set"
-		).when(
-			"The option value is updated"
-		).then(
-			"price is required, cpInstanceUUID and cProductId are optional"
-		);
-
-		CPDefinitionOptionValueRel cpDefinitionOptionValueRel =
-			_addCPDefinitionWithOptionValue();
-
-		CPInstance cpInstance = CPTestUtil.addCPInstanceFromCatalog(
-			_commerceCatalog.getGroupId());
-
-		CPDefinitionOptionRel cpDefinitionOptionRel =
-			cpDefinitionOptionValueRel.getCPDefinitionOptionRel();
-
-		_cpDefinitionOptionRelLocalService.updateCPDefinitionOptionRel(
-			cpDefinitionOptionRel.getCPDefinitionOptionRelId(),
-			cpDefinitionOptionRel.getCPOptionId(),
-			cpDefinitionOptionRel.getNameMap(),
-			cpDefinitionOptionRel.getDescriptionMap(),
-			cpDefinitionOptionRel.getCommerceOptionTypeKey(),
-			cpDefinitionOptionRel.getInfoItemServiceKey(),
-			cpDefinitionOptionRel.getPriority(),
-			cpDefinitionOptionRel.isDefinedExternally(),
-			cpDefinitionOptionRel.isFacetable(),
-			cpDefinitionOptionRel.isRequired(),
-			cpDefinitionOptionRel.isSkuContributor(),
-			CPConstants.PRODUCT_OPTION_PRICE_TYPE_STATIC,
-			cpDefinitionOptionRel.getTypeSettings(), _serviceContext);
-
-		_updateCPDefinitionOptionValueRel(
-			cpDefinitionOptionValueRel, cpInstance.getCPInstanceId(),
-			cpDefinitionOptionValueRel.isPreselected(), null, BigDecimal.ONE);
 	}
 
 	@Test(expected = CPDefinitionOptionValueRelQuantityException.class)
@@ -1526,6 +1553,29 @@ public class CPDefinitionOptionValueRelLocalServiceTest {
 			BigDecimal.ZERO, cpDefinitionOptionValueRel.getQuantity());
 	}
 
+	private CPDefinitionOptionValueRel _addCPDefinitionWithOptionValue()
+		throws Exception {
+
+		CPDefinition cpDefinition = CPTestUtil.addCPDefinitionFromCatalog(
+			_commerceCatalog.getGroupId(), SimpleCPTypeConstants.NAME, true,
+			true);
+
+		List<CPDefinitionOptionRel> cpDefinitionOptionRels =
+			CPTestUtil.addCPOption(
+				_commerceCatalog.getGroupId(), cpDefinition.getCPDefinitionId(),
+				1, 1);
+
+		_cpDefinitionOptionRels.addAll(cpDefinitionOptionRels);
+
+		CPDefinitionOptionRel cpDefinitionOptionRel =
+			cpDefinitionOptionRels.get(0);
+
+		return _cpDefinitionOptionValueRelLocalService.
+			addCPDefinitionOptionValueRel(
+				null, cpDefinitionOptionRel.getCPDefinitionOptionRelId(),
+				"cpInstance-option-value", null, 0, _serviceContext);
+	}
+
 	private CPDefinitionOptionValueRel _addCPDefinitionWitOptionValue(
 			String key)
 		throws Exception {
@@ -1556,29 +1606,6 @@ public class CPDefinitionOptionValueRelLocalServiceTest {
 					LocaleUtil.getDefault(), RandomTestUtil.randomString()
 				).build(),
 				RandomTestUtil.randomDouble(), _serviceContext);
-	}
-
-	private CPDefinitionOptionValueRel _addCPDefinitionWithOptionValue()
-		throws Exception {
-
-		CPDefinition cpDefinition = CPTestUtil.addCPDefinitionFromCatalog(
-			_commerceCatalog.getGroupId(), SimpleCPTypeConstants.NAME, true,
-			true);
-
-		List<CPDefinitionOptionRel> cpDefinitionOptionRels =
-			CPTestUtil.addCPOption(
-				_commerceCatalog.getGroupId(), cpDefinition.getCPDefinitionId(),
-				1, 1);
-
-		_cpDefinitionOptionRels.addAll(cpDefinitionOptionRels);
-
-		CPDefinitionOptionRel cpDefinitionOptionRel =
-			cpDefinitionOptionRels.get(0);
-
-		return _cpDefinitionOptionValueRelLocalService.
-			addCPDefinitionOptionValueRel(
-				null, cpDefinitionOptionRel.getCPDefinitionOptionRelId(),
-				"cpInstance-option-value", null, 0, _serviceContext);
 	}
 
 	private void _assertValidateCPDefinitionOptionValueRelCPInstanceLinkFail(
