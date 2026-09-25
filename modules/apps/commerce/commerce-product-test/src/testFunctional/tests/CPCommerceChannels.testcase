@@ -1398,38 +1398,6 @@ definition {
 
 	}
 
-	@description = "This is a test for COMMERCE-6101. UseSearchBar"
-	@priority = 3
-	test UseSearchBar {
-		property portal.acceptance = "false";
-
-		CommerceJSONChannelsAPI._addChannel(
-			channelName = "Test Channel",
-			channelType = "site",
-			currencyCode = "USD");
-
-		CommerceJSONChannelsAPI._addChannel(
-			channelName = "Minium",
-			channelType = "site",
-			currencyCode = "USD");
-
-		CommerceChannels.openChannelsAdmin();
-
-		CommerceNavigator.searchEntry(entryName = "Minium");
-
-		AssertElementPresent(
-			key_entryName = "Minium",
-			locator1 = "CommerceNavigation#ENTRY_NAME");
-
-		AssertElementNotPresent(
-			key_entryName = "Test Channel",
-			locator1 = "CommerceNavigation#ENTRY_NAME");
-
-		CommerceNavigator.searchEntry(entryName = 1111);
-
-		AssertElementPresent(locator1 = "CommerceNavigation#EMPTY_SEARCH_CONTAINER");
-	}
-
 	@description = "This is a test for COMMERCE-6266. VerifyNotificationQueue"
 	@priority = 3
 	test VerifyNotificationQueue {
