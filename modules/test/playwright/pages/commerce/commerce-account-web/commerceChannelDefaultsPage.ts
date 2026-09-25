@@ -32,6 +32,7 @@ export class CommerceChannelDefaultsPage {
 		name: string,
 		exact?: boolean
 	) => Locator;
+	readonly defaultDeliveryCommerceTermEntriesRow: (name: string) => Locator;
 	readonly defaultPaymentCommerceTermEntries: Locator;
 	readonly defaultPaymentCommerceTermEntriesActionsButton: Locator;
 	readonly defaultPaymentCommerceTermEntriesButton: Locator;
@@ -39,6 +40,7 @@ export class CommerceChannelDefaultsPage {
 		name: string,
 		exact?: boolean
 	) => Locator;
+	readonly defaultPaymentCommerceTermEntriesRow: (name: string) => Locator;
 	readonly defaultShippingCommerceAddresses: Locator;
 	readonly defaultShippingCommerceAddressesActions: Locator;
 	readonly defaultShippingCommerceAddressesButton: Locator;
@@ -136,6 +138,10 @@ export class CommerceChannelDefaultsPage {
 				exact,
 				name,
 			});
+		this.defaultDeliveryCommerceTermEntriesRow = (name: string) =>
+			this.defaultDeliveryCommerceTermEntries
+				.getByRole('row')
+				.filter({hasText: name});
 		this.defaultPaymentCommerceTermEntries = page.getByTestId(
 			'defaultPaymentCommerceTermEntries'
 		);
@@ -155,6 +161,10 @@ export class CommerceChannelDefaultsPage {
 				exact,
 				name,
 			});
+		this.defaultPaymentCommerceTermEntriesRow = (name: string) =>
+			this.defaultPaymentCommerceTermEntries
+				.getByRole('row')
+				.filter({hasText: name});
 		this.defaultShippingCommerceAddresses = page.getByTestId(
 			'defaultShippingCommerceAddresses'
 		);
