@@ -20,6 +20,8 @@ import com.liferay.headless.commerce.admin.catalog.client.dto.v1_0.Attachment;
 import com.liferay.headless.commerce.admin.catalog.client.dto.v1_0.AttachmentBase64;
 import com.liferay.headless.commerce.admin.catalog.client.pagination.Page;
 import com.liferay.headless.commerce.admin.catalog.client.pagination.Pagination;
+import com.liferay.petra.function.UnsafeSupplier;
+import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
@@ -75,6 +77,36 @@ public class AttachmentResourceTest extends BaseAttachmentResourceTestCase {
 		_serviceContext = ServiceContextTestUtil.getServiceContext(
 			testCompany.getCompanyId(), testGroup.getGroupId(),
 			_user.getUserId());
+	}
+
+	@Override
+	@Test
+	public void testDeleteAttachment() throws Exception {
+		super.testDeleteAttachment();
+
+		_testDeleteAttachment(
+			attachmentResource.postProductIdAttachment(
+				_cProduct.getCProductId(), randomAttachment()),
+			() -> attachmentResource.getProductIdAttachmentsPage(
+				_cProduct.getCProductId(), Pagination.of(1, 10)));
+		_testDeleteAttachment(
+			attachmentResource.postProductIdImage(
+				_cProduct.getCProductId(), _randomImageAttachment()),
+			() -> attachmentResource.getProductIdImagesPage(
+				_cProduct.getCProductId(), Pagination.of(1, 10)));
+
+		Attachment attachment = _randomImageAttachment();
+
+		attachment.setCdnEnabled(true);
+		attachment.setCdnURL(
+			"http://www.liferay.com/" + RandomTestUtil.randomString() + ".jpg");
+		attachment.setFileEntryId((Long)null);
+
+		_testDeleteAttachment(
+			attachmentResource.postProductIdImage(
+				_cProduct.getCProductId(), attachment),
+			() -> attachmentResource.getProductIdImagesPage(
+				_cProduct.getCProductId(), Pagination.of(1, 10)));
 	}
 
 	@Override
@@ -452,6 +484,27 @@ public class AttachmentResourceTest extends BaseAttachmentResourceTestCase {
 				type = CPAttachmentFileEntryConstants.TYPE_IMAGE;
 			}
 		};
+	}
+
+	private void _testDeleteAttachment(
+			Attachment attachment,
+			UnsafeSupplier<Page<Attachment>, Exception> unsafeSupplier)
+		throws Exception {
+
+		Page<Attachment> page = unsafeSupplier.get();
+
+		assertContains(attachment, (List<Attachment>)page.getItems());
+
+		attachmentResource.deleteAttachment(attachment.getId());
+
+		page = unsafeSupplier.get();
+
+		List<Long> attachmentIds = TransformUtil.transform(
+			page.getItems(), Attachment::getId);
+
+		Assert.assertFalse(
+			attachmentIds.toString(),
+			attachmentIds.contains(attachment.getId()));
 	}
 
 	private void _testGetProductByExternalReferenceCodeAttachmentsPageWithBinaries()
