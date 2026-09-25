@@ -1082,6 +1082,8 @@ public class CPDefinitionLocalServiceTest {
 			"the product is updated"
 		).then(
 			"the product should have a new version with the product change"
+		).and(
+			"a product saved while a workflow is active stays a draft"
 		);
 
 		CPDefinition cpDefinition1 = CPTestUtil.addCPDefinitionFromCatalog(
@@ -1211,6 +1213,25 @@ public class CPDefinitionLocalServiceTest {
 					TestPropsValues.getCompanyId(),
 					_commerceCatalog.getGroupId(), CPDefinition.class.getName(),
 					0, 0, "Single Approver", 1);
+
+			int workflowTaskCount =
+				_workflowTaskManager.getWorkflowTaskCountByUserRoles(
+					TestPropsValues.getCompanyId(), TestPropsValues.getUserId(),
+					false);
+
+			CPDefinition draftCPDefinition =
+				CPTestUtil.addCPDefinitionFromCatalog(
+					_commerceCatalog.getGroupId(), SimpleCPTypeConstants.NAME,
+					false, false);
+
+			Assert.assertEquals(
+				WorkflowConstants.STATUS_DRAFT, draftCPDefinition.getStatus());
+
+			Assert.assertEquals(
+				workflowTaskCount,
+				_workflowTaskManager.getWorkflowTaskCountByUserRoles(
+					TestPropsValues.getCompanyId(), TestPropsValues.getUserId(),
+					false));
 
 			CPDefinition cpDefinition3 =
 				_cpDefinitionLocalService.updateCPDefinition(
@@ -1539,7 +1560,7 @@ public class CPDefinitionLocalServiceTest {
 
 	private void _addCPDefinitionLink(
 			CPDefinition cpDefinition1, CPDefinition cpDefinition2, String type)
-		throws PortalException {
+		throws Exception {
 
 		Calendar displayCalendar = CalendarFactoryUtil.getCalendar();
 
@@ -1557,7 +1578,7 @@ public class CPDefinitionLocalServiceTest {
 
 	private void _assertCloneCPDefinition(
 			CPDefinition cpDefinition, CPDefinition cloneCPDefinition)
-		throws PortalException {
+		throws Exception {
 
 		cloneCPDefinition = _cpDefinitionLocalService.getCPDefinition(
 			cloneCPDefinition.getCPDefinitionId());
