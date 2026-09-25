@@ -3070,3 +3070,52 @@ test(
 		).toHaveCount(0);
 	}
 );
+
+test(
+	'Buyer can complete checkout with rich text term descriptions',
+	{tag: ['@COMMERCE-9088', '@LPD-106244-Grouped-5']},
+	async ({
+		apiHelpers,
+		checkoutPage,
+		commerceAdminChannelDetailsPage,
+		commerceAdminChannelsPage,
+		orderDetailsPage,
+		page,
+		pendingOrdersPage,
+	}) => {
+		test.setTimeout(600000);
+
+		const terms = await setUpTermsCheckout({
+			apiHelpers,
+			checkoutPage,
+			commerceAdminChannelDetailsPage,
+			commerceAdminChannelsPage,
+			orderDetailsPage,
+			page,
+			pendingOrdersPage,
+			termDescription:
+				'<ul><li><u><em><strong>Bulleted Term</strong></em></u></li></ul><ol><li>Numbered Term</li></ol>',
+			termTypes: ['delivery-terms', 'payment-terms'],
+		});
+
+		await page.waitForURL((url) => url.href.includes('delivery-terms'));
+
+		await checkoutPage
+			.deliveryTermOption(terms['delivery-terms'][0].label['en_US'])
+			.check();
+		await checkoutPage.continueButton.click();
+
+		await page.waitForURL((url) => url.href.includes('payment-terms'));
+
+		await checkoutPage
+			.paymentTermOption(terms['payment-terms'][0].label['en_US'])
+			.check();
+		await checkoutPage.continueButton.click();
+
+		await page.waitForURL((url) => url.href.includes('order-summary'));
+
+		await checkoutPage.continueButton.click();
+
+		await expect(checkoutPage.orderSuccessMessage).toBeVisible();
+	}
+);
