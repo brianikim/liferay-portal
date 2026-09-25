@@ -639,18 +639,7 @@ public class CPDefinitionLocalServiceTest {
 			_commerceCatalog.getGroupId(), SimpleCPTypeConstants.NAME, false,
 			false);
 
-		Calendar displayCalendar = CalendarFactoryUtil.getCalendar();
-
-		displayCalendar.setTime(cpDefinition1.getDisplayDate());
-
-		_cpDefinitionLinkLocalService.addCPDefinitionLinkByCProductId(
-			cpDefinition1.getCPDefinitionId(), cpDefinition2.getCProductId(),
-			displayCalendar.get(Calendar.MONTH),
-			displayCalendar.get(Calendar.DAY_OF_MONTH),
-			displayCalendar.get(Calendar.YEAR),
-			displayCalendar.get(Calendar.HOUR_OF_DAY),
-			displayCalendar.get(Calendar.MINUTE), 0, 0, 0, 0, 0, true, 0D,
-			"related", _serviceContext);
+		_addCPDefinitionLink(cpDefinition1, cpDefinition2, "related");
 
 		Assert.assertEquals(
 			1,
@@ -1417,6 +1406,24 @@ public class CPDefinitionLocalServiceTest {
 
 	@Rule
 	public final FrutillaRule frutillaRule = new FrutillaRule();
+
+	private void _addCPDefinitionLink(
+			CPDefinition cpDefinition1, CPDefinition cpDefinition2, String type)
+		throws PortalException {
+
+		Calendar displayCalendar = CalendarFactoryUtil.getCalendar();
+
+		displayCalendar.setTime(cpDefinition1.getDisplayDate());
+
+		_cpDefinitionLinkLocalService.addCPDefinitionLinkByCProductId(
+			cpDefinition1.getCPDefinitionId(), cpDefinition2.getCProductId(),
+			displayCalendar.get(Calendar.MONTH),
+			displayCalendar.get(Calendar.DAY_OF_MONTH),
+			displayCalendar.get(Calendar.YEAR),
+			displayCalendar.get(Calendar.HOUR_OF_DAY),
+			displayCalendar.get(Calendar.MINUTE), 0, 0, 0, 0, 0, true, 0D, type,
+			_serviceContext);
+	}
 
 	private void _assertUniqueExternalReferenceCodes(
 		CPDefinitionOptionRel sourceCPDefinitionOptionRel,
