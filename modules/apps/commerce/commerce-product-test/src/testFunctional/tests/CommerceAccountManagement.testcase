@@ -465,13 +465,4 @@ definition {
 			locator1 = "CommerceAccelerators#ACCOUNT_MANAGEMENT_ADDRESS_TYPE");
 	}
 
-	@description = "COMMERCE-6365. In Members tab, I want to be able to search for an account member using the search bar"
-	@ignore = "true"
-	@priority = 3
-	test SearchAnAccountMember {
-
-		// TODO COMMERCE-6365 SearchAnAccountMember pending implementation
-
-	}
-
 }
