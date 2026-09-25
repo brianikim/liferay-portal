@@ -5,6 +5,7 @@
 
 import {expect, mergeTests} from '@playwright/test';
 
+import {accountsPagesTest} from '../../../../fixtures/accountsPagesTest';
 import {commercePagesTest} from '../../../../fixtures/commercePagesTest';
 import {dataApiHelpersTest} from '../../../../fixtures/dataApiHelpersTest';
 import {loginTest} from '../../../../fixtures/loginTest';
@@ -13,6 +14,7 @@ import getRandomString from '../../../../utils/getRandomString';
 import {waitForAlert} from '../../../../utils/waitForAlert';
 
 export const test = mergeTests(
+	accountsPagesTest,
 	commercePagesTest,
 	dataApiHelpersTest,
 	loginTest()
@@ -267,3 +269,106 @@ test(
 		).toContainText('Yes');
 	}
 );
+
+for (const variant of [
+	{
+		actionsKey: 'defaultDeliveryCommerceTermEntriesActionsButton',
+		addButtonKey: 'defaultDeliveryCommerceTermEntriesButton',
+		cellKey: 'defaultDeliveryCommerceTermEntriesCell',
+		entriesKey: 'defaultDeliveryCommerceTermEntries',
+		name: 'delivery',
+		rowKey: 'defaultDeliveryCommerceTermEntriesRow',
+		tags: {inactive: '@COMMERCE-8334', priority: '@COMMERCE-8332'},
+		termType: 'delivery-terms',
+	},
+	{
+		actionsKey: 'defaultPaymentCommerceTermEntriesActionsButton',
+		addButtonKey: 'defaultPaymentCommerceTermEntriesButton',
+		cellKey: 'defaultPaymentCommerceTermEntriesCell',
+		entriesKey: 'defaultPaymentCommerceTermEntries',
+		name: 'payment',
+		rowKey: 'defaultPaymentCommerceTermEntriesRow',
+		tags: {inactive: '@COMMERCE-8328', priority: '@COMMERCE-8319'},
+		termType: 'payment-terms',
+	},
+] as const) {
+	test(
+		`Account default ${variant.name} terms are listed by priority and can be removed`,
+		{tag: [variant.tags.priority, '@LPD-106244-Grouped-5']},
+		async ({
+			accountsPage,
+			apiHelpers,
+			commerceChannelDefaultsPage,
+			editAccountPage,
+			page,
+		}) => {
+			const account = await apiHelpers.headlessAdminUser.postAccount({
+				name: getRandomString(),
+				type: 'business',
+			});
+
+			const priority = getRandomInt();
+
+			const term1 = await apiHelpers.headlessCommerceAdminOrder.postTerm({
+				priority,
+				type: variant.termType,
+			});
+			const term2 = await apiHelpers.headlessCommerceAdminOrder.postTerm({
+				priority: priority + 1,
+				type: variant.termType,
+			});
+
+			await accountsPage.gotoAccountAdmin();
+
+			await accountsPage.accountsTable.search(account.name);
+			await accountsPage.accountNameLink(account.name).click();
+			await editAccountPage.channelDefaultsLink.click();
+
+			const termEntries = commerceChannelDefaultsPage[variant.entriesKey];
+
+			await expect(
+				termEntries.getByText('No Results Found')
+			).toBeVisible();
+
+			await commerceChannelDefaultsPage[variant.addButtonKey].click();
+
+			await expect(
+				commerceChannelDefaultsPage.editFrameTermSelect
+			).toBeVisible();
+
+			const termOptions = (
+				await commerceChannelDefaultsPage.editFrameTermOptions.allTextContents()
+			).map((s) => s.trim());
+
+			expect(termOptions).toContain(term1.label['en_US']);
+			expect(termOptions.indexOf(term2.label['en_US'])).toBeLessThan(
+				termOptions.indexOf(term1.label['en_US'])
+			);
+
+			await page.keyboard.press('Escape');
+
+			await expect(async () => {
+				await commerceChannelDefaultsPage[variant.addButtonKey].click();
+				await commerceChannelDefaultsPage.editFrameTermSelect.selectOption(
+					String(term1.id)
+				);
+				await commerceChannelDefaultsPage.editFrameSaveButton.click();
+
+				await expect(
+					commerceChannelDefaultsPage[variant.cellKey](
+						term1.label['en_US']
+					)
+				).toBeVisible({timeout: 500});
+			}).toPass({timeout: 5000});
+
+			page.on('dialog', (dialog) => dialog.accept());
+
+			await commerceChannelDefaultsPage[variant.actionsKey].click();
+			await commerceChannelDefaultsPage.deleteMenuItem.click();
+
+			await expect(
+				termEntries.getByText('No Results Found')
+			).toBeVisible();
+		}
+	);
+}
