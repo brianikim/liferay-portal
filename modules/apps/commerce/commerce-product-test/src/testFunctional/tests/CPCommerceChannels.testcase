@@ -152,15 +152,6 @@ definition {
 			locator1 = "CommerceEntry#CHANNELS_GENERAL_ACTIVE_STATUS");
 	}
 
-	@description = "[Please Update]"
-	@ignore = "Test Stub"
-	@priority = 4
-	test AddANewDefaultPaymentMethod {
-
-		// TODO COMMERCE-8534 AddANewDefaultPaymentMethod pending implementation
-
-	}
-
 	@description = "This is a test for COMMERCE-6111. AddShippingOptionFlatRate"
 	@priority = 3
 	test AddShippingOptionFlatRate {
@@ -955,15 +946,6 @@ definition {
 		Button.clickSave();
 
 		AssertElementPresent(locator1 = "Message#SUCCESS");
-	}
-
-	@description = "[Please Update]"
-	@ignore = "Test Stub"
-	@priority = 4
-	test DeactivatePaymentMethodLinkedToAnAccount {
-
-		// TODO COMMERCE-8545 DeactivatePaymentMethodLinkedToAnAccount pending implementation
-
 	}
 
 	@description = "This is a test for COMMERCE-6109. EditAuthorizePaymentMethod"
