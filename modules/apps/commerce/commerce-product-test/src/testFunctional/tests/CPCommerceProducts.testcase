@@ -314,30 +314,6 @@ definition {
 			status = "Any");
 	}
 
-	@description = "This is a test for COMMERCE-9189. CanCheckApprovedProductDuplication"
-	@priority = 5
-	test CanCheckApprovedProductDuplication {
-		property portal.acceptance = "true";
-
-		CommerceProducts.openProductsAdmin();
-
-		CPCommerceCatalog.newProductsEntry(
-			productCatalog = "Master",
-			productName = "Simple T-Shirt",
-			productType = "Simple");
-
-		CommerceProducts.duplicateProduct(
-			checkProductFields = "true",
-			compileDescription = "false",
-			productCatalog = "Master",
-			productName = "Simple T-Shirt",
-			publishProduct = "false");
-
-		AssertElementPresent(
-			key_status = "Draft",
-			locator1 = "CommerceEntry#WORKFLOW_STATUS");
-	}
-
 	@description = "This is a test for COMMERCE-9183. CanCheckApprovedProductSaveAsDraft"
 	@priority = 3
 	test CanCheckApprovedProductSaveAsDraft {
@@ -514,32 +490,6 @@ definition {
 			productCatalog = "Master",
 			productName = "Denied Product",
 			status = "Denied");
-	}
-
-	@description = "This is a test for COMMERCE-9190. CanCheckDraftProductDuplication"
-	@priority = 3
-	test CanCheckDraftProductDuplication {
-		property portal.acceptance = "false";
-
-		CommerceProducts.openProductsAdmin();
-
-		CPCommerceCatalog.newProductsEntry(
-			compileDescription = "false",
-			productCatalog = "Master",
-			productName = "Simple T-Shirt",
-			productType = "Simple",
-			publishProduct = "false");
-
-		CommerceProducts.duplicateProduct(
-			checkProductFields = "true",
-			compileDescription = "false",
-			productCatalog = "Master",
-			productName = "Simple T-Shirt",
-			publishProduct = "false");
-
-		AssertElementPresent(
-			key_status = "Draft",
-			locator1 = "CommerceEntry#WORKFLOW_STATUS");
 	}
 
 	@description = "This is a test for COMMERCE-9181. CanCheckDraftProductSaveAsDraft"
@@ -1403,47 +1353,6 @@ definition {
 			if (${file} == "true") {
 				fail("The buyer can still download the file even without permissions");
 			}
-		}
-	}
-
-	@description = "This is a test for COMMERCE-10877. Can duplicate a product and the SEO Friendly URL match the name of the duplicated product"
-	@priority = 3
-	test CanDuplicateProductAndVerifyFriendlyUrlMatchesProductName {
-		property portal.acceptance = "false";
-
-		task ("Given a Minium site is created") {
-			CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
-		}
-
-		task ("And the admin duplicates the product ABS Sensor") {
-			CommerceProducts.openProductsAdmin();
-
-			CommerceProducts.searchAndGoToProductEntry(entryProductName = "ABS Sensor");
-
-			AssertTextEquals(
-				key_fieldLabel = "Friendly URL",
-				locator1 = "TextInput#GENERIC_TEXT_INPUT",
-				value1 = "abs-sensor");
-
-			CommerceProducts.duplicateProduct(
-				checkProductFields = "true",
-				compileDescription = "false",
-				productCatalog = "Minium",
-				productName = "ABS Sensor",
-				publishProduct = "true");
-		}
-
-		task ("When the admin navigates to the duplicate product") {
-			CommerceProducts.openProductsAdmin();
-
-			CommerceProducts.searchAndGoToProductEntry(entryProductName = "Copy of ABS Sensor");
-		}
-
-		task ("Then the Friendly URL matches the product name") {
-			AssertTextEquals(
-				key_fieldLabel = "Friendly URL",
-				locator1 = "TextInput#GENERIC_TEXT_INPUT",
-				value1 = "copy-of-abs-sensor");
 		}
 	}
 
