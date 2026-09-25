@@ -371,4 +371,64 @@ for (const variant of [
 			).toBeVisible();
 		}
 	);
+
+	test(
+		`An inactive account default ${variant.name} term stays listed as inactive`,
+		{tag: [variant.tags.inactive, '@LPD-106244-Grouped-5']},
+		async ({
+			accountsPage,
+			apiHelpers,
+			commerceChannelDefaultsPage,
+			editAccountPage,
+			page,
+		}) => {
+			const account = await apiHelpers.headlessAdminUser.postAccount({
+				name: getRandomString(),
+				type: 'business',
+			});
+
+			const term = await apiHelpers.headlessCommerceAdminOrder.postTerm({
+				type: variant.termType,
+			});
+
+			await accountsPage.gotoAccountAdmin();
+
+			await accountsPage.accountsTable.search(account.name);
+			await accountsPage.accountNameLink(account.name).click();
+			await editAccountPage.channelDefaultsLink.click();
+
+			await expect(async () => {
+				await commerceChannelDefaultsPage[variant.addButtonKey].click();
+				await commerceChannelDefaultsPage.editFrameTermSelect.selectOption(
+					String(term.id)
+				);
+				await commerceChannelDefaultsPage.editFrameSaveButton.click();
+
+				await expect(
+					commerceChannelDefaultsPage[variant.cellKey](
+						term.label['en_US']
+					)
+				).toBeVisible({timeout: 500});
+			}).toPass({timeout: 5000});
+
+			const termRow = commerceChannelDefaultsPage[variant.rowKey](
+				term.label['en_US']
+			);
+
+			await expect(
+				termRow.getByRole('cell', {exact: true, name: 'Yes'})
+			).toBeVisible();
+
+			await apiHelpers.headlessCommerceAdminOrder.patchTerm(term.id, {
+				active: false,
+			});
+
+			await page.reload();
+
+			await expect(termRow).toBeVisible();
+			await expect(
+				termRow.getByRole('cell', {exact: true, name: 'Yes'})
+			).toHaveCount(0);
+		}
+	);
 }
