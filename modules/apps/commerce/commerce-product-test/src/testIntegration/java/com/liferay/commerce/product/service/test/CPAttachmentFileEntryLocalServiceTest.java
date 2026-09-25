@@ -19,6 +19,12 @@ import com.liferay.commerce.product.service.CommerceCatalogLocalServiceUtil;
 import com.liferay.commerce.product.test.util.CPTestUtil;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
+import com.liferay.expando.kernel.model.ExpandoBridge;
+import com.liferay.expando.kernel.model.ExpandoColumn;
+import com.liferay.expando.kernel.model.ExpandoColumnConstants;
+import com.liferay.expando.kernel.model.ExpandoTable;
+import com.liferay.expando.kernel.service.ExpandoTableLocalService;
+import com.liferay.expando.test.util.ExpandoTestUtil;
 import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.lazy.referencing.LazyReferencingThreadLocal;
@@ -28,6 +34,7 @@ import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.service.ClassNameLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
+import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.CompanyTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
@@ -41,6 +48,7 @@ import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
 
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 
 import org.frutilla.FrutillaRule;
@@ -193,6 +201,73 @@ public class CPAttachmentFileEntryLocalServiceTest {
 			WorkflowConstants.STATUS_EMPTY, cpAttachmentFileEntry.getStatus());
 	}
 
+	@Test
+	public void testUpdateCPAttachmentFileEntry() throws Exception {
+		_expandoTable = _expandoTableLocalService.addDefaultTable(
+			_company.getCompanyId(), CPAttachmentFileEntry.class.getName());
+
+		ExpandoColumn expandoColumn = ExpandoTestUtil.addColumn(
+			_expandoTable, RandomTestUtil.randomString(),
+			ExpandoColumnConstants.STRING);
+
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(
+				_company.getGroupId(), _user.getUserId());
+
+		String expandoValue = RandomTestUtil.randomString();
+
+		serviceContext.setExpandoBridgeAttributes(
+			Collections.singletonMap(expandoColumn.getName(), expandoValue));
+
+		serviceContext.setWorkflowAction(WorkflowConstants.ACTION_SAVE_DRAFT);
+
+		Calendar calendar = CalendarFactoryUtil.getCalendar();
+
+		for (int type :
+				new int[] {
+					CPAttachmentFileEntryConstants.TYPE_IMAGE,
+					CPAttachmentFileEntryConstants.TYPE_OTHER
+				}) {
+
+			CPDefinition cpDefinition = CPTestUtil.addCPDefinition(
+				_company.getGroupId(), "simple", true, false);
+
+			CPAttachmentFileEntry cpAttachmentFileEntry =
+				_addCPAttachmentFileEntry(cpDefinition, type);
+
+			String title = RandomTestUtil.randomString();
+
+			cpAttachmentFileEntry =
+				_cpAttachmentFileEntryLocalService.updateCPAttachmentFileEntry(
+					_user.getUserId(),
+					cpAttachmentFileEntry.getCPAttachmentFileEntryId(),
+					cpAttachmentFileEntry.getFileEntryId(), false, null,
+					calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE),
+					calendar.get(Calendar.YEAR),
+					calendar.get(Calendar.HOUR_OF_DAY),
+					calendar.get(Calendar.MINUTE), 0, 0, 0, 0, 0, true, false,
+					HashMapBuilder.put(
+						LocaleUtil.getSiteDefault(), title
+					).build(),
+					null, 0, type, serviceContext);
+
+			Assert.assertEquals(
+				WorkflowConstants.STATUS_DRAFT,
+				cpAttachmentFileEntry.getStatus());
+			Assert.assertEquals(
+				title,
+				cpAttachmentFileEntry.getTitle(LocaleUtil.getSiteDefault()));
+			Assert.assertEquals(type, cpAttachmentFileEntry.getType());
+
+			ExpandoBridge expandoBridge =
+				cpAttachmentFileEntry.getExpandoBridge();
+
+			Assert.assertEquals(
+				expandoValue,
+				expandoBridge.getAttribute(expandoColumn.getName(), false));
+		}
+	}
+
 	@Test(expected = DuplicateCPAttachmentFileEntryException.class)
 	public void testUpdateWithExistingExternalReferenceCode() throws Exception {
 		frutillaRule.scenario(
@@ -215,7 +290,7 @@ public class CPAttachmentFileEntryLocalServiceTest {
 			_company.getGroupId(), "simple", true, false);
 
 		CPAttachmentFileEntry cpAttachmentFileEntry = _addCPAttachmentFileEntry(
-			cpDefinition1);
+			cpDefinition1, CPAttachmentFileEntryConstants.TYPE_OTHER);
 
 		Calendar displayDateCalendar = Calendar.getInstance();
 
@@ -250,7 +325,7 @@ public class CPAttachmentFileEntryLocalServiceTest {
 	public final FrutillaRule frutillaRule = new FrutillaRule();
 
 	private CPAttachmentFileEntry _addCPAttachmentFileEntry(
-			CPDefinition cpDefinition)
+			CPDefinition cpDefinition, int type)
 		throws Exception {
 
 		FileEntry fileEntry = _dlAppLocalService.addFileEntry(
@@ -283,8 +358,7 @@ public class CPAttachmentFileEntryLocalServiceTest {
 			expirationDateCalendar.get(Calendar.HOUR),
 			expirationDateCalendar.get(Calendar.MINUTE), true, true,
 			RandomTestUtil.randomLocaleStringMap(), null,
-			RandomTestUtil.nextDouble(),
-			CPAttachmentFileEntryConstants.TYPE_OTHER, _serviceContext);
+			RandomTestUtil.nextDouble(), type, _serviceContext);
 	}
 
 	private static Company _company;
@@ -307,6 +381,12 @@ public class CPAttachmentFileEntryLocalServiceTest {
 
 	@Inject
 	private DLAppLocalService _dlAppLocalService;
+
+	@DeleteAfterTestRun
+	private ExpandoTable _expandoTable;
+
+	@Inject
+	private ExpandoTableLocalService _expandoTableLocalService;
 
 	private ServiceContext _serviceContext;
 
