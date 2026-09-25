@@ -18,55 +18,6 @@ definition {
 		CommerceConfiguration.commerceTearDown();
 	}
 
-	@description = "COMMERCE-6347. In Info tab, I want to be unable to add an organization that is already added to the account"
-	@ignore = "true"
-	@priority = 3
-	test AssertOrganizationThatIsPartOfTheAccountCannotBeAddedAgain {
-		property portal.acceptance = "false";
-
-		// TODO Review
-
-		CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
-
-		JSONOrganization.addOrganization(organizationName = "Test Organization");
-
-		ApplicationsMenu.gotoSite(site = "Minium");
-
-		CommerceNavigator.gotoMiniumSidebarItem(menuItem = "Account Management");
-
-		CommerceAcceleratorsInitializer.createNewAccountViaFront(accountName = "Commerce Account");
-
-		Click(
-			key_text = "Add Organizations",
-			locator1 = "Button#ANY");
-
-		Click(
-			key_userEmailAddress = "Test Organization",
-			locator1 = "CommerceAccelerators#ACCOUNT_MANAGEMENT_ADD_MODAL_PLUS_BUTTON");
-
-		Click(
-			key_button = "Add Organization",
-			locator1 = "CommerceAccelerators#ANY_BUTTON");
-
-		AssertElementPresent(
-			key_addressType = "Test Organization",
-			locator1 = "CommerceAccelerators#ACCOUNT_MANAGEMENT_ADDRESS_TYPE");
-
-		Click(
-			key_text = "Add Organizations",
-			locator1 = "Button#ANY");
-
-		Click(
-			key_userEmailAddress = "Test Organization",
-			locator1 = "CommerceAccelerators#ACCOUNT_MANAGEMENT_ADD_MODAL_PLUS_BUTTON");
-
-		Click(
-			key_button = "Add Organization",
-			locator1 = "CommerceAccelerators#ANY_BUTTON");
-
-		Alert.viewRequestFailedToComplete();
-	}
-
 	@description = "COMMERCE-6357. In Members tab, I want to be unable to add a user that is already a member of the account"
 	@ignore = "true"
 	@priority = 3
