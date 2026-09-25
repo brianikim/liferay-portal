@@ -39,6 +39,7 @@ import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -113,47 +114,6 @@ public class CPInstanceUnitOfMeasureLocalServiceTest {
 		List<CPInstance> cpInstances = cpDefinition.getCPInstances();
 
 		Assert.assertNotNull(_getCpInstanceUnitOfMeasure(cpInstances.get(0)));
-	}
-
-	@Test
-	public void testAddCPInstanceUnitOfMeasureWithSpecialCharactersName()
-		throws PortalException {
-
-		frutillaRule.scenario(
-			"Create a new UOM for a CPInstance"
-		).given(
-			"A product definition with a default SKU"
-		).when(
-			"Unit Of Measure is added"
-		).then(
-			"UOM name is added with special characters"
-		).and(
-			"UOM name is created and converted without special characters."
-		);
-
-		CPDefinition cpDefinition = CPTestUtil.addCPDefinitionFromCatalog(
-			_commerceCatalog.getGroupId(), SimpleCPTypeConstants.NAME, true,
-			true);
-
-		List<CPInstance> cpInstances = cpDefinition.getCPInstances();
-
-		CPInstance cpInstance = cpInstances.get(0);
-
-		CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure =
-			_cpInstanceUnitOfMeasureLocalService.addCPInstanceUnitOfMeasure(
-				_user.getUserId(), cpInstance.getCPInstanceId(), true,
-				BigDecimal.TEN, "KEY",
-				HashMapBuilder.put(
-					LocaleUtil.getDefault(), "<Test>Unit of Measure"
-				).build(),
-				2, BigDecimal.ZERO, true, 0.0, BigDecimal.ONE,
-				cpInstance.getSku());
-
-		Assert.assertNotNull(cpInstanceUnitOfMeasure);
-
-		Assert.assertEquals(
-			"Unit of Measure",
-			cpInstanceUnitOfMeasure.getName(LocaleUtil.getDefault()));
 	}
 
 	@Test(
@@ -332,6 +292,47 @@ public class CPInstanceUnitOfMeasureLocalServiceTest {
 		Assert.assertTrue(cpInstanceUnitOfMeasures.isEmpty());
 	}
 
+	@Test
+	public void testAddCPInstanceUnitOfMeasureWithSpecialCharactersName()
+		throws PortalException {
+
+		frutillaRule.scenario(
+			"Create a new UOM for a CPInstance"
+		).given(
+			"A product definition with a default SKU"
+		).when(
+			"Unit Of Measure is added"
+		).then(
+			"UOM name is added with special characters"
+		).and(
+			"UOM name is created and converted without special characters."
+		);
+
+		CPDefinition cpDefinition = CPTestUtil.addCPDefinitionFromCatalog(
+			_commerceCatalog.getGroupId(), SimpleCPTypeConstants.NAME, true,
+			true);
+
+		List<CPInstance> cpInstances = cpDefinition.getCPInstances();
+
+		CPInstance cpInstance = cpInstances.get(0);
+
+		CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure =
+			_cpInstanceUnitOfMeasureLocalService.addCPInstanceUnitOfMeasure(
+				_user.getUserId(), cpInstance.getCPInstanceId(), true,
+				BigDecimal.TEN, "KEY",
+				HashMapBuilder.put(
+					LocaleUtil.getDefault(), "<Test>Unit of Measure"
+				).build(),
+				2, BigDecimal.ZERO, true, 0.0, BigDecimal.ONE,
+				cpInstance.getSku());
+
+		Assert.assertNotNull(cpInstanceUnitOfMeasure);
+
+		Assert.assertEquals(
+			"Unit of Measure",
+			cpInstanceUnitOfMeasure.getName(LocaleUtil.getDefault()));
+	}
+
 	@Test(expected = DuplicateCPInstanceUnitOfMeasureKeyException.class)
 	public void testCPInstanceUnitOfMeasureMustHaveUniqueKeyForCPInstance()
 		throws PortalException {
@@ -370,6 +371,37 @@ public class CPInstanceUnitOfMeasureLocalServiceTest {
 		Assert.assertEquals(
 			cpInstanceUnitOfMeasures.toString(), 1,
 			cpInstanceUnitOfMeasures.size());
+	}
+
+	@Test
+	public void testGetActiveCPInstanceUnitOfMeasuresSortedByPriority()
+		throws PortalException {
+
+		CPDefinition cpDefinition = CPTestUtil.addCPDefinitionFromCatalog(
+			_commerceCatalog.getGroupId(), SimpleCPTypeConstants.NAME, true,
+			true);
+
+		List<CPInstance> cpInstances = cpDefinition.getCPInstances();
+
+		CPInstance cpInstance = cpInstances.get(0);
+
+		CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure4 =
+			_addCPInstanceUnitOfMeasure(cpInstance, true, 4);
+		CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure1 =
+			_addCPInstanceUnitOfMeasure(cpInstance, true, 1);
+
+		_addCPInstanceUnitOfMeasure(cpInstance, false, 2);
+
+		CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure3 =
+			_addCPInstanceUnitOfMeasure(cpInstance, true, 3);
+
+		Assert.assertEquals(
+			Arrays.asList(
+				cpInstanceUnitOfMeasure1, cpInstanceUnitOfMeasure3,
+				cpInstanceUnitOfMeasure4),
+			_cpInstanceUnitOfMeasureLocalService.
+				getActiveCPInstanceUnitOfMeasures(
+					cpInstance.getCPInstanceId()));
 	}
 
 	@Test
@@ -513,58 +545,6 @@ public class CPInstanceUnitOfMeasureLocalServiceTest {
 			"Rate", BigDecimal.TEN, cpInstanceUnitOfMeasure.getRate());
 	}
 
-	@Test
-	public void testUpdateCPInstanceUnitOfMeasureWithSpecialCharactersName()
-		throws PortalException {
-
-		frutillaRule.scenario(
-			"Create a new UOM for a CPInstance"
-		).given(
-			"I have a product definition with a default SKU"
-		).when(
-			"Unit Of Measure is created"
-		).then(
-			"UOM name is update with special characters"
-		).and(
-			"UOM name is converted without special characters."
-		);
-
-		CPDefinition cpDefinition = CPTestUtil.addCPDefinitionFromCatalog(
-			_commerceCatalog.getGroupId(), SimpleCPTypeConstants.NAME, true,
-			true);
-
-		List<CPInstance> cpInstances = cpDefinition.getCPInstances();
-
-		CPInstance cpInstance = cpInstances.get(0);
-
-		CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure =
-			_cpInstanceUnitOfMeasureLocalService.addCPInstanceUnitOfMeasure(
-				_user.getUserId(), cpInstance.getCPInstanceId(), true,
-				BigDecimal.TEN, "KEY",
-				HashMapBuilder.put(
-					LocaleUtil.getDefault(), "Name"
-				).build(),
-				2, BigDecimal.ZERO, true, 0.0, BigDecimal.ONE,
-				cpInstance.getSku());
-
-		Assert.assertNotNull(cpInstanceUnitOfMeasure);
-
-		cpInstanceUnitOfMeasure =
-			_cpInstanceUnitOfMeasureLocalService.updateCPInstanceUnitOfMeasure(
-				cpInstanceUnitOfMeasure.getCPInstanceUnitOfMeasureId(),
-				cpInstanceUnitOfMeasure.getCPInstanceId(), true, BigDecimal.TEN,
-				"KEY",
-				HashMapBuilder.put(
-					LocaleUtil.getDefault(), "<Test>Unit of Measure"
-				).build(),
-				2, BigDecimal.ZERO, true, 0.0, BigDecimal.ONE,
-				cpInstance.getSku());
-
-		Assert.assertEquals(
-			"Unit of Measure",
-			cpInstanceUnitOfMeasure.getName(LocaleUtil.getDefault()));
-	}
-
 	@Test(
 		expected = CPInstanceUnitOfMeasureIncrementalOrderQuantityException.class
 	)
@@ -695,8 +675,71 @@ public class CPInstanceUnitOfMeasureLocalServiceTest {
 			"Rate", BigDecimal.ONE, cpInstanceUnitOfMeasure.getRate());
 	}
 
+	@Test
+	public void testUpdateCPInstanceUnitOfMeasureWithSpecialCharactersName()
+		throws PortalException {
+
+		frutillaRule.scenario(
+			"Create a new UOM for a CPInstance"
+		).given(
+			"I have a product definition with a default SKU"
+		).when(
+			"Unit Of Measure is created"
+		).then(
+			"UOM name is update with special characters"
+		).and(
+			"UOM name is converted without special characters."
+		);
+
+		CPDefinition cpDefinition = CPTestUtil.addCPDefinitionFromCatalog(
+			_commerceCatalog.getGroupId(), SimpleCPTypeConstants.NAME, true,
+			true);
+
+		List<CPInstance> cpInstances = cpDefinition.getCPInstances();
+
+		CPInstance cpInstance = cpInstances.get(0);
+
+		CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure =
+			_cpInstanceUnitOfMeasureLocalService.addCPInstanceUnitOfMeasure(
+				_user.getUserId(), cpInstance.getCPInstanceId(), true,
+				BigDecimal.TEN, "KEY",
+				HashMapBuilder.put(
+					LocaleUtil.getDefault(), "Name"
+				).build(),
+				2, BigDecimal.ZERO, true, 0.0, BigDecimal.ONE,
+				cpInstance.getSku());
+
+		Assert.assertNotNull(cpInstanceUnitOfMeasure);
+
+		cpInstanceUnitOfMeasure =
+			_cpInstanceUnitOfMeasureLocalService.updateCPInstanceUnitOfMeasure(
+				cpInstanceUnitOfMeasure.getCPInstanceUnitOfMeasureId(),
+				cpInstanceUnitOfMeasure.getCPInstanceId(), true, BigDecimal.TEN,
+				"KEY",
+				HashMapBuilder.put(
+					LocaleUtil.getDefault(), "<Test>Unit of Measure"
+				).build(),
+				2, BigDecimal.ZERO, true, 0.0, BigDecimal.ONE,
+				cpInstance.getSku());
+
+		Assert.assertEquals(
+			"Unit of Measure",
+			cpInstanceUnitOfMeasure.getName(LocaleUtil.getDefault()));
+	}
+
 	@Rule
 	public final FrutillaRule frutillaRule = new FrutillaRule();
+
+	private CPInstanceUnitOfMeasure _addCPInstanceUnitOfMeasure(
+			CPInstance cpInstance, boolean active, double priority)
+		throws PortalException {
+
+		return _cpInstanceUnitOfMeasureLocalService.addCPInstanceUnitOfMeasure(
+			_user.getUserId(), cpInstance.getCPInstanceId(), active,
+			BigDecimal.ONE, RandomTestUtil.randomString(),
+			RandomTestUtil.randomLocaleStringMap(), 2, BigDecimal.ZERO, false,
+			priority, BigDecimal.ONE, cpInstance.getSku());
+	}
 
 	private CPInstanceUnitOfMeasure _getCpInstanceUnitOfMeasure(
 			CPInstance cpInstance)
