@@ -17,6 +17,7 @@ import com.liferay.commerce.product.model.CPDefinition;
 import com.liferay.commerce.product.model.CPDefinitionOptionRel;
 import com.liferay.commerce.product.model.CPDefinitionOptionValueRel;
 import com.liferay.commerce.product.model.CPInstance;
+import com.liferay.commerce.product.model.CPInstanceUnitOfMeasure;
 import com.liferay.commerce.product.model.CPOption;
 import com.liferay.commerce.product.model.CommerceCatalog;
 import com.liferay.commerce.product.service.CPDefinitionLocalService;
@@ -1362,6 +1363,90 @@ public class CPDefinitionOptionValueRelLocalServiceTest {
 		Assert.assertEquals(
 			"Size of product option values increased by one", size + 1,
 			cpDefinitionOptionValueRels.size());
+	}
+
+	@Test
+	public void testValidateStaticLinkedCPDefinitionOptionValueRelWithUOM()
+		throws Exception {
+
+		CPDefinition cpDefinition =
+			CPTestUtil.addCPDefinitionWithChildCPDefinitions(
+				_commerceCatalog.getGroupId(), 1,
+				CPConstants.PRODUCT_OPTION_PRICE_TYPE_STATIC);
+
+		_cpDefinitionOptionRels.addAll(
+			_cpDefinitionOptionRelLocalService.getCPDefinitionOptionRels(
+				cpDefinition.getCPDefinitionId()));
+
+		CPDefinitionOptionValueRel cpDefinitionOptionValueRel1 =
+			CPTestUtil.getRandomCPDefinitionOptionValueRel(
+				cpDefinition.getCPDefinitionId());
+
+		CPInstance cpInstance = cpDefinitionOptionValueRel1.fetchCPInstance();
+
+		CPInstanceUnitOfMeasure cpInstanceUnitOfMeasure =
+			CPTestUtil.addCPInstanceUnitOfMeasure(
+				_commerceCatalog.getGroupId(), cpInstance.getCPInstanceId(),
+				RandomTestUtil.randomString(), BigDecimal.ONE,
+				cpInstance.getSku());
+
+		_cpDefinitionOptionValueRelLocalService.
+			updateCPDefinitionOptionValueRel(
+				cpDefinitionOptionValueRel1.getCPDefinitionOptionValueRelId(),
+				cpInstance.getCPInstanceId(),
+				cpDefinitionOptionValueRel1.getKey(),
+				cpDefinitionOptionValueRel1.getNameMap(), false, BigDecimal.TEN,
+				cpDefinitionOptionValueRel1.getPriority(), BigDecimal.ONE,
+				cpInstanceUnitOfMeasure.getKey(), _serviceContext);
+
+		CPDefinitionOptionValueRel cpDefinitionOptionValueRel2 =
+			_cpDefinitionOptionValueRelLocalService.
+				addCPDefinitionOptionValueRel(
+					null,
+					cpDefinitionOptionValueRel1.getCPDefinitionOptionRelId(),
+					RandomTestUtil.randomString(),
+					RandomTestUtil.randomLocaleStringMap(),
+					RandomTestUtil.nextDouble(), _serviceContext);
+
+		try {
+			_cpDefinitionOptionValueRelLocalService.
+				updateCPDefinitionOptionValueRel(
+					cpDefinitionOptionValueRel2.
+						getCPDefinitionOptionValueRelId(),
+					cpInstance.getCPInstanceId(),
+					cpDefinitionOptionValueRel2.getKey(),
+					cpDefinitionOptionValueRel2.getNameMap(), false,
+					BigDecimal.TEN, cpDefinitionOptionValueRel2.getPriority(),
+					BigDecimal.ONE, cpInstanceUnitOfMeasure.getKey(),
+					_serviceContext);
+
+			Assert.fail();
+		}
+		catch (CPDefinitionOptionValueRelQuantityException
+					cpDefinitionOptionValueRelQuantityException) {
+
+			Assert.assertNotNull(cpDefinitionOptionValueRelQuantityException);
+		}
+
+		BigDecimal quantity = BigDecimal.valueOf(2);
+
+		cpDefinitionOptionValueRel2 =
+			_cpDefinitionOptionValueRelLocalService.
+				updateCPDefinitionOptionValueRel(
+					cpDefinitionOptionValueRel2.
+						getCPDefinitionOptionValueRelId(),
+					cpInstance.getCPInstanceId(),
+					cpDefinitionOptionValueRel2.getKey(),
+					cpDefinitionOptionValueRel2.getNameMap(), false,
+					BigDecimal.TEN, cpDefinitionOptionValueRel2.getPriority(),
+					quantity, cpInstanceUnitOfMeasure.getKey(),
+					_serviceContext);
+
+		Assert.assertEquals(
+			quantity, cpDefinitionOptionValueRel2.getQuantity());
+		Assert.assertEquals(
+			cpInstanceUnitOfMeasure.getKey(),
+			cpDefinitionOptionValueRel2.getUnitOfMeasureKey());
 	}
 
 	@Rule
