@@ -18,57 +18,6 @@ definition {
 		CommerceConfiguration.commerceTearDown();
 	}
 
-	@description = "COMMERCE-6368. In Addresses tab, I want to be able to add addresses to the account(Billing, Shipping, Billing and Shipping)"
-	@ignore = "true"
-	@priority = 3
-	test AddAddressToAccount {
-		property portal.acceptance = "false";
-
-		// TODO Review
-
-		CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
-
-		Navigator.openWithAppendToBaseURL(urlAppend = "web/minium");
-
-		CommerceNavigator.gotoMiniumSidebarItem(menuItem = "Account Management");
-
-		CommerceAcceleratorsInitializer.createNewAccountViaFront(accountName = "Commerce Account");
-
-		Click(
-			key_navUnderline = "Addresses",
-			locator1 = "NavUnderline#NAV_UNDERLINE_LINK");
-
-		CommerceAcceleratorsInitializer.addAddressToAccount(
-			keyAddress = "Test Address",
-			keyCity = "Test City",
-			keyCountry = "United States",
-			keyName = "Test Name",
-			keyRegion = "Alaska",
-			keyTelephone = "Test Telephone",
-			keyType = "Billing",
-			keyZipCode = "Test Zip Code");
-
-		CommerceAcceleratorsInitializer.addAddressToAccount(
-			keyAddress = "Test Address",
-			keyCity = "Test City",
-			keyCountry = "United States",
-			keyName = "Test Name",
-			keyRegion = "Alaska",
-			keyTelephone = "Test Telephone",
-			keyType = "Shipping",
-			keyZipCode = "Test Zip Code");
-
-		CommerceAcceleratorsInitializer.addAddressToAccount(
-			keyAddress = "Test Address",
-			keyCity = "Test City",
-			keyCountry = "United States",
-			keyName = "Test Name",
-			keyRegion = "Alaska",
-			keyTelephone = "Test Telephone",
-			keyType = "Billing and Shipping",
-			keyZipCode = "Test Zip Code");
-	}
-
 	@description = "COMMERCE-6337. In Info tab, I want to be able to add an organization to the account"
 	@ignore = "true"
 	@priority = 3
@@ -516,60 +465,6 @@ definition {
 			locator1 = "CommerceAccelerators#ACCOUNT_MANAGEMENT_AVATAR_BY_ID");
 	}
 
-	@description = "COMMERCE-6372. In Addresses tab, I want to be able to edit an address added to the account"
-	@ignore = "true"
-	@priority = 3
-	test EditAddressInAccount {
-		property portal.acceptance = "false";
-
-		// TODO Review
-
-		CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
-
-		ApplicationsMenu.gotoSite(site = "Minium");
-
-		CommerceNavigator.gotoMiniumSidebarItem(menuItem = "Account Management");
-
-		CommerceAcceleratorsInitializer.createNewAccountViaFront(accountName = "Test Test");
-
-		Click(
-			key_navUnderline = "Addresses",
-			locator1 = "NavUnderline#NAV_UNDERLINE_LINK");
-
-		CommerceAcceleratorsInitializer.addAddressToAccount(
-			keyAddress = "Test Address",
-			keyCity = "Test City",
-			keyCountry = "United States",
-			keyName = "Test Address",
-			keyRegion = "Alaska",
-			keyTelephone = "Test Telephone",
-			keyType = "Billing",
-			keyZipCode = "Test Zip Code");
-
-		Refresh();
-
-		Click(
-			key_memberEmailAddress = "Test Address",
-			locator1 = "CommerceAccelerators#ACCOUNT_MANAGEMENT_MEMBER_ACTIONS_DROPDOWN");
-
-		MenuItem.click(menuItem = "Edit");
-
-		Click(locator1 = "Button#ARROW_SUBMIT_BTN");
-
-		Type(
-			key_fieldLabel = "Name",
-			locator1 = "TextInput#GENERIC_TEXT_INPUT",
-			value1 = "Test Address 2");
-
-		Click(
-			key_tab = "Update",
-			locator1 = "Button#TAB_SUBMIT_BTN");
-
-		AssertElementPresent(
-			key_memberEmailAddress = "Test Address 2",
-			locator1 = "CommerceAccelerators#ACCOUNT_MANAGEMENT_MEMBER_ACTIONS_DROPDOWN");
-	}
-
 	@description = "COMMERCE-6373. In Addresses tab, I want to be able to remove addresses from the account"
 	@ignore = "true"
 	@priority = 3
@@ -695,15 +590,6 @@ definition {
 		AssertElementNotPresent(
 			key_addressType = "buyer@liferay.com",
 			locator1 = "CommerceAccelerators#ACCOUNT_MANAGEMENT_ADDRESS_TYPE");
-	}
-
-	@description = "COMMERCE-6376. In Addresses tab, I want to be able to search for an address using the search bar"
-	@ignore = "true"
-	@priority = 3
-	test SearchAnAccountAddress {
-
-		// TODO COMMERCE-6376 SearchAnAccountAddress pending implementation
-
 	}
 
 	@description = "COMMERCE-6365. In Members tab, I want to be able to search for an account member using the search bar"
