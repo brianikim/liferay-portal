@@ -28,6 +28,7 @@ import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.CompanyTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
@@ -147,25 +148,22 @@ public class CPDefinitionHelperTest {
 		CPInstance[] cpInstances = _addCPInstances(
 			_commerceCatalog.getGroupId(), _CP_INSTANCES_COUNT);
 
-		int counter = 0;
-		int position = 0;
+		long[] cpDefinitionIds1 = new long[_CP_INSTANCES_COUNT / 2];
+		long[] cpDefinitionIds2 = new long[_CP_INSTANCES_COUNT / 2];
 
-		long[] cpDefinitionIds = new long[_CP_INSTANCES_COUNT / 2];
+		for (int i = 0; i < cpInstances.length; i++) {
+			CPInstance cpInstance = cpInstances[i];
 
-		for (CPInstance cpInstance : cpInstances) {
-			if ((counter % 2) == 0) {
-				CPDefinition cpDefinition = cpInstance.getCPDefinition();
-
-				cpDefinitionIds[position] = cpDefinition.getCPDefinitionId();
-
-				position++;
+			if ((i % 2) == 0) {
+				cpDefinitionIds1[i / 2] = cpInstance.getCPDefinitionId();
 			}
-
-			counter++;
+			else {
+				cpDefinitionIds2[i / 2] = cpInstance.getCPDefinitionId();
+			}
 		}
 
-		AssetCategory assetCategory = CPTestUtil.addCategoryToCPDefinitions(
-			_commerceCatalog.getGroupId(), cpDefinitionIds);
+		AssetCategory assetCategory1 = CPTestUtil.addCategoryToCPDefinitions(
+			_commerceCatalog.getGroupId(), cpDefinitionIds1);
 
 		SearchContext searchContext = CPTestUtil.getSearchContext(
 			null, WorkflowConstants.STATUS_APPROVED,
@@ -173,7 +171,7 @@ public class CPDefinitionHelperTest {
 
 		CPQuery cpQuery = new CPQuery();
 
-		cpQuery.setAllCategoryIds(new long[] {assetCategory.getCategoryId()});
+		cpQuery.setAllCategoryIds(new long[] {assetCategory1.getCategoryId()});
 
 		CPDataSourceResult cpDataSourceResult = _cpDefinitionHelper.search(
 			_commerceCatalog.getGroupId(), searchContext, cpQuery,
@@ -183,7 +181,7 @@ public class CPDefinitionHelperTest {
 			cpDataSourceResult.getCPCatalogEntries();
 
 		Assert.assertEquals(
-			cpCatalogEntries.toString(), cpDefinitionIds.length,
+			cpCatalogEntries.toString(), cpDefinitionIds1.length,
 			cpCatalogEntries.size());
 
 		List<Long> actualCPDefinitionIds = TransformUtil.transform(
@@ -191,13 +189,29 @@ public class CPDefinitionHelperTest {
 			cpCatalogEntry -> cpCatalogEntry.getCPDefinitionId());
 
 		List<Long> cpDefinitionIdsList = TransformUtil.transformToList(
-			cpDefinitionIds, cpDefinitionId -> cpDefinitionId);
+			cpDefinitionIds1, cpDefinitionId -> cpDefinitionId);
 
 		Assert.assertTrue(
 			actualCPDefinitionIds.containsAll(cpDefinitionIdsList));
 
+		Assert.assertEquals(
+			SetUtil.fromArray(cpDefinitionIds1),
+			_searchCPDefinitionIds(assetCategory1.getName()));
+
+		AssetCategory assetCategory2 = CPTestUtil.addCategoryToCPDefinitions(
+			_commerceCatalog.getGroupId(), cpDefinitionIds2);
+
+		Assert.assertEquals(
+			SetUtil.fromArray(
+				ArrayUtil.append(cpDefinitionIds1, cpDefinitionIds2)),
+			_searchCPDefinitionIds(
+				assetCategory1.getName() + StringPool.SPACE +
+					assetCategory2.getName()));
+
 		AssetCategoryLocalServiceUtil.deleteCategory(
-			assetCategory.getCategoryId());
+			assetCategory1.getCategoryId());
+		AssetCategoryLocalServiceUtil.deleteCategory(
+			assetCategory2.getCategoryId());
 	}
 
 	@Test
