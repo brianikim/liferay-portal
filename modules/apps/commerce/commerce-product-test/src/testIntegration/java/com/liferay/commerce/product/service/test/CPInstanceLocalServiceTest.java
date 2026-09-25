@@ -722,24 +722,12 @@ public class CPInstanceLocalServiceTest {
 
 		_cpInstanceLocalService.updateCPInstance(cpInstance2);
 
-		Calendar calendar = CalendarFactoryUtil.getCalendar();
 		cpDefinition = cpInstance1.getCPDefinition();
 
 		try {
-			_cpInstanceLocalService.updateCPInstance(
-				cpInstance3.getExternalReferenceCode(),
-				cpInstance3.getCPInstanceId(), cpInstance3.getSku(), null, null,
-				false, 0, 0, 0, 0, BigDecimal.ZERO, BigDecimal.ZERO,
-				BigDecimal.ZERO, false, calendar.get(Calendar.MONTH),
-				calendar.get(Calendar.DATE), calendar.get(Calendar.YEAR),
-				calendar.get(Calendar.HOUR_OF_DAY),
-				calendar.get(Calendar.MINUTE), 0, 0, 0, 0, 0, true, false,
-				false, 0, null, null, 0, false, 0, null, null, 0, null, true,
-				cpInstance1.getCPInstanceUuid(), cpDefinition.getCProductId(),
-				calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE),
-				calendar.get(Calendar.YEAR),
-				ServiceContextTestUtil.getServiceContext(
-					cpInstance3.getGroupId()));
+			_updateCPInstance(
+				cpInstance3, cpInstance1.getCPInstanceUuid(),
+				cpDefinition.getCProductId());
 
 			Assert.fail();
 		}
@@ -848,6 +836,27 @@ public class CPInstanceLocalServiceTest {
 				cpInstanceCPDefinitionOptionValueRel.
 					getCPDefinitionOptionValueRelId());
 		}
+	}
+
+	private void _updateCPInstance(
+			CPInstance cpInstance, String replacementCPInstanceUuid,
+			long replacementCProductId)
+		throws Exception {
+
+		Calendar calendar = CalendarFactoryUtil.getCalendar();
+
+		_cpInstanceLocalService.updateCPInstance(
+			cpInstance.getExternalReferenceCode(), cpInstance.getCPInstanceId(),
+			cpInstance.getSku(), null, null, false, 0, 0, 0, 0, BigDecimal.ZERO,
+			BigDecimal.ZERO, BigDecimal.ZERO, false,
+			calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE),
+			calendar.get(Calendar.YEAR), calendar.get(Calendar.HOUR_OF_DAY),
+			calendar.get(Calendar.MINUTE), 0, 0, 0, 0, 0, true, false, false, 0,
+			null, null, 0, false, 0, null, null, 0, null, true,
+			replacementCPInstanceUuid, replacementCProductId,
+			calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE),
+			calendar.get(Calendar.YEAR),
+			ServiceContextTestUtil.getServiceContext(cpInstance.getGroupId()));
 	}
 
 	private static Company _company;
