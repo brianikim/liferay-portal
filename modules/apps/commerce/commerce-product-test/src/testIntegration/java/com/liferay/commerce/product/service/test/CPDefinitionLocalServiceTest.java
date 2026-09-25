@@ -16,11 +16,13 @@ import com.liferay.commerce.price.list.model.CommercePriceList;
 import com.liferay.commerce.price.list.service.CommercePriceEntryLocalService;
 import com.liferay.commerce.price.list.service.CommercePriceListLocalService;
 import com.liferay.commerce.product.configuration.CProductVersionConfiguration;
+import com.liferay.commerce.product.constants.CPDefinitionLinkTypeConstants;
 import com.liferay.commerce.product.constants.CPInstanceConstants;
 import com.liferay.commerce.product.constants.CommerceChannelAccountEntryRelConstants;
 import com.liferay.commerce.product.exception.NoSuchCProductException;
 import com.liferay.commerce.product.model.CPConfigurationList;
 import com.liferay.commerce.product.model.CPDefinition;
+import com.liferay.commerce.product.model.CPDefinitionLink;
 import com.liferay.commerce.product.model.CPDefinitionLocalization;
 import com.liferay.commerce.product.model.CPDefinitionOptionRel;
 import com.liferay.commerce.product.model.CPDefinitionOptionValueRel;
@@ -171,6 +173,57 @@ public class CPDefinitionLocalServiceTest {
 
 		Assert.assertEquals(
 			WorkflowConstants.STATUS_APPROVED, cpDefinition.getStatus());
+	}
+
+	@Test
+	public void testAddCPDefinitionLinkByCProductIdWithBidirectionalType()
+		throws Exception {
+
+		frutillaRule.scenario(
+			"Add an incompatible in bundle definition link"
+		).given(
+			"Two product definitions"
+		).when(
+			"an incompatible in bundle definition link is added from the " +
+				"first product definition to the second"
+		).then(
+			"the reverse definition link is added"
+		).and(
+			"deleting the reverse definition link deletes the original one"
+		);
+
+		CPDefinition cpDefinition1 = CPTestUtil.addCPDefinitionFromCatalog(
+			_commerceCatalog.getGroupId(), SimpleCPTypeConstants.NAME, false,
+			false);
+		CPDefinition cpDefinition2 = CPTestUtil.addCPDefinitionFromCatalog(
+			_commerceCatalog.getGroupId(), SimpleCPTypeConstants.NAME, false,
+			false);
+
+		_addCPDefinitionLink(
+			cpDefinition1, cpDefinition2,
+			CPDefinitionLinkTypeConstants.INCOMPATIBLE_IN_BUNDLE);
+
+		Assert.assertNotNull(
+			_cpDefinitionLinkLocalService.fetchCPDefinitionLink(
+				cpDefinition1.getCPDefinitionId(),
+				cpDefinition2.getCProductId(),
+				CPDefinitionLinkTypeConstants.INCOMPATIBLE_IN_BUNDLE));
+
+		CPDefinitionLink cpDefinitionLink =
+			_cpDefinitionLinkLocalService.fetchCPDefinitionLink(
+				cpDefinition2.getCPDefinitionId(),
+				cpDefinition1.getCProductId(),
+				CPDefinitionLinkTypeConstants.INCOMPATIBLE_IN_BUNDLE);
+
+		Assert.assertNotNull(cpDefinitionLink);
+
+		_cpDefinitionLinkLocalService.deleteCPDefinitionLink(cpDefinitionLink);
+
+		Assert.assertNull(
+			_cpDefinitionLinkLocalService.fetchCPDefinitionLink(
+				cpDefinition1.getCPDefinitionId(),
+				cpDefinition2.getCProductId(),
+				CPDefinitionLinkTypeConstants.INCOMPATIBLE_IN_BUNDLE));
 	}
 
 	@Test
