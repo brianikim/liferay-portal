@@ -19,6 +19,7 @@ import com.liferay.expando.kernel.model.ExpandoTable;
 import com.liferay.expando.kernel.service.ExpandoColumnLocalServiceUtil;
 import com.liferay.expando.kernel.service.ExpandoTableLocalServiceUtil;
 import com.liferay.expando.test.util.ExpandoTestUtil;
+import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.Field;
@@ -35,6 +36,7 @@ import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.search.test.util.HitsAssert;
 import com.liferay.portal.test.rule.Inject;
@@ -183,6 +185,51 @@ public class CPDefinitionIndexerTest {
 			actualDocument.get("entryClassPK"));
 		Assert.assertEquals(
 			expectedDocument.get("gtins"), cpInstance.getGtin());
+	}
+
+	@Test
+	public void testSearchByPartialSku() throws Exception {
+		CommerceCatalog commerceCatalog =
+			_commerceCatalogLocalService.addCommerceCatalog(
+				null, RandomTestUtil.randomString(),
+				RandomTestUtil.randomString(),
+				LocaleUtil.US.getDisplayLanguage(),
+				ServiceContextTestUtil.getServiceContext(_group.getGroupId()));
+
+		CPTestUtil.addCPInstanceFromCatalog(commerceCatalog.getGroupId());
+
+		List<String> entryClassPKs = new ArrayList<>();
+		String skuPrefix = RandomTestUtil.randomString();
+
+		for (int i = 0; i < 4; i++) {
+			CPInstance cpInstance = CPTestUtil.addCPInstanceFromCatalog(
+				commerceCatalog.getGroupId());
+
+			cpInstance.setSku(skuPrefix + i);
+
+			cpInstance = _cpInstanceLocalService.updateCPInstance(cpInstance);
+
+			_indexer.reindex(cpInstance.getCPDefinition());
+
+			entryClassPKs.add(String.valueOf(cpInstance.getCPDefinitionId()));
+		}
+
+		SearchContext searchContext = new SearchContext();
+
+		searchContext.setCompanyId(_group.getCompanyId());
+		searchContext.setEntryClassNames(
+			new String[] {CPDefinition.class.getName()});
+		searchContext.setGroupIds(new long[] {commerceCatalog.getGroupId()});
+		searchContext.setKeywords(skuPrefix);
+
+		Hits hits = _indexer.search(searchContext);
+
+		Assert.assertEquals(
+			SetUtil.fromList(entryClassPKs),
+			SetUtil.fromList(
+				TransformUtil.transform(
+					hits.toList(),
+					document -> document.get(Field.ENTRY_CLASS_PK))));
 	}
 
 	private void _setUp(String expandoValue, CPInstance cpInstance)
