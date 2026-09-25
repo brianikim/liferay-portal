@@ -27,6 +27,7 @@ import com.liferay.commerce.product.test.util.CPTestUtil;
 import com.liferay.commerce.product.type.simple.constants.SimpleCPTypeConstants;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.lang.SafeCloseable;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.lazy.referencing.LazyReferencingThreadLocal;
 import com.liferay.portal.kernel.model.Group;
@@ -618,6 +619,49 @@ public class CPDefinitionOptionRelLocalServiceTest {
 		Assert.assertEquals(
 			CPConstants.PRODUCT_OPTION_PRICE_TYPE_STATIC,
 			cpDefinitionOptionRel.getPriceType());
+	}
+
+	@Test
+	public void testValidatePriceTypeDefinedExternally() throws Exception {
+		CPDefinition cpDefinition = CPTestUtil.addCPDefinition(
+			_commerceCatalog.getGroupId());
+
+		CPDefinitionOptionRel cpDefinitionOptionRel =
+			CPTestUtil.addCPDefinitionOptionRel(
+				_commerceCatalog.getGroupId(), cpDefinition.getCPDefinitionId(),
+				false, 0);
+
+		_cpDefinitionOptionRels.add(cpDefinitionOptionRel);
+
+		cpDefinitionOptionRel.setDefinedExternally(true);
+
+		for (String priceType :
+				new String[] {
+					CPConstants.PRODUCT_OPTION_PRICE_TYPE_STATIC,
+					StringPool.BLANK
+				}) {
+
+			try {
+				_updatePriceType(cpDefinitionOptionRel, priceType);
+
+				Assert.fail();
+			}
+			catch (CPDefinitionOptionRelPriceTypeException
+						cpDefinitionOptionRelPriceTypeException) {
+
+				Assert.assertEquals(
+					"Price type must be dynamic",
+					cpDefinitionOptionRelPriceTypeException.getMessage());
+			}
+		}
+
+		cpDefinitionOptionRel =
+			_cpDefinitionOptionRelLocalService.getCPDefinitionOptionRel(
+				cpDefinitionOptionRel.getCPDefinitionOptionRelId());
+
+		Assert.assertFalse(cpDefinitionOptionRel.isDefinedExternally());
+		Assert.assertTrue(
+			Validator.isNull(cpDefinitionOptionRel.getPriceType()));
 	}
 
 	@Test
