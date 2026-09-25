@@ -73,6 +73,7 @@ async function setUpTermsCheckout({
 	page,
 	pendingOrdersPage,
 	rolePermissions,
+	termDescription,
 	termTypes,
 }: {
 	apiHelpers: DataApiHelpers;
@@ -83,6 +84,7 @@ async function setUpTermsCheckout({
 	page: Page;
 	pendingOrdersPage: PendingOrdersPage;
 	rolePermissions?: TRole['rolePermissions'];
+	termDescription?: string;
 	termTypes: Array<'delivery-terms' | 'payment-terms'>;
 }) {
 	const {channel, product, site} = await apiStorefrontSetUp(apiHelpers, [
@@ -121,13 +123,18 @@ async function setUpTermsCheckout({
 	const terms = {};
 
 	for (const termType of termTypes) {
+		const termProperties = {
+			...(termDescription && {description: {en_US: termDescription}}),
+			type: termType,
+		};
+
 		terms[termType] = [
-			await apiHelpers.headlessCommerceAdminOrder.postTerm({
-				type: termType,
-			}),
-			await apiHelpers.headlessCommerceAdminOrder.postTerm({
-				type: termType,
-			}),
+			await apiHelpers.headlessCommerceAdminOrder.postTerm(
+				termProperties
+			),
+			await apiHelpers.headlessCommerceAdminOrder.postTerm(
+				termProperties
+			),
 		];
 
 		if (termType === 'payment-terms') {
