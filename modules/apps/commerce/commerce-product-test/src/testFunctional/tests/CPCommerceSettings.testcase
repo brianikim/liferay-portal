@@ -362,19 +362,4 @@ definition {
 		AssertElementPresent(locator1 = "Message#SUCCESS");
 	}
 
-	@description = "This is a test to check the instance currencies available"
-	@priority = 5
-	test ViewInstanceCurrenciesAvailable {
-		property environment.acceptance = "false";
-		property operating.system.types = "alpine,amazonlinux,centos,debian,fedora,orcllinux,osx,redhat,rockylinux,solaris,suse,ubuntu,windows";
-		property portal.acceptance = "true";
-		property portal.upstream = "true";
-
-		CommerceNavigator.gotoPortlet(
-			category = "Store Management",
-			portlet = "Currencies");
-
-		CommerceEntry.viewCurrenciesEntry(currenciesList = "US Dollar,Australian Dollar,British Pound,Canadian Dollar,Chinese Yuan Renminbi,Euro,Hong Kong Dollar,Japanese Yen,Indian Rupee,Brazilian Real");
-	}
-
 }

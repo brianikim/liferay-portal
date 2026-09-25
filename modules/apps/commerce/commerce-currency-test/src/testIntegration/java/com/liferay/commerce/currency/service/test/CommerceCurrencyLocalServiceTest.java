@@ -22,7 +22,10 @@ import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
+import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
+import com.liferay.portal.kernel.util.HashMapBuilder;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.test.rule.Inject;
@@ -30,6 +33,8 @@ import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
 
 import java.math.BigDecimal;
+
+import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -156,6 +161,46 @@ public class CommerceCurrencyLocalServiceTest {
 		Assert.assertNotEquals(
 			WorkflowConstants.STATUS_EMPTY, commerceCurrency.getStatus());
 		Assert.assertEquals(code, commerceCurrency.getCode());
+	}
+
+	@Test
+	public void testImportDefaultValues() throws Exception {
+		_commerceCurrencyLocalService.importDefaultValues(
+			false,
+			ServiceContextTestUtil.getServiceContext(
+				TestPropsValues.getGroupId()));
+
+		Map<String, String> names = HashMapBuilder.put(
+			"AUD", "Australian Dollar"
+		).put(
+			"BRL", "Brazilian Real"
+		).put(
+			"CAD", "Canadian Dollar"
+		).put(
+			"CNY", "Chinese Yuan Renminbi"
+		).put(
+			"EUR", "Euro"
+		).put(
+			"GBP", "British Pound"
+		).put(
+			"HKD", "Hong Kong Dollar"
+		).put(
+			"INR", "Indian Rupee"
+		).put(
+			"JPY", "Japanese Yen"
+		).put(
+			"USD", "US Dollar"
+		).build();
+
+		for (Map.Entry<String, String> entry : names.entrySet()) {
+			CommerceCurrency commerceCurrency =
+				_commerceCurrencyLocalService.fetchCommerceCurrency(
+					TestPropsValues.getCompanyId(), entry.getKey());
+
+			Assert.assertNotNull(entry.getKey(), commerceCurrency);
+			Assert.assertEquals(
+				entry.getValue(), commerceCurrency.getName(LocaleUtil.US));
+		}
 	}
 
 	@Test
