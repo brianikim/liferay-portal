@@ -16,6 +16,7 @@ import com.liferay.commerce.currency.model.CommerceCurrency;
 import com.liferay.commerce.currency.test.util.CommerceCurrencyTestUtil;
 import com.liferay.commerce.model.CommerceAddress;
 import com.liferay.commerce.product.model.CommerceChannel;
+import com.liferay.commerce.product.model.CommerceChannelRel;
 import com.liferay.commerce.product.service.CommerceChannelRelLocalService;
 import com.liferay.commerce.service.CommerceAddressService;
 import com.liferay.commerce.test.util.CommerceTestUtil;
@@ -261,11 +262,14 @@ public class CommerceAddressServiceTest {
 			commerceChannel1.getCommerceChannelId(),
 			ServiceContextTestUtil.getServiceContext(
 				TestPropsValues.getGroupId()));
-		_commerceChannelRelLocalService.addCommerceChannelRel(
-			Address.class.getName(), _commerceAddress.getCommerceAddressId(),
-			commerceChannel2.getCommerceChannelId(),
-			ServiceContextTestUtil.getServiceContext(
-				TestPropsValues.getGroupId()));
+
+		CommerceChannelRel commerceChannelRel =
+			_commerceChannelRelLocalService.addCommerceChannelRel(
+				Address.class.getName(),
+				_commerceAddress.getCommerceAddressId(),
+				commerceChannel2.getCommerceChannelId(),
+				ServiceContextTestUtil.getServiceContext(
+					TestPropsValues.getGroupId()));
 
 		long[] commerceAddressIds = _getBillingCommerceAddressIds(
 			commerceChannel1.getCommerceChannelId());
@@ -307,6 +311,16 @@ public class CommerceAddressServiceTest {
 		Assert.assertTrue(
 			ArrayUtil.contains(
 				commerceAddressIds, commerceAddress2.getCommerceAddressId()));
+
+		_commerceChannelRelLocalService.deleteCommerceChannelRel(
+			commerceChannelRel);
+
+		commerceAddressIds = _getBillingCommerceAddressIds(
+			commerceChannel1.getCommerceChannelId());
+
+		Assert.assertTrue(
+			ArrayUtil.contains(
+				commerceAddressIds, _commerceAddress.getCommerceAddressId()));
 	}
 
 	@Test
@@ -384,11 +398,14 @@ public class CommerceAddressServiceTest {
 			commerceChannel1.getCommerceChannelId(),
 			ServiceContextTestUtil.getServiceContext(
 				TestPropsValues.getGroupId()));
-		_commerceChannelRelLocalService.addCommerceChannelRel(
-			Address.class.getName(), _commerceAddress.getCommerceAddressId(),
-			commerceChannel2.getCommerceChannelId(),
-			ServiceContextTestUtil.getServiceContext(
-				TestPropsValues.getGroupId()));
+
+		CommerceChannelRel commerceChannelRel =
+			_commerceChannelRelLocalService.addCommerceChannelRel(
+				Address.class.getName(),
+				_commerceAddress.getCommerceAddressId(),
+				commerceChannel2.getCommerceChannelId(),
+				ServiceContextTestUtil.getServiceContext(
+					TestPropsValues.getGroupId()));
 
 		long[] commerceAddressIds = _getShippingCommerceAddressIds(
 			commerceChannel1.getCommerceChannelId());
@@ -430,6 +447,16 @@ public class CommerceAddressServiceTest {
 		Assert.assertTrue(
 			ArrayUtil.contains(
 				commerceAddressIds, commerceAddress2.getCommerceAddressId()));
+
+		_commerceChannelRelLocalService.deleteCommerceChannelRel(
+			commerceChannelRel);
+
+		commerceAddressIds = _getShippingCommerceAddressIds(
+			commerceChannel1.getCommerceChannelId());
+
+		Assert.assertTrue(
+			ArrayUtil.contains(
+				commerceAddressIds, _commerceAddress.getCommerceAddressId()));
 	}
 
 	@Test
