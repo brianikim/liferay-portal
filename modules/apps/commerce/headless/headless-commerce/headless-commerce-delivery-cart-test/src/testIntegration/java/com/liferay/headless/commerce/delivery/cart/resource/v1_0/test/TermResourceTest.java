@@ -32,6 +32,7 @@ import com.liferay.commerce.term.model.CommerceTermEntry;
 import com.liferay.commerce.term.service.CommerceTermEntryLocalService;
 import com.liferay.headless.commerce.core.util.DateConfig;
 import com.liferay.headless.commerce.delivery.cart.client.dto.v1_0.Term;
+import com.liferay.headless.commerce.delivery.cart.client.pagination.Page;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.model.Address;
 import com.liferay.portal.kernel.model.Country;
@@ -55,9 +56,11 @@ import java.math.BigDecimal;
 
 import java.util.Collections;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
@@ -172,11 +175,38 @@ public class TermResourceTest extends BaseTermResourceTestCase {
 	}
 
 	@Override
+	@Test
+	public void testGetCartDeliveryTermsPage() throws Exception {
+		super.testGetCartDeliveryTermsPage();
+
+		CommerceShippingFixedOption commerceShippingFixedOption =
+			_commerceShippingFixedOptionLocalService.
+				addCommerceShippingFixedOption(
+					_user.getUserId(), _commerceChannel.getGroupId(),
+					_commerceShippingMethod.getCommerceShippingMethodId(),
+					BigDecimal.valueOf(RandomTestUtil.nextDouble()),
+					RandomTestUtil.randomLocaleStringMap(),
+					RandomTestUtil.randomString(),
+					Collections.singletonMap(
+						LocaleUtil.US, RandomTestUtil.randomString()),
+					RandomTestUtil.nextDouble());
+
+		Term term = _addDeliveryTerm(randomTerm(), commerceShippingFixedOption);
+
+		Page<Term> page = termResource.getCartDeliveryTermsPage(
+			_commerceOrder.getCommerceOrderId());
+
+		for (Term item : page.getItems()) {
+			Assert.assertNotEquals(term.getId(), item.getId());
+		}
+	}
+
+	@Override
 	protected Term testGetCartByExternalReferenceCodeDeliveryTermsPage_addTerm(
 			String externalReferenceCode, Term term)
 		throws Exception {
 
-		return _addDeliveryTerm(term);
+		return _addDeliveryTerm(term, _commerceShippingFixedOption);
 	}
 
 	@Override
@@ -207,7 +237,7 @@ public class TermResourceTest extends BaseTermResourceTestCase {
 	protected Term testGetCartDeliveryTermsPage_addTerm(Long cartId, Term term)
 		throws Exception {
 
-		return _addDeliveryTerm(term);
+		return _addDeliveryTerm(term, _commerceShippingFixedOption);
 	}
 
 	@Override
@@ -227,7 +257,10 @@ public class TermResourceTest extends BaseTermResourceTestCase {
 		return _commerceOrder.getCommerceOrderId();
 	}
 
-	private Term _addDeliveryTerm(Term term) throws Exception {
+	private Term _addDeliveryTerm(
+			Term term, CommerceShippingFixedOption commerceShippingFixedOption)
+		throws Exception {
+
 		CommerceTermEntry commerceTermEntry = _addTerm(
 			term, CommerceTermEntryConstants.TYPE_DELIVERY_TERMS);
 
@@ -235,8 +268,7 @@ public class TermResourceTest extends BaseTermResourceTestCase {
 			addCommerceShippingFixedOptionQualifier(
 				CommerceTermEntry.class.getName(),
 				commerceTermEntry.getCommerceTermEntryId(),
-				_commerceShippingFixedOption.
-					getCommerceShippingFixedOptionId());
+				commerceShippingFixedOption.getCommerceShippingFixedOptionId());
 
 		return new Term() {
 			{
