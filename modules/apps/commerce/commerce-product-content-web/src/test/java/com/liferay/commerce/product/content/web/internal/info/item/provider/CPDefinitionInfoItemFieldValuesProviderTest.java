@@ -22,6 +22,9 @@ import com.liferay.commerce.product.service.CommerceChannelLocalService;
 import com.liferay.commerce.service.CPDefinitionInventoryLocalService;
 import com.liferay.commerce.util.CommerceContextThreadLocal;
 import com.liferay.expando.info.item.provider.ExpandoInfoItemFieldSetProvider;
+import com.liferay.info.field.InfoField;
+import com.liferay.info.field.InfoFieldValue;
+import com.liferay.info.field.type.HTMLInfoFieldType;
 import com.liferay.info.item.InfoItemFieldValues;
 import com.liferay.info.item.field.reader.InfoItemFieldReaderFieldSetProvider;
 import com.liferay.layout.page.template.info.item.provider.DisplayPageInfoItemFieldSetProvider;
@@ -32,6 +35,7 @@ import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
 import com.liferay.template.info.item.provider.TemplateInfoItemFieldSetProvider;
@@ -140,11 +144,32 @@ public class CPDefinitionInfoItemFieldValuesProviderTest {
 
 		CPDefinition cpDefinition = _createMockCPDefinition();
 
+		String description = "<p>" + RandomTestUtil.randomString() + "</p>";
+
+		Mockito.doReturn(
+			HashMapBuilder.put(
+				LocaleUtil.US, description
+			).build()
+		).when(
+			cpDefinition
+		).getDescriptionMap();
+
 		InfoItemFieldValues values =
 			_cpDefinitionInfoItemFieldValuesProvider.getInfoItemFieldValues(
 				cpDefinition);
 
 		Assert.assertNotNull(values);
+
+		InfoFieldValue<Object> descriptionInfoFieldValue =
+			values.getInfoFieldValue("description");
+
+		InfoField infoField = descriptionInfoFieldValue.getInfoField();
+
+		Assert.assertEquals(
+			HTMLInfoFieldType.INSTANCE, infoField.getInfoFieldType());
+
+		Assert.assertEquals(
+			description, descriptionInfoFieldValue.getValue(LocaleUtil.US));
 	}
 
 	private CPDefinition _createMockCPDefinition() {
