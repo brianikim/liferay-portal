@@ -25,6 +25,8 @@ import com.liferay.commerce.term.model.CommerceTermEntry;
 import com.liferay.commerce.term.service.CommerceTermEntryLocalServiceUtil;
 import com.liferay.commerce.test.util.CommerceTestUtil;
 import com.liferay.headless.commerce.admin.account.client.dto.v1_0.AccountChannelEntry;
+import com.liferay.headless.commerce.admin.account.client.pagination.Page;
+import com.liferay.headless.commerce.admin.account.client.pagination.Pagination;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.model.Address;
 import com.liferay.portal.kernel.model.Country;
@@ -53,6 +55,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -145,6 +148,42 @@ public class AccountChannelEntryResourceTest
 
 		UserLocalServiceUtil.addRoleUser(
 			role.getRoleId(), _commerceUser.getUserId());
+	}
+
+	@Test
+	public void testDeleteCommerceTermEntry() throws Exception {
+		CommerceTermEntry deliveryCommerceTermEntry = _addCommerceTermEntry(
+			CommerceTermEntryConstants.TYPE_DELIVERY_TERMS);
+
+		AccountChannelEntry deliveryTermAccountChannelEntry =
+			randomAccountChannelEntry();
+
+		deliveryTermAccountChannelEntry.setClassPK(
+			deliveryCommerceTermEntry.getPrimaryKey());
+
+		accountChannelEntryResource.postAccountIdAccountChannelDeliveryTerm(
+			_accountEntry.getAccountEntryId(), deliveryTermAccountChannelEntry);
+
+		CommerceTermEntry paymentCommerceTermEntry = _addCommerceTermEntry(
+			CommerceTermEntryConstants.TYPE_PAYMENT_TERMS);
+
+		AccountChannelEntry paymentTermAccountChannelEntry =
+			randomAccountChannelEntry();
+
+		paymentTermAccountChannelEntry.setClassPK(
+			paymentCommerceTermEntry.getPrimaryKey());
+
+		accountChannelEntryResource.postAccountIdAccountChannelPaymentTerm(
+			_accountEntry.getAccountEntryId(), paymentTermAccountChannelEntry);
+
+		_assertAccountChannelTermEntriesTotalCount(1);
+
+		CommerceTermEntryLocalServiceUtil.deleteCommerceTermEntry(
+			deliveryCommerceTermEntry);
+		CommerceTermEntryLocalServiceUtil.deleteCommerceTermEntry(
+			paymentCommerceTermEntry);
+
+		_assertAccountChannelTermEntriesTotalCount(0);
 	}
 
 	@Ignore
@@ -1199,6 +1238,24 @@ public class AccountChannelEntryResourceTest
 			ServiceContextTestUtil.getServiceContext(
 				testCompany.getCompanyId(), testGroup.getGroupId(),
 				_user.getUserId()));
+	}
+
+	private void _assertAccountChannelTermEntriesTotalCount(long totalCount)
+		throws Exception {
+
+		Page<AccountChannelEntry> page =
+			accountChannelEntryResource.
+				getAccountIdAccountChannelDeliveryTermsPage(
+					_accountEntry.getAccountEntryId(), Pagination.of(1, 10));
+
+		Assert.assertEquals(totalCount, page.getTotalCount());
+
+		page =
+			accountChannelEntryResource.
+				getAccountIdAccountChannelPaymentTermsPage(
+					_accountEntry.getAccountEntryId(), Pagination.of(1, 10));
+
+		Assert.assertEquals(totalCount, page.getTotalCount());
 	}
 
 	private AccountChannelEntry _postAccountChannelEntryBillingAddress()
