@@ -18,41 +18,6 @@ definition {
 		CommerceConfiguration.commerceTearDown();
 	}
 
-	@description = "COMMERCE-6337. In Info tab, I want to be able to add an organization to the account"
-	@ignore = "true"
-	@priority = 3
-	test AddOrganizationToAccount {
-		property portal.acceptance = "false";
-
-		// TODO Review
-
-		CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
-
-		JSONOrganization.addOrganization(organizationName = "Test Organization");
-
-		ApplicationsMenu.gotoSite(site = "Minium");
-
-		CommerceNavigator.gotoMiniumSidebarItem(menuItem = "Account Management");
-
-		CommerceAcceleratorsInitializer.createNewAccountViaFront(accountName = "Commerce Account");
-
-		Click(
-			key_text = "Add Organizations",
-			locator1 = "Button#ANY");
-
-		Click(
-			key_userEmailAddress = "Test Organization",
-			locator1 = "CommerceAccelerators#ACCOUNT_MANAGEMENT_ADD_MODAL_PLUS_BUTTON");
-
-		Click(
-			key_button = "Add Organization",
-			locator1 = "CommerceAccelerators#ANY_BUTTON");
-
-		AssertElementPresent(
-			key_addressType = "Test Organization",
-			locator1 = "CommerceAccelerators#ACCOUNT_MANAGEMENT_ADDRESS_TYPE");
-	}
-
 	@description = "COMMERCE-6347. In Info tab, I want to be unable to add an organization that is already added to the account"
 	@ignore = "true"
 	@priority = 3
@@ -508,49 +473,6 @@ definition {
 			locator1 = "CommerceAccelerators#ACCOUNT_MANAGEMENT_MEMBER_ACTIONS_DROPDOWN");
 	}
 
-	@description = "COMMERCE-6351. In Info tab, I want to be able to remove an organization from the account by clicking 'Delete'"
-	@ignore = "true"
-	@priority = 3
-	test RemoveOrganizationFromAccount {
-		property portal.acceptance = "false";
-
-		// TODO Review
-
-		CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
-
-		JSONOrganization.addOrganization(organizationName = "Test Organization");
-
-		ApplicationsMenu.gotoSite(site = "Minium");
-
-		CommerceNavigator.gotoMiniumSidebarItem(menuItem = "Account Management");
-
-		CommerceAcceleratorsInitializer.createNewAccountViaFront(accountName = "Commerce Account");
-
-		Click(
-			key_text = "Add Organizations",
-			locator1 = "Button#ANY");
-
-		Click(
-			key_userEmailAddress = "Test Organization",
-			locator1 = "CommerceAccelerators#ACCOUNT_MANAGEMENT_ADD_MODAL_PLUS_BUTTON");
-
-		Click(
-			key_button = "Add Organization",
-			locator1 = "CommerceAccelerators#ANY_BUTTON");
-
-		AssertElementPresent(
-			key_addressType = "Test Organization",
-			locator1 = "CommerceAccelerators#ACCOUNT_MANAGEMENT_ADDRESS_TYPE");
-
-		Click(
-			key_index = "Delete",
-			locator1 = "WorkflowMetrics#SEARCH_FIELD_MAPPINGS_METRICS_INDEXES");
-
-		AssertElementNotPresent(
-			key_addressType = "Test Organization",
-			locator1 = "CommerceAccelerators#ACCOUNT_MANAGEMENT_ADDRESS_TYPE");
-	}
-
 	@description = "COMMERCE-6361. In Members tab, I want to be able to remove users from the account"
 	@ignore = "true"
 	@priority = 3
@@ -598,15 +520,6 @@ definition {
 	test SearchAnAccountMember {
 
 		// TODO COMMERCE-6365 SearchAnAccountMember pending implementation
-
-	}
-
-	@description = "COMMERCE-6352. In Info tab, I want to be able to search for an organization in the account using the search bar"
-	@ignore = "true"
-	@priority = 3
-	test SearchAnAccountOrganization {
-
-		// TODO COMMERCE-6352 SearchAnAccountOrganization pending implementation
 
 	}
 
