@@ -13,6 +13,7 @@ import com.liferay.commerce.term.model.CommerceTermEntryRel;
 import com.liferay.commerce.term.service.CommerceTermEntryLocalService;
 import com.liferay.commerce.term.service.CommerceTermEntryRelLocalService;
 import com.liferay.headless.commerce.admin.order.client.dto.v1_0.TermOrderType;
+import com.liferay.headless.commerce.admin.order.client.problem.Problem;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.ServiceContext;
@@ -22,6 +23,7 @@ import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.test.rule.Inject;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -84,6 +86,26 @@ public class TermOrderTypeResourceTest
 	@Test
 	public void testGraphQLDeleteTermOrderType() throws Exception {
 		super.testGraphQLDeleteTermOrderType();
+	}
+
+	@Test
+	public void testPostTermIdTermOrderTypeWithDuplicateOrderType()
+		throws Exception {
+
+		TermOrderType termOrderType =
+			testPostTermIdTermOrderType_addTermOrderType(randomTermOrderType());
+
+		try {
+			termOrderTypeResource.postTermIdTermOrderType(
+				_commerceTermEntry.getCommerceTermEntryId(), termOrderType);
+
+			Assert.fail();
+		}
+		catch (Problem.ProblemException problemException) {
+			Problem problem = problemException.getProblem();
+
+			Assert.assertEquals("CONFLICT", problem.getStatus());
+		}
 	}
 
 	@Override
