@@ -109,17 +109,8 @@ public class AccountChannelEntryResourceTest
 					LocaleUtil.getSiteDefault(), RandomTestUtil.randomString()),
 				RandomTestUtil.randomString(), BigDecimal.ONE, new HashMap<>(),
 				2, 2, "HALF_EVEN", false, 0, true);
-		_commerceDeliveryTerm =
-			CommerceTermEntryLocalServiceUtil.addCommerceTermEntry(
-				RandomTestUtil.randomString(), _user.getUserId(), true,
-				Collections.singletonMap(
-					LocaleUtil.getSiteDefault(), RandomTestUtil.randomString()),
-				1, 1, 2022, 12, 0, 0, 0, 0, 0, 0, true,
-				Collections.singletonMap(
-					LocaleUtil.getSiteDefault(), RandomTestUtil.randomString()),
-				RandomTestUtil.randomString(), 1000,
-				CommerceTermEntryConstants.TYPE_DELIVERY_TERMS, null,
-				serviceContext);
+		_commerceDeliveryTerm = _addCommerceTermEntry(
+			CommerceTermEntryConstants.TYPE_DELIVERY_TERMS);
 		_commerceDiscount =
 			CommerceDiscountLocalServiceUtil.addCommerceDiscount(
 				RandomTestUtil.randomString(), _user.getUserId(),
@@ -129,17 +120,8 @@ public class AccountChannelEntryResourceTest
 				BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
 				CommerceDiscountConstants.LIMITATION_TYPE_UNLIMITED, 0, true,
 				true, 1, 1, 2022, 12, 0, 0, 0, 0, 0, 0, true, serviceContext);
-		_commercePaymentTerm =
-			CommerceTermEntryLocalServiceUtil.addCommerceTermEntry(
-				RandomTestUtil.randomString(), _user.getUserId(), true,
-				Collections.singletonMap(
-					LocaleUtil.getSiteDefault(), RandomTestUtil.randomString()),
-				1, 1, 2022, 12, 0, 0, 0, 0, 0, 0, true,
-				Collections.singletonMap(
-					LocaleUtil.getSiteDefault(), RandomTestUtil.randomString()),
-				RandomTestUtil.randomString(), 1000,
-				CommerceTermEntryConstants.TYPE_PAYMENT_TERMS, null,
-				serviceContext);
+		_commercePaymentTerm = _addCommerceTermEntry(
+			CommerceTermEntryConstants.TYPE_PAYMENT_TERMS);
 		_commercePriceList =
 			CommercePriceListLocalServiceUtil.addCommercePriceList(
 				RandomTestUtil.randomString(), _user.getUserId(),
@@ -1200,6 +1182,23 @@ public class AccountChannelEntryResourceTest
 		_commercePaymentMethodGroupRels.add(commercePaymentMethodGroupRel);
 
 		return commercePaymentMethodGroupRel;
+	}
+
+	private CommerceTermEntry _addCommerceTermEntry(String type)
+		throws Exception {
+
+		return CommerceTermEntryLocalServiceUtil.addCommerceTermEntry(
+			RandomTestUtil.randomString(), _user.getUserId(), true,
+			Collections.singletonMap(
+				LocaleUtil.getSiteDefault(), RandomTestUtil.randomString()),
+			1, 1, 2022, 12, 0, 0, 0, 0, 0, 0, true,
+			Collections.singletonMap(
+				LocaleUtil.getSiteDefault(), RandomTestUtil.randomString()),
+			RandomTestUtil.randomString(), RandomTestUtil.randomDouble(), type,
+			null,
+			ServiceContextTestUtil.getServiceContext(
+				testCompany.getCompanyId(), testGroup.getGroupId(),
+				_user.getUserId()));
 	}
 
 	private AccountChannelEntry _postAccountChannelEntryBillingAddress()
