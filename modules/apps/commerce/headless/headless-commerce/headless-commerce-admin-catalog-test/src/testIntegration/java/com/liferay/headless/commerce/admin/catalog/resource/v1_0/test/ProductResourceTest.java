@@ -14,6 +14,8 @@ import com.liferay.commerce.currency.model.CommerceCurrency;
 import com.liferay.commerce.currency.service.CommerceCurrencyLocalService;
 import com.liferay.commerce.pricing.model.CommercePricingClass;
 import com.liferay.commerce.pricing.service.CommercePricingClassLocalService;
+import com.liferay.commerce.product.constants.CPAttachmentFileEntryConstants;
+import com.liferay.commerce.product.model.CPAttachmentFileEntry;
 import com.liferay.commerce.product.model.CPDefinition;
 import com.liferay.commerce.product.model.CPInstance;
 import com.liferay.commerce.product.model.CPOptionCategory;
@@ -423,6 +425,7 @@ public class ProductResourceTest extends BaseProductResourceTestCase {
 		_testPostProductWithProductAccountGroupExternalReferenceCode();
 		_testPostProductWithProductChannelExternalReferenceCode();
 		_testPostProductWithProductGroupExternalReferenceCode();
+		_testPostProductWithSkuWithoutDiscontinuedDate();
 		_testPostProductWithTermsOfUseJournalArticleExternalReferenceCode();
 		_testPostProductWithTermsOfUseJournalArticleGroupExternalReferenceCode();
 		_testPostProductWithWorkflowSingleApprover();
@@ -1518,6 +1521,27 @@ public class ProductResourceTest extends BaseProductResourceTestCase {
 			GetterUtil.getLong(productProductGroup.getProductGroupId()));
 	}
 
+	private void _testPostProductWithSkuWithoutDiscontinuedDate()
+		throws Exception {
+
+		Product randomProduct = _randomProductWithSku();
+
+		Sku[] skus = randomProduct.getSkus();
+
+		skus[0].setDiscontinuedDate((Date)null);
+
+		Product postProduct = productResource.postProduct(randomProduct);
+
+		CPDefinition cpDefinition = _cpDefinitionLocalService.getCPDefinition(
+			postProduct.getId());
+
+		List<CPInstance> cpInstances = cpDefinition.getCPInstances();
+
+		CPInstance cpInstance = cpInstances.get(0);
+
+		Assert.assertNull(cpInstance.getDiscontinuedDate());
+	}
+
 	private void _testPostProductWithTermsOfUseJournalArticleExternalReferenceCode()
 		throws Exception {
 
@@ -1583,8 +1607,24 @@ public class ProductResourceTest extends BaseProductResourceTestCase {
 			testCompany.getGroupId(), CPDefinition.class.getName(), 0, 0,
 			"Single Approver@1");
 
-		Product postProduct = productResource.postProduct(
-			_randomProductWithSku());
+		Product randomProduct = _randomProductWithSku();
+
+		Attachment randomAttachment = new Attachment() {
+			{
+				attachment = Base64.encode(
+					FileUtil.getBytes(
+						ProductResourceTest.class, "dependencies/image.jpg"));
+				externalReferenceCode = StringUtil.toLowerCase(
+					RandomTestUtil.randomString());
+				neverExpire = true;
+				title = LanguageUtils.getLanguageIdMap(
+					RandomTestUtil.randomLocaleStringMap());
+			}
+		};
+
+		randomProduct.setImages(new Attachment[] {randomAttachment});
+
+		Product postProduct = productResource.postProduct(randomProduct);
 
 		CPDefinition cpDefinition = _cpDefinitionLocalService.getCPDefinition(
 			postProduct.getId());
@@ -1595,6 +1635,25 @@ public class ProductResourceTest extends BaseProductResourceTestCase {
 
 		Assert.assertEquals(
 			cpInstance.getStatus(), WorkflowConstants.STATUS_APPROVED);
+
+		List<CPAttachmentFileEntry> cpAttachmentFileEntries =
+			cpDefinition.getCPAttachmentFileEntries(
+				CPAttachmentFileEntryConstants.TYPE_IMAGE,
+				WorkflowConstants.STATUS_ANY);
+
+		Assert.assertEquals(
+			cpAttachmentFileEntries.toString(), 1,
+			cpAttachmentFileEntries.size());
+
+		CPAttachmentFileEntry cpAttachmentFileEntry =
+			cpAttachmentFileEntries.get(0);
+
+		Assert.assertEquals(
+			randomAttachment.getExternalReferenceCode(),
+			cpAttachmentFileEntry.getExternalReferenceCode());
+		Assert.assertEquals(
+			WorkflowConstants.STATUS_APPROVED,
+			cpAttachmentFileEntry.getStatus());
 	}
 
 	private void _testPutProductByExternalReferenceCodeBatch()
