@@ -14,16 +14,20 @@ import com.liferay.commerce.product.model.CPDefinitionOptionRel;
 import com.liferay.commerce.product.model.CPDefinitionOptionValueRel;
 import com.liferay.commerce.product.model.CPInstance;
 import com.liferay.commerce.product.model.CPOption;
+import com.liferay.commerce.product.model.CPOptionValue;
 import com.liferay.commerce.product.model.CommerceCatalog;
 import com.liferay.commerce.product.service.CPDefinitionLocalService;
 import com.liferay.commerce.product.service.CPDefinitionOptionRelLocalService;
 import com.liferay.commerce.product.service.CPDefinitionOptionValueRelLocalService;
 import com.liferay.commerce.product.service.CPInstanceLocalService;
 import com.liferay.commerce.product.service.CPOptionLocalService;
+import com.liferay.commerce.product.service.CPOptionValueLocalService;
 import com.liferay.commerce.product.service.CommerceCatalogLocalService;
 import com.liferay.commerce.product.test.util.CPTestUtil;
 import com.liferay.commerce.product.type.simple.constants.SimpleCPTypeConstants;
+import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.lang.SafeCloseable;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.lazy.referencing.LazyReferencingThreadLocal;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
@@ -42,6 +46,8 @@ import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -95,6 +101,60 @@ public class CPDefinitionOptionRelLocalServiceTest {
 		_cpOptionLocalService.deleteCPOptions(_serviceContext.getCompanyId());
 
 		_serviceContext = null;
+	}
+
+	@Test
+	public void testAddCPDefinitionOptionRelAfterDeleteRestoresCPOptionValues()
+		throws Exception {
+
+		CPDefinition cpDefinition = CPTestUtil.addCPDefinition(
+			_commerceCatalog.getGroupId());
+
+		CPDefinitionOptionRel cpDefinitionOptionRel =
+			CPTestUtil.addCPDefinitionOptionRel(
+				_commerceCatalog.getGroupId(), cpDefinition.getCPDefinitionId(),
+				false, 2);
+
+		List<CPDefinitionOptionValueRel> cpDefinitionOptionValueRels =
+			cpDefinitionOptionRel.getCPDefinitionOptionValueRels();
+
+		Assert.assertEquals(
+			cpDefinitionOptionValueRels.toString(), 2,
+			cpDefinitionOptionValueRels.size());
+
+		_cpDefinitionOptionValueRelLocalService.
+			deleteCPDefinitionOptionValueRel(
+				cpDefinitionOptionValueRels.get(1));
+
+		CPDefinitionOptionValueRel cpDefinitionOptionValueRel =
+			cpDefinitionOptionValueRels.get(0);
+
+		Assert.assertEquals(
+			Collections.singletonList(cpDefinitionOptionValueRel.getKey()),
+			TransformUtil.transform(
+				cpDefinitionOptionRel.getCPDefinitionOptionValueRels(),
+				CPDefinitionOptionValueRel::getKey));
+
+		_cpDefinitionOptionRelLocalService.deleteCPDefinitionOptionRel(
+			cpDefinitionOptionRel);
+
+		cpDefinitionOptionRel = CPTestUtil.addCPDefinitionOptionRel(
+			_commerceCatalog.getGroupId(), cpDefinition.getCPDefinitionId(),
+			cpDefinitionOptionRel.getCPOptionId());
+
+		_cpDefinitionOptionRels.add(cpDefinitionOptionRel);
+
+		Assert.assertEquals(
+			new HashSet<>(
+				TransformUtil.transform(
+					_cpOptionValueLocalService.getCPOptionValues(
+						cpDefinitionOptionRel.getCPOptionId(),
+						QueryUtil.ALL_POS, QueryUtil.ALL_POS),
+					CPOptionValue::getKey)),
+			new HashSet<>(
+				TransformUtil.transform(
+					cpDefinitionOptionRel.getCPDefinitionOptionValueRels(),
+					CPDefinitionOptionValueRel::getKey)));
 	}
 
 	@Test
@@ -749,6 +809,9 @@ public class CPDefinitionOptionRelLocalServiceTest {
 
 	@Inject
 	private CPOptionLocalService _cpOptionLocalService;
+
+	@Inject
+	private CPOptionValueLocalService _cpOptionValueLocalService;
 
 	@DeleteAfterTestRun
 	private Group _group;
