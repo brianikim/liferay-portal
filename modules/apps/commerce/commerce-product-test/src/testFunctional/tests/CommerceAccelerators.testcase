@@ -1251,15 +1251,6 @@ definition {
 			productTotalPrice = "$ 100.00");
 	}
 
-	@description = "COMMERCE-6350. As a buyer, I want to be redirected to Order Details page after clicking 'Review Order' button on mini-cart, if Buyer Order Approval Workflow is active"
-	@ignore = "true"
-	@priority = 3
-	test MiniumSiteFullFlowWithBuyerOrderApprovalWorkflow {
-
-		// TODO COMMERCE-6350 MiniumSiteFullFlowWithBuyerOrderApprovalWorkflow pending implementation
-
-	}
-
 	@priority = 5
 	test SpeedwellSiteFullFlow {
 		property portal.acceptance = "true";
