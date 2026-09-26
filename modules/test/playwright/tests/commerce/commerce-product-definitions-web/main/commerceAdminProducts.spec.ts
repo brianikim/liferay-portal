@@ -12,6 +12,7 @@ import {isolatedSiteTest} from '../../../../fixtures/isolatedSiteTest';
 import {loginTest} from '../../../../fixtures/loginTest';
 import {userPersonalBarPagesTest} from '../../../../fixtures/userPersonalBarPagesTest';
 import {DataApiHelpers} from '../../../../helpers/ApiHelpers';
+import {getTableRowCells} from '../../../../pages/commerce/commerce-order-content-web/orderImportPage';
 import {CommerceAdminProductDetailsPage} from '../../../../pages/commerce/commerce-product-definitions-web/commerceAdminProductDetailsPage';
 import {CommerceAdminProductPage} from '../../../../pages/commerce/commerce-product-definitions-web/commerceAdminProductPage';
 import {clickAndExpectToBeVisible} from '../../../../utils/clickAndExpectToBeVisible';
@@ -474,6 +475,131 @@ test(
 
 		await expect(priceOnApplicationLabel).toBeHidden();
 		await expect(productCard).toContainText('25.00');
+	}
+);
+
+test(
+	'The Price tab of a SKU shows which price list and promotion entries are priced on application',
+	{tag: ['@COMMERCE-12210', '@COMMERCE-12211']},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductDetailsSkusPage,
+		commerceAdminProductPage,
+	}) => {
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		const product =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+			});
+
+		const sku = (
+			await apiHelpers.headlessCommerceAdminCatalog.getProduct(
+				product.productId
+			)
+		).skus[0];
+
+		const priceEntries = [];
+
+		for (const [type, price] of [
+			['price-list', 20],
+			['promotion', 0],
+		] as const) {
+			const priceList =
+				await apiHelpers.headlessCommerceAdminPricing.postPriceList({
+					catalogId: catalog.id,
+					currencyCode: 'USD',
+					name: getRandomString(),
+					type,
+				});
+
+			priceEntries.push({
+				name: priceList.name,
+				priceEntry:
+					await apiHelpers.headlessCommerceAdminPricing.postPriceEntry(
+						{price, priceListId: priceList.id, skuId: sku.id}
+					),
+			});
+		}
+
+		const basePriceListNames = [
+			`${catalog.name} Base Price List`,
+			`${catalog.name} Base Promotion`,
+		];
+
+		const gotoSkuLists = [
+			async () => {
+				await commerceAdminProductPage.gotoProduct(
+					product.name['en_US']
+				);
+
+				await commerceAdminProductDetailsPage.goToProductSkus();
+			},
+			async () => {
+				await commerceAdminProductPage.goto();
+
+				await commerceAdminProductPage.productSkusLink.click();
+
+				await commerceAdminProductPage.searchByValue(sku.sku);
+			},
+		];
+
+		const openSkuPriceTab = async (gotoSkuList: () => Promise<void>) => {
+			await gotoSkuList();
+
+			await commerceAdminProductDetailsSkusPage
+				.skusTableRowLink(sku.sku)
+				.click();
+			await commerceAdminProductDetailsSkusPage.goToSkuTab('Price');
+		};
+
+		const expectPriceOnApplication = async (
+			priceListNames: string[],
+			priceOnApplication: string
+		) => {
+			for (const priceListName of priceListNames) {
+				await expect(async () => {
+					expect(
+						await getTableRowCells(
+							commerceAdminProductDetailsSkusPage.sidePanelFrame.locator(
+								'table'
+							),
+							priceListName
+						)
+					).toMatchObject({
+						'PRICE ON APPLICATION': priceOnApplication,
+					});
+				}).toPass({timeout: 30000});
+			}
+		};
+
+		for (const gotoSkuList of gotoSkuLists) {
+			await openSkuPriceTab(gotoSkuList);
+
+			await expectPriceOnApplication(
+				[...basePriceListNames, ...priceEntries.map(({name}) => name)],
+				'No'
+			);
+		}
+
+		for (const {priceEntry} of priceEntries) {
+			await apiHelpers.headlessCommerceAdminPricing.patchPriceEntry(
+				priceEntry.priceEntryId,
+				{priceOnApplication: true}
+			);
+		}
+
+		for (const gotoSkuList of gotoSkuLists) {
+			await openSkuPriceTab(gotoSkuList);
+
+			await expectPriceOnApplication(basePriceListNames, 'No');
+			await expectPriceOnApplication(
+				priceEntries.map(({name}) => name),
+				'Yes'
+			);
+		}
 	}
 );
 
