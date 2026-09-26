@@ -1105,6 +1105,102 @@ test('LPD-39067 Can product media and relation show correct date format', async 
 	);
 });
 
+for (const variant of [
+	{
+		fileName: 'attachment.txt',
+		mediaType: 'attachment',
+		tag: '@COMMERCE-6033',
+	},
+	{
+		fileName: 'liferay.png',
+		mediaType: 'image',
+		tag: '@COMMERCE-6026',
+	},
+]) {
+	test(
+		`An ${variant.mediaType} can be deleted from the Media tab of a product`,
+		{tag: [variant.tag, '@LPD-106244-Grouped-17']},
+		async ({
+			apiHelpers,
+			commerceAdminProductDetailsMediaPage,
+			commerceAdminProductDetailsPage,
+			commerceAdminProductPage,
+			page,
+			site,
+		}) => {
+			const document = await apiHelpers.headlessDelivery.postDocument(
+				site.id,
+				createReadStream(
+					path.join(__dirname, '/dependencies/' + variant.fileName)
+				),
+				{
+					description: getRandomString(),
+					externalReferenceCode: getRandomString(),
+					fileName: getRandomString(),
+					title: getRandomString(),
+					viewableBy: 'Owner',
+				}
+			);
+
+			apiHelpers.data.push({id: document.id, type: 'document'});
+
+			const catalog =
+				await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+			const product =
+				await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+					catalogId: catalog.id,
+					name: {en_US: getRandomString()},
+				});
+
+			let mediaTable =
+				commerceAdminProductDetailsMediaPage.mediaImagesTable;
+
+			if (variant.mediaType === 'attachment') {
+				await apiHelpers.headlessCommerceAdminCatalog.postAttachment(
+					product.productId,
+					document.id,
+					document.title
+				);
+
+				mediaTable =
+					commerceAdminProductDetailsMediaPage.mediaAttachmentsTable;
+			}
+			else {
+				await apiHelpers.headlessCommerceAdminCatalog.postImage(
+					product.productId,
+					document.id,
+					document.title
+				);
+			}
+
+			await commerceAdminProductPage.gotoProduct(product.name.en_US);
+			await commerceAdminProductDetailsPage.productMediaLink.click();
+
+			const mediaRow = mediaTable
+				.getByRole('row')
+				.filter({hasText: document.title});
+
+			await expect(mediaRow).toBeVisible();
+
+			await mediaTable
+				.getByRole('button', {
+					exact: true,
+					name: `${document.title} Actions`,
+				})
+				.click();
+
+			await page
+				.getByRole('menuitem', {exact: true, name: 'Delete'})
+				.click();
+
+			await waitForAlert(page);
+
+			await expect(mediaRow).toHaveCount(0);
+		}
+	);
+}
+
 test('LPD-52731 Product shows in catalog after updating Account Group Visibility Filter through Batch API', async ({
 	apiHelpers,
 	globalMenuPage,
