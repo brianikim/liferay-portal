@@ -350,13 +350,10 @@ public class SkuResourceTest extends BaseSkuResourceTestCase {
 				cpInstance.getCPInstanceUuid(), priceListType, uomKey);
 	}
 
-	private SkuVirtualSettings _postSkuWithTermsOfUse(
-			String groupExternalReferenceCode, JournalArticle journalArticle)
-		throws Exception {
-
+	private SkuResource _getSkuVirtualSettingsSkuResource() throws Exception {
 		User adminUser = UserTestUtil.getAdminUser(testCompany.getCompanyId());
 
-		SkuResource skuResource = SkuResource.builder(
+		return SkuResource.builder(
 		).authentication(
 			adminUser.getEmailAddress(), PropsValues.DEFAULT_ADMIN_PASSWORD
 		).locale(
@@ -364,6 +361,13 @@ public class SkuResourceTest extends BaseSkuResourceTestCase {
 		).parameters(
 			"nestedFields", "skuVirtualSettings"
 		).build();
+	}
+
+	private SkuVirtualSettings _postSkuWithTermsOfUse(
+			String groupExternalReferenceCode, JournalArticle journalArticle)
+		throws Exception {
+
+		SkuResource skuResource = _getSkuVirtualSettingsSkuResource();
 
 		Sku randomSku = randomSku();
 
@@ -803,16 +807,7 @@ public class SkuResourceTest extends BaseSkuResourceTestCase {
 	private void _testPostProductIdSkuWithSkuVirtualSettings()
 		throws Exception {
 
-		User adminUser = UserTestUtil.getAdminUser(testCompany.getCompanyId());
-
-		SkuResource skuResource = SkuResource.builder(
-		).authentication(
-			adminUser.getEmailAddress(), PropsValues.DEFAULT_ADMIN_PASSWORD
-		).locale(
-			LocaleUtil.getDefault()
-		).parameters(
-			"nestedFields", "skuVirtualSettings"
-		).build();
+		SkuResource skuResource = _getSkuVirtualSettingsSkuResource();
 
 		SkuVirtualSettings randomSkuVirtualSettings = new SkuVirtualSettings() {
 			{
