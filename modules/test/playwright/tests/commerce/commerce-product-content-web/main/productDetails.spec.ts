@@ -1973,6 +1973,7 @@ test(
 		commerceAdminChannelDetailsPage,
 		commerceAdminChannelsPage,
 		page,
+		productDetailsPage,
 	}) => {
 		const {channel, product, site} = await apiStorefrontSetUp(apiHelpers);
 
@@ -1995,7 +1996,7 @@ test(
 			`/web${site.friendlyUrlPath}/p/${product.urls['en_US']}`
 		);
 
-		await expect(page.locator('.product-header-title')).toHaveText(
+		await expect(productDetailsPage.productHeaderTitle).toHaveText(
 			product.name['en_US']
 		);
 	}
@@ -2009,6 +2010,7 @@ test(
 		commerceAdminProductDetailsPage,
 		commerceAdminProductPage,
 		page,
+		productDetailsPage,
 	}) => {
 		const {catalog, site} = await apiStorefrontSetUp(apiHelpers, [
 			{
@@ -2044,20 +2046,26 @@ test(
 			}
 		);
 
-		await page
-			.getByRole('link', {exact: true, name: 'Subscription'})
+		await commerceAdminProductDetailsPage.productSubscriptionLink.click();
+
+		await commerceAdminProductDetailsPage
+			.subscriptionEnabledLabel('Payment Subscription')
 			.click();
 
-		await page.locator('label[for$="_subscriptionEnabled"]').click();
-
 		await expect(
-			page.locator('select[id$="_subscriptionType"] option:checked')
+			commerceAdminProductDetailsPage
+				.subscriptionTypeSelect('Payment Subscription')
+				.locator('option:checked')
 		).toHaveText('Day');
 		await expect(
-			page.locator('input[id$="_subscriptionLength"]')
+			commerceAdminProductDetailsPage.subscriptionLengthInput(
+				'Payment Subscription'
+			)
 		).toHaveValue('1');
 		await expect(
-			page.locator('[id$="_cycleLengthContainer"] .input-group-text')
+			commerceAdminProductDetailsPage.subscriptionLengthSuffix(
+				'Payment Subscription'
+			)
 		).toHaveText('Day');
 
 		await commerceAdminProductDetailsPage.publish();
@@ -2071,11 +2079,13 @@ test(
 
 		await page.getByLabel(optionName).selectOption({label: 'Value 1'});
 
-		const subscriptionInfo = page.locator('.commerce-subscription-info');
-
-		await expect(subscriptionInfo).toContainText('Payment Subscription');
-		await expect(subscriptionInfo).toContainText('Every 1 Day');
-		await expect(subscriptionInfo).not.toContainText(
+		await expect(productDetailsPage.subscriptionInfo).toContainText(
+			'Payment Subscription'
+		);
+		await expect(productDetailsPage.subscriptionInfo).toContainText(
+			'Every 1 Day'
+		);
+		await expect(productDetailsPage.subscriptionInfo).not.toContainText(
 			'Delivery Subscription'
 		);
 	}
@@ -2249,10 +2259,218 @@ test(
 			['Payment Subscription', 'Every 5 Years'],
 		]) {
 			await expect(
-				page
-					.locator('.commerce-subscription-info .row')
-					.filter({hasText: subscriptionName})
+				productDetailsPage.subscriptionInfoRow(subscriptionName)
 			).toContainText(subscriptionPeriod);
 		}
+	}
+);
+
+test(
+	'Virtual product details and the SKU override sample file are shown on the product details page',
+	{tag: ['@COMMERCE-11344', '@COMMERCE-11379', '@LPD-106244-Grouped-32']},
+	async ({apiHelpers, page, productDetailsPage}) => {
+		const {catalog, channel, site} = await apiStorefrontSetUp(apiHelpers, [
+			{
+				title: getRandomString(),
+				widgetName:
+					'com_liferay_commerce_product_content_web_internal_portlet_CPContentPortlet',
+			},
+		]);
+
+		const specification =
+			await apiHelpers.headlessCommerceAdminCatalog.postSpecification(
+				true,
+				0,
+				getRandomString()
+			);
+
+		const imageAttachment = readFileSync(
+			path.join(__dirname, '/dependencies/liferay.png')
+		).toString('base64');
+		const imageTitles = [getRandomString(), getRandomString()];
+		const sku = getRandomString();
+
+		const virtualProduct =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				description: {en_US: 'Full description'},
+				images: imageTitles.map((imageTitle) => ({
+					attachment: imageAttachment,
+					title: {en_US: imageTitle},
+				})),
+				name: {en_US: getRandomString()},
+				productConfiguration: {
+					displayAvailability: true,
+					displayStockQuantity: true,
+					minOrderQuantity: 4,
+				},
+				productSpecifications: [
+					{
+						specificationKey: specification.key,
+						value: {en_US: '6 Months'},
+					},
+				],
+				productType: 'virtual',
+				productVirtualSettings: {
+					activationStatus: 0,
+					url: 'http://www.liferay.com/file',
+				},
+				shortDescription: {en_US: 'Short description'},
+				skus: [
+					{
+						cost: 0,
+						gtin: 'GTIN1',
+						manufacturerPartNumber: 'MPN1',
+						price: 0,
+						published: true,
+						purchasable: true,
+						sku,
+					},
+				],
+			});
+
+		const skuId = virtualProduct.skus[0].id;
+
+		await apiHelpers.headlessCommerceAdminCatalog.patchSku(String(skuId), {
+			sku,
+			skuVirtualSettings: {
+				activationStatus: 0,
+				override: true,
+				sampleURL: 'http://www.liferay.com/sample',
+				url: 'http://www.liferay.com/file',
+				useSample: true,
+			},
+		});
+
+		await apiHelpers.headlessCommerceAdminCatalog.patchProductSubscriptionConfiguration(
+			virtualProduct.productId,
+			{
+				deliverySubscriptionEnable: true,
+				deliverySubscriptionLength: 10,
+				deliverySubscriptionType: 'monthly',
+				deliverySubscriptionTypeSettings: {
+					deliveryMonthDay: 15,
+					deliveryMonthlyMode: 1,
+				},
+				enable: true,
+				length: 10,
+				subscriptionType: 'monthly',
+				subscriptionTypeSettings: {monthDay: 15, monthlyMode: 1},
+			}
+		);
+
+		const basePriceListId =
+			await apiHelpers.headlessCommerceAdminPricing.getBasePriceListId(
+				catalog.id
+			);
+
+		await apiHelpers.headlessCommerceAdminPricing.postPriceEntry({
+			price: 55,
+			priceListId: basePriceListId.items[0].id,
+			skuId,
+		});
+
+		const basePromoPriceListId =
+			await apiHelpers.headlessCommerceAdminPricing.getBasePromoPriceListId(
+				catalog.id
+			);
+
+		await apiHelpers.headlessCommerceAdminPricing.postPriceEntry({
+			price: 50,
+			priceListId: basePromoPriceListId.items[0].id,
+			skuId,
+		});
+
+		await apiHelpers.headlessCommerceAdminPricing.postDiscount({
+			discountProducts: [{productId: virtualProduct.productId}],
+			percentageLevel1: 20,
+			usePercentage: true,
+		});
+
+		const warehouse =
+			await apiHelpers.headlessCommerceAdminInventoryApiHelper.postWarehouses(
+				{
+					active: true,
+					latitude: getRandomInt(),
+					longitude: getRandomInt(),
+					warehouseItems: [{quantity: 60, sku}],
+				}
+			);
+
+		await apiHelpers.headlessCommerceAdminInventoryApiHelper.postWarehousesChannels(
+			warehouse.id,
+			channel.id
+		);
+
+		await page.goto(
+			`/web${site.friendlyUrlPath}/p/${virtualProduct.urls['en_US']}`
+		);
+
+		await expect(
+			await productDetailsPage.nameField(virtualProduct.name['en_US'])
+		).toBeVisible();
+		await expect(await productDetailsPage.skuField(sku)).toBeVisible();
+		await expect(await productDetailsPage.mpnField('MPN1')).toBeVisible();
+		await expect(await productDetailsPage.gtinField('GTIN1')).toBeVisible();
+		await expect(
+			await productDetailsPage.shortDescriptionField('Short description')
+		).toBeVisible();
+		await expect(
+			productDetailsPage.productDetailAvailabilityLabel
+		).toHaveText('Available');
+		await expect(productDetailsPage.inStockQuantity).toContainText(
+			'60 in Stock'
+		);
+
+		for (const subscriptionName of [
+			'Delivery Subscription',
+			'Payment Subscription',
+		]) {
+			await expect(
+				productDetailsPage.subscriptionInfoRow(subscriptionName)
+			).toContainText('Every 10 Months');
+		}
+
+		await expect(
+			productDetailsPage.priceContainer.getByText('$ 55.00', {
+				exact: true,
+			})
+		).toHaveClass(/price-value-inactive/);
+		await expect(
+			productDetailsPage.priceContainer.getByText('$ 50.00', {
+				exact: true,
+			})
+		).toHaveClass(/price-value-inactive/);
+		await expect(
+			productDetailsPage.priceContainer.locator('.price-value-discount')
+		).toContainText('20');
+		await expect(
+			productDetailsPage.priceContainer.locator('.price-value-final')
+		).toHaveText('$ 40.00');
+		await expect(
+			page.getByText('Minimum Quantity per Order: 4', {exact: true})
+		).toBeVisible();
+		await expect(
+			await productDetailsPage.downloadSampleField('Download Sample File')
+		).toBeVisible();
+
+		for (const imageTitle of imageTitles) {
+			await expect(
+				page.getByRole('img', {name: imageTitle}).first()
+			).toBeVisible();
+		}
+
+		await expect(
+			await productDetailsPage.fullDescriptionField('Full description')
+		).toBeVisible();
+
+		await page.getByRole('tab', {name: 'Specifications'}).click();
+
+		await expect(page.locator('.specification-list')).toContainText(
+			specification.title['en_US']
+		);
+		await expect(page.locator('.specification-list')).toContainText(
+			'6 Months'
+		);
 	}
 );
