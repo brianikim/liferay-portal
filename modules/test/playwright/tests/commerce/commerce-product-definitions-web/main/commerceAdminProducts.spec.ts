@@ -323,12 +323,22 @@ test(
 
 test(
 	'Currency changes based on price lists',
-	{tag: '@LPD-52938'},
+	{
+		tag: [
+			'@COMMERCE-11084',
+			'@COMMERCE-12218',
+			'@LPD-52938',
+			'@LPD-106244-Grouped-16',
+		],
+	},
 	async ({
 		apiHelpers,
+		commerceAdminPriceListDetailsPage,
+		commerceAdminPriceListsPage,
 		commerceAdminProductDetailsPage,
 		commerceAdminProductDetailsSkusPage,
 		commerceAdminProductPage,
+		page,
 	}) => {
 		const catalog =
 			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
@@ -358,14 +368,14 @@ test(
 			await apiHelpers.headlessCommerceAdminPricing.postPriceList({
 				catalogId: catalog.id,
 				currencyCode: currencyEUR.code,
-				name: 'EUR-pl',
+				name: 'EUR-pl ' + getRandomString(),
 				type: 'price-list',
 			});
 		const priceListUSD =
 			await apiHelpers.headlessCommerceAdminPricing.postPriceList({
 				catalogId: catalog.id,
 				currencyCode: currencyUSD.code,
-				name: 'USD-pl',
+				name: 'USD-pl ' + getRandomString(),
 				type: 'price-list',
 			});
 
@@ -398,6 +408,80 @@ test(
 				'USD',
 				{exact: true}
 			)
+		).toBeVisible();
+
+		const unitPriceInputs =
+			commerceAdminProductDetailsSkusPage.skuPriceAddModal.getByLabel(
+				'Unit Price'
+			);
+
+		await unitPriceInputs.first().fill('10');
+
+		await commerceAdminProductDetailsSkusPage.skuPriceAddModal
+			.getByRole('button', {name: 'Add Entry'})
+			.click();
+
+		await commerceAdminProductDetailsSkusPage.skuPriceListSelect
+			.nth(1)
+			.selectOption(priceListEUR.name);
+
+		await unitPriceInputs.nth(1).fill('20');
+
+		await page
+			.locator('.modal-footer')
+			.getByRole('button', {exact: true, name: 'Add'})
+			.click();
+
+		for (const {price, priceList} of [
+			{price: '10.00', priceList: priceListUSD},
+			{price: '20.00', priceList: priceListEUR},
+		]) {
+			await expect(
+				commerceAdminProductDetailsSkusPage.skuPriceFrame
+					.getByRole('row')
+					.filter({hasText: priceList.name})
+			).toContainText(price);
+		}
+
+		await commerceAdminProductDetailsSkusPage
+			.sidePanelSkuPriceTableRowLink(priceListUSD.name)
+			.click();
+
+		await expect(
+			commerceAdminProductDetailsSkusPage.sidePanelNestedFrame
+				.locator('.input-group-text', {hasText: 'USD'})
+				.first()
+		).toBeVisible();
+
+		await commerceAdminPriceListsPage.goto();
+
+		await commerceAdminPriceListsPage
+			.priceListLink(priceListUSD.name)
+			.click();
+
+		await commerceAdminPriceListDetailsPage.currencySelect.selectOption({
+			label: 'EUR',
+		});
+		await commerceAdminPriceListDetailsPage.publishButton.click();
+
+		await waitForAlert(page);
+
+		await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+		await commerceAdminProductDetailsPage.goToProductSkus();
+
+		await commerceAdminProductDetailsSkusPage
+			.skusTableRowLink(`${productSkus[0].sku}`)
+			.click();
+		await commerceAdminProductDetailsSkusPage.goToSkuTab('Price');
+		await commerceAdminProductDetailsSkusPage
+			.sidePanelSkuPriceTableRowLink(priceListUSD.name)
+			.click();
+
+		await expect(
+			commerceAdminProductDetailsSkusPage.sidePanelNestedFrame
+				.locator('.input-group-text', {hasText: 'EUR'})
+				.first()
 		).toBeVisible();
 	}
 );
