@@ -1361,66 +1361,6 @@ definition {
 			locator1 = "CommerceEntry#TABLE_LIST_TITLE");
 	}
 
-	@description = "This is a test for COMMERCE-6115. RemoveShippingSettingOptionVariableRate"
-	@priority = 3
-	test RemoveShippingSettingOptionVariableRate {
-		property portal.acceptance = "false";
-
-		// TODO Review
-
-		CommerceChannels.openChannelsAdmin();
-
-		CommerceNavigator.gotoEntry(entryName = "Minium Portal");
-
-		Click(
-			key_entryName = "Variable Rate",
-			locator1 = "CommerceEntry#CHANNELS_GENERAL_TAB_EDITS");
-
-		SelectFrame.selectFrameNoLoading(locator1 = "CommerceEntry#IFRAME_SIDE_PANEL");
-
-		Check.checkToggleSwitch(
-			key_toggleSwitchLabel = "Active",
-			locator1 = "ToggleSwitch#ANY_TOGGLE_SWITCH");
-
-		Button.clickSave();
-
-		Alert.viewSuccessMessage();
-
-		CommerceEntry.gotoMenuTab(menuTab = "Shipping Options");
-
-		CommerceEntry.AddShippingOptionVariableRate(
-			key_description = "Standard Description",
-			key_name = "Standard",
-			key_priority = "");
-
-		Alert.viewSuccessMessage();
-
-		Click(locator1 = "Icon#CLOSE");
-
-		SelectFrameTop();
-
-		SelectFrame.selectFrameNoLoading(locator1 = "CommerceEntry#IFRAME_SIDE_PANEL");
-
-		CommerceEntry.addShippingOptionSettingsVariableRate(
-			country = "Italy",
-			fixedPrice = 1,
-			priceUnitWeight = 1,
-			region = "Roma",
-			shippingOption = "Standard",
-			subtotal = 1,
-			weightFrom = 1,
-			weightTo = 1,
-			zip = 0100);
-
-		Click(
-			key_text = "Standard",
-			locator1 = "Icon#ANY_VERTICAL_ELLIPSIS");
-
-		MenuItem.clickNoError(menuItem = "Delete");
-
-		Alert.viewSuccessMessage();
-	}
-
 	@description = "This is a test for COMMERCE-6121. RemoveTaxRateSettingsByAddressTaxCalculation"
 	@priority = 3
 	test RemoveTaxRateSettingsByAddressTaxCalculation {
