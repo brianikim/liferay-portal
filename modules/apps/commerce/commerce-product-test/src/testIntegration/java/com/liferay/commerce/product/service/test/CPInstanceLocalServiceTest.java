@@ -27,10 +27,12 @@ import com.liferay.commerce.product.test.util.CPTestUtil;
 import com.liferay.commerce.product.type.simple.constants.SimpleCPTypeConstants;
 import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.petra.string.StringBundler;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.lazy.referencing.LazyReferencingThreadLocal;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
+import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.CompanyTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
@@ -750,6 +752,32 @@ public class CPInstanceLocalServiceTest {
 			cpDefinition.getCProductId());
 	}
 
+	@Test
+	public void testUpdateCPInstanceWithReplacement() throws Exception {
+		CPInstance cpInstance = CPTestUtil.addCPInstanceFromCatalog(
+			_commerceCatalog.getGroupId());
+
+		_testUpdateCPInstanceWithReplacement(
+			cpInstance, _commerceCatalog.getGroupId());
+
+		_replacementCommerceCatalog =
+			_commerceCatalogLocalService.addCommerceCatalog(
+				null, RandomTestUtil.randomString(),
+				RandomTestUtil.randomString(),
+				LocaleUtil.US.getDisplayLanguage(),
+				ServiceContextTestUtil.getServiceContext(
+					_company.getGroupId()));
+
+		_testUpdateCPInstanceWithReplacement(
+			cpInstance, _replacementCommerceCatalog.getGroupId());
+
+		cpInstance = _updateCPInstance(cpInstance, null, 0);
+
+		Assert.assertEquals(
+			StringPool.BLANK, cpInstance.getReplacementCPInstanceUuid());
+		Assert.assertEquals(0, cpInstance.getReplacementCProductId());
+	}
+
 	@Rule
 	public final FrutillaRule frutillaRule = new FrutillaRule();
 
@@ -850,14 +878,36 @@ public class CPInstanceLocalServiceTest {
 		}
 	}
 
-	private void _updateCPInstance(
+	private void _testUpdateCPInstanceWithReplacement(
+			CPInstance cpInstance, long replacementGroupId)
+		throws Exception {
+
+		CPInstance replacementCPInstance = CPTestUtil.addCPInstanceFromCatalog(
+			replacementGroupId);
+
+		CPDefinition replacementCPDefinition =
+			replacementCPInstance.getCPDefinition();
+
+		CPInstance updatedCPInstance = _updateCPInstance(
+			cpInstance, replacementCPInstance.getCPInstanceUuid(),
+			replacementCPDefinition.getCProductId());
+
+		Assert.assertEquals(
+			replacementCPInstance.getCPInstanceUuid(),
+			updatedCPInstance.getReplacementCPInstanceUuid());
+		Assert.assertEquals(
+			replacementCPDefinition.getCProductId(),
+			updatedCPInstance.getReplacementCProductId());
+	}
+
+	private CPInstance _updateCPInstance(
 			CPInstance cpInstance, String replacementCPInstanceUuid,
 			long replacementCProductId)
 		throws Exception {
 
 		Calendar calendar = CalendarFactoryUtil.getCalendar();
 
-		_cpInstanceLocalService.updateCPInstance(
+		return _cpInstanceLocalService.updateCPInstance(
 			cpInstance.getExternalReferenceCode(), cpInstance.getCPInstanceId(),
 			cpInstance.getSku(), null, null, false, 0, 0, 0, 0, BigDecimal.ZERO,
 			BigDecimal.ZERO, BigDecimal.ZERO, false,
@@ -886,5 +936,8 @@ public class CPInstanceLocalServiceTest {
 
 	@Inject
 	private CPOptionLocalService _cpOptionLocalService;
+
+	@DeleteAfterTestRun
+	private CommerceCatalog _replacementCommerceCatalog;
 
 }
