@@ -241,60 +241,6 @@ definition {
 		}
 	}
 
-	@description = "Verify the selected order type for an order is displayed in the Open Carts widget."
-	@priority = 5
-	test AssertOrderTypeInOpenCartsWidgetList {
-		property custom.properties = "company.security.strangers.verify=false${line.separator}jsonws.web.service.paths.excludes=";
-		property portal.acceptance = "true";
-
-		task ("Given a buyer user connected to the Commerce Account") {
-			CommerceEntry.addAccountEntryUser(
-				accountName = "Commerce Account",
-				agreeToTermsAndAnswerReminderQuery = "true",
-				requireReset = "false",
-				userEmailAddress = "buyer@liferay.com",
-				userFirstName = "Buyer",
-				userLastName = "User",
-				userRole = "Buyer",
-				userScreenName = "buyeruser",
-				userSiteMembership = "Minium");
-		}
-
-		task ("And given two active order types") {
-			CommerceJSONOrdersAPI._addOrderType(
-				active = "true",
-				orderTypeDescription = "Test Order Type Description 1",
-				orderTypeName = "Test Order Type 1");
-
-			CommerceJSONOrdersAPI._addOrderType(
-				active = "true",
-				orderTypeDescription = "Test Order Type Description 2",
-				orderTypeName = "Test Order Type 2");
-		}
-
-		task ("And given the buyer creates an order from Pending Orders with Order Type 2") {
-			User.logoutPG();
-
-			CommerceLogin.miniumLogin(
-				password = PropsUtil.get("default.admin.password"),
-				urlAppend = "web/minium",
-				userEmailAddress = "buyer@liferay.com");
-
-			CommerceAcceleratorsInitializer.createNewOrderFromPendingOrders(orderType = "Test Order Type 2");
-		}
-
-		task ("When the buyer goes to the Pending Orders page") {
-			CommerceNavigator.gotoMiniumSidebarItem(menuItem = "Pending Orders");
-		}
-
-		task ("Then the Order Type field is present in the Open Carts Widget list and populated with Test Order Type 2") {
-			AssertElementPresent(
-				key_entry = "Commerce Account",
-				key_orderType = "Test Order Type 2",
-				locator1 = "CommerceOrders#PENDING_ORDERS_LIST_ORDER_TYPE");
-		}
-	}
-
 	@description = "This is a test for COMMERCE-11355. As a user, I cannot reorder an unavailable product."
 	@priority = 5
 	test CannotReorderUnavailableProduct {
@@ -457,28 +403,6 @@ definition {
 				locator1 = "CommerceFrontStore#FS_PRODUCT_NAME",
 				value1 = "Bushings");
 		}
-	}
-
-	@description = "COMMERCE-6374. As a buyer, I want to be able to create a new order by clicking on 'Add Order' button"
-	@priority = 5
-	test CreateNewOrderFromPendingOrdersPage {
-		property portal.acceptance = "true";
-
-		// TODO Review
-
-		ApplicationsMenu.gotoSite(site = "Minium");
-
-		CommerceNavigator.gotoMiniumSidebarItem(menuItem = "Pending Orders");
-
-		Click.mouseDownMouseUp(
-			key_text = "Add Order",
-			locator1 = "Button#ANY");
-
-		CommerceNavigator.gotoMiniumSidebarItem(menuItem = "Pending Orders");
-
-		AssertElementPresent(
-			key_errorMessage = "Approved",
-			locator1 = "WorkflowMetricsSLA#SLA_ERROR_MESSAGE");
 	}
 
 	@description = "COMMERCE-6380. As a buyer, I want to be able to delete an Order in Pending Order details page"

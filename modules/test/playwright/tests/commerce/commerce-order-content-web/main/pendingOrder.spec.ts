@@ -31,6 +31,7 @@ import getFragmentDefinition from '../../../layout-content-page-editor-web/main/
 import getPageDefinition from '../../../layout-content-page-editor-web/main/utils/getPageDefinition';
 import getWidgetDefinition from '../../../layout-content-page-editor-web/main/utils/getWidgetDefinition';
 import {
+	apiStorefrontSetUp,
 	configureBuyerUserForSite,
 	configureOperationsManagerUserForSite,
 	configureOrderManagerUserForSite,
@@ -38,6 +39,7 @@ import {
 	createProductWithOptions,
 	findSkuByOptionValueKeys,
 	miniumSetUp,
+	selectCurrentAccount,
 } from '../../utils/commerce';
 
 export const test = mergeTests(
@@ -2347,5 +2349,72 @@ test(
 		});
 
 		await performLoginViaApi({page, screenName: 'test'});
+	}
+);
+
+test(
+	'An order created from the Pending Orders page is listed with its order type',
+	{tag: ['@COMMERCE-6374', '@LPD-106244-Grouped-11']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelsPage,
+		commerceLayoutsPage,
+		page,
+		pendingOrdersPage,
+	}) => {
+		const {channel, site} = await apiStorefrontSetUp(apiHelpers, [
+			{
+				title: 'Pending Orders',
+				widgetName:
+					'com_liferay_commerce_order_content_web_internal_portlet_CommerceOpenOrderContentPortlet',
+			},
+		]);
+
+		await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+			channel.name,
+			'B2B'
+		);
+
+		const account = await apiHelpers.headlessAdminUser.postAccount({
+			name: 'Commerce Account ' + getRandomString(),
+			type: 'business',
+		});
+
+		await apiHelpers.headlessAdminUser.assignUserToAccountByEmailAddress(
+			account.id,
+			['test@liferay.com']
+		);
+
+		await selectCurrentAccount(account.id, apiHelpers, site.id);
+
+		await apiHelpers.headlessCommerceAdminOrder.postOrderType({
+			active: true,
+		});
+
+		const orderType =
+			await apiHelpers.headlessCommerceAdminOrder.postOrderType({
+				active: true,
+			});
+
+		const pendingOrdersURL = `/web${site.friendlyUrlPath}/pending-orders`;
+
+		await page.goto(pendingOrdersURL);
+
+		await commerceLayoutsPage.addOrderButton.click();
+		await commerceLayoutsPage.orderTypeModalInput.selectOption({
+			label: orderType.name['en_US'],
+		});
+		await commerceLayoutsPage.orderTypeModalButton.click();
+
+		await expect(pendingOrdersPage.orderType).toHaveText(
+			orderType.name['en_US']
+		);
+
+		await page.goto(pendingOrdersURL);
+
+		const orderRow = page.getByRole('row').filter({hasText: account.name});
+
+		await expect(orderRow).toContainText(orderType.name['en_US']);
+		await expect(orderRow).toContainText('Approved');
 	}
 );
