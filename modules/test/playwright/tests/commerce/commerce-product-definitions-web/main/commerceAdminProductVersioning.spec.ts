@@ -148,3 +148,65 @@ test('LPD-84993 Editing the Configuration tab and clicking Publish carries the c
 		commerceAdminProductDetailsConfigurationPage.purchasableInput
 	).not.toBeChecked();
 });
+
+test(
+	'Saving an approved versionable product as draft creates a draft version',
+	{tag: ['@COMMERCE-9535', '@COMMERCE-9537']},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductPage,
+		page,
+	}) => {
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		const product =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				productStatus: 2,
+			});
+
+		await apiHelpers.headlessCommerceAdminCatalog.patchProduct(
+			String(product.productId),
+			{name: product.name, productStatus: 0}
+		);
+
+		await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+		await expect(commerceAdminProductDetailsPage.publishLink).toBeVisible();
+		await expect(
+			commerceAdminProductDetailsPage.saveAsDraftLink
+		).toBeVisible();
+
+		await commerceAdminProductDetailsPage.saveAsDraftLink.click();
+
+		await expect(page.locator('.workflow-status-draft')).toBeVisible();
+
+		await commerceAdminProductDetailsPage.backLink.click();
+
+		for (const status of ['Approved', 'Draft']) {
+			await expect(
+				commerceAdminProductPage
+					.productsTableRow(product.name['en_US'])
+					.filter({hasText: status})
+			).toHaveCount(1);
+		}
+
+		const draftProduct =
+			await apiHelpers.headlessCommerceAdminCatalog.getProductByVersion(
+				product.productId,
+				2
+			);
+
+		await apiHelpers.headlessCommerceAdminCatalog.deleteProductByVersion(
+			draftProduct.productId,
+			2
+		);
+
+		await apiHelpers.headlessCommerceAdminCatalog.deleteProductByVersion(
+			product.productId,
+			1
+		);
+	}
+);

@@ -181,31 +181,6 @@ definition {
 		}
 	}
 
-	@description = "This is a test for the story COMMERCE-9376, with the testplan COMMERCE-9534 and test ticket COMMERCE-9535"
-	@priority = 3
-	test CanCheckVersionableProductSaveAsDraftButton {
-		property portal.acceptance = "false";
-
-		task ("When the Admin goes into the Commerce -> Products and create a new simple product") {
-			CommerceProducts.openProductsAdmin();
-
-			CPCommerceCatalog.newProductsEntry(
-				productCatalog = "Master",
-				productName = "Simple T-Shirt",
-				productType = "Simple");
-		}
-
-		task ("Then the admin now will see two buttons 'Save as Draft' and 'Publish'") {
-			AssertElementPresent(
-				key_text = "Publish",
-				locator1 = "Button#ANY");
-
-			AssertElementPresent(
-				key_text = "Save as Draft",
-				locator1 = "Button#ANY");
-		}
-	}
-
 	@description = "This is a test for the story COMMERCE-9376, with the testplan COMMERCE-9534 and test ticket COMMERCE-9540"
 	@priority = 5
 	test CanCheckVersionableProductVisibilityOnMiniumCatalogPage {
@@ -327,39 +302,6 @@ definition {
 			AssertElementPresent(
 				locator1 = "CommerceEntry#MESSAGE_MORE_INFO_INFORMATION",
 				value = "Hoses Full NEW");
-		}
-	}
-
-	@description = "This is a test for the story COMMERCE-9376, with the testplan COMMERCE-9534 and test ticket COMMERCE-9537"
-	@priority = 5
-	test CanCreateNewVersionableProductDraftVersion {
-		property portal.acceptance = "true";
-
-		task ("Given the admin has already created a new simple product") {
-			CommerceProducts.openProductsAdmin();
-
-			CPCommerceCatalog.newProductsEntry(
-				productCatalog = "Master",
-				productName = "Simple T-Shirt",
-				productType = "Simple");
-		}
-
-		task ("And click on 'Save as Draft'") {
-			Click(
-				key_text = "Save as Draft",
-				locator1 = "Button#ANY");
-		}
-
-		task ("Then the admin will be redirected to the new page of the version of the product (see IDs difference) ") {
-			AssertElementPresent(
-				key_status = "Draft",
-				locator1 = "CommerceEntry#WORKFLOW_STATUS");
-		}
-
-		task ("if the admin goes back, he will find two products with the same name where the first is approved, and the second is draft") {
-			Navigator.gotoBack();
-
-			CommerceProducts.checkProductsPresent(list = "Simple T-Shirt:Approved,Simple T-Shirt:Draft");
 		}
 	}
 
