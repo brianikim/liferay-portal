@@ -180,8 +180,15 @@ test(
 );
 
 test(
-	'Product relations created under the Single Approver workflow show as pending and become approved once approved',
-	{tag: '@COMMERCE-11569'},
+	'Product relations created under the Single Approver workflow stay pending through a rejection and become approved once resubmitted and approved',
+	{
+		tag: [
+			'@COMMERCE-11569',
+			'@COMMERCE-11571',
+			'@COMMERCE-12048',
+			'@LPD-106244-Grouped-16',
+		],
+	},
 	async ({
 		apiHelpers,
 		commerceAdminProductDetailsPage,
@@ -189,6 +196,7 @@ test(
 		commerceAdminProductPage,
 		configurationTabPage,
 		page,
+		workflowTaskDetailsPage,
 	}) => {
 		await configurationTabPage.goTo();
 
@@ -254,23 +262,82 @@ test(
 			const userAccount =
 				await apiHelpers.headlessAdminUser.getMyUserAccount();
 
-			let workflowTasks: any[] = [];
+			const getWorkflowTasks = async (workflowTaskName: string) => {
+				let workflowTasks: any[] = [];
 
-			await expect(async () => {
-				const {items} =
-					await apiHelpers.headlessAdminWorkflow.getWorkflowTasksBySubmittingUser(
-						userAccount.id,
-						-1
+				await expect(async () => {
+					const {items} =
+						await apiHelpers.headlessAdminWorkflow.getWorkflowTasksBySubmittingUser(
+							userAccount.id,
+							-1
+						);
+
+					workflowTasks = items.filter(
+						(item) =>
+							relationLinkIds.has(item.objectReviewed?.id) &&
+							item.name === workflowTaskName
 					);
 
-				workflowTasks = items.filter((item) =>
-					relationLinkIds.has(item.objectReviewed?.id)
+					expect(workflowTasks).toHaveLength(relationTypes.length);
+				}).toPass();
+
+				return workflowTasks;
+			};
+
+			const rejectedWorkflowTasks = await getWorkflowTasks('review');
+
+			const [firstRejectedWorkflowTask] = rejectedWorkflowTasks;
+
+			await apiHelpers.headlessAdminWorkflow.postAssignTaskToUser(
+				firstRejectedWorkflowTask.id,
+				userAccount.id
+			);
+
+			await workflowTaskDetailsPage.goTo(sourceProduct.name.en_US);
+
+			await expect(
+				page
+					.getByRole('row')
+					.filter({hasText: relatedProduct.name.en_US})
+			).toContainText('Pending');
+
+			for (const workflowTask of rejectedWorkflowTasks.slice(1)) {
+				await apiHelpers.headlessAdminWorkflow.postAssignTaskToUser(
+					workflowTask.id,
+					userAccount.id
 				);
+			}
 
-				expect(workflowTasks).toHaveLength(relationTypes.length);
-			}).toPass();
+			for (const workflowTask of rejectedWorkflowTasks) {
+				await apiHelpers.headlessAdminWorkflow.postWorkflowTaskChangeTransition(
+					workflowTask.id,
+					'reject'
+				);
+			}
 
-			for (const workflowTask of workflowTasks) {
+			await commerceAdminProductPage.gotoProduct(
+				sourceProduct.name.en_US
+			);
+
+			await commerceAdminProductDetailsPage.goToProductRelations();
+
+			for (const {label} of relationTypes) {
+				await expect(
+					commerceAdminProductDetailsProductRelationsPage.productRelationStatusLabel(
+						relatedProduct.name.en_US,
+						label
+					)
+				).toHaveText('Pending');
+			}
+
+			for (const workflowTask of await getWorkflowTasks('update')) {
+				await apiHelpers.headlessAdminWorkflow.postWorkflowTaskChangeTransition(
+					workflowTask.id,
+					'resubmit'
+				);
+			}
+
+			for (const workflowTask of await getWorkflowTasks('review')) {
 				await apiHelpers.headlessAdminWorkflow.postAssignTaskToUser(
 					workflowTask.id,
 					userAccount.id
