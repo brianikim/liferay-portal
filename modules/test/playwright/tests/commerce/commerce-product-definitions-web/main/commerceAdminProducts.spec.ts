@@ -1275,3 +1275,106 @@ test(
 		});
 	}
 );
+
+for (const {
+	cycleLengthContainerId,
+	subscriptionEnabledId,
+	subscriptionLengthId,
+	subscriptionName,
+	subscriptionTypeId,
+} of [
+	{
+		cycleLengthContainerId: 'deliveryCycleLengthContainer',
+		subscriptionEnabledId: 'deliverySubscriptionEnabled',
+		subscriptionLengthId: 'deliverySubscriptionLength',
+		subscriptionName: 'Delivery Subscription',
+		subscriptionTypeId: 'deliverySubscriptionType',
+	},
+	{
+		cycleLengthContainerId: 'cycleLengthContainer',
+		subscriptionEnabledId: 'subscriptionEnabled',
+		subscriptionLengthId: 'subscriptionLength',
+		subscriptionName: 'Payment Subscription',
+		subscriptionTypeId: 'subscriptionType',
+	},
+]) {
+	test(
+		`The ${subscriptionName} length shows the subscription type in singular or plural`,
+		{tag: ['@COMMERCE-9744', '@COMMERCE-9798', '@LPD-106244-Grouped-24']},
+		async ({
+			apiHelpers,
+			commerceAdminProductDetailsPage,
+			commerceAdminProductPage,
+			page,
+		}) => {
+			const catalog =
+				await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+			const product =
+				await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+					catalogId: catalog.id,
+				});
+
+			await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+			await page
+				.getByRole('link', {exact: true, name: 'Subscription'})
+				.click();
+
+			await page
+				.locator(`label[for$="_${subscriptionEnabledId}"]`)
+				.click();
+
+			const subscriptionLengthInput = page.locator(
+				`input[id$="_${subscriptionLengthId}"]`
+			);
+			const subscriptionLengthSuffix = page.locator(
+				`[id$="_${cycleLengthContainerId}"] .input-group-text`
+			);
+			const subscriptionTypeSelect = page.locator(
+				`select[id$="_${subscriptionTypeId}"]`
+			);
+
+			await expect(
+				subscriptionTypeSelect.locator('option:checked')
+			).toHaveText('Day');
+			await expect(subscriptionLengthInput).toHaveValue('1');
+			await expect(subscriptionLengthSuffix).toHaveText('Day');
+
+			for (const subscriptionType of ['Week', 'Month', 'Year']) {
+				await subscriptionTypeSelect.selectOption({
+					label: subscriptionType,
+				});
+
+				await commerceAdminProductDetailsPage.publishLink.click();
+
+				await waitForAlert(page);
+
+				await expect(subscriptionLengthSuffix).toHaveText(
+					subscriptionType
+				);
+			}
+
+			await subscriptionLengthInput.fill('2');
+
+			for (const {subscriptionType, subscriptionTypeSuffix} of [
+				{subscriptionType: 'Day', subscriptionTypeSuffix: 'Days'},
+				{subscriptionType: 'Week', subscriptionTypeSuffix: 'Weeks'},
+				{subscriptionType: 'Month', subscriptionTypeSuffix: 'Months'},
+				{subscriptionType: 'Year', subscriptionTypeSuffix: 'Years'},
+			]) {
+				await subscriptionTypeSelect.selectOption({
+					label: subscriptionType,
+				});
+
+				await commerceAdminProductDetailsPage.publishLink.click();
+
+				await waitForAlert(page);
+
+				await expect(subscriptionLengthSuffix).toHaveText(
+					subscriptionTypeSuffix
+				);
+			}
+		}
+	);
+}
