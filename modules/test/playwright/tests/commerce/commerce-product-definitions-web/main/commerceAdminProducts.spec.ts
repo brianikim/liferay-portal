@@ -1024,3 +1024,86 @@ test(
 		}
 	}
 );
+
+test(
+	'Converting an approved product to draft keeps its edited name',
+	{tag: ['@COMMERCE-9183', '@LPD-106244-Grouped-23']},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductPage,
+		page,
+	}) => {
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		const product =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+			});
+
+		await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+		await expect(
+			commerceAdminProductDetailsPage.saveAsDraftLink
+		).toHaveCount(0);
+
+		const productName = getRandomString();
+
+		await commerceAdminProductDetailsPage.nameInput.fill(productName);
+
+		page.once('dialog', async (dialog) => {
+			expect(dialog.message()).toBe(
+				'Converting the product status to draft will remove the product from the product catalog. Do you wish to proceed?'
+			);
+
+			await dialog.accept();
+		});
+
+		await commerceAdminProductDetailsPage.headerActionsButton.click();
+		await commerceAdminProductDetailsPage
+			.headerActionsMenuItem('Convert to Draft')
+			.click();
+
+		await expect(
+			commerceAdminProductDetailsPage.saveAsDraftLink
+		).toBeVisible();
+		await expect(page.locator('.workflow-status-draft')).toBeVisible();
+		await expect(commerceAdminProductDetailsPage.nameInput).toHaveValue(
+			productName
+		);
+	}
+);
+
+test(
+	'Saving a draft product as draft keeps its edited name',
+	{tag: ['@COMMERCE-9181', '@LPD-106244-Grouped-23']},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductPage,
+		page,
+	}) => {
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		const product =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				productStatus: 2,
+			});
+
+		await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+		const productName = getRandomString();
+
+		await commerceAdminProductDetailsPage.nameInput.fill(productName);
+
+		await commerceAdminProductDetailsPage.saveAsDraftLink.click();
+
+		await expect(page.locator('.workflow-status-draft')).toBeVisible();
+		await expect(commerceAdminProductDetailsPage.nameInput).toHaveValue(
+			productName
+		);
+	}
+);
