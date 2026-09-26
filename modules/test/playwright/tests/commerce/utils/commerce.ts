@@ -19,6 +19,8 @@ import getRandomString from '../../../utils/getRandomString';
 import {performLogout, userData} from '../../../utils/performLogin';
 import {openProductMenu} from '../../../utils/productMenu';
 import {waitForAlert} from '../../../utils/waitForAlert';
+import getPageDefinition from '../../layout-content-page-editor-web/main/utils/getPageDefinition';
+import getWidgetDefinition from '../../layout-content-page-editor-web/main/utils/getWidgetDefinition';
 import {TAccount} from '../../workspaces/liferay-partner-workspace/main/types/account';
 import {ORDER_WORKFLOW_STATUS_CODE} from '../../workspaces/liferay-workspace-marketplace/main/utils/constants';
 
@@ -50,6 +52,59 @@ type TUnitOfMeasure = {
 	name: {[key: string]: string};
 	promoPrice: number;
 };
+
+export async function apiStorefrontSetUp(
+	apiHelpers: DataApiHelpers,
+	sitePages: Array<{title: string; widgetName: string}> = []
+) {
+	const site = await apiHelpers.headlessAdminSite.postSite({
+		name: getRandomString(),
+	});
+
+	const channel = await apiHelpers.headlessCommerceAdminChannel.postChannel({
+		name: getRandomString(),
+		siteGroupId: site.id,
+	});
+
+	const catalog = await apiHelpers.headlessCommerceAdminCatalog.postCatalog({
+		name: getRandomString(),
+	});
+
+	const product = await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+		catalogId: catalog.id,
+		name: {en_US: getRandomString()},
+		productConfiguration: {allowBackOrder: true},
+		shippingConfiguration: {
+			freeShipping: false,
+			shippable: true,
+			shippingSeparately: false,
+		},
+		skus: [
+			{
+				cost: 0,
+				price: 10,
+				published: true,
+				purchasable: true,
+				sku: getRandomString(),
+			},
+		],
+	});
+
+	for (const sitePage of sitePages) {
+		await apiHelpers.headlessDelivery.createSitePage({
+			pageDefinition: getPageDefinition([
+				getWidgetDefinition({
+					id: getRandomString(),
+					widgetName: sitePage.widgetName,
+				}),
+			]),
+			siteId: site.id,
+			title: sitePage.title,
+		});
+	}
+
+	return {catalog, channel, product, site};
+}
 
 export async function classicCommerceSetUp(
 	apiHelpers: DataApiHelpers,
