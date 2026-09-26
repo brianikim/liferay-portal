@@ -19,6 +19,7 @@ import {DisplayPageTemplatesPage} from '../../../../pages/layout-page-template-a
 import getGlobalSiteId from '../../../../utils/getGlobalSiteId';
 import {getRandomInt} from '../../../../utils/getRandomInt';
 import getRandomString from '../../../../utils/getRandomString';
+import {waitForAlert} from '../../../../utils/waitForAlert';
 import {
 	apiStorefrontSetUp,
 	deployProductFragmentsOnDefaultDPT,
@@ -472,5 +473,93 @@ test(
 				);
 			}
 		}
+	}
+);
+
+test(
+	'Marking and unmarking a product display page template as default switches the product page',
+	{tag: '@LPD-106244-Grouped-30'},
+	async ({
+		apiHelpers,
+		displayPageTemplatesPage,
+		page,
+		pageEditorPage,
+		productDetailsPage,
+	}) => {
+		const {product, site} = await apiStorefrontSetUp(apiHelpers, [
+			{
+				title: getRandomString(),
+				widgetName:
+					'com_liferay_commerce_product_content_web_internal_portlet_CPContentPortlet',
+			},
+		]);
+
+		const headingText = getRandomString();
+
+		const displayPageTemplateName =
+			await deployProductFragmentsOnDefaultDPT(apiHelpers, {
+				displayPageTemplatesPage,
+				fragmentNames: [],
+				onFragmentsAdded: async () => {
+					await pageEditorPage.addFragment(
+						'Basic Components',
+						'Heading'
+					);
+
+					await pageEditorPage.editTextEditable(
+						await pageEditorPage.getFragmentId('Heading'),
+						'element-text',
+						headingText
+					);
+				},
+				pageEditorPage,
+				site,
+			});
+
+		const heading = page.locator('.component-heading', {
+			hasText: headingText,
+		});
+
+		await gotoProductPage(page, site, product);
+
+		await expect(heading).toBeVisible();
+
+		await displayPageTemplatesPage.goto(site.friendlyUrlPath);
+
+		page.once('dialog', async (dialog) => {
+			expect(dialog.message()).toBe(
+				'Some assets might be set to use the default display page. Are you sure you want to unmark this?'
+			);
+
+			await dialog.accept();
+		});
+
+		await displayPageTemplatesPage.clickMoreActions(
+			displayPageTemplateName,
+			'Unmark as Default'
+		);
+
+		await waitForAlert(page);
+
+		await gotoProductPage(page, site, product);
+
+		await expect(heading).toHaveCount(0);
+		await expect(
+			await productDetailsPage.nameField(product.name['en_US'])
+		).toBeVisible();
+		await expect(
+			await productDetailsPage.skuField(product.skus[0].sku)
+		).toBeVisible();
+		await expect(
+			await productDetailsPage.priceField('$ 10.00')
+		).toBeVisible();
+
+		await displayPageTemplatesPage.goto(site.friendlyUrlPath);
+
+		await displayPageTemplatesPage.markAsDefault(displayPageTemplateName);
+
+		await gotoProductPage(page, site, product);
+
+		await expect(heading).toBeVisible();
 	}
 );
