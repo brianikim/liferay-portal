@@ -306,24 +306,6 @@ definition {
 		}
 	}
 
-	@description = "COMMERCE-6662. I want to be able to use ADT to render Commerce Comparison Bar widget and I want to be able to select a Display Template and see it applied to the widget"
-	@ignore = "true"
-	@priority = 3
-	test UseADTInCommerceComparisonBarWidget {
-
-		// TODO COMMERCE-6662 UseADTInCommerceComparisonBarWidget pending implementation
-
-	}
-
-	@description = "COMMERCE-6661. I want to be able to use ADT to render Commerce Comparison Table widget and I want to be able to select a Display Template and see it applied to the widget"
-	@ignore = "true"
-	@priority = 3
-	test UseADTInCommerceComparisonTableWidget {
-
-		// TODO COMMERCE-6661 UseADTInCommerceComparisonTableWidget pending implementation
-
-	}
-
 	@description = "COMMERCE-5919. Verify buyers can view product options and specifications, if set, when comparing items in the Compare page."
 	@priority = 5
 	test ViewProductOptionsAndSpecificationsWhenComparingItemsInComparePage {
