@@ -42,6 +42,7 @@ import com.liferay.template.info.item.provider.TemplateInfoItemFieldSetProvider;
 
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -66,6 +67,156 @@ public class CPDefinitionInfoItemFieldValuesProviderTest {
 
 		_setUpMocks();
 		_setUpServiceContext();
+	}
+
+	@Test
+	public void testGetInfoItemFieldValues() throws Exception {
+		CommerceContextThreadLocal.set(null);
+
+		CPDefinition cpDefinition = _createMockCPDefinition();
+
+		Mockito.doReturn(
+			true
+		).when(
+			cpDefinition
+		).isDeliverySubscriptionEnabled();
+
+		Mockito.doReturn(
+			5
+		).when(
+			cpDefinition
+		).getDeliverySubscriptionLength();
+
+		Mockito.doReturn(
+			"monthly"
+		).when(
+			cpDefinition
+		).getDeliverySubscriptionType();
+
+		Mockito.doReturn(
+			"deliveryMonthDay=1\ndeliveryMonthlyMode=1"
+		).when(
+			cpDefinition
+		).getDeliverySubscriptionTypeSettings();
+
+		Mockito.doReturn(
+			7.0
+		).when(
+			cpDefinition
+		).getDepth();
+
+		Mockito.doReturn(
+			false
+		).when(
+			cpDefinition
+		).isFreeShipping();
+
+		Mockito.doReturn(
+			2.0
+		).when(
+			cpDefinition
+		).getHeight();
+
+		Mockito.doReturn(
+			false
+		).when(
+			cpDefinition
+		).isShipSeparately();
+
+		Mockito.doReturn(
+			true
+		).when(
+			cpDefinition
+		).isShippable();
+
+		Mockito.doReturn(
+			0.0
+		).when(
+			cpDefinition
+		).getShippingExtraPrice();
+
+		Mockito.doReturn(
+			true
+		).when(
+			cpDefinition
+		).isSubscriptionEnabled();
+
+		Mockito.doReturn(
+			10
+		).when(
+			cpDefinition
+		).getSubscriptionLength();
+
+		Mockito.doReturn(
+			"monthly"
+		).when(
+			cpDefinition
+		).getSubscriptionType();
+
+		Mockito.doReturn(
+			"monthDay=15\nmonthlyMode=1"
+		).when(
+			cpDefinition
+		).getSubscriptionTypeSettings();
+
+		Mockito.doReturn(
+			1.0
+		).when(
+			cpDefinition
+		).getWeight();
+
+		Mockito.doReturn(
+			5.0
+		).when(
+			cpDefinition
+		).getWidth();
+
+		InfoItemFieldValues infoItemFieldValues =
+			_cpDefinitionInfoItemFieldValuesProvider.getInfoItemFieldValues(
+				cpDefinition);
+
+		Map<String, Object> values = HashMapBuilder.<String, Object>put(
+			"deliverySubscriptionEnabled", true
+		).put(
+			"deliverySubscriptionLength", 5
+		).put(
+			"deliverySubscriptionType", "monthly"
+		).put(
+			"deliverySubscriptionTypeSettings",
+			"deliveryMonthDay=1\ndeliveryMonthlyMode=1"
+		).put(
+			"depth", 7.0
+		).put(
+			"freeShipping", false
+		).put(
+			"height", 2.0
+		).put(
+			"shippable", true
+		).put(
+			"shippingExtraPrice", 0.0
+		).put(
+			"shipSeparately", false
+		).put(
+			"subscriptionEnabled", true
+		).put(
+			"subscriptionLength", 10
+		).put(
+			"subscriptionType", "monthly"
+		).put(
+			"subscriptionTypeSettings", "monthDay=15\nmonthlyMode=1"
+		).put(
+			"weight", 1.0
+		).put(
+			"width", 5.0
+		).build();
+
+		for (Map.Entry<String, Object> entry : values.entrySet()) {
+			InfoFieldValue<Object> infoFieldValue =
+				infoItemFieldValues.getInfoFieldValue(entry.getKey());
+
+			Assert.assertEquals(
+				entry.getKey(), entry.getValue(), infoFieldValue.getValue());
+		}
 	}
 
 	@Test
