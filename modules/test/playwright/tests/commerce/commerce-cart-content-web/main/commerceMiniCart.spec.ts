@@ -3724,3 +3724,79 @@ test(
 		await expect(checkoutPage.orderSuccessMessage).toBeVisible();
 	}
 );
+
+test(
+	'A SKU with a promotion quick added to the Mini Cart fragment shows its list and promotion prices',
+	{tag: '@COMMERCE-10587'},
+	async ({
+		apiHelpers,
+		commerceAdminChannelsPage,
+		commerceMiniCartPage,
+		page,
+	}) => {
+		const {catalog, channel, product, site} =
+			await apiStorefrontSetUp(apiHelpers);
+
+		await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+			channel.name,
+			'B2B'
+		);
+
+		await waitForAlert(page);
+
+		const layout = await apiHelpers.headlessDelivery.createSitePage({
+			pageDefinition: getPageDefinition([
+				getFragmentDefinition({
+					id: getRandomString(),
+					key: 'COMMERCE_CART_FRAGMENTS-mini-cart',
+				}),
+			]),
+			siteId: site.id,
+			title: getRandomString(),
+		});
+
+		const basePromoPriceList =
+			await apiHelpers.headlessCommerceAdminPricing.getBasePromoPriceList(
+				catalog.id
+			);
+
+		await apiHelpers.headlessCommerceAdminPricing.postPriceEntry({
+			price: 9,
+			priceListId: basePromoPriceList.items[0].id,
+			skuId: product.skus[0].id,
+		});
+
+		const {buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id
+		);
+
+		await performLogout(page);
+		await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+		await page.goto(
+			`/web${site.friendlyUrlPath}${layout.friendlyUrlPath}`,
+			{waitUntil: 'networkidle'}
+		);
+
+		await commerceMiniCartPage.open();
+
+		const skuName = product.skus[0].sku;
+
+		await commerceMiniCartPage.selectQuickAddToCartSku(skuName);
+
+		await expect(
+			commerceMiniCartPage.quickAddToCartChip(skuName)
+		).toBeVisible();
+
+		await commerceMiniCartPage.quickAddToCartButton.click();
+
+		await expect(commerceMiniCartPage.miniCartSku(skuName)).toBeVisible();
+		await expect(
+			commerceMiniCartPage.miniCartItemListPrice(product.name.en_US)
+		).toHaveText('$ 10.00');
+		await expect(
+			commerceMiniCartPage.miniCartItemPromoPrice(product.name.en_US)
+		).toHaveText('$ 9.00');
+	}
+);
