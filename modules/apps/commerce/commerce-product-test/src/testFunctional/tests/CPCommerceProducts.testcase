@@ -1029,46 +1029,6 @@ definition {
 		Alert.viewSuccessMessage();
 	}
 
-	@description = "This is a test for COMMERCE-6303. UseSchedule"
-	@priority = 5
-	test UseSchedule {
-		property portal.acceptance = "true";
-
-		// TODO Review
-
-		CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
-
-		CommerceProducts.openProductsAdmin();
-
-		CommerceNavigator.searchEntry(entryName = '''"Brake Fluid"''');
-
-		Click(
-			key_entryName = "Brake Fluid",
-			locator1 = "CommerceEntry#TABLE_LIST_TITLE");
-
-		Uncheck.uncheckToggleSwitch(
-			key_toggleSwitchLabel = "Never Expire",
-			locator1 = "ToggleSwitch#ANY_TOGGLE_SWITCH");
-
-		Click(locator1 = "CommerceEntry#EXPIRATION_DATE_FIELD");
-
-		var displayDateDay = DateUtil.getCurrentDate();
-		var displayDateMonth = DateUtil.getCurrentMonth();
-		var displayDateYear = DateUtil.getCurrentYear();
-
-		var futureYear = ${displayDateYear} + 1;
-
-		var displayDate = "${displayDateMonth}/${displayDateDay}/${futureYear}";
-
-		Type(
-			locator1 = "CommerceEntry#EXPIRATION_DATE_FIELD",
-			value1 = ${displayDate});
-
-		Button.clickPublish();
-
-		AssertElementPresent(locator1 = "Message#SUCCESS");
-	}
-
 	@description = "This is a test for COMMERCE-5805. UseSearchBarAndPagination"
 	@priority = 3
 	test UseSearchBarAndPagination {

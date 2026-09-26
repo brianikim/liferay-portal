@@ -1107,3 +1107,44 @@ test(
 		);
 	}
 );
+
+test(
+	'Publish a product with an expiration date',
+	{tag: ['@COMMERCE-6303', '@LPD-106244-Grouped-23']},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductPage,
+		page,
+	}) => {
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		const product =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+			});
+
+		await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+		await page.getByLabel('Never Expire').uncheck();
+
+		const expirationDate = new Date();
+
+		expirationDate.setFullYear(expirationDate.getFullYear() + 1);
+
+		await page
+			.locator('input[id*="expirationDate"][placeholder="mm/dd/yyyy"]')
+			.fill(
+				[
+					String(expirationDate.getMonth() + 1).padStart(2, '0'),
+					String(expirationDate.getDate()).padStart(2, '0'),
+					expirationDate.getFullYear(),
+				].join('/')
+			);
+
+		await expect(
+			await commerceAdminProductDetailsPage.publish()
+		).toBeVisible();
+	}
+);
