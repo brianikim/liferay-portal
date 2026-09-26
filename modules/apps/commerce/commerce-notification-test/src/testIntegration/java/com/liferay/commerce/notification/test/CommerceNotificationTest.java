@@ -590,6 +590,62 @@ public class CommerceNotificationTest {
 	}
 
 	@Test
+	public void testUpdateCommerceNotificationTemplate() throws Exception {
+		String name = RandomTestUtil.randomString();
+
+		_commerceNotificationTemplate =
+			CommerceNotificationTestUtil.addCommerceNotificationTemplate(
+				name, RandomTestUtil.randomString(), "test@liferay.com",
+				"[%ACCOUNT_ROLE_ADMINISTRATOR%]",
+				CommerceOrderConstants.ORDER_NOTIFICATION_PLACED,
+				_serviceContext);
+
+		_commerceNotificationTemplate =
+			_commerceNotificationTemplateLocalService.
+				getCommerceNotificationTemplate(
+					_commerceNotificationTemplate.
+						getCommerceNotificationTemplateId());
+
+		Assert.assertEquals(
+			"test@liferay.com", _commerceNotificationTemplate.getFrom());
+		Assert.assertEquals(name, _commerceNotificationTemplate.getName());
+		Assert.assertEquals(
+			"[%ACCOUNT_ROLE_ADMINISTRATOR%]",
+			_commerceNotificationTemplate.getTo());
+		Assert.assertEquals(
+			CommerceOrderConstants.ORDER_NOTIFICATION_PLACED,
+			_commerceNotificationTemplate.getType());
+
+		name = RandomTestUtil.randomString();
+
+		_commerceNotificationTemplateLocalService.
+			updateCommerceNotificationTemplate(
+				_commerceNotificationTemplate.
+					getCommerceNotificationTemplateId(),
+				name, _commerceNotificationTemplate.getDescription(),
+				_commerceNotificationTemplate.getFrom(),
+				_commerceNotificationTemplate.getFromNameMap(),
+				"[%ACCOUNT_ROLE_ORDER_MANAGER%]", null, null,
+				CommerceOrderConstants.ORDER_NOTIFICATION_COMPLETED, true,
+				_commerceNotificationTemplate.getSubjectMap(),
+				_commerceNotificationTemplate.getBodyMap(), _serviceContext);
+
+		_commerceNotificationTemplate =
+			_commerceNotificationTemplateLocalService.
+				getCommerceNotificationTemplate(
+					_commerceNotificationTemplate.
+						getCommerceNotificationTemplateId());
+
+		Assert.assertEquals(name, _commerceNotificationTemplate.getName());
+		Assert.assertEquals(
+			"[%ACCOUNT_ROLE_ORDER_MANAGER%]",
+			_commerceNotificationTemplate.getTo());
+		Assert.assertEquals(
+			CommerceOrderConstants.ORDER_NOTIFICATION_COMPLETED,
+			_commerceNotificationTemplate.getType());
+	}
+
+	@Test
 	public void testUserGroupRecipient() throws Exception {
 		_setUpAccountAdministrator();
 
