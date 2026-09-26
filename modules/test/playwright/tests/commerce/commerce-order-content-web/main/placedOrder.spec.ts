@@ -2159,6 +2159,102 @@ test(
 );
 
 test(
+	'A placed order keeps its item details after the product is deleted',
+	{tag: ['@COMMERCE-3111', '@LPD-106244-Grouped-29']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelsPage,
+		page,
+		placedOrdersPage,
+		productDetailsPage,
+		site,
+	}) => {
+		const layout = await apiHelpers.headlessDelivery.createSitePage({
+			pageDefinition: getPageDefinition([
+				getWidgetDefinition({
+					id: getRandomString(),
+					widgetName:
+						'com_liferay_commerce_order_content_web_internal_portlet_CommerceOrderContentPortlet',
+				}),
+			]),
+			siteId: site.id,
+			title: getRandomString(),
+		});
+
+		const channel =
+			await apiHelpers.headlessCommerceAdminChannel.postChannel({
+				siteGroupId: site.id,
+			});
+
+		await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+			channel.name,
+			'B2B'
+		);
+
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		const productName = getRandomString();
+		const sku = getRandomString();
+
+		const product =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				name: {en_US: productName},
+				skus: [
+					{
+						cost: 0,
+						price: 18,
+						published: true,
+						purchasable: true,
+						sku,
+					},
+				],
+			});
+
+		const {account, buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id
+		);
+
+		await apiHelpers.headlessCommerceAdminOrder.postOrder({
+			accountId: account.id,
+			channelId: channel.id,
+			orderItems: [{quantity: 1, skuId: String(product.skus[0].id)}],
+			orderStatus: '1',
+		});
+
+		await apiHelpers.headlessCommerceAdminCatalog.deleteProduct(
+			product.productId
+		);
+
+		await performLogout(page);
+		await performLogin(page, buyerUser.alternateName);
+
+		await page.goto(
+			`${liferayConfig.environment.baseUrl}/web${site.friendlyUrlPath}${layout.friendlyUrlPath}`,
+			{waitUntil: 'networkidle'}
+		);
+
+		await placedOrdersPage.viewButton.click();
+
+		const orderItemRow = page
+			.getByRole('row')
+			.filter({hasText: productName});
+
+		await expect(orderItemRow).toContainText(sku);
+		await expect(orderItemRow).toContainText('$ 18.00');
+		await expect(
+			orderItemRow.getByRole('cell', {exact: true, name: '1'})
+		).toBeVisible();
+
+		await orderItemRow.getByText(productName).click();
+
+		await expect(productDetailsPage.productHeaderTitle).toHaveCount(0);
+	}
+);
+
+test(
 	'A display template selected in the Placed Orders widget configuration renders the orders and survives reopening it',
 	{
 		tag: [
