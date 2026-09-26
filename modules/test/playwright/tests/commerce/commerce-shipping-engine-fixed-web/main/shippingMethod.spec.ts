@@ -281,6 +281,90 @@ for (const {addShippingOption, shippingMethod, tags} of [
 }
 
 test(
+	'Flat Rate shipping options show their priority and are ordered by it',
+	{tag: '@LPD-106244-Grouped-7'},
+	async ({
+		apiHelpers,
+		commerceAdminChannelDetailsPage,
+		commerceAdminChannelsPage,
+		site,
+	}) => {
+		const channel =
+			await apiHelpers.headlessCommerceAdminChannel.postChannel({
+				siteGroupId: site.id,
+			});
+
+		await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+			channel.name,
+			'B2B'
+		);
+
+		const expeditedDeliveryName = getRandomString();
+
+		await commerceAdminChannelDetailsPage.addFlatRateShippingOption(
+			expeditedDeliveryName,
+			'10',
+			undefined,
+			'2'
+		);
+
+		const standardDeliveryName = getRandomString();
+
+		await commerceAdminChannelDetailsPage.addFlatRateShippingOption(
+			standardDeliveryName,
+			'5',
+			undefined,
+			'1'
+		);
+
+		await (
+			await commerceAdminChannelDetailsPage.generalCommerceAdminChannelTableLink(
+				'Flat Rate'
+			)
+		).click();
+		await (
+			await commerceAdminChannelDetailsPage.shippingOptionsTab(
+				'Shipping Methods'
+			)
+		).click();
+
+		await expect(
+			(
+				await commerceAdminChannelDetailsPage.getRowByTextFromSidePanelTable(
+					'Shipping Methods',
+					standardDeliveryName
+				)
+			)
+				.locator('td')
+				.nth(2)
+		).toHaveText('1');
+		await expect(
+			(
+				await commerceAdminChannelDetailsPage.getRowByTextFromSidePanelTable(
+					'Shipping Methods',
+					expeditedDeliveryName
+				)
+			)
+				.locator('td')
+				.nth(2)
+		).toHaveText('2');
+
+		const shippingOptionRows = (
+			await commerceAdminChannelDetailsPage.sidePanelFrame(
+				'Shipping Methods'
+			)
+		).locator('tbody tr');
+
+		await expect(shippingOptionRows.nth(0)).toContainText(
+			standardDeliveryName
+		);
+		await expect(shippingOptionRows.nth(1)).toContainText(
+			expeditedDeliveryName
+		);
+	}
+);
+
+test(
 	'Shipment tracking URL for an order can be updated and viewed',
 	{tag: ['@COMMERCE-9459', '@LPD-56179']},
 	async ({
