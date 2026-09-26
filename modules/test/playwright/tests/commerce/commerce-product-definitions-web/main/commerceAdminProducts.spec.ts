@@ -252,8 +252,15 @@ test(
 );
 
 test(
-	'Editing the base price list entry of a SKU updates its storefront price',
-	{tag: ['@COMMERCE-6022', '@COMMERCE-12218']},
+	'Editing the base price and tier prices of a SKU updates its storefront price',
+	{
+		tag: [
+			'@COMMERCE-6022',
+			'@COMMERCE-12218',
+			'@LPD-106244-Grouped-16',
+			'@LPD-106244-Grouped-24',
+		],
+	},
 	async ({
 		apiHelpers,
 		commerceAdminProductDetailsPage,
@@ -269,16 +276,63 @@ test(
 			},
 		]);
 
-		await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+		const basePriceListName = `${catalog.name} Base Price List`;
 
-		await commerceAdminProductDetailsPage.goToProductSkus();
+		const goToSkuPrices = async () => {
+			await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+			await commerceAdminProductDetailsPage.goToProductSkus();
+
+			await commerceAdminProductDetailsSkusPage
+				.skusTableRowLink(product.skus[0].sku)
+				.click();
+			await commerceAdminProductDetailsSkusPage.goToSkuTab('Price');
+		};
+
+		const expectStorefrontPrice = async (price: string) => {
+			await page.goto(`/web${site.friendlyUrlPath}/catalog`);
+
+			await expect(
+				page.locator('.card').filter({hasText: product.name['en_US']})
+			).toContainText(price);
+		};
+
+		const nestedFrame =
+			commerceAdminProductDetailsSkusPage.sidePanelNestedFrame;
+		const tierPriceModalFrame = page.frameLocator('.modal-body iframe');
+
+		const clickTierPriceAction = async (price: string, action: string) => {
+			await goToSkuPrices();
+
+			await commerceAdminProductDetailsSkusPage
+				.sidePanelSkuPriceTableRowLink(basePriceListName)
+				.click();
+
+			await nestedFrame
+				.getByRole('row')
+				.filter({hasText: price})
+				.getByRole('button', {name: /Actions$/})
+				.click();
+
+			await nestedFrame
+				.getByRole('menuitem', {exact: true, name: action})
+				.click();
+		};
+
+		const submitTierPrice = async (price: string) => {
+			await tierPriceModalFrame.getByLabel('Quantity Required').fill('1');
+			await tierPriceModalFrame
+				.getByLabel('Tier Price Required')
+				.fill(price);
+			await tierPriceModalFrame
+				.getByRole('button', {exact: true, name: 'Submit'})
+				.click();
+		};
+
+		await goToSkuPrices();
 
 		await commerceAdminProductDetailsSkusPage
-			.skusTableRowLink(product.skus[0].sku)
-			.click();
-		await commerceAdminProductDetailsSkusPage.goToSkuTab('Price');
-		await commerceAdminProductDetailsSkusPage
-			.sidePanelSkuPriceTableRowLink(`${catalog.name} Base Price List`)
+			.sidePanelSkuPriceTableRowLink(basePriceListName)
 			.click();
 
 		await commerceAdminProductDetailsSkusPage.sidePanelNestedPriceListPrice.fill(
@@ -286,15 +340,50 @@ test(
 		);
 		await commerceAdminProductDetailsSkusPage.sidePanelNestedSaveButton.click();
 
-		await waitForAlert(
-			commerceAdminProductDetailsSkusPage.sidePanelNestedFrame
-		);
+		await waitForAlert(nestedFrame);
 
-		await page.goto(`/web${site.friendlyUrlPath}/catalog`);
+		await expectStorefrontPrice('25.00');
 
-		await expect(
-			page.locator('.card').filter({hasText: product.name['en_US']})
-		).toContainText('25.00');
+		await goToSkuPrices();
+
+		await commerceAdminProductDetailsSkusPage
+			.sidePanelSkuPriceTableRowLink(basePriceListName)
+			.click();
+
+		await nestedFrame
+			.locator('[data-testid="fdsCreationActionButton"]')
+			.click();
+
+		await submitTierPrice('10');
+
+		await expectStorefrontPrice('10.00');
+
+		await clickTierPriceAction('10.00', 'Edit');
+
+		await submitTierPrice('20');
+
+		await expectStorefrontPrice('20.00');
+
+		await clickTierPriceAction('20.00', 'Delete');
+
+		await expectStorefrontPrice('25.00');
+
+		await goToSkuPrices();
+
+		const basePriceListRow =
+			commerceAdminProductDetailsSkusPage.skuPriceFrame
+				.getByRole('row')
+				.filter({hasText: basePriceListName});
+
+		await basePriceListRow.getByRole('button', {name: /Actions$/}).click();
+
+		await commerceAdminProductDetailsSkusPage.skuPriceFrame
+			.getByRole('menuitem', {exact: true, name: 'Delete'})
+			.click();
+
+		await expect(basePriceListRow).toHaveCount(0);
+
+		await expectStorefrontPrice('$ 0.00');
 	}
 );
 
