@@ -4,6 +4,7 @@
  */
 
 import '@testing-library/jest-dom';
+import {openToast} from 'frontend-js-components-web';
 
 import {
 	DEFAULT_ORDER_DETAILS_PORTLET_ID,
@@ -11,6 +12,7 @@ import {
 } from '../../../../src/main/resources/META-INF/resources/components/mini_cart/util/constants';
 import {
 	filterOptions,
+	getCorrectedQuantity,
 	hasErrors,
 	parseOptions,
 	summaryDataMapper,
@@ -20,6 +22,11 @@ import {regenerateOrderDetailURL} from '../../../../src/main/resources/META-INF/
 jest.mock(
 	'../../../../src/main/resources/META-INF/resources/ServiceProvider/index'
 );
+
+jest.mock('frontend-js-components-web', () => ({
+	...jest.requireActual('frontend-js-components-web'),
+	openToast: jest.fn(),
+}));
 
 describe('MiniCart tests_utilities', () => {
 	describe('filterOptions', () => {
@@ -38,6 +45,82 @@ describe('MiniCart tests_utilities', () => {
 		it('returns an empty array when the input is not valid options JSON', () => {
 			expect(filterOptions('/fail]')).toEqual([]);
 			expect(filterOptions(null)).toEqual([]);
+		});
+	});
+
+	describe('getCorrectedQuantity', () => {
+		const PRODUCT_CONFIGURATION = {
+			allowedOrderQuantities: [],
+			maxOrderQuantity: 10000,
+			minOrderQuantity: 1,
+			multipleOrderQuantity: 1,
+		};
+
+		it('returns the quantity to add for the quick add-to-cart SKU', () => {
+			for (const {
+				cartItems = [],
+				expectedQuantity,
+				productConfiguration,
+				sku,
+			} of [
+				{
+					expectedQuantity: 3,
+					productConfiguration: {minOrderQuantity: 3},
+					sku: 'MIN55860',
+				},
+				{
+					expectedQuantity: 3,
+					productConfiguration: {multipleOrderQuantity: 3},
+					sku: 'MIN93016A',
+				},
+				{
+					cartItems: [{quantity: 3, sku: 'MIN93016A'}],
+					expectedQuantity: 3,
+					productConfiguration: {multipleOrderQuantity: 3},
+					sku: 'MIN93016A',
+				},
+				{
+					cartItems: [{quantity: 6, sku: 'MIN93016A'}],
+					expectedQuantity: 3,
+					productConfiguration: {multipleOrderQuantity: 3},
+					sku: 'MIN93016B',
+				},
+				{
+					cartItems: [
+						{quantity: 6, sku: 'MIN93016A'},
+						{quantity: 3, sku: 'MIN93016B'},
+					],
+					expectedQuantity: 3,
+					productConfiguration: {multipleOrderQuantity: 3},
+					sku: 'MIN93016C',
+				},
+				{
+					expectedQuantity: 10,
+					productConfiguration: {
+						minOrderQuantity: 6,
+						multipleOrderQuantity: 5,
+					},
+					sku: 'MIN55860',
+				},
+				{
+					expectedQuantity: 5,
+					productConfiguration: {
+						minOrderQuantity: 4,
+						multipleOrderQuantity: 5,
+					},
+					sku: 'MIN55860',
+				},
+			]) {
+				expect(
+					getCorrectedQuantity(
+						{...PRODUCT_CONFIGURATION, ...productConfiguration},
+						sku,
+						cartItems
+					)
+				).toBe(expectedQuantity);
+			}
+
+			expect(openToast).not.toHaveBeenCalled();
 		});
 	});
 
