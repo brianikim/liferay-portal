@@ -9,6 +9,11 @@ import {apiHelpersTest} from '../../../../fixtures/apiHelpersTest';
 import {commercePagesTest} from '../../../../fixtures/commercePagesTest';
 import {dataApiHelpersTest} from '../../../../fixtures/dataApiHelpersTest';
 import {loginTest} from '../../../../fixtures/loginTest';
+import getGlobalSiteId from '../../../../utils/getGlobalSiteId';
+import getRandomString from '../../../../utils/getRandomString';
+import getPageDefinition from '../../../layout-content-page-editor-web/main/utils/getPageDefinition';
+import getWidgetDefinition from '../../../layout-content-page-editor-web/main/utils/getWidgetDefinition';
+import {apiStorefrontSetUp} from '../../utils/commerce';
 
 export const test = mergeTests(
 	apiHelpersTest,
@@ -131,3 +136,68 @@ test('LPD-3381 Error message is shown when saving an existing override category 
 		commerceAdminChannelDetailsCategoryDisplayPagesPage.errorMessageSelectCategory
 	).toBeVisible();
 });
+
+test(
+	'Clicking a category in the categories navigation widget opens the category content page when no default category display page is set',
+	{tag: ['@COMMERCE-7843', '@LPD-106244-Grouped-30']},
+	async ({apiHelpers, page}) => {
+		const {site} = await apiStorefrontSetUp(apiHelpers);
+
+		const vocabulary =
+			await apiHelpers.headlessAdminTaxonomy.postSiteTaxonomyVocabulary({
+				name: getRandomString(),
+				siteId: String(await getGlobalSiteId(apiHelpers)),
+			});
+
+		const categoryName = getRandomString();
+
+		await apiHelpers.headlessAdminTaxonomy.postTaxonomyVocabularyTaxonomyCategory(
+			{
+				name: categoryName,
+				vocabularyId: vocabulary.id,
+			}
+		);
+
+		const layoutTitle = getRandomString();
+
+		const layout = await apiHelpers.headlessDelivery.createSitePage({
+			pageDefinition: getPageDefinition([
+				getWidgetDefinition({
+					id: getRandomString(),
+					widgetConfig: {
+						assetVocabularyId: String(vocabulary.id),
+					},
+					widgetName:
+						'com_liferay_commerce_product_asset_categories_navigation_web_internal_portlet_CPAssetCategoriesNavigationPortlet',
+				}),
+				getWidgetDefinition({
+					id: getRandomString(),
+					widgetName:
+						'com_liferay_commerce_product_content_web_internal_portlet_CPCategoryContentPortlet',
+				}),
+			]),
+			siteId: site.id,
+			title: layoutTitle,
+		});
+
+		await page.goto(`/web${site.friendlyUrlPath}${layout.friendlyUrlPath}`);
+
+		await page.getByRole('link', {exact: true, name: categoryName}).click();
+
+		await expect(page).toHaveURL(
+			new RegExp(
+				`/web${site.friendlyUrlPath}/g/${categoryName.toLowerCase()}`
+			)
+		);
+		await expect(
+			page.getByTestId('headerTitle').filter({hasText: layoutTitle})
+		).toBeVisible();
+		await expect(
+			page
+				.locator(
+					'[id^="portlet_com_liferay_commerce_product_content_web_internal_portlet_CPCategoryContentPortlet"]'
+				)
+				.getByText(categoryName)
+		).toBeVisible();
+	}
+);
