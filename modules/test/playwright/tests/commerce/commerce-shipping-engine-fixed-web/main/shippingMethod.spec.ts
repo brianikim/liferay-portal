@@ -594,6 +594,62 @@ test(
 );
 
 test(
+	'The Flat Rate shipping method tracking URL can be edited and cleared',
+	{tag: ['@COMMERCE-9459', '@LPD-106244-Grouped-7']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelDetailsPage,
+		commerceAdminChannelsPage,
+		page,
+		site,
+	}) => {
+		const channel =
+			await apiHelpers.headlessCommerceAdminChannel.postChannel({
+				siteGroupId: site.id,
+			});
+
+		await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+			channel.name,
+			'B2B'
+		);
+
+		for (const trackingURL of [
+			'www.carriersite.com/',
+			'www.carriersite2.com/',
+			'',
+		]) {
+			await commerceAdminChannelDetailsPage.setShippingMethodTrackingURL(
+				'Flat Rate',
+				trackingURL,
+				'Shipping Methods'
+			);
+
+			await page.reload();
+
+			await (
+				await commerceAdminChannelDetailsPage.generalCommerceAdminChannelTableLink(
+					'Flat Rate'
+				)
+			).click();
+
+			await expect(
+				await commerceAdminChannelDetailsPage.sidePanelFrameInput(
+					'Tracking URL',
+					'Shipping Methods'
+				)
+			).toHaveValue(trackingURL);
+
+			await (
+				await commerceAdminChannelDetailsPage.closeSidePanelFrame(
+					false,
+					'Shipping Methods'
+				)
+			).click();
+		}
+	}
+);
+
+test(
 	'Certain special characters are double escaped in Commerce Channel shipping option descriptions',
 	{tag: ['@LPD-74663', '@LPP-62173']},
 	async ({
