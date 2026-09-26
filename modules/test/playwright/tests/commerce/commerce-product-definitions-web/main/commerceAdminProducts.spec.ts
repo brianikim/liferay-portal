@@ -11,6 +11,7 @@ import {dataApiHelpersTest} from '../../../../fixtures/dataApiHelpersTest';
 import {isolatedSiteTest} from '../../../../fixtures/isolatedSiteTest';
 import {loginTest} from '../../../../fixtures/loginTest';
 import {userPersonalBarPagesTest} from '../../../../fixtures/userPersonalBarPagesTest';
+import {clickAndExpectToBeVisible} from '../../../../utils/clickAndExpectToBeVisible';
 import getRandomString from '../../../../utils/getRandomString';
 import {userData} from '../../../../utils/performLogin';
 
@@ -494,6 +495,65 @@ test(
 		await expect(
 			commerceAdminProductDetailsPage.nameInputLocaleSelector
 		).toHaveText('es-ES');
+	}
+);
+
+test(
+	'Edit a product name and its translation',
+	{tag: ['@COMMERCE-5808', '@LPD-106244-Grouped-16']},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductPage,
+		page,
+	}) => {
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		const product =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+			});
+
+		await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+		const productName = getRandomString();
+
+		await commerceAdminProductDetailsPage.nameInput.fill(productName);
+
+		await commerceAdminProductDetailsPage.publish();
+
+		await expect(commerceAdminProductDetailsPage.nameInput).toHaveValue(
+			productName
+		);
+
+		const spanishLocaleMenuItem = page.getByRole('menuitem', {
+			name: 'es-ES',
+		});
+
+		await clickAndExpectToBeVisible({
+			autoClick: true,
+			target: spanishLocaleMenuItem,
+			trigger: commerceAdminProductDetailsPage.nameInputLocaleSelector,
+		});
+
+		const translatedProductName = getRandomString();
+
+		await commerceAdminProductDetailsPage.nameInput.fill(
+			translatedProductName
+		);
+
+		await commerceAdminProductDetailsPage.publish();
+
+		await clickAndExpectToBeVisible({
+			autoClick: true,
+			target: spanishLocaleMenuItem,
+			trigger: commerceAdminProductDetailsPage.nameInputLocaleSelector,
+		});
+
+		await expect(commerceAdminProductDetailsPage.nameInput).toHaveValue(
+			translatedProductName
+		);
 	}
 );
 

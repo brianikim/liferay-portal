@@ -1740,30 +1740,6 @@ definition {
 		Alert.viewSuccessMessage();
 	}
 
-	@description = "This is a test for COMMERCE-5808. EditAProduct"
-	@priority = 5
-	test EditAProduct {
-		property portal.acceptance = "true";
-
-		CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
-
-		CommerceProducts.openProductsAdmin();
-
-		CommerceNavigator.gotoEntry(entryName = "ABS Sensor");
-
-		Type(
-			locator1 = "CommerceEntry#NAME_FIELD",
-			value1 = "ABS");
-
-		Button.clickPublish();
-
-		Alert.viewSuccessMessage();
-
-		AssertTextEquals(
-			locator1 = "CommerceEntry#NAME_FIELD",
-			value1 = "ABS");
-	}
-
 	@description = "This is a test for COMMERCE-5807. EditSkuAndDelete"
 	@priority = 5
 	test EditSkuAndDelete {
@@ -1796,37 +1772,6 @@ definition {
 		CommerceNavigator.searchEntry(entryName = "MIN930178");
 
 		CommerceEntry.deleteCommerceEntry(entryName = "MIN930178");
-	}
-
-	@priority = 5
-	test TranslateProductName {
-		property portal.acceptance = "true";
-
-		CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
-
-		CommerceProducts.openProductsAdmin();
-
-		CommerceNavigator.searchEntry(entryName = "Shock Absorber");
-
-		CommerceNavigator.gotoEntry(entryName = "Shock Absorber");
-
-		PortletEntry.changeLocale(
-			fieldName = "Name",
-			locale = "es-ES");
-
-		Type(
-			locator1 = "TextInput#NAME",
-			value1 = "Amortiguador");
-
-		Button.clickPublish();
-
-		PortletEntry.changeLocale(
-			fieldName = "Name",
-			locale = "es-ES");
-
-		AssertTextEquals(
-			locator1 = "TextInput#NAME",
-			value1 = "Amortiguador");
 	}
 
 	@description = "This is a test for COMMERCE-6304. UseFriendlyURL"
