@@ -2142,3 +2142,70 @@ test(
 		).toBeVisible();
 	}
 );
+
+test(
+	'Clicking a product in the catalog opens the product details widget page when no default product display page is set',
+	{tag: ['@COMMERCE-7833', '@LPD-106244-Grouped-30']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelDetailsPage,
+		commerceAdminChannelsPage,
+		page,
+		productDetailsPage,
+	}) => {
+		const productDetailsLayoutTitle = getRandomString();
+
+		const {channel, product, site} = await apiStorefrontSetUp(apiHelpers, [
+			{
+				title: 'Catalog',
+				widgetName:
+					'com_liferay_commerce_product_content_search_web_internal_portlet_CPSearchResultsPortlet',
+			},
+			{
+				title: productDetailsLayoutTitle,
+				widgetName:
+					'com_liferay_commerce_product_content_web_internal_portlet_CPContentPortlet',
+			},
+		]);
+
+		await commerceAdminChannelsPage.goto();
+
+		await (
+			await commerceAdminChannelsPage.channelsTableRowLink(channel.name)
+		).click();
+
+		await commerceAdminChannelDetailsPage.goToTab('Product Display Pages');
+
+		await expect(page.locator('[id$="_displayPageNameInput"]')).toHaveText(
+			'None'
+		);
+		await expect(
+			page.getByText('Sorry, no results were found.')
+		).toBeVisible();
+
+		await page.goto(`/web${site.friendlyUrlPath}/catalog`);
+
+		await page
+			.getByRole('link', {name: product.name['en_US']})
+			.first()
+			.click();
+
+		await expect(page).toHaveURL(
+			new RegExp(`/web${site.friendlyUrlPath}/p/${product.urls['en_US']}`)
+		);
+		await expect(
+			page
+				.getByTestId('headerTitle')
+				.filter({hasText: productDetailsLayoutTitle})
+		).toBeVisible();
+		await expect(
+			await productDetailsPage.nameField(product.name['en_US'])
+		).toBeVisible();
+		await expect(
+			await productDetailsPage.skuField(product.skus[0].sku)
+		).toBeVisible();
+		await expect(
+			await productDetailsPage.priceField('$ 10.00')
+		).toBeVisible();
+	}
+);
