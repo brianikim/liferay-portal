@@ -41,6 +41,71 @@ export const test = mergeTests(
 	pageViewModePagesTest
 );
 
+async function postBundleProduct(
+	apiHelpers: DataApiHelpers,
+	{
+		catalogId,
+		name,
+		optionName,
+		productOptionValue,
+	}: {
+		catalogId: number;
+		name: string;
+		optionName: string;
+		productOptionValue: {
+			quantity: number;
+			skuId: number;
+			unitOfMeasureKey?: string;
+		};
+	}
+) {
+	const optionKey = `option-${getRandomInt()}`;
+
+	const option = await apiHelpers.headlessCommerceAdminCatalog.postOption(
+		'select',
+		optionKey,
+		optionName,
+		1
+	);
+
+	return apiHelpers.headlessCommerceAdminCatalog.postProduct({
+		catalogId,
+		name: {en_US: name},
+		productConfiguration: {allowBackOrder: true},
+		productOptions: [
+			{
+				fieldType: 'select',
+				key: optionKey,
+				name: {en_US: optionName},
+				optionId: option.id,
+				priceType: 'static',
+				priority: 1,
+				productOptionValues: [
+					{
+						deltaPrice: 0.0,
+						key: 'value1',
+						name: {en_US: 'Value1'},
+						preselected: true,
+						priority: 1,
+						...productOptionValue,
+					},
+				],
+				required: true,
+				skuContributor: false,
+			},
+		],
+		skus: [
+			{
+				cost: 0,
+				price: 50,
+				published: true,
+				purchasable: true,
+				sku: `SKU-${name}`,
+			},
+		],
+	});
+}
+
 async function setUpBundleStorefront(
 	apiHelpers: DataApiHelpers,
 	commerceAdminChannelsPage: CommerceAdminChannelsPage,
@@ -1816,54 +1881,15 @@ test(
 					],
 				});
 
-			const optionKey = `option-${getRandomInt()}`;
-
-			const option =
-				await apiHelpers.headlessCommerceAdminCatalog.postOption(
-					'select',
-					optionKey,
-					optionName,
-					1
-				);
-
-			bundleProduct =
-				await apiHelpers.headlessCommerceAdminCatalog.postProduct({
-					catalogId: catalog.id,
-					name: {en_US: bundleProductName},
-					productConfiguration: {allowBackOrder: true},
-					productOptions: [
-						{
-							fieldType: 'select',
-							key: optionKey,
-							name: {en_US: optionName},
-							optionId: option.id,
-							priceType: 'static',
-							priority: 1,
-							productOptionValues: [
-								{
-									deltaPrice: 0.0,
-									key: 'value1',
-									name: {en_US: 'Value1'},
-									preselected: true,
-									priority: 1,
-									quantity: 2,
-									skuId: linkedProduct.skus[0].id,
-								},
-							],
-							required: true,
-							skuContributor: false,
-						},
-					],
-					skus: [
-						{
-							cost: 0,
-							price: 50,
-							published: true,
-							purchasable: true,
-							sku: `SKU-${bundleProductName}`,
-						},
-					],
-				});
+			bundleProduct = await postBundleProduct(apiHelpers, {
+				catalogId: catalog.id,
+				name: bundleProductName,
+				optionName,
+				productOptionValue: {
+					quantity: 2,
+					skuId: linkedProduct.skus[0].id,
+				},
+			});
 		});
 
 		await test.step('Create an active order rule limiting both products to two', async () => {
