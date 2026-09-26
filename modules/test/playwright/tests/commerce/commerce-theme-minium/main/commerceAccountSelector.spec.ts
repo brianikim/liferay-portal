@@ -23,7 +23,7 @@ import {waitForAlert} from '../../../../utils/waitForAlert';
 import getFragmentDefinition from '../../../layout-content-page-editor-web/main/utils/getFragmentDefinition';
 import getPageDefinition from '../../../layout-content-page-editor-web/main/utils/getPageDefinition';
 import getWidgetDefinition from '../../../layout-content-page-editor-web/main/utils/getWidgetDefinition';
-import {miniumSetUp} from '../../utils/commerce';
+import {createBuyerUserForAccount, miniumSetUp} from '../../utils/commerce';
 
 export const test = mergeTests(
 	apiHelpersTest,
@@ -427,6 +427,8 @@ test(
 		const firstAccountName = `${accountNamePrefix} First Account`;
 		const secondAccountName = `${accountNamePrefix} Second Account`;
 
+		const accounts = [];
+
 		for (const accountName of [firstAccountName, secondAccountName]) {
 			await commerceThemeMiniumCatalogPage.openAccountSelectorDropdown();
 
@@ -453,6 +455,8 @@ test(
 				await apiHelpers.headlessAdminUser.getAccountByName(
 					accountName
 				);
+
+			accounts.push(account);
 
 			apiHelpers.data.push({id: account.id, type: 'account'});
 		}
@@ -488,6 +492,28 @@ test(
 		await expect(
 			commerceThemeMiniumCatalogPage.accountSelectorSelectedAccount
 		).toHaveText(firstAccountName);
+
+		const buyerUser = await createBuyerUserForAccount(
+			accounts[0],
+			apiHelpers,
+			site.id
+		);
+
+		await performLogout(page);
+		await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+		await page.goto(`/web/${site.name}/${layout.friendlyUrlPath}`, {
+			waitUntil: 'networkidle',
+		});
+
+		await commerceThemeMiniumCatalogPage.openAccountSelectorDropdown();
+
+		await expect(
+			commerceThemeMiniumCatalogPage.accountSelectorSearchAccountInput
+		).toBeVisible();
+		await expect(
+			commerceThemeMiniumCatalogPage.createNewAccountButton
+		).toBeHidden();
 	}
 );
 
