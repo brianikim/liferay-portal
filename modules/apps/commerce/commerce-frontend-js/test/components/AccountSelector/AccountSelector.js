@@ -314,6 +314,28 @@ describe('AccountSelector', () => {
 			).toHaveTextContent('My Account Name');
 		});
 
+		it('closes the dropdown when the user clicks outside of it', async () => {
+			await userEvent.click(
+				renderedComponent.container.querySelector(
+					'.btn-account-selector'
+				)
+			);
+
+			expect(
+				renderedComponent.baseElement.querySelector(
+					'.account-selector-dropdown-menu'
+				)
+			).toHaveClass('show');
+
+			await userEvent.click(renderedComponent.baseElement);
+
+			expect(
+				renderedComponent.baseElement.querySelector(
+					'.account-selector-dropdown-menu'
+				)
+			).not.toHaveClass('show');
+		});
+
 		it('must display an order placeholder"', () => {
 			const orderPlaceholder =
 				renderedComponent.getByText(/no-order-selected/i);
