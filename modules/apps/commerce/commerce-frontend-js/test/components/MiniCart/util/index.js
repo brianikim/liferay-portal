@@ -28,6 +28,13 @@ jest.mock('frontend-js-components-web', () => ({
 	openToast: jest.fn(),
 }));
 
+jest.mock('frontend-js-web', () => ({
+	...jest.requireActual('frontend-js-web'),
+	sub: jest.fn((key, ...args) =>
+		args.reduce((key, arg) => key.replace('-x', `-${arg}`), key)
+	),
+}));
+
 describe('MiniCart tests_utilities', () => {
 	describe('filterOptions', () => {
 		it('parses the options JSON string and keeps only options with a truthy value', () => {
@@ -55,6 +62,10 @@ describe('MiniCart tests_utilities', () => {
 			minOrderQuantity: 1,
 			multipleOrderQuantity: 1,
 		};
+
+		beforeEach(() => {
+			jest.clearAllMocks();
+		});
 
 		it('returns the quantity to add for the quick add-to-cart SKU', () => {
 			for (const {
@@ -110,6 +121,92 @@ describe('MiniCart tests_utilities', () => {
 					},
 					sku: 'MIN55860',
 				},
+				{
+					expectedQuantity: 3,
+					productConfiguration: {allowedOrderQuantities: [3, 7]},
+					sku: 'MIN93016A',
+				},
+				{
+					cartItems: [{quantity: 3, sku: 'MIN93016A'}],
+					expectedQuantity: 4,
+					productConfiguration: {allowedOrderQuantities: [3, 7]},
+					sku: 'MIN93016A',
+				},
+				{
+					cartItems: [{quantity: 7, sku: 'MIN93016A'}],
+					expectedQuantity: 3,
+					productConfiguration: {allowedOrderQuantities: [3, 7]},
+					sku: 'MIN93016B',
+				},
+				{
+					cartItems: [
+						{quantity: 7, sku: 'MIN93016A'},
+						{quantity: 3, sku: 'MIN93016B'},
+					],
+					expectedQuantity: 4,
+					productConfiguration: {allowedOrderQuantities: [3, 7]},
+					sku: 'MIN93016B',
+				},
+				{
+					cartItems: [
+						{quantity: 7, sku: 'MIN93016A'},
+						{quantity: 7, sku: 'MIN93016B'},
+					],
+					expectedQuantity: 3,
+					productConfiguration: {allowedOrderQuantities: [3, 7]},
+					sku: 'MIN93016C',
+				},
+				{
+					cartItems: [
+						{quantity: 7, sku: 'MIN93016A'},
+						{quantity: 7, sku: 'MIN93016B'},
+						{quantity: 3, sku: 'MIN93016C'},
+					],
+					expectedQuantity: 4,
+					productConfiguration: {allowedOrderQuantities: [3, 7]},
+					sku: 'MIN93016C',
+				},
+				{
+					expectedQuantity: 6,
+					productConfiguration: {
+						allowedOrderQuantities: [6, 8],
+						maxOrderQuantity: 7,
+					},
+					sku: 'MIN55860',
+				},
+				{
+					expectedQuantity: 8,
+					productConfiguration: {
+						allowedOrderQuantities: [7, 8],
+						minOrderQuantity: 8,
+					},
+					sku: 'MIN55860',
+				},
+				{
+					expectedQuantity: 5,
+					productConfiguration: {
+						allowedOrderQuantities: [5, 6, 10],
+						multipleOrderQuantity: 5,
+					},
+					sku: 'MIN55860',
+				},
+				{
+					cartItems: [{quantity: 5, sku: 'MIN55860'}],
+					expectedQuantity: 5,
+					productConfiguration: {
+						allowedOrderQuantities: [5, 6, 10],
+						multipleOrderQuantity: 5,
+					},
+					sku: 'MIN55860',
+				},
+				{
+					expectedQuantity: 5,
+					productConfiguration: {
+						maxOrderQuantity: 6,
+						multipleOrderQuantity: 5,
+					},
+					sku: 'MIN55860',
+				},
 			]) {
 				expect(
 					getCorrectedQuantity(
@@ -121,6 +218,91 @@ describe('MiniCart tests_utilities', () => {
 			}
 
 			expect(openToast).not.toHaveBeenCalled();
+		});
+
+		it('returns 0 and shows an error toast when the quick add-to-cart quantity breaks the quantity rules', () => {
+			const rows = [
+				{
+					cartItems: [{quantity: 7, sku: 'MIN93016C'}],
+					expectedMessage:
+						'the-maximum-allowed-quantity-for-MIN93016C-is-7',
+					productConfiguration: {allowedOrderQuantities: [3, 7]},
+					sku: 'MIN93016C',
+				},
+				{
+					cartItems: [{quantity: 6, sku: 'MIN55860'}],
+					expectedMessage: 'max-quantity-per-order-is-7',
+					productConfiguration: {
+						allowedOrderQuantities: [6, 8],
+						maxOrderQuantity: 7,
+					},
+					sku: 'MIN55860',
+				},
+				{
+					expectedMessage: 'max-quantity-per-order-is-7',
+					productConfiguration: {
+						allowedOrderQuantities: [8, 9],
+						maxOrderQuantity: 7,
+					},
+					sku: 'MIN55860',
+				},
+				{
+					expectedMessage: 'the-minimum-quantity-is-8',
+					productConfiguration: {
+						allowedOrderQuantities: [6, 7],
+						minOrderQuantity: 8,
+					},
+					sku: 'MIN55860',
+				},
+				{
+					cartItems: [{quantity: 10, sku: 'MIN55860'}],
+					expectedMessage: 'the-product-quantity-is-not-valid',
+					productConfiguration: {
+						allowedOrderQuantities: [5, 6, 10],
+						multipleOrderQuantity: 5,
+					},
+					sku: 'MIN55860',
+				},
+				{
+					cartItems: [{quantity: 5, sku: 'MIN55860'}],
+					expectedMessage: 'max-quantity-per-order-is-6',
+					productConfiguration: {
+						maxOrderQuantity: 6,
+						multipleOrderQuantity: 5,
+					},
+					sku: 'MIN55860',
+				},
+				{
+					expectedMessage: 'max-quantity-per-order-is-4',
+					productConfiguration: {
+						maxOrderQuantity: 4,
+						multipleOrderQuantity: 5,
+					},
+					sku: 'MIN55860',
+				},
+			];
+
+			for (const {
+				cartItems = [],
+				expectedMessage,
+				productConfiguration,
+				sku,
+			} of rows) {
+				expect(
+					getCorrectedQuantity(
+						{...PRODUCT_CONFIGURATION, ...productConfiguration},
+						sku,
+						cartItems
+					)
+				).toBe(0);
+
+				expect(openToast).toHaveBeenLastCalledWith({
+					message: expectedMessage,
+					type: 'danger',
+				});
+			}
+
+			expect(openToast).toHaveBeenCalledTimes(rows.length);
 		});
 	});
 
