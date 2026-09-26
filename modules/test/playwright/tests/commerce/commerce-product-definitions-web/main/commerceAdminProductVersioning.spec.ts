@@ -150,8 +150,16 @@ test('LPD-84993 Editing the Configuration tab and clicking Publish carries the c
 });
 
 test(
-	'Saving an approved versionable product as draft creates a draft version',
-	{tag: ['@COMMERCE-9535', '@COMMERCE-9537']},
+	'Saving an approved versionable product as draft creates a single draft version',
+	{
+		tag: [
+			'@COMMERCE-9535',
+			'@COMMERCE-9537',
+			'@COMMERCE-9539',
+			'@COMMERCE-9549',
+			'@LPD-106244-Grouped-23',
+		],
+	},
 	async ({
 		apiHelpers,
 		commerceAdminProductDetailsPage,
@@ -172,7 +180,9 @@ test(
 			{name: product.name, productStatus: 0}
 		);
 
-		await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+		const productName = product.name['en_US'];
+
+		await commerceAdminProductPage.gotoProduct(productName);
 
 		await expect(commerceAdminProductDetailsPage.publishLink).toBeVisible();
 		await expect(
@@ -181,32 +191,195 @@ test(
 
 		await commerceAdminProductDetailsPage.saveAsDraftLink.click();
 
-		await expect(page.locator('.workflow-status-draft')).toBeVisible();
+		await expect(
+			commerceAdminProductDetailsPage.draftWorkflowStatus
+		).toBeVisible();
 
 		await commerceAdminProductDetailsPage.backLink.click();
 
 		for (const status of ['Approved', 'Draft']) {
 			await expect(
 				commerceAdminProductPage
-					.productsTableRow(product.name['en_US'])
+					.productsTableRow(productName)
 					.filter({hasText: status})
 			).toHaveCount(1);
 		}
 
-		const draftProduct =
-			await apiHelpers.headlessCommerceAdminCatalog.getProductByVersion(
-				product.productId,
-				2
+		const approvedProductLink = commerceAdminProductPage
+			.productsTableRow(productName)
+			.filter({hasText: 'Approved'})
+			.getByRole('link', {exact: true, name: productName});
+
+		await approvedProductLink.click();
+
+		page.once('dialog', (dialog) => dialog.dismiss());
+
+		await commerceAdminProductDetailsPage.saveAsDraftLink.click();
+
+		await commerceAdminProductDetailsPage.backLink.click();
+
+		await expect(
+			commerceAdminProductPage.productsTableRow(productName)
+		).toHaveCount(2);
+
+		await approvedProductLink.click();
+
+		page.once('dialog', async (dialog) => {
+			expect(dialog.message()).toBe(
+				'There is already a draft version of this product. Continuing will replace that draft version with this draft version. Do you wish to proceed?'
 			);
 
-		await apiHelpers.headlessCommerceAdminCatalog.deleteProductByVersion(
-			draftProduct.productId,
-			2
+			await dialog.accept();
+		});
+
+		await commerceAdminProductDetailsPage.saveAsDraftLink.click();
+
+		await expect(
+			commerceAdminProductDetailsPage.draftWorkflowStatus
+		).toBeVisible();
+
+		await commerceAdminProductDetailsPage.backLink.click();
+
+		for (const status of ['Approved', 'Draft', 'Incomplete']) {
+			await expect(
+				commerceAdminProductPage
+					.productsTableRow(productName)
+					.filter({hasText: status})
+			).toHaveCount(1);
+		}
+
+		const commerceInstanceSettingsPage = new CommerceInstanceSettingsPage(
+			page
 		);
 
-		await apiHelpers.headlessCommerceAdminCatalog.deleteProductByVersion(
-			product.productId,
-			1
+		await commerceInstanceSettingsPage.toggleProductVersioning();
+
+		try {
+			await commerceAdminProductPage.goto();
+
+			await commerceAdminProductPage.managementToolbarSearchInput.fill(
+				productName
+			);
+			await commerceAdminProductPage.managementToolbarSearchInput.press(
+				'Enter'
+			);
+
+			for (const status of ['Approved', 'Draft', 'Incomplete']) {
+				await expect(
+					commerceAdminProductPage
+						.productsTableRow(productName)
+						.filter({hasText: status})
+				).toHaveCount(1);
+			}
+
+			await approvedProductLink.click();
+
+			await expect(
+				commerceAdminProductDetailsPage.saveAsDraftLink
+			).toHaveCount(0);
+		}
+		finally {
+			await commerceInstanceSettingsPage.toggleProductVersioning();
+		}
+
+		for (const version of [3, 2, 1]) {
+			await apiHelpers.headlessCommerceAdminCatalog.deleteProductByVersion(
+				product.productId,
+				version
+			);
+		}
+	}
+);
+
+test(
+	'Converting an approved versionable product to draft keeps its product ID',
+	{tag: ['@COMMERCE-9553', '@LPD-106244-Grouped-23']},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductPage,
+		page,
+	}) => {
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		const product =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				productStatus: 2,
+			});
+
+		await apiHelpers.headlessCommerceAdminCatalog.patchProduct(
+			String(product.productId),
+			{name: product.name, productStatus: 0}
 		);
+
+		const productName = product.name['en_US'];
+
+		await commerceAdminProductPage.gotoProduct(productName);
+
+		const approvedProductId =
+			await commerceAdminProductDetailsPage.productId.textContent();
+
+		await commerceAdminProductDetailsPage.saveAsDraftLink.click();
+
+		await expect(
+			commerceAdminProductDetailsPage.draftWorkflowStatus
+		).toBeVisible();
+
+		const draftProductId =
+			await commerceAdminProductDetailsPage.productId.textContent();
+
+		await commerceAdminProductDetailsPage.backLink.click();
+
+		await commerceAdminProductPage
+			.productsTableRow(productName)
+			.filter({hasText: 'Approved'})
+			.getByRole('link', {exact: true, name: productName})
+			.click();
+
+		page.once('dialog', async (dialog) => {
+			expect(dialog.message()).toBe(
+				'Converting the product status to draft will remove the product from the product catalog. Do you wish to proceed?'
+			);
+
+			await dialog.accept();
+		});
+
+		await commerceAdminProductDetailsPage.headerActionsButton.click();
+		await commerceAdminProductDetailsPage
+			.headerActionsMenuItem('Convert to Draft')
+			.click();
+
+		await expect(
+			commerceAdminProductDetailsPage.draftWorkflowStatus
+		).toBeVisible();
+		await expect(commerceAdminProductDetailsPage.productId).toHaveText(
+			approvedProductId
+		);
+
+		await commerceAdminProductDetailsPage.backLink.click();
+
+		await expect(
+			commerceAdminProductPage.productsTableRow(productName)
+		).toHaveCount(2);
+
+		for (const {productId, status} of [
+			{productId: approvedProductId, status: 'Draft'},
+			{productId: draftProductId, status: 'Incomplete'},
+		]) {
+			await expect(
+				commerceAdminProductPage
+					.productsTableRow(productName)
+					.filter({hasText: status})
+			).toContainText(productId);
+		}
+
+		for (const version of [2, 1]) {
+			await apiHelpers.headlessCommerceAdminCatalog.deleteProductByVersion(
+				product.productId,
+				version
+			);
+		}
 	}
 );
