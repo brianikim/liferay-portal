@@ -173,6 +173,11 @@ type TProductSpecifications = {
 };
 
 export type TProductSubscriptionConfiguration = {
+	deliverySubscriptionEnable?: boolean;
+	deliverySubscriptionLength?: number;
+	deliverySubscriptionNumberOfLength?: number;
+	deliverySubscriptionType?: string;
+	deliverySubscriptionTypeSettings?: {[key: string]: number};
 	enable?: boolean;
 	length?: number;
 	numberOfLength?: number;
