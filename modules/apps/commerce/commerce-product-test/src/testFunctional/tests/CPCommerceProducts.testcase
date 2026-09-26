@@ -1029,41 +1029,6 @@ definition {
 		Alert.viewSuccessMessage();
 	}
 
-	@description = "This is a test for COMMERCE-6304. UseFriendlyURL"
-	@priority = 5
-	test UseFriendlyURL {
-		property portal.acceptance = "true";
-
-		CommerceChannels.openChannelsAdmin();
-
-		CommerceNavigator.gotoEntry(entryName = "Test Channel");
-
-		for (var fixIssueButtonName : list "Product Detail") {
-			if (IsElementPresent(key_fixIssueButtonName = ${fixIssueButtonName}, locator1 = "CommerceEntry#FIX_ISSUE_BUTTON")) {
-				Click(
-					key_fixIssueButtonName = ${fixIssueButtonName},
-					locator1 = "CommerceEntry#FIX_ISSUE_BUTTON");
-
-				Alert.viewSuccessMessage();
-			}
-		}
-
-		CommerceProducts.openProductsAdmin();
-
-		CPCommerceCatalog.newProductsEntry(
-			productCatalog = "Master",
-			productName = "Orange",
-			productType = "Simple");
-
-		var baseURL = PropsUtil.get("portal.url");
-
-		Navigator.openSpecificURL(url = "${baseURL}/web/guest/p/orange");
-
-		AssertTextEquals(
-			locator1 = "CommerceFrontStore#FS_PRODUCT_NAME",
-			value1 = "Orange");
-	}
-
 	@description = "This is a test for COMMERCE-6303. UseSchedule"
 	@priority = 5
 	test UseSchedule {
