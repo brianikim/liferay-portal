@@ -304,12 +304,8 @@ export class CommerceMiniCartPage {
 
 		await expect(this.miniCartButtonClose).toBeVisible();
 
-		await expect(async () => {
-			await this.searchProductsInput.fill(sku);
-			await expect(this.quickAddToCartSku(sku)).toBeVisible();
-		}).toPass();
+		await this.selectQuickAddToCartSku(sku);
 
-		await this.quickAddToCartSku(sku).click();
 		await this.quickAddToCartButton.click();
 	}
 
@@ -318,6 +314,15 @@ export class CommerceMiniCartPage {
 			this.miniCartEditItemPanel.getByLabel(optionName),
 			optionLabel
 		);
+	}
+
+	async selectQuickAddToCartSku(sku: string) {
+		await expect(async () => {
+			await this.searchProductsInput.fill(sku);
+			await expect(this.quickAddToCartSku(sku)).toBeVisible();
+		}).toPass();
+
+		await this.quickAddToCartSku(sku).click();
 	}
 
 	async showItemOptions(product: string | Locator) {
