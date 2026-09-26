@@ -12,15 +12,20 @@ import {displayPageTemplatesPagesTest} from '../../../../fixtures/displayPageTem
 import {loginTest} from '../../../../fixtures/loginTest';
 import {pageEditorPagesTest} from '../../../../fixtures/pageEditorPagesTest';
 import {usersAndOrganizationsPagesTest} from '../../../../fixtures/usersAndOrganizationsPagesTest';
+import {getRandomInt} from '../../../../utils/getRandomInt';
 import getRandomString from '../../../../utils/getRandomString';
 import performLogin, {
 	performLoginViaApi,
 	performLogout,
 	performUserSwitch,
 } from '../../../../utils/performLogin';
+import getPageDefinition from '../../../layout-content-page-editor-web/main/utils/getPageDefinition';
+import getWidgetDefinition from '../../../layout-content-page-editor-web/main/utils/getWidgetDefinition';
 import {
+	apiStorefrontSetUp,
 	classicCommerceSetUp,
 	createAccountWithBuyerUser,
+	createProductWithOptions,
 	miniumSetUp,
 } from '../../utils/commerce';
 
@@ -790,5 +795,122 @@ test(
 				)
 			).toHaveCount(0);
 		});
+	}
+);
+
+test(
+	'Only the out of stock product card shows an availability label when a product with variants follows it',
+	{tag: ['@COMMERCE-11553', '@LPD-106244-Grouped-31']},
+	async ({
+		apiHelpers,
+		commerceAdminProductPage,
+		page,
+		productDetailsPage,
+	}) => {
+		const {catalog, channel, site} = await apiStorefrontSetUp(apiHelpers, [
+			{
+				title: getRandomString(),
+				widgetName:
+					'com_liferay_commerce_product_content_web_internal_portlet_CPContentPortlet',
+			},
+		]);
+
+		const catalogLayout = await apiHelpers.headlessDelivery.createSitePage({
+			pageDefinition: getPageDefinition([
+				getWidgetDefinition({
+					id: getRandomString(),
+					widgetConfig: {defaultSort: 'name-ascending'},
+					widgetName:
+						'com_liferay_commerce_product_content_search_web_internal_portlet_CPSortPortlet',
+				}),
+				getWidgetDefinition({
+					id: getRandomString(),
+					widgetName:
+						'com_liferay_commerce_product_content_search_web_internal_portlet_CPSearchResultsPortlet',
+				}),
+			]),
+			siteId: site.id,
+			title: getRandomString(),
+		});
+
+		const productNamePrefix = getRandomString();
+
+		const outOfStockProduct =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				name: {en_US: `${productNamePrefix}A`},
+				productConfiguration: {displayAvailability: true},
+			});
+
+		const {product: variantsProduct} = await createProductWithOptions(
+			apiHelpers,
+			commerceAdminProductPage,
+			{
+				catalogId: catalog.id,
+				name: `${productNamePrefix}B`,
+				optionSpecs: [
+					{
+						fieldType: 'select',
+						name: 'Size',
+						skuContributor: true,
+						values: [
+							{key: 'value1', name: 'Value1'},
+							{key: 'value2', name: 'Value2'},
+						],
+					},
+				],
+				productConfiguration: {displayAvailability: true},
+			}
+		);
+
+		const warehouse =
+			await apiHelpers.headlessCommerceAdminInventoryApiHelper.postWarehouses(
+				{
+					active: true,
+					latitude: getRandomInt(),
+					longitude: getRandomInt(),
+					warehouseItems: variantsProduct.skus.map(
+						(sku: {sku: string}) => ({quantity: 6, sku: sku.sku})
+					),
+				}
+			);
+
+		await apiHelpers.headlessCommerceAdminInventoryApiHelper.postWarehousesChannels(
+			warehouse.id,
+			channel.id
+		);
+
+		const productCard = (productName: string) =>
+			page.locator('.product-card').filter({hasText: productName});
+
+		await expect(async () => {
+			await page.goto(
+				`/web${site.friendlyUrlPath}${catalogLayout.friendlyUrlPath}`
+			);
+
+			await expect(
+				productCard(variantsProduct.name['en_US'])
+			).toBeVisible({timeout: 5000});
+		}).toPass({timeout: 60000});
+
+		await expect(
+			productCard(outOfStockProduct.name['en_US']).getByText(
+				'Unavailable',
+				{exact: true}
+			)
+		).toBeVisible();
+		await expect(
+			productCard(variantsProduct.name['en_US']).locator(
+				'[class*="availability-label"]'
+			)
+		).toHaveCount(0);
+
+		await page.goto(
+			`/web${site.friendlyUrlPath}/p/${variantsProduct.urls['en_US']}`
+		);
+
+		await expect(
+			productDetailsPage.productDetailAvailabilityLabel
+		).toHaveText('Available');
 	}
 );
