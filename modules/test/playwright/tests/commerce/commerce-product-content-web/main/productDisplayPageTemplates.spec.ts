@@ -8,6 +8,7 @@ import {createReadStream, readFileSync} from 'fs';
 import path from 'path';
 
 import {commercePagesTest} from '../../../../fixtures/commercePagesTest';
+import {customFieldsPagesTest} from '../../../../fixtures/customFieldsPagesTest';
 import {dataApiHelpersTest} from '../../../../fixtures/dataApiHelpersTest';
 import {displayPageTemplatesPagesTest} from '../../../../fixtures/displayPageTemplatesPagesTest';
 import {loginTest} from '../../../../fixtures/loginTest';
@@ -15,6 +16,8 @@ import {pageEditorPagesTest} from '../../../../fixtures/pageEditorPagesTest';
 import {DataApiHelpers} from '../../../../helpers/ApiHelpers';
 import {PageEditorPage} from '../../../../pages/layout-content-page-editor-web/PageEditorPage';
 import {DisplayPageTemplatesPage} from '../../../../pages/layout-page-template-admin-web/DisplayPageTemplatesPage';
+import getGlobalSiteId from '../../../../utils/getGlobalSiteId';
+import {getRandomInt} from '../../../../utils/getRandomInt';
 import getRandomString from '../../../../utils/getRandomString';
 import {
 	apiStorefrontSetUp,
@@ -23,6 +26,7 @@ import {
 
 export const test = mergeTests(
 	commercePagesTest,
+	customFieldsPagesTest,
 	dataApiHelpersTest,
 	displayPageTemplatesPagesTest,
 	loginTest(),
@@ -275,6 +279,198 @@ test(
 
 			await expect(page.getByText('No Results Found')).toBeVisible();
 			await expect(diagramLink).toHaveCount(0);
+		}
+	}
+);
+
+test(
+	'Heading fragments mapped to product fields show the product values on the product page',
+	{
+		tag: [
+			'@COMMERCE-7277',
+			'@COMMERCE-9461',
+			'@COMMERCE-9696',
+			'@LPD-106244-Grouped-30',
+		],
+	},
+	async ({
+		addCustomFieldPage,
+		apiHelpers,
+		commerceLayoutsPage,
+		displayPageTemplatesPage,
+		page,
+		pageEditorPage,
+		viewAttributesPage,
+	}) => {
+		test.setTimeout(300000);
+
+		const {catalog, channel, site} = await apiStorefrontSetUp(apiHelpers);
+
+		const globalSiteId = String(await getGlobalSiteId(apiHelpers));
+
+		const vocabularies = [];
+
+		for (const categoryNames of [
+			[getRandomString()],
+			[getRandomString()],
+			[getRandomString(), getRandomString()],
+		]) {
+			const vocabulary =
+				await apiHelpers.headlessAdminTaxonomy.postSiteTaxonomyVocabulary(
+					{
+						name: getRandomString(),
+						siteId: globalSiteId,
+					}
+				);
+
+			const categories = [];
+
+			for (const categoryName of categoryNames) {
+				const category =
+					await apiHelpers.headlessAdminTaxonomy.postTaxonomyVocabularyTaxonomyCategory(
+						{
+							name: categoryName,
+							vocabularyId: vocabulary.id,
+						}
+					);
+
+				categories.push({id: category.id, name: categoryName});
+			}
+
+			vocabularies.push({categories, name: vocabulary.name});
+		}
+
+		const customFields = [
+			{name: getRandomString(), value: getRandomString()},
+			{name: getRandomString(), value: getRandomString()},
+		];
+
+		for (const customField of customFields) {
+			await addCustomFieldPage.addCustomField({
+				fieldName: customField.name,
+				fieldType: 'textArea',
+				resource: 'Product',
+			});
+		}
+
+		try {
+			const product =
+				await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+					catalogId: catalog.id,
+					categories: vocabularies.flatMap(
+						(vocabulary) => vocabulary.categories
+					),
+					customFields: customFields.map((customField) => ({
+						customValue: {data: customField.value},
+						name: customField.name,
+					})),
+					description: {en_US: getRandomString()},
+					name: {en_US: getRandomString()},
+					shortDescription: {en_US: getRandomString()},
+					skus: [
+						{
+							cost: 0,
+							price: 24,
+							published: true,
+							purchasable: true,
+							sku: getRandomString(),
+						},
+					],
+				});
+
+			const warehouse =
+				await apiHelpers.headlessCommerceAdminInventoryApiHelper.postWarehouses(
+					{
+						active: true,
+						latitude: getRandomInt(),
+						longitude: getRandomInt(),
+						warehouseItems: [
+							{
+								quantity: 120,
+								sku: product.skus[0].sku,
+							},
+						],
+					}
+				);
+
+			await apiHelpers.headlessCommerceAdminInventoryApiHelper.postWarehousesChannels(
+				warehouse.id,
+				channel.id
+			);
+
+			const mappedFields = [
+				{field: 'Availability Status', text: 'available'},
+				{field: 'Description', text: product.description['en_US']},
+				{field: 'Final Price', text: '$ 24.00'},
+				{field: 'Inventory', text: '120'},
+				{field: 'Name', text: product.name['en_US']},
+				{field: 'Product Type', text: 'simple'},
+				{
+					field: 'Short Description',
+					text: product.shortDescription['en_US'],
+				},
+				{field: 'SKU', text: product.skus[0].sku},
+				{field: 'Author Name', text: 'Test Test'},
+				...vocabularies.map((vocabulary) => ({
+					field: vocabulary.name,
+					text: vocabulary.categories.map(
+						(category) => category.name
+					),
+				})),
+				...customFields.map((customField) => ({
+					field: customField.name,
+					text: customField.value,
+				})),
+			];
+
+			await deployProductFragmentsOnDefaultDPT(apiHelpers, {
+				displayPageTemplatesPage,
+				fragmentNames: [],
+				onFragmentsAdded: async () => {
+					for (const [index, {field}] of mappedFields.entries()) {
+						await pageEditorPage.addFragment(
+							'Basic Components',
+							'Heading'
+						);
+
+						await pageEditorPage.selectEditable(
+							await pageEditorPage.getFragmentId(
+								'Heading',
+								index
+							),
+							'element-text'
+						);
+
+						await commerceLayoutsPage.labelField.selectOption(
+							field
+						);
+
+						await pageEditorPage.waitForChangesSaved();
+					}
+				},
+				pageEditorPage,
+				site,
+			});
+
+			await gotoProductPage(page, site, product);
+
+			const headings = page.locator('.component-heading');
+
+			for (const [index, {text}] of mappedFields.entries()) {
+				for (const expectedText of [text].flat()) {
+					await expect(headings.nth(index)).toContainText(
+						expectedText
+					);
+				}
+			}
+		}
+		finally {
+			for (const customField of customFields) {
+				await viewAttributesPage.deleteCustomField(
+					customField.name,
+					'Product'
+				);
+			}
 		}
 	}
 );
