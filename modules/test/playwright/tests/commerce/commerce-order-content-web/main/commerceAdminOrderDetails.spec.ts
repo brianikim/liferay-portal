@@ -19,12 +19,15 @@ import {
 	performLogout,
 } from '../../../../utils/performLogin';
 import {waitForAlert} from '../../../../utils/waitForAlert';
+import {watchForDialog} from '../../../../utils/watchForDialog';
 import {
+	apiStorefrontSetUp,
 	createAccountWithBuyerUser,
 	createProductWithOptions,
 	findSkuByOptionValueKeys,
 	getSkusByName,
 	miniumSetUp,
+	selectCurrentAccount,
 } from '../../utils/commerce';
 
 export const test = mergeTests(
@@ -190,6 +193,114 @@ test('LPD-15231 Escape account name on admin order details page', async ({
 		commerceAdminOrderDetailsPage.commerceOrderAccountEntryName
 	).toHaveText(account.name);
 });
+
+test(
+	'Scripts injected in account addresses are not executed in the addresses widget and the admin order details',
+	{tag: ['@COMMERCE-11974', '@LPD-106244-Grouped-29']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelsPage,
+		commerceAdminOrderDetailsPage,
+		commerceAdminOrdersPage,
+		page,
+	}) => {
+		const {channel, product, site} = await apiStorefrontSetUp(apiHelpers, [
+			{
+				title: 'Addresses',
+				widgetName:
+					'com_liferay_commerce_address_content_web_internal_portlet_CommerceAddressContentPortlet',
+			},
+		]);
+
+		await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+			channel.name,
+			'B2B'
+		);
+
+		await waitForAlert(page);
+
+		const account = await apiHelpers.headlessAdminUser.postAccount({
+			name: 'Commerce Account ' + getRandomString(),
+			type: 'business',
+		});
+
+		await apiHelpers.headlessAdminUser.assignUserToAccountByEmailAddress(
+			account.id,
+			['test@liferay.com']
+		);
+
+		await selectCurrentAccount(account.id, apiHelpers, site.id);
+
+		const addressIds = {};
+
+		for (const {addressType, type} of [
+			{addressType: 'billing', type: 1},
+			{addressType: 'shipping', type: 3},
+		]) {
+			const address =
+				await apiHelpers.headlessCommerceAdminAccount.postAddress(
+					account.id,
+					{
+						city: `<script>alert('${addressType}-city')</script>`,
+						name: `<script>alert('${addressType}-name')</script>`,
+						street1: `<script>alert('${addressType}-street-1')</script>`,
+						street2: `<script>alert('${addressType}-street-2')</script>`,
+						street3: `<script>alert('${addressType}-street-3')</script>`,
+						type,
+						zip: `<script>alert('${addressType}-zip')</script>`,
+					}
+				);
+
+			addressIds[addressType] = address.id;
+		}
+
+		const watcher = watchForDialog(page);
+
+		try {
+			await page.goto(`/web${site.friendlyUrlPath}/addresses`);
+
+			await expect(
+				page.getByText("<script>alert('billing-name')</script>").first()
+			).toBeVisible();
+
+			watcher.assertNoDialog();
+
+			const cart = await apiHelpers.headlessCommerceDeliveryCart.postCart(
+				{
+					accountId: account.id,
+					billingAddressId: addressIds['billing'],
+					cartItems: [
+						{
+							options: '[]',
+							quantity: 5,
+							skuId: product.skus[0].id,
+						},
+					],
+					shippingAddressId: addressIds['shipping'],
+				},
+				channel.id
+			);
+
+			await commerceAdminOrdersPage.goto();
+
+			await (
+				await commerceAdminOrdersPage.tableRowLink({
+					colIndex: 1,
+					rowValue: cart.id,
+				})
+			).click();
+
+			await expect(
+				commerceAdminOrderDetailsPage.headerDetailsTitle
+			).toBeVisible();
+
+			watcher.assertNoDialog();
+		}
+		finally {
+			watcher.dispose();
+		}
+	}
+);
 
 test('LPD-26244 Split order items are shown on admin order details page when show separate order items toggle is enabled', async ({
 	apiHelpers,
