@@ -14,6 +14,7 @@ import getRandomString from '../../../../utils/getRandomString';
 import getFragmentDefinition from '../../../layout-content-page-editor-web/main/utils/getFragmentDefinition';
 import getPageDefinition from '../../../layout-content-page-editor-web/main/utils/getPageDefinition';
 import getWidgetDefinition from '../../../layout-content-page-editor-web/main/utils/getWidgetDefinition';
+import {apiStorefrontSetUp} from '../../utils/commerce';
 
 export const test = mergeTests(
 	commercePagesTest,
@@ -199,5 +200,78 @@ test(
 		await expect(
 			commerceWishListPage.wishListLink(wishListName)
 		).toHaveCount(0);
+	}
+);
+
+test(
+	'A product added to and removed from the wish list on its product details page leaves the wish list',
+	{tag: ['@COMMERCE-6355', '@LPD-106244-Grouped-20']},
+	async ({
+		apiHelpers,
+		commerceThemeMiniumCatalogPage,
+		commerceWishListPage,
+		page,
+	}) => {
+		const {product, site} = await apiStorefrontSetUp(apiHelpers, [
+			{
+				title: 'Product Details',
+				widgetName:
+					'com_liferay_commerce_product_content_web_internal_portlet_CPContentPortlet',
+			},
+		]);
+
+		const wishListsLayout =
+			await apiHelpers.headlessDelivery.createSitePage({
+				pageDefinition: getPageDefinition([
+					getWidgetDefinition({
+						id: getRandomString(),
+						widgetName:
+							'com_liferay_commerce_wish_list_web_internal_portlet_MyCommerceWishListsPortlet',
+					}),
+					getWidgetDefinition({
+						id: getRandomString(),
+						widgetName:
+							'com_liferay_commerce_wish_list_web_internal_portlet_CommerceWishListContentPortlet',
+					}),
+				]),
+				siteId: site.id,
+				title: getRandomString(),
+			});
+
+		const productDetails = page.locator(
+			'[id^="portlet_com_liferay_commerce_product_content_web_internal_portlet_CPContentPortlet"]'
+		);
+
+		for (const wishListItemsCount of [1, 0]) {
+			await page.goto(
+				`/web${site.friendlyUrlPath}/p/${product.urls['en_US']}`,
+				{waitUntil: 'networkidle'}
+			);
+
+			await commerceThemeMiniumCatalogPage
+				.productCardFragmentWishListToggle(productDetails)
+				.click();
+
+			await page.reload();
+
+			await expect(
+				commerceThemeMiniumCatalogPage.productCardFragmentWishListFullIcon(
+					productDetails
+				)
+			).toHaveCount(wishListItemsCount);
+
+			await page.goto(
+				`/web${site.friendlyUrlPath}${wishListsLayout.friendlyUrlPath}`,
+				{waitUntil: 'networkidle'}
+			);
+
+			await commerceWishListPage.wishListLink('Default').click();
+
+			await expect(
+				commerceWishListPage.wishListContentPortlet.getByText(
+					product.name.en_US
+				)
+			).toHaveCount(wishListItemsCount);
+		}
 	}
 );
