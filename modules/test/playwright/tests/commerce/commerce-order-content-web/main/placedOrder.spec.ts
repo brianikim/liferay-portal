@@ -62,8 +62,8 @@ export const test = mergeTests(
 );
 
 test(
-	'Placed orders widget configuration to display full addresses and phone number',
-	{tag: '@LPD-25831'},
+	'Placed order details show the billing and shipping addresses, and the widget configuration adds their full address and phone number',
+	{tag: ['@LPD-25831', '@LPD-106244-Grouped-11']},
 	async ({apiHelpers, page, placedOrdersPage, site, widgetPagePage}) => {
 		const layout = await apiHelpers.jsonWebServicesLayout.addLayout({
 			groupId: site.id,
@@ -106,7 +106,12 @@ test(
 
 		const phoneNumber = '12345';
 
-		const address =
+		const billingAddress =
+			await apiHelpers.headlessCommerceAdminAccount.postAddress(
+				account.id,
+				{phoneNumber, regionISOCode: 'AL'}
+			);
+		const shippingAddress =
 			await apiHelpers.headlessCommerceAdminAccount.postAddress(
 				account.id,
 				{phoneNumber, regionISOCode: 'AL'}
@@ -114,7 +119,7 @@ test(
 
 		await apiHelpers.headlessCommerceAdminOrder.postOrder({
 			accountId: account.id,
-			billingAddressId: address.id,
+			billingAddressId: billingAddress.id,
 			channelId: channel.id,
 			orderItems: [
 				{
@@ -125,7 +130,7 @@ test(
 			],
 			orderStatus: '0',
 			paymentStatus: '0',
-			shippingAddressId: address.id,
+			shippingAddressId: shippingAddress.id,
 		});
 
 		await page.goto(`/web${site.friendlyUrlPath}${layout.friendlyURL}`, {
@@ -135,6 +140,30 @@ test(
 		await widgetPagePage.addPortlet('Placed Orders');
 
 		await placedOrdersPage.viewButton.click();
+
+		for (const [addressPanel, address, otherAddress] of [
+			[
+				placedOrdersPage.commerceBillingAddress,
+				billingAddress,
+				shippingAddress,
+			],
+			[
+				placedOrdersPage.commerceShippingAddress,
+				shippingAddress,
+				billingAddress,
+			],
+		]) {
+			for (const value of [
+				address.name,
+				address.street1,
+				address.city,
+				address.zip,
+			]) {
+				await expect(addressPanel).toContainText(value);
+			}
+
+			await expect(addressPanel).not.toContainText(otherAddress.name);
+		}
 
 		await expect(placedOrdersPage.commerceBillingAddress).not.toContainText(
 			'United States'
