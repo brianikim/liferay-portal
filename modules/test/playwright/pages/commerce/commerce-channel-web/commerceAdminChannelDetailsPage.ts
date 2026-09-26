@@ -937,17 +937,22 @@ export class CommerceAdminChannelDetailsPage {
 
 			await eligibilityButton.click();
 
-			const placeholderInput = await this.placeHolderTerm(
-				isNestedFrame,
-				tableName,
-				'Find a Payment Term'
-			);
+			if (entryName) {
+				const placeholderInput = await this.placeHolderTerm(
+					isNestedFrame,
+					tableName,
+					'Find a Payment Term'
+				);
 
-			await expect(placeholderInput).toBeVisible();
+				await expect(placeholderInput).toBeVisible();
 
-			await placeholderInput.fill(entryName);
+				await placeholderInput.fill(entryName);
 
-			await (await this.selectButton(isNestedFrame, tableName)).click();
+				await (
+					await this.selectButton(isNestedFrame, tableName)
+				).click();
+			}
+
 			await (
 				await this.frameSaveButton(isNestedFrame, tableName)
 			).click();
