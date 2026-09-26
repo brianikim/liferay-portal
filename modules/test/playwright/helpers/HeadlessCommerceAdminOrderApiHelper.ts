@@ -302,6 +302,18 @@ export class HeadlessCommerceAdminOrderApiHelper {
 		return orderRuleOrderType;
 	}
 
+	async postOrderTypeIdOrderTypeChannel(
+		orderTypeId: number,
+		channelId: number
+	) {
+		return this.apiHelpers.post(
+			`${this.apiHelpers.baseUrl}${this.basePath}/order-types/${orderTypeId}/order-type-channels`,
+			{
+				data: {channelId, orderTypeId},
+			}
+		);
+	}
+
 	async postTerm(terms: TTerm) {
 		terms = {
 			active: true,
