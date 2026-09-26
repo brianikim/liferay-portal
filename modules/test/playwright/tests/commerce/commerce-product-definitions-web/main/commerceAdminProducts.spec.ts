@@ -14,6 +14,8 @@ import {userPersonalBarPagesTest} from '../../../../fixtures/userPersonalBarPage
 import {clickAndExpectToBeVisible} from '../../../../utils/clickAndExpectToBeVisible';
 import getRandomString from '../../../../utils/getRandomString';
 import {userData} from '../../../../utils/performLogin';
+import {waitForAlert} from '../../../../utils/waitForAlert';
+import {apiStorefrontSetUp} from '../../utils/commerce';
 
 export const test = mergeTests(
 	apiHelpersTest,
@@ -25,13 +27,23 @@ export const test = mergeTests(
 );
 
 test(
-	'Add a SKU',
-	{tag: '@COMMERCE-6021'},
+	'Add, edit, and delete a SKU',
+	{
+		tag: [
+			'@COMMERCE-5807',
+			'@COMMERCE-6021',
+			'@COMMERCE-6022',
+			'@COMMERCE-6023',
+			'@COMMERCE-9891',
+			'@LPD-106244-Grouped-16',
+		],
+	},
 	async ({
 		apiHelpers,
 		commerceAdminProductDetailsPage,
 		commerceAdminProductDetailsSkusPage,
 		commerceAdminProductPage,
+		page,
 	}) => {
 		const catalog =
 			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
@@ -58,6 +70,100 @@ test(
 		await expect(
 			commerceAdminProductDetailsSkusPage.skuAddModalSuccessMessage
 		).toBeVisible();
+
+		await commerceAdminProductDetailsSkusPage
+			.skusTableRowLink('BLACKSKU')
+			.click();
+
+		await commerceAdminProductDetailsSkusPage.sidePanelDetailsSkuFieldName.fill(
+			'REDSKU'
+		);
+
+		const externalReferenceCodeInput =
+			commerceAdminProductDetailsSkusPage.sidePanelFrame.locator(
+				'input[id$="_externalReferenceCode"]'
+			);
+		const externalReferenceCode = getRandomString();
+
+		await externalReferenceCodeInput.fill(externalReferenceCode);
+
+		await commerceAdminProductDetailsSkusPage.sidePanelDetailsSkuPublishButton.click();
+
+		await expect(
+			commerceAdminProductDetailsSkusPage.sidePanelFrame.getByText(
+				'Success:Your request completed successfully.'
+			)
+		).toBeVisible();
+		await expect(externalReferenceCodeInput).toHaveValue(
+			externalReferenceCode
+		);
+
+		await page.reload();
+
+		await expect(
+			commerceAdminProductDetailsSkusPage.skusTableRowLink('REDSKU')
+		).toBeVisible();
+
+		await commerceAdminProductPage
+			.productRowActionsButton('REDSKU')
+			.click();
+
+		page.once('dialog', (dialog) => dialog.accept());
+
+		await commerceAdminProductPage.deleteMenuItem.click();
+
+		await waitForAlert(page);
+
+		await expect(
+			commerceAdminProductDetailsSkusPage.skusTableRowLink('REDSKU')
+		).toHaveCount(0);
+	}
+);
+
+test(
+	'Editing the base price list entry of a SKU updates its storefront price',
+	{tag: ['@COMMERCE-6022', '@COMMERCE-12218']},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductDetailsSkusPage,
+		commerceAdminProductPage,
+		page,
+	}) => {
+		const {catalog, product, site} = await apiStorefrontSetUp(apiHelpers, [
+			{
+				title: 'Catalog',
+				widgetName:
+					'com_liferay_commerce_product_content_search_web_internal_portlet_CPSearchResultsPortlet',
+			},
+		]);
+
+		await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+		await commerceAdminProductDetailsPage.goToProductSkus();
+
+		await commerceAdminProductDetailsSkusPage
+			.skusTableRowLink(product.skus[0].sku)
+			.click();
+		await commerceAdminProductDetailsSkusPage.goToSkuTab('Price');
+		await commerceAdminProductDetailsSkusPage
+			.sidePanelSkuPriceTableRowLink(`${catalog.name} Base Price List`)
+			.click();
+
+		await commerceAdminProductDetailsSkusPage.sidePanelNestedPriceListPrice.fill(
+			'25'
+		);
+		await commerceAdminProductDetailsSkusPage.sidePanelNestedSaveButton.click();
+
+		await waitForAlert(
+			commerceAdminProductDetailsSkusPage.sidePanelNestedFrame
+		);
+
+		await page.goto(`/web${site.friendlyUrlPath}/catalog`);
+
+		await expect(
+			page.locator('.card').filter({hasText: product.name['en_US']})
+		).toContainText('25.00');
 	}
 );
 

@@ -1740,40 +1740,6 @@ definition {
 		Alert.viewSuccessMessage();
 	}
 
-	@description = "This is a test for COMMERCE-5807. EditSkuAndDelete"
-	@priority = 5
-	test EditSkuAndDelete {
-		property portal.acceptance = "true";
-
-		CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
-
-		CommerceProducts.openProductsAdmin();
-
-		CommerceEntry.gotoMenuTab(menuTab = "SKUs");
-
-		CommerceNavigator.searchEntry(entryName = "MIN93017");
-
-		CommerceNavigator.gotoEntry(entryName = "MIN93017");
-
-		SelectFrame.selectFrameNoLoading(locator1 = "CommerceEntry#IFRAME_SIDE_PANEL");
-
-		Type(
-			locator1 = "CommerceEntry#SKU_FIELD",
-			value1 = "MIN930178");
-
-		Button.clickPublish();
-
-		AssertVisible(locator1 = "Message#SUCCESS");
-
-		Click(locator1 = "Icon#CLOSE");
-
-		Refresh();
-
-		CommerceNavigator.searchEntry(entryName = "MIN930178");
-
-		CommerceEntry.deleteCommerceEntry(entryName = "MIN930178");
-	}
-
 	@description = "This is a test for COMMERCE-6304. UseFriendlyURL"
 	@priority = 5
 	test UseFriendlyURL {
