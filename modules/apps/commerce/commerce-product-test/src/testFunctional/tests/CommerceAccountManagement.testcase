@@ -18,15 +18,6 @@ definition {
 		CommerceConfiguration.commerceTearDown();
 	}
 
-	@description = "COMMERCE-6357. In Members tab, I want to be unable to add a user that is already a member of the account"
-	@ignore = "true"
-	@priority = 3
-	test AssertUserThatIsPartOfTheAccountCannotBeAddedAgain {
-
-		// TODO COMMERCE-6357 AssertUserThatIsPartOfTheAccountCannotBeAddedAgain pending implementation
-
-	}
-
 	@description = "COMMERCE-10841. Verify that using the impersonate feature the context is saved on Minium"
 	@priority = 3
 	test CanAssertImpersonatingOnMiniumMaintainsContext {

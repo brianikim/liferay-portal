@@ -1009,7 +1009,7 @@ test(
 
 test(
 	'Can filter valid domain users and all users when assigning',
-	{tag: ['@LPD-47225']},
+	{tag: ['@COMMERCE-6357', '@LPD-47225', '@LPD-106244-Grouped-9']},
 	async ({
 		accountUserSelectorPage,
 		accountUsersPage,
@@ -1201,6 +1201,19 @@ test(
 			await accountUserSelectorPage.usersTable.changeFilter(
 				'Valid Domain Users'
 			);
+
+			await expect(async () => {
+				await expect(
+					await accountUserSelectorPage.usersTable.rowCheckbox(
+						user1.name
+					)
+				).toBeChecked({timeout: 1000});
+				await expect(
+					await accountUserSelectorPage.usersTable.rowCheckbox(
+						user1.name
+					)
+				).toBeDisabled({timeout: 1000});
+			}).toPass();
 		}
 		finally {
 			await emailDomainsInstanceSettingsPage.enableEmailDomainValidation(
