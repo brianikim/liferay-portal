@@ -14,6 +14,7 @@ import {
 	render,
 	waitFor,
 } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import fetchMock from 'fetch-mock';
 import React from 'react';
 
@@ -293,12 +294,24 @@ describe('AccountSelector', () => {
 			).toBeInTheDocument();
 		});
 
-		it('must display the account name', () => {
+		it('must display the account name in the selector bar and in the dropdown', async () => {
 			const currentAccountName =
 				renderedComponent.container.querySelector(
 					'.btn-account-selector .account-name .text-truncate'
 				).innerHTML;
 			expect(currentAccountName).toBe('My Account Name');
+
+			await userEvent.click(
+				renderedComponent.container.querySelector(
+					'.btn-account-selector'
+				)
+			);
+
+			expect(
+				renderedComponent.baseElement.querySelector(
+					'.item-list-head .text-truncate'
+				)
+			).toHaveTextContent('My Account Name');
 		});
 
 		it('must display an order placeholder"', () => {
