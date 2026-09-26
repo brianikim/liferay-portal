@@ -170,3 +170,95 @@ test(
 		).toBeVisible();
 	}
 );
+
+test(
+	'Configure the file entry, maximum downloads and sample of a virtual product',
+	{tag: ['@COMMERCE-6751', '@LPD-106244-Grouped-23']},
+	async ({apiHelpers, commerceAdminProductPage, page}) => {
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		const virtualProduct =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				productType: 'virtual',
+			});
+
+		await commerceAdminProductPage.gotoProduct(virtualProduct.name.en_US);
+
+		await commerceAdminProductPage.productVirtualLink.click();
+		await commerceAdminProductPage.addVirtualProductFileEntryButton.click();
+
+		const fileEntrySidePanelFrame = page.frameLocator('iframe >> nth=1');
+
+		await fileEntrySidePanelFrame
+			.getByRole('button', {exact: true, name: 'Select'})
+			.click();
+
+		const fileEntryItemSelectorFrame = fileEntrySidePanelFrame.frameLocator(
+			'iframe[title="Select File"]'
+		);
+		const fileEntryName = `${getRandomString()}.txt`;
+		const fileContent = readFileSync(
+			path.join(__dirname, '/dependencies/attachment.txt')
+		);
+
+		await fileEntryItemSelectorFrame
+			.locator('input[type="file"]')
+			.setInputFiles(createTempFile(fileEntryName, fileContent));
+		await fileEntryItemSelectorFrame
+			.getByRole('button', {exact: true, name: 'Add'})
+			.click();
+
+		await commerceAdminProductPage.productVirtualFileEntrySaveButton.click();
+		await commerceAdminProductPage.productVirtualFileEntryCancelButton.click();
+
+		await expect(page.getByText(fileEntryName)).toBeVisible();
+
+		const maxNumberOfDownloadsInput = page.getByLabel(
+			'Max Number of Downloads'
+		);
+
+		await clickAndExpectToBeVisible({
+			target: maxNumberOfDownloadsInput,
+			trigger: page.locator('fieldset#baseInformation > a'),
+		});
+
+		await maxNumberOfDownloadsInput.fill('10');
+
+		const enableSampleToggle = page.getByLabel('Enable Sample');
+
+		await clickAndExpectToBeVisible({
+			target: enableSampleToggle,
+			trigger: page.locator('fieldset#sample > a'),
+		});
+
+		await enableSampleToggle.check();
+
+		await page.locator('[id$="_selectSampleFile"]').click();
+
+		const sampleItemSelectorFrame = page.frameLocator(
+			'iframe[title="Select File"]'
+		);
+		const sampleFileName = `${getRandomString()}.txt`;
+
+		await sampleItemSelectorFrame
+			.locator('input[type="file"]')
+			.setInputFiles(createTempFile(sampleFileName, fileContent));
+		await sampleItemSelectorFrame
+			.getByRole('button', {exact: true, name: 'Add'})
+			.click();
+
+		await page.getByRole('button', {exact: true, name: 'Save'}).click();
+
+		await waitForAlert(page);
+
+		await page.reload();
+
+		await expect(page.getByText(fileEntryName)).toBeVisible();
+		await expect(
+			page.locator('[id$="_sampleFileEntryNameInput"]')
+		).toContainText(sampleFileName);
+		await expect(maxNumberOfDownloadsInput).toHaveValue('10');
+	}
+);
