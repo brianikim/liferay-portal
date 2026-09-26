@@ -2013,7 +2013,6 @@ test(
 		commerceAdminProductDetailsMediaPage,
 		commerceAdminProductDetailsPage,
 		commerceAdminProductPage,
-		page,
 		site,
 	}) => {
 		const documentTitle = getRandomString();
@@ -2036,19 +2035,24 @@ test(
 		const imageTitle = getRandomString();
 		const productName = getRandomString();
 
-		const product =
-			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
-				catalogId: catalog.id,
-				images: [
-					{
-						src: `${liferayConfig.environment.baseUrl}${document.contentUrl}`,
-						title: {en_US: imageTitle},
-					},
-				],
-				name: {en_US: productName},
-			});
+		await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+			catalogId: catalog.id,
+			images: [
+				{
+					src: `${liferayConfig.environment.baseUrl}${document.contentUrl}`,
+					title: {en_US: imageTitle},
+				},
+			],
+			name: {en_US: productName},
+		});
 
-		expect(product.name['en_US']).toBe(productName);
+		const {images} =
+			await apiHelpers.headlessCommerceAdminCatalog.getProductByName(
+				productName,
+				{catalogId: catalog.id, nestedFields: 'images'}
+			);
+
+		const imageSrc = new RegExp(`/images/${images[0].id}\\?`);
 
 		await commerceAdminProductPage.goto();
 
@@ -2063,7 +2067,7 @@ test(
 			commerceAdminProductPage
 				.productsTableRow(productName)
 				.locator('img.sticker-img')
-		).toHaveAttribute('src', /account/);
+		).toHaveAttribute('src', imageSrc);
 
 		await commerceAdminProductPage
 			.productsTableRowLink(productName)
@@ -2072,13 +2076,11 @@ test(
 		await commerceAdminProductDetailsPage.productMediaLink.click();
 
 		await expect(
-			page.locator('img.sticker-img[src*="account"]').first()
-		).toBeVisible();
-		await expect(
 			commerceAdminProductDetailsMediaPage.mediaImagesTable
 				.getByRole('row')
 				.filter({hasText: imageTitle})
-		).toBeVisible();
+				.locator('img.sticker-img')
+		).toHaveAttribute('src', imageSrc);
 	}
 );
 
@@ -2234,6 +2236,7 @@ test(
 	{tag: ['@COMMERCE-12799', '@LPD-106244-Grouped-31']},
 	async ({
 		apiHelpers,
+		checkoutPage,
 		commerceAdminChannelsPage,
 		commerceMiniCartPage,
 		page,
@@ -2303,7 +2306,7 @@ test(
 					'No more than 1.1 products in this product range can be purchased together.'
 				)
 		).toBeVisible();
-		await expect(page.locator('.commerce-multi-step-nav')).toBeHidden();
+		await expect(checkoutPage.multiStepNav).toBeHidden();
 	}
 );
 
@@ -2312,6 +2315,7 @@ test(
 	{tag: ['@COMMERCE-12798', '@LPD-106244-Grouped-31']},
 	async ({
 		apiHelpers,
+		checkoutPage,
 		commerceAdminChannelsPage,
 		commerceMiniCartPage,
 		page,
@@ -2388,7 +2392,7 @@ test(
 					'No more than 1.9 products in this product range can be purchased together.'
 				)
 		).toBeVisible();
-		await expect(page.locator('.commerce-multi-step-nav')).toBeHidden();
+		await expect(checkoutPage.multiStepNav).toBeHidden();
 	}
 );
 
@@ -2397,6 +2401,7 @@ test(
 	{tag: ['@COMMERCE-12800', '@LPD-106244-Grouped-31']},
 	async ({
 		apiHelpers,
+		checkoutPage,
 		commerceAdminChannelsPage,
 		commerceMiniCartPage,
 		page,
@@ -2463,7 +2468,7 @@ test(
 			2
 		);
 
-		await expect(page.locator('.commerce-multi-step-nav')).toBeVisible();
+		await expect(checkoutPage.multiStepNav).toBeVisible();
 		await expect(
 			page.getByText(
 				'No more than 1 products in this product range can be purchased together.'
@@ -2490,7 +2495,7 @@ test(
 					'No more than 1 products in this product range can be purchased together.'
 				)
 		).toBeVisible();
-		await expect(page.locator('.commerce-multi-step-nav')).toBeHidden();
+		await expect(checkoutPage.multiStepNav).toBeHidden();
 	}
 );
 
@@ -2499,6 +2504,7 @@ test(
 	{tag: ['@COMMERCE-12801', '@LPD-106244-Grouped-31']},
 	async ({
 		apiHelpers,
+		checkoutPage,
 		commerceAdminChannelsPage,
 		commerceMiniCartPage,
 		page,
@@ -2568,7 +2574,7 @@ test(
 			2
 		);
 
-		await expect(page.locator('.commerce-multi-step-nav')).toBeVisible();
+		await expect(checkoutPage.multiStepNav).toBeVisible();
 		await expect(
 			page.getByText(
 				'No more than 1 products in this product range can be purchased together.'
@@ -2599,7 +2605,7 @@ test(
 					'No more than 1 products in this product range can be purchased together.'
 				)
 		).toBeVisible();
-		await expect(page.locator('.commerce-multi-step-nav')).toBeHidden();
+		await expect(checkoutPage.multiStepNav).toBeHidden();
 	}
 );
 
@@ -2608,6 +2614,7 @@ test(
 	{tag: ['@COMMERCE-12802', '@LPD-106244-Grouped-31']},
 	async ({
 		apiHelpers,
+		checkoutPage,
 		commerceAdminChannelsPage,
 		commerceLayoutsPage,
 		commerceMiniCartPage,
@@ -2705,7 +2712,7 @@ test(
 			2
 		);
 
-		await expect(page.locator('.commerce-multi-step-nav')).toBeVisible();
+		await expect(checkoutPage.multiStepNav).toBeVisible();
 		await expect(
 			page.getByText(
 				'No more than 1 products in this product range can be purchased together.'
@@ -2732,7 +2739,7 @@ test(
 					'No more than 1 products in this product range can be purchased together.'
 				)
 		).toBeVisible();
-		await expect(page.locator('.commerce-multi-step-nav')).toBeHidden();
+		await expect(checkoutPage.multiStepNav).toBeHidden();
 	}
 );
 
@@ -2741,6 +2748,7 @@ test(
 	{tag: ['@COMMERCE-12797', '@LPD-106244-Grouped-31']},
 	async ({
 		apiHelpers,
+		checkoutPage,
 		commerceAdminChannelsPage,
 		commerceInstanceSettingsPage,
 		commerceMiniCartPage,
@@ -2845,7 +2853,229 @@ test(
 						'No more than 1.1 products in this product range can be purchased together.'
 					)
 			).toBeVisible();
-			await expect(page.locator('.commerce-multi-step-nav')).toBeHidden();
+			await expect(checkoutPage.multiStepNav).toBeHidden();
+		}
+		finally {
+			await performLoginViaApi({page, screenName: 'test'});
+
+			await commerceInstanceSettingsPage.toggleShowUnselectableOptions(
+				false
+			);
+		}
+	}
+);
+
+test(
+	'The mini cart edit panel shows why bundle option values are included or excluded',
+	{tag: ['@COMMERCE-12808', '@LPD-106244-Grouped-31']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelsPage,
+		commerceAdminProductPage,
+		commerceInstanceSettingsPage,
+		commerceMiniCartPage,
+		page,
+		productDetailsPage,
+		site,
+	}) => {
+		test.setTimeout(180000);
+
+		await commerceInstanceSettingsPage.toggleShowUnselectableOptions(true);
+
+		try {
+			const catalog =
+				await apiHelpers.headlessCommerceAdminCatalog.postCatalog({
+					name: getRandomString(),
+				});
+
+			const {buyerUser} = await setUpBundleStorefront(
+				apiHelpers,
+				commerceAdminChannelsPage,
+				page,
+				site
+			);
+
+			const [
+				requiringProduct,
+				incompatibleProduct,
+				requiredProduct,
+				excludedProduct,
+			] = await Promise.all(
+				Array.from({length: 4}, () =>
+					apiHelpers.headlessCommerceAdminCatalog.postProduct({
+						catalogId: catalog.id,
+						name: {en_US: getRandomString()},
+						productConfiguration: {allowBackOrder: true},
+					})
+				)
+			);
+
+			await apiHelpers.headlessCommerceAdminCatalog.postProductRelatedProduct(
+				requiringProduct.productId,
+				{
+					productId: requiredProduct.productId,
+					type: 'requires-in-bundle',
+				}
+			);
+			await apiHelpers.headlessCommerceAdminCatalog.postProductRelatedProduct(
+				incompatibleProduct.productId,
+				{
+					productId: excludedProduct.productId,
+					type: 'incompatible-in-bundle',
+				}
+			);
+
+			const productOptions = [];
+
+			for (const [index, linkedProducts] of [
+				[requiringProduct, incompatibleProduct],
+				[requiredProduct, excludedProduct],
+			].entries()) {
+				const optionKey = `option-${getRandomInt()}`;
+				const optionName = `Option${index + 1}`;
+
+				const option =
+					await apiHelpers.headlessCommerceAdminCatalog.postOption(
+						'select',
+						optionKey,
+						optionName,
+						index + 1
+					);
+
+				productOptions.push({
+					fieldType: 'select',
+					key: optionKey,
+					name: {en_US: optionName},
+					optionId: option.id,
+					priceType: 'static',
+					priority: index + 1,
+					productOptionValues: linkedProducts.map(
+						(linkedProduct, valueIndex) => ({
+							deltaPrice: 0.0,
+							key: `value${index * 2 + valueIndex + 1}`,
+							name: {en_US: `Value${index * 2 + valueIndex + 1}`},
+							priority: valueIndex + 1,
+							quantity: 1,
+							skuId: linkedProduct.skus[0].id,
+						})
+					),
+					required: true,
+					skuContributor: true,
+				});
+			}
+
+			const bundleProduct =
+				await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+					catalogId: catalog.id,
+					name: {en_US: getRandomString()},
+					productConfiguration: {allowBackOrder: true},
+					productOptions,
+				});
+
+			await commerceAdminProductPage.gotoProduct(
+				bundleProduct.name['en_US']
+			);
+
+			await commerceAdminProductPage.generateSkus();
+
+			await performLogout(page);
+			await performLoginViaApi({
+				page,
+				screenName: buyerUser.alternateName,
+			});
+
+			const optionValue = (name: string) =>
+				page.getByRole('option', {name: new RegExp(`^${name}`)});
+
+			const editCartItem = async (optionValueNames: [string, string]) => {
+				await page.goto(
+					`/web${site.friendlyUrlPath}/p/${bundleProduct.urls['en_US']}`
+				);
+
+				await commerceMiniCartPage.open();
+
+				await commerceMiniCartPage
+					.miniCartItemActionsButton(
+						commerceMiniCartPage.miniCartItem(
+							bundleProduct.name['en_US']
+						)
+					)
+					.click();
+
+				await commerceMiniCartPage.editMenuItem.click();
+
+				for (const [
+					index,
+					optionValueName,
+				] of optionValueNames.entries()) {
+					await commerceMiniCartPage.miniCartEditItemPanel
+						.getByLabel(`Option${index + 1}`)
+						.click();
+
+					await optionValue(optionValueName).click();
+				}
+			};
+
+			const openEditItemOption = async (optionName: string) => {
+				await commerceMiniCartPage.miniCartEditItemPanel
+					.getByLabel(optionName)
+					.click();
+			};
+
+			await page.goto(
+				`/web${site.friendlyUrlPath}/p/${bundleProduct.urls['en_US']}`
+			);
+
+			await expect(
+				productDetailsPage.optionSelector('Option1')
+			).toContainText('Value1');
+			await expect(
+				productDetailsPage.optionSelector('Option2')
+			).toContainText('Value3');
+
+			await productDetailsPage.addToCartButton.click();
+
+			await editCartItem(['Value1', 'Value4']);
+
+			await expect(
+				commerceMiniCartPage.miniCartSaveButton
+			).toBeDisabled();
+
+			await openEditItemOption('Option1');
+
+			await expect(optionValue('Value1')).toContainText(
+				`${requiringProduct.name['en_US']} requires ${requiredProduct.name['en_US']} to be purchased also.`
+			);
+			await expect(optionValue('Value2')).toContainText(
+				`${incompatibleProduct.name['en_US']} cannot be combined with ${excludedProduct.name['en_US']}.`
+			);
+
+			await openEditItemOption('Option2');
+
+			for (const optionValueName of ['Value3', 'Value4']) {
+				await expect(optionValue(optionValueName)).not.toContainText(
+					/requires|cannot be combined/
+				);
+			}
+
+			await editCartItem(['Value2', 'Value3']);
+
+			await openEditItemOption('Option2');
+
+			await expect(optionValue('Value4')).toContainText(
+				`${excludedProduct.name['en_US']} cannot be combined with ${incompatibleProduct.name['en_US']}.`
+			);
+			await expect(optionValue('Value3')).not.toContainText(
+				/requires|cannot be combined/
+			);
+
+			await openEditItemOption('Option1');
+
+			for (const optionValueName of ['Value1', 'Value2']) {
+				await expect(optionValue(optionValueName)).not.toContainText(
+					/requires|cannot be combined/
+				);
+			}
 		}
 		finally {
 			await performLoginViaApi({page, screenName: 'test'});
