@@ -1378,3 +1378,162 @@ for (const {
 		}
 	);
 }
+
+test(
+	'Product and SKU subscription configurations are saved',
+	{tag: ['@COMMERCE-9806', '@COMMERCE-11150', '@LPD-106244-Grouped-24']},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductDetailsSkusPage,
+		commerceAdminProductPage,
+		page,
+	}) => {
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		const product =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+			});
+
+		await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+		const subscriptionLink = page.getByRole('link', {
+			exact: true,
+			name: 'Subscription',
+		});
+
+		await subscriptionLink.click();
+
+		await page
+			.locator('label[for$="_deliverySubscriptionEnabled"]')
+			.click();
+
+		const deliveryDayInput = page.locator(
+			'input[name$="_deliverySubscriptionTypeSettings--yearly--deliveryMonthDay--"]'
+		);
+		const deliveryModeSelect = page.locator(
+			'select[name$="_deliverySubscriptionTypeSettings--yearly--deliveryYearlyMode--"]'
+		);
+		const deliveryMonthSelect = page.locator(
+			'select[name$="_deliverySubscriptionTypeSettings--yearly--deliveryMonth--"]'
+		);
+		const deliverySubscriptionLengthInput = page.locator(
+			'input[id$="_deliverySubscriptionLength"]'
+		);
+		const deliverySubscriptionTypeSelect = page.locator(
+			'select[id$="_deliverySubscriptionType"]'
+		);
+
+		await deliverySubscriptionTypeSelect.selectOption({label: 'Year'});
+		await deliveryModeSelect.selectOption({label: 'Exact Day of Year'});
+		await deliveryMonthSelect.selectOption({label: 'March'});
+		await deliveryDayInput.fill('5');
+		await deliverySubscriptionLengthInput.fill('5');
+
+		await commerceAdminProductDetailsPage.publishLink.click();
+
+		await waitForAlert(page);
+
+		await page.getByRole('link', {exact: true, name: 'Details'}).click();
+
+		await subscriptionLink.click();
+
+		for (const {select, value} of [
+			{select: deliverySubscriptionTypeSelect, value: 'Year'},
+			{select: deliveryModeSelect, value: 'Exact Day of Year'},
+			{select: deliveryMonthSelect, value: 'March'},
+		]) {
+			await expect(select.locator('option:checked')).toHaveText(value);
+		}
+
+		for (const input of [
+			deliveryDayInput,
+			deliverySubscriptionLengthInput,
+		]) {
+			await expect(input).toHaveValue('5');
+		}
+
+		await page.locator('label[for$="_subscriptionEnabled"]').click();
+
+		await commerceAdminProductDetailsPage.publishLink.click();
+
+		await waitForAlert(page);
+
+		const paymentSubscriptionTypeSelect = page.locator(
+			'select[id$="_subscriptionType"]'
+		);
+
+		await expect(
+			paymentSubscriptionTypeSelect.locator('option:checked')
+		).toHaveText('Day');
+
+		await paymentSubscriptionTypeSelect.selectOption({label: 'Year'});
+
+		await commerceAdminProductDetailsPage.publishLink.click();
+
+		await waitForAlert(page);
+
+		await expect(
+			page
+				.locator(
+					'select[name$="_subscriptionTypeSettings--yearly--yearlyMode--"]'
+				)
+				.locator('option:checked')
+		).toHaveText('Order Date');
+
+		await commerceAdminProductDetailsPage.goToProductSkus();
+
+		await commerceAdminProductDetailsSkusPage
+			.skusTableRowLink(product.skus[0].sku)
+			.click();
+		await commerceAdminProductDetailsSkusPage.goToSkuTab('Subscriptions');
+
+		const sidePanelFrame =
+			commerceAdminProductDetailsSkusPage.sidePanelFrame;
+
+		await sidePanelFrame
+			.getByLabel('Override Subscription Settings')
+			.check();
+		await sidePanelFrame
+			.locator('label[for$="_deliverySubscriptionEnabled"]')
+			.click();
+
+		await commerceAdminProductDetailsSkusPage.sidePanelSaveButton.click();
+
+		await waitForAlert(sidePanelFrame);
+
+		const skuDeliveryModeSelect = sidePanelFrame.locator(
+			'select[name$="_deliverySubscriptionTypeSettings--yearly--deliveryYearlyMode--"]'
+		);
+		const skuDeliverySubscriptionTypeSelect = sidePanelFrame.locator(
+			'select[id$="_deliverySubscriptionType"]'
+		);
+
+		await expect(
+			skuDeliverySubscriptionTypeSelect.locator('option:checked')
+		).toHaveText('Day');
+
+		await skuDeliverySubscriptionTypeSelect.selectOption({label: 'Year'});
+
+		await expect(
+			skuDeliveryModeSelect.locator('option:checked')
+		).toHaveText('Order Date');
+
+		await commerceAdminProductDetailsSkusPage.sidePanelSaveButton.click();
+
+		await waitForAlert(sidePanelFrame);
+
+		for (const {select, value} of [
+			{select: skuDeliverySubscriptionTypeSelect, value: 'Year'},
+			{select: skuDeliveryModeSelect, value: 'Order Date'},
+		]) {
+			await expect(select.locator('option:checked')).toHaveText(value);
+		}
+
+		await expect(
+			sidePanelFrame.locator('input[id$="_deliverySubscriptionLength"]')
+		).toHaveValue('1');
+	}
+);
