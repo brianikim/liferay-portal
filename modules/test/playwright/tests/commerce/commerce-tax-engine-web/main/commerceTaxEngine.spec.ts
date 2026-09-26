@@ -10,6 +10,7 @@ import {dataApiHelpersTest} from '../../../../fixtures/dataApiHelpersTest';
 import {loginTest} from '../../../../fixtures/loginTest';
 import {taxCategoriesPageTest} from '../../../../fixtures/taxCategoriesPageTest';
 import {liferayConfig} from '../../../../liferay.config';
+import {CommerceAdminChannelDetailsPage} from '../../../../pages/commerce/commerce-channel-web/commerceAdminChannelDetailsPage';
 import {getRandomInt} from '../../../../utils/getRandomInt';
 import {waitForAlert} from '../../../../utils/waitForAlert';
 
@@ -19,6 +20,22 @@ export const test = mergeTests(
 	taxCategoriesPageTest,
 	loginTest()
 );
+
+async function openRemoteConfiguration(
+	commerceAdminChannelDetailsPage: CommerceAdminChannelDetailsPage
+) {
+	await (
+		await commerceAdminChannelDetailsPage.generalCommerceAdminChannelTableLink(
+			'Remote'
+		)
+	).click();
+	await (
+		await commerceAdminChannelDetailsPage.sidePanelFrameNavLink(
+			'Configuration',
+			'Tax Calculations'
+		)
+	).click();
+}
 
 async function verifyFixedTaxRate(
 	commerceAdminChannelDetailsPage,
@@ -387,6 +404,112 @@ test(
 
 				await waitForAlert(page);
 			}
+		}
+	}
+);
+
+test(
+	'Tax engines can be reactivated and the Remote engine can be configured',
+	{tag: ['@COMMERCE-6118', '@COMMERCE-6122', '@LPD-106244-Grouped-7']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelDetailsPage,
+		commerceAdminChannelsPage,
+		page,
+	}) => {
+		const site =
+			await apiHelpers.headlessAdminUser.getSiteByFriendlyUrlPath(
+				'guest'
+			);
+
+		const channel =
+			await apiHelpers.headlessCommerceAdminChannel.postChannel({
+				siteGroupId: site.id,
+			});
+
+		await commerceAdminChannelsPage.goto();
+
+		await (
+			await commerceAdminChannelsPage.channelsTableRowLink(channel.name)
+		).click();
+
+		const taxEngines = [
+			'Avalara',
+			'By Address',
+			'Fixed Tax Rate',
+			'Remote',
+		];
+
+		for (const taxEngine of taxEngines) {
+			await commerceAdminChannelDetailsPage.deactivateChannelConfiguration(
+				taxEngine,
+				'Tax Calculations'
+			);
+			await commerceAdminChannelDetailsPage.activateChannelConfiguration(
+				taxEngine,
+				'Tax Calculations'
+			);
+		}
+
+		await page.reload();
+
+		for (const taxEngine of taxEngines) {
+			await expect(
+				page
+					.getByRole('row')
+					.filter({
+						has: page.getByRole('link', {
+							exact: true,
+							name: taxEngine,
+						}),
+					})
+					.locator('.label-success')
+			).toBeVisible();
+		}
+
+		const remoteConfiguration = [
+			{
+				label: 'Tax Value Endpoint URL',
+				value: 'http://localhost:8080/web/test',
+			},
+			{label: 'Tax Value Endpoint Authorization Token', value: 'Test'},
+		];
+
+		await openRemoteConfiguration(commerceAdminChannelDetailsPage);
+
+		for (const {label, value} of remoteConfiguration) {
+			await (
+				await commerceAdminChannelDetailsPage.sidePanelFrameInput(
+					label,
+					'Tax Calculations'
+				)
+			).fill(value);
+		}
+
+		await (
+			await commerceAdminChannelDetailsPage.frameSaveButton(
+				false,
+				'Tax Calculations'
+			)
+		).click();
+
+		await waitForAlert(
+			await commerceAdminChannelDetailsPage.sidePanelFrame(
+				'Tax Calculations'
+			)
+		);
+
+		await page.reload();
+
+		await openRemoteConfiguration(commerceAdminChannelDetailsPage);
+
+		for (const {label, value} of remoteConfiguration) {
+			await expect(
+				await commerceAdminChannelDetailsPage.sidePanelFrameInput(
+					label,
+					'Tax Calculations'
+				)
+			).toHaveValue(value);
 		}
 	}
 );
