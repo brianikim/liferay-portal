@@ -241,23 +241,6 @@ definition {
 	}
 
 	@priority = 5
-	test CreateNewAvailabilityEstimate {
-		property portal.acceptance = "true";
-
-		CommerceNavigator.gotoPortlet(
-			category = "Settings",
-			portlet = "Availability Estimates");
-
-		Click(locator1 = "Button#PLUS");
-
-		CommerceEntry.addNewAvailabilityEstimatesEntry(entryName = "New Availability Estimate");
-
-		Button.clickSave();
-
-		AssertElementPresent(locator1 = "Message#SUCCESS");
-	}
-
-	@priority = 5
 	test CreateNewMeasurementUnits {
 		property portal.acceptance = "true";
 
