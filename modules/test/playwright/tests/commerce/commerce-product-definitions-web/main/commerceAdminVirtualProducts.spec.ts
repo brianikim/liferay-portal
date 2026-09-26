@@ -27,7 +27,15 @@ export const test = mergeTests(
 
 test(
 	'LPD-21637 Virtual item details section visible for product and sku',
-	{tag: ['@COMMERCE-6301', '@COMMERCE-9800', '@LPD-106244-Grouped-18']},
+	{
+		tag: [
+			'@COMMERCE-6301',
+			'@COMMERCE-9800',
+			'@COMMERCE-11343',
+			'@LPD-106244-Grouped-18',
+			'@LPD-106244-Grouped-32',
+		],
+	},
 	async ({apiHelpers, commerceAdminProductPage, globalMenuPage, page}) => {
 		const catalog =
 			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
@@ -161,13 +169,78 @@ test(
 
 		await commerceAdminProductPage.productSkuVirtualFileEntryCancelButton.click();
 
+		const skuFrame = page.frameLocator('iframe');
+
+		const skuFileEntryURL = skuFrame.getByText(
+			'http://test-virtual-product-sku-details-section.com'
+		);
+
+		await expect(skuFileEntryURL).toBeVisible();
+
+		const activationStatusSelect = skuFrame.getByLabel('Activation Status');
+		const baseInformationLink = skuFrame.getByRole('button', {
+			exact: true,
+			name: 'Base Information',
+		});
+
+		await clickAndExpectToBeVisible({
+			target: activationStatusSelect,
+			trigger: baseInformationLink,
+		});
+
+		await activationStatusSelect.selectOption({label: 'Pending'});
+
+		const durationInput = skuFrame.getByLabel('Duration');
+		const maxUsagesInput = skuFrame.getByLabel('Max Number of Downloads');
+
+		await durationInput.fill('3');
+		await maxUsagesInput.fill('3');
+
+		const skuEnableSampleToggle = skuFrame.getByLabel('Enable Sample');
+
+		await clickAndExpectToBeVisible({
+			target: skuEnableSampleToggle,
+			trigger: skuFrame.getByRole('button', {
+				exact: true,
+				name: 'Sample',
+			}),
+		});
+
+		await skuEnableSampleToggle.check();
+
+		await skuFrame
+			.getByLabel('Sample File URL')
+			.fill('http://test-virtual-product-sku-sample.com');
+
+		const skuSaveButton = skuFrame.getByRole('button', {
+			exact: true,
+			name: 'Save',
+		});
+
+		await skuSaveButton.click();
+
+		await waitForAlert(skuFrame);
+
+		await commerceAdminProductPage.productSkuVirtualOverrideToggle.uncheck();
+
+		await skuSaveButton.click();
+
+		await waitForAlert(skuFrame);
+
+		await commerceAdminProductPage.productSkuVirtualOverrideToggle.check();
+
+		await clickAndExpectToBeVisible({
+			target: activationStatusSelect,
+			trigger: baseInformationLink,
+		});
+
 		await expect(
-			page
-				.frameLocator('iframe')
-				.getByText(
-					'http://test-virtual-product-sku-details-section.com'
-				)
-		).toBeVisible();
+			activationStatusSelect.locator('option:checked')
+		).toHaveText('Completed');
+		await expect(durationInput).toHaveValue('0');
+		await expect(maxUsagesInput).toHaveValue('0');
+		await expect(skuEnableSampleToggle).not.toBeChecked();
+		await expect(skuFileEntryURL).toHaveCount(0);
 	}
 );
 
