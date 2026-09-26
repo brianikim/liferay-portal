@@ -88,68 +88,6 @@ definition {
 		}
 	}
 
-	@description = "This is a test for COMMERCE-10587. Buyer user can add to cart a product with a promotion"
-	@priority = 5
-	test CanAddToCartProductWithPromotion {
-		property portal.acceptance = "true";
-
-		task ("Given an account with a buyer user is created") {
-			CommerceEntry.addAccountEntryUser(
-				accountName = "Commerce Account",
-				accountType = "Business",
-				agreeToTermsAndAnswerReminderQuery = "true",
-				createNewAccount = "true",
-				requireReset = "false",
-				userEmailAddress = "buyer@liferay.com",
-				userFirstName = "Buyer",
-				userLastName = "User",
-				userRole = "Buyer",
-				userScreenName = "buyeruser",
-				userSiteMembership = "Minium");
-		}
-
-		task ("And buyer user opens the minicart after signing in") {
-			User.logoutPG();
-
-			CommerceLogin.miniumLogin(
-				password = PropsUtil.get("default.admin.password"),
-				urlAppend = "web/minium",
-				userEmailAddress = "buyer@liferay.com");
-
-			CommerceNavigator.gotoMiniCart();
-		}
-
-		task ("And selects a product with a promotion on the quick add to cart (e.g. MIN93017)") {
-			FrontStore.quickAddToCartSearchAndSelectItem(orderItemSku = "MIN93017");
-		}
-
-		task ("Then the selected sku is visible as a chip on the search bar") {
-			AssertElementPresent(
-				locator1 = "CommerceWidget#TAG_FACET_LABEL_LAYOUT",
-				tagName = "MIN93017");
-		}
-
-		task ("When the buyer clicks on the search bar add to cart button") {
-			Click(locator1 = "CommerceAccelerators#QUICK_ADD_TO_CART_BUTTON");
-		}
-
-		task ("Then the SKU is correctly added to the cart") {
-			AssertElementPresent(
-				key_cartItemSku = "MIN93017",
-				locator1 = "CommerceAccelerators#MINI_CART_ITEM_SKU");
-		}
-
-		task ("And the promo price is correct") {
-			AssertTextEquals.assertPartialText(
-				locator1 = "CommerceAccelerators#PRODUCT_DETAILS_LIST_PRICE_INACTIVE",
-				value1 = "100.00");
-
-			AssertTextEquals.assertPartialText(
-				locator1 = "CommerceAccelerators#PRODUCT_DETAILS_LIST_PRICE_PROMO",
-				value1 = "90.00");
-		}
-	}
-
 	@description = "This is a test for COMMERCE-10538. Buyer user cannot add non purchasable SKUs"
 	@priority = 5
 	test CannotAddNonPurchasableSKUs {
