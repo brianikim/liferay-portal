@@ -3358,8 +3358,18 @@ test(
 );
 
 test(
-	'A buyer without orders searches, quick adds several SKUs at quantity 1, gets a pending order and checks out',
-	{tag: ['@COMMERCE-10387', '@COMMERCE-10390', '@COMMERCE-10532']},
+	'A buyer without orders searches by SKU and product name, quick adds several SKUs at quantity 1, gets a pending order and checks out',
+	{
+		tag: [
+			'@COMMERCE-10387',
+			'@COMMERCE-10390',
+			'@COMMERCE-10532',
+			'@COMMERCE-10533',
+			'@COMMERCE-10537',
+			'@COMMERCE-10609',
+			'@LPD-106244-Grouped-26',
+		],
+	},
 	async ({
 		apiHelpers,
 		checkoutPage,
@@ -3449,6 +3459,68 @@ test(
 			});
 		}
 
+		const productNameToken = `abs${getRandomInt()}`;
+
+		const productNameSkuName = `MIN${getRandomInt()}`;
+
+		await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+			catalogId: catalog.id,
+			name: {en_US: `${productNameToken} Sensor`},
+			productConfiguration: {allowBackOrder: true},
+			skus: [
+				{
+					cost: 0,
+					price: 10,
+					published: true,
+					purchasable: true,
+					sku: productNameSkuName,
+				},
+			],
+		});
+
+		const option = await apiHelpers.headlessCommerceAdminCatalog.postOption(
+			'select',
+			`color-${getRandomInt()}`
+		);
+
+		const optionValueKeys = ['blue', 'white'];
+
+		const optionSkuNames = optionValueKeys.map(
+			(optionValueKey) => `${prefixSkuToken}${optionValueKey}`
+		);
+
+		await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+			catalogId: catalog.id,
+			name: {en_US: `Shock ${productNameToken}`},
+			productConfiguration: {allowBackOrder: true},
+			productOptions: [
+				{
+					fieldType: 'select',
+					key: option.key,
+					name: {en_US: 'Color'},
+					optionId: option.id,
+					priceType: 'static',
+					priority: 1,
+					productOptionValues: optionValueKeys.map(
+						(optionValueKey, index) => ({
+							key: optionValueKey,
+							name: {en_US: optionValueKey},
+							priority: index + 1,
+						})
+					),
+					skuContributor: true,
+				},
+			],
+			skus: optionValueKeys.map((optionValueKey, index) => ({
+				cost: 0,
+				price: 10,
+				published: true,
+				purchasable: true,
+				sku: optionSkuNames[index],
+				skuOptions: [{key: option.key, value: optionValueKey}],
+			})),
+		});
+
 		const {buyerUser} = await createAccountWithBuyerUser(
 			apiHelpers,
 			site.id
@@ -3478,7 +3550,8 @@ test(
 
 		for (const [searchText, skuNames] of [
 			[skuNameToken, partialSkuNames],
-			[prefixSkuToken, prefixSkuNames],
+			[prefixSkuToken, [...prefixSkuNames, ...optionSkuNames]],
+			[productNameToken, [productNameSkuName, ...optionSkuNames]],
 		] as const) {
 			await commerceMiniCartPage.searchProductsInput.fill(searchText);
 
@@ -3493,10 +3566,17 @@ test(
 			product.skus[0].sku,
 			partialSkuNames[0],
 			prefixSkuNames[0],
+			...optionSkuNames,
 		];
 
 		for (const skuName of selectedSkuNames) {
 			await commerceMiniCartPage.selectQuickAddToCartSku(skuName);
+		}
+
+		for (const skuName of selectedSkuNames) {
+			await expect(
+				commerceMiniCartPage.quickAddToCartChip(skuName)
+			).toBeVisible();
 		}
 
 		await commerceMiniCartPage.quickAddToCartButton.click();
