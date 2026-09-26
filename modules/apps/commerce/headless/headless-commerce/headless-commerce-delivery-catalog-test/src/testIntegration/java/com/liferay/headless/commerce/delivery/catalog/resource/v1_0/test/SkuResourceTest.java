@@ -11,6 +11,8 @@ import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.commerce.currency.model.CommerceCurrency;
 import com.liferay.commerce.currency.service.CommerceCurrencyLocalService;
 import com.liferay.commerce.currency.test.util.CommerceCurrencyTestUtil;
+import com.liferay.commerce.inventory.model.CommerceInventoryWarehouse;
+import com.liferay.commerce.inventory.service.CommerceInventoryReplenishmentItemLocalService;
 import com.liferay.commerce.price.list.constants.CommercePriceListConstants;
 import com.liferay.commerce.price.list.model.CommercePriceEntry;
 import com.liferay.commerce.price.list.model.CommercePriceList;
@@ -27,6 +29,7 @@ import com.liferay.commerce.product.model.CommerceChannel;
 import com.liferay.commerce.product.service.CPInstanceLocalService;
 import com.liferay.commerce.product.service.CPInstanceUnitOfMeasureLocalService;
 import com.liferay.commerce.product.test.util.CPTestUtil;
+import com.liferay.commerce.test.util.CommerceInventoryTestUtil;
 import com.liferay.commerce.test.util.CommerceTestUtil;
 import com.liferay.commerce.test.util.price.list.CommercePriceEntryTestUtil;
 import com.liferay.commerce.test.util.price.list.CommercePriceListTestUtil;
@@ -38,6 +41,7 @@ import com.liferay.headless.commerce.delivery.catalog.client.dto.v1_0.TierPrice;
 import com.liferay.headless.commerce.delivery.catalog.client.pagination.Page;
 import com.liferay.headless.commerce.delivery.catalog.client.pagination.Pagination;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
@@ -45,16 +49,23 @@ import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.util.BigDecimalUtil;
+import com.liferay.portal.kernel.util.FastDateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
+import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.Time;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.test.rule.Inject;
 
 import java.math.BigDecimal;
 
+import java.text.Format;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Objects;
@@ -109,6 +120,7 @@ public class SkuResourceTest extends BaseSkuResourceTestCase {
 	public void testGetChannelProductSkusPage() throws Exception {
 		super.testGetChannelProductSkusPage();
 
+		_testGetChannelProductSkusPageWithIncomingQuantityLabel();
 		_testGetChannelProductSkusPageWithPriceListAccountRel();
 		_testGetChannelProductSkusPageWithUnitOfMeasure();
 		_testGetChannelProductSkusPageWithUnitOfMeasurePrice();
@@ -336,6 +348,20 @@ public class SkuResourceTest extends BaseSkuResourceTestCase {
 			RandomTestUtil.randomLocaleStringMap(),
 			RandomTestUtil.randomInt(0, 5), BigDecimal.ONE, true,
 			RandomTestUtil.nextDouble(), BigDecimal.ONE, sku.getSku());
+	}
+
+	private String _getIncomingQuantityLabel(
+			Date availabilityDate, int quantity)
+		throws Exception {
+
+		User user = UserTestUtil.getAdminUser(testCompany.getCompanyId());
+
+		Format format = FastDateFormatFactoryUtil.getDate(
+			user.getLocale(), user.getTimeZone());
+
+		return LanguageUtil.format(
+			LocaleUtil.getDefault(), "incoming-date-quantity-x-x-items",
+			new Object[] {format.format(availabilityDate), quantity});
 	}
 
 	private void _testGetChannelProductSkuAllowMultiplePriceEntriesInTheSamePriceList()
@@ -616,6 +642,72 @@ public class SkuResourceTest extends BaseSkuResourceTestCase {
 			updatedPrice.getPricingQuantityPriceFormatted());
 	}
 
+	private void _testGetChannelProductSkusPageWithIncomingQuantityLabel()
+		throws Exception {
+
+		Long channelId = testGetChannelProductSkusPage_getChannelId();
+		Long productId = testGetChannelProductSkusPage_getProductId();
+
+		Sku sku1 = testGetChannelProductSkusPage_addSku(
+			channelId, productId, randomSku());
+		Sku sku2 = testGetChannelProductSkusPage_addSku(
+			channelId, productId, randomSku());
+		Sku sku3 = testGetChannelProductSkusPage_addSku(
+			channelId, productId, randomSku());
+
+		_commerceInventoryWarehouse =
+			CommerceInventoryTestUtil.addCommerceInventoryWarehouse(
+				_serviceContext);
+
+		Date nearestAvailabilityDate = new Date(
+			System.currentTimeMillis() + (Time.YEAR * 2));
+
+		_commerceInventoryReplenishmentItemLocalService.
+			addCommerceInventoryReplenishmentItem(
+				null, _user.getUserId(),
+				_commerceInventoryWarehouse.getCommerceInventoryWarehouseId(),
+				nearestAvailabilityDate, BigDecimal.valueOf(4), sku1.getSku(),
+				StringPool.BLANK);
+
+		Date fartherAvailabilityDate = new Date(
+			System.currentTimeMillis() + (Time.YEAR * 3));
+
+		_commerceInventoryReplenishmentItemLocalService.
+			addCommerceInventoryReplenishmentItem(
+				null, _user.getUserId(),
+				_commerceInventoryWarehouse.getCommerceInventoryWarehouseId(),
+				fartherAvailabilityDate, BigDecimal.valueOf(2), sku1.getSku(),
+				StringPool.BLANK);
+		_commerceInventoryReplenishmentItemLocalService.
+			addCommerceInventoryReplenishmentItem(
+				null, _user.getUserId(),
+				_commerceInventoryWarehouse.getCommerceInventoryWarehouseId(),
+				fartherAvailabilityDate, BigDecimal.valueOf(2), sku2.getSku(),
+				StringPool.BLANK);
+
+		Page<Sku> page = skuResource.getChannelProductSkusPage(
+			channelId, productId, null, null, Pagination.of(1, 10));
+
+		for (Sku sku : page.getItems()) {
+			if (Objects.equals(sku.getId(), sku1.getId())) {
+				Assert.assertEquals(
+					_getIncomingQuantityLabel(nearestAvailabilityDate, 4),
+					sku.getIncomingQuantityLabel());
+			}
+
+			if (Objects.equals(sku.getId(), sku2.getId())) {
+				Assert.assertEquals(
+					_getIncomingQuantityLabel(fartherAvailabilityDate, 2),
+					sku.getIncomingQuantityLabel());
+			}
+
+			if (Objects.equals(sku.getId(), sku3.getId())) {
+				Assert.assertTrue(
+					Validator.isNull(sku.getIncomingQuantityLabel()));
+			}
+		}
+	}
+
 	private void _testGetChannelProductSkusPageWithPriceListAccountRel()
 		throws Exception {
 
@@ -821,6 +913,13 @@ public class SkuResourceTest extends BaseSkuResourceTestCase {
 
 	@Inject
 	private CommerceCurrencyLocalService _commerceCurrencyLocalService;
+
+	@Inject
+	private CommerceInventoryReplenishmentItemLocalService
+		_commerceInventoryReplenishmentItemLocalService;
+
+	@DeleteAfterTestRun
+	private CommerceInventoryWarehouse _commerceInventoryWarehouse;
 
 	@Inject
 	private CommercePriceEntryLocalService _commercePriceEntryLocalService;
