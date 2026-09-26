@@ -318,6 +318,108 @@ test(
 );
 
 test(
+	'Product option values can be edited and deleted from product admins',
+	{tag: ['@COMMERCE-6019', '@LPD-106244-Grouped-31']},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductDetailsProductOptionsPage,
+		commerceAdminProductPage,
+		page,
+	}) => {
+		const optionName = getRandomString();
+
+		const option = await apiHelpers.headlessCommerceAdminCatalog.postOption(
+			'select',
+			`color-${getRandomString().toLowerCase()}`,
+			optionName,
+			1,
+			true
+		);
+
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		const product =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				name: {en_US: getRandomString()},
+				productOptions: [
+					{
+						facetable: true,
+						fieldType: 'select',
+						key: option.key,
+						name: {en_US: optionName},
+						optionId: option.id,
+						priority: 1,
+						productOptionValues: [
+							{
+								key: 'black',
+								name: {en_US: 'Black'},
+								priority: 1,
+							},
+						],
+						required: true,
+						skuContributor: true,
+					},
+				],
+			});
+
+		await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+		await commerceAdminProductDetailsPage.goToProductOptions();
+
+		await commerceAdminProductDetailsProductOptionsPage.openOption(
+			optionName
+		);
+
+		await commerceAdminProductDetailsProductOptionsPage
+			.optionValueLink('Black')
+			.click();
+
+		const optionValueSidePanelFrame =
+			commerceAdminProductDetailsProductOptionsPage.optionValueSidePanelFrame;
+
+		await optionValueSidePanelFrame
+			.getByLabel('Name', {exact: true})
+			.fill('Red');
+		await optionValueSidePanelFrame
+			.getByLabel('Key', {exact: true})
+			.fill('red');
+
+		await commerceAdminProductDetailsProductOptionsPage.optionValueSaveButton.click();
+
+		await waitForAlert(optionValueSidePanelFrame);
+
+		await commerceAdminProductDetailsProductOptionsPage.closeOptionValue();
+		await commerceAdminProductDetailsProductOptionsPage.closeOption();
+
+		await page.reload();
+
+		await commerceAdminProductDetailsProductOptionsPage.openOption(
+			optionName
+		);
+
+		await expect(
+			commerceAdminProductDetailsProductOptionsPage.optionValueLink('Red')
+		).toBeVisible();
+
+		await commerceAdminProductDetailsProductOptionsPage.clickOptionValueAction(
+			'Delete',
+			'Red'
+		);
+
+		await waitForAlert(
+			commerceAdminProductDetailsProductOptionsPage.optionSidePanelFrame
+		);
+
+		await expect(
+			commerceAdminProductDetailsProductOptionsPage.optionValueRow('Red')
+		).toHaveCount(0);
+	}
+);
+
+test(
 	'Create an option from the standalone options portlet',
 	{tag: '@LPD-106244-Grouped-3'},
 	async ({apiHelpers, commerceAdminOptionsPage, globalMenuPage}) => {
