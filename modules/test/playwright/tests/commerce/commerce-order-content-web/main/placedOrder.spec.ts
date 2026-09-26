@@ -2159,8 +2159,15 @@ test(
 );
 
 test(
-	'A display template selected in the Placed Orders widget configuration survives reopening it',
-	{tag: ['@COMMERCE-12266', '@LPD-106723']},
+	'A display template selected in the Placed Orders widget configuration renders the orders and survives reopening it',
+	{
+		tag: [
+			'@COMMERCE-12266',
+			'@COMMERCE-6666',
+			'@LPD-106723',
+			'@LPD-106244-Grouped-11',
+		],
+	},
 	async ({
 		apiHelpers,
 		page,
@@ -2174,8 +2181,27 @@ test(
 			title: getRandomString(),
 		});
 
-		await apiHelpers.headlessCommerceAdminChannel.postChannel({
-			siteGroupId: site.id,
+		const channel =
+			await apiHelpers.headlessCommerceAdminChannel.postChannel({
+				siteGroupId: site.id,
+			});
+
+		const account = await apiHelpers.headlessAdminUser.postAccount({
+			name: getRandomString(),
+			type: 'person',
+		});
+
+		await apiHelpers.headlessAdminUser.assignUserToAccountByEmailAddress(
+			account.id,
+			['test@liferay.com']
+		);
+
+		await selectCurrentAccount(account.id, apiHelpers, site.id);
+
+		const order = await apiHelpers.headlessCommerceAdminOrder.postOrder({
+			accountId: account.id,
+			channelId: channel.id,
+			orderStatus: '0',
 		});
 
 		const displayTemplateName = `Placed Orders ${getRandomString()}`;
@@ -2186,6 +2212,13 @@ test(
 			displayTemplateName,
 			'Placed Orders Template'
 		);
+		await templatesPage.editTemplate(displayTemplateName);
+		await templatesPage.importInformationTemplate(
+			__dirname,
+			'placed_orders_template.ftl'
+		);
+
+		await templatesPage.saveTemplate(displayTemplateName);
 
 		await page.goto(`/web${site.friendlyUrlPath}${layout.friendlyURL}`, {
 			waitUntil: 'networkidle',
@@ -2198,6 +2231,14 @@ test(
 		await placedOrdersPage.selectDisplayTemplate(displayTemplateName);
 
 		await page.reload();
+
+		await expect(
+			page
+				.locator(
+					'#portlet_com_liferay_commerce_order_content_web_internal_portlet_CommerceOrderContentPortlet'
+				)
+				.getByText(String(order.id), {exact: true})
+		).toBeVisible();
 
 		await placedOrdersPage.goToConfiguration();
 
