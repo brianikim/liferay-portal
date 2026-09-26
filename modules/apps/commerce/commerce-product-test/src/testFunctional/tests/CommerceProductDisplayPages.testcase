@@ -18,47 +18,6 @@ definition {
 		CommerceConfiguration.commerceTearDown();
 	}
 
-	@description = "This is a test for COMMERCE-7833. Verify user is redirected to the Product Detail page when they click on a product in the catalog if Default Product Display Page is not set"
-	@priority = 3
-	test AssertOldLogicIsAppliedIfDefaultProductDisplayPageIsNotSet {
-		property portal.acceptance = "false";
-
-		task ("Given a Minium site") {
-			CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
-		}
-
-		task ("And given no default product display page is set") {
-			CommerceChannels.openChannelsAdmin();
-
-			CommerceNavigator.gotoEntry(entryName = "Minium Portal");
-
-			CommerceEntry.gotoMenuTab(menuTab = "Product Display Pages");
-
-			CommerceEntry.assertDefaultDisplayPage(pageName = "None");
-
-			AssertTextEquals(
-				locator1 = "CommerceNavigation#EMPTY_SEARCH_CONTAINER",
-				value1 = "Sorry, no results were found.");
-		}
-
-		task ("When I click on a product in the catalog page") {
-			ApplicationsMenu.gotoSite(site = "Minium");
-
-			CommerceNavigator.gotoProductDetails(productName = "U-Joint");
-		}
-
-		task ("Then I should be redirected to the product detail page") {
-			ControlMenu.viewHeaderTitle(headerTitle = "Product Detail Restricted Page");
-
-			AssertLocation.assertPartialLocation(value1 = "web/minium/p/u-joint");
-
-			FrontStore.assertProductDetails(
-				productListPrice = "24.00",
-				productName = "U-Joint",
-				productSKU = "MIN55861");
-		}
-	}
-
 	@description = "This is a test for COMMERCE-7950. Verify user can select, change, and remove a Default Product Display page"
 	@priority = 5
 	test CanSelectChangeAndRemoveDefaultProductDisplayPage {
