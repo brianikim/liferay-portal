@@ -498,28 +498,4 @@ definition {
 		}
 	}
 
-	@description = "This is a test for COMMERCE-6085. UseSubscriptions"
-	@priority = 5
-	test UseSubscriptions {
-		property portal.acceptance = "true";
-
-		// TODO Review
-
-		CommerceProducts.openProductsAdmin();
-
-		CPCommerceCatalog.newProductsEntry(
-			productName = "Simple T-Shirt",
-			productType = "Simple");
-
-		CommerceEntry.gotoMenuTab(menuTab = "Subscription");
-
-		Click(locator1 = "CommerceEntry#PAYMENT_SUBSCRIPTION_TOGGLE");
-
-		Click(locator1 = "CommerceEntry#DELIVERY_SUBSCRIPTION_TOGGLE");
-
-		Button.clickPublish();
-
-		Alert.viewSuccessMessage();
-	}
-
 }

@@ -102,12 +102,13 @@ test(
 
 test(
 	'Add a SKU with subscriptions',
-	{tag: '@COMMERCE-6024'},
+	{tag: ['@COMMERCE-6024', '@COMMERCE-6085', '@LPD-106244-Grouped-16']},
 	async ({
 		apiHelpers,
 		commerceAdminProductDetailsPage,
 		commerceAdminProductDetailsSkusPage,
 		commerceAdminProductPage,
+		page,
 	}) => {
 		const catalog =
 			await apiHelpers.headlessCommerceAdminCatalog.postCatalog({
@@ -122,6 +123,25 @@ test(
 			});
 
 		await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+		await page
+			.getByRole('link', {exact: true, name: 'Subscription'})
+			.click();
+
+		for (const subscriptionEnabledName of [
+			'deliverySubscriptionEnabled',
+			'subscriptionEnabled',
+		]) {
+			await page
+				.locator(`label[for$="_${subscriptionEnabledName}"]`)
+				.click();
+
+			await expect(
+				page.locator(`input[id$="_${subscriptionEnabledName}"]`)
+			).toBeChecked();
+		}
+
+		await commerceAdminProductDetailsPage.publish();
 
 		await commerceAdminProductDetailsPage.goToProductSkus();
 
