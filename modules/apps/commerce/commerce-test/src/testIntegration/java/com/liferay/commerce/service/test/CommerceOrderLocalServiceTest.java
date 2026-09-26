@@ -620,8 +620,73 @@ public class CommerceOrderLocalServiceTest {
 			commerceOrders.toString(), commerceOrder2, commerceOrders.get(1));
 	}
 
+	@Test
+	public void testMergeGuestCommerceOrder() throws Exception {
+		CommerceTestUtil.addCommerceOrderItem(
+			_commerceOrder.getCommerceOrderId(), _cpInstance.getCPInstanceId(),
+			BigDecimal.ONE, _commerceContext);
+
+		CPInstance cpInstance = CPTestUtil.addCPInstanceFromCatalog(
+			_cpInstance.getGroupId(), BigDecimal.valueOf(15),
+			RandomTestUtil.randomString());
+
+		CommerceTestUtil.updateBackOrderCPDefinitionInventory(
+			cpInstance.getCPDefinition());
+
+		CommerceOrder guestCommerceOrder = CommerceTestUtil.addB2BCommerceOrder(
+			_commerceChannel.getSiteGroupId(), _user.getUserId(),
+			_commerceOrder.getCommerceAccountId(),
+			_commerceCurrency.getCommerceCurrencyId());
+
+		CommerceTestUtil.addCommerceOrderItem(
+			guestCommerceOrder.getCommerceOrderId(),
+			_cpInstance.getCPInstanceId(), BigDecimal.valueOf(5),
+			_commerceContext);
+		CommerceTestUtil.addCommerceOrderItem(
+			guestCommerceOrder.getCommerceOrderId(),
+			cpInstance.getCPInstanceId(), BigDecimal.valueOf(5),
+			_commerceContext);
+
+		_commerceOrderLocalService.mergeGuestCommerceOrder(
+			_user.getUserId(), guestCommerceOrder.getCommerceOrderId(),
+			_commerceOrder.getCommerceOrderId(), _commerceContext,
+			_serviceContext);
+
+		Assert.assertNull(
+			_commerceOrderLocalService.fetchCommerceOrder(
+				guestCommerceOrder.getCommerceOrderId()));
+		Assert.assertEquals(
+			2,
+			_commerceOrderItemLocalService.getCommerceOrderItemsCount(
+				_commerceOrder.getCommerceOrderId()));
+
+		_assertCommerceOrderItem(_cpInstance, BigDecimal.ONE);
+		_assertCommerceOrderItem(cpInstance, BigDecimal.valueOf(5));
+	}
+
 	@Rule
 	public FrutillaRule frutillaRule = new FrutillaRule();
+
+	private void _assertCommerceOrderItem(
+		CPInstance cpInstance, BigDecimal quantity) {
+
+		List<CommerceOrderItem> commerceOrderItems =
+			_commerceOrderItemLocalService.getCommerceOrderItems(
+				_commerceOrder.getCommerceOrderId(),
+				cpInstance.getCPInstanceId(), QueryUtil.ALL_POS,
+				QueryUtil.ALL_POS);
+
+		Assert.assertEquals(
+			commerceOrderItems.toString(), 1, commerceOrderItems.size());
+
+		CommerceOrderItem commerceOrderItem = commerceOrderItems.get(0);
+
+		Assert.assertTrue(
+			BigDecimalUtil.eq(quantity, commerceOrderItem.getQuantity()));
+		Assert.assertTrue(
+			BigDecimalUtil.eq(
+				cpInstance.getPrice(), commerceOrderItem.getUnitPrice()));
+	}
 
 	private AccountEntry _accountEntry;
 
