@@ -1264,7 +1264,7 @@ test(
 );
 
 test(
-	'Assert date and time are displayed as order date',
+	'The order date shows the create time until the Placed Orders widget configuration hides it',
 	{tag: '@LPD-33658'},
 	async ({
 		apiHelpers,
@@ -1392,6 +1392,57 @@ test(
 					)
 				)
 		).toBeVisible();
+
+		await page.goto(
+			`${liferayConfig.environment.baseUrl}/web${site.friendlyUrlPath}${layout.friendlyUrlPath}`
+		);
+
+		await placedOrdersPage.goToConfiguration();
+
+		await expect(
+			placedOrdersPage.configurationIFrame.getByText(
+				'Order Date Display',
+				{exact: true}
+			)
+		).toBeVisible();
+
+		await placedOrdersPage.configurationIFrame
+			.getByLabel('Show Order Create Time')
+			.uncheck();
+		await placedOrdersPage.configurationIFrameSaveButton.click();
+
+		await waitForAlert(
+			placedOrdersPage.configurationIFrame,
+			'Success:You have successfully updated the setup'
+		);
+
+		await page.reload();
+
+		const orderDate = page
+			.getByText(
+				getDateCustomFormat(
+					order.createDate,
+					locale,
+					customFormatDateYY.DATE_AND_TIME
+				),
+				{exact: true}
+			)
+			.or(
+				page.getByText(
+					getDateCustomFormat(
+						order.createDate,
+						locale,
+						customFormatDateYYYY.DATE_AND_TIME
+					),
+					{exact: true}
+				)
+			);
+
+		await expect(orderDate).toBeVisible();
+
+		await placedOrdersPage.placedOrderTableViewButton.click();
+
+		await expect(orderDate).toBeVisible();
 
 		await page.goto(`/web/${site.name}`);
 	}
