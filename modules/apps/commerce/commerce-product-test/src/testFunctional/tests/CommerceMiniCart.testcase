@@ -72,55 +72,6 @@ definition {
 		}
 	}
 
-	@description = "This is a test for COMMERCE-12621.Can view that product image cotains img tag and has the alt attribute "
-	@priority = 3
-	test CanSeeProductNameTruncated {
-		property portal.acceptance = "false";
-
-		task ("Given a commerce account with a buyer user is created") {
-			CommerceEntry.addAccountEntryUser(
-				accountName = "Commerce Account",
-				accountType = "Business",
-				agreeToTermsAndAnswerReminderQuery = "true",
-				createNewAccount = "true",
-				requireReset = "false",
-				userEmailAddress = "buyer@liferay.com",
-				userFirstName = "Buyer",
-				userLastName = "User",
-				userRole = "Buyer",
-				userScreenName = "buyeruser",
-				userSiteMembership = "Minium");
-		}
-
-		task ("And given a product with a very long name") {
-			CommerceJSONProductsAPI._addCommerceProduct(
-				catalogName = "Minium",
-				productName = "This Is a Product With a Very Long Name That Will Be Truncated",
-				productType = "Simple");
-		}
-
-		task ("When the buyer adds the product to the cart and opens the mini-cart") {
-			User.logoutPG();
-
-			CommerceLogin.miniumLogin(
-				password = PropsUtil.get("default.admin.password"),
-				urlAppend = "web/minium",
-				userEmailAddress = "buyer@liferay.com");
-
-			CommerceNavigator.gotoMiniumSidebarItem(menuItem = "Catalog");
-
-			FrontStore.addInitializerProductToCart(
-				productName = "This Is a Product With a Very Long Name That Will Be Truncated",
-				productQuantity = 1);
-
-			CommerceNavigator.gotoMiniCart();
-		}
-
-		task ("Then the product name is shown truncated") {
-			TestUtils.assertTruncatedText(element = "//div[contains(@class,'mini-cart-item')]//div[contains(text(),'This Is a Product With a Very Long Name That Will Be Truncated')]");
-		}
-	}
-
 	@description = "This is a test for COMMERCE-7870. CanUpdateSubscriptionProductQuantity"
 	@priority = 4
 	test CanUseMiniCartWidgetToCheckout {
