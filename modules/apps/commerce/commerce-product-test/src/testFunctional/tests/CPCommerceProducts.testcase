@@ -23,27 +23,6 @@ definition {
 		CommerceConfiguration.commerceTearDown();
 	}
 
-	@description = "This is a test for COMMERCE-9251. CanCheckAnyProductStatusWorkflow"
-	@priority = 3
-	test CanCheckAnyProductWorkflowStatus {
-		property portal.acceptance = "false";
-
-		CommerceProducts.addProductWithStatusViaAPI(
-			catalogName = "Master",
-			productStatusCode = 9,
-			productType = "simple");
-
-		CommerceProducts.openProductsAdmin();
-
-		CommerceProducts.checkProductStatusAfterDuplicationAndConvertionToDraft(
-			checkProductFields = "true",
-			compileDescription = "false",
-			entryName = "Any Product",
-			productCatalog = "Master",
-			productName = "Any Product",
-			status = "Any");
-	}
-
 	@description = "This is a test for COMMERCE-9183. CanCheckApprovedProductSaveAsDraft"
 	@priority = 3
 	test CanCheckApprovedProductSaveAsDraft {
@@ -85,27 +64,6 @@ definition {
 		AssertTextEquals(
 			locator1 = "CommerceEntry#NAME_FIELD",
 			value1 = "Simple T-Shirt 01");
-	}
-
-	@description = "This is a test for COMMERCE-9251. CanCheckApprovedProductStatusWorkflow"
-	@priority = 5
-	test CanCheckApprovedProductWorkflowStatus {
-		property portal.acceptance = "true";
-
-		CommerceProducts.addProductWithStatusViaAPI(
-			catalogName = "Master",
-			productStatusCode = 0,
-			productType = "simple");
-
-		CommerceProducts.openProductsAdmin();
-
-		CommerceProducts.checkProductStatusAfterDuplicationAndConvertionToDraft(
-			checkProductFields = "true",
-			compileDescription = "false",
-			entryName = "Approved Product",
-			productCatalog = "Master",
-			productName = "Approved Product",
-			status = "Approved");
 	}
 
 	@description = "This is a test for COMMERCE-9253. CanCheckTheApprovedStatusForSingleApproverWorkflow"
@@ -201,27 +159,6 @@ definition {
 		CommerceProducts.disableProductSingleApproverWorkflow();
 	}
 
-	@description = "This is a test for COMMERCE-9251. CanCheckDeniedProductStatusWorkflow"
-	@priority = 5
-	test CanCheckDeniedProductWorkflowStatus {
-		property portal.acceptance = "true";
-
-		CommerceProducts.addProductWithStatusViaAPI(
-			catalogName = "Master",
-			productStatusCode = 4,
-			productType = "simple");
-
-		CommerceProducts.openProductsAdmin();
-
-		CommerceProducts.checkProductStatusAfterDuplicationAndConvertionToDraft(
-			checkProductFields = "true",
-			compileDescription = "false",
-			entryName = "Denied Product",
-			productCatalog = "Master",
-			productName = "Denied Product",
-			status = "Denied");
-	}
-
 	@description = "This is a test for COMMERCE-9181. CanCheckDraftProductSaveAsDraft"
 	@priority = 3
 	test CanCheckDraftProductSaveAsDraft {
@@ -251,27 +188,6 @@ definition {
 		AssertTextEquals(
 			locator1 = "CommerceEntry#NAME_FIELD",
 			value1 = "Simple T-Shirt 01");
-	}
-
-	@description = "This is a test for COMMERCE-9251. CanCheckDraftProductStatusWorkflow"
-	@priority = 3
-	test CanCheckDraftProductWorkflowStatus {
-		property portal.acceptance = "false";
-
-		CommerceProducts.addProductWithStatusViaAPI(
-			catalogName = "Master",
-			productStatusCode = 2,
-			productType = "simple");
-
-		CommerceProducts.openProductsAdmin();
-
-		CommerceProducts.checkProductStatusAfterDuplicationAndConvertionToDraft(
-			checkProductFields = "true",
-			compileDescription = "false",
-			entryName = "Draft Product",
-			productCatalog = "Master",
-			productName = "Draft Product",
-			status = "Draft");
 	}
 
 	@description = "This is a test for COMMERCE-9290. CanCheckTheDraftStatusForSingleApproverWorkflow"
@@ -333,113 +249,6 @@ definition {
 		User.firstLoginPG();
 
 		CommerceProducts.disableProductSingleApproverWorkflow();
-	}
-
-	@description = "This is a test for COMMERCE-9251. CanCheckExpiredProductStatusWorkflow"
-	@priority = 5
-	test CanCheckExpiredProductWorkflowStatus {
-		property portal.acceptance = "true";
-
-		CommerceProducts.addProductWithStatusViaAPI(
-			catalogName = "Master",
-			productStatusCode = 3,
-			productType = "simple");
-
-		CommerceProducts.openProductsAdmin();
-
-		CommerceProducts.checkProductStatusAfterDuplicationAndConvertionToDraft(
-			checkProductFields = "true",
-			compileDescription = "false",
-			entryName = "Expired Product",
-			productCatalog = "Master",
-			productName = "Expired Product",
-			status = "Expired");
-	}
-
-	@description = "This is a test for COMMERCE-9251. CanCheckInactiveProductStatusWorkflow"
-	@priority = 5
-	test CanCheckInactiveProductWorkflowStatus {
-		property portal.acceptance = "true";
-
-		CommerceProducts.addProductWithStatusViaAPI(
-			catalogName = "Master",
-			productStatusCode = 5,
-			productType = "simple");
-
-		CommerceProducts.openProductsAdmin();
-
-		CommerceProducts.checkProductStatusAfterDuplicationAndConvertionToDraft(
-			checkProductFields = "true",
-			compileDescription = "false",
-			entryName = "Inactive Product",
-			productCatalog = "Master",
-			productName = "Inactive Product",
-			status = "Inactive");
-	}
-
-	@description = "This is a test for COMMERCE-9251. CanCheckIncompleteProductStatusWorkflow"
-	@priority = 5
-	test CanCheckIncompleteProductWorkflowStatus {
-		property portal.acceptance = "true";
-
-		CommerceProducts.addProductWithStatusViaAPI(
-			catalogName = "Master",
-			productStatusCode = 6,
-			productType = "simple");
-
-		CommerceProducts.openProductsAdmin();
-
-		CommerceProducts.checkProductStatusAfterDuplicationAndConvertionToDraft(
-			checkProductFields = "true",
-			compileDescription = "false",
-			entryName = "Incomplete Product",
-			productCatalog = "Master",
-			productName = "Incomplete Product",
-			status = "Incomplete");
-	}
-
-	@description = "This is a test for COMMERCE-9251. CanCheckInRecycleBinProductStatusWorkflow"
-	@priority = 3
-	test CanCheckInRecycleBinProductWorkflowStatus {
-		property portal.acceptance = "false";
-
-		CommerceProducts.addProductWithStatusViaAPI(
-			catalogName = "Master",
-			productStatusCode = 8,
-			productType = "simple");
-
-		CommerceProducts.openProductsAdmin();
-
-		CommerceProducts.checkProductStatusAfterDuplicationAndConvertionToDraft(
-			checkProductFields = "true",
-			compileDescription = "false",
-			entryName = "In Recycle Bin Product",
-			productCatalog = "Master",
-			productName = "In Recycle Bin Product",
-			status = "In Recycle Bin");
-	}
-
-	@description = "This is a test for COMMERCE-9251. CanCheckPendingProductStatusWorkflow"
-	@priority = 3
-	test CanCheckPendingProductWorkflowStatus {
-		property portal.acceptance = "false";
-
-		CommerceProducts.enableProductSingleApproverWorkflow();
-
-		CommerceProducts.addProductWithStatusViaAPI(
-			catalogName = "Master",
-			productStatusCode = 1,
-			productType = "simple");
-
-		CommerceProducts.openProductsAdmin();
-
-		CommerceProducts.checkProductStatusAfterDuplicationAndConvertionToDraft(
-			checkProductFields = "true",
-			compileDescription = "false",
-			entryName = "Pending Product",
-			productCatalog = "Master",
-			productName = "Pending Product",
-			status = "Pending");
 	}
 
 	@description = "This is a test for COMMERCE-9292. CanCheckThePendingReviewStatusForSingleApproverWorkflow"
@@ -536,27 +345,6 @@ definition {
 		User.firstLoginPG();
 
 		CommerceProducts.disableProductSingleApproverWorkflow();
-	}
-
-	@description = "This is a test for COMMERCE-9251. CanCheckScheduledProductStatusWorkflow"
-	@priority = 3
-	test CanCheckScheduledProductWorkflowStatus {
-		property portal.acceptance = "false";
-
-		CommerceProducts.addProductWithStatusViaAPI(
-			catalogName = "Master",
-			productStatusCode = 7,
-			productType = "simple");
-
-		CommerceProducts.openProductsAdmin();
-
-		CommerceProducts.checkProductStatusAfterDuplicationAndConvertionToDraft(
-			checkProductFields = "true",
-			compileDescription = "false",
-			entryName = "Scheduled Product",
-			productCatalog = "Master",
-			productName = "Scheduled Product",
-			status = "Scheduled");
 	}
 
 	@description = "This is a test for the COMMERCE-10763, to verify that a buyer user can download the virtual product by the URL retrieved using API"

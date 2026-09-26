@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import {expect, mergeTests} from '@playwright/test';
+import {Page, expect, mergeTests} from '@playwright/test';
 
 import {apiHelpersTest} from '../../../../fixtures/apiHelpersTest';
 import {commercePagesTest} from '../../../../fixtures/commercePagesTest';
@@ -11,6 +11,9 @@ import {dataApiHelpersTest} from '../../../../fixtures/dataApiHelpersTest';
 import {isolatedSiteTest} from '../../../../fixtures/isolatedSiteTest';
 import {loginTest} from '../../../../fixtures/loginTest';
 import {userPersonalBarPagesTest} from '../../../../fixtures/userPersonalBarPagesTest';
+import {DataApiHelpers} from '../../../../helpers/ApiHelpers';
+import {CommerceAdminProductDetailsPage} from '../../../../pages/commerce/commerce-product-definitions-web/commerceAdminProductDetailsPage';
+import {CommerceAdminProductPage} from '../../../../pages/commerce/commerce-product-definitions-web/commerceAdminProductPage';
 import {clickAndExpectToBeVisible} from '../../../../utils/clickAndExpectToBeVisible';
 import getRandomString from '../../../../utils/getRandomString';
 import {userData} from '../../../../utils/performLogin';
@@ -25,6 +28,133 @@ export const test = mergeTests(
 	loginTest(),
 	userPersonalBarPagesTest
 );
+
+async function checkProductStatusAfterDuplicationAndConversionToDraft({
+	apiHelpers,
+	commerceAdminProductDetailsPage,
+	commerceAdminProductPage,
+	page,
+	productStatus,
+	status,
+}: {
+	apiHelpers: DataApiHelpers;
+	commerceAdminProductDetailsPage: CommerceAdminProductDetailsPage;
+	commerceAdminProductPage: CommerceAdminProductPage;
+	page: Page;
+	productStatus: number;
+	status: string;
+}) {
+	const catalog = await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+	const product = await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+		catalogId: catalog.id,
+		productStatus,
+	});
+
+	const productName = product.name['en_US'];
+
+	const workflowStatus = (label: string) =>
+		page.locator('.workflow-status').getByText(label, {exact: true});
+
+	try {
+		await commerceAdminProductPage.gotoProduct(productName);
+
+		await expect(workflowStatus(status)).toBeVisible();
+
+		if (status === 'Draft') {
+			await expect(
+				commerceAdminProductDetailsPage.saveAsDraftLink
+			).toBeVisible();
+		}
+		else {
+			await expect(
+				commerceAdminProductDetailsPage.saveAsDraftLink
+			).toHaveCount(0);
+		}
+
+		await commerceAdminProductDetailsPage.headerActionsButton.click();
+		await commerceAdminProductDetailsPage
+			.headerActionsMenuItem('Duplicate')
+			.click();
+
+		const duplicateFrame = page.frameLocator('iframe[title="Duplicate"]');
+
+		await duplicateFrame.getByPlaceholder('Type Here').fill(catalog.name);
+		await duplicateFrame
+			.getByRole('menuitem', {exact: true, name: catalog.name})
+			.click();
+		await duplicateFrame
+			.getByRole('button', {exact: true, name: 'Submit'})
+			.click();
+
+		await expect(commerceAdminProductDetailsPage.nameInput).toHaveValue(
+			`Copy of ${productName}`
+		);
+		await expect(workflowStatus('Draft')).toBeVisible();
+
+		await commerceAdminProductPage.gotoProduct(productName);
+
+		if (status === 'Draft') {
+			await expect(
+				commerceAdminProductDetailsPage.saveAsDraftLink
+			).toBeVisible();
+
+			await commerceAdminProductDetailsPage.headerActionsButton.click();
+
+			await expect(
+				commerceAdminProductDetailsPage.headerActionsMenuItem(
+					'Convert to Draft'
+				)
+			).toHaveCount(0);
+
+			return;
+		}
+
+		await expect(
+			commerceAdminProductDetailsPage.saveAsDraftLink
+		).toHaveCount(0);
+
+		page.once('dialog', (dialog) => dialog.dismiss());
+
+		await commerceAdminProductDetailsPage.headerActionsButton.click();
+		await commerceAdminProductDetailsPage
+			.headerActionsMenuItem('Convert to Draft')
+			.click();
+
+		await expect(workflowStatus(status)).toBeVisible();
+
+		page.once('dialog', async (dialog) => {
+			expect(dialog.message()).toBe(
+				'Converting the product status to draft will remove the product from the product catalog. Do you wish to proceed?'
+			);
+
+			await dialog.accept();
+		});
+
+		await commerceAdminProductDetailsPage.headerActionsButton.click();
+		await commerceAdminProductDetailsPage
+			.headerActionsMenuItem('Convert to Draft')
+			.click();
+
+		await expect(
+			commerceAdminProductDetailsPage.saveAsDraftLink
+		).toBeVisible();
+		await expect(workflowStatus('Draft')).toBeVisible();
+	}
+	finally {
+		const copyProduct = (
+			await apiHelpers.headlessCommerceAdminCatalog.getProducts(
+				new URLSearchParams({
+					filter: `name eq 'Copy of ${productName}'`,
+				})
+			)
+		).items[0];
+
+		if (copyProduct) {
+			apiHelpers.data.push({id: copyProduct.productId, type: 'product'});
+		}
+	}
+}
 
 test(
 	'Add, edit, and delete a SKU',
@@ -833,3 +963,64 @@ for (const {productType, tags} of [
 		}
 	);
 }
+
+for (const {productStatus, status} of [
+	{productStatus: 0, status: 'Approved'},
+	{productStatus: 2, status: 'Draft'},
+	{productStatus: 3, status: 'Expired'},
+	{productStatus: 4, status: 'Denied'},
+	{productStatus: 5, status: 'Inactive'},
+	{productStatus: 6, status: 'Incomplete'},
+	{productStatus: 7, status: 'Scheduled'},
+	{productStatus: 8, status: 'In Recycle Bin'},
+	{productStatus: 9, status: 'Any'},
+]) {
+	test(
+		`A product with ${status} status can be duplicated and converted to draft`,
+		{tag: ['@COMMERCE-9251', '@LPD-106244-Grouped-23']},
+		async ({
+			apiHelpers,
+			commerceAdminProductDetailsPage,
+			commerceAdminProductPage,
+			page,
+		}) => {
+			await checkProductStatusAfterDuplicationAndConversionToDraft({
+				apiHelpers,
+				commerceAdminProductDetailsPage,
+				commerceAdminProductPage,
+				page,
+				productStatus,
+				status,
+			});
+		}
+	);
+}
+
+test(
+	'A product with Pending status can be duplicated and converted to draft',
+	{tag: ['@COMMERCE-9251', '@LPD-106244-Grouped-23']},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductPage,
+		page,
+		userPersonalBarPage,
+	}) => {
+		await userPersonalBarPage.goToProcessBuilderConfigurationTab();
+		await userPersonalBarPage.enableSingleApproverWorkflowProduct();
+
+		try {
+			await checkProductStatusAfterDuplicationAndConversionToDraft({
+				apiHelpers,
+				commerceAdminProductDetailsPage,
+				commerceAdminProductPage,
+				page,
+				productStatus: 1,
+				status: 'Pending',
+			});
+		}
+		finally {
+			await userPersonalBarPage.disableSingleApproverWorkflowProduct();
+		}
+	}
+);
