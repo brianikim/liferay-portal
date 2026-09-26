@@ -373,6 +373,110 @@ test(
 );
 
 test(
+	'Accounts created in flow become active and can be searched and selected in the account selector',
+	{tag: ['@COMMERCE-5956', '@COMMERCE-9022', '@LPD-106244-Grouped-10']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelsPage,
+		commerceThemeMiniumCatalogPage,
+		page,
+		site,
+	}) => {
+		const layout = await apiHelpers.headlessDelivery.createSitePage({
+			pageDefinition: getPageDefinition([
+				getFragmentDefinition({
+					id: getRandomString(),
+					key: 'COMMERCE_ACCOUNT_FRAGMENTS-account-selector',
+				}),
+			]),
+			siteId: site.id,
+			title: getRandomString(),
+		});
+
+		const channel =
+			await apiHelpers.headlessCommerceAdminChannel.postChannel({
+				siteGroupId: site.id,
+			});
+
+		await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+			channel.name,
+			'B2B'
+		);
+
+		await page.goto(`/web/${site.name}/${layout.friendlyUrlPath}`, {
+			waitUntil: 'networkidle',
+		});
+
+		const accountNamePrefix = getRandomString();
+
+		const firstAccountName = `${accountNamePrefix} First Account`;
+		const secondAccountName = `${accountNamePrefix} Second Account`;
+
+		for (const accountName of [firstAccountName, secondAccountName]) {
+			await commerceThemeMiniumCatalogPage.openAccountSelectorDropdown();
+
+			await clickAndExpectToBeVisible({
+				target: commerceThemeMiniumCatalogPage.createNewAccountModal,
+				trigger: commerceThemeMiniumCatalogPage.createNewAccountButton,
+			});
+
+			await commerceThemeMiniumCatalogPage.createNewAccountModalNameInput.fill(
+				accountName
+			);
+
+			await clickAndExpectToBeHidden({
+				target: commerceThemeMiniumCatalogPage.createNewAccountModal,
+				trigger:
+					commerceThemeMiniumCatalogPage.createNewAccountModalCreateButton,
+			});
+
+			await expect(
+				commerceThemeMiniumCatalogPage.accountSelectorSelectedAccount
+			).toHaveText(accountName);
+
+			const account =
+				await apiHelpers.headlessAdminUser.getAccountByName(
+					accountName
+				);
+
+			apiHelpers.data.push({id: account.id, type: 'account'});
+		}
+
+		await commerceThemeMiniumCatalogPage.openAccountSelectorDropdown();
+
+		await commerceThemeMiniumCatalogPage.accountSelectorSearchAccountInput.fill(
+			accountNamePrefix
+		);
+
+		for (const accountName of [firstAccountName, secondAccountName]) {
+			await expect(
+				commerceThemeMiniumCatalogPage.accountSelectorAccount(
+					accountName
+				)
+			).toBeVisible();
+		}
+
+		await commerceThemeMiniumCatalogPage.accountSelectorSearchAccountInput.fill(
+			firstAccountName
+		);
+
+		await expect(
+			commerceThemeMiniumCatalogPage.accountSelectorAccount(
+				secondAccountName
+			)
+		).toBeHidden();
+
+		await commerceThemeMiniumCatalogPage
+			.accountSelectorAccount(firstAccountName)
+			.click();
+
+		await expect(
+			commerceThemeMiniumCatalogPage.accountSelectorSelectedAccount
+		).toHaveText(firstAccountName);
+	}
+);
+
+test(
 	'Correct current order is fetched when creating an order with an impersonated user and then impersonating a second user',
 	{tag: ['@LPD-59082', '@LPP-59365']},
 	async ({
