@@ -4,7 +4,7 @@
  */
 
 import {expect, mergeTests} from '@playwright/test';
-import {createReadStream} from 'fs';
+import {createReadStream, readFileSync} from 'fs';
 import path from 'node:path';
 
 import {accountsPagesTest} from '../../../../fixtures/accountsPagesTest';
@@ -2207,5 +2207,52 @@ test(
 		await expect(
 			await productDetailsPage.priceField('$ 10.00')
 		).toBeVisible();
+	}
+);
+
+test(
+	'Product subscription information is shown on the product details page',
+	{tag: ['@COMMERCE-5312', '@LPD-106244-Grouped-31']},
+	async ({apiHelpers, page, productDetailsPage}) => {
+		const {product, site} = await apiStorefrontSetUp(apiHelpers, [
+			{
+				title: getRandomString(),
+				widgetName:
+					'com_liferay_commerce_product_content_web_internal_portlet_CPContentPortlet',
+			},
+		]);
+
+		await apiHelpers.headlessCommerceAdminCatalog.patchProductSubscriptionConfiguration(
+			product.productId,
+			{
+				deliverySubscriptionEnable: true,
+				deliverySubscriptionLength: 5,
+				deliverySubscriptionType: 'monthly',
+				deliverySubscriptionTypeSettings: {deliveryMonthlyMode: 0},
+				enable: true,
+				length: 5,
+				subscriptionType: 'yearly',
+				subscriptionTypeSettings: {yearlyMode: 0},
+			}
+		);
+
+		await page.goto(
+			`/web${site.friendlyUrlPath}/p/${product.urls['en_US']}`
+		);
+
+		await expect(
+			await productDetailsPage.nameField(product.name['en_US'])
+		).toBeVisible();
+
+		for (const [subscriptionName, subscriptionPeriod] of [
+			['Delivery Subscription', 'Every 5 Months'],
+			['Payment Subscription', 'Every 5 Years'],
+		]) {
+			await expect(
+				page
+					.locator('.commerce-subscription-info .row')
+					.filter({hasText: subscriptionName})
+			).toContainText(subscriptionPeriod);
+		}
 	}
 );
