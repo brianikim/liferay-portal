@@ -6,6 +6,9 @@
 package com.liferay.commerce.product.search.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.commerce.price.list.model.CommercePriceList;
+import com.liferay.commerce.price.list.service.CommercePriceListLocalService;
+import com.liferay.commerce.product.constants.CPField;
 import com.liferay.commerce.product.model.CPDefinition;
 import com.liferay.commerce.product.model.CPInstance;
 import com.liferay.commerce.product.model.CommerceCatalog;
@@ -13,6 +16,7 @@ import com.liferay.commerce.product.service.CPDefinitionLocalService;
 import com.liferay.commerce.product.service.CPInstanceLocalService;
 import com.liferay.commerce.product.service.CommerceCatalogLocalService;
 import com.liferay.commerce.product.test.util.CPTestUtil;
+import com.liferay.commerce.test.util.price.list.CommercePriceEntryTestUtil;
 import com.liferay.expando.kernel.model.ExpandoColumn;
 import com.liferay.expando.kernel.model.ExpandoColumnConstants;
 import com.liferay.expando.kernel.model.ExpandoTable;
@@ -35,13 +39,18 @@ import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
+import com.liferay.portal.kernel.test.util.TestPropsValues;
+import com.liferay.portal.kernel.util.BigDecimalUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.search.test.util.HitsAssert;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
+
+import java.math.BigDecimal;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -99,6 +108,61 @@ public class CPDefinitionIndexerTest {
 			expectedValue,
 			document.get(
 				"expando__keyword__custom_fields__" + _EXPANDO_COLUMN_NAME));
+	}
+
+	@Test
+	public void testGetDocumentWithExpiredCPInstance() throws Exception {
+		CommerceCatalog commerceCatalog =
+			_commerceCatalogLocalService.addCommerceCatalog(
+				null, RandomTestUtil.randomString(),
+				RandomTestUtil.randomString(),
+				LocaleUtil.US.getDisplayLanguage(),
+				ServiceContextTestUtil.getServiceContext(_group.getGroupId()));
+
+		CPInstance expiredCPInstance = CPTestUtil.addCPInstanceFromCatalog(
+			commerceCatalog.getGroupId(), BigDecimal.valueOf(75),
+			RandomTestUtil.randomString());
+
+		BigDecimal price = BigDecimal.valueOf(750);
+
+		CPInstance cpInstance = CPTestUtil.addCPDefinitionCPInstanceWithPrice(
+			expiredCPInstance.getCPDefinitionId(), Collections.emptyMap(),
+			price);
+
+		CommercePriceList commercePriceList =
+			_commercePriceListLocalService.fetchCatalogBaseCommercePriceList(
+				commerceCatalog.getGroupId());
+
+		CPDefinition cpDefinition = cpInstance.getCPDefinition();
+
+		CommercePriceEntryTestUtil.addCommercePriceEntry(
+			null, cpDefinition.getCProductId(), cpInstance.getCPInstanceUuid(),
+			commercePriceList.getCommercePriceListId(), price);
+
+		expiredCPInstance = _cpInstanceLocalService.getCPInstance(
+			expiredCPInstance.getCPInstanceId());
+
+		Assert.assertEquals(
+			WorkflowConstants.STATUS_EXPIRED, expiredCPInstance.getStatus());
+
+		Assert.assertTrue(cpInstance.isApproved());
+
+		Document document = _indexer.getDocument(cpDefinition);
+
+		Assert.assertTrue(
+			BigDecimalUtil.eq(
+				price, new BigDecimal(document.get(CPField.BASE_PRICE))));
+		Assert.assertArrayEquals(
+			new String[] {cpInstance.getSku()},
+			document.getValues(CPField.SKUS));
+
+		_cpInstanceLocalService.updateStatus(
+			TestPropsValues.getUserId(), cpInstance.getCPInstanceId(),
+			WorkflowConstants.STATUS_EXPIRED);
+
+		document = _indexer.getDocument(cpDefinition);
+
+		Assert.assertFalse(document.hasField(CPField.BASE_PRICE));
 	}
 
 	@Test
@@ -283,6 +347,9 @@ public class CPDefinitionIndexerTest {
 
 	@Inject
 	private CommerceCatalogLocalService _commerceCatalogLocalService;
+
+	@Inject
+	private CommercePriceListLocalService _commercePriceListLocalService;
 
 	@Inject
 	private CPDefinitionLocalService _cpDefinitionLocalService;
