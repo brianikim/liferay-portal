@@ -123,48 +123,119 @@ test('LPD-26249 Configure options and Product options', async ({
 	).toBeVisible();
 });
 
-test('LPD-45740 Product options can be added from product admins', async ({
-	apiHelpers,
-	commerceAdminProductDetailsPage,
-	commerceAdminProductDetailsProductOptionsPage,
-	commerceAdminProductPage,
-	page,
-}) => {
-	await page.goto('/');
+test(
+	'LPD-45740 Product options can be added from product admins',
+	{tag: ['@COMMERCE-6017', '@COMMERCE-6269', '@LPD-106244-Grouped-16']},
+	async ({
+		apiHelpers,
+		commerceAdminOptionsPage,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductDetailsProductOptionsPage,
+		commerceAdminProductPage,
+		globalMenuPage,
+		page,
+	}) => {
+		await page.goto('/');
 
-	const catalog = await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
 
-	const product = await apiHelpers.headlessCommerceAdminCatalog.postProduct({
-		catalogId: catalog.id,
-		name: {en_US: 'Simple T-Shirt'},
-	});
+		const product =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				name: {en_US: 'Simple T-Shirt'},
+			});
 
-	await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+		await commerceAdminProductPage.gotoProduct(product.name['en_US']);
 
-	await commerceAdminProductDetailsPage.goToProductOptions();
+		await commerceAdminProductDetailsPage.goToProductOptions();
 
-	const optionName = getRandomString();
+		const optionNames = [];
 
-	await commerceAdminProductDetailsProductOptionsPage.addOptionsSearch.fill(
-		optionName
-	);
+		try {
+			for (const fieldType of [
+				'Text',
+				'Single Selection',
+				'Multiple Selection',
+				'Date',
+				'Numeric',
+				'Boolean',
+			]) {
+				const optionName = getRandomString();
 
-	await commerceAdminProductDetailsProductOptionsPage.createNewOptionsButton.click();
+				optionNames.push(optionName);
 
-	await waitForAlert(page, 'Success:Option Created');
+				await commerceAdminProductDetailsProductOptionsPage.addOptionsSearch.fill(
+					optionName
+				);
 
-	await page.reload();
+				await commerceAdminProductDetailsProductOptionsPage.createNewOptionsButton.click();
 
-	await expect(
-		(
-			await commerceAdminProductDetailsProductOptionsPage.tableRow(
-				0,
-				optionName,
-				true
-			)
-		).row
-	).toBeVisible();
-});
+				await waitForAlert(page, 'Success:Option Created');
+
+				await page.reload();
+
+				const optionRow = (
+					await commerceAdminProductDetailsProductOptionsPage.tableRow(
+						0,
+						optionName,
+						true
+					)
+				).row;
+
+				await expect(optionRow).toBeVisible();
+				await expect(optionRow).toContainText('Select from List');
+
+				await commerceAdminProductDetailsProductOptionsPage.openOption(
+					optionName
+				);
+
+				await commerceAdminProductDetailsProductOptionsPage.optionSidePanelFrame
+					.getByLabel('Field Type')
+					.selectOption({label: fieldType});
+				await commerceAdminProductDetailsProductOptionsPage.optionSidePanelFrame
+					.getByRole('button', {exact: true, name: 'Save'})
+					.click();
+
+				await waitForAlert(
+					commerceAdminProductDetailsProductOptionsPage.optionSidePanelFrame
+				);
+
+				await commerceAdminProductDetailsProductOptionsPage.closeOption();
+
+				await page.reload();
+
+				await expect(
+					(
+						await commerceAdminProductDetailsProductOptionsPage.tableRow(
+							0,
+							optionName,
+							true
+						)
+					).row
+				).toContainText(fieldType);
+			}
+
+			await globalMenuPage.goToCommerce('Options');
+
+			for (const optionName of optionNames) {
+				await expect(
+					commerceAdminOptionsPage.optionLink(optionName)
+				).toBeVisible();
+			}
+		}
+		finally {
+			const options =
+				await apiHelpers.headlessCommerceAdminCatalog.getOptions();
+
+			for (const option of options?.items ?? []) {
+				if (optionNames.includes(option.name['en_US'])) {
+					apiHelpers.data.push({id: option.id, type: 'option'});
+				}
+			}
+		}
+	}
+);
 
 test(
 	'Product options can be deleted from product admins',
