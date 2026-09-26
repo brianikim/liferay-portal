@@ -707,3 +707,84 @@ for (const {
 		}
 	);
 }
+
+test(
+	'Specification Facet keeps working when searching products with many specifications',
+	{tag: ['@COMMERCE-12191', '@LPD-106244-Grouped-21']},
+	async ({apiHelpers, page, site, specificationFacetsPage}) => {
+		const {catalogId, url} = await setUpFacetPage(
+			apiHelpers,
+			page,
+			specificationFacetsPage,
+			site
+		);
+
+		const specifications = [];
+
+		for (let index = 0; index < 21; index++) {
+			specifications.push(
+				await apiHelpers.headlessCommerceAdminCatalog.postSpecification(
+					true,
+					index,
+					'Spec' + getRandomString()
+				)
+			);
+		}
+
+		const productPlans = [
+			{
+				keyword: getRandomString(),
+				specifications: specifications.slice(0, 20),
+			},
+			{
+				keyword: getRandomString(),
+				specifications: [specifications[0], specifications[20]],
+			},
+		];
+
+		for (const productPlan of productPlans) {
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId,
+				name: {en_US: `${productPlan.keyword} Product`},
+				productSpecifications: productPlan.specifications.map(
+					(specification) => ({
+						specificationKey: specification.key,
+						value: {en_US: '0'},
+					})
+				),
+			});
+		}
+
+		await goToIndexedFacetPage(
+			page,
+			specificationFacetsPage,
+			url,
+			'Specification Facet',
+			specifications[0].key
+		);
+
+		await specificationFacetsPage.updateFacetConfiguration(
+			'Specification Facet',
+			{maxTerms: 20}
+		);
+
+		await specificationFacetsPage.closeFacetConfiguration();
+
+		for (const {keyword} of productPlans) {
+			await specificationFacetsPage.searchFormInput.fill(keyword);
+			await specificationFacetsPage.searchFormInput.press('Enter');
+
+			await expect(
+				specificationFacetsPage.facetPanel(
+					'Specification Facet',
+					specifications[0].key
+				)
+			).toBeVisible();
+			await expect(
+				page.getByText(
+					'Specification Facet is temporarily unavailable.'
+				)
+			).toHaveCount(0);
+		}
+	}
+);
