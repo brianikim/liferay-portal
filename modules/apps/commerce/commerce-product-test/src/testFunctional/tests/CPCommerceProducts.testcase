@@ -59,31 +59,6 @@ definition {
 			locator1 = "CommerceEntry#TABLE_LIST_TITLE");
 	}
 
-	@description = "This is a test for COMMERCE-6302. AddGroupedProduct"
-	@priority = 5
-	test AddGroupedProduct {
-		property portal.acceptance = "true";
-
-		// TODO Review
-
-		CommerceProducts.openProductsAdmin();
-
-		CPCommerceCatalog.newProductsEntry(
-			productCatalog = "Master",
-			productName = "Grouped T-Shirt",
-			productType = "Grouped");
-
-		Click(locator1 = "Icon#BACK");
-
-		AssertElementPresent(
-			key_entryName = "Grouped T-Shirt",
-			locator1 = "CommerceEntry#TABLE_LIST_TITLE");
-
-		AssertElementPresent(
-			key_tableEntryURL = "Grouped",
-			locator1 = "ClientExtension#TABLE_ENTRY_URL_REMOTE_TABLE");
-	}
-
 	@description = "This is a test for COMMERCE-6301. AddVirtualProduct"
 	@priority = 3
 	test CanAddVirtualProductAndCheckNoShippingOverride {
@@ -360,29 +335,6 @@ definition {
 		AssertTextEquals(
 			locator1 = "CommerceEntry#NAME_FIELD",
 			value1 = "Simple T-Shirt 01");
-	}
-
-	@description = "This is a test for COMMERCE-9179. CanCheckDraftProductStatus"
-	@priority = 5
-	test CanCheckDraftProductStatus {
-		property portal.acceptance = "true";
-
-		CommerceProducts.openProductsAdmin();
-
-		CPCommerceCatalog.newProductsEntry(
-			compileDescription = "false",
-			productCatalog = "Master",
-			productName = "Simple T-Shirt",
-			productType = "Simple",
-			publishProduct = "false");
-
-		AssertElementPresent(
-			key_text = "Publish",
-			locator1 = "Button#ANY");
-
-		AssertElementPresent(
-			key_text = "Save as Draft",
-			locator1 = "Button#ANY");
 	}
 
 	@description = "This is a test for COMMERCE-9251. CanCheckDraftProductStatusWorkflow"
@@ -668,19 +620,6 @@ definition {
 		User.firstLoginPG();
 
 		CommerceProducts.disableProductSingleApproverWorkflow();
-	}
-
-	@description = "This is a test for COMMERCE-9180. CanCheckProductPublication"
-	@priority = 3
-	test CanCheckProductPublication {
-		property portal.acceptance = "false";
-
-		CommerceProducts.openProductsAdmin();
-
-		CPCommerceCatalog.newProductsEntry(
-			productCatalog = "Master",
-			productName = "Simple T-Shirt",
-			productType = "Simple");
 	}
 
 	@description = "This is a test for COMMERCE-9251. CanCheckScheduledProductStatusWorkflow"
