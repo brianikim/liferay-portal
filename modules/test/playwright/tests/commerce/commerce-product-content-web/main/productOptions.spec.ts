@@ -4,6 +4,7 @@
  */
 
 import {expect, mergeTests} from '@playwright/test';
+import {readFileSync} from 'fs';
 import path from 'node:path';
 
 import {commercePagesTest} from '../../../../fixtures/commercePagesTest';
@@ -2146,12 +2147,10 @@ test(
 				optionName
 			);
 
-			await commerceAdminProductDetailsProductOptionsPage.optionSidePanelFrame
-				.getByRole('button', {exact: true, name: 'Value1 Actions'})
-				.click();
-			await commerceAdminProductDetailsProductOptionsPage.optionSidePanelFrame
-				.getByRole('menuitem', {exact: true, name: 'Toggle Default'})
-				.click();
+			await commerceAdminProductDetailsProductOptionsPage.clickOptionValueAction(
+				'Toggle Default',
+				'Value1'
+			);
 
 			await waitForAlert(
 				commerceAdminProductDetailsProductOptionsPage.optionSidePanelFrame
@@ -2212,5 +2211,112 @@ test(
 		await expect(
 			commerceMiniCartPage.miniCartItemShowOptionsButton(cartItem)
 		).toHaveCount(0);
+	}
+);
+
+test(
+	'The images bound to the selected option value are shown on the product details widget and the image gallery fragment',
+	{tag: ['@COMMERCE-12118', '@LPD-106244-Grouped-31']},
+	async ({
+		apiHelpers,
+		commerceAdminProductPage,
+		displayPageTemplatesPage,
+		page,
+		pageEditorPage,
+		productDetailsPage,
+	}) => {
+		const {catalog, site} = await apiStorefrontSetUp(apiHelpers, [
+			{
+				title: getRandomString(),
+				widgetName:
+					'com_liferay_commerce_product_content_web_internal_portlet_CPContentPortlet',
+			},
+		]);
+
+		const optionName = getRandomString();
+
+		const option = await apiHelpers.headlessCommerceAdminCatalog.postOption(
+			'select',
+			`select-${getRandomString().toLowerCase()}`,
+			optionName,
+			1
+		);
+
+		const imageTitles = {
+			black: getRandomString(),
+			white: getRandomString(),
+		};
+
+		const product =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				images: [
+					{fileName: 'liferay.png', optionValueKey: 'black'},
+					{
+						fileName: 'diagram-replacement.png',
+						optionValueKey: 'white',
+					},
+				].map(({fileName, optionValueKey}) => ({
+					attachment: readFileSync(
+						path.join(__dirname, 'dependencies', fileName)
+					).toString('base64'),
+					options: {[option.key]: optionValueKey},
+					title: {en_US: imageTitles[optionValueKey]},
+				})),
+				name: {en_US: getRandomString()},
+				productConfiguration: {allowBackOrder: true},
+				productOptions: [
+					{
+						fieldType: 'select',
+						key: option.key,
+						name: {en_US: optionName},
+						optionId: option.id,
+						priority: 1,
+						productOptionValues: [
+							{key: 'black', name: {en_US: 'Black'}, priority: 1},
+							{key: 'white', name: {en_US: 'White'}, priority: 2},
+						],
+						required: true,
+						skuContributor: true,
+					},
+				],
+			});
+
+		await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+		await commerceAdminProductPage.generateSkus();
+
+		const productURL = `/web${site.friendlyUrlPath}/p/${product.urls['en_US']}`;
+
+		await page.goto(productURL);
+
+		await expect(
+			page.getByRole('img', {name: imageTitles.black}).first()
+		).toBeVisible();
+
+		await productDetailsPage.selectOption('White', optionName);
+
+		await expect(
+			page.getByRole('img', {name: imageTitles.white}).first()
+		).toBeVisible();
+
+		await deployProductFragmentsOnDefaultDPT(apiHelpers, {
+			displayPageTemplatesPage,
+			fragmentNames: ['Image Gallery', 'Option Selector'],
+			pageEditorPage,
+			site,
+		});
+
+		await page.goto(productURL);
+
+		await expect(
+			page.getByRole('img', {name: imageTitles.black}).first()
+		).toBeVisible();
+
+		await page.getByRole('img', {name: imageTitles.white}).first().click();
+
+		await expect(
+			page.getByRole('img', {name: imageTitles.white}).first()
+		).toBeVisible();
 	}
 );
