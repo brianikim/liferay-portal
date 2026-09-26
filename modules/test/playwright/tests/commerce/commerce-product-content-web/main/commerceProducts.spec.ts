@@ -1898,3 +1898,80 @@ test(
 		});
 	}
 );
+
+test(
+	'A product image posted by URL through the API is shown in the products admin',
+	{tag: ['@COMMERCE-9448', '@LPD-106244-Grouped-23']},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsMediaPage,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductPage,
+		page,
+		site,
+	}) => {
+		const documentTitle = getRandomString();
+
+		const document = await apiHelpers.headlessDelivery.postDocument(
+			site.id,
+			createReadStream(path.join(__dirname, '/dependencies/liferay.png')),
+			{
+				fileName: `${documentTitle}.png`,
+				title: documentTitle,
+				viewableBy: 'Anyone',
+			}
+		);
+
+		apiHelpers.data.push({id: document.id, type: 'document'});
+
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		const imageTitle = getRandomString();
+		const productName = getRandomString();
+
+		const product =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				images: [
+					{
+						src: `${liferayConfig.environment.baseUrl}${document.contentUrl}`,
+						title: {en_US: imageTitle},
+					},
+				],
+				name: {en_US: productName},
+			});
+
+		expect(product.name['en_US']).toBe(productName);
+
+		await commerceAdminProductPage.goto();
+
+		await commerceAdminProductPage.managementToolbarSearchInput.fill(
+			productName
+		);
+		await commerceAdminProductPage.managementToolbarSearchInput.press(
+			'Enter'
+		);
+
+		await expect(
+			commerceAdminProductPage
+				.productsTableRow(productName)
+				.locator('img.sticker-img')
+		).toHaveAttribute('src', /account/);
+
+		await commerceAdminProductPage
+			.productsTableRowLink(productName)
+			.click();
+
+		await commerceAdminProductDetailsPage.productMediaLink.click();
+
+		await expect(
+			page.locator('img.sticker-img[src*="account"]').first()
+		).toBeVisible();
+		await expect(
+			commerceAdminProductDetailsMediaPage.mediaImagesTable
+				.getByRole('row')
+				.filter({hasText: imageTitle})
+		).toBeVisible();
+	}
+);
