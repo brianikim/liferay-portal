@@ -14,8 +14,10 @@ import com.liferay.commerce.product.data.source.CPDataSourceResult;
 import com.liferay.commerce.product.helper.CPDefinitionHelper;
 import com.liferay.commerce.product.model.CPDefinition;
 import com.liferay.commerce.product.model.CPInstance;
+import com.liferay.commerce.product.model.CPSpecificationOption;
 import com.liferay.commerce.product.model.CommerceCatalog;
 import com.liferay.commerce.product.service.CPDefinitionLocalService;
+import com.liferay.commerce.product.service.CPDefinitionSpecificationOptionValueLocalService;
 import com.liferay.commerce.product.service.CommerceCatalogLocalService;
 import com.liferay.commerce.product.test.util.CPTestUtil;
 import com.liferay.petra.function.transform.TransformUtil;
@@ -26,6 +28,7 @@ import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
+import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.CompanyTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
@@ -304,6 +307,56 @@ public class CPDefinitionHelperTest {
 	}
 
 	@Test
+	public void testSearchCPDefinitionsBySpecificationValue()
+		throws PortalException {
+
+		frutillaRule.scenario(
+			"Search for CPDefinitions by specification value"
+		).given(
+			"A collection of CPDefinitions with different specification values"
+		).when(
+			"I search for CPDefinitions given specification values as keywords"
+		).then(
+			"The results will contain only the products with matching values"
+		);
+
+		_cpSpecificationOption = CPTestUtil.addCPSpecificationOption(
+			_commerceCatalog.getGroupId(), true);
+
+		CPInstance[] cpInstances = _addCPInstances(
+			_commerceCatalog.getGroupId(), 3);
+
+		String[] values = new String[cpInstances.length];
+
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(
+				_commerceCatalog.getGroupId());
+
+		for (int i = 0; i < cpInstances.length; i++) {
+			values[i] = RandomTestUtil.randomString();
+
+			_cpDefinitionSpecificationOptionValueLocalService.
+				addCPDefinitionSpecificationOptionValue(
+					StringPool.BLANK, cpInstances[i].getCPDefinitionId(),
+					_cpSpecificationOption.getCPSpecificationOptionId(), 0,
+					RandomTestUtil.randomDouble(),
+					Collections.singletonMap(LocaleUtil.US, values[i]), true,
+					serviceContext);
+		}
+
+		Assert.assertEquals(
+			Collections.singleton(cpInstances[0].getCPDefinitionId()),
+			_searchCPDefinitionIds(values[0]));
+		Assert.assertEquals(
+			SetUtil.fromArray(
+				new long[] {
+					cpInstances[0].getCPDefinitionId(),
+					cpInstances[1].getCPDefinitionId()
+				}),
+			_searchCPDefinitionIds(values[0] + StringPool.SPACE + values[1]));
+	}
+
+	@Test
 	public void testSearchCPDefinitionsByStatus() throws Exception {
 		frutillaRule.scenario(
 			"Search for CPDefinitions by status"
@@ -386,5 +439,12 @@ public class CPDefinitionHelperTest {
 
 	@Inject
 	private CPDefinitionLocalService _cpDefinitionLocalService;
+
+	@Inject
+	private CPDefinitionSpecificationOptionValueLocalService
+		_cpDefinitionSpecificationOptionValueLocalService;
+
+	@DeleteAfterTestRun
+	private CPSpecificationOption _cpSpecificationOption;
 
 }
