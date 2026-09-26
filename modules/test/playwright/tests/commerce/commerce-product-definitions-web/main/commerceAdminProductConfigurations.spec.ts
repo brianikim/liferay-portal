@@ -1447,3 +1447,40 @@ test(
 		).toHaveCount(0);
 	}
 );
+
+test(
+	'Availability estimates can be added from the Availability Estimates admin',
+	{tag: '@LPD-106244-Grouped-29'},
+	async ({globalMenuPage, page}) => {
+		const title = getRandomString();
+
+		await globalMenuPage.goToCommerce('Availability Estimates');
+
+		try {
+			await page
+				.getByRole('link', {name: 'Add Availability Estimate'})
+				.click();
+
+			await page.getByLabel('Title', {exact: true}).fill(title);
+			await page.getByRole('button', {name: 'Save'}).click();
+
+			await waitForAlert(page);
+
+			await expect(page.getByRole('link', {name: title})).toBeVisible();
+		}
+		finally {
+			await globalMenuPage.goToCommerce('Availability Estimates');
+
+			page.once('dialog', (dialog) => dialog.accept());
+
+			await page
+				.getByRole('row')
+				.filter({hasText: title})
+				.getByRole('button')
+				.click();
+			await page.getByRole('menuitem', {name: 'Delete'}).click();
+
+			await waitForAlert(page);
+		}
+	}
+);
