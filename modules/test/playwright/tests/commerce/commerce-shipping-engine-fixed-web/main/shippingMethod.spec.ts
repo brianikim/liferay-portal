@@ -10,6 +10,7 @@ import {dataApiHelpersTest} from '../../../../fixtures/dataApiHelpersTest';
 import {isolatedSiteTest} from '../../../../fixtures/isolatedSiteTest';
 import {loginTest} from '../../../../fixtures/loginTest';
 import {pageViewModePagesTest} from '../../../../fixtures/pageViewModePagesTest';
+import {CommerceAdminChannelDetailsPage} from '../../../../pages/commerce/commerce-channel-web/commerceAdminChannelDetailsPage';
 import {getRandomInt} from '../../../../utils/getRandomInt';
 import getRandomString from '../../../../utils/getRandomString';
 import {waitForAlert} from '../../../../utils/waitForAlert';
@@ -167,6 +168,117 @@ test(
 		await expect(checkoutPage.shippingCost).toContainText('$ 1.50');
 	}
 );
+
+for (const {addShippingOption, shippingMethod, tags} of [
+	{
+		addShippingOption: (
+			commerceAdminChannelDetailsPage: CommerceAdminChannelDetailsPage,
+			name: string
+		) =>
+			commerceAdminChannelDetailsPage.addFlatRateShippingOption(
+				name,
+				'1',
+				'Standard Description',
+				'1'
+			),
+		shippingMethod: 'Flat Rate',
+		tags: ['@COMMERCE-6111', '@COMMERCE-6114'],
+	},
+	{
+		addShippingOption: (
+			commerceAdminChannelDetailsPage: CommerceAdminChannelDetailsPage,
+			name: string
+		) =>
+			commerceAdminChannelDetailsPage.addVariableRateShippingOption(name),
+		shippingMethod: 'Variable Rate',
+		tags: ['@COMMERCE-6110', '@COMMERCE-6112'],
+	},
+]) {
+	test(
+		`A shipping option can be added to and removed from the ${shippingMethod} shipping method`,
+		{tag: [...tags, '@LPD-106244-Grouped-7']},
+		async ({
+			apiHelpers,
+			commerceAdminChannelDetailsPage,
+			commerceAdminChannelsPage,
+			page,
+			site,
+		}) => {
+			const channel =
+				await apiHelpers.headlessCommerceAdminChannel.postChannel({
+					siteGroupId: site.id,
+				});
+
+			await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+				channel.name,
+				'B2B'
+			);
+
+			await commerceAdminChannelDetailsPage.deactivateChannelConfiguration(
+				shippingMethod,
+				'Shipping Methods'
+			);
+			await commerceAdminChannelDetailsPage.activateChannelConfiguration(
+				shippingMethod,
+				'Shipping Methods'
+			);
+
+			const shippingOptionName = getRandomString();
+
+			await addShippingOption(
+				commerceAdminChannelDetailsPage,
+				shippingOptionName
+			);
+
+			await (
+				await commerceAdminChannelDetailsPage.generalCommerceAdminChannelTableLink(
+					shippingMethod
+				)
+			).click();
+			await (
+				await commerceAdminChannelDetailsPage.shippingOptionsTab(
+					'Shipping Methods'
+				)
+			).click();
+
+			await expect(
+				await commerceAdminChannelDetailsPage.getRowByTextFromSidePanelTable(
+					'Shipping Methods',
+					shippingOptionName
+				)
+			).toBeVisible();
+
+			await (
+				await commerceAdminChannelDetailsPage.sidePanelFrameActionsButton(
+					'Shipping Methods',
+					shippingOptionName
+				)
+			).click();
+
+			page.once('dialog', (dialog) => dialog.accept());
+
+			await (
+				await commerceAdminChannelDetailsPage.sidePanelFrameDeleteMenuItem(
+					'Shipping Methods'
+				)
+			).click();
+
+			await waitForAlert(
+				await commerceAdminChannelDetailsPage.sidePanelFrame(
+					'Shipping Methods'
+				)
+			);
+
+			await expect(
+				(
+					await commerceAdminChannelDetailsPage.sidePanelFrame(
+						'Shipping Methods'
+					)
+				).getByText(shippingOptionName)
+			).toHaveCount(0);
+		}
+	);
+}
 
 test(
 	'Shipment tracking URL for an order can be updated and viewed',
