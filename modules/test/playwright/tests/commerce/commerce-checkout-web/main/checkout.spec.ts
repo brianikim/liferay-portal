@@ -3138,3 +3138,123 @@ test(
 		await expect(checkoutPage.orderSuccessMessage).toBeVisible();
 	}
 );
+
+test(
+	'Shipping options are offered according to their order type eligibility',
+	{tag: '@LPD-106244-Grouped-27'},
+	async ({
+		apiHelpers,
+		checkoutPage,
+		commerceAdminChannelDetailsPage,
+		commerceAdminChannelsPage,
+		orderDetailsPage,
+		page,
+		pendingOrdersPage,
+	}) => {
+		test.setTimeout(300000);
+
+		const {channel, product, site} = await apiStorefrontSetUp(apiHelpers, [
+			{
+				title: 'Checkout',
+				widgetName:
+					'com_liferay_commerce_checkout_web_internal_portlet_CommerceCheckoutPortlet',
+			},
+			{
+				title: 'Pending Orders',
+				widgetName:
+					'com_liferay_commerce_order_content_web_internal_portlet_CommerceOpenOrderContentPortlet',
+			},
+		]);
+
+		const orderType1 =
+			await apiHelpers.headlessCommerceAdminOrder.postOrderType({
+				active: true,
+			});
+		const orderType2 =
+			await apiHelpers.headlessCommerceAdminOrder.postOrderType({
+				active: true,
+			});
+
+		await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+			channel.name,
+			'B2B'
+		);
+
+		await waitForAlert(page);
+
+		await commerceAdminChannelDetailsPage.activateChannelConfiguration(
+			'Flat Rate',
+			'Shipping Methods'
+		);
+		await commerceAdminChannelDetailsPage.addFlatRateShippingOption(
+			'Expedited Delivery'
+		);
+		await commerceAdminChannelDetailsPage.addFlatRateShippingOption(
+			'Standard Delivery'
+		);
+
+		await (
+			await commerceAdminChannelDetailsPage.generalCommerceAdminChannelTableLink(
+				'Flat Rate'
+			)
+		).click();
+		await commerceAdminChannelDetailsPage.setEntryEligibility(
+			'Specific Order Types',
+			orderType1.name['en_US'],
+			'Shipping Methods',
+			'Standard Delivery'
+		);
+
+		for (const {orderType, standardDeliveryCount} of [
+			{orderType: orderType1, standardDeliveryCount: 1},
+			{orderType: orderType2, standardDeliveryCount: 0},
+		]) {
+			const {account, buyerUser} = await createAccountWithBuyerUser(
+				apiHelpers,
+				site.id
+			);
+
+			const cart = await apiHelpers.headlessCommerceDeliveryCart.postCart(
+				{
+					accountId: account.id,
+					cartItems: [
+						{
+							options: '[]',
+							quantity: 1,
+							skuId: product.skus[0].id,
+						},
+					],
+					orderTypeId: orderType.id,
+				},
+				channel.id
+			);
+
+			await performUserSwitch(page, buyerUser.alternateName);
+
+			await pendingOrdersPage.gotoOrder(site.friendlyUrlPath, cart.id);
+
+			await orderDetailsPage.checkoutButton.click();
+
+			await checkoutPage.addAddress({
+				city: 'Test City',
+				countryLabel: 'United States',
+				name: 'Test Name',
+				regionLabel: 'Florida',
+				street: 'Test Street',
+				zip: '12345',
+			});
+			await checkoutPage.continueButton.click();
+
+			await page.waitForURL((url) =>
+				url.href.includes('shipping-method')
+			);
+
+			await expect(
+				checkoutPage.shippingMethodRadio('Expedited Delivery')
+			).toBeVisible();
+			await expect(
+				checkoutPage.shippingMethodRadio('Standard Delivery')
+			).toHaveCount(standardDeliveryCount);
+		}
+	}
+);
