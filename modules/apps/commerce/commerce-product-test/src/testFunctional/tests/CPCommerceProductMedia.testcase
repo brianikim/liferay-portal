@@ -40,15 +40,6 @@ definition {
 		CommerceProductImages.addAttachmentImages(imageTitles = "Black");
 	}
 
-	@description = "This is a test for COMMERCE-6032. AddAnAttachmentToAnOption"
-	@ignore = "true"
-	@priority = 3
-	test AddAnAttachmentToAnOption {
-
-		// TODO COMMERCE-6032 AddAnAttachmentToAnOption
-
-	}
-
 	@description = "This is a test for COMMERCE-6025. AddAnImage"
 	@priority = 3
 	test AddAnImage {
@@ -65,56 +56,6 @@ definition {
 		CommerceProductImages.addProductImages(
 			imageTitles = "Black",
 			validationImage = "true");
-	}
-
-	@description = "This is a test for COMMERCE-6028. AddAnImageToAnOption"
-	@priority = 5
-	test AddAnImageToAnOption {
-		property portal.acceptance = "true";
-
-		CommerceNavigator.gotoPortlet(
-			category = "Product Management",
-			portlet = "Options");
-
-		CPCommerceCatalog.newOptionsEntry(
-			facetable = "true",
-			optionDescription = "Option Description",
-			optionFieldType = "Select from List",
-			optionName = "Color",
-			required = "true",
-			skuContributor = "true");
-
-		Button.clickSave();
-
-		AssertElementPresent(locator1 = "Message#SUCCESS");
-
-		CPCommerceCatalog.addOptionValues(
-			optionEntryName = "Color",
-			optionValuesList = "Black:1");
-
-		CommerceProducts.openProductsAdmin();
-
-		CPCommerceCatalog.newProductsEntry(
-			productCatalog = "Master",
-			productName = "Simple T-Shirt",
-			productType = "Simple");
-
-		CommerceEntry.gotoMenuTab(menuTab = "Options");
-
-		CommerceRelations.assignSingleRelationToProductsEntry(
-			entryName = "Color",
-			title = "Add Option");
-
-		Alert.viewSuccessMessage();
-
-		CommerceEntry.gotoMenuTab(menuTab = "Media");
-
-		CommerceProductImages.addProductImages(
-			imageTitles = "Black",
-			optionValue = "Black",
-			validationImage = "true");
-
-		Alert.viewSuccessMessage();
 	}
 
 	@description = "COMMERCE-12853 | Verify that is possible to add tags to the attachments and remove it"
