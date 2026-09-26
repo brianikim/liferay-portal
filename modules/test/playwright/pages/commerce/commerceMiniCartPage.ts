@@ -71,6 +71,7 @@ export class CommerceMiniCartPage {
 	) => Promise<Locator>;
 	readonly proceedAsGuest: Locator;
 	readonly quickAddToCartButton: Locator;
+	readonly quickAddToCartChip: (sku: string) => Locator;
 	readonly quickAddToCartSku: (sku: string) => Locator;
 	readonly requestAQuoteButton: Locator;
 	readonly reviewOrderButton: Locator;
@@ -245,6 +246,8 @@ export class CommerceMiniCartPage {
 			name: 'Review Order',
 		});
 		this.quickAddToCartButton = page.getByTestId('quickAddToCartButton');
+		this.quickAddToCartChip = (sku) =>
+			page.locator('.form-control-tag-group').getByText(sku);
 		this.quickAddToCartSku = (sku) =>
 			page.getByRole('menuitem', {name: sku});
 		this.selectOption = (optionLabel: string, optionName: string) =>
