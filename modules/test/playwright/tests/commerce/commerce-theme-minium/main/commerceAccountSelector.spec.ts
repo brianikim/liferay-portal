@@ -272,8 +272,8 @@ test(
 );
 
 test(
-	'Cancelling the in-flow account creation does not create the account',
-	{tag: ['@COMMERCE-9022', '@LPD-104785']},
+	'The in-flow account creation requires a name and cancelling it does not create the account',
+	{tag: ['@COMMERCE-9022', '@LPD-104785', '@LPD-106244-Grouped-10']},
 	async ({
 		apiHelpers,
 		commerceAdminChannelsPage,
@@ -319,6 +319,23 @@ test(
 				target: commerceThemeMiniumCatalogPage.createNewAccountModal,
 				trigger: commerceThemeMiniumCatalogPage.createNewAccountButton,
 			});
+		});
+
+		await test.step('Check that the account cannot be created without a name', async () => {
+			await commerceThemeMiniumCatalogPage.createNewAccountModalCreateButton.click();
+
+			expect(
+				await commerceThemeMiniumCatalogPage.createNewAccountModalNameInput.evaluate(
+					(element: HTMLInputElement) => element.validity.valueMissing
+				)
+			).toBe(true);
+
+			await expect(
+				commerceThemeMiniumCatalogPage.createNewAccountModal.getByRole(
+					'heading',
+					{name: 'Create New Account'}
+				)
+			).toBeVisible();
 		});
 
 		await test.step('Type an account name and cancel', async () => {
