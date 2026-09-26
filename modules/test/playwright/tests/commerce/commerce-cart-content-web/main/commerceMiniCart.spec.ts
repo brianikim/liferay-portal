@@ -39,6 +39,7 @@ import {
 	findSkuByOptionValueKeys,
 	getSkusByName,
 	miniumSetUp,
+	selectCurrentAccount,
 	setUpBrakeFluidUnitsOfMeasure,
 	unitOfMeasurePriceLabel,
 	zeroWarehouseStock,
@@ -3774,6 +3775,129 @@ test(
 			)
 			.getByText('Checkout', {exact: true})
 			.click();
+
+		await checkoutPage.addAddress({
+			city: 'Test City',
+			countryLabel: 'United States',
+			name: 'Test Name',
+			regionLabel: 'Florida',
+			street: 'Test Street',
+			zip: '12345',
+		});
+		await checkoutPage.continueButton.click();
+
+		await page.waitForURL((url) => url.href.includes('shipping-method'));
+
+		await checkoutPage.shippingMethodRadio('Standard Delivery').check();
+		await checkoutPage.continueButton.click();
+
+		await page.waitForURL((url) => url.href.includes('order-summary'));
+
+		await checkoutPage.continueButton.click();
+
+		await expect(checkoutPage.orderSuccessMessage).toBeVisible();
+	}
+);
+
+test(
+	'An account member approves and checks out an order from the Mini Cart widget under the buyer order approval workflow',
+	{tag: '@COMMERCE-10247'},
+	async ({
+		apiHelpers,
+		checkoutPage,
+		commerceAdminChannelDetailsPage,
+		commerceAdminChannelsPage,
+		page,
+		pendingOrdersPage,
+	}) => {
+		const {channel, product, site} = await apiStorefrontSetUp(apiHelpers, [
+			{
+				title: 'Checkout',
+				widgetName:
+					'com_liferay_commerce_checkout_web_internal_portlet_CommerceCheckoutPortlet',
+			},
+			{
+				title: 'Mini Cart',
+				widgetName:
+					'com_liferay_commerce_cart_content_web_internal_portlet_CommerceCartContentMiniPortlet',
+			},
+		]);
+
+		await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+			channel.name,
+			'B2B'
+		);
+
+		await waitForAlert(page);
+
+		await (
+			await commerceAdminChannelDetailsPage.generalCommerceAdminChannelTableLink(
+				'Flat Rate'
+			)
+		).click();
+		await commerceAdminChannelDetailsPage.activateChannelConfiguration(
+			'Flat Rate',
+			'Shipping Methods'
+		);
+		await commerceAdminChannelDetailsPage.addFlatRateShippingOption(
+			'Standard Delivery'
+		);
+
+		await commerceAdminChannelsPage.changeCommerceChannelBuyerOrderApprovalWorkflow(
+			'Single Approver (Version 1)',
+			channel.name
+		);
+
+		const account = await apiHelpers.headlessAdminUser.postAccount({
+			name: getRandomString(),
+			type: 'business',
+		});
+
+		await apiHelpers.headlessAdminUser.assignUserToAccountByEmailAddress(
+			account.id,
+			['test@liferay.com']
+		);
+
+		await apiHelpers.headlessCommerceDeliveryCart.postCart(
+			{
+				accountId: account.id,
+				cartItems: [
+					{options: '[]', quantity: 1, skuId: product.skus[0].id},
+				],
+			},
+			channel.id
+		);
+
+		await selectCurrentAccount(account.id, apiHelpers, site.id);
+
+		await page.goto(`/web${site.friendlyUrlPath}/mini-cart`, {
+			waitUntil: 'networkidle',
+		});
+
+		const miniCartPortlet = page.locator(
+			'#portlet_com_liferay_commerce_cart_content_web_internal_portlet_CommerceCartContentMiniPortlet'
+		);
+
+		await miniCartPortlet
+			.getByRole('button', {exact: true, name: 'Submit'})
+			.click();
+		await miniCartPortlet
+			.getByRole('button', {exact: true, name: 'Approve'})
+			.click();
+		await page.getByRole('button', {exact: true, name: 'Cancel'}).click();
+		await miniCartPortlet
+			.getByRole('button', {exact: true, name: 'Reject'})
+			.click();
+		await pendingOrdersPage.doneButton.click();
+		await miniCartPortlet
+			.getByRole('button', {exact: true, name: 'Resubmit'})
+			.click();
+		await pendingOrdersPage.doneButton.click();
+		await miniCartPortlet
+			.getByRole('button', {exact: true, name: 'Approve'})
+			.click();
+		await pendingOrdersPage.doneButton.click();
+		await miniCartPortlet.getByText('Checkout', {exact: true}).click();
 
 		await checkoutPage.addAddress({
 			city: 'Test City',
