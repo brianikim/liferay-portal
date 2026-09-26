@@ -3629,3 +3629,98 @@ test(
 		).toHaveValue('2');
 	}
 );
+
+test(
+	'A buyer checks out from the Mini Cart widget',
+	{tag: ['@COMMERCE-7870', '@LPD-106244-Grouped-19']},
+	async ({
+		apiHelpers,
+		checkoutPage,
+		commerceAdminChannelDetailsPage,
+		commerceAdminChannelsPage,
+		page,
+	}) => {
+		const {channel, product, site} = await apiStorefrontSetUp(apiHelpers, [
+			{
+				title: 'Checkout',
+				widgetName:
+					'com_liferay_commerce_checkout_web_internal_portlet_CommerceCheckoutPortlet',
+			},
+			{
+				title: 'Mini Cart',
+				widgetName:
+					'com_liferay_commerce_cart_content_web_internal_portlet_CommerceCartContentMiniPortlet',
+			},
+		]);
+
+		await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+			channel.name,
+			'B2B'
+		);
+
+		await waitForAlert(page);
+
+		await (
+			await commerceAdminChannelDetailsPage.generalCommerceAdminChannelTableLink(
+				'Flat Rate'
+			)
+		).click();
+		await commerceAdminChannelDetailsPage.activateChannelConfiguration(
+			'Flat Rate',
+			'Shipping Methods'
+		);
+		await commerceAdminChannelDetailsPage.addFlatRateShippingOption(
+			'Standard Delivery'
+		);
+
+		const {account, buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id
+		);
+
+		await performLogout(page);
+		await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+		await apiHelpers.headlessCommerceDeliveryCart.postCart(
+			{
+				accountId: account.id,
+				cartItems: [
+					{options: '[]', quantity: 1, skuId: product.skus[0].id},
+				],
+			},
+			channel.id
+		);
+
+		await page.goto(`/web${site.friendlyUrlPath}/mini-cart`, {
+			waitUntil: 'networkidle',
+		});
+
+		await page
+			.locator(
+				'#portlet_com_liferay_commerce_cart_content_web_internal_portlet_CommerceCartContentMiniPortlet'
+			)
+			.getByText('Checkout', {exact: true})
+			.click();
+
+		await checkoutPage.addAddress({
+			city: 'Test City',
+			countryLabel: 'United States',
+			name: 'Test Name',
+			regionLabel: 'Florida',
+			street: 'Test Street',
+			zip: '12345',
+		});
+		await checkoutPage.continueButton.click();
+
+		await page.waitForURL((url) => url.href.includes('shipping-method'));
+
+		await checkoutPage.shippingMethodRadio('Standard Delivery').check();
+		await checkoutPage.continueButton.click();
+
+		await page.waitForURL((url) => url.href.includes('order-summary'));
+
+		await checkoutPage.continueButton.click();
+
+		await expect(checkoutPage.orderSuccessMessage).toBeVisible();
+	}
+);
