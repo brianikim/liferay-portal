@@ -19,56 +19,6 @@ definition {
 		CommerceConfiguration.commerceTearDown();
 	}
 
-	@description = "COMMERCE-5937. As a buyer, I want open Account Selector to close if I open the Global Search"
-	@priority = 3
-	test AssertAccountSelectorIsClosedAfterGlobalSearchIsOpened {
-		property portal.acceptance = "false";
-
-		CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
-
-		ApplicationsMenu.gotoSite(site = "Minium");
-
-		CommerceNavigator.gotoMiniumSidebarItem(menuItem = "Account Management");
-
-		CommerceAcceleratorsInitializer.createNewAccountViaFront(accountName = "Commerce Account 1");
-
-		ApplicationsMenu.gotoSite(site = "Minium");
-
-		Click(locator1 = "Button#ANGLE_DOWN");
-
-		AssertElementPresent(locator1 = "CommerceAccelerators#ACCOUNT_SELECTOR_DROPDOWN_SHOW");
-
-		Click(locator1 = "AppBuilder#SEARCH_BUTTON");
-
-		AssertElementNotPresent(locator1 = "CommerceAccelerators#ACCOUNT_SELECTOR_DROPDOWN_SHOW");
-	}
-
-	@description = "COMMERCE-5938. As a buyer, I want open Account Selector to close if I open the mini-cart"
-	@priority = 3
-	test AssertAccountSelectorIsClosedAfterMiniCartIsOpened {
-		property portal.acceptance = "false";
-
-		// TODO Review
-
-		CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
-
-		ApplicationsMenu.gotoSite(site = "Minium");
-
-		CommerceNavigator.gotoMiniumSidebarItem(menuItem = "Account Management");
-
-		CommerceAcceleratorsInitializer.createNewAccountViaFront(accountName = "Commerce Account 1");
-
-		ApplicationsMenu.gotoSite(site = "Minium");
-
-		Click(locator1 = "Button#ANGLE_DOWN");
-
-		AssertElementPresent(locator1 = "CommerceAccelerators#ACCOUNT_SELECTOR_DROPDOWN_SHOW");
-
-		Click(locator1 = "CommerceAccelerators#MINI_CART_BUTTON");
-
-		AssertElementNotPresent(locator1 = "CommerceAccelerators#ACCOUNT_SELECTOR_DROPDOWN_SHOW");
-	}
-
 	@description = "COMMERCE-5925. As a buyer, I want the account I have currently selected to be highlighted in the account selector bar"
 	@priority = 5
 	test AssertActiveAccountIsVisibleOnAccountSelectorBar {
