@@ -22,6 +22,7 @@ import com.liferay.commerce.currency.test.util.CommerceCurrencyTestUtil;
 import com.liferay.commerce.inventory.model.CommerceInventoryWarehouse;
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.model.CommerceOrderItem;
+import com.liferay.commerce.model.CommerceOrderType;
 import com.liferay.commerce.price.CommerceOrderItemPrice;
 import com.liferay.commerce.price.CommerceOrderPriceCalculation;
 import com.liferay.commerce.price.CommerceProductPrice;
@@ -31,7 +32,10 @@ import com.liferay.commerce.price.list.model.CommercePriceEntry;
 import com.liferay.commerce.price.list.model.CommercePriceList;
 import com.liferay.commerce.price.list.service.CommercePriceEntryLocalService;
 import com.liferay.commerce.price.list.service.CommercePriceListAccountRelLocalService;
+import com.liferay.commerce.price.list.service.CommercePriceListChannelRelLocalService;
+import com.liferay.commerce.price.list.service.CommercePriceListCommerceAccountGroupRelLocalService;
 import com.liferay.commerce.price.list.service.CommercePriceListLocalService;
+import com.liferay.commerce.price.list.service.CommercePriceListOrderTypeRelLocalService;
 import com.liferay.commerce.price.list.test.util.CommercePriceEntryTestUtil;
 import com.liferay.commerce.price.list.test.util.CommercePriceListTestUtil;
 import com.liferay.commerce.pricing.configuration.CommercePricingConfiguration;
@@ -50,10 +54,12 @@ import com.liferay.commerce.product.model.CommerceChannel;
 import com.liferay.commerce.product.service.CommerceCatalogLocalService;
 import com.liferay.commerce.product.test.util.CPTestUtil;
 import com.liferay.commerce.service.CommerceOrderLocalService;
+import com.liferay.commerce.service.CommerceOrderTypeLocalService;
 import com.liferay.commerce.test.util.CommerceInventoryTestUtil;
 import com.liferay.commerce.test.util.CommerceTestUtil;
 import com.liferay.commerce.test.util.context.TestCommerceContext;
 import com.liferay.commerce.test.util.pricing.CommercePriceModifierTestUtil;
+import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.test.util.ConfigurationTemporarySwapper;
 import com.liferay.portal.kernel.model.Group;
@@ -64,6 +70,7 @@ import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
+import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.LocaleUtil;
@@ -73,6 +80,8 @@ import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+
+import java.util.Calendar;
 
 import org.frutilla.FrutillaRule;
 
@@ -392,6 +401,81 @@ public class CommercePricingTest {
 				commerceContext, cpInstance, false, false,
 				BigDecimal.valueOf(30), BigDecimal.TEN);
 		}
+	}
+
+	@Test
+	public void testGetCommerceProductPriceWithPriceOnApplicationEligibility()
+		throws Exception {
+
+		CommerceContext commerceContext = new TestCommerceContext(
+			_accountEntry, _commerceCurrency, _commerceChannel, _user, _group,
+			null);
+
+		AccountEntry accountEntry =
+			CommerceAccountTestUtil.addBusinessAccountEntry(
+				_user.getUserId(), RandomTestUtil.randomString(),
+				RandomTestUtil.randomString() + "@liferay.com",
+				_serviceContext);
+
+		CommerceContext accountEntryCommerceContext = new TestCommerceContext(
+			accountEntry, _commerceCurrency, _commerceChannel, _user, _group,
+			null);
+
+		_assertPriceOnApplicationEligibility(
+			commercePriceList ->
+				_commercePriceListAccountRelLocalService.
+					addCommercePriceListAccountRel(
+						_user.getUserId(),
+						commercePriceList.getCommercePriceListId(),
+						_accountEntry.getAccountEntryId(), 0, _serviceContext),
+			commerceContext, accountEntryCommerceContext);
+
+		AccountGroup accountGroup =
+			CommerceAccountTestUtil.addAccountGroupAndAccountRel(
+				_group.getCompanyId(), RandomTestUtil.randomString(),
+				AccountConstants.ACCOUNT_GROUP_TYPE_STATIC,
+				accountEntry.getAccountEntryId(), _serviceContext);
+
+		_assertPriceOnApplicationEligibility(
+			commercePriceList ->
+				_commercePriceListCommerceAccountGroupRelLocalService.
+					addCommercePriceListCommerceAccountGroupRel(
+						_user.getUserId(),
+						commercePriceList.getCommercePriceListId(),
+						accountGroup.getAccountGroupId(), 0, _serviceContext),
+			accountEntryCommerceContext, commerceContext);
+
+		_assertPriceOnApplicationEligibility(
+			commercePriceList ->
+				_commercePriceListChannelRelLocalService.
+					addCommercePriceListChannelRel(
+						_user.getUserId(),
+						commercePriceList.getCommercePriceListId(),
+						_commerceChannel.getCommerceChannelId(), 0,
+						_serviceContext),
+			commerceContext,
+			new TestCommerceContext(
+				_accountEntry, _commerceCurrency,
+				CommerceTestUtil.addCommerceChannel(
+					_group.getGroupId(), _commerceCurrency.getCode()),
+				_user, _group, null));
+
+		CommerceOrder commerceOrder = _addCommerceOrder();
+
+		_assertPriceOnApplicationEligibility(
+			commercePriceList ->
+				_commercePriceListOrderTypeRelLocalService.
+					addCommercePriceListOrderTypeRel(
+						_user.getUserId(),
+						commercePriceList.getCommercePriceListId(),
+						commerceOrder.getCommerceOrderTypeId(), 0,
+						_serviceContext),
+			new TestCommerceContext(
+				_accountEntry, _commerceCurrency, _commerceChannel, _user,
+				_group, commerceOrder),
+			new TestCommerceContext(
+				_accountEntry, _commerceCurrency, _commerceChannel, _user,
+				_group, _addCommerceOrder()));
 	}
 
 	@Test
@@ -1429,6 +1513,29 @@ public class CommercePricingTest {
 			_serviceContext);
 	}
 
+	private CommerceOrder _addCommerceOrder() throws Exception {
+		Calendar calendar = Calendar.getInstance();
+
+		CommerceOrderType commerceOrderType =
+			_commerceOrderTypeLocalService.addCommerceOrderType(
+				RandomTestUtil.randomString(), TestPropsValues.getUserId(),
+				RandomTestUtil.randomLocaleStringMap(),
+				RandomTestUtil.randomLocaleStringMap(), true,
+				calendar.get(Calendar.MONTH),
+				calendar.get(Calendar.DAY_OF_MONTH),
+				calendar.get(Calendar.YEAR), calendar.get(Calendar.HOUR_OF_DAY),
+				calendar.get(Calendar.MINUTE), 0, calendar.get(Calendar.MONTH),
+				calendar.get(Calendar.DAY_OF_MONTH),
+				calendar.get(Calendar.YEAR), calendar.get(Calendar.HOUR_OF_DAY),
+				calendar.get(Calendar.MINUTE), true,
+				ServiceContextTestUtil.getServiceContext(_group.getGroupId()));
+
+		return _commerceOrderLocalService.addCommerceOrder(
+			_user.getUserId(), _commerceChannel.getGroupId(),
+			_accountEntry.getAccountEntryId(), _commerceCurrency.getCode(),
+			commerceOrderType.getCommerceOrderTypeId());
+	}
+
 	private CommercePriceList _addCommercePriceEntry(
 			CPInstance cpInstance, String type, double priority,
 			BigDecimal price, boolean priceOnApplication)
@@ -1495,6 +1602,52 @@ public class CommercePricingTest {
 		Assert.assertEquals(
 			unitPromoPrice.stripTrailingZeros(),
 			actualUnitPromoPrice.stripTrailingZeros());
+	}
+
+	private void _assertPriceOnApplicationEligibility(
+			UnsafeConsumer<CommercePriceList, Exception> unsafeConsumer,
+			CommerceContext eligibleCommerceContext,
+			CommerceContext ineligibleCommerceContext)
+		throws Exception {
+
+		CPInstance cpInstance = _addCPInstance();
+
+		_addCatalogBaseCommercePriceEntry(
+			cpInstance, CommercePriceListConstants.TYPE_PRICE_LIST,
+			BigDecimal.valueOf(24), false);
+
+		unsafeConsumer.accept(
+			_addCommercePriceEntry(
+				cpInstance, CommercePriceListConstants.TYPE_PRICE_LIST, 0.0,
+				BigDecimal.ZERO, true));
+
+		_assertCommerceProductPrice(
+			eligibleCommerceContext, cpInstance, true, true, BigDecimal.ZERO,
+			BigDecimal.ZERO);
+		_assertCommerceProductPrice(
+			ineligibleCommerceContext, cpInstance, false, false,
+			BigDecimal.valueOf(24), BigDecimal.ZERO);
+
+		cpInstance = _addCPInstance();
+
+		_addCatalogBaseCommercePriceEntry(
+			cpInstance, CommercePriceListConstants.TYPE_PRICE_LIST,
+			BigDecimal.ZERO, true);
+		_addCatalogBaseCommercePriceEntry(
+			cpInstance, CommercePriceListConstants.TYPE_PROMOTION,
+			BigDecimal.ZERO, true);
+
+		unsafeConsumer.accept(
+			_addCommercePriceEntry(
+				cpInstance, CommercePriceListConstants.TYPE_PROMOTION, 0.0,
+				BigDecimal.TEN, false));
+
+		_assertCommerceProductPrice(
+			eligibleCommerceContext, cpInstance, false, true, BigDecimal.ZERO,
+			BigDecimal.TEN);
+		_assertCommerceProductPrice(
+			ineligibleCommerceContext, cpInstance, true, true, BigDecimal.ZERO,
+			BigDecimal.ZERO);
 	}
 
 	private CommerceOrderItemPrice _getCommerceOrderItemPrice(
@@ -1591,6 +1744,9 @@ public class CommercePricingTest {
 	private CommerceOrderPriceCalculation _commerceOrderPriceCalculation;
 
 	@Inject
+	private CommerceOrderTypeLocalService _commerceOrderTypeLocalService;
+
+	@Inject
 	private CommercePriceEntryLocalService _commercePriceEntryLocalService;
 
 	@Inject
@@ -1598,7 +1754,19 @@ public class CommercePricingTest {
 		_commercePriceListAccountRelLocalService;
 
 	@Inject
+	private CommercePriceListChannelRelLocalService
+		_commercePriceListChannelRelLocalService;
+
+	@Inject
+	private CommercePriceListCommerceAccountGroupRelLocalService
+		_commercePriceListCommerceAccountGroupRelLocalService;
+
+	@Inject
 	private CommercePriceListLocalService _commercePriceListLocalService;
+
+	@Inject
+	private CommercePriceListOrderTypeRelLocalService
+		_commercePriceListOrderTypeRelLocalService;
 
 	@Inject
 	private CommercePriceModifierLocalService
