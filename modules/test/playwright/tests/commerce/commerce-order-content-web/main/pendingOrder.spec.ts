@@ -32,6 +32,7 @@ import getPageDefinition from '../../../layout-content-page-editor-web/main/util
 import getWidgetDefinition from '../../../layout-content-page-editor-web/main/utils/getWidgetDefinition';
 import {
 	apiStorefrontSetUp,
+	assignBuyerUserToAccount,
 	configureBuyerUserForSite,
 	configureOperationsManagerUserForSite,
 	configureOrderManagerUserForSite,
@@ -2416,5 +2417,126 @@ test(
 
 		await expect(orderRow).toContainText(orderType.name['en_US']);
 		await expect(orderRow).toContainText('Approved');
+	}
+);
+
+test(
+	'A buyer can switch the active account from and delete a pending order on its details page',
+	{tag: ['@COMMERCE-12909', '@COMMERCE-6380', '@LPD-106244-Grouped-11']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelsPage,
+		commerceThemeMiniumCatalogPage,
+		page,
+		pendingOrdersPage,
+	}) => {
+		const {channel, site} = await apiStorefrontSetUp(apiHelpers);
+
+		await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+			channel.name,
+			'B2B'
+		);
+
+		await waitForAlert(page);
+
+		const layout = await apiHelpers.headlessDelivery.createSitePage({
+			pageDefinition: getPageDefinition([
+				getFragmentDefinition({
+					id: getRandomString(),
+					key: 'COMMERCE_ACCOUNT_FRAGMENTS-account-selector',
+				}),
+				getWidgetDefinition({
+					id: getRandomString(),
+					widgetName:
+						'com_liferay_commerce_order_content_web_internal_portlet_CommerceOpenOrderContentPortlet',
+				}),
+			]),
+			siteId: site.id,
+			title: getRandomString(),
+		});
+
+		const {account: account1, buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id
+		);
+
+		const account2 = await apiHelpers.headlessAdminUser.postAccount({
+			name: `Commerce Account ${getRandomString()}`,
+			type: 'business',
+		});
+
+		await assignBuyerUserToAccount(account2, apiHelpers, buyerUser);
+
+		const cart = await apiHelpers.headlessCommerceDeliveryCart.postCart(
+			{accountId: account1.id, cartItems: []},
+			channel.id
+		);
+
+		await performLogout(page);
+		await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+		await selectCurrentAccount(account1.id, apiHelpers, site.id);
+
+		const layoutURL = `/web${site.friendlyUrlPath}${layout.friendlyUrlPath}`;
+
+		await page.goto(layoutURL, {waitUntil: 'networkidle'});
+
+		const cartRow = pendingOrdersPage.orderItemsTableRowWith(
+			String(cart.id)
+		);
+
+		await test.step('Switching the active account from the pending order details page redirects to the Pending Orders list', async () => {
+			for (const account of [account2, account1]) {
+				await cartRow.getByLabel('View').click();
+
+				await expect(pendingOrdersPage.orderId).toHaveText(
+					String(cart.id)
+				);
+				await expect(page).toHaveURL(
+					new RegExp(`${layoutURL}/-/pending-order/`)
+				);
+
+				await commerceThemeMiniumCatalogPage.openAccountSelectorDropdown();
+
+				await commerceThemeMiniumCatalogPage
+					.accountSelectorAccount(account.name)
+					.click();
+
+				await expect(page).toHaveURL(
+					new RegExp(
+						`${layoutURL}\\?p_p_id=com_liferay_commerce_order_content_web_internal_portlet_CommerceOpenOrderContentPortlet`
+					)
+				);
+				await expect(cartRow).toBeVisible();
+			}
+		});
+
+		await test.step('Deleting the pending order from its details page removes it from the Pending Orders list', async () => {
+			await cartRow.getByLabel('View').click();
+
+			await expect(async () => {
+				await pendingOrdersPage.orderActionsButton.click();
+
+				await expect(pendingOrdersPage.deleteMenuItem).toBeVisible({
+					timeout: 500,
+				});
+			}).toPass({timeout: 5000});
+
+			page.once('dialog', async (dialog) => {
+				expect(dialog.message()).toContain(
+					'Are you sure you want to delete this? It will be deleted immediately.'
+				);
+
+				await dialog.accept();
+			});
+
+			await pendingOrdersPage.deleteMenuItem.click();
+
+			await expect(pendingOrdersPage.deleteMenuItem).toBeHidden();
+
+			await page.goto(layoutURL, {waitUntil: 'networkidle'});
+
+			await expect(cartRow).toHaveCount(0);
+		});
 	}
 );
