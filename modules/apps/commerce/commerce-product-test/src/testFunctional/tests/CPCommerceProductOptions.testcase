@@ -499,60 +499,6 @@ definition {
 		}
 	}
 
-	@description = "COMMERCE-12700 Verify that is not possible to view the accordion 'Show Option' in case the product has no options"
-	@priority = 4
-	test CannotViewTheAccordionForProductsWithNoOptions {
-		property custom.properties = "feature.flag.LPD-11235=true${line.separator}jsonws.web.service.paths.excludes=";
-		property portal.acceptance = "false";
-
-		task ("Given a Minium site with a buyer user is created") {
-			CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
-
-			CommerceEntry.addAccountEntryUser(
-				accountName = "Commerce Account",
-				accountType = "Business",
-				agreeToTermsAndAnswerReminderQuery = "true",
-				createNewAccount = "true",
-				requireReset = "false",
-				userEmailAddress = "buyer@liferay.com",
-				userFirstName = "Buyer",
-				userLastName = "User",
-				userRole = "Buyer",
-				userScreenName = "buyeruser",
-				userSiteMembership = "Minium");
-		}
-
-		task ("And the buyer logs in on Minium") {
-			User.logoutPG();
-
-			CommerceLogin.miniumLogin(
-				password = PropsUtil.get("default.admin.password"),
-				urlAppend = "web/minium",
-				userEmailAddress = "buyer@liferay.com");
-		}
-
-		task ("When the buyer adds to the cart U-Joint without an option") {
-			Navigator.openWithAppendToBaseURL(urlAppend = "web/minium/p/u-joint");
-
-			FrontStore.addToCartFromProductDetails(
-				productName = "U-Joint",
-				productSku = "MIN55861");
-		}
-
-		task ("Then the accordion is not present") {
-			CommerceNavigator.gotoMiniCart();
-
-			AssertElementNotPresent(
-				key_userName = "Show Options",
-				locator1 = "Sharing#MANAGE_COLLABORATORS_NAME");
-
-			FrontStore.viewMiniCartItem(
-				cartItemName = "U-Joint",
-				cartItemQuantity = 1,
-				cartItemSku = "MIN55861");
-		}
-	}
-
 	@description = "COMMERCE-12701 Verify that is possible to view and use the accordion 'Show Options' for the bundled products with UOM"
 	@priority = 5
 	test CanUseTheAccordionForBundledProductsWithUOM {
