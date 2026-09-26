@@ -35,6 +35,7 @@ import {
 	configureBuyerUserForSite,
 	createAccountWithBuyerUser,
 	createChannelAccountManagerUser,
+	createProductWithOptions,
 	deployProductFragmentsOnDefaultDPT,
 	miniumSetUp,
 } from '../../utils/commerce';
@@ -1996,6 +1997,86 @@ test(
 
 		await expect(page.locator('.product-header-title')).toHaveText(
 			product.name['en_US']
+		);
+	}
+);
+
+test(
+	'Buyer views the payment subscription of a product with multiple SKUs on its product details page',
+	{tag: ['@COMMERCE-9743', '@LPD-106244-Grouped-24']},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductPage,
+		page,
+	}) => {
+		const {catalog, site} = await apiStorefrontSetUp(apiHelpers, [
+			{
+				title: 'Product Details',
+				widgetName:
+					'com_liferay_commerce_product_content_web_internal_portlet_CPContentPortlet',
+			},
+		]);
+
+		const {buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id
+		);
+
+		const optionName = getRandomString();
+
+		const {product} = await createProductWithOptions(
+			apiHelpers,
+			commerceAdminProductPage,
+			{
+				catalogId: catalog.id,
+				optionSpecs: [
+					{
+						fieldType: 'select',
+						name: optionName,
+						skuContributor: true,
+						values: [
+							{key: 'value-1', name: 'Value 1'},
+							{key: 'value-2', name: 'Value 2'},
+						],
+					},
+				],
+			}
+		);
+
+		await page
+			.getByRole('link', {exact: true, name: 'Subscription'})
+			.click();
+
+		await page.locator('label[for$="_subscriptionEnabled"]').click();
+
+		await expect(
+			page.locator('select[id$="_subscriptionType"] option:checked')
+		).toHaveText('Day');
+		await expect(
+			page.locator('input[id$="_subscriptionLength"]')
+		).toHaveValue('1');
+		await expect(
+			page.locator('[id$="_cycleLengthContainer"] .input-group-text')
+		).toHaveText('Day');
+
+		await commerceAdminProductDetailsPage.publish();
+
+		await performLogout(page);
+		await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+		await page.goto(
+			`/web${site.friendlyUrlPath}/p/${product.urls['en_US']}`
+		);
+
+		await page.getByLabel(optionName).selectOption({label: 'Value 1'});
+
+		const subscriptionInfo = page.locator('.commerce-subscription-info');
+
+		await expect(subscriptionInfo).toContainText('Payment Subscription');
+		await expect(subscriptionInfo).toContainText('Every 1 Day');
+		await expect(subscriptionInfo).not.toContainText(
+			'Delivery Subscription'
 		);
 	}
 );
