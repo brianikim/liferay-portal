@@ -845,6 +845,29 @@ export class CommerceAdminChannelDetailsPage {
 		await waitForAlert(this.page);
 	}
 
+	async deleteTaxRate(calculationName: string, name: string) {
+		const tableName = 'Tax Calculations';
+
+		await (
+			await this.generalCommerceAdminChannelTableLink(calculationName)
+		).click();
+
+		if (calculationName === 'By Address') {
+			await (await this.taxRateSettingsTab(tableName)).click();
+		}
+		else {
+			await (await this.taxRatesTab(tableName)).click();
+		}
+
+		await (await this.sidePanelFrameActionsButton(tableName, name)).click();
+
+		this.page.once('dialog', (dialog) => dialog.accept());
+
+		await (await this.sidePanelFrameDeleteMenuItem(tableName)).click();
+
+		await waitForAlert(await this.sidePanelFrame(tableName));
+	}
+
 	async editFixedTaxRate(newAmount: string, name: string) {
 		const tableName = 'Tax Calculations';
 
