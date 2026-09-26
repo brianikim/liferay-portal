@@ -23,65 +23,6 @@ definition {
 		CommerceConfiguration.commerceTearDown();
 	}
 
-	@description = "This is a test for COMMERCE-9891 UI to show External Reference code of SKU"
-	@priority = 5
-	test CanNotUseTheSameSKUERCForDifferentSKU {
-		property portal.acceptance = "true";
-
-		task ("Given a Minium site is created") {
-			CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
-		}
-
-		task ("And admin edits and publishes SKU ERC of a product") {
-			CommerceProducts.openProductsAdmin();
-
-			CommerceNavigator.searchEntry(entryName = "ABS Sensor");
-
-			CommerceNavigator.gotoTableListEntry(entryName = "ABS Sensor");
-
-			CommerceEntry.gotoMenuTab(menuTab = "SKUs");
-
-			Click(
-				key_value = "MIN93015",
-				locator1 = "CommerceEntry#BODY_VERTICAL_ELLIPSIS");
-
-			MenuItem.click(menuItem = "Edit");
-
-			CommerceSKUs.editSkuERC(
-				closeFrame = "true",
-				publish = "true",
-				skuERC = "Test ERC");
-		}
-
-		task ("When enters the same ERC value to another product and clicks Publish") {
-			Click(locator1 = "CommerceNavigation#BACK");
-
-			CommerceNavigator.searchEntry(entryName = "U-Joint");
-
-			CommerceNavigator.gotoTableListEntry(entryName = "U-Joint");
-
-			CommerceEntry.gotoMenuTab(menuTab = "SKUs");
-
-			Click(
-				key_value = "MIN55861",
-				locator1 = "CommerceEntry#BODY_VERTICAL_ELLIPSIS");
-
-			MenuItem.click(menuItem = "Edit");
-
-			CommerceSKUs.editSkuERC(
-				publish = "true",
-				skuERC = "Test ERC");
-		}
-
-		task ("Then verifies that the same ERC cannot be given twice and an error message appears") {
-			AssertElementNotPresent(locator1 = "Message#SUCCESS");
-
-			AssertTextEquals.assertText(
-				locator1 = "Message#ERROR",
-				value1 = "Close Error:Please enter a unique external reference code.");
-		}
-	}
-
 	@description = "This is a test for COMMERCE-12218. Admin can view channel currency matches catalog currency but doesn't change the price list on a product's SKU details page"
 	@priority = 5
 	test CanViewChannelCurrencyDoesntChangePriceListOnProductSKU {

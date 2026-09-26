@@ -1764,3 +1764,56 @@ test(
 		}
 	}
 );
+
+test(
+	'A SKU external reference code cannot be used by another SKU',
+	{tag: ['@COMMERCE-9891', '@LPD-106244-Grouped-24']},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductDetailsSkusPage,
+		commerceAdminProductPage,
+	}) => {
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		const externalReferenceCode = getRandomString();
+		const sidePanelFrame =
+			commerceAdminProductDetailsSkusPage.sidePanelFrame;
+
+		const publishSkuExternalReferenceCode = async () => {
+			const product =
+				await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+					catalogId: catalog.id,
+				});
+
+			await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+			await commerceAdminProductDetailsPage.goToProductSkus();
+
+			await commerceAdminProductDetailsSkusPage
+				.skusTableRowLink(product.skus[0].sku)
+				.click();
+
+			await sidePanelFrame
+				.locator('input[id$="_externalReferenceCode"]')
+				.fill(externalReferenceCode);
+
+			await commerceAdminProductDetailsSkusPage.sidePanelDetailsSkuPublishButton.click();
+		};
+
+		await publishSkuExternalReferenceCode();
+
+		await waitForAlert(sidePanelFrame);
+
+		await publishSkuExternalReferenceCode();
+
+		await waitForAlert(
+			sidePanelFrame,
+			'Error:Please enter a unique external reference code.',
+			{autoClose: false, type: 'danger'}
+		);
+
+		await expect(sidePanelFrame.locator('.alert-success')).toHaveCount(0);
+	}
+);
