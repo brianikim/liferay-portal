@@ -2018,3 +2018,150 @@ test(
 		).toBeVisible();
 	}
 );
+
+test(
+	'A bundle cannot be added to the cart when a product required in the bundle is not purchasable or out of stock',
+	{tag: ['@COMMERCE-12831', '@COMMERCE-12832', '@LPD-106244-Grouped-31']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelsPage,
+		commerceAdminProductPage,
+		page,
+		productDetailsPage,
+		site,
+	}) => {
+		test.setTimeout(180000);
+
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog({
+				name: getRandomString(),
+			});
+
+		const {buyerUser} = await setUpBundleStorefront(
+			apiHelpers,
+			commerceAdminChannelsPage,
+			page,
+			site
+		);
+
+		for (const {
+			alertMessage,
+			requiredProductAllowBackOrder,
+			requiredSkuPurchasable,
+		} of [
+			{
+				alertMessage: 'Danger:The product is no longer available.',
+				requiredProductAllowBackOrder: true,
+				requiredSkuPurchasable: false,
+			},
+			{
+				alertMessage: 'Danger:The specified quantity is unavailable.',
+				requiredProductAllowBackOrder: false,
+				requiredSkuPurchasable: true,
+			},
+		]) {
+			await performLoginViaApi({page, screenName: 'test'});
+
+			const requiringProduct =
+				await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+					catalogId: catalog.id,
+					name: {en_US: getRandomString()},
+					productConfiguration: {allowBackOrder: true},
+				});
+			const requiredProduct =
+				await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+					catalogId: catalog.id,
+					name: {en_US: getRandomString()},
+					productConfiguration: {
+						allowBackOrder: requiredProductAllowBackOrder,
+					},
+				});
+
+			await apiHelpers.headlessCommerceAdminCatalog.postProductRelatedProduct(
+				requiringProduct.productId,
+				{
+					productId: requiredProduct.productId,
+					type: 'requires-in-bundle',
+				}
+			);
+
+			const productOptions = [];
+
+			for (const [index, linkedProduct] of [
+				requiringProduct,
+				requiredProduct,
+			].entries()) {
+				const optionKey = `option-${getRandomInt()}`;
+				const optionName = `Option${index + 1}`;
+
+				const option =
+					await apiHelpers.headlessCommerceAdminCatalog.postOption(
+						'select',
+						optionKey,
+						optionName,
+						index + 1
+					);
+
+				productOptions.push({
+					fieldType: 'select',
+					key: optionKey,
+					name: {en_US: optionName},
+					optionId: option.id,
+					priceType: 'static',
+					priority: index + 1,
+					productOptionValues: [
+						{
+							deltaPrice: 0.0,
+							key: `value${index + 1}`,
+							name: {en_US: `Value${index + 1}`},
+							priority: 1,
+							quantity: 1,
+							skuId: linkedProduct.skus[0].id,
+						},
+					],
+					required: true,
+					skuContributor: true,
+				});
+			}
+
+			const bundleProduct =
+				await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+					catalogId: catalog.id,
+					name: {en_US: getRandomString()},
+					productConfiguration: {allowBackOrder: true},
+					productOptions,
+				});
+
+			await commerceAdminProductPage.gotoProduct(
+				bundleProduct.name['en_US']
+			);
+
+			await commerceAdminProductPage.generateSkus();
+
+			await apiHelpers.headlessCommerceAdminCatalog.patchSku(
+				String(requiredProduct.skus[0].id),
+				{
+					purchasable: requiredSkuPurchasable,
+					sku: requiredProduct.skus[0].sku,
+				}
+			);
+
+			await performLogout(page);
+			await performLoginViaApi({
+				page,
+				screenName: buyerUser.alternateName,
+			});
+
+			await page.goto(
+				`/web${site.friendlyUrlPath}/p/${bundleProduct.urls['en_US']}`
+			);
+
+			await productDetailsPage.selectOption('Value1', 'Option1');
+			await productDetailsPage.selectOption('Value2', 'Option2');
+
+			await productDetailsPage.addToCartButton.click();
+
+			await waitForAlert(page, alertMessage, {type: 'danger'});
+		}
+	}
+);
