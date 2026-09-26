@@ -26,12 +26,17 @@ import com.liferay.commerce.price.CommerceOrderItemPrice;
 import com.liferay.commerce.price.CommerceOrderPriceCalculation;
 import com.liferay.commerce.price.CommerceProductPrice;
 import com.liferay.commerce.price.CommerceProductPriceCalculation;
+import com.liferay.commerce.price.list.constants.CommercePriceListConstants;
 import com.liferay.commerce.price.list.model.CommercePriceEntry;
 import com.liferay.commerce.price.list.model.CommercePriceList;
+import com.liferay.commerce.price.list.service.CommercePriceEntryLocalService;
 import com.liferay.commerce.price.list.service.CommercePriceListAccountRelLocalService;
+import com.liferay.commerce.price.list.service.CommercePriceListLocalService;
 import com.liferay.commerce.price.list.test.util.CommercePriceEntryTestUtil;
 import com.liferay.commerce.price.list.test.util.CommercePriceListTestUtil;
+import com.liferay.commerce.pricing.configuration.CommercePricingConfiguration;
 import com.liferay.commerce.pricing.constants.CommercePriceModifierConstants;
+import com.liferay.commerce.pricing.constants.CommercePricingConstants;
 import com.liferay.commerce.pricing.model.CommercePriceModifier;
 import com.liferay.commerce.pricing.model.CommercePricingClass;
 import com.liferay.commerce.pricing.service.CommercePriceModifierLocalService;
@@ -50,6 +55,7 @@ import com.liferay.commerce.test.util.CommerceTestUtil;
 import com.liferay.commerce.test.util.context.TestCommerceContext;
 import com.liferay.commerce.test.util.pricing.CommercePriceModifierTestUtil;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.configuration.test.util.ConfigurationTemporarySwapper;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.ServiceContext;
@@ -59,6 +65,7 @@ import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
+import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
@@ -274,6 +281,117 @@ public class CommercePricingTest {
 		Assert.assertEquals(
 			expectedPrice.stripTrailingZeros(),
 			finalPrice.stripTrailingZeros());
+	}
+
+	@Test
+	public void testGetCommerceProductPriceWithPriceOnApplicationDiscovery()
+		throws Exception {
+
+		CommerceContext commerceContext = new TestCommerceContext(
+			_accountEntry, _commerceCurrency, _commerceChannel, _user, _group,
+			null);
+
+		CPInstance cpInstance = _addCPInstance();
+
+		_addCatalogBaseCommercePriceEntry(
+			cpInstance, CommercePriceListConstants.TYPE_PRICE_LIST,
+			BigDecimal.valueOf(50), false);
+		_addCatalogBaseCommercePriceEntry(
+			cpInstance, CommercePriceListConstants.TYPE_PROMOTION,
+			BigDecimal.ZERO, true);
+		_addCommercePriceEntry(
+			cpInstance, CommercePriceListConstants.TYPE_PRICE_LIST, 1.0,
+			BigDecimal.valueOf(40), false);
+		_addCommercePriceEntry(
+			cpInstance, CommercePriceListConstants.TYPE_PRICE_LIST, 0.0,
+			BigDecimal.valueOf(30), false);
+
+		_assertCommerceProductPrice(
+			commerceContext, cpInstance, false, false, BigDecimal.valueOf(40),
+			BigDecimal.ZERO);
+
+		_addCommercePriceEntry(
+			cpInstance, CommercePriceListConstants.TYPE_PROMOTION, 1.0,
+			BigDecimal.TEN, false);
+
+		_assertCommerceProductPrice(
+			commerceContext, cpInstance, false, false, BigDecimal.valueOf(40),
+			BigDecimal.TEN);
+
+		cpInstance = _addCPInstance();
+
+		_addCatalogBaseCommercePriceEntry(
+			cpInstance, CommercePriceListConstants.TYPE_PRICE_LIST,
+			BigDecimal.valueOf(50), false);
+		_addCatalogBaseCommercePriceEntry(
+			cpInstance, CommercePriceListConstants.TYPE_PROMOTION,
+			BigDecimal.TEN, false);
+		_addCommercePriceEntry(
+			cpInstance, CommercePriceListConstants.TYPE_PRICE_LIST, 1.0,
+			BigDecimal.ZERO, true);
+		_addCommercePriceEntry(
+			cpInstance, CommercePriceListConstants.TYPE_PRICE_LIST, 0.0,
+			BigDecimal.valueOf(20), false);
+
+		_assertCommerceProductPrice(
+			commerceContext, cpInstance, false, true, BigDecimal.ZERO,
+			BigDecimal.TEN);
+
+		try (ConfigurationTemporarySwapper configurationTemporarySwapper =
+				new ConfigurationTemporarySwapper(
+					CommercePricingConfiguration.class.getName(),
+					HashMapDictionaryBuilder.<String, Object>put(
+						"commercePriceListDiscovery",
+						CommercePricingConstants.ORDER_BY_LOWEST_ENTRY
+					).put(
+						"commercePromotionDiscovery",
+						CommercePricingConstants.ORDER_BY_LOWEST_ENTRY
+					).build())) {
+
+			cpInstance = _addCPInstance();
+
+			_addCatalogBaseCommercePriceEntry(
+				cpInstance, CommercePriceListConstants.TYPE_PRICE_LIST,
+				BigDecimal.valueOf(50), false);
+			_addCatalogBaseCommercePriceEntry(
+				cpInstance, CommercePriceListConstants.TYPE_PROMOTION,
+				BigDecimal.ZERO, true);
+			_addCommercePriceEntry(
+				cpInstance, CommercePriceListConstants.TYPE_PRICE_LIST, 1.0,
+				BigDecimal.valueOf(30), false);
+			_addCommercePriceEntry(
+				cpInstance, CommercePriceListConstants.TYPE_PRICE_LIST, 0.0,
+				BigDecimal.valueOf(40), false);
+			_addCommercePriceEntry(
+				cpInstance, CommercePriceListConstants.TYPE_PROMOTION, 1.0,
+				BigDecimal.TEN, false);
+
+			_assertCommerceProductPrice(
+				commerceContext, cpInstance, false, false,
+				BigDecimal.valueOf(30), BigDecimal.TEN);
+
+			cpInstance = _addCPInstance();
+
+			_addCatalogBaseCommercePriceEntry(
+				cpInstance, CommercePriceListConstants.TYPE_PRICE_LIST,
+				BigDecimal.valueOf(50), false);
+			_addCatalogBaseCommercePriceEntry(
+				cpInstance, CommercePriceListConstants.TYPE_PROMOTION,
+				BigDecimal.TEN, false);
+			_addCommercePriceEntry(
+				cpInstance, CommercePriceListConstants.TYPE_PRICE_LIST, 1.0,
+				BigDecimal.valueOf(30), false);
+			_addCommercePriceEntry(
+				cpInstance, CommercePriceListConstants.TYPE_PRICE_LIST, 0.0,
+				BigDecimal.ZERO, true);
+			_addCommercePriceEntry(
+				cpInstance, CommercePriceListConstants.TYPE_PROMOTION, 1.0,
+				BigDecimal.valueOf(20), false);
+
+			_assertCommerceProductPrice(
+				commerceContext, cpInstance, false, false,
+				BigDecimal.valueOf(30), BigDecimal.TEN);
+		}
 	}
 
 	@Test
@@ -1291,6 +1409,94 @@ public class CommercePricingTest {
 	@Rule
 	public FrutillaRule frutillaRule = new FrutillaRule();
 
+	private CommercePriceEntry _addCatalogBaseCommercePriceEntry(
+			CPInstance cpInstance, String type, BigDecimal price,
+			boolean priceOnApplication)
+		throws Exception {
+
+		CPDefinition cpDefinition = cpInstance.getCPDefinition();
+
+		CommercePriceList commercePriceList =
+			_commercePriceListLocalService.
+				fetchCatalogBaseCommercePriceListByType(
+					cpInstance.getGroupId(), type);
+
+		return _commercePriceEntryLocalService.addCommercePriceEntry(
+			StringPool.BLANK, cpDefinition.getCProductId(),
+			cpInstance.getCPInstanceUuid(),
+			commercePriceList.getCommercePriceListId(), price,
+			priceOnApplication, BigDecimal.ZERO, StringPool.BLANK,
+			_serviceContext);
+	}
+
+	private CommercePriceList _addCommercePriceEntry(
+			CPInstance cpInstance, String type, double priority,
+			BigDecimal price, boolean priceOnApplication)
+		throws Exception {
+
+		CommercePriceList commercePriceList =
+			CommercePriceListTestUtil.addCommercePriceList(
+				cpInstance.getGroupId(), false, type, priority);
+
+		CPDefinition cpDefinition = cpInstance.getCPDefinition();
+
+		_commercePriceEntryLocalService.addCommercePriceEntry(
+			StringPool.BLANK, cpDefinition.getCProductId(),
+			cpInstance.getCPInstanceUuid(),
+			commercePriceList.getCommercePriceListId(), price,
+			priceOnApplication, BigDecimal.ZERO, StringPool.BLANK,
+			_serviceContext);
+
+		return commercePriceList;
+	}
+
+	private CPInstance _addCPInstance() throws Exception {
+		CommerceCatalog commerceCatalog = CommerceTestUtil.addCommerceCatalog(
+			_group.getCompanyId(), _group.getGroupId(), _user.getUserId(),
+			_commerceCurrency.getCode());
+
+		return CPTestUtil.addCPInstanceFromCatalog(
+			commerceCatalog.getGroupId());
+	}
+
+	private void _assertCommerceProductPrice(
+			CommerceContext commerceContext, CPInstance cpInstance,
+			boolean priceOnApplication, boolean unitPriceOnApplication,
+			BigDecimal unitPrice, BigDecimal unitPromoPrice)
+		throws Exception {
+
+		CommerceProductPrice commerceProductPrice =
+			_commerceProductPriceCalculation.getCommerceProductPrice(
+				cpInstance.getCPInstanceId(), BigDecimal.ONE, StringPool.BLANK,
+				commerceContext);
+
+		Assert.assertEquals(
+			priceOnApplication, commerceProductPrice.isPriceOnApplication());
+
+		CommerceMoney unitPriceCommerceMoney =
+			commerceProductPrice.getUnitPrice();
+
+		Assert.assertEquals(
+			unitPriceOnApplication,
+			unitPriceCommerceMoney.isPriceOnApplication());
+
+		BigDecimal actualUnitPrice = unitPriceCommerceMoney.getPrice();
+
+		Assert.assertEquals(
+			unitPrice.stripTrailingZeros(),
+			actualUnitPrice.stripTrailingZeros());
+
+		CommerceMoney unitPromoPriceCommerceMoney =
+			commerceProductPrice.getUnitPromoPrice();
+
+		BigDecimal actualUnitPromoPrice =
+			unitPromoPriceCommerceMoney.getPrice();
+
+		Assert.assertEquals(
+			unitPromoPrice.stripTrailingZeros(),
+			actualUnitPromoPrice.stripTrailingZeros());
+	}
+
 	private CommerceOrderItemPrice _getCommerceOrderItemPrice(
 			BigDecimal price, BigDecimal promoPrice)
 		throws Exception {
@@ -1385,8 +1591,14 @@ public class CommercePricingTest {
 	private CommerceOrderPriceCalculation _commerceOrderPriceCalculation;
 
 	@Inject
+	private CommercePriceEntryLocalService _commercePriceEntryLocalService;
+
+	@Inject
 	private CommercePriceListAccountRelLocalService
 		_commercePriceListAccountRelLocalService;
+
+	@Inject
+	private CommercePriceListLocalService _commercePriceListLocalService;
 
 	@Inject
 	private CommercePriceModifierLocalService
