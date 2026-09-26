@@ -22,6 +22,7 @@ import {waitForAlert} from '../../../../utils/waitForAlert';
 import {watchForDialog} from '../../../../utils/watchForDialog';
 import {
 	apiStorefrontSetUp,
+	completedVirtualOrderItemSetUp,
 	createAccountWithBuyerUser,
 	createProductWithOptions,
 	findSkuByOptionValueKeys,
@@ -1784,5 +1785,39 @@ test(
 				)
 			).toContainText(newTerm.label['en_US']);
 		}
+	}
+);
+
+test(
+	'Admin can view the virtual settings of a virtual order item',
+	{tag: ['@COMMERCE-9794', '@LPD-106244-Grouped-32']},
+	async ({
+		apiHelpers,
+		commerceAdminOrderDetailsPage,
+		commerceAdminOrdersPage,
+	}) => {
+		const virtualFileURL = `http://${getRandomString()}.com`;
+
+		const {order} = await completedVirtualOrderItemSetUp(apiHelpers, 1, {
+			activationStatus: 0,
+			url: virtualFileURL,
+		});
+
+		await commerceAdminOrdersPage.goto();
+
+		await commerceAdminOrdersPage.tableRowOrderIdLink(order.id).click();
+
+		await commerceAdminOrderDetailsPage.orderItemActions.click();
+		await commerceAdminOrderDetailsPage.orderItemActionEdit.click();
+
+		await commerceAdminOrderDetailsPage.orderItemFrame
+			.getByRole('link', {exact: true, name: 'Virtual Settings'})
+			.click();
+
+		await expect(
+			commerceAdminOrderDetailsPage.orderItemFrame.getByText(
+				virtualFileURL
+			)
+		).toBeVisible();
 	}
 );
