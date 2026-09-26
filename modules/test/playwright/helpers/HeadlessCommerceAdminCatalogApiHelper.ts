@@ -231,6 +231,7 @@ type TSku = {
 	purchasable: boolean;
 	replacementSkuId?: number;
 	sku: string;
+	skuVirtualSettings?: TProductVirtualSettings & {override?: boolean};
 };
 
 type TSkuUnitOfMeasure = {
