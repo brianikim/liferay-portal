@@ -750,6 +750,7 @@ test(
 for (const {productType, tags} of [
 	{productType: 'Grouped', tags: ['@COMMERCE-6302']},
 	{productType: 'Simple', tags: ['@COMMERCE-9179', '@COMMERCE-9180']},
+	{productType: 'Virtual', tags: ['@COMMERCE-6301']},
 ]) {
 	test(
 		`Publish a ${productType} product`,

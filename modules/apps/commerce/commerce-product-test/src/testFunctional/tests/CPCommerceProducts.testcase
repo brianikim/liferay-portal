@@ -23,54 +23,6 @@ definition {
 		CommerceConfiguration.commerceTearDown();
 	}
 
-	@description = "This is a test for COMMERCE-6301. AddVirtualProduct"
-	@priority = 3
-	test CanAddVirtualProductAndCheckNoShippingOverride {
-		property portal.acceptance = "false";
-
-		// TODO Review
-
-		task ("Given a new virtual product is added") {
-			CommerceProducts.openProductsAdmin();
-
-			CPCommerceCatalog.newProductsEntry(
-				productCatalog = "Master",
-				productName = "Virtual Book",
-				productType = "Virtual");
-
-			Alert.viewSuccessMessage();
-		}
-
-		task ("And the new product is successful created") {
-			Click(locator1 = "Icon#BACK");
-
-			AssertElementPresent(
-				key_productName = "Virtual Book",
-				locator1 = "CommerceOrders#ORDER_DETAILS_PRODUCT_NAME");
-
-			AssertElementPresent(
-				key_productName = "Virtual Book",
-				key_value = "Virtual",
-				locator1 = "CommerceEntry#TABLE_SEARCH_BY_NAME_AND_CONTENT");
-		}
-
-		task ("When the details page is open") {
-			CommerceNavigator.gotoEntry(entryName = "Virtual Book");
-
-			CommerceEntry.gotoMenuTab(menuTab = "SKUs");
-
-			Click(
-				key_entryName = "default",
-				locator1 = "CommerceEntry#TABLE_LIST_TITLE");
-		}
-
-		task ("Then the Shipping Override is not shown") {
-			AssertElementNotPresent(
-				key_cardName = "Shipping Override",
-				locator1 = "CommerceEntry#PRODUCT_DETAIL_CARD_HEADER");
-		}
-	}
-
 	@description = "This is a test for COMMERCE-9251. CanCheckAnyProductStatusWorkflow"
 	@priority = 3
 	test CanCheckAnyProductWorkflowStatus {
