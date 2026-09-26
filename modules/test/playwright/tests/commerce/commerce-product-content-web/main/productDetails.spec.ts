@@ -2421,3 +2421,50 @@ test(
 		);
 	}
 );
+
+test(
+	'Product subscription information is shown on the product details page',
+	{tag: '@COMMERCE-5312'},
+	async ({apiHelpers, page, productDetailsPage}) => {
+		const {product, site} = await apiStorefrontSetUp(apiHelpers, [
+			{
+				title: getRandomString(),
+				widgetName:
+					'com_liferay_commerce_product_content_web_internal_portlet_CPContentPortlet',
+			},
+		]);
+
+		await apiHelpers.headlessCommerceAdminCatalog.patchProductSubscriptionConfiguration(
+			product.productId,
+			{
+				deliverySubscriptionEnable: true,
+				deliverySubscriptionLength: 5,
+				deliverySubscriptionType: 'monthly',
+				deliverySubscriptionTypeSettings: {deliveryMonthlyMode: 0},
+				enable: true,
+				length: 5,
+				subscriptionType: 'yearly',
+				subscriptionTypeSettings: {yearlyMode: 0},
+			}
+		);
+
+		await page.goto(
+			`/web${site.friendlyUrlPath}/p/${product.urls['en_US']}`
+		);
+
+		await expect(
+			await productDetailsPage.nameField(product.name['en_US'])
+		).toBeVisible();
+
+		for (const [subscriptionName, subscriptionPeriod] of [
+			['Delivery Subscription', 'Every 5 Months'],
+			['Payment Subscription', 'Every 5 Years'],
+		]) {
+			await expect(
+				page
+					.locator('.commerce-subscription-info .row')
+					.filter({hasText: subscriptionName})
+			).toContainText(subscriptionPeriod);
+		}
+	}
+);
