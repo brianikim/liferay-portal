@@ -1216,6 +1216,25 @@ test(
 			);
 
 			apiHelpers.data.push({id: channel.id, type: 'channel'});
+
+			await page.reload();
+
+			await expect(page.getByLabel('Name', {exact: true})).toHaveValue(
+				channel.name
+			);
+			await expect(
+				commerceAdminChannelDetailsPage.channelCurrencySelect.locator(
+					'option:checked'
+				)
+			).toHaveText('US Dollar');
+
+			await page.getByRole('link', {exact: true, name: 'Type'}).click();
+
+			await expect(
+				page
+					.locator('header', {hasText: 'Type'})
+					.locator('xpath=../div[@class="description"]')
+			).toHaveText('Site');
 		});
 
 		await test.step('Create a Warehouse', async () => {
