@@ -187,6 +187,10 @@ public class AttachmentResourceTest extends BaseAttachmentResourceTestCase {
 	public void testPostProductIdAttachment() throws Exception {
 		super.testPostProductIdAttachment();
 
+		_testPostAttachmentWithOptions(
+			randomAttachment(),
+			attachment -> attachmentResource.postProductIdAttachment(
+				_cProduct.getCProductId(), attachment));
 		_testPostProductIdAttachmentProductVersioning();
 		_testPostProductIdAttachmentWithFileEntryExternalReferenceCode();
 	}
@@ -202,6 +206,10 @@ public class AttachmentResourceTest extends BaseAttachmentResourceTestCase {
 		assertEquals(randomAttachment, postAttachment);
 		assertValid(postAttachment);
 
+		_testPostAttachmentWithOptions(
+			_randomImageAttachment(),
+			attachment -> attachmentResource.postProductIdImage(
+				_cProduct.getCProductId(), attachment));
 		_testPostProductIdImageWithBase64();
 		_testPostProductIdImageWithFileEntryExternalReferenceCode();
 	}
