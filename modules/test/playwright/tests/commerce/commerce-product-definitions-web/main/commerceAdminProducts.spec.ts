@@ -388,6 +388,104 @@ test(
 );
 
 test(
+	'Toggling Price on Application on a SKU base price list entry updates its storefront label',
+	{tag: ['@COMMERCE-11548', '@LPD-106244-Grouped-25']},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductDetailsSkusPage,
+		commerceAdminProductPage,
+		page,
+	}) => {
+		const {catalog, product, site} = await apiStorefrontSetUp(apiHelpers, [
+			{
+				title: 'Catalog',
+				widgetName:
+					'com_liferay_commerce_product_content_search_web_internal_portlet_CPSearchResultsPortlet',
+			},
+		]);
+
+		const openBasePriceListEntry = async () => {
+			await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+			await commerceAdminProductDetailsPage.goToProductSkus();
+
+			await commerceAdminProductDetailsSkusPage
+				.skusTableRowLink(product.skus[0].sku)
+				.click();
+			await commerceAdminProductDetailsSkusPage.goToSkuTab('Price');
+			await commerceAdminProductDetailsSkusPage
+				.sidePanelSkuPriceTableRowLink(
+					`${catalog.name} Base Price List`
+				)
+				.click();
+		};
+
+		const saveBasePriceListEntry = async () => {
+			await commerceAdminProductDetailsSkusPage.sidePanelNestedSaveButton.click();
+
+			await waitForAlert(
+				commerceAdminProductDetailsSkusPage.sidePanelNestedFrame
+			);
+
+			await page.goto(`/web${site.friendlyUrlPath}/catalog`);
+		};
+
+		await openBasePriceListEntry();
+
+		await commerceAdminProductDetailsSkusPage.sidePanelNestedPriceListPrice.fill(
+			'25'
+		);
+
+		await saveBasePriceListEntry();
+
+		const productCard = page
+			.locator('.card')
+			.filter({hasText: product.name['en_US']});
+
+		await expect(productCard).toContainText('25.00');
+
+		await openBasePriceListEntry();
+
+		const priceOnApplicationTooltip =
+			commerceAdminProductDetailsSkusPage.sidePanelNestedFrame
+				.locator('label', {hasText: 'Price on Application'})
+				.locator('.lfr-portal-tooltip');
+
+		await priceOnApplicationTooltip.hover();
+
+		await expect(priceOnApplicationTooltip).toHaveAttribute(
+			'data-restore-title',
+			'Do not set a base price for this product and instead require that buyers request a quote.'
+		);
+
+		const priceOnApplicationToggle =
+			commerceAdminProductDetailsSkusPage.sidePanelNestedFrame.getByLabel(
+				'Price on Application'
+			);
+
+		await priceOnApplicationToggle.check();
+
+		await saveBasePriceListEntry();
+
+		const priceOnApplicationLabel = productCard
+			.locator('.price-value')
+			.filter({hasText: 'Price on Application'});
+
+		await expect(priceOnApplicationLabel).toBeVisible();
+
+		await openBasePriceListEntry();
+
+		await priceOnApplicationToggle.uncheck();
+
+		await saveBasePriceListEntry();
+
+		await expect(priceOnApplicationLabel).toBeHidden();
+		await expect(productCard).toContainText('25.00');
+	}
+);
+
+test(
 	'Back button works as expected',
 	{tag: '@LPD-43791'},
 	async ({

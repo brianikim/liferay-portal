@@ -17,10 +17,14 @@ import {
 	performLoginViaApi,
 	performLogout,
 } from '../../../../utils/performLogin';
+import {waitForAlert} from '../../../../utils/waitForAlert';
 import getFragmentDefinition from '../../../layout-content-page-editor-web/main/utils/getFragmentDefinition';
 import getPageDefinition from '../../../layout-content-page-editor-web/main/utils/getPageDefinition';
 import getWidgetDefinition from '../../../layout-content-page-editor-web/main/utils/getWidgetDefinition';
-import {createAccountWithBuyerUser} from '../../utils/commerce';
+import {
+	apiStorefrontSetUp,
+	createAccountWithBuyerUser,
+} from '../../utils/commerce';
 
 export const test = mergeTests(
 	commercePagesTest,
@@ -282,6 +286,85 @@ test(
 				);
 			}
 		});
+	}
+);
+
+test(
+	'Marking a base promotion or base price list entry as Price on Application disables its price settings and applies only the price list to the storefront',
+	{tag: ['@COMMERCE-11683', '@COMMERCE-11707', '@LPD-106244-Grouped-25']},
+	async ({
+		apiHelpers,
+		commerceAdminPriceListDetailsPage,
+		commerceAdminPriceListsPage,
+		commerceAdminPromotionsPage,
+		page,
+	}) => {
+		const {catalog, product, site} = await apiStorefrontSetUp(apiHelpers, [
+			{
+				title: 'Catalog',
+				widgetName:
+					'com_liferay_commerce_product_content_search_web_internal_portlet_CPSearchResultsPortlet',
+			},
+		]);
+
+		const skuName = product.skus[0].sku;
+
+		const priceOnApplicationLabel = page
+			.locator('.card')
+			.filter({hasText: product.name['en_US']})
+			.locator('.price-value')
+			.filter({hasText: 'Price on Application'});
+
+		for (const [commerceAdminPage, priceListName, priceOnApplication] of [
+			[
+				commerceAdminPromotionsPage,
+				`${catalog.name} Base Promotion`,
+				false,
+			],
+			[
+				commerceAdminPriceListsPage,
+				`${catalog.name} Base Price List`,
+				true,
+			],
+		] as const) {
+			await commerceAdminPage.goto();
+
+			await (
+				await commerceAdminPage.tableRowLink({
+					colIndex: 0,
+					rowValue: priceListName,
+				})
+			).click();
+
+			await commerceAdminPriceListDetailsPage.entriesTab.click();
+
+			await commerceAdminPriceListDetailsPage.searchByValue(skuName);
+
+			await commerceAdminPriceListDetailsPage
+				.skusTableRowLink(skuName)
+				.click();
+
+			await commerceAdminPriceListDetailsPage.sidePanelFrame
+				.getByLabel('Price on Application')
+				.check();
+			await commerceAdminPriceListDetailsPage.sidePanelSaveButton.click();
+
+			await waitForAlert(
+				commerceAdminPriceListDetailsPage.sidePanelFrame
+			);
+
+			await expect(
+				commerceAdminPriceListDetailsPage.sidePanelFrame.locator(
+					'fieldset.price-entry-price-settings.disabled, fieldset[id*="price-settings"][disabled]'
+				)
+			).toBeVisible();
+
+			await page.goto(`/web${site.friendlyUrlPath}/catalog`);
+
+			await expect(priceOnApplicationLabel).toBeVisible({
+				visible: priceOnApplication,
+			});
+		}
 	}
 );
 
