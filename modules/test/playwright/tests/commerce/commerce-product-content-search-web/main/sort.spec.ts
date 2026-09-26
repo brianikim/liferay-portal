@@ -11,6 +11,8 @@ import {dataApiHelpersTest} from '../../../../fixtures/dataApiHelpersTest';
 import {globalMenuPagesTest} from '../../../../fixtures/globalMenuPagesTest';
 import {loginTest} from '../../../../fixtures/loginTest';
 import {getRandomInt} from '../../../../utils/getRandomInt';
+import {watchForDialog} from '../../../../utils/watchForDialog';
+import {apiStorefrontSetUp} from '../../utils/commerce';
 
 export const test = mergeTests(
 	apiHelpersTest,
@@ -202,3 +204,30 @@ test('LPD-18714 Setting default sort for commerce products', async ({
 		}
 	}
 });
+
+test(
+	'Sort widget does not execute a script injected through orderByCol',
+	{tag: ['@COMMERCE-9739', '@LPD-106244-Grouped-21']},
+	async ({apiHelpers, page}) => {
+		const {site} = await apiStorefrontSetUp(apiHelpers, [
+			{
+				title: 'Catalog',
+				widgetName:
+					'com_liferay_commerce_product_content_search_web_internal_portlet_CPSortPortlet',
+			},
+		]);
+
+		const watcher = watchForDialog(page);
+
+		try {
+			await page.goto(
+				`/web${site.friendlyUrlPath}/catalog?_com_liferay_commerce_product_content_search_web_internal_portlet_CPSortPortlet_orderByCol=<script>alert(123)</script>&p_p_id=com_liferay_commerce_product_content_search_web_internal_portlet_CPSortPortlet`
+			);
+
+			watcher.assertNoDialog();
+		}
+		finally {
+			watcher.dispose();
+		}
+	}
+);
