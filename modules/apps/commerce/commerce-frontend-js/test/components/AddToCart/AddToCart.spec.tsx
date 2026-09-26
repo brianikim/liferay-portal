@@ -353,6 +353,58 @@ describe('Add to Cart', () => {
 			});
 		});
 
+		it('Must start at the first multiple and flag the unmet rules when minOrderQuantity is lower than multipleOrderQuantity', async () => {
+			const addToCart = renderWithConfiguration({
+				minOrderQuantity: 4,
+				multipleOrderQuantity: 5,
+			});
+
+			const {input} = getLocators(addToCart);
+
+			expect(input).toHaveValue(5);
+
+			fireEvent.focus(input);
+
+			for (const {minError, multipleError, quantity} of [
+				{minError: true, multipleError: true, quantity: 1},
+				{minError: true, multipleError: true, quantity: 4},
+				{minError: false, multipleError: false, quantity: 5},
+				{minError: false, multipleError: false, quantity: 20},
+			]) {
+				fireEvent.change(input, {target: {value: quantity}});
+
+				expect(input).toHaveValue(quantity);
+
+				await waitFor(() => {
+					expect(
+						input
+							.closest('.form-group')
+							?.classList.contains('has-error')
+					).toBe(minError || multipleError);
+
+					const minRule = screen.getByText(
+						/min-quantity-per-order-is/
+					);
+					const multipleRule = screen.getByText(
+						/quantity-must-be-a-multiple-of/
+					);
+
+					expect(minRule).toHaveTextContent(
+						'min-quantity-per-order-is-5'
+					);
+					expect(minRule.classList.contains('text-danger')).toBe(
+						minError
+					);
+					expect(multipleRule).toHaveTextContent(
+						'quantity-must-be-a-multiple-of-5'
+					);
+					expect(multipleRule.classList.contains('text-danger')).toBe(
+						multipleError
+					);
+				});
+			}
+		});
+
 		it('Must render an allowedOrderQuantities dropdown with only the listed quantities', () => {
 			renderWithConfiguration({
 				allowedOrderQuantities: [2, 3, 6],
