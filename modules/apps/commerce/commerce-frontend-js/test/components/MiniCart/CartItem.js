@@ -412,6 +412,59 @@ describe('MiniCart Item', () => {
 				});
 			});
 
+			it('flags the edited quantity only when it is outside the minimum and maximum quantities', async () => {
+				for (const {edits, settings} of [
+					{
+						edits: [
+							{hasError: true, quantity: 2},
+							{hasError: false, quantity: 4},
+						],
+						settings: {
+							maxQuantity: 10000,
+							minQuantity: 3,
+							multipleQuantity: 1,
+						},
+					},
+					{
+						edits: [
+							{hasError: true, quantity: 9},
+							{hasError: false, quantity: 8},
+							{hasError: false, quantity: 7},
+						],
+						settings: {
+							maxQuantity: 8,
+							minQuantity: 1,
+							multipleQuantity: 1,
+						},
+					},
+				]) {
+					const {getByRole, unmount} = renderCartItem({
+						...BASE_PROPS,
+						item: {...BASE_PROPS.item, quantity: 3, settings},
+					});
+
+					for (const {hasError, quantity} of edits) {
+						await act(async () => {
+							fireEvent.change(getByRole('spinbutton'), {
+								target: {value: `${quantity}`},
+							});
+						});
+
+						await act(async () => {
+							jest.advanceTimersByTime(1000);
+						});
+
+						expect(
+							getByRole('spinbutton')
+								.closest('.form-group')
+								.classList.contains('has-error')
+						).toBe(hasError);
+					}
+
+					unmount();
+				}
+			});
+
 			it('if the request fails, surfaces the error on the item and does not refresh the cart', async () => {
 				const ERROR_MESSAGE = 'The quantity is not available';
 
