@@ -27,6 +27,7 @@ import getFragmentDefinition from '../../../layout-content-page-editor-web/main/
 import getPageDefinition from '../../../layout-content-page-editor-web/main/utils/getPageDefinition';
 import getWidgetDefinition from '../../../layout-content-page-editor-web/main/utils/getWidgetDefinition';
 import {
+	apiStorefrontSetUp,
 	classicCommerceSetUp,
 	configureBuyerUserForSite,
 	createAccountWithBuyerUser,
@@ -2055,5 +2056,161 @@ test(
 				);
 			}
 		});
+	}
+);
+
+test(
+	'A default option value is checked on the product details page and added to the cart until it is no longer the default',
+	{tag: ['@COMMERCE-9834', '@LPD-106244-Grouped-31']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelsPage,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductDetailsProductOptionsPage,
+		commerceAdminProductPage,
+		commerceMiniCartPage,
+		page,
+		productDetailsPage,
+	}) => {
+		const {catalog, channel, site} = await apiStorefrontSetUp(apiHelpers);
+
+		await apiHelpers.headlessDelivery.createSitePage({
+			pageDefinition: getPageDefinition([
+				getWidgetDefinition({
+					id: getRandomString(),
+					widgetName:
+						'com_liferay_commerce_product_content_web_internal_portlet_CPContentPortlet',
+				}),
+				getWidgetDefinition({
+					id: getRandomString(),
+					widgetName:
+						'com_liferay_commerce_cart_content_web_internal_portlet_CommerceCartContentMiniPortlet',
+				}),
+			]),
+			siteId: site.id,
+			title: getRandomString(),
+		});
+
+		await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+			channel.name,
+			'B2B'
+		);
+
+		await waitForAlert(page);
+
+		const {buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id
+		);
+
+		const optionName = getRandomString();
+
+		const option = await apiHelpers.headlessCommerceAdminCatalog.postOption(
+			'radio',
+			`radio-${getRandomString().toLowerCase()}`,
+			optionName,
+			1
+		);
+
+		const product =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				name: {en_US: getRandomString()},
+				productConfiguration: {allowBackOrder: true},
+				productOptions: [
+					{
+						fieldType: 'radio',
+						key: option.key,
+						name: {en_US: optionName},
+						optionId: option.id,
+						priority: 1,
+						productOptionValues: [
+							{
+								key: 'value1',
+								name: {en_US: 'Value1'},
+								priority: 1,
+							},
+						],
+					},
+				],
+			});
+
+		const toggleDefaultOptionValue = async () => {
+			await performLoginViaApi({page, screenName: 'test'});
+
+			await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+			await commerceAdminProductDetailsPage.goToProductOptions();
+
+			await commerceAdminProductDetailsProductOptionsPage.openOption(
+				optionName
+			);
+
+			await commerceAdminProductDetailsProductOptionsPage.optionSidePanelFrame
+				.getByRole('button', {exact: true, name: 'Value1 Actions'})
+				.click();
+			await commerceAdminProductDetailsProductOptionsPage.optionSidePanelFrame
+				.getByRole('menuitem', {exact: true, name: 'Toggle Default'})
+				.click();
+
+			await waitForAlert(
+				commerceAdminProductDetailsProductOptionsPage.optionSidePanelFrame
+			);
+		};
+
+		const gotoProductAsBuyer = async () => {
+			await performLogout(page);
+			await performLoginViaApi({
+				page,
+				screenName: buyerUser.alternateName,
+			});
+
+			await page.goto(
+				`/web${site.friendlyUrlPath}/p/${product.urls['en_US']}`,
+				{waitUntil: 'networkidle'}
+			);
+		};
+
+		const cartItem = commerceMiniCartPage.miniCartItem(
+			product.name['en_US']
+		);
+
+		await toggleDefaultOptionValue();
+		await gotoProductAsBuyer();
+
+		await expect(productDetailsPage.optionRadio('Value1')).toBeChecked();
+
+		await productDetailsPage.addToCartButton.click();
+
+		await commerceMiniCartPage.miniCartButton.click();
+
+		await commerceMiniCartPage
+			.miniCartItemShowOptionsButton(cartItem)
+			.click();
+
+		await expect(
+			commerceMiniCartPage.miniCartItemOption(cartItem, optionName)
+		).toContainText('Value1');
+
+		await commerceMiniCartPage.removeAllItemsButton.click();
+		await commerceMiniCartPage.removeAllItemsConfirmButton.click();
+
+		await expect(cartItem).toHaveCount(0);
+
+		await toggleDefaultOptionValue();
+		await gotoProductAsBuyer();
+
+		await expect(
+			productDetailsPage.optionRadio('Value1')
+		).not.toBeChecked();
+
+		await productDetailsPage.addToCartButton.click();
+
+		await commerceMiniCartPage.miniCartButton.click();
+
+		await expect(cartItem).toBeVisible();
+		await expect(
+			commerceMiniCartPage.miniCartItemShowOptionsButton(cartItem)
+		).toHaveCount(0);
 	}
 );
