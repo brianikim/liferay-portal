@@ -4,9 +4,10 @@
  */
 
 import '@testing-library/jest-dom';
-import {render, waitFor} from '@testing-library/react';
+import {fireEvent, render, waitFor} from '@testing-library/react';
 import React from 'react';
 
+import CompareCheckbox from '../../../src/main/resources/META-INF/resources/components/compare_checkbox/CompareCheckbox';
 import MiniCompare from '../../../src/main/resources/META-INF/resources/components/mini_compare/MiniCompare';
 
 const PRODUCT_COMPARISON_COOKIES_TITLE_KEY = 'product-comparison-cookies-title';
@@ -77,6 +78,59 @@ describe('MiniCompare', () => {
 
 		expect(container).toBeEmptyDOMElement();
 		expect(mockCheckCookieConsentForTypes).not.toHaveBeenCalled();
+	});
+
+	it('disables the compare checkbox of further products and shows no extra item once the items limit is reached', () => {
+		const listeners = {};
+
+		window.Liferay.detach.mockImplementation((eventName, callback) => {
+			listeners[eventName] = listeners[eventName].filter(
+				(listener) => listener !== callback
+			);
+		});
+		window.Liferay.fire.mockImplementation((eventName, payload) => {
+			(listeners[eventName] || []).forEach((listener) =>
+				listener(payload)
+			);
+		});
+		window.Liferay.on.mockImplementation((eventName, callback) => {
+			listeners[eventName] = [...(listeners[eventName] || []), callback];
+		});
+
+		const {container, getByLabelText} = render(
+			<>
+				{[
+					'U-Joint',
+					'Transmission Fluid',
+					'Torque Converters',
+					'Mount',
+				].map((productName) => (
+					<CompareCheckbox
+						itemId={productName}
+						key={productName}
+						label={productName}
+					/>
+				))}
+
+				<MiniCompare {...BASE_PROPS} itemsLimit={3} />
+			</>
+		);
+
+		for (const productName of [
+			'U-Joint',
+			'Transmission Fluid',
+			'Torque Converters',
+		]) {
+			fireEvent.click(getByLabelText(productName));
+		}
+
+		expect(getByLabelText('Mount')).toBeDisabled();
+		expect(
+			container.querySelectorAll('.mini-compare-item.active')
+		).toHaveLength(3);
+		expect(container.querySelectorAll('.mini-compare-item')).toHaveLength(
+			3
+		);
 	});
 
 	it('renders the compare bar when items are present and functional cookies are accepted', () => {
