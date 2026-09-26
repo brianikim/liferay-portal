@@ -3618,7 +3618,7 @@ test(
 		await commerceMiniCartPage.selectQuickAddToCartSku(skuName);
 
 		await expect(
-			page.locator('.form-control-tag-group').getByText(skuName)
+			commerceMiniCartPage.quickAddToCartChip(skuName)
 		).toBeVisible();
 
 		await commerceMiniCartPage.quickAddToCartButton.click();
