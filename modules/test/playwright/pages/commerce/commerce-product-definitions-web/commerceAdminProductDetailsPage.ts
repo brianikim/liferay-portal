@@ -32,6 +32,8 @@ export class CommerceAdminProductDetailsPage {
 	) => Promise<string[]>;
 	readonly frameDropdownSpecification: Locator;
 	readonly frameSubmitSpecification: Locator;
+	readonly headerActionsButton: Locator;
+	readonly headerActionsMenuItem: (name: string) => Locator;
 	readonly menuItemSpecification: (chooseAddOrCreate: string) => Locator;
 	readonly nameInput: Locator;
 	readonly nameInputLocaleSelector: Locator;
@@ -122,6 +124,11 @@ export class CommerceAdminProductDetailsPage {
 			'button',
 			{name: 'Submit'}
 		);
+		this.headerActionsButton = page
+			.locator('#dropdown-header-container')
+			.getByRole('button', {name: 'Actions'});
+		this.headerActionsMenuItem = (name: string) =>
+			page.getByRole('menuitem', {exact: true, name});
 		this.menuItemSpecification = (chooseAddOrCreate: string) => {
 			return page.getByRole('menuitem', {name: chooseAddOrCreate});
 		};
