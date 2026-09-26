@@ -33,6 +33,7 @@ export class CommerceThemeMiniumCatalogPage {
 	readonly createNewAccountButton: Locator;
 	readonly createNewAccountModal: Locator;
 	readonly createNewAccountModalCancelButton: Locator;
+	readonly createNewAccountModalCreateButton: Locator;
 	readonly createNewAccountModalNameInput: Locator;
 	readonly createNewOrderButton: Locator;
 	readonly firstCardItem: Locator;
@@ -179,6 +180,11 @@ export class CommerceThemeMiniumCatalogPage {
 		this.createNewAccountModal = page.locator('.modal-content');
 		this.createNewAccountModalCancelButton =
 			this.createNewAccountModal.getByRole('button', {name: 'Cancel'});
+		this.createNewAccountModalCreateButton =
+			this.createNewAccountModal.getByRole('button', {
+				exact: true,
+				name: 'Create',
+			});
 		this.createNewAccountModalNameInput =
 			this.createNewAccountModal.locator('input[name="accountName"]');
 		this.createNewOrderButton = page.getByRole('button', {
