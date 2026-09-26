@@ -82,6 +82,7 @@ export type TProduct = {
 	id?: number;
 	images?: Array<{
 		attachment?: string;
+		src?: string;
 		title?: {
 			[key: string]: string;
 		};
