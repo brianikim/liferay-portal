@@ -981,22 +981,27 @@ export class CommerceAdminChannelDetailsPage {
 
 			await eligibilityButton.click();
 
-			const placeholderText =
-				eligibilityOption === 'Specific Order Types'
-					? 'Find an Order Type'
-					: 'Find a Delivery Term';
+			if (entryName) {
+				const placeholderText =
+					eligibilityOption === 'Specific Order Types'
+						? 'Find an Order Type'
+						: 'Find a Delivery Term';
 
-			const placeholderInput = await this.placeHolderTerm(
-				isNestedFrame,
-				tableName,
-				placeholderText
-			);
+				const placeholderInput = await this.placeHolderTerm(
+					isNestedFrame,
+					tableName,
+					placeholderText
+				);
 
-			await expect(placeholderInput).toBeVisible();
+				await expect(placeholderInput).toBeVisible();
 
-			await placeholderInput.fill(entryName);
+				await placeholderInput.fill(entryName);
 
-			await (await this.selectButton(isNestedFrame, tableName)).click();
+				await (
+					await this.selectButton(isNestedFrame, tableName)
+				).click();
+			}
+
 			await (
 				await this.frameSaveButton(isNestedFrame, tableName)
 			).click();
