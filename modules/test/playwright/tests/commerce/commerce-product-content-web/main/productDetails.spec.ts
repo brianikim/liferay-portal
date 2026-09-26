@@ -31,6 +31,7 @@ import {waitForAlert} from '../../../../utils/waitForAlert';
 import getPageDefinition from '../../../layout-content-page-editor-web/main/utils/getPageDefinition';
 import getWidgetDefinition from '../../../layout-content-page-editor-web/main/utils/getWidgetDefinition';
 import {
+	apiStorefrontSetUp,
 	configureBuyerUserForSite,
 	createAccountWithBuyerUser,
 	createChannelAccountManagerUser,
@@ -1960,5 +1961,41 @@ test(
 				0
 			);
 		});
+	}
+);
+
+test(
+	'A product is reachable through its friendly URL once the Product Detail health check is fixed',
+	{tag: ['@COMMERCE-6304', '@LPD-106244-Grouped-23']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelDetailsPage,
+		commerceAdminChannelsPage,
+		page,
+	}) => {
+		const {channel, product, site} = await apiStorefrontSetUp(apiHelpers);
+
+		await commerceAdminChannelsPage.goto();
+
+		await (
+			await commerceAdminChannelsPage.channelsTableRowLink(channel.name)
+		).click();
+
+		await (
+			await commerceAdminChannelDetailsPage.commerceChannelHealthChecksTableRowAction(
+				'Fix Issue',
+				'Product Detail'
+			)
+		).click();
+
+		await waitForAlert(page);
+
+		await page.goto(
+			`/web${site.friendlyUrlPath}/p/${product.urls['en_US']}`
+		);
+
+		await expect(page.locator('.product-header-title')).toHaveText(
+			product.name['en_US']
+		);
 	}
 );
