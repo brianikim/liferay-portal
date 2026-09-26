@@ -12,14 +12,18 @@ import {isolatedSiteTest} from '../../../../fixtures/isolatedSiteTest';
 import {loginTest} from '../../../../fixtures/loginTest';
 import {getTableRowCells} from '../../../../pages/commerce/commerce-order-content-web/orderImportPage';
 import getRandomString from '../../../../utils/getRandomString';
+import {hoverAndExpectToBeVisible} from '../../../../utils/hoverAndExpectToBeVisible';
 import {
 	performLoginViaApi,
 	performLogout,
 	userData,
 } from '../../../../utils/performLogin';
+import {waitForAlert} from '../../../../utils/waitForAlert';
+import getFragmentDefinition from '../../../layout-content-page-editor-web/main/utils/getFragmentDefinition';
 import getPageDefinition from '../../../layout-content-page-editor-web/main/utils/getPageDefinition';
 import getWidgetDefinition from '../../../layout-content-page-editor-web/main/utils/getWidgetDefinition';
 import {
+	apiStorefrontSetUp,
 	createAccountWithBuyerUser,
 	getSkusByName,
 	miniumSetUp,
@@ -808,3 +812,232 @@ test(
 		).toHaveCount(0);
 	}
 );
+
+for (const variant of [
+	{
+		allowBackOrder: false,
+		description:
+			'A discontinued SKU without stock is replaced when it is quick added to the Mini Cart fragment',
+		pricing: 'none',
+		tags: ['@COMMERCE-12005', '@COMMERCE-12037'],
+	},
+	{
+		allowBackOrder: true,
+		description:
+			'A discontinued SKU that allows back orders is not replaced when it is quick added to the Mini Cart fragment',
+		pricing: 'none',
+		tags: ['@COMMERCE-12006'],
+	},
+	{
+		allowBackOrder: false,
+		description:
+			'A discount applies to the replacement SKU of a discontinued SKU quick added to the Mini Cart fragment',
+		pricing: 'discount',
+		tags: ['@COMMERCE-12035'],
+	},
+	{
+		allowBackOrder: false,
+		description:
+			'A promotion applies to the replacement SKU of a discontinued SKU quick added to the Mini Cart fragment',
+		pricing: 'promotion',
+		tags: ['@COMMERCE-12034'],
+	},
+	{
+		allowBackOrder: false,
+		description:
+			'A price on application replacement SKU of a discontinued SKU quick added to the Mini Cart fragment requires a quote',
+		pricing: 'priceOnApplication',
+		tags: ['@COMMERCE-12036'],
+	},
+]) {
+	test(
+		variant.description,
+		{tag: [...variant.tags, '@LPD-106244-Grouped-15']},
+		async ({
+			apiHelpers,
+			commerceAdminChannelsPage,
+			commerceMiniCartPage,
+			page,
+		}) => {
+			const {
+				catalog,
+				channel,
+				product: replacementProduct,
+				site,
+			} = await apiStorefrontSetUp(apiHelpers);
+
+			await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+				channel.name,
+				'B2B'
+			);
+
+			await waitForAlert(page);
+
+			const layout = await apiHelpers.headlessDelivery.createSitePage({
+				pageDefinition: getPageDefinition([
+					getFragmentDefinition({
+						id: getRandomString(),
+						key: 'COMMERCE_CART_FRAGMENTS-mini-cart',
+					}),
+				]),
+				siteId: site.id,
+				title: getRandomString(),
+			});
+
+			const replacementSku = replacementProduct.skus[0];
+
+			const discontinuedProduct =
+				await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+					catalogId: catalog.id,
+					name: {en_US: getRandomString()},
+					productConfiguration: {
+						allowBackOrder: variant.allowBackOrder,
+					},
+					skus: [
+						{
+							cost: 0,
+							discontinued: true,
+							price: 10,
+							published: true,
+							purchasable: true,
+							replacementSkuId: replacementSku.id,
+							sku: getRandomString(),
+						},
+					],
+				});
+
+			if (variant.pricing === 'discount') {
+				await apiHelpers.headlessCommerceAdminPricing.postDiscount({
+					discountProducts: [
+						{productId: replacementProduct.productId},
+					],
+					level: 'L1',
+					percentageLevel1: 50,
+					target: 'products',
+					usePercentage: true,
+				});
+			}
+			else if (variant.pricing === 'promotion') {
+				const basePromoPriceList =
+					await apiHelpers.headlessCommerceAdminPricing.getBasePromoPriceList(
+						catalog.id
+					);
+
+				await apiHelpers.headlessCommerceAdminPricing.postPriceEntry({
+					price: 2,
+					priceListId: basePromoPriceList.items[0].id,
+					skuId: replacementSku.id,
+				});
+			}
+			else if (variant.pricing === 'priceOnApplication') {
+				const basePriceList =
+					await apiHelpers.headlessCommerceAdminPricing.getBasePriceList(
+						catalog.id
+					);
+
+				const priceEntries =
+					await apiHelpers.headlessCommerceAdminPricing.getPriceListEntries(
+						basePriceList.items[0].id
+					);
+
+				await apiHelpers.headlessCommerceAdminPricing.patchPriceEntry(
+					priceEntries.items.find(
+						(entry: {skuId: number}) =>
+							entry.skuId === replacementSku.id
+					).priceEntryId,
+					{priceOnApplication: true}
+				);
+			}
+
+			const {buyerUser} = await createAccountWithBuyerUser(
+				apiHelpers,
+				site.id
+			);
+
+			await performLogout(page);
+			await performLoginViaApi({
+				page,
+				screenName: buyerUser.alternateName,
+			});
+
+			await page.goto(
+				`/web${site.friendlyUrlPath}${layout.friendlyUrlPath}`,
+				{waitUntil: 'networkidle'}
+			);
+
+			const discontinuedSku = discontinuedProduct.skus[0].sku;
+
+			await commerceMiniCartPage.quickAddToCart(discontinuedSku);
+
+			if (variant.allowBackOrder) {
+				await expect(
+					commerceMiniCartPage.miniCartSku(discontinuedSku)
+				).toBeVisible();
+				await expect(
+					commerceMiniCartPage.miniCartItemsContainer.getByText(
+						'Replacement',
+						{exact: true}
+					)
+				).toHaveCount(0);
+
+				return;
+			}
+
+			const replacementProductName = replacementProduct.name.en_US;
+
+			await expect(
+				commerceMiniCartPage.miniCartSku(replacementSku.sku)
+			).toBeVisible();
+			await expect(
+				commerceMiniCartPage.miniCartItemReplacementLabel(
+					replacementProductName
+				)
+			).toBeVisible();
+			await expect(
+				commerceMiniCartPage.miniCartReplacementInfoMessage
+			).toBeVisible();
+
+			if (variant.pricing === 'none') {
+				await hoverAndExpectToBeVisible({
+					target: page
+						.getByRole('tooltip')
+						.getByText(
+							`Replacement Product for ${discontinuedSku}.`,
+							{exact: true}
+						),
+					trigger: commerceMiniCartPage
+						.miniCartItem(replacementProductName)
+						.getByLabel('Info', {exact: true}),
+				});
+			}
+			else if (variant.pricing === 'discount') {
+				await expect(
+					commerceMiniCartPage.miniCartItemNetPrice(
+						replacementProductName
+					)
+				).toContainText('$ 5.00');
+			}
+			else if (variant.pricing === 'promotion') {
+				await expect(
+					commerceMiniCartPage.miniCartItemListPrice(
+						replacementProductName
+					)
+				).toHaveText('$ 10.00');
+				await expect(
+					commerceMiniCartPage.miniCartItemPromoPrice(
+						replacementProductName
+					)
+				).toHaveText('$ 2.00');
+			}
+			else {
+				await expect(
+					commerceMiniCartPage.miniCartPriceOnApplicationInfoMessage
+				).toBeVisible();
+				await expect(commerceMiniCartPage.submitButton).toBeDisabled();
+				await expect(
+					commerceMiniCartPage.requestAQuoteButton
+				).toBeEnabled();
+			}
+		}
+	);
+}
