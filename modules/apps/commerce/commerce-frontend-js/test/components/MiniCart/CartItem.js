@@ -519,7 +519,7 @@ describe('MiniCart Item', () => {
 				</MiniCartContext.Provider>
 			);
 
-		it('renders the item name, SKU, list price, and quantity selector', () => {
+		it('renders the item name, SKU, list price, and quantity selector, without an options accordion when the item has no options', () => {
 			const item = mockCartItem({
 				name: 'Sample Product',
 				quantity: 3,
@@ -540,6 +540,9 @@ describe('MiniCart Item', () => {
 			expect(
 				container.querySelector(`${COMPONENT_SELECTOR}-actions button`)
 			).toBeInTheDocument();
+			expect(
+				container.querySelector('.item-info-collapse')
+			).not.toBeInTheDocument();
 		});
 
 		it('renders the tier-discounted final price when quantity reaches the tier', () => {
