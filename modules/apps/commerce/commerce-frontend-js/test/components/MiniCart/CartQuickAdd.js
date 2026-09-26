@@ -241,4 +241,38 @@ describe('MiniCart Quick Add', () => {
 			unmount();
 		}
 	});
+
+	it('shows a chip for each selected SKU', async () => {
+		const {baseElement, getByRole} = renderCartQuickAdd();
+
+		const selectedSKUs = [];
+
+		for (const [index, sku] of [
+			'MIN55861',
+			'MIN38805',
+			'MIN55860',
+		].entries()) {
+			mockProductsSearch([
+				getProduct('U-Joint', [
+					{id: index + 1, purchasable: true, sku},
+				]),
+			]);
+
+			fireEvent.change(getByRole('combobox'), {target: {value: sku}});
+
+			await waitForProductsSearch();
+
+			await act(async () => {
+				fireEvent.click(baseElement.querySelector('.dropdown-item'));
+			});
+
+			selectedSKUs.push(sku);
+
+			expect(
+				[...baseElement.querySelectorAll('.label')].map(
+					(label) => label.textContent
+				)
+			).toEqual(selectedSKUs);
+		}
+	});
 });
