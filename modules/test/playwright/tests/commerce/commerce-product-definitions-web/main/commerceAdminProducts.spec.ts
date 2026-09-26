@@ -12,6 +12,7 @@ import {isolatedSiteTest} from '../../../../fixtures/isolatedSiteTest';
 import {loginTest} from '../../../../fixtures/loginTest';
 import {userPersonalBarPagesTest} from '../../../../fixtures/userPersonalBarPagesTest';
 import {DataApiHelpers} from '../../../../helpers/ApiHelpers';
+import {getTableRowCells} from '../../../../pages/commerce/commerce-order-content-web/orderImportPage';
 import {CommerceAdminProductDetailsPage} from '../../../../pages/commerce/commerce-product-definitions-web/commerceAdminProductDetailsPage';
 import {CommerceAdminProductPage} from '../../../../pages/commerce/commerce-product-definitions-web/commerceAdminProductPage';
 import {clickAndExpectToBeVisible} from '../../../../utils/clickAndExpectToBeVisible';
@@ -482,6 +483,131 @@ test(
 
 		await expect(priceOnApplicationLabel).toBeHidden();
 		await expect(productCard).toContainText('25.00');
+	}
+);
+
+test(
+	'The Price tab of a SKU shows which price list and promotion entries are priced on application',
+	{tag: ['@COMMERCE-12210', '@COMMERCE-12211', '@LPD-106244-Grouped-25']},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductDetailsSkusPage,
+		commerceAdminProductPage,
+	}) => {
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		const product =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+			});
+
+		const sku = (
+			await apiHelpers.headlessCommerceAdminCatalog.getProduct(
+				product.productId
+			)
+		).skus[0];
+
+		const priceEntries = [];
+
+		for (const [type, price] of [
+			['price-list', 20],
+			['promotion', 0],
+		] as const) {
+			const priceList =
+				await apiHelpers.headlessCommerceAdminPricing.postPriceList({
+					catalogId: catalog.id,
+					currencyCode: 'USD',
+					name: getRandomString(),
+					type,
+				});
+
+			priceEntries.push({
+				name: priceList.name,
+				priceEntry:
+					await apiHelpers.headlessCommerceAdminPricing.postPriceEntry(
+						{price, priceListId: priceList.id, skuId: sku.id}
+					),
+			});
+		}
+
+		const basePriceListNames = [
+			`${catalog.name} Base Price List`,
+			`${catalog.name} Base Promotion`,
+		];
+
+		const gotoSkuLists = [
+			async () => {
+				await commerceAdminProductPage.gotoProduct(
+					product.name['en_US']
+				);
+
+				await commerceAdminProductDetailsPage.goToProductSkus();
+			},
+			async () => {
+				await commerceAdminProductPage.goto();
+
+				await commerceAdminProductPage.productSkusLink.click();
+
+				await commerceAdminProductPage.searchByValue(sku.sku);
+			},
+		];
+
+		const openSkuPriceTab = async (gotoSkuList: () => Promise<void>) => {
+			await gotoSkuList();
+
+			await commerceAdminProductDetailsSkusPage
+				.skusTableRowLink(sku.sku)
+				.click();
+			await commerceAdminProductDetailsSkusPage.goToSkuTab('Price');
+		};
+
+		const expectPriceOnApplication = async (
+			priceListNames: string[],
+			priceOnApplication: string
+		) => {
+			for (const priceListName of priceListNames) {
+				await expect(async () => {
+					expect(
+						await getTableRowCells(
+							commerceAdminProductDetailsSkusPage.sidePanelFrame.locator(
+								'table'
+							),
+							priceListName
+						)
+					).toMatchObject({
+						'PRICE ON APPLICATION': priceOnApplication,
+					});
+				}).toPass({timeout: 30000});
+			}
+		};
+
+		for (const gotoSkuList of gotoSkuLists) {
+			await openSkuPriceTab(gotoSkuList);
+
+			await expectPriceOnApplication(
+				[...basePriceListNames, ...priceEntries.map(({name}) => name)],
+				'No'
+			);
+		}
+
+		for (const {priceEntry} of priceEntries) {
+			await apiHelpers.headlessCommerceAdminPricing.patchPriceEntry(
+				priceEntry.priceEntryId,
+				{priceOnApplication: true}
+			);
+		}
+
+		for (const gotoSkuList of gotoSkuLists) {
+			await openSkuPriceTab(gotoSkuList);
+
+			await expectPriceOnApplication(basePriceListNames, 'No');
+			await expectPriceOnApplication(
+				priceEntries.map(({name}) => name),
+				'Yes'
+			);
+		}
 	}
 );
 
@@ -1103,7 +1229,7 @@ for (const {productType, tags} of [
 
 				await expect(page.getByText(productName)).toBeVisible();
 				await expect(
-					page.locator('.workflow-status-draft')
+					commerceAdminProductDetailsPage.draftWorkflowStatus
 				).toBeVisible();
 				await expect(
 					page
@@ -1256,7 +1382,9 @@ test(
 		await expect(
 			commerceAdminProductDetailsPage.saveAsDraftLink
 		).toBeVisible();
-		await expect(page.locator('.workflow-status-draft')).toBeVisible();
+		await expect(
+			commerceAdminProductDetailsPage.draftWorkflowStatus
+		).toBeVisible();
 		await expect(commerceAdminProductDetailsPage.nameInput).toHaveValue(
 			productName
 		);
@@ -1270,7 +1398,6 @@ test(
 		apiHelpers,
 		commerceAdminProductDetailsPage,
 		commerceAdminProductPage,
-		page,
 	}) => {
 		const catalog =
 			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
@@ -1289,7 +1416,9 @@ test(
 
 		await commerceAdminProductDetailsPage.saveAsDraftLink.click();
 
-		await expect(page.locator('.workflow-status-draft')).toBeVisible();
+		await expect(
+			commerceAdminProductDetailsPage.draftWorkflowStatus
+		).toBeVisible();
 		await expect(commerceAdminProductDetailsPage.nameInput).toHaveValue(
 			productName
 		);
@@ -1463,28 +1592,10 @@ test(
 	}
 );
 
-for (const {
-	cycleLengthContainerId,
-	subscriptionEnabledId,
-	subscriptionLengthId,
-	subscriptionName,
-	subscriptionTypeId,
-} of [
-	{
-		cycleLengthContainerId: 'deliveryCycleLengthContainer',
-		subscriptionEnabledId: 'deliverySubscriptionEnabled',
-		subscriptionLengthId: 'deliverySubscriptionLength',
-		subscriptionName: 'Delivery Subscription',
-		subscriptionTypeId: 'deliverySubscriptionType',
-	},
-	{
-		cycleLengthContainerId: 'cycleLengthContainer',
-		subscriptionEnabledId: 'subscriptionEnabled',
-		subscriptionLengthId: 'subscriptionLength',
-		subscriptionName: 'Payment Subscription',
-		subscriptionTypeId: 'subscriptionType',
-	},
-]) {
+for (const subscriptionName of [
+	'Delivery Subscription',
+	'Payment Subscription',
+] as const) {
 	test(
 		`The ${subscriptionName} length shows the subscription type in singular or plural`,
 		{tag: ['@COMMERCE-9744', '@COMMERCE-9798', '@LPD-106244-Grouped-24']},
@@ -1504,23 +1615,24 @@ for (const {
 
 			await commerceAdminProductPage.gotoProduct(product.name['en_US']);
 
-			await page
-				.getByRole('link', {exact: true, name: 'Subscription'})
+			await commerceAdminProductDetailsPage.productSubscriptionLink.click();
+
+			await commerceAdminProductDetailsPage
+				.subscriptionEnabledLabel(subscriptionName)
 				.click();
 
-			await page
-				.locator(`label[for$="_${subscriptionEnabledId}"]`)
-				.click();
-
-			const subscriptionLengthInput = page.locator(
-				`input[id$="_${subscriptionLengthId}"]`
-			);
-			const subscriptionLengthSuffix = page.locator(
-				`[id$="_${cycleLengthContainerId}"] .input-group-text`
-			);
-			const subscriptionTypeSelect = page.locator(
-				`select[id$="_${subscriptionTypeId}"]`
-			);
+			const subscriptionLengthInput =
+				commerceAdminProductDetailsPage.subscriptionLengthInput(
+					subscriptionName
+				);
+			const subscriptionLengthSuffix =
+				commerceAdminProductDetailsPage.subscriptionLengthSuffix(
+					subscriptionName
+				);
+			const subscriptionTypeSelect =
+				commerceAdminProductDetailsPage.subscriptionTypeSelect(
+					subscriptionName
+				);
 
 			await expect(
 				subscriptionTypeSelect.locator('option:checked')
@@ -1586,15 +1698,10 @@ test(
 
 		await commerceAdminProductPage.gotoProduct(product.name['en_US']);
 
-		const subscriptionLink = page.getByRole('link', {
-			exact: true,
-			name: 'Subscription',
-		});
+		await commerceAdminProductDetailsPage.productSubscriptionLink.click();
 
-		await subscriptionLink.click();
-
-		await page
-			.locator('label[for$="_deliverySubscriptionEnabled"]')
+		await commerceAdminProductDetailsPage
+			.subscriptionEnabledLabel('Delivery Subscription')
 			.click();
 
 		const deliveryDayInput = page.locator(
@@ -1606,12 +1713,14 @@ test(
 		const deliveryMonthSelect = page.locator(
 			'select[name$="_deliverySubscriptionTypeSettings--yearly--deliveryMonth--"]'
 		);
-		const deliverySubscriptionLengthInput = page.locator(
-			'input[id$="_deliverySubscriptionLength"]'
-		);
-		const deliverySubscriptionTypeSelect = page.locator(
-			'select[id$="_deliverySubscriptionType"]'
-		);
+		const deliverySubscriptionLengthInput =
+			commerceAdminProductDetailsPage.subscriptionLengthInput(
+				'Delivery Subscription'
+			);
+		const deliverySubscriptionTypeSelect =
+			commerceAdminProductDetailsPage.subscriptionTypeSelect(
+				'Delivery Subscription'
+			);
 
 		await deliverySubscriptionTypeSelect.selectOption({label: 'Year'});
 		await deliveryModeSelect.selectOption({label: 'Exact Day of Year'});
@@ -1625,7 +1734,7 @@ test(
 
 		await page.getByRole('link', {exact: true, name: 'Details'}).click();
 
-		await subscriptionLink.click();
+		await commerceAdminProductDetailsPage.productSubscriptionLink.click();
 
 		for (const {select, value} of [
 			{select: deliverySubscriptionTypeSelect, value: 'Year'},
@@ -1642,15 +1751,18 @@ test(
 			await expect(input).toHaveValue('5');
 		}
 
-		await page.locator('label[for$="_subscriptionEnabled"]').click();
+		await commerceAdminProductDetailsPage
+			.subscriptionEnabledLabel('Payment Subscription')
+			.click();
 
 		await commerceAdminProductDetailsPage.publishLink.click();
 
 		await waitForAlert(page);
 
-		const paymentSubscriptionTypeSelect = page.locator(
-			'select[id$="_subscriptionType"]'
-		);
+		const paymentSubscriptionTypeSelect =
+			commerceAdminProductDetailsPage.subscriptionTypeSelect(
+				'Payment Subscription'
+			);
 
 		await expect(
 			paymentSubscriptionTypeSelect.locator('option:checked')
