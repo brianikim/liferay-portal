@@ -217,3 +217,90 @@ test('LPD-30466 Verify users without edit permission cannot click on channel nam
 		await performLogin(page, 'test');
 	}
 });
+
+test(
+	'Payment method eligibility can be set to a payment term and back to no payment terms',
+	{tag: '@LPD-106244-Grouped-7'},
+	async ({
+		apiHelpers,
+		commerceAdminChannelDetailsPage,
+		commerceAdminChannelsPage,
+		page,
+		site,
+	}) => {
+		const channel =
+			await apiHelpers.headlessCommerceAdminChannel.postChannel({
+				siteGroupId: site.id,
+			});
+
+		const paymentTerm =
+			await apiHelpers.headlessCommerceAdminOrder.postTerm({
+				type: 'payment-terms',
+			});
+
+		await commerceAdminChannelsPage.goto();
+
+		await (
+			await commerceAdminChannelsPage.channelsTableRowLink(channel.name)
+		).click();
+
+		await commerceAdminChannelDetailsPage.activateChannelConfiguration(
+			'PayPal',
+			'Payment Methods'
+		);
+
+		const paymentTermCell = (
+			await commerceAdminChannelDetailsPage.sidePanelFrame(
+				'Payment Methods'
+			)
+		).getByRole('cell', {exact: true, name: paymentTerm.name});
+
+		for (const {eligibilityOption, paymentTermCount, paymentTermLabel} of [
+			{
+				eligibilityOption: 'Specific Payment Terms',
+				paymentTermCount: 1,
+				paymentTermLabel: paymentTerm.label['en_US'],
+			},
+			{
+				eligibilityOption: 'No Payment Terms',
+				paymentTermCount: 0,
+				paymentTermLabel: '',
+			},
+		]) {
+			await page.reload();
+
+			await (
+				await commerceAdminChannelDetailsPage.generalCommerceAdminChannelTableLink(
+					'PayPal'
+				)
+			).click();
+
+			await commerceAdminChannelDetailsPage.setEntryEligibility(
+				eligibilityOption,
+				paymentTermLabel,
+				'Payment Methods'
+			);
+
+			await (
+				await commerceAdminChannelDetailsPage.generalCommerceAdminChannelTableLink(
+					'PayPal'
+				)
+			).click();
+			await (
+				await commerceAdminChannelDetailsPage.eligibilityTab(
+					false,
+					'Payment Methods'
+				)
+			).click();
+
+			await expect(paymentTermCell).toHaveCount(paymentTermCount);
+
+			await (
+				await commerceAdminChannelDetailsPage.closeSidePanelFrame(
+					false,
+					'Payment Methods'
+				)
+			).click();
+		}
+	}
+);
