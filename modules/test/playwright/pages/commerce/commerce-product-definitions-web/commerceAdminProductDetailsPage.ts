@@ -5,6 +5,25 @@
 
 import {FrameLocator, Locator, Page, expect} from '@playwright/test';
 
+export type ProductSubscriptionName =
+	| 'Delivery Subscription'
+	| 'Payment Subscription';
+
+const SUBSCRIPTION_FIELD_IDS = {
+	'Delivery Subscription': {
+		cycleLengthContainer: 'deliveryCycleLengthContainer',
+		enabled: 'deliverySubscriptionEnabled',
+		length: 'deliverySubscriptionLength',
+		type: 'deliverySubscriptionType',
+	},
+	'Payment Subscription': {
+		cycleLengthContainer: 'cycleLengthContainer',
+		enabled: 'subscriptionEnabled',
+		length: 'subscriptionLength',
+		type: 'subscriptionType',
+	},
+};
+
 export class CommerceAdminProductDetailsPage {
 	readonly addExistingSpecificationValueTextbox: Locator;
 	readonly addSpecification: Locator;
@@ -13,6 +32,7 @@ export class CommerceAdminProductDetailsPage {
 	readonly closeEditFrame: Locator;
 	readonly createNewSpecificationProduct: Locator;
 	readonly createNewValueSpecificationProduct: Locator;
+	readonly draftWorkflowStatus: Locator;
 	readonly dropdownProductSpecification: (
 		chooseEditOrDelete: string
 	) => Promise<Locator>;
@@ -32,6 +52,8 @@ export class CommerceAdminProductDetailsPage {
 	) => Promise<string[]>;
 	readonly frameDropdownSpecification: Locator;
 	readonly frameSubmitSpecification: Locator;
+	readonly headerActionsButton: Locator;
+	readonly headerActionsMenuItem: (name: string) => Locator;
 	readonly menuItemSpecification: (chooseAddOrCreate: string) => Locator;
 	readonly nameInput: Locator;
 	readonly nameInputLocaleSelector: Locator;
@@ -45,9 +67,22 @@ export class CommerceAdminProductDetailsPage {
 	readonly productOptionsLink: Locator;
 	readonly productRelationsLink: Locator;
 	readonly productSkusLink: Locator;
+	readonly productSubscriptionLink: Locator;
 	readonly productVisibilityLink: Locator;
 	readonly publishLink: Locator;
 	readonly saveAsDraftLink: Locator;
+	readonly subscriptionEnabledLabel: (
+		subscriptionName: ProductSubscriptionName
+	) => Locator;
+	readonly subscriptionLengthInput: (
+		subscriptionName: ProductSubscriptionName
+	) => Locator;
+	readonly subscriptionLengthSuffix: (
+		subscriptionName: ProductSubscriptionName
+	) => Locator;
+	readonly subscriptionTypeSelect: (
+		subscriptionName: ProductSubscriptionName
+	) => Locator;
 	readonly textTableCell: (text: string) => Locator;
 	readonly visibleToggle: Locator;
 
@@ -68,6 +103,7 @@ export class CommerceAdminProductDetailsPage {
 		this.createNewValueSpecificationProduct = this.addSpecificationFrame
 			.getByRole('textbox')
 			.nth(1);
+		this.draftWorkflowStatus = page.locator('.workflow-status-draft');
 		this.dropdownProductSpecification = async (
 			chooseEditOrDelete: string
 		) => {
@@ -122,6 +158,11 @@ export class CommerceAdminProductDetailsPage {
 			'button',
 			{name: 'Submit'}
 		);
+		this.headerActionsButton = page
+			.locator('#dropdown-header-container')
+			.getByRole('button', {name: 'Actions'});
+		this.headerActionsMenuItem = (name: string) =>
+			page.getByRole('menuitem', {exact: true, name});
 		this.menuItemSpecification = (chooseAddOrCreate: string) => {
 			return page.getByRole('menuitem', {name: chooseAddOrCreate});
 		};
@@ -155,6 +196,10 @@ export class CommerceAdminProductDetailsPage {
 		this.productSkusLink = page.getByRole('link', {
 			name: 'Skus',
 		});
+		this.productSubscriptionLink = page.getByRole('link', {
+			exact: true,
+			name: 'Subscription',
+		});
 		this.productVisibilityLink = page.getByRole('link', {
 			name: 'Visibility',
 		});
@@ -163,6 +208,30 @@ export class CommerceAdminProductDetailsPage {
 			exact: true,
 			name: 'Save as Draft',
 		});
+		this.subscriptionEnabledLabel = (
+			subscriptionName: ProductSubscriptionName
+		) =>
+			page.locator(
+				`label[for$="_${SUBSCRIPTION_FIELD_IDS[subscriptionName].enabled}"]`
+			);
+		this.subscriptionLengthInput = (
+			subscriptionName: ProductSubscriptionName
+		) =>
+			page.locator(
+				`input[id$="_${SUBSCRIPTION_FIELD_IDS[subscriptionName].length}"]`
+			);
+		this.subscriptionLengthSuffix = (
+			subscriptionName: ProductSubscriptionName
+		) =>
+			page.locator(
+				`[id$="_${SUBSCRIPTION_FIELD_IDS[subscriptionName].cycleLengthContainer}"] .input-group-text`
+			);
+		this.subscriptionTypeSelect = (
+			subscriptionName: ProductSubscriptionName
+		) =>
+			page.locator(
+				`select[id$="_${SUBSCRIPTION_FIELD_IDS[subscriptionName].type}"]`
+			);
 		this.textTableCell = (text: string) =>
 			this.page.getByRole('cell', {
 				exact: true,
