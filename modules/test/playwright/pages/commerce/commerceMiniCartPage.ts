@@ -63,6 +63,9 @@ export class CommerceMiniCartPage {
 	readonly miniCartSummaryItem: (label: string) => Locator;
 	readonly miniCartTotalPrice: Locator;
 	readonly miniCartUnitOfMeasureSelector: Locator;
+	readonly miniCartWidget: Locator;
+	readonly miniCartWidgetButton: (name: string) => Locator;
+	readonly miniCartWidgetCheckoutButton: Locator;
 	readonly page: Page;
 	readonly editQuantitySelector: Locator;
 	readonly priceField: (
@@ -71,6 +74,7 @@ export class CommerceMiniCartPage {
 	) => Promise<Locator>;
 	readonly proceedAsGuest: Locator;
 	readonly quickAddToCartButton: Locator;
+	readonly quickAddToCartChip: (sku: string) => Locator;
 	readonly quickAddToCartSku: (sku: string) => Locator;
 	readonly requestAQuoteButton: Locator;
 	readonly reviewOrderButton: Locator;
@@ -225,6 +229,15 @@ export class CommerceMiniCartPage {
 		this.miniCartUnitOfMeasureSelector = page.locator(
 			'select[name="minicart-uom-selector"]'
 		);
+		this.miniCartWidget = page.locator(
+			'#portlet_com_liferay_commerce_cart_content_web_internal_portlet_CommerceCartContentMiniPortlet'
+		);
+		this.miniCartWidgetButton = (name: string) =>
+			this.miniCartWidget.getByRole('button', {exact: true, name});
+		this.miniCartWidgetCheckoutButton = this.miniCartWidget.getByText(
+			'Checkout',
+			{exact: true}
+		);
 		this.priceField = async (price: string, container = this.page) => {
 			return container.getByText(price);
 		};
@@ -245,6 +258,8 @@ export class CommerceMiniCartPage {
 			name: 'Review Order',
 		});
 		this.quickAddToCartButton = page.getByTestId('quickAddToCartButton');
+		this.quickAddToCartChip = (sku) =>
+			page.locator('.form-control-tag-group').getByText(sku);
 		this.quickAddToCartSku = (sku) =>
 			page.getByRole('menuitem', {name: sku});
 		this.selectOption = (optionLabel: string, optionName: string) =>
