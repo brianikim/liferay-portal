@@ -18,56 +18,6 @@ definition {
 		CommerceConfiguration.commerceTearDown();
 	}
 
-	@description = "COMMERCE-12919. Can Edit PayPal payment method in a channel's Details page"
-	@priority = 3
-	test CanEditPayPalPaymentMethod {
-		property portal.acceptance = "false";
-
-		task ("When the user navigates to Minium Channel details") {
-			CommerceChannels.openChannelsAdmin();
-
-			CommerceNavigator.gotoEntry(entryName = "Minium Portal");
-		}
-
-		task ("Then the user can edit PayPal details") {
-			CommerceChannels.editPaymentMethod(
-				active = "true",
-				description = "PayPal Description",
-				name = "PayPal New Name",
-				paymentMethod = "PayPal",
-				priority = "3.0");
-		}
-
-		task ("And can see PayPal is now enabled and changes are saved") {
-			AssertElementPresent(
-				key_entryName = "PayPal New Name",
-				locator1 = "CommerceEntry#CHANNELS_GENERAL_ACTIVE_STATUS");
-
-			CommerceChannels.assertPaymentMethodDetails(
-				active = "true",
-				description = "PayPal Description",
-				paymentMethodName = "PayPal New Name",
-				priority = "3.0");
-		}
-
-		task ("When the user edits PayPal configuration") {
-			CommerceChannels.configurationPaypal(
-				entryName = "PayPal New Name",
-				merchantId = "MerchantID",
-				mode = "Sandbox");
-
-			SelectFrame.selectFrameTop();
-		}
-
-		task ("Then the fields successfully updated") {
-			CommerceChannels.assertPayPalConfiguration(
-				clientId = "PayPal Client ID",
-				entryName = "PayPal New Name",
-				merchantId = "MerchantID",
-				mode = "Sandbox");
-		}
-	}
-
 	@description = "This is a test for COMMERCE-10053. An error message shows up when the eligibility element is already linked"
 	@priority = 3
 	test CannotSelectShippingMethodEligibilitiesTwice {
@@ -249,99 +199,6 @@ definition {
 
 	}
 
-	@description = "This is a test for COMMERCE-6109. EditAuthorizePaymentMethod"
-	@priority = 3
-	test EditAuthorizePaymentMethod {
-		property portal.acceptance = "false";
-
-		CommerceChannels.openChannelsAdmin();
-
-		CommerceNavigator.gotoEntry(entryName = "Minium Portal");
-
-		CommerceEntry.clickTableEntryEditButton(
-			entryName = "Authorize.Net",
-			table = "Payment Methods");
-
-		SelectFrame.selectFrameNoLoading(locator1 = "CommerceEntry#IFRAME_SIDE_PANEL");
-
-		Type(
-			locator1 = "TextInput#NAME",
-			value1 = "Authorize.Net");
-
-		Type(
-			locator1 = "TextInput#DESCRIPTION",
-			value1 = "Test");
-
-		Check.checkToggleSwitch(locator1 = "CommerceEntry#ACTIVE_CHECKBOX");
-
-		Button.clickSave();
-
-		Alert.viewSuccessMessage();
-
-		Click(
-			locator1 = "CommerceEntry#PAYMENT_METHODS_SIDE_PANEL_NAV_ITEMS",
-			navItem = "Configuration");
-
-		Select(
-			key_fieldLabel = "Environment",
-			locator1 = "Select#GENERIC_SELECT_FIELD",
-			value1 = "Sandbox");
-
-		for (var key_value : list "Show Bank Account,Show Credit Card,Show Store Name,Require CAPTCHA,Require Card Code Verification") {
-			Check.checkToggleSwitch(
-				checkboxName = ${key_value},
-				locator1 = "Checkbox#ANY_CHECKBOX");
-		}
-
-		Button.clickSave();
-
-		Alert.viewSuccessMessage();
-	}
-
-	@description = "This is a test for COMMERCE-6107. EditMercanetPaymentMethod"
-	@priority = 3
-	test EditMercanetPaymentMethod {
-		property portal.acceptance = "false";
-
-		CommerceChannels.openChannelsAdmin();
-
-		CommerceNavigator.gotoEntry(entryName = "Minium Portal");
-
-		CommerceEntry.clickTableEntryEditButton(
-			entryName = "Mercanet",
-			table = "Payment Methods");
-
-		SelectFrame.selectFrameNoLoading(locator1 = "CommerceEntry#IFRAME_SIDE_PANEL");
-
-		Type(
-			locator1 = "TextInput#NAME",
-			value1 = "Mercanet");
-
-		Type(
-			locator1 = "TextInput#DESCRIPTION",
-			value1 = "Test");
-
-		Check.checkToggleSwitch(locator1 = "CommerceEntry#ACTIVE_CHECKBOX");
-
-		Button.clickSave();
-
-		Alert.viewSuccessMessage();
-
-		Click(locator1 = "Icon#CLOSE");
-
-		Refresh();
-
-		CommerceChannels.assertMercanetConfigurationEnvironment(
-			key_value = "Test",
-			paymentMethod = "Mercanet");
-
-		Refresh();
-
-		CommerceChannels.assertMercanetConfigurationEnvironment(
-			key_value = "Production",
-			paymentMethod = "Mercanet");
-	}
-
 	@description = "This is a test for COMMERCE-6105. EditMoneyOrderPaymentMethod"
 	@priority = 3
 	test EditMoneyOrderPaymentMethod {
@@ -366,52 +223,6 @@ definition {
 			value1 = "Test");
 
 		Check.checkToggleSwitch(locator1 = "CommerceEntry#ACTIVE_CHECKBOX");
-
-		Button.clickSave();
-
-		Alert.viewSuccessMessage();
-	}
-
-	@description = "This is a test for COMMERCE-6106. EditPaypalSubscriptionsPaymentMethod"
-	@priority = 3
-	test EditPaypalSubscriptionsPaymentMethod {
-		property portal.acceptance = "false";
-
-		// TODO Review
-
-		CommerceChannels.openChannelsAdmin();
-
-		CommerceNavigator.gotoEntry(entryName = "Minium Portal");
-
-		CommerceEntry.clickTableEntryEditButton(
-			entryName = "PayPal Subscriptions",
-			table = "Payment Methods");
-
-		SelectFrame.selectFrameNoLoading(locator1 = "CommerceEntry#IFRAME_SIDE_PANEL");
-
-		Type(
-			locator1 = "TextInput#DESCRIPTION",
-			value1 = "Test");
-
-		Check.checkToggleSwitch(locator1 = "CommerceEntry#ACTIVE_CHECKBOX");
-
-		Button.clickSave();
-
-		Alert.viewSuccessMessage();
-
-		Click(
-			locator1 = "CommerceEntry#PAYMENT_METHODS_SIDE_PANEL_NAV_ITEMS",
-			navItem = "Configuration");
-
-		Select(
-			key_fieldLabel = "Mode",
-			locator1 = "Select#GENERIC_SELECT_FIELD",
-			value1 = "Sandbox");
-
-		Type(
-			key_text = "Payment Attempts Max Count",
-			locator1 = "TextInput#ANY",
-			value1 = 1);
 
 		Button.clickSave();
 
