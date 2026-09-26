@@ -1817,3 +1817,74 @@ test(
 		await expect(sidePanelFrame.locator('.alert-success')).toHaveCount(0);
 	}
 );
+
+test(
+	'Changing the channel currency does not change the SKU price list currency',
+	{tag: ['@COMMERCE-12218', '@LPD-106244-Grouped-24']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelDetailsPage,
+		commerceAdminChannelsPage,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductDetailsSkusPage,
+		commerceAdminProductPage,
+		page,
+	}) => {
+		const {catalog, channel, product, site} = await apiStorefrontSetUp(
+			apiHelpers,
+			[
+				{
+					title: 'Catalog',
+					widgetName:
+						'com_liferay_commerce_product_content_search_web_internal_portlet_CPSearchResultsPortlet',
+				},
+			]
+		);
+
+		const expectBasePriceListCurrency = async () => {
+			await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+			await commerceAdminProductDetailsPage.goToProductSkus();
+
+			await commerceAdminProductDetailsSkusPage
+				.skusTableRowLink(product.skus[0].sku)
+				.click();
+			await commerceAdminProductDetailsSkusPage.goToSkuTab('Price');
+			await commerceAdminProductDetailsSkusPage
+				.sidePanelSkuPriceTableRowLink(
+					`${catalog.name} Base Price List`
+				)
+				.click();
+
+			await expect(
+				commerceAdminProductDetailsSkusPage.sidePanelNestedFrame
+					.locator('.input-group-text', {hasText: 'USD'})
+					.first()
+			).toBeVisible();
+		};
+
+		await expectBasePriceListCurrency();
+
+		await commerceAdminChannelsPage.goto();
+
+		await (
+			await commerceAdminChannelsPage.channelsTableRowLink(channel.name)
+		).click();
+
+		await expect(
+			commerceAdminChannelDetailsPage.channelCurrencySelect
+		).toHaveValue('USD');
+
+		await commerceAdminChannelDetailsPage.changeChannelDefaultCurrency(
+			'EUR'
+		);
+
+		await expectBasePriceListCurrency();
+
+		await page.goto(`/web${site.friendlyUrlPath}/catalog`);
+
+		await expect(
+			page.locator('.card').filter({hasText: product.name['en_US']})
+		).toContainText('€ 0.00');
+	}
+);
