@@ -20,26 +20,69 @@ describe('MiniCart Quick Add', () => {
 		fetchMock.restore();
 	});
 
-	it('adds the same SKU again with one more unit when it is already in the cart', async () => {
+	function getProduct(name, skus) {
+		return {
+			name,
+			productConfiguration: {
+				allowedOrderQuantities: [],
+				maxOrderQuantity: 10000,
+				minOrderQuantity: 1,
+				multipleOrderQuantity: 1,
+			},
+			skus,
+			urls: {},
+		};
+	}
+
+	function getSearchResultSKUs(baseElement) {
+		return [
+			...baseElement.querySelectorAll('.dropdown-item .autofit-col'),
+		].map((element) => element.textContent);
+	}
+
+	function mockProductsSearch(products) {
+		fetchMock.restore();
+
 		fetchMock.get(new RegExp('/channels/1/products'), {
-			items: [
-				{
-					name: 'Brake Pads',
-					productConfiguration: {
-						allowedOrderQuantities: [],
-						maxOrderQuantity: 10000,
-						minOrderQuantity: 1,
-						multipleOrderQuantity: 1,
-					},
-					skus: [{id: 101, purchasable: true, sku: SKU}],
-					urls: {},
-				},
-			],
+			items: products,
 			lastPage: 1,
 			page: 1,
 			pageSize: 100,
-			totalCount: 1,
+			totalCount: products.length,
 		});
+	}
+
+	function renderCartQuickAdd(cartItems = []) {
+		return render(
+			<MiniCartContext.Provider
+				value={{
+					cartState: {
+						accountId: 1,
+						cartItems,
+						channel: {channel: {id: 1}},
+						id: 1,
+					},
+				}}
+			>
+				<CartQuickAdd />
+			</MiniCartContext.Provider>
+		);
+	}
+
+	async function waitForProductsSearch() {
+		await waitFor(() => expect(fetchMock.called()).toBe(true));
+
+		await act(async () => {
+			await fetchMock.flush();
+
+			await new Promise((resolve) => setTimeout(resolve, 0));
+		});
+	}
+
+	it('adds the same SKU again with one more unit when it is already in the cart', async () => {
+		mockProductsSearch([
+			getProduct('Brake Pads', [{id: 101, purchasable: true, sku: SKU}]),
+		]);
 
 		const addedQuantities = [];
 
@@ -57,20 +100,8 @@ describe('MiniCart Quick Add', () => {
 			[],
 			[{quantity: 1, sku: SKU}],
 		].entries()) {
-			const {baseElement, getByLabelText, getByRole, unmount} = render(
-				<MiniCartContext.Provider
-					value={{
-						cartState: {
-							accountId: 1,
-							cartItems,
-							channel: {channel: {id: 1}},
-							id: 1,
-						},
-					}}
-				>
-					<CartQuickAdd />
-				</MiniCartContext.Provider>
-			);
+			const {baseElement, getByLabelText, getByRole, unmount} =
+				renderCartQuickAdd(cartItems);
 
 			fireEvent.change(getByRole('combobox'), {target: {value: SKU}});
 
@@ -99,6 +130,52 @@ describe('MiniCart Quick Add', () => {
 			);
 
 			expect(addedQuantities[index]).toBe(1);
+
+			unmount();
+		}
+	});
+
+	it('lists only the purchasable SKUs of the products found', async () => {
+		for (const [search, products, expectedSKUs] of [
+			[
+				SKU,
+				[
+					getProduct('ABS Sensor', [
+						{id: 101, purchasable: false, sku: SKU},
+					]),
+				],
+				[],
+			],
+			[
+				SKU,
+				[
+					getProduct('ABS Sensor', [
+						{id: 101, purchasable: true, sku: SKU},
+					]),
+				],
+				[SKU],
+			],
+			['MIN99999', [], []],
+			[
+				SKU,
+				[
+					getProduct('Calipers', []),
+					getProduct('ABS Sensor', [
+						{id: 101, purchasable: true, sku: SKU},
+					]),
+				],
+				[SKU],
+			],
+		]) {
+			mockProductsSearch(products);
+
+			const {baseElement, getByRole, unmount} = renderCartQuickAdd();
+
+			fireEvent.change(getByRole('combobox'), {target: {value: search}});
+
+			await waitForProductsSearch();
+
+			expect(getSearchResultSKUs(baseElement)).toEqual(expectedSKUs);
 
 			unmount();
 		}
