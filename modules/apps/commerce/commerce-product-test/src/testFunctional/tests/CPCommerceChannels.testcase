@@ -368,36 +368,6 @@ definition {
 			value1 = "Gross Price");
 	}
 
-	@description = "This is a test for creating a new notification template"
-	@priority = 5
-	test CreateNewNotificationTemplate {
-		property portal.acceptance = "true";
-
-		CommerceChannels.openChannelsAdmin();
-
-		Click(locator1 = "Button#PLUS");
-
-		CommerceEntry.addNewChannelsEntry(
-			channelCurrency = "US Dollar",
-			channelName = "Test Channel",
-			channelType = "Site",
-			siteName = "Guest");
-
-		CommerceEntry.gotoMenuTab(menuTab = "Notification Templates DEPRECATED");
-
-		Click(locator1 = "Button#PLUS");
-
-		CommerceEntry.addNewNotificationTemplate(
-			entryName = "New Notification Template",
-			fromAddress = "test@liferay.com",
-			fromName = "Test Test",
-			notificationType = "Order Placed");
-
-		Button.clickSave();
-
-		AssertElementPresent(locator1 = "Message#SUCCESS");
-	}
-
 	@description = "This is a test for COMMERCE-6109. EditAuthorizePaymentMethod"
 	@priority = 3
 	test EditAuthorizePaymentMethod {
@@ -519,78 +489,6 @@ definition {
 		Button.clickSave();
 
 		Alert.viewSuccessMessage();
-	}
-
-	@description = "This is a test for COMMERCE-6276. EditNotificationTemplate"
-	@priority = 3
-	test EditNotificationTemplate {
-		property portal.acceptance = "false";
-
-		// TODO Review
-
-		CommerceChannels.openChannelsAdmin();
-
-		CommerceNavigator.gotoEntry(entryName = "Minium Portal");
-
-		CommerceEntry.gotoMenuTab(menuTab = "Notification Templates DEPRECATED");
-
-		Click(locator1 = "Button#PLUS");
-
-		SelectFrameTop();
-
-		CommerceEntry.addNewNotificationTemplate(
-			entryName = "Test Notification Template",
-			fromAddress = "test@liferay.com",
-			fromName = "Test",
-			notificationType = "Order Placed");
-
-		Type(
-			key_fieldLabel = "To",
-			locator1 = "TextInput#GENERIC_TEXT_INPUT",
-			value1 = "[%ACCOUNT_ROLE_ADMINISTRATOR%]");
-
-		Button.clickSave();
-
-		Alert.viewSuccessMessage();
-
-		Click(locator1 = "Icon#CLOSE");
-
-		Refresh();
-
-		AssertVisible(
-			key_entryName = "Test Notification Template",
-			locator1 = "CommerceNavigation#ENTRY_NAME");
-
-		Click(
-			key_text = "Test Notification Template",
-			locator1 = "Icon#ANY_VERTICAL_ELLIPSIS");
-
-		MenuItem.clickNoError(menuItem = "Edit");
-
-		SelectFrameTop();
-
-		CommerceEntry.addNewNotificationTemplate(
-			entryName = "Notification Template",
-			fromAddress = "test@liferay.com",
-			fromName = "Test",
-			notificationType = "Order Completed");
-
-		Type(
-			key_fieldLabel = "To",
-			locator1 = "TextInput#GENERIC_TEXT_INPUT",
-			value1 = "[%ACCOUNT_ROLE_ORDER_MANAGER%]");
-
-		Button.clickSave();
-
-		Alert.viewSuccessMessage();
-
-		Click(locator1 = "Icon#CLOSE");
-
-		Refresh();
-
-		AssertVisible(
-			key_entryName = "Notification Template",
-			locator1 = "CommerceNavigation#ENTRY_NAME");
 	}
 
 	@description = "This is a test for COMMERCE-6106. EditPaypalSubscriptionsPaymentMethod"
