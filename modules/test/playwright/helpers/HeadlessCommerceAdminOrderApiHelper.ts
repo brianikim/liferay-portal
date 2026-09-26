@@ -56,6 +56,8 @@ type TOrderRule = {
 	active?: boolean;
 	id?: number;
 	name?: string;
+	orderRuleAccount?: Array<{accountId: number}>;
+	orderRuleChannel?: Array<{channelId: number}>;
 	priority?: number;
 	type: string;
 	typeSettings?: string;
