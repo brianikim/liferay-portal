@@ -13,6 +13,7 @@ import com.liferay.commerce.account.test.util.CommerceAccountTestUtil;
 import com.liferay.commerce.context.CommerceContext;
 import com.liferay.commerce.currency.model.CommerceCurrency;
 import com.liferay.commerce.currency.test.util.CommerceCurrencyTestUtil;
+import com.liferay.commerce.inventory.constants.CommerceInventoryAvailabilityConstants;
 import com.liferay.commerce.inventory.constants.CommerceInventoryConstants;
 import com.liferay.commerce.inventory.engine.CommerceInventoryEngine;
 import com.liferay.commerce.inventory.exception.DuplicateCommerceInventoryWarehouseException;
@@ -43,6 +44,7 @@ import com.liferay.commerce.product.test.util.CPTestUtil;
 import com.liferay.commerce.service.CommerceOrderItemLocalService;
 import com.liferay.commerce.service.CommerceOrderLocalService;
 import com.liferay.commerce.test.util.CommerceInventoryTestUtil;
+import com.liferay.commerce.test.util.CommerceTestUtil;
 import com.liferay.commerce.test.util.context.TestCommerceContext;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
@@ -1179,6 +1181,65 @@ public class CommerceInventoryEngineTest {
 					_group.getCompanyId(), _accountEntry.getAccountEntryId(),
 					_cpInstance1.getGroupId(), _commerceChannel.getGroupId(),
 					_cpInstance1.getSku(), StringPool.BLANK)));
+	}
+
+	@Test
+	public void testGetStockQuantityUsingMultipleChannels() throws Exception {
+		frutillaRule.scenario(
+			"An order booked in one channel does not affect the stock of " +
+				"another channel"
+		).given(
+			"2 channels with one eligible warehouse each"
+		).when(
+			"An order books more than the stock of the first channel"
+		).then(
+			"Only the stock and availability of the first channel change"
+		);
+
+		CommerceInventoryTestUtil.addCommerceInventoryWarehouseItem(
+			_commerceChannel.getCommerceChannelId(), BigDecimal.valueOf(4),
+			_cpInstance1.getSku(), StringPool.BLANK, _serviceContext);
+
+		CommerceChannel commerceChannel = CommerceTestUtil.addCommerceChannel(
+			_commerceCurrency.getCode());
+
+		CommerceInventoryTestUtil.addCommerceInventoryWarehouseItem(
+			commerceChannel.getCommerceChannelId(), BigDecimal.valueOf(6),
+			_cpInstance1.getSku(), StringPool.BLANK, _serviceContext);
+
+		CommerceTestUtil.updateBackOrderCPDefinitionInventory(
+			_cpInstance1.getCPDefinition());
+
+		_commerceOrders.add(
+			_addCommerceOrderWithBookedQuantity(
+				BigDecimal.valueOf(11), StringPool.BLANK));
+
+		Assert.assertTrue(
+			BigDecimalUtil.eq(
+				BigDecimal.valueOf(-7),
+				_commerceInventoryEngine.getStockQuantity(
+					_group.getCompanyId(), _accountEntry.getAccountEntryId(),
+					_cpInstance1.getGroupId(), _commerceChannel.getGroupId(),
+					_cpInstance1.getSku(), StringPool.BLANK)));
+		Assert.assertEquals(
+			CommerceInventoryAvailabilityConstants.UNAVAILABLE,
+			_commerceInventoryEngine.getAvailabilityStatus(
+				_group.getCompanyId(), _accountEntry.getAccountEntryId(),
+				_cpInstance1.getGroupId(), _commerceChannel.getGroupId(),
+				BigDecimal.ONE, _cpInstance1.getSku(), StringPool.BLANK));
+		Assert.assertTrue(
+			BigDecimalUtil.eq(
+				BigDecimal.valueOf(6),
+				_commerceInventoryEngine.getStockQuantity(
+					_group.getCompanyId(), _accountEntry.getAccountEntryId(),
+					_cpInstance1.getGroupId(), commerceChannel.getGroupId(),
+					_cpInstance1.getSku(), StringPool.BLANK)));
+		Assert.assertEquals(
+			CommerceInventoryAvailabilityConstants.AVAILABLE,
+			_commerceInventoryEngine.getAvailabilityStatus(
+				_group.getCompanyId(), _accountEntry.getAccountEntryId(),
+				_cpInstance1.getGroupId(), commerceChannel.getGroupId(),
+				BigDecimal.ONE, _cpInstance1.getSku(), StringPool.BLANK));
 	}
 
 	@Test
