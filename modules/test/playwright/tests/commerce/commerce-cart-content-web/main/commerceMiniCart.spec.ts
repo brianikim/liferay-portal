@@ -32,6 +32,7 @@ import getWidgetDefinition from '../../../layout-content-page-editor-web/main/ut
 import {
 	TProductOptionSpec,
 	apiStorefrontSetUp,
+	assignBuyerUserToAccount,
 	createAccountWithBuyerUser,
 	createProductWithOptions,
 	expectBrakeFluidCartItems,
@@ -3806,8 +3807,8 @@ test(
 );
 
 test(
-	'A SKU with a promotion quick added to the Mini Cart fragment shows its list and promotion prices',
-	{tag: '@COMMERCE-10587'},
+	'SKUs quick added to the Mini Cart fragment show their price list and promotion prices',
+	{tag: ['@COMMERCE-10587', '@COMMERCE-10620', '@LPD-106244-Grouped-26']},
 	async ({
 		apiHelpers,
 		commerceAdminChannelsPage,
@@ -3846,6 +3847,36 @@ test(
 			skuId: product.skus[0].id,
 		});
 
+		const priceListProduct =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				name: {en_US: getRandomString()},
+				productConfiguration: {allowBackOrder: true},
+				skus: [
+					{
+						cost: 0,
+						price: 10,
+						published: true,
+						purchasable: true,
+						sku: getRandomString(),
+					},
+				],
+			});
+
+		const priceList =
+			await apiHelpers.headlessCommerceAdminPricing.postPriceList({
+				catalogId: catalog.id,
+				currencyCode: 'USD',
+				name: getRandomString(),
+				type: 'price-list',
+			});
+
+		await apiHelpers.headlessCommerceAdminPricing.postPriceEntry({
+			price: 15,
+			priceListId: priceList.id,
+			skuId: priceListProduct.skus[0].id,
+		});
+
 		const {buyerUser} = await createAccountWithBuyerUser(
 			apiHelpers,
 			site.id
@@ -3861,22 +3892,144 @@ test(
 
 		await commerceMiniCartPage.open();
 
-		const skuName = product.skus[0].sku;
+		const skuNames = [product.skus[0].sku, priceListProduct.skus[0].sku];
 
-		await commerceMiniCartPage.selectQuickAddToCartSku(skuName);
+		for (const skuName of skuNames) {
+			await commerceMiniCartPage.selectQuickAddToCartSku(skuName);
 
-		await expect(
-			commerceMiniCartPage.quickAddToCartChip(skuName)
-		).toBeVisible();
+			await expect(
+				commerceMiniCartPage.quickAddToCartChip(skuName)
+			).toBeVisible();
+		}
 
 		await commerceMiniCartPage.quickAddToCartButton.click();
 
-		await expect(commerceMiniCartPage.miniCartSku(skuName)).toBeVisible();
+		for (const skuName of skuNames) {
+			await expect(
+				commerceMiniCartPage.miniCartSku(skuName)
+			).toBeVisible();
+		}
+
 		await expect(
 			commerceMiniCartPage.miniCartItemListPrice(product.name.en_US)
 		).toHaveText('$ 10.00');
 		await expect(
 			commerceMiniCartPage.miniCartItemPromoPrice(product.name.en_US)
 		).toHaveText('$ 9.00');
+		await expect(
+			commerceMiniCartPage.miniCartItemListPrice(
+				priceListProduct.name.en_US
+			)
+		).toHaveText('$ 15.00');
+	}
+);
+
+test(
+	'A buyer linked to several accounts quick adds a SKU at the price of the selected account',
+	{tag: ['@COMMERCE-10588', '@LPD-106244-Grouped-26']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelsPage,
+		commerceMiniCartPage,
+		commerceThemeMiniumCatalogPage,
+		page,
+	}) => {
+		const {channel, product, site} = await apiStorefrontSetUp(apiHelpers);
+
+		await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+			channel.name,
+			'B2B'
+		);
+
+		await waitForAlert(page);
+
+		const layout = await apiHelpers.headlessDelivery.createSitePage({
+			pageDefinition: getPageDefinition([
+				getFragmentDefinition({
+					id: getRandomString(),
+					key: 'COMMERCE_ACCOUNT_FRAGMENTS-account-selector',
+				}),
+				getFragmentDefinition({
+					id: getRandomString(),
+					key: 'COMMERCE_CART_FRAGMENTS-mini-cart',
+				}),
+			]),
+			siteId: site.id,
+			title: getRandomString(),
+		});
+
+		const accountName = `Commerce Account ${getRandomInt()}`;
+
+		const {account, buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id,
+			{accountName: `${accountName} 1`}
+		);
+
+		const secondAccount = await apiHelpers.headlessAdminUser.postAccount({
+			name: `${accountName} 2`,
+			type: 'business',
+		});
+
+		await assignBuyerUserToAccount(secondAccount, apiHelpers, buyerUser);
+
+		const discount =
+			await apiHelpers.headlessCommerceAdminPricing.postDiscount({
+				discountProducts: [{productId: product.productId}],
+				percentageLevel1: 20,
+				target: 'products',
+				usePercentage: true,
+			});
+
+		await apiHelpers.headlessCommerceAdminPricing.postDiscountAccount(
+			discount.id,
+			secondAccount.id
+		);
+
+		await performLogout(page);
+		await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+		await page.goto(
+			`/web${site.friendlyUrlPath}${layout.friendlyUrlPath}`,
+			{waitUntil: 'networkidle'}
+		);
+
+		await expect(
+			commerceThemeMiniumCatalogPage.accountSelectorSelectedAccount
+		).toHaveText(account.name);
+
+		const skuName = product.skus[0].sku;
+
+		await commerceMiniCartPage.open();
+
+		await commerceMiniCartPage.selectQuickAddToCartSku(skuName);
+
+		await commerceMiniCartPage.quickAddToCartButton.click();
+
+		await expect(
+			commerceMiniCartPage.miniCartItemListPrice(product.name.en_US)
+		).toHaveText('$ 10.00');
+
+		await commerceMiniCartPage.close();
+
+		await commerceThemeMiniumCatalogPage.openAccountSelectorDropdown();
+
+		await commerceThemeMiniumCatalogPage
+			.accountSelectorAccount(secondAccount.name)
+			.click();
+
+		await expect(
+			commerceThemeMiniumCatalogPage.accountSelectorSelectedAccount
+		).toHaveText(secondAccount.name);
+
+		await commerceMiniCartPage.open();
+
+		await commerceMiniCartPage.selectQuickAddToCartSku(skuName);
+
+		await commerceMiniCartPage.quickAddToCartButton.click();
+
+		await expect(
+			commerceMiniCartPage.miniCartItemNetPrice(product.name.en_US)
+		).toContainText('$ 8.00');
 	}
 );
