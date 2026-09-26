@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import {expect, mergeTests} from '@playwright/test';
+import {Page, expect, mergeTests} from '@playwright/test';
 import {createReadStream} from 'fs';
 import path from 'node:path';
 
@@ -14,7 +14,9 @@ import {globalMenuPagesTest} from '../../../../fixtures/globalMenuPagesTest';
 import {isolatedSiteTest} from '../../../../fixtures/isolatedSiteTest';
 import {loginTest} from '../../../../fixtures/loginTest';
 import {pageViewModePagesTest} from '../../../../fixtures/pageViewModePagesTest';
+import {DataApiHelpers} from '../../../../helpers/ApiHelpers';
 import {liferayConfig} from '../../../../liferay.config';
+import {CommerceAdminChannelsPage} from '../../../../pages/commerce/commerce-channel-web/commerceAdminChannelsPage';
 import {getRandomInt} from '../../../../utils/getRandomInt';
 import getRandomString from '../../../../utils/getRandomString';
 import performLogin, {
@@ -38,6 +40,60 @@ export const test = mergeTests(
 	loginTest(),
 	pageViewModePagesTest
 );
+
+async function setUpBundleStorefront(
+	apiHelpers: DataApiHelpers,
+	commerceAdminChannelsPage: CommerceAdminChannelsPage,
+	page: Page,
+	site: Site
+) {
+	for (const widgetName of [
+		'com_liferay_commerce_checkout_web_internal_portlet_CommerceCheckoutPortlet',
+		'com_liferay_commerce_order_content_web_internal_portlet_CommerceOpenOrderContentPortlet',
+	]) {
+		await apiHelpers.headlessDelivery.createSitePage({
+			pageDefinition: getPageDefinition([
+				getWidgetDefinition({id: getRandomString(), widgetName}),
+			]),
+			siteId: site.id,
+			title: getRandomString(),
+		});
+	}
+
+	await apiHelpers.headlessDelivery.createSitePage({
+		pageDefinition: getPageDefinition([
+			getWidgetDefinition({
+				id: getRandomString(),
+				widgetName:
+					'com_liferay_commerce_product_content_web_internal_portlet_CPContentPortlet',
+			}),
+			getFragmentDefinition({
+				id: getRandomString(),
+				key: 'COMMERCE_CART_FRAGMENTS-mini-cart',
+			}),
+		]),
+		siteId: site.id,
+		title: getRandomString(),
+	});
+
+	const channel = await apiHelpers.headlessCommerceAdminChannel.postChannel({
+		siteGroupId: site.id,
+	});
+
+	await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+		channel.name,
+		'B2B'
+	);
+
+	await waitForAlert(page);
+
+	const {account, buyerUser} = await createAccountWithBuyerUser(
+		apiHelpers,
+		site.id
+	);
+
+	return {account, buyerUser, channel};
+}
 
 test('LPD-5780 Modal title and product name appear properly in product menu', async ({
 	apiHelpers,
@@ -1729,50 +1785,11 @@ test(
 				name: getRandomString(),
 			});
 
-		for (const widgetName of [
-			'com_liferay_commerce_checkout_web_internal_portlet_CommerceCheckoutPortlet',
-			'com_liferay_commerce_order_content_web_internal_portlet_CommerceOpenOrderContentPortlet',
-		]) {
-			await apiHelpers.headlessDelivery.createSitePage({
-				pageDefinition: getPageDefinition([
-					getWidgetDefinition({id: getRandomString(), widgetName}),
-				]),
-				siteId: site.id,
-				title: getRandomString(),
-			});
-		}
-
-		await apiHelpers.headlessDelivery.createSitePage({
-			pageDefinition: getPageDefinition([
-				getWidgetDefinition({
-					id: getRandomString(),
-					widgetName:
-						'com_liferay_commerce_product_content_web_internal_portlet_CPContentPortlet',
-				}),
-				getFragmentDefinition({
-					id: getRandomString(),
-					key: 'COMMERCE_CART_FRAGMENTS-mini-cart',
-				}),
-			]),
-			siteId: site.id,
-			title: getRandomString(),
-		});
-
-		const channel =
-			await apiHelpers.headlessCommerceAdminChannel.postChannel({
-				siteGroupId: site.id,
-			});
-
-		await commerceAdminChannelsPage.changeCommerceChannelSiteType(
-			channel.name,
-			'B2B'
-		);
-
-		await waitForAlert(page);
-
-		const {buyerUser} = await createAccountWithBuyerUser(
+		const {buyerUser} = await setUpBundleStorefront(
 			apiHelpers,
-			site.id
+			commerceAdminChannelsPage,
+			page,
+			site
 		);
 
 		const bundleProductName = getRandomString();
