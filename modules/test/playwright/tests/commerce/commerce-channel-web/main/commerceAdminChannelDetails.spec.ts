@@ -10,18 +10,22 @@ import {commercePagesTest} from '../../../../fixtures/commercePagesTest';
 import {dataApiHelpersTest} from '../../../../fixtures/dataApiHelpersTest';
 import {isolatedSiteTest} from '../../../../fixtures/isolatedSiteTest';
 import {loginTest} from '../../../../fixtures/loginTest';
+import {taxCategoriesPageTest} from '../../../../fixtures/taxCategoriesPageTest';
+import {getRandomInt} from '../../../../utils/getRandomInt';
 import getRandomString from '../../../../utils/getRandomString';
 import performLogin, {
 	performLogout,
 	userData,
 } from '../../../../utils/performLogin';
+import {waitForAlert} from '../../../../utils/waitForAlert';
 
 export const test = mergeTests(
 	apiHelpersTest,
 	commercePagesTest,
 	dataApiHelpersTest,
 	isolatedSiteTest,
-	loginTest()
+	loginTest(),
+	taxCategoriesPageTest
 );
 
 test('LPD-13490 Manage channel country visibility from channel page', async ({
@@ -301,6 +305,144 @@ test(
 					'Payment Methods'
 				)
 			).click();
+		}
+	}
+);
+
+test(
+	'Channel general settings can be edited and are persisted',
+	{tag: ['@COMMERCE-6102', '@LPD-106244-Grouped-27']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelDetailsPage,
+		commerceAdminChannelsPage,
+		newTaxCategoryPage,
+		page,
+		site,
+		taxCategoriesPage,
+	}) => {
+		const channel =
+			await apiHelpers.headlessCommerceAdminChannel.postChannel({
+				siteGroupId: site.id,
+			});
+
+		const channelName = getRandomString();
+		const taxCategoryName = 'Tax Category ' + getRandomInt();
+
+		const selects = [
+			{
+				label: 'Euro',
+				locator: commerceAdminChannelDetailsPage.channelCurrencySelect,
+			},
+			{label: 'B2X', locator: commerceAdminChannelsPage.commerceSiteType},
+			{
+				label: 'Single Approver (Version 1)',
+				locator: commerceAdminChannelsPage.buyerOrderApprovalWorkflow,
+			},
+			{
+				label: 'Single Approver (Version 1)',
+				locator:
+					commerceAdminChannelsPage.sellerOrderAcceptanceWorkflow,
+			},
+			{
+				label: 'Gross Price',
+				locator: page.getByLabel('Price Type', {exact: true}),
+			},
+			{
+				label: 'Gross Price',
+				locator: page.getByLabel('Discounts Target Price Type'),
+			},
+		];
+
+		const toggles = [
+			commerceAdminChannelDetailsPage.guestCheckoutToggle,
+			page.getByLabel('Purchase Order Number'),
+		];
+
+		try {
+			await test.step('Create a tax category', async () => {
+				await taxCategoriesPage.goto();
+
+				await taxCategoriesPage.newButton.click();
+				await newTaxCategoryPage.nameInput.fill(taxCategoryName);
+				await newTaxCategoryPage.saveButton.click();
+
+				await waitForAlert(page);
+			});
+
+			await test.step('Edit every general setting of the channel', async () => {
+				await commerceAdminChannelsPage.goto();
+
+				await (
+					await commerceAdminChannelsPage.channelsTableRowLink(
+						channel.name
+					)
+				).click();
+
+				await page.getByLabel('Name', {exact: true}).fill(channelName);
+
+				for (const {label, locator} of selects) {
+					await locator.selectOption({label});
+				}
+
+				for (const toggle of toggles) {
+					await toggle.check();
+				}
+
+				await commerceAdminChannelDetailsPage.maxOpenOrderAccountInput.fill(
+					'1'
+				);
+
+				await commerceAdminChannelDetailsPage.taxCategoryInput.fill(
+					taxCategoryName
+				);
+				await commerceAdminChannelDetailsPage
+					.searchedEntry(taxCategoryName)
+					.click();
+
+				await commerceAdminChannelDetailsPage.saveButton.click();
+
+				await waitForAlert(page);
+			});
+
+			await test.step('Every general setting is persisted', async () => {
+				await page.reload();
+
+				await expect(
+					page.getByLabel('Name', {exact: true})
+				).toHaveValue(channelName);
+
+				for (const {label, locator} of selects) {
+					await expect(locator.locator('option:checked')).toHaveText(
+						label
+					);
+				}
+
+				for (const toggle of toggles) {
+					await expect(toggle).toBeChecked();
+				}
+
+				await expect(
+					commerceAdminChannelDetailsPage.maxOpenOrderAccountInput
+				).toHaveValue('1');
+				await expect(
+					commerceAdminChannelDetailsPage.taxCategoryInput
+				).toHaveValue(taxCategoryName);
+			});
+		}
+		finally {
+			page.once('dialog', (dialog) => dialog.accept());
+
+			await taxCategoriesPage.goto();
+
+			await (
+				await taxCategoriesPage.taxCategoriesTableRowActions(
+					taxCategoryName
+				)
+			).click();
+			await taxCategoriesPage.deleteMenuItem.click();
+
+			await waitForAlert(page);
 		}
 	}
 );
