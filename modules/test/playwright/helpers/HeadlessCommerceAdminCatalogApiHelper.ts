@@ -73,6 +73,10 @@ export type TProduct = {
 	catalogId: number;
 	categories?: TCategory[];
 	createDate?: string;
+	customFields?: Array<{
+		customValue: {data: string};
+		name: string;
+	}>;
 	description?: {
 		[key: string]: string;
 	};
