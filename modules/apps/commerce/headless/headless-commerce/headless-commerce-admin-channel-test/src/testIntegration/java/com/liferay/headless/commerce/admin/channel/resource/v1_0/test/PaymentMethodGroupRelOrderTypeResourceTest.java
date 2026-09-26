@@ -15,20 +15,32 @@ import com.liferay.commerce.payment.service.CommercePaymentMethodGroupRelLocalSe
 import com.liferay.commerce.payment.service.CommercePaymentMethodGroupRelQualifierLocalService;
 import com.liferay.commerce.product.model.CommerceChannel;
 import com.liferay.commerce.service.CommerceOrderTypeLocalServiceUtil;
+import com.liferay.commerce.term.constants.CommerceTermEntryConstants;
+import com.liferay.commerce.term.model.CommerceTermEntry;
+import com.liferay.commerce.term.service.CommerceTermEntryLocalService;
 import com.liferay.commerce.test.util.CommerceTestUtil;
 import com.liferay.headless.commerce.admin.channel.client.dto.v1_0.PaymentMethodGroupRelOrderType;
+import com.liferay.headless.commerce.admin.channel.client.dto.v1_0.PaymentMethodGroupRelTerm;
+import com.liferay.headless.commerce.admin.channel.client.problem.Problem;
+import com.liferay.headless.commerce.admin.channel.client.resource.v1_0.PaymentMethodGroupRelTermResource;
 import com.liferay.headless.commerce.core.util.DateConfig;
+import com.liferay.petra.function.UnsafeRunnable;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
+import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.PropsValues;
 import com.liferay.portal.test.rule.Inject;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -133,6 +145,16 @@ public class PaymentMethodGroupRelOrderTypeResourceTest
 	@Test
 	public void testGraphQLDeletePaymentMethodGroupRelOrderType()
 		throws Exception {
+	}
+
+	@Override
+	@Test
+	public void testPostPaymentMethodGroupRelIdPaymentMethodGroupRelOrderType()
+		throws Exception {
+
+		super.testPostPaymentMethodGroupRelIdPaymentMethodGroupRelOrderType();
+
+		_testPostPaymentMethodGroupRelIdPaymentMethodGroupRelOrderTypeWithDuplicateQualifier();
 	}
 
 	@Override
@@ -280,6 +302,25 @@ public class PaymentMethodGroupRelOrderTypeResourceTest
 		};
 	}
 
+	private void _assertDuplicateQualifierProblem(
+			UnsafeRunnable<Exception> unsafeRunnable)
+		throws Exception {
+
+		try {
+			unsafeRunnable.run();
+
+			Assert.fail();
+		}
+		catch (Problem.ProblemException problemException) {
+			Problem problem = problemException.getProblem();
+
+			Assert.assertEquals("CONFLICT", problem.getStatus());
+			Assert.assertEquals(
+				"The payment method group relation qualifier already exists.",
+				problem.getTitle());
+		}
+	}
+
 	private long _getId() throws Exception {
 		CommercePaymentMethodGroupRel commercePaymentMethodGroupRel =
 			CommercePaymentMethodGroupRelLocalServiceUtil.
@@ -293,6 +334,62 @@ public class PaymentMethodGroupRelOrderTypeResourceTest
 
 		return commercePaymentMethodGroupRel.
 			getCommercePaymentMethodGroupRelId();
+	}
+
+	private void _testPostPaymentMethodGroupRelIdPaymentMethodGroupRelOrderTypeWithDuplicateQualifier()
+		throws Exception {
+
+		long id = _getId();
+
+		PaymentMethodGroupRelOrderType paymentMethodGroupRelOrderType =
+			_addPaymentMethodGroupRelOrderType(id);
+
+		_assertDuplicateQualifierProblem(
+			() ->
+				paymentMethodGroupRelOrderTypeResource.
+					postPaymentMethodGroupRelIdPaymentMethodGroupRelOrderType(
+						id, paymentMethodGroupRelOrderType));
+
+		_commerceTermEntry =
+			_commerceTermEntryLocalService.addCommerceTermEntry(
+				RandomTestUtil.randomString(), _user.getUserId(), true,
+				RandomTestUtil.randomLocaleStringMap(), 1, 1, 2022, 12, 0, 0, 0,
+				0, 0, 0, true, RandomTestUtil.randomLocaleStringMap(),
+				RandomTestUtil.randomString(), RandomTestUtil.nextDouble(),
+				CommerceTermEntryConstants.TYPE_PAYMENT_TERMS, StringPool.BLANK,
+				_serviceContext);
+
+		_commercePaymentMethodGroupRelQualifiers.add(
+			_commercePaymentMethodGroupRelQualifierLocalService.
+				addCommercePaymentMethodGroupRelQualifier(
+					_user.getUserId(), CommerceTermEntry.class.getName(),
+					_commerceTermEntry.getCommerceTermEntryId(), id));
+
+		User user = UserTestUtil.getAdminUser(testCompany.getCompanyId());
+
+		PaymentMethodGroupRelTermResource paymentMethodGroupRelTermResource =
+			PaymentMethodGroupRelTermResource.builder(
+			).authentication(
+				user.getEmailAddress(), PropsValues.DEFAULT_ADMIN_PASSWORD
+			).endpoint(
+				testCompany.getVirtualHostname(),
+				PortalUtil.getPortalServerPort(false), "http"
+			).locale(
+				LocaleUtil.getDefault()
+			).build();
+
+		_assertDuplicateQualifierProblem(
+			() ->
+				paymentMethodGroupRelTermResource.
+					postPaymentMethodGroupRelIdPaymentMethodGroupRelTerm(
+						id,
+						new PaymentMethodGroupRelTerm() {
+							{
+								paymentMethodGroupRelId = id;
+								termId =
+									_commerceTermEntry.getCommerceTermEntryId();
+							}
+						}));
 	}
 
 	@DeleteAfterTestRun
@@ -315,6 +412,12 @@ public class PaymentMethodGroupRelOrderTypeResourceTest
 	@DeleteAfterTestRun
 	private List<CommercePaymentMethodGroupRel>
 		_commercePaymentMethodGroupRels = new ArrayList<>();
+
+	@DeleteAfterTestRun
+	private CommerceTermEntry _commerceTermEntry;
+
+	@Inject
+	private CommerceTermEntryLocalService _commerceTermEntryLocalService;
 
 	private ServiceContext _serviceContext;
 
