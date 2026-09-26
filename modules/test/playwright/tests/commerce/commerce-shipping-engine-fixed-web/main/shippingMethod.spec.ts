@@ -653,11 +653,12 @@ test(
 
 test(
 	'Verify Variable Rate Shipping Option Settings is viewed from Shipping Option',
-	{tag: ['@LPD-71919']},
+	{tag: ['@COMMERCE-6115', '@LPD-71919', '@LPD-106244-Grouped-7']},
 	async ({
 		apiHelpers,
 		commerceAdminChannelDetailsPage,
 		commerceAdminChannelsPage,
+		page,
 		site,
 	}) => {
 		const channel =
@@ -688,5 +689,31 @@ test(
 				'Shipping Methods'
 			)
 		).toBeVisible();
+
+		const shippingOptionFrame =
+			await commerceAdminChannelDetailsPage.sidePanelNestedFrame(
+				'Shipping Methods'
+			);
+
+		await shippingOptionFrame
+			.locator('tbody tr')
+			.filter({hasText: 'variable rate'})
+			.getByRole('button', {name: 'Actions'})
+			.click();
+
+		page.once('dialog', (dialog) => dialog.accept());
+
+		await shippingOptionFrame
+			.getByRole('menuitem', {name: 'Delete'})
+			.click();
+
+		await waitForAlert(shippingOptionFrame);
+
+		await expect(
+			await commerceAdminChannelDetailsPage.shippingOptionsSettingsTableLink(
+				'variable rate',
+				'Shipping Methods'
+			)
+		).toHaveCount(0);
 	}
 );
