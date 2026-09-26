@@ -1388,6 +1388,61 @@ test(
 );
 
 test(
+	'Product configuration tab rejects empty and less than minimum order quantities',
+	{tag: ['@COMMERCE-10173', '@LPD-106244-Grouped-31']},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsConfigurationPage,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductPage,
+		page,
+	}) => {
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		const product =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+			});
+
+		for (const {errorMessage, value} of [
+			{errorMessage: 'This field is required.', value: ''},
+			{
+				errorMessage:
+					'Please enter a value greater than or equal to 0.000001.',
+				value: '0',
+			},
+		]) {
+			await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+			await commerceAdminProductDetailsPage.goToProductConfiguration();
+
+			const orderQuantityLabels = [
+				'Maximum Order Quantity',
+				'Minimum Order Quantity',
+				'Multiple Order Quantity',
+			];
+
+			for (const orderQuantityLabel of orderQuantityLabels) {
+				await page.getByLabel(orderQuantityLabel).fill(value);
+			}
+
+			await commerceAdminProductDetailsConfigurationPage.publishLink.click();
+
+			for (const orderQuantityLabel of orderQuantityLabels) {
+				await expect(
+					page
+						.locator('.form-group')
+						.filter({has: page.getByLabel(orderQuantityLabel)})
+				).toContainText(errorMessage);
+			}
+
+			await expect(page.locator('.alert-success')).toHaveCount(0);
+		}
+	}
+);
+
+test(
 	'Configuration entries have no visibility bulk actions or row selection',
 	{tag: '@LPD-95737'},
 	async ({
