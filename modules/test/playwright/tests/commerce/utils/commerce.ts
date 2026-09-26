@@ -7,6 +7,7 @@ import {Locator, Page, expect} from '@playwright/test';
 
 import {DataApiHelpers, getHeader} from '../../../helpers/ApiHelpers';
 import {TPermission} from '../../../helpers/HeadlessAdminUserApiHelper';
+import {TProduct} from '../../../helpers/HeadlessCommerceAdminCatalogApiHelper';
 import {CommerceAdminChannelDetailsPage} from '../../../pages/commerce/commerce-channel-web/commerceAdminChannelDetailsPage';
 import {CommerceAdminChannelsPage} from '../../../pages/commerce/commerce-channel-web/commerceAdminChannelsPage';
 import {CommerceAdminProductPage} from '../../../pages/commerce/commerce-product-definitions-web/commerceAdminProductPage';
@@ -505,7 +506,8 @@ export async function selectCurrentAccount(
 
 export async function completedVirtualOrderItemSetUp(
 	apiHelpers: DataApiHelpers,
-	orderItemQuantity: number
+	orderItemQuantity: number,
+	productVirtualSettings?: TProduct['productVirtualSettings']
 ) {
 	const site = await apiHelpers.headlessAdminSite.postSite({
 		name: getRandomString(),
@@ -521,6 +523,7 @@ export async function completedVirtualOrderItemSetUp(
 	const product = await apiHelpers.headlessCommerceAdminCatalog.postProduct({
 		catalogId: catalog.id,
 		productType: 'virtual',
+		productVirtualSettings,
 	});
 
 	const productSkus = await apiHelpers.headlessCommerceAdminCatalog
