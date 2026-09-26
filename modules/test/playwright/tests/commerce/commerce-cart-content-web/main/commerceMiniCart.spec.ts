@@ -12,11 +12,13 @@ import {globalMenuPagesTest} from '../../../../fixtures/globalMenuPagesTest';
 import {loginTest} from '../../../../fixtures/loginTest';
 import {DataApiHelpers} from '../../../../helpers/ApiHelpers';
 import {liferayConfig} from '../../../../liferay.config';
+import {getTableRowCells} from '../../../../pages/commerce/commerce-order-content-web/orderImportPage';
 import {CommerceAdminProductPage} from '../../../../pages/commerce/commerce-product-definitions-web/commerceAdminProductPage';
 import {CommerceThemeMiniumCatalogPage} from '../../../../pages/commerce/commerce-theme-minium/commerceThemeMiniumCatalogPage';
 import {CommerceMiniCartPage} from '../../../../pages/commerce/commerceMiniCartPage';
 import {clickAndExpectToBeHidden} from '../../../../utils/clickAndExpectToBeHidden';
 import {clickAndExpectToBeVisible} from '../../../../utils/clickAndExpectToBeVisible';
+import {getRandomInt} from '../../../../utils/getRandomInt';
 import getRandomString from '../../../../utils/getRandomString';
 import performLogin, {
 	performLoginViaApi,
@@ -29,6 +31,7 @@ import getPageDefinition from '../../../layout-content-page-editor-web/main/util
 import getWidgetDefinition from '../../../layout-content-page-editor-web/main/utils/getWidgetDefinition';
 import {
 	TProductOptionSpec,
+	apiStorefrontSetUp,
 	createAccountWithBuyerUser,
 	createProductWithOptions,
 	expectBrakeFluidCartItems,
@@ -3318,5 +3321,202 @@ test(
 				false
 			);
 		}
+	}
+);
+
+test(
+	'A buyer without orders searches, quick adds several SKUs at quantity 1, gets a pending order and checks out',
+	{tag: ['@COMMERCE-10387', '@COMMERCE-10390', '@COMMERCE-10532']},
+	async ({
+		apiHelpers,
+		checkoutPage,
+		commerceAdminChannelDetailsPage,
+		commerceAdminChannelsPage,
+		commerceMiniCartPage,
+		commerceThemeMiniumCatalogPage,
+		orderDetailsPage,
+		page,
+		pendingOrdersPage,
+	}) => {
+		test.setTimeout(300000);
+
+		const {catalog, channel, product, site} = await apiStorefrontSetUp(
+			apiHelpers,
+			[
+				{
+					title: 'Checkout',
+					widgetName:
+						'com_liferay_commerce_checkout_web_internal_portlet_CommerceCheckoutPortlet',
+				},
+				{
+					title: 'Pending Orders',
+					widgetName:
+						'com_liferay_commerce_order_content_web_internal_portlet_CommerceOpenOrderContentPortlet',
+				},
+			]
+		);
+
+		await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+			channel.name,
+			'B2B'
+		);
+
+		await waitForAlert(page);
+
+		await (
+			await commerceAdminChannelDetailsPage.generalCommerceAdminChannelTableLink(
+				'Flat Rate'
+			)
+		).click();
+		await commerceAdminChannelDetailsPage.activateChannelConfiguration(
+			'Flat Rate',
+			'Shipping Methods'
+		);
+		await commerceAdminChannelDetailsPage.addFlatRateShippingOption(
+			'Standard Delivery'
+		);
+
+		const miniCartLayout = await apiHelpers.headlessDelivery.createSitePage(
+			{
+				pageDefinition: getPageDefinition([
+					getFragmentDefinition({
+						id: getRandomString(),
+						key: 'COMMERCE_CART_FRAGMENTS-mini-cart',
+					}),
+				]),
+				siteId: site.id,
+				title: getRandomString(),
+			}
+		);
+
+		const skuNameToken = String(getRandomInt());
+
+		const partialSkuNames = [`MIN${skuNameToken}0`, `MIN${skuNameToken}1`];
+
+		const prefixSkuToken = `MIN${getRandomInt()}`;
+
+		const prefixSkuNames = ['A', 'B', 'C'].map(
+			(suffix) => `${prefixSkuToken}${suffix}`
+		);
+
+		for (const skuName of [...partialSkuNames, ...prefixSkuNames]) {
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				name: {en_US: getRandomString()},
+				productConfiguration: {allowBackOrder: true},
+				skus: [
+					{
+						cost: 0,
+						price: 10,
+						published: true,
+						purchasable: true,
+						sku: skuName,
+					},
+				],
+			});
+		}
+
+		const {buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id
+		);
+
+		await performLogout(page);
+		await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+		await page.goto(`/web${site.friendlyUrlPath}/pending-orders`, {
+			waitUntil: 'networkidle',
+		});
+
+		await expect(
+			page
+				.locator(
+					'#portlet_com_liferay_commerce_order_content_web_internal_portlet_CommerceOpenOrderContentPortlet'
+				)
+				.getByText('No Results Found')
+		).toBeVisible();
+
+		await page.goto(
+			`/web${site.friendlyUrlPath}${miniCartLayout.friendlyUrlPath}`,
+			{waitUntil: 'networkidle'}
+		);
+
+		await commerceMiniCartPage.open();
+
+		for (const [searchText, skuNames] of [
+			[skuNameToken, partialSkuNames],
+			[prefixSkuToken, prefixSkuNames],
+		] as const) {
+			await commerceMiniCartPage.searchProductsInput.fill(searchText);
+
+			for (const skuName of skuNames) {
+				await expect(
+					commerceMiniCartPage.quickAddToCartSku(skuName)
+				).toBeVisible();
+			}
+		}
+
+		const selectedSkuNames = [
+			product.skus[0].sku,
+			partialSkuNames[0],
+			prefixSkuNames[0],
+		];
+
+		for (const skuName of selectedSkuNames) {
+			await commerceMiniCartPage.selectQuickAddToCartSku(skuName);
+		}
+
+		await commerceMiniCartPage.quickAddToCartButton.click();
+
+		for (const skuName of selectedSkuNames) {
+			await expect(
+				commerceThemeMiniumCatalogPage.quantitySelector(
+					commerceMiniCartPage.miniCartItemForSku(skuName)
+				)
+			).toHaveValue('1');
+		}
+
+		await page.goto(`/web${site.friendlyUrlPath}/pending-orders`, {
+			waitUntil: 'networkidle',
+		});
+
+		await pendingOrdersPage.viewButton.click();
+
+		await expect(async () => {
+			expect(
+				await getTableRowCells(
+					pendingOrdersPage.orderItemsTable,
+					product.name.en_US
+				)
+			).toMatchObject({
+				'LIST PRICE': '$ 10.00',
+				'QUANTITY': '1',
+				'SKU': product.skus[0].sku,
+				'TOTAL': '$ 10.00',
+			});
+		}).toPass({timeout: 30000});
+
+		await orderDetailsPage.checkoutButton.click();
+
+		await checkoutPage.addAddress({
+			city: 'Test City',
+			countryLabel: 'United States',
+			name: 'Test Name',
+			regionLabel: 'Florida',
+			street: 'Test Street',
+			zip: '12345',
+		});
+		await checkoutPage.continueButton.click();
+
+		await page.waitForURL((url) => url.href.includes('shipping-method'));
+
+		await checkoutPage.shippingMethodRadio('Standard Delivery').check();
+		await checkoutPage.continueButton.click();
+
+		await page.waitForURL((url) => url.href.includes('order-summary'));
+
+		await checkoutPage.continueButton.click();
+
+		await expect(checkoutPage.orderSuccessMessage).toBeVisible();
 	}
 );
