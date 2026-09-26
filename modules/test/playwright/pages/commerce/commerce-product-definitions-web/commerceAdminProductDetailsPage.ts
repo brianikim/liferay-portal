@@ -47,6 +47,7 @@ export class CommerceAdminProductDetailsPage {
 	readonly productSkusLink: Locator;
 	readonly productVisibilityLink: Locator;
 	readonly publishLink: Locator;
+	readonly saveAsDraftLink: Locator;
 	readonly textTableCell: (text: string) => Locator;
 	readonly visibleToggle: Locator;
 
@@ -158,6 +159,10 @@ export class CommerceAdminProductDetailsPage {
 			name: 'Visibility',
 		});
 		this.publishLink = page.getByRole('link', {name: 'Publish'});
+		this.saveAsDraftLink = page.getByRole('link', {
+			exact: true,
+			name: 'Save as Draft',
+		});
 		this.textTableCell = (text: string) =>
 			this.page.getByRole('cell', {
 				exact: true,
