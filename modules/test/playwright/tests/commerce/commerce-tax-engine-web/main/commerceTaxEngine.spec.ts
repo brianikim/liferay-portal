@@ -95,253 +95,301 @@ async function verifyByAddressTaxRate(
 	await expect(sidePanelFrame.getByText(zip)).toBeVisible();
 }
 
-test('LPD-31663 Activate Fixed Tax Engine and Add Tax Rate', async ({
-	apiHelpers,
-	commerceAdminChannelDetailsPage,
-	commerceAdminChannelsPage,
-	newTaxCategoryPage,
-	page,
-	taxCategoriesPage,
-}) => {
-	const taxCategoriesExternalReferenceCode =
-		'Test Reference ' + getRandomInt();
+test(
+	'LPD-31663 Activate Fixed Tax Engine and Add Tax Rate',
+	{tag: ['@COMMERCE-6124', '@LPD-106244-Grouped-7']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelDetailsPage,
+		commerceAdminChannelsPage,
+		newTaxCategoryPage,
+		page,
+		taxCategoriesPage,
+	}) => {
+		const taxCategoriesExternalReferenceCode =
+			'Test Reference ' + getRandomInt();
 
-	const taxCategories = [
-		{
-			description: 'Test Description ' + getRandomInt(),
-			name: 'Test ' + getRandomInt(),
-			taxCategoriesExternalReferenceCode,
-		},
-		{
-			description: 'Test Description ' + getRandomInt(),
-			name: 'Test ' + getRandomInt(),
-			taxCategoriesExternalReferenceCode,
-		},
-	];
+		const taxCategories = [
+			{
+				description: 'Test Description ' + getRandomInt(),
+				name: 'Test ' + getRandomInt(),
+				taxCategoriesExternalReferenceCode,
+			},
+			{
+				description: 'Test Description ' + getRandomInt(),
+				name: 'Test ' + getRandomInt(),
+				taxCategoriesExternalReferenceCode,
+			},
+		];
 
-	try {
-		await test.step('Create two tax categories and verify unique external reference code', async () => {
+		try {
+			await test.step('Create two tax categories and verify unique external reference code', async () => {
+				await taxCategoriesPage.goto();
+
+				for (const taxCategory of taxCategories) {
+					await taxCategoriesPage.newButton.click();
+					await newTaxCategoryPage.externalReferenceCodeInput.fill(
+						taxCategory.taxCategoriesExternalReferenceCode
+					);
+					await newTaxCategoryPage.nameInput.fill(taxCategory.name);
+					await newTaxCategoryPage.descriptionInput.fill(
+						taxCategory.description
+					);
+					await newTaxCategoryPage.saveButton.click();
+
+					if (taxCategory.name === taxCategories[0].name) {
+						await waitForAlert(page);
+
+						await expect(taxCategoriesPage.newButton).toBeVisible();
+					}
+					else {
+						await waitForAlert(
+							page,
+							'Error:Please enter a unique external reference code.',
+							{autoClose: false, type: 'danger'}
+						);
+
+						await newTaxCategoryPage.externalReferenceCodeInput.fill(
+							'Test Reference' + getRandomInt()
+						);
+						await newTaxCategoryPage.saveButton.click();
+
+						await waitForAlert(page);
+					}
+				}
+			});
+
+			await test.step('Create a commerce channel via API and navigate to channel details page', async () => {
+				const site =
+					await apiHelpers.headlessAdminUser.getSiteByFriendlyUrlPath(
+						'guest'
+					);
+
+				const channel =
+					await apiHelpers.headlessCommerceAdminChannel.postChannel({
+						siteGroupId: site.id,
+					});
+
+				await commerceAdminChannelsPage.goto();
+
+				await (
+					await commerceAdminChannelsPage.channelsTableRowLink(
+						channel.name
+					)
+				).click();
+			});
+
+			await test.step('Add Fixed Tax Rate and assert values', async () => {
+				await commerceAdminChannelDetailsPage.addFixedTaxRate(
+					'7.5',
+					taxCategories[0].name
+				);
+				await verifyFixedTaxRate(
+					commerceAdminChannelDetailsPage,
+					taxCategories[0].name,
+					'$ 7.50'
+				);
+				await commerceAdminChannelDetailsPage.editFixedTaxRate(
+					'10.0',
+					taxCategories[0].name
+				);
+				await verifyFixedTaxRate(
+					commerceAdminChannelDetailsPage,
+					taxCategories[0].name,
+					'$ 10.00'
+				);
+			});
+
+			await test.step('Delete the Fixed Tax Rate rate and assert it is removed', async () => {
+				await commerceAdminChannelDetailsPage.deleteTaxRate(
+					'Fixed Tax Rate',
+					taxCategories[0].name
+				);
+
+				await expect(
+					(
+						await commerceAdminChannelDetailsPage.sidePanelFrame(
+							'Tax Calculations'
+						)
+					).getByRole('cell', {
+						exact: true,
+						name: taxCategories[0].name,
+					})
+				).toBeHidden();
+			});
+		}
+		finally {
+			await page.reload();
+
+			page.on('dialog', (dialog) => {
+				dialog.accept();
+			});
+
 			await taxCategoriesPage.goto();
 
 			for (const taxCategory of taxCategories) {
-				await taxCategoriesPage.newButton.click();
-				await newTaxCategoryPage.externalReferenceCodeInput.fill(
-					taxCategory.taxCategoriesExternalReferenceCode
-				);
-				await newTaxCategoryPage.nameInput.fill(taxCategory.name);
-				await newTaxCategoryPage.descriptionInput.fill(
-					taxCategory.description
-				);
-				await newTaxCategoryPage.saveButton.click();
+				await expect(async () => {
+					await (
+						await taxCategoriesPage.taxCategoriesTableRowActions(
+							taxCategory.name
+						)
+					).click();
 
-				if (taxCategory.name === taxCategories[0].name) {
-					await waitForAlert(page);
+					await expect(
+						taxCategoriesPage.deleteMenuItem
+					).toBeVisible();
+				}).toPass();
+				await taxCategoriesPage.deleteMenuItem.click();
 
-					await expect(taxCategoriesPage.newButton).toBeVisible();
-				}
-				else {
-					await waitForAlert(
-						page,
-						'Error:Please enter a unique external reference code.',
-						{autoClose: false, type: 'danger'}
-					);
+				await waitForAlert(page);
+			}
+		}
+	}
+);
 
+test(
+	'LPD-31663 Activate By Address Tax Engine and Add Tax Rate',
+	{tag: ['@COMMERCE-6121', '@LPD-106244-Grouped-7']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelDetailsPage,
+		commerceAdminChannelsPage,
+		newTaxCategoryPage,
+		page,
+		taxCategoriesPage,
+	}) => {
+		const taxCategories = [
+			{
+				description: 'Test Description ' + getRandomInt(),
+				name: 'Test ' + getRandomInt(),
+				taxCategoriesExternalReferenceCode:
+					'Test Reference ' + getRandomInt(),
+			},
+			{
+				description: 'Test Description ' + getRandomInt(),
+				name: 'Test ' + getRandomInt(),
+				taxCategoriesExternalReferenceCode:
+					'Test Reference ' + getRandomInt(),
+			},
+		];
+
+		try {
+			await test.step('Create two tax categories', async () => {
+				await taxCategoriesPage.goto();
+
+				for (const taxCategory of taxCategories) {
+					await taxCategoriesPage.newButton.click();
 					await newTaxCategoryPage.externalReferenceCodeInput.fill(
-						'Test Reference' + getRandomInt()
+						taxCategory.taxCategoriesExternalReferenceCode
+					);
+					await newTaxCategoryPage.nameInput.fill(taxCategory.name);
+					await newTaxCategoryPage.descriptionInput.fill(
+						taxCategory.description
 					);
 					await newTaxCategoryPage.saveButton.click();
 
 					await waitForAlert(page);
+
+					await expect(taxCategoriesPage.newButton).toBeVisible();
 				}
-			}
-		});
+			});
 
-		await test.step('Create a commerce channel via API and navigate to channel details page', async () => {
-			const site =
-				await apiHelpers.headlessAdminUser.getSiteByFriendlyUrlPath(
-					'guest'
-				);
+			await test.step('Create a commerce channel via API and navigate to channel details page', async () => {
+				const site =
+					await apiHelpers.headlessAdminUser.getSiteByFriendlyUrlPath(
+						'guest'
+					);
 
-			const channel =
-				await apiHelpers.headlessCommerceAdminChannel.postChannel({
-					siteGroupId: site.id,
-				});
+				const channel =
+					await apiHelpers.headlessCommerceAdminChannel.postChannel({
+						siteGroupId: site.id,
+					});
 
-			await commerceAdminChannelsPage.goto();
+				await commerceAdminChannelsPage.goto();
 
-			await (
-				await commerceAdminChannelsPage.channelsTableRowLink(
-					channel.name
-				)
-			).click();
-		});
-
-		await test.step('Add Fixed Tax Rate and assert values', async () => {
-			await commerceAdminChannelDetailsPage.addFixedTaxRate(
-				'7.5',
-				taxCategories[0].name
-			);
-			await verifyFixedTaxRate(
-				commerceAdminChannelDetailsPage,
-				taxCategories[0].name,
-				'$ 7.50'
-			);
-			await commerceAdminChannelDetailsPage.editFixedTaxRate(
-				'10.0',
-				taxCategories[0].name
-			);
-			await verifyFixedTaxRate(
-				commerceAdminChannelDetailsPage,
-				taxCategories[0].name,
-				'$ 10.00'
-			);
-		});
-	}
-	finally {
-		await page.reload();
-
-		page.on('dialog', (dialog) => {
-			dialog.accept();
-		});
-
-		await taxCategoriesPage.goto();
-
-		for (const taxCategory of taxCategories) {
-			await expect(async () => {
 				await (
-					await taxCategoriesPage.taxCategoriesTableRowActions(
-						taxCategory.name
+					await commerceAdminChannelsPage.channelsTableRowLink(
+						channel.name
 					)
 				).click();
+			});
 
-				await expect(taxCategoriesPage.deleteMenuItem).toBeVisible();
-			}).toPass();
-			await taxCategoriesPage.deleteMenuItem.click();
+			await test.step('Add By Address Tax Rate and assert values', async () => {
+				await commerceAdminChannelDetailsPage.addByAddressTaxRate(
+					'7.5',
+					'Italy',
+					taxCategories[0].name,
+					'Roma',
+					'12345'
+				);
+				await verifyByAddressTaxRate(
+					commerceAdminChannelDetailsPage,
+					'Italy',
+					taxCategories[0].name,
+					'Roma',
+					'$ 7.50',
+					'12345'
+				);
+				await commerceAdminChannelDetailsPage.editByAddressTaxRate(
+					'10.0',
+					taxCategories[0].name
+				);
+				await verifyByAddressTaxRate(
+					commerceAdminChannelDetailsPage,
+					'Italy',
+					taxCategories[0].name,
+					'Roma',
+					'$ 10.00',
+					'12345'
+				);
+			});
 
-			await waitForAlert(page);
+			await test.step('Delete the By Address rate and assert it is removed', async () => {
+				await commerceAdminChannelDetailsPage.deleteTaxRate(
+					'By Address',
+					taxCategories[0].name
+				);
+
+				await expect(
+					(
+						await commerceAdminChannelDetailsPage.sidePanelFrame(
+							'Tax Calculations'
+						)
+					).getByRole('cell', {
+						exact: true,
+						name: taxCategories[0].name,
+					})
+				).toBeHidden();
+			});
 		}
-	}
-});
+		finally {
+			await page.reload();
 
-test('LPD-31663 Activate By Address Tax Engine and Add Tax Rate', async ({
-	apiHelpers,
-	commerceAdminChannelDetailsPage,
-	commerceAdminChannelsPage,
-	newTaxCategoryPage,
-	page,
-	taxCategoriesPage,
-}) => {
-	const taxCategories = [
-		{
-			description: 'Test Description ' + getRandomInt(),
-			name: 'Test ' + getRandomInt(),
-			taxCategoriesExternalReferenceCode:
-				'Test Reference ' + getRandomInt(),
-		},
-		{
-			description: 'Test Description ' + getRandomInt(),
-			name: 'Test ' + getRandomInt(),
-			taxCategoriesExternalReferenceCode:
-				'Test Reference ' + getRandomInt(),
-		},
-	];
+			page.on('dialog', (dialog) => {
+				dialog.accept();
+			});
 
-	try {
-		await test.step('Create two tax categories', async () => {
 			await taxCategoriesPage.goto();
 
 			for (const taxCategory of taxCategories) {
-				await taxCategoriesPage.newButton.click();
-				await newTaxCategoryPage.externalReferenceCodeInput.fill(
-					taxCategory.taxCategoriesExternalReferenceCode
-				);
-				await newTaxCategoryPage.nameInput.fill(taxCategory.name);
-				await newTaxCategoryPage.descriptionInput.fill(
-					taxCategory.description
-				);
-				await newTaxCategoryPage.saveButton.click();
+				await expect(async () => {
+					await (
+						await taxCategoriesPage.taxCategoriesTableRowActions(
+							taxCategory.name
+						)
+					).click();
+
+					await expect(
+						taxCategoriesPage.deleteMenuItem
+					).toBeVisible();
+				}).toPass();
+				await taxCategoriesPage.deleteMenuItem.click();
 
 				await waitForAlert(page);
-
-				await expect(taxCategoriesPage.newButton).toBeVisible();
 			}
-		});
-
-		await test.step('Create a commerce channel via API and navigate to channel details page', async () => {
-			const site =
-				await apiHelpers.headlessAdminUser.getSiteByFriendlyUrlPath(
-					'guest'
-				);
-
-			const channel =
-				await apiHelpers.headlessCommerceAdminChannel.postChannel({
-					siteGroupId: site.id,
-				});
-
-			await commerceAdminChannelsPage.goto();
-
-			await (
-				await commerceAdminChannelsPage.channelsTableRowLink(
-					channel.name
-				)
-			).click();
-		});
-
-		await test.step('Add By Address Tax Rate and assert values', async () => {
-			await commerceAdminChannelDetailsPage.addByAddressTaxRate(
-				'7.5',
-				'Italy',
-				taxCategories[0].name,
-				'Roma',
-				'12345'
-			);
-			await verifyByAddressTaxRate(
-				commerceAdminChannelDetailsPage,
-				'Italy',
-				taxCategories[0].name,
-				'Roma',
-				'$ 7.50',
-				'12345'
-			);
-			await commerceAdminChannelDetailsPage.editByAddressTaxRate(
-				'10.0',
-				taxCategories[0].name
-			);
-			await verifyByAddressTaxRate(
-				commerceAdminChannelDetailsPage,
-				'Italy',
-				taxCategories[0].name,
-				'Roma',
-				'$ 10.00',
-				'12345'
-			);
-		});
-	}
-	finally {
-		await page.reload();
-
-		page.on('dialog', (dialog) => {
-			dialog.accept();
-		});
-
-		await taxCategoriesPage.goto();
-
-		for (const taxCategory of taxCategories) {
-			await expect(async () => {
-				await (
-					await taxCategoriesPage.taxCategoriesTableRowActions(
-						taxCategory.name
-					)
-				).click();
-
-				await expect(taxCategoriesPage.deleteMenuItem).toBeVisible();
-			}).toPass();
-			await taxCategoriesPage.deleteMenuItem.click();
-
-			await waitForAlert(page);
 		}
 	}
-});
+);
 
 test("COMMERCE-7000 No XSS is present when the user updates a tax categories entry's details URL", async ({
 	apiHelpers,
