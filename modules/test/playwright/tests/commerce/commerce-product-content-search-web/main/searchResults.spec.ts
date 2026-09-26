@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import {expect, mergeTests} from '@playwright/test';
+import {Page, expect, mergeTests} from '@playwright/test';
 
 import {commercePagesTest} from '../../../../fixtures/commercePagesTest';
 import {dataApiHelpersTest} from '../../../../fixtures/dataApiHelpersTest';
@@ -11,6 +11,7 @@ import {featureFlagsTest} from '../../../../fixtures/featureFlagsTest';
 import {isolatedSiteTest} from '../../../../fixtures/isolatedSiteTest';
 import {loginTest} from '../../../../fixtures/loginTest';
 import {searchPageTest} from '../../../../fixtures/searchPageTest';
+import {getRandomInt} from '../../../../utils/getRandomInt';
 import getRandomString from '../../../../utils/getRandomString';
 import getPageDefinition from '../../../layout-content-page-editor-web/main/utils/getPageDefinition';
 import getWidgetDefinition from '../../../layout-content-page-editor-web/main/utils/getWidgetDefinition';
@@ -184,3 +185,87 @@ test(
 		await expect(page.getByText(product1.name.en_US)).not.toBeVisible();
 	}
 );
+
+for (const {
+	name,
+	paginationLocator,
+	paginationLocatorCount,
+	tag,
+	widgetConfig,
+} of [
+	{
+		name: 'Search results should hide the pagination bar when pagination is disabled',
+		paginationLocator: (page: Page) => page.locator('.pagination-bar'),
+		paginationLocatorCount: 0,
+		tag: '@COMMERCE-6664',
+		widgetConfig: {paginate: 'false'},
+	},
+	{
+		name: 'Search results should display the configured number of items per page',
+		paginationLocator: (page: Page) =>
+			page
+				.locator('.pagination-items-per-page')
+				.getByRole('button', {name: '4 Entries'}),
+		paginationLocatorCount: 1,
+		tag: '@COMMERCE-6146',
+		widgetConfig: {paginationDelta: '4'},
+	},
+]) {
+	test(
+		name,
+		{tag: [tag, '@LPD-106244-Grouped-28']},
+		async ({apiHelpers, page, site}) => {
+			await apiHelpers.headlessCommerceAdminChannel.postChannel({
+				siteGroupId: site.id,
+			});
+
+			const catalog =
+				await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+			const keyword = getRandomString().replace(/-/g, '');
+
+			for (let i = 0; i < 5; i++) {
+				await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+					catalogId: catalog.id,
+					name: {en_US: `${keyword} ${getRandomInt()}`},
+				});
+			}
+
+			const layout = await apiHelpers.headlessDelivery.createSitePage({
+				pageDefinition: getPageDefinition([
+					getWidgetDefinition({
+						id: getRandomString(),
+						widgetConfig: {
+							keywordsParameterName: 'q',
+							searchScope: 'everything',
+						},
+						widgetName:
+							'com_liferay_portal_search_web_search_bar_portlet_SearchBarPortlet',
+					}),
+					getWidgetDefinition({
+						id: getRandomString(),
+						widgetConfig,
+						widgetName:
+							'com_liferay_commerce_product_content_search_web_internal_portlet_CPSearchResultsPortlet',
+					}),
+				]),
+				siteId: site.id,
+				title: getRandomString(),
+			});
+
+			await expect(async () => {
+				await page.goto(
+					`/web/${site.name}/${layout.friendlyUrlPath}?q=${keyword}`
+				);
+
+				await expect(page.getByText(keyword).first()).toBeVisible({
+					timeout: 5000,
+				});
+			}).toPass({timeout: 60000});
+
+			await expect(paginationLocator(page)).toHaveCount(
+				paginationLocatorCount
+			);
+		}
+	);
+}
