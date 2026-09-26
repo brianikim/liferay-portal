@@ -1537,3 +1537,141 @@ test(
 		).toHaveValue('1');
 	}
 );
+
+test(
+	'Add price entries for different units of measure from the SKU price modal',
+	{tag: ['@COMMERCE-12289', '@COMMERCE-12290', '@LPD-106244-Grouped-24']},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductDetailsSkusPage,
+		commerceAdminProductPage,
+		page,
+	}) => {
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		const product =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				skus: [
+					{
+						cost: 0,
+						price: 50,
+						published: true,
+						purchasable: true,
+						sku: getRandomString(),
+					},
+				],
+			});
+
+		const currencies =
+			await apiHelpers.headlessCommerceAdminCatalog.getCurrenciesPage('');
+
+		const [priceListEUR, priceListUSD] = await Promise.all(
+			['Euro', 'US Dollar'].map((currencyName) =>
+				apiHelpers.headlessCommerceAdminPricing.postPriceList({
+					catalogId: catalog.id,
+					currencyCode: currencies.items.find(
+						(item) => item.name['en_US'] === currencyName
+					).code,
+					name: getRandomString(),
+					type: 'price-list',
+				})
+			)
+		);
+
+		await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+		await commerceAdminProductDetailsPage.goToProductSkus();
+
+		await commerceAdminProductDetailsSkusPage
+			.skusTableRowLink(product.skus[0].sku)
+			.click();
+		await commerceAdminProductDetailsSkusPage.goToSkuTab('Price');
+		await commerceAdminProductDetailsSkusPage.skuPriceAddButton.click();
+
+		const skuPriceAddModal =
+			commerceAdminProductDetailsSkusPage.skuPriceAddModal;
+		const unitOfMeasureSelects =
+			skuPriceAddModal.getByLabel('Unit of Measure');
+		const unitPriceInputs = skuPriceAddModal.getByLabel('Unit Price');
+
+		await expect(
+			commerceAdminProductDetailsSkusPage.skuPriceListSelect.locator(
+				'option:checked'
+			)
+		).toHaveText(`${catalog.name} Base Price List`);
+		await expect(unitPriceInputs).toHaveValue(/^50(\.0+)?$/);
+		await expect(unitOfMeasureSelects).toHaveCount(0);
+
+		await page
+			.locator('.modal-footer')
+			.getByRole('button', {exact: true, name: 'Cancel'})
+			.click();
+
+		for (const index of [1, 2]) {
+			await apiHelpers.headlessCommerceAdminCatalog.postSkuUnitOfMeasure(
+				product.skus[0].id,
+				{
+					basePrice: index,
+					key: `uom${index}`,
+					name: {en_US: `uom${index}`},
+					priority: index,
+				}
+			);
+		}
+
+		await commerceAdminProductDetailsSkusPage.goToSkuTab('Price');
+
+		await expect(
+			commerceAdminProductDetailsSkusPage.skuPriceFrame
+				.getByRole('row')
+				.filter({hasText: catalog.name})
+		).toHaveCount(4);
+
+		await commerceAdminProductDetailsSkusPage.skuPriceAddButton.click();
+
+		await expect(
+			commerceAdminProductDetailsSkusPage.skuPriceListSelect.locator(
+				'option:checked'
+			)
+		).toHaveText(`${catalog.name} Base Price List`);
+		await expect(unitOfMeasureSelects.locator('option:checked')).toHaveText(
+			'uom1'
+		);
+		await expect(unitPriceInputs).toHaveValue(/^1(\.0+)?$/);
+
+		await commerceAdminProductDetailsSkusPage.skuPriceListSelect.selectOption(
+			priceListUSD.name
+		);
+		await unitOfMeasureSelects.selectOption('uom1');
+		await unitPriceInputs.fill('30');
+
+		await skuPriceAddModal.getByRole('button', {name: 'Add Entry'}).click();
+
+		await commerceAdminProductDetailsSkusPage.skuPriceListSelect
+			.nth(1)
+			.selectOption(priceListEUR.name);
+		await unitOfMeasureSelects.nth(1).selectOption('uom2');
+		await unitPriceInputs.nth(1).fill('90');
+
+		await page
+			.locator('.modal-footer')
+			.getByRole('button', {exact: true, name: 'Add'})
+			.click();
+
+		for (const {price, priceList, unitOfMeasure} of [
+			{price: '$ 30.00', priceList: priceListUSD, unitOfMeasure: 'uom1'},
+			{price: '€ 90.00', priceList: priceListEUR, unitOfMeasure: 'uom2'},
+		]) {
+			const priceEntryRow =
+				commerceAdminProductDetailsSkusPage.skuPriceFrame
+					.getByRole('row')
+					.filter({hasText: priceList.name});
+
+			await expect(priceEntryRow).toContainText(unitOfMeasure);
+			await expect(priceEntryRow).toContainText(price);
+		}
+	}
+);
