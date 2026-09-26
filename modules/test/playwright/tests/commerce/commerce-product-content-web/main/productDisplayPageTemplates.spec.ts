@@ -4,7 +4,7 @@
  */
 
 import {Page, expect, mergeTests} from '@playwright/test';
-import {createReadStream} from 'fs';
+import {createReadStream, readFileSync} from 'fs';
 import path from 'path';
 
 import {commercePagesTest} from '../../../../fixtures/commercePagesTest';
@@ -193,6 +193,88 @@ test(
 					.filter({hasText: attachmentTitle})
 					.getByRole('link', {name: 'Download'})
 			).toBeVisible();
+		}
+	}
+);
+
+test(
+	'Collection Display fragment lists the related diagrams of the displayed product with each list item style',
+	{tag: ['@COMMERCE-9392', '@COMMERCE-11201', '@LPD-106244-Grouped-30']},
+	async ({apiHelpers, displayPageTemplatesPage, page, pageEditorPage}) => {
+		test.setTimeout(300000);
+
+		const {catalog, product, site} = await apiStorefrontSetUp(apiHelpers);
+
+		const diagramProduct =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				diagram: {
+					attachmentBase64: {
+						attachment: readFileSync(
+							path.join(__dirname, 'dependencies', 'liferay.png')
+						).toString('base64'),
+						title: {en_US: getRandomString()},
+					},
+					radius: 1,
+				},
+				name: {en_US: getRandomString()},
+				productType: 'diagram',
+			});
+
+		const pinnedProducts = [];
+
+		for (const sequence of ['1', '2']) {
+			const pinnedProduct =
+				await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+					catalogId: catalog.id,
+					name: {en_US: getRandomString()},
+				});
+
+			await apiHelpers.headlessCommerceAdminCatalog.postPin(
+				diagramProduct.productId,
+				{
+					mappedProduct: {
+						productId: pinnedProduct.productId,
+						quantity: 1,
+						sequence,
+						sku: pinnedProduct.skus[0].sku,
+						skuId: pinnedProduct.skus[0].id,
+						type: 'sku',
+					},
+					sequence,
+				}
+			);
+
+			pinnedProducts.push(pinnedProduct);
+		}
+
+		const diagramLink = page.getByRole('link', {
+			name: diagramProduct.name['en_US'],
+		});
+
+		for (const listItemStyle of [undefined, 'Diagram Card']) {
+			await deployCollectionDisplayOnDefaultDPT(apiHelpers, {
+				collectionName: 'Related Diagrams',
+				displayPageTemplatesPage,
+				listItemStyle,
+				pageEditorPage,
+				site,
+			});
+
+			for (const pinnedProduct of pinnedProducts) {
+				await gotoProductPage(page, site, pinnedProduct);
+
+				await diagramLink.first().click();
+
+				await expect(page).toHaveURL(
+					new RegExp(`/p/${diagramProduct.urls['en_US']}`)
+				);
+			}
+
+			await gotoProductPage(page, site, product);
+
+			await expect(page.getByText('No Results Found')).toBeVisible();
+			await expect(diagramLink).toHaveCount(0);
 		}
 	}
 );
