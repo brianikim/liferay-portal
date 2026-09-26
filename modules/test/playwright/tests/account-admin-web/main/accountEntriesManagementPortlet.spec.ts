@@ -197,6 +197,61 @@ test(
 );
 
 test(
+	'User can reverse the sort direction of the accounts',
+	{tag: ['@COMMERCE-9427', '@LPD-106244-Grouped-29']},
+	async ({accountManagementWidgetPage, apiHelpers, page, site}) => {
+		const layout = await createWidgetPage(apiHelpers, site.id);
+
+		const accountNamePrefix = `Commerce Account ${getRandomInt()}`;
+
+		for (const suffix of ['1', '2']) {
+			await apiHelpers.headlessAdminUser.postAccount({
+				name: `${accountNamePrefix} ${suffix}`,
+				type: 'business',
+			});
+		}
+
+		const reverseOrderDirectionButton = page
+			.getByTitle('Reverse Order Direction')
+			.first();
+
+		await page.goto(`/web/${site.name}/${layout.friendlyUrlPath}`);
+
+		await accountManagementWidgetPage.accountsTable.search(
+			accountNamePrefix
+		);
+
+		await expect(
+			reverseOrderDirectionButton.locator('.lexicon-icon-order-list-up')
+		).toBeVisible();
+		await expect(
+			await accountManagementWidgetPage.accountsTable.firstRow()
+		).toContainText(`${accountNamePrefix} 1`);
+
+		await reverseOrderDirectionButton.click();
+
+		await page.reload();
+
+		await accountManagementWidgetPage.accountsTable.search(
+			accountNamePrefix
+		);
+
+		await expect(
+			reverseOrderDirectionButton.locator('.lexicon-icon-order-list-down')
+		).toBeVisible();
+		await expect(
+			await accountManagementWidgetPage.accountsTable.firstRow()
+		).toContainText(`${accountNamePrefix} 2`);
+
+		await reverseOrderDirectionButton.click();
+
+		await expect(
+			reverseOrderDirectionButton.locator('.lexicon-icon-order-list-up')
+		).toBeVisible();
+	}
+);
+
+test(
 	'User can set active account',
 	{tag: ['@LPD-81993']},
 	async ({accountEntriesManagementPortletPage, apiHelpers, page, site}) => {
