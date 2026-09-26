@@ -276,10 +276,18 @@ test(
 );
 
 test(
-	'Empty channels visibility is shown to a user with view permissions on products and catalogs',
-	{tag: ['@COMMERCE-10610', '@LPD-87061']},
+	'Channels visibility follows the channel view permission of the user',
+	{
+		tag: [
+			'@COMMERCE-10602',
+			'@COMMERCE-10610',
+			'@LPD-87061',
+			'@LPD-106244-Grouped-7',
+		],
+	},
 	async ({
 		apiHelpers,
+		commerceAdminChannelsPage,
 		commerceAdminProductDetailsPage,
 		commerceAdminProductDetailsVisibilityPage,
 		commerceAdminProductPage,
@@ -294,11 +302,23 @@ test(
 		const catalog =
 			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
 
+		const channel =
+			await apiHelpers.headlessCommerceAdminChannel.postChannel({});
+
 		const product =
 			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
 				catalogId: catalog.id,
 				name: {en_US: 'Simple Product ' + getRandomString()},
 				productChannelFilter: true,
+				productChannels: [
+					{
+						channelId: channel.id,
+						currencyCode: channel.currencyCode,
+						id: channel.id,
+						name: channel.name,
+						type: channel.type,
+					},
+				],
 			});
 
 		const user = await apiHelpers.headlessAdminUser.postUserAccount();
@@ -308,6 +328,19 @@ test(
 			password: 'test',
 			surname: user.familyName,
 		};
+
+		const channelViewRole = await apiHelpers.headlessAdminUser.postRole({
+			name: 'Test Channel View Role ' + getRandomString(),
+			rolePermissions: [
+				{
+					actionIds: ['VIEW'],
+					primaryKey: companyId,
+					resourceName:
+						'com.liferay.commerce.product.model.CommerceChannel',
+					scope: 1,
+				},
+			],
+		});
 
 		await test.step('Create a custom role with view permissions on products and catalogs and assign it to the user', async () => {
 			const role = await apiHelpers.headlessAdminUser.postRole({
@@ -325,6 +358,13 @@ test(
 						primaryKey: companyId,
 						resourceName:
 							'com_liferay_commerce_catalog_web_internal_portlet_CommerceCatalogsPortlet',
+						scope: 1,
+					},
+					{
+						actionIds: ['ACCESS_IN_CONTROL_PANEL'],
+						primaryKey: companyId,
+						resourceName:
+							'com_liferay_commerce_channel_web_internal_portlet_CommerceChannelsPortlet',
 						scope: 1,
 					},
 					{
@@ -347,6 +387,12 @@ test(
 						scope: 1,
 					},
 					{
+						actionIds: ['VIEW_COMMERCE_CHANNELS'],
+						primaryKey: companyId,
+						resourceName: 'com.liferay.commerce.channel',
+						scope: 1,
+					},
+					{
 						actionIds: [
 							'MANAGE_COMMERCE_PRODUCT_CHANNEL_VISIBILITY',
 						],
@@ -361,21 +407,50 @@ test(
 				role.externalReferenceCode,
 				user.id
 			);
+			await apiHelpers.headlessAdminUser.assignUserToRole(
+				channelViewRole.externalReferenceCode,
+				user.id
+			);
 		});
 
-		await test.step('Log in as the user and open the visibility tab of the product', async () => {
+		await test.step('Log in as the user and assert the channel is displayed in the channels admin and the visibility tab of the product', async () => {
 			await performLogout(page);
 			await performLoginViaApi({page, screenName: user.alternateName});
+
+			await commerceAdminChannelsPage.goto();
+
+			await expect(
+				commerceAdminChannelsPage.channelLink(channel.name)
+			).toBeVisible();
 
 			await commerceAdminProductPage.gotoProduct(product.name.en_US);
 
 			await commerceAdminProductDetailsPage.goToProductVisibility();
+
+			await expect(
+				commerceAdminProductDetailsVisibilityPage.visibilityEntityRow(
+					channel.name
+				)
+			).toBeVisible();
 		});
 
-		await test.step('Assert that no channels are displayed', async () => {
+		await test.step('Remove the channel view permission and assert that no channels are displayed', async () => {
+			await apiHelpers.headlessAdminUser.deleteRoleUserAccountAssociation(
+				channelViewRole.id,
+				Number(user.id)
+			);
+
+			await page.reload();
+
 			await expect(
 				commerceAdminProductDetailsVisibilityPage.channelsEmptyStateMessage
 			).toBeVisible();
+
+			await commerceAdminChannelsPage.goto();
+
+			await expect(
+				commerceAdminChannelsPage.channelLink(channel.name)
+			).toHaveCount(0);
 		});
 	}
 );
