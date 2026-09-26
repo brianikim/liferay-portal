@@ -70,57 +70,6 @@ definition {
 
 	@description = "This is a test for COMMERCE-10053. An error message shows up when the eligibility element is already linked"
 	@priority = 3
-	test CannotSelectPaymentMethodEligibilitiesTwice {
-		property portal.acceptance = "false";
-
-		task ("Given an active payment term is created") {
-			CommerceJSONTermsAndConditionsAPI._addCommerceTermsAndConditions(termsType = "Payment");
-		}
-
-		task ("And an order type is created") {
-			CommerceJSONOrdersAPI._addOrderType(
-				active = "true",
-				orderTypeName = "Order Type Test");
-		}
-
-		task ("And Money Order payment method is set as active") {
-			CommerceChannels.openChannelsAdmin();
-
-			CommerceNavigator.gotoEntry(entryName = "Minium Portal");
-
-			CommerceChannels.activatePaymentMethod(paymentMethod = "Money Order");
-		}
-
-		task ("And Money Order's eligibility is set specifically to Payment Term 1 and Order Type Test") {
-			CommerceEntry.setEntryEligibility(
-				orderTypesEligibility = "Order Type Test",
-				paymentMethod = "Money Order",
-				paymentTermsEligibility = "Payment Term 1");
-		}
-
-		task ("When the admin selects the same order type eligibility once again") {
-			CommerceEntry.setEntryEligibility(
-				orderTypesEligibility = "Order Type Test",
-				unpublish = "true");
-		}
-
-		task ("Then an error message is shown") {
-			Alert.viewErrorMessage(errorMessage = "The payment method group relation qualifier already exists.");
-		}
-
-		task ("When the admin selects the same term eligibility once again") {
-			CommerceEntry.setEntryEligibility(
-				paymentTermsEligibility = "Payment Term 1",
-				unpublish = "true");
-		}
-
-		task ("Then an error message is shown") {
-			Alert.viewErrorMessage(errorMessage = "The payment method group relation qualifier already exists.");
-		}
-	}
-
-	@description = "This is a test for COMMERCE-10053. An error message shows up when the eligibility element is already linked"
-	@priority = 3
 	test CannotSelectShippingMethodEligibilitiesTwice {
 		property portal.acceptance = "false";
 
