@@ -15,6 +15,7 @@ import {DataApiHelpers} from '../../../../helpers/ApiHelpers';
 import {CommerceAdminProductDetailsPage} from '../../../../pages/commerce/commerce-product-definitions-web/commerceAdminProductDetailsPage';
 import {CommerceAdminProductPage} from '../../../../pages/commerce/commerce-product-definitions-web/commerceAdminProductPage';
 import {clickAndExpectToBeVisible} from '../../../../utils/clickAndExpectToBeVisible';
+import {getRandomInt} from '../../../../utils/getRandomInt';
 import getRandomString from '../../../../utils/getRandomString';
 import {userData} from '../../../../utils/performLogin';
 import {waitForAlert} from '../../../../utils/waitForAlert';
@@ -1146,5 +1147,131 @@ test(
 		await expect(
 			await commerceAdminProductDetailsPage.publish()
 		).toBeVisible();
+	}
+);
+
+test(
+	'Search, sort and paginate the products and SKUs admin lists',
+	{
+		tag: [
+			'@COMMERCE-5801',
+			'@COMMERCE-5803',
+			'@COMMERCE-5805',
+			'@LPD-106244-Grouped-23',
+		],
+	},
+	async ({apiHelpers, commerceAdminProductPage, page}) => {
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		const prefix = 'p' + getRandomInt();
+
+		const productNames = Array.from(
+			{length: 21},
+			(_, index) =>
+				`${prefix} ${String.fromCharCode(65 + ((index * 8) % 21))}`
+		);
+
+		for (const [index, productName] of productNames.entries()) {
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				name: {en_US: productName},
+				skus: [
+					{
+						cost: 0,
+						price: 0,
+						published: true,
+						purchasable: true,
+						sku: `${prefix}sku${index}`,
+					},
+				],
+			});
+		}
+
+		const nextPageButton = page.locator('[data-testid="nextArrow"]');
+
+		const searchList = async (keywords: string) => {
+			await commerceAdminProductPage.managementToolbarSearchInput.fill(
+				keywords
+			);
+			await commerceAdminProductPage.managementToolbarSearchInput.press(
+				'Enter'
+			);
+		};
+
+		await test.step('Search and sort the products', async () => {
+			await commerceAdminProductPage.goto();
+
+			await searchList(prefix);
+
+			const sortedProductNames = [...productNames].sort();
+
+			for (const {column, expectedProductNames} of [
+				{column: 'Name', expectedProductNames: sortedProductNames},
+				{
+					column: 'Name',
+					expectedProductNames: [...sortedProductNames].reverse(),
+				},
+				{column: 'Modified Date', expectedProductNames: productNames},
+				{
+					column: 'Modified Date',
+					expectedProductNames: [...productNames].reverse(),
+				},
+			]) {
+				await commerceAdminProductPage.table
+					.getByRole('columnheader', {exact: true, name: column})
+					.click();
+
+				for (const [index, productName] of expectedProductNames
+					.slice(0, 3)
+					.entries()) {
+					await expect(
+						commerceAdminProductPage.table
+							.locator('tbody tr')
+							.nth(index)
+					).toContainText(productName);
+				}
+			}
+		});
+
+		await test.step('Paginate the products', async () => {
+			await expect(
+				page.getByText('Showing 1 to 20 of 21 entries.')
+			).toBeVisible();
+			await expect(
+				page.getByRole('button', {name: '20 Items'})
+			).toBeVisible();
+
+			await nextPageButton.click();
+
+			await expect(
+				page.getByText('Showing 21 to 21 of 21 entries.')
+			).toBeVisible();
+		});
+
+		await test.step('Search and paginate the SKUs', async () => {
+			await commerceAdminProductPage.productSkusLink.click();
+
+			await searchList(prefix);
+
+			await expect(
+				page.getByText('Showing 1 to 20 of 21 entries.')
+			).toBeVisible();
+
+			await nextPageButton.click();
+
+			await expect(
+				page.getByText('Showing 21 to 21 of 21 entries.')
+			).toBeVisible();
+
+			await searchList(`${prefix}sku7`);
+
+			await expect(
+				page.getByText(`${prefix}sku7`, {exact: true})
+			).toBeVisible();
+			await expect(
+				page.getByText('Showing 1 to 1 of 1 entries.')
+			).toBeVisible();
+		});
 	}
 );
