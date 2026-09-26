@@ -19,6 +19,7 @@ import {
 import getGlobalSiteId from '../../../../utils/getGlobalSiteId';
 import {getRandomInt} from '../../../../utils/getRandomInt';
 import getRandomString from '../../../../utils/getRandomString';
+import {waitForAlert} from '../../../../utils/waitForAlert';
 import getPageDefinition from '../../../layout-content-page-editor-web/main/utils/getPageDefinition';
 import getWidgetDefinition from '../../../layout-content-page-editor-web/main/utils/getWidgetDefinition';
 
@@ -1103,10 +1104,6 @@ test(
 			});
 		}).toPass({timeout: 60000});
 
-		const priceRangeFacetPortlet = page.locator(
-			'//section[contains(@id, "CPPriceRangeFacetsPortlet")]'
-		);
-
 		for (const {checkboxes, portlet} of [
 			{
 				checkboxes: ['Alpha', 'Beta'].map((term) =>
@@ -1129,11 +1126,14 @@ test(
 			{
 				checkboxes: ['$ 0.00 - $ 49.99', '$ 50.00 - $ 99.99'].map(
 					(term) =>
-						priceRangeFacetPortlet.getByRole('checkbox', {
-							name: term,
-						})
+						specificationFacetsPage.priceRangeFacetPortlet.getByRole(
+							'checkbox',
+							{
+								name: term,
+							}
+						)
 				),
-				portlet: priceRangeFacetPortlet,
+				portlet: specificationFacetsPage.priceRangeFacetPortlet,
 			},
 		]) {
 			for (const checkbox of checkboxes) {
@@ -1233,11 +1233,11 @@ test(
 				visibleProducts: [products[0], products[1], products[2]],
 			},
 			{
-				checkbox: page
-					.locator(
-						'//section[contains(@id, "CPPriceRangeFacetsPortlet")]'
-					)
-					.getByRole('checkbox', {name: '$ 100.00 - $ 199.99'}),
+				checkbox:
+					specificationFacetsPage.priceRangeFacetPortlet.getByRole(
+						'checkbox',
+						{name: '$ 100.00 - $ 199.99'}
+					),
 				hiddenProducts: [products[2], products[3]],
 				productCount: 2,
 				visibleProducts: [products[0], products[1]],
@@ -1270,5 +1270,105 @@ test(
 				).toBeHidden();
 			}
 		}
+	}
+);
+
+test(
+	'Option Facet shows a facetable product option with its values until the option is no longer facetable',
+	{tag: ['@COMMERCE-9830', '@LPD-106244-Grouped-31']},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductDetailsProductOptionsPage,
+		commerceAdminProductPage,
+		page,
+		site,
+		specificationFacetsPage,
+	}) => {
+		const {catalogId, url} = await setUpFacetPage(
+			apiHelpers,
+			page,
+			specificationFacetsPage,
+			site
+		);
+
+		const optionName = getRandomString();
+
+		const option = await apiHelpers.headlessCommerceAdminCatalog.postOption(
+			'select',
+			optionName.toLowerCase(),
+			optionName,
+			0,
+			true
+		);
+
+		const optionValueNames = ['Value1', 'Value2'];
+
+		const product =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId,
+				name: {en_US: getRandomString()},
+				productOptions: [
+					{
+						facetable: true,
+						fieldType: 'select',
+						key: option.key,
+						name: {en_US: optionName},
+						optionId: option.id,
+						priceType: 'static',
+						priority: 0,
+						productOptionValues: optionValueNames.map(
+							(optionValueName, index) => ({
+								key: optionValueName.toLowerCase(),
+								name: {en_US: optionValueName},
+								priority: index,
+							})
+						),
+					},
+				],
+			});
+
+		await goToIndexedFacetPage(
+			page,
+			specificationFacetsPage,
+			url,
+			'Option Facet',
+			optionName
+		);
+
+		for (const optionValueName of optionValueNames) {
+			await expect(
+				specificationFacetsPage
+					.facetTerms('Option Facet', optionName)
+					.filter({hasText: optionValueName})
+			).toHaveCount(1);
+		}
+
+		await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+		await commerceAdminProductDetailsPage.goToProductOptions();
+
+		await commerceAdminProductDetailsProductOptionsPage.openOption(
+			optionName
+		);
+
+		await commerceAdminProductDetailsProductOptionsPage.optionSidePanelFrame
+			.getByLabel('Use in Faceted Navigation')
+			.uncheck();
+		await commerceAdminProductDetailsProductOptionsPage.optionSidePanelFrame
+			.getByRole('button', {exact: true, name: 'Save'})
+			.click();
+
+		await waitForAlert(
+			commerceAdminProductDetailsProductOptionsPage.optionSidePanelFrame
+		);
+
+		await expect(async () => {
+			await page.goto(url);
+
+			await expect(
+				specificationFacetsPage.facetPanel('Option Facet', optionName)
+			).toBeHidden({timeout: 5000});
+		}).toPass({timeout: 60000});
 	}
 );
