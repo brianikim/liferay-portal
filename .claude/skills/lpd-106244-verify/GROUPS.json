@@ -1,0 +1,2762 @@
+{
+	"base": "d41da6abe7d93",
+	"baseDescription": "commerce/master at the time of the migration",
+	"branch": "LPD-106244",
+	"groups": [
+		{
+			"commits": [
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-1 Migrate smoke specification test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-1 Migrate smoke publish product test to Playwright"
+				}
+			],
+			"group": 1,
+			"helpers": [
+			],
+			"integration": {
+			},
+			"jest": [
+			],
+			"junit": {
+			},
+			"name": "CommerceSmoke file removal",
+			"playwrightSpecs": [
+				"modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProducts.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-product-options-web/main/commerceSpecifications.spec.ts"
+			],
+			"playwrightTests": [
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-options-web/main/commerceSpecifications.spec.ts",
+					"title": "Create new specification label and specification group"
+				}
+			],
+			"poshiRemoved": [
+				"CommerceSmoke::CreateNewSpecificationOptions",
+				"CommerceSmoke::PublishSimpleProduct"
+			],
+			"tag": "@LPD-106244-Grouped-1",
+			"testcaseFilesDeleted": [
+				"CommerceSmoke.testcase"
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "Covered by CommerceDiscountV2Test.",
+					"title": "LPD-106244-Grouped-2 Drop discount test already covered"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-2 Migrate same level discount test to integration"
+				}
+			],
+			"group": 2,
+			"helpers": [
+			],
+			"integration": {
+				"modules/apps/commerce/commerce-test": {
+					"CommerceDiscountV2Test": [
+						"testCommercePercentageDiscountsWithInactiveDiscount"
+					]
+				}
+			},
+			"jest": [
+			],
+			"junit": {
+			},
+			"name": "CommerceDiscountCheckout file removal",
+			"playwrightSpecs": [
+			],
+			"playwrightTests": [
+			],
+			"poshiRemoved": [
+				"CommerceDiscountCheckout::CanCheckoutProductWithTwoDiscount",
+				"CommerceDiscountCheckout::CanCheckoutProductWithDiscountsLowerDiscountIsApplied"
+			],
+			"tag": "@LPD-106244-Grouped-2",
+			"testcaseFilesDeleted": [
+				"CommerceDiscountCheckout.testcase"
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-3 Add admin options page object to commerce fixtures"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-3 Migrate create option test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-3 Migrate remove option test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-3 Add option value methods to catalog API helper"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-3 Migrate option value custom fields test to Playwright"
+				}
+			],
+			"group": 3,
+			"helpers": [
+				"modules/test/playwright/helpers/HeadlessCommerceAdminCatalogApiHelper.ts",
+				"modules/test/playwright/pages/commerce/commerce-product-options-web/commerceAdminOptionsPage.ts"
+			],
+			"integration": {
+			},
+			"jest": [
+			],
+			"junit": {
+			},
+			"name": "CPCommerceOptions file removal",
+			"playwrightSpecs": [
+				"modules/test/playwright/tests/commerce/commerce-product-options-web/main/commerceAdminOptions.spec.ts"
+			],
+			"playwrightTests": [
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-options-web/main/commerceAdminOptions.spec.ts",
+					"title": "Create an option from the standalone options portlet"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-options-web/main/commerceAdminOptions.spec.ts",
+					"title": "Remove an option from the standalone options portlet"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-options-web/main/commerceAdminOptions.spec.ts",
+					"title": "Custom fields can be returned from the option value API"
+				}
+			],
+			"poshiRemoved": [
+				"CPCommerceOptions::CreateAnOption",
+				"CPCommerceOptions::RemoveAnOption",
+				"CPCommerceOptions::CanCustomFieldsBeReturnedFromOptionValueAPI"
+			],
+			"tag": "@LPD-106244-Grouped-3",
+			"testcaseFilesDeleted": [
+				"CPCommerceOptions.testcase"
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "Covered by checkout.spec.ts.",
+					"title": "LPD-106244-Grouped-4 Drop payment term test already covered"
+				},
+				{
+					"body": "Covered by accountDefaults.",
+					"title": "LPD-106244-Grouped-4 Drop delivery terms test already covered"
+				},
+				{
+					"body": "Covered by commerceAdminOrderDetails.",
+					"title": "LPD-106244-Grouped-4 Drop terms tests already covered"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-4 Add checkout step label locator to checkout page"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-4 Add API storefront setup helper to commerce utils"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-4 Migrate checkout terms tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-4 Migrate checkout terms permission test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-4 Migrate admin order terms edit test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-4 Migrate placed order terms test to Playwright"
+				}
+			],
+			"group": 4,
+			"helpers": [
+				"modules/test/playwright/pages/commerce/commerce-checkout-web/checkoutPage.ts",
+				"modules/test/playwright/tests/commerce/utils/commerce.ts"
+			],
+			"integration": {
+			},
+			"jest": [
+			],
+			"junit": {
+			},
+			"name": "CommerceTermsAndConditions file removal",
+			"playwrightSpecs": [
+				"modules/test/playwright/tests/commerce/commerce-checkout-web/main/checkout.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-order-content-web/main/commerceAdminOrderDetails.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-order-content-web/main/placedOrder.spec.ts"
+			],
+			"playwrightTests": [
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-checkout-web/main/checkout.spec.ts",
+					"title": "Buyer can view every eligible ${variant.name} term and change it before completing checkout"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-checkout-web/main/checkout.spec.ts",
+					"title": "Delivery and payment terms checkout steps are hidden without the manage terms permissions"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-order-content-web/main/commerceAdminOrderDetails.spec.ts",
+					"title": "Admin can change the delivery and payment terms attached to an order"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-order-content-web/main/placedOrder.spec.ts",
+					"title": "Terms are not editable in the placed order details page"
+				}
+			],
+			"poshiRemoved": [
+				"CommerceTermsAndConditions::ChangePaymentTermBeforeCompletingCheckout",
+				"CommerceTermsAndConditions::ViewAvailableDeliveryTerms",
+				"CommerceTermsAndConditions::ViewDeliveryTermAttachedToOrder",
+				"CommerceTermsAndConditions::ViewPaymentTermAttachedToOrder",
+				"CommerceTermsAndConditions::ChangeDeliveryTermBeforeCompletingCheckout",
+				"CommerceTermsAndConditions::ViewAvailablePaymentTerms",
+				"CommerceTermsAndConditions::AssertCheckoutStepsNotShownWithoutPermissions",
+				"CommerceTermsAndConditions::EditTermsFromOrderAdmin",
+				"CommerceTermsAndConditions::AssertTermsNotEditableAfterOrderIsPlaced"
+			],
+			"tag": "@LPD-106244-Grouped-4",
+			"testcaseFilesDeleted": [
+				"CommerceTermsAndConditions.testcase"
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-5 Add term options locator to channel defaults page"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-5 Add term row locators to channel defaults page"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-5 Add term description option to setUpTermsCheckout"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-5 Migrate default term tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-5 Migrate inactive default term tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-5 Migrate rich text term checkout test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-5 Migrate duplicate term eligibility test to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-5 Extract term entry helper in account channel test"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-5 Migrate term deletion tests to integration"
+				}
+			],
+			"group": 5,
+			"helpers": [
+				"modules/test/playwright/pages/commerce/commerce-account-web/commerceChannelDefaultsPage.ts"
+			],
+			"integration": {
+				"modules/apps/commerce/headless/headless-commerce/headless-commerce-admin-account-test": {
+					"AccountChannelEntryResourceTest": [
+						"testDeleteCommerceTermEntry"
+					]
+				},
+				"modules/apps/commerce/headless/headless-commerce/headless-commerce-admin-order-test": {
+					"TermOrderTypeResourceTest": [
+						"testPostTermIdTermOrderTypeWithDuplicateOrderType"
+					]
+				}
+			},
+			"jest": [
+			],
+			"junit": {
+			},
+			"name": "CPCommerceTermsAndConditions file removal",
+			"playwrightSpecs": [
+				"modules/test/playwright/tests/commerce/commerce-checkout-web/main/checkout.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-order-management/main/paymentTerms.spec.ts"
+			],
+			"playwrightTests": [
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-checkout-web/main/checkout.spec.ts",
+					"title": "Buyer can complete checkout with rich text term descriptions"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-order-management/main/paymentTerms.spec.ts",
+					"title": "Account default ${variant.name} terms are listed by priority and can be removed"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-order-management/main/paymentTerms.spec.ts",
+					"title": "An inactive account default ${variant.name} term stays listed as inactive"
+				}
+			],
+			"poshiRemoved": [
+				"CPCommerceTermsAndConditions::AddADefaultDeliveryTerm",
+				"CPCommerceTermsAndConditions::CanAddADefaultPaymentTerm",
+				"CPCommerceTermsAndConditions::SetAnInactiveDeliveryTermLinkedToAnAccountAsDefaultOne",
+				"CPCommerceTermsAndConditions::SetAnInactivePaymentTermLinkedToAnAccountAsDefaultOne",
+				"CPCommerceTermsAndConditions::CanCompleteCheckoutWithRichTextTermDescription",
+				"CPCommerceTermsAndConditions::CannotSelectTermEligibilityTwice",
+				"CPCommerceTermsAndConditions::RemoveADeliveryTermLinkedToAnAccountAsDefaultOne",
+				"CPCommerceTermsAndConditions::RemoveAPaymentTermLinkedToAnAccountAsDefaultOne"
+			],
+			"tag": "@LPD-106244-Grouped-5",
+			"testcaseFilesDeleted": [
+				"CPCommerceTermsAndConditions.testcase"
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "Covered by commerceMiniCart.spec.ts.",
+					"title": "LPD-106244-Grouped-6 Drop UOM bundle test already covered"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-6 Migrate integer UOM bundle test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-6 Migrate linked SKU UOM quantity test to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-6 Migrate UOM priority order test to integration"
+				}
+			],
+			"group": 6,
+			"helpers": [
+			],
+			"integration": {
+				"modules/apps/commerce/commerce-product-test": {
+					"CPDefinitionOptionValueRelLocalServiceTest": [
+						"testValidateStaticLinkedCPDefinitionOptionValueRelWithUOM"
+					],
+					"CPInstanceUnitOfMeasureLocalServiceTest": [
+						"testGetActiveCPInstanceUnitOfMeasuresSortedByPriority"
+					]
+				}
+			},
+			"jest": [
+			],
+			"junit": {
+			},
+			"name": "Units of measure",
+			"playwrightSpecs": [
+				"modules/test/playwright/tests/commerce/commerce-cart-content-web/main/commerceMiniCart.spec.ts"
+			],
+			"playwrightTests": [
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-cart-content-web/main/commerceMiniCart.spec.ts",
+					"title": "variant.description"
+				}
+			],
+			"poshiRemoved": [
+				"CommerceUnitsOfMeasureBundles::CanAssertDecimalUOMPricesAreConvertedInProductBundles",
+				"CommerceUnitsOfMeasureBundles::CanAddToCartDynamicPriceBundledProductWithUOM",
+				"CommerceUnitsOfMeasureBundles::CanOptionValuesHaveLinkedSkuWithDifferentQuantitiesSet",
+				"CommerceUnitsOfMeasure::CanAssertUOMsAreSortedByPriority"
+			],
+			"tag": "@LPD-106244-Grouped-6",
+			"testcaseFilesDeleted": [
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "Covered by shippingMethod.spec.ts.",
+					"title": "LPD-106244-Grouped-7 Drop variable rate test already covered"
+				},
+				{
+					"body": "Covered by commerceTaxEngine.spec.ts.",
+					"title": "LPD-106244-Grouped-7 Drop tax rate tests already covered"
+				},
+				{
+					"body": "These stubs duplicate the COMMERCE-8536 to COMMERCE-8539 scenarios that LPD-88689 converted into CommerceChannelDefaultPaymentMethodTest (testIsActivePaymentMethodCommerceCheckoutStepDisabledDefault, testIsActivePaymentMethodCommerceCheckoutStepDefaultIneligibleForOrderType, testIsActivePaymentMethodCommerceCheckoutStepDefaultEligibleForOrderType, testIsActivePaymentMethodCommerceCheckoutStepDisabledDefaultEligibleForOrderType).",
+					"title": "LPD-106244-Grouped-7 Drop payment method checkout tests already covered"
+				},
+				{
+					"body": "These stubs duplicate the COMMERCE-8534 and COMMERCE-8545 scenarios covered by \"Can edit default payment method linked to an account\" and \"Can see the status of a default payment method linked to an account\" in commerceChannelDefaults.spec.ts.",
+					"title": "LPD-106244-Grouped-7 Drop default payment method tests already covered"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-7 Add tax rate delete action to channel details page"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-7 Add optional term to payment eligibility helper"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-7 Migrate shipping option tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-7 Migrate shipping priority test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-7 Migrate shipping setting test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-7 Migrate tracking URL edit test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-7 Migrate tax rate deletion tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-7 Migrate channel view permission test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-7 Migrate payment term eligibility test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-7 Migrate tax engine activation tests to Playwright"
+				},
+				{
+					"body": "The planned paymentMethods.spec.ts sets up a Minium site in its beforeAll hook, so the test lives in a new Minium-free spec next to it and builds its channel and product with apiStorefrontSetUp.",
+					"title": "LPD-106244-Grouped-7 Migrate payment method permission tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-7 Migrate channel creation test to Playwright"
+				}
+			],
+			"group": 7,
+			"helpers": [
+				"modules/test/playwright/pages/commerce/commerce-channel-web/commerceAdminChannelDetailsPage.ts"
+			],
+			"integration": {
+			},
+			"jest": [
+			],
+			"junit": {
+			},
+			"name": "Channel administration",
+			"playwrightSpecs": [
+				"modules/test/playwright/tests/commerce/commerce-channel-web/main/commerceAdminChannelDetails.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-checkout-web/main/checkout.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-order-management/main/paymentMethodPermissions.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProductVisibility.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-shipping-engine-fixed-web/main/shippingMethod.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-tax-engine-web/main/commerceTaxEngine.spec.ts"
+			],
+			"playwrightTests": [
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-channel-web/main/commerceAdminChannelDetails.spec.ts",
+					"title": "Payment method eligibility can be set to a payment term and back to no payment terms"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-order-management/main/paymentMethodPermissions.spec.ts",
+					"title": "Users with the manage payment methods permission can edit the payment method of an order"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProductVisibility.spec.ts",
+					"title": "Channels visibility follows the channel view permission of the user"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-shipping-engine-fixed-web/main/shippingMethod.spec.ts",
+					"title": "A shipping option can be added to and removed from the ${shippingMethod} shipping method"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-shipping-engine-fixed-web/main/shippingMethod.spec.ts",
+					"title": "Flat Rate shipping options show their priority and are ordered by it"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-shipping-engine-fixed-web/main/shippingMethod.spec.ts",
+					"title": "The Flat Rate shipping method tracking URL can be edited and cleared"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-shipping-engine-fixed-web/main/shippingMethod.spec.ts",
+					"title": "Verify Variable Rate Shipping Option Settings is viewed from Shipping Option"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-tax-engine-web/main/commerceTaxEngine.spec.ts",
+					"title": "LPD-31663 Activate Fixed Tax Engine and Add Tax Rate"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-tax-engine-web/main/commerceTaxEngine.spec.ts",
+					"title": "LPD-31663 Activate By Address Tax Engine and Add Tax Rate"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-tax-engine-web/main/commerceTaxEngine.spec.ts",
+					"title": "Tax engines can be reactivated and the Remote engine can be configured"
+				}
+			],
+			"poshiRemoved": [
+				"CPCommerceChannels::AddShippingOptionSettingVariableRate",
+				"CPCommerceChannels::AddTaxRateSettingsByAddressTaxCalculation",
+				"CPCommerceChannels::AddTaxRateSettingsFixedTaxRateTaxCalculation",
+				"CPCommerceChannels::CompleteCheckoutWhereDefaultPaymentMethodIsDisabledIntoChannel",
+				"CPCommerceChannels::CompleteCheckoutWhereDefaultPaymentMethodIsNotPresentIntoOrderType",
+				"CPCommerceChannels::CompleteCheckoutWhereDefaultPaymentMethodIsPresentIntoOrderType",
+				"CPCommerceChannels::CompleteCheckoutWhereDefaultPaymentMethodIsPresentIntoOrderTypeButDisabledIntoChannel",
+				"CPCommerceChannels::AddANewDefaultPaymentMethod",
+				"CPCommerceChannels::DeactivatePaymentMethodLinkedToAnAccount",
+				"CPCommerceChannels::AddShippingOptionFlatRate",
+				"CPCommerceChannels::AddShippingOptionVariableRate",
+				"CPCommerceChannels::RemoveShippingOptionFlatRate",
+				"CPCommerceChannels::RemoveShippingOptionVariableRate",
+				"CPCommerceChannels::VerifyPriorityColumnForShippingOption",
+				"CPCommerceChannels::RemoveShippingSettingOptionVariableRate",
+				"CPCommerceChannels::CanEditShippingMethodTrackingURL",
+				"CPCommerceChannels::RemoveTaxRateSettingsByAddressTaxCalculation",
+				"CPCommerceChannels::RemoveTaxRateSettingsFixedTaxRateTaxCalculation",
+				"CPCommerceChannels::CanUserWithChannelViewPermissionSeeChannelEntries",
+				"CPCommerceChannels::SetAndEditPaymentMethodTermElgibility",
+				"CPCommerceChannels::ActiveAllTaxCalculations",
+				"CPCommerceChannels::EditConfigurationRemoteTaxCalculation",
+				"CommercePaymentMethodsPermissions::CanOperationsManagerEditEmptyPlacedOrderSelectedPaymentMethod",
+				"CommercePaymentMethodsPermissions::UsersWithManagePaymentMethodsPermissionCanEditSelectedPaymentMethod",
+				"CPCommerceChannels::CreateNewChannel"
+			],
+			"tag": "@LPD-106244-Grouped-7",
+			"testcaseFilesDeleted": [
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-8 Migrate channel search bar test to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-8 Migrate delivery term test to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-8 Migrate long email recipient test to integration"
+				},
+				{
+					"body": "VerifyNotificationQueue is removed without a new test because testUserGroupRecipient already asserts that a user group template on Order Placed adds one queue entry.",
+					"title": "LPD-106244-Grouped-8 Migrate notification deletion tests to integration"
+				}
+			],
+			"group": 8,
+			"helpers": [
+			],
+			"integration": {
+				"modules/apps/commerce/commerce-notification-test": {
+					"CommerceNotificationTest": [
+						"testDeleteCommerceNotificationQueueEntry",
+						"testDeleteCommerceNotificationTemplate",
+						"testLongEmailAddressRecipient"
+					]
+				},
+				"modules/apps/commerce/commerce-product-test": {
+					"CommerceChannelLocalServiceTest": [
+						"testSearch"
+					]
+				},
+				"modules/apps/commerce/headless/headless-commerce/headless-commerce-delivery-cart-test": {
+					"TermResourceTest": [
+						"testGetCartDeliveryTermsPage"
+					]
+				}
+			},
+			"jest": [
+			],
+			"junit": {
+			},
+			"name": "Channel services",
+			"playwrightSpecs": [
+			],
+			"playwrightTests": [
+			],
+			"poshiRemoved": [
+				"CPCommerceChannels::UseSearchBar",
+				"CPCommerceChannels::ShippingOptionEligibleForSpecificDeliveryTerms",
+				"CPCommerceChannels::CanUseLongEmailAdressInNotificationTemplates",
+				"CPCommerceChannels::RemoveNotificationQueue",
+				"CPCommerceChannels::RemoveNotificationTemplate",
+				"CPCommerceChannels::VerifyNotificationQueue"
+			],
+			"tag": "@LPD-106244-Grouped-8",
+			"testcaseFilesDeleted": [
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "Covered by accountAddresses.spec.ts.",
+					"title": "LPD-106244-Grouped-9 Drop address tests already covered"
+				},
+				{
+					"body": "Covered by \"Can add and remove an organizations to an account\" and \"Can search assigned organizations\" in accountOrganizations.spec.ts.",
+					"title": "LPD-106244-Grouped-9 Drop organization tests already covered"
+				},
+				{
+					"body": "Covered by AccountEntryOrganizationRelLocalServiceTest#testAddAccountEntryOrganizationRelThrowsDuplicateAccountEntryOrganizationRelException, which enforces the rule behind the removed storefront error alert.",
+					"title": "LPD-106244-Grouped-9 Drop duplicate organization test already covered"
+				},
+				{
+					"body": "Covered by accountPermissions.spec.",
+					"title": "LPD-106244-Grouped-9 Drop member search test already covered"
+				},
+				{
+					"body": "COMMERCE-7166 replaced the Commerce Account Management UI this test drove with the Account Entries Management portlet. Editing account details is covered by \"An account can be updated\" in account-admin-web accounts.spec.ts.",
+					"title": "LPD-106244-Grouped-9 Drop edit account test already covered"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-9 Migrate account type tests to integration"
+				},
+				{
+					"body": "The ignored Poshi test was an empty placeholder for COMMERCE-6357. The user selector already renders existing members as checked and disabled, so the assertion is added where the account user filter test reopens the selector for an account the user already belongs to.",
+					"title": "LPD-106244-Grouped-9 Migrate existing account member test to Playwright"
+				}
+			],
+			"group": 9,
+			"helpers": [
+			],
+			"integration": {
+				"modules/apps/headless/headless-admin-user/headless-admin-user-test": {
+					"AccountResourceTest": [
+					]
+				}
+			},
+			"jest": [
+			],
+			"junit": {
+			},
+			"name": "Account management",
+			"playwrightSpecs": [
+				"modules/test/playwright/tests/account-admin-web/main/accountUsers.spec.ts"
+			],
+			"playwrightTests": [
+				{
+					"spec": "modules/test/playwright/tests/account-admin-web/main/accountUsers.spec.ts",
+					"title": "Can filter valid domain users and all users when assigning"
+				}
+			],
+			"poshiRemoved": [
+				"CommerceAccountManagement::AddAddressToAccount",
+				"CommerceAccountManagement::EditAddressInAccount",
+				"CommerceAccountManagement::SearchAnAccountAddress",
+				"CommerceAccountManagement::AddOrganizationToAccount",
+				"CommerceAccountManagement::RemoveOrganizationFromAccount",
+				"CommerceAccountManagement::SearchAnAccountOrganization",
+				"CommerceAccountManagement::AssertOrganizationThatIsPartOfTheAccountCannotBeAddedAgain",
+				"CommerceAccountManagement::SearchAnAccountMember",
+				"CommerceAccountManagement::EditAccountDetails",
+				"CommerceAccountManagement::CanCreateAllTypesOfAccountsViaAPI",
+				"CommerceAccountManagement::CanCreateBusinessAccountWhenAccountTypeIsNotSpecified",
+				"CommerceAccountManagement::AssertUserThatIsPartOfTheAccountCannotBeAddedAgain"
+			],
+			"tag": "@LPD-106244-Grouped-9",
+			"testcaseFilesDeleted": [
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "Covered by \"Can switch account and create an order from the Account Selector fragment on a content page\" in storefrontFragments.spec.ts.",
+					"title": "LPD-106244-Grouped-10 Drop account selector tests already covered"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-10 Add account name checks to AccountSelector test"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-10 Migrate account selector outside click tests to Jest"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-10 Add create account button to Minium catalog page"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-10 Migrate in-flow account required name test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-10 Migrate account selector search tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-10 Migrate account selector orders list test to Playwright"
+				}
+			],
+			"group": 10,
+			"helpers": [
+				"modules/test/playwright/pages/commerce/commerce-theme-minium/commerceThemeMiniumCatalogPage.ts"
+			],
+			"integration": {
+			},
+			"jest": [
+				"modules/apps/commerce/commerce-frontend-js/test/components/AccountSelector/AccountSelector.js"
+			],
+			"junit": {
+			},
+			"name": "Account selector",
+			"playwrightSpecs": [
+				"modules/test/playwright/tests/commerce/commerce-theme-minium/main/commerceAccountSelector.spec.ts"
+			],
+			"playwrightTests": [
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-theme-minium/main/commerceAccountSelector.spec.ts",
+					"title": "Account Selector in Minium theme working as expected"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-theme-minium/main/commerceAccountSelector.spec.ts",
+					"title": "The in-flow account creation requires a name and cancelling it does not create the account"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-theme-minium/main/commerceAccountSelector.spec.ts",
+					"title": "Accounts created in flow become active and can be searched and selected in the account selector"
+				}
+			],
+			"poshiRemoved": [
+				"CommerceAccountSelector::ChangeActiveAccountFromAccountsList",
+				"CommerceAccountSelector::ViewAccountSelectorDropdownAccountsList",
+				"CommerceAccountSelector::AssertAccountSelectorIsClosedAfterGlobalSearchIsOpened",
+				"CommerceAccountSelector::AssertAccountSelectorIsClosedAfterMiniCartIsOpened",
+				"CommerceAccountSelector::CannotSaveInFlowAccountWithoutRequiredField",
+				"CommerceAccountSelector::CanSearchForAnInFlowAccountAndSelectItAsActive",
+				"CommerceAccountSelector::SearchForAnAccountAndSelectItAsActive",
+				"CommerceAccountSelector::ViewAccountSelectorDropdownOrdersList"
+			],
+			"tag": "@LPD-106244-Grouped-10",
+			"testcaseFilesDeleted": [
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "Covered by orderTypes.spec.ts.",
+					"title": "LPD-106244-Grouped-11 Drop order type test already covered"
+				},
+				{
+					"body": "Covered by pendingOrder.spec.ts.",
+					"title": "LPD-106244-Grouped-11 Drop approval workflow test already covered"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-11 Migrate order search tests to integration"
+				},
+				{
+					"body": "The planned orderTypes.spec.ts sets up a Minium site in its beforeAll hook, so the test joins pendingOrder.spec.ts, which covers the same Open Carts widget without a Minium hook, and builds its storefront with apiStorefrontSetUp.",
+					"title": "LPD-106244-Grouped-11 Migrate pending orders add order tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-11 Migrate placed order date display tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-11 Migrate placed order details status test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-11 Migrate placed order addresses test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-11 Migrate placed orders display template test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-11 Migrate pending order details tests to Playwright"
+				}
+			],
+			"group": 11,
+			"helpers": [
+			],
+			"integration": {
+				"modules/apps/commerce/commerce-test": {
+					"CommerceOrderTest": [
+						"testGetPendingCommerceOrderByOrderId",
+						"testGetPlacedCommerceOrderByOrderId"
+					]
+				}
+			},
+			"jest": [
+			],
+			"junit": {
+			},
+			"name": "Storefront orders",
+			"playwrightSpecs": [
+				"modules/test/playwright/tests/commerce/commerce-order-content-web/main/pendingOrder.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-order-content-web/main/placedOrder.spec.ts"
+			],
+			"playwrightTests": [
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-order-content-web/main/pendingOrder.spec.ts",
+					"title": "An order created from the Pending Orders page is listed with its order type"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-order-content-web/main/pendingOrder.spec.ts",
+					"title": "A buyer can switch the active account from and delete a pending order on its details page"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-order-content-web/main/placedOrder.spec.ts",
+					"title": "Placed order details show the billing and shipping addresses, and the widget configuration adds their full address and phone number"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-order-content-web/main/placedOrder.spec.ts",
+					"title": "The order date shows the create time until the Placed Orders widget configuration hides it"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-order-content-web/main/placedOrder.spec.ts",
+					"title": "ERC and status are displayed in the placed order details page"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-order-content-web/main/placedOrder.spec.ts",
+					"title": "A display template selected in the Placed Orders widget configuration renders the orders and survives reopening it"
+				}
+			],
+			"poshiRemoved": [
+				"SFCommerceOrders::AssertOrderTypeInPlacedOrdersList",
+				"CommerceAccelerators::MiniumSiteFullFlowWithBuyerOrderApprovalWorkflow",
+				"SFCommerceOrders::SearchOrderInPendingOrdersPage",
+				"SFCommerceOrders::SearchOrderInPlacedOrdersPage",
+				"SFCommerceOrders::AssertOrderTypeInOpenCartsWidgetList",
+				"SFCommerceOrders::CreateNewOrderFromPendingOrdersPage",
+				"SFCommerceOrders::AssertDateIsDisplayedAsOrderDate",
+				"SFCommerceOrders::AssertOrderDateDisplayIsPresent",
+				"SFCommerceOrders::AssertOrderStatusInPlacedOrderDetails",
+				"SFCommerceOrders::AssertNameOfTheShippingAndBillingAddressInPlacedOrderDetails",
+				"SFCommerceOrders::UseADTInPlacedOrdersWidget",
+				"CommerceAccountSelector::CanChangeActiveAccountInPendingOrdersPage",
+				"SFCommerceOrders::DeleteOrderFromPendingOrderDetailsPage"
+			],
+			"tag": "@LPD-106244-Grouped-11",
+			"testcaseFilesDeleted": [
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-12 Extract definition link helper in service test"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-12 Migrate product duplication tests to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-12 Migrate versioned deletion tests to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-12 Migrate duplicate SKU price test to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-12 Migrate bidirectional relation test to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-12 Migrate draft workflow test to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-12 Migrate relation direction test to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-12 Migrate bundle price type toggle test to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-12 Migrate product creation tests to integration"
+				}
+			],
+			"group": 12,
+			"helpers": [
+			],
+			"integration": {
+				"modules/apps/commerce/commerce-product-test": {
+					"CPDefinitionLocalServiceTest": [
+						"testAddCPDefinitionLinkByCProductIdWithBidirectionalType",
+						"testCloneCPDefinition"
+					],
+					"CPDefinitionOptionRelLocalServiceTest": [
+						"testUpdateCPDefinitionOptionRelPriceTypeAfterDeletingOptionValue"
+					]
+				},
+				"modules/apps/commerce/headless/headless-commerce/headless-commerce-admin-catalog-test": {
+					"ProductResourceTest": [
+					],
+					"RelatedProductResourceTest": [
+					]
+				}
+			},
+			"jest": [
+			],
+			"junit": {
+			},
+			"name": "Product definition services",
+			"playwrightSpecs": [
+			],
+			"playwrightTests": [
+			],
+			"poshiRemoved": [
+				"CPCommerceProductVersioning::CanDuplicateVersionableProductsAndDelete",
+				"CPCommerceProducts::CanCheckApprovedProductDuplication",
+				"CPCommerceProducts::CanCheckDraftProductDuplication",
+				"CPCommerceProducts::CanDuplicateProductAndVerifyFriendlyUrlMatchesProductName",
+				"CPCommerceProductVersioning::CanDeleteVersionableProducts",
+				"CPCommerceProductVersioning::CanDeleteVersionableProductsOneByOne",
+				"CPCommerceProducts::DuplicateAProductAndVerifyIfSkuPriceIsUnique",
+				"CommerceProductBundleRules::CanVerifyExcludedProductRelationIsBidirectional",
+				"CPCommerceProducts::CanCheckDraftProductStatusWithWorkflow",
+				"CommerceProductBundleRules::CanVerifyIncludedProductRelationIsUnidirectional",
+				"CPCommerceProducts::AssertProductBundleCanBeCreatedWithPriceTypeStaticAndDynamic",
+				"CPCommerceProducts::CanCreateProductViaAPIWithoutTheEndOfLifeDate",
+				"CPCommerceProducts::CanUploadProductImageViaAPIWithWorkflowEnabled"
+			],
+			"tag": "@LPD-106244-Grouped-12",
+			"testcaseFilesDeleted": [
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-13 Migrate SKU search tests to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-13 Migrate category search tests to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-13 Migrate draft product search test to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-13 Migrate grouped product search test to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-13 Migrate shared partial SKU test to integration"
+				}
+			],
+			"group": 13,
+			"helpers": [
+			],
+			"integration": {
+				"modules/apps/commerce/commerce-product-test": {
+					"CPDefinitionHelperTest": [
+						"testSearchCPDefinitionsBySku",
+						"testSearchCPDefinitionsByStatus"
+					],
+					"CPDefinitionIndexerTest": [
+						"testSearchByPartialSku"
+					]
+				},
+				"modules/apps/commerce/commerce-product-type-grouped-test": {
+					"CPDefinitionGroupedEntryLocalServiceTest": [
+						"testGetCPDefinitionGroupedEntries"
+					]
+				}
+			},
+			"jest": [
+			],
+			"junit": {
+			},
+			"name": "Product search",
+			"playwrightSpecs": [
+			],
+			"playwrightTests": [
+			],
+			"poshiRemoved": [
+				"CommerceSearch::SearchBarWidgetSearchProductBySKU",
+				"CommerceSearch::SearchBarWidgetSearchProductsByDifferentSKUs",
+				"CommerceSearch::SearchProductsByPartialSKU",
+				"CommerceSearch::SearchBarWidgetSearchProductsByCategory",
+				"CommerceSearch::SearchBarWidgetSearchProductsByDifferentCategories",
+				"CPCommerceProducts::CanCheckDraftProductVisibilityOnMiniumCatalogPage",
+				"CPCommerceProducts::CanSearchProductsOnGroupedProducts",
+				"CommerceSearch::AssertMultipleProductsPopulatedSharingSamePartialSKUThatIsSearchedFor"
+			],
+			"tag": "@LPD-106244-Grouped-13",
+			"testcaseFilesDeleted": [
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-14 Migrate option remove and readd test to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-14 Migrate defined externally test to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-14 Migrate default option value test to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-14 Migrate SKU tests to integration"
+				}
+			],
+			"group": 14,
+			"helpers": [
+			],
+			"integration": {
+				"modules/apps/commerce/commerce-product-test": {
+					"CPDefinitionOptionRelLocalServiceTest": [
+						"testAddCPDefinitionOptionRelAfterDeleteRestoresCPOptionValues",
+						"testValidatePriceTypeDefinedExternally"
+					],
+					"CPDefinitionOptionValueRelLocalServiceTest": [
+					]
+				},
+				"modules/apps/commerce/headless/headless-commerce/headless-commerce-admin-catalog-test": {
+					"SkuResourceTest": [
+						"testGetProductIdSkusPage"
+					]
+				}
+			},
+			"jest": [
+			],
+			"junit": {
+			},
+			"name": "Product options and SKUs",
+			"playwrightSpecs": [
+			],
+			"playwrightTests": [
+			],
+			"poshiRemoved": [
+				"CPCommerceProductOptions::CanEditRemoveReaddProductOption",
+				"CPCommerceProductOptionDefineExternally::CanUseDefineExternallyOnlyWithDynamicPriceType",
+				"CPCommerceProductOptions::CanAssertDefaultOptionValuesAreSavedUsingToggleSwitch",
+				"CPCommerceProductOptions::CanDeleteProductOptionWithGeneratedSkus",
+				"CPCommerceProductSKUs::CanPatchSKUERCViaAPI"
+			],
+			"tag": "@LPD-106244-Grouped-14",
+			"testcaseFilesDeleted": [
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "Covered by \"A discontinued product shows its end of life date and offers no replacements list\" and \"Replacement product row redirects to the discontinued product details page\" in commerceReplacementProducts.spec.ts.",
+					"title": "LPD-106244-Grouped-15 Drop replacement tests already covered"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-15 Extract replacement helper in SKU service test"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-15 Migrate SKU self replacement test to integration"
+				},
+				{
+					"body": "Every variant runs against the Mini Cart fragment on a Classic site built with apiStorefrontSetUp, so the Classic theme test and the Minium quick add tests share one data loop instead of depending on the Minium initializer.",
+					"title": "LPD-106244-Grouped-15 Migrate quick add replacement tests to Playwright"
+				}
+			],
+			"group": 15,
+			"helpers": [
+			],
+			"integration": {
+				"modules/apps/commerce/commerce-product-test": {
+					"CPInstanceLocalServiceTest": [
+						"testUpdateCPInstanceWithOwnReplacement"
+					]
+				}
+			},
+			"jest": [
+			],
+			"junit": {
+			},
+			"name": "Product replacements",
+			"playwrightSpecs": [
+				"modules/test/playwright/tests/commerce/commerce-product-content-web/main/commerceReplacementProducts.spec.ts"
+			],
+			"playwrightTests": [
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-web/main/commerceReplacementProducts.spec.ts",
+					"title": "variant.description"
+				}
+			],
+			"poshiRemoved": [
+				"CPCommerceProductReplacements::AssertEndOfLifeDateIsVisibleInProductDetailsPage",
+				"CPCommerceProductReplacements::CanEditReplacementProduct",
+				"CPCommerceProductReplacements::SKUCannotBeItsOwnReplacement",
+				"CommerceQuickAddToCart::CanDiscontinuedSKUBeReplaced",
+				"CommerceQuickAddToCart::CanDiscontinuedSKUBeReplacedCorrectlyUsingClassicTheme",
+				"CommerceQuickAddToCart::CanDiscountBeAppliedCorrectlyOnReplacementSKU",
+				"CommerceQuickAddToCart::CannotDiscontinuedSKUBeReplacedWithBackOrderActive",
+				"CommerceQuickAddToCart::CanPriceOnApplicationBeAppliedCorrectlyOnReplacementSKU",
+				"CommerceQuickAddToCart::CanPromotionBeAppliedCorrectlyOnReplacementSKU"
+			],
+			"tag": "@LPD-106244-Grouped-15",
+			"testcaseFilesDeleted": [
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-16 Add product name input to product details page"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-16 Add Save as Draft link to product details page"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-16 Migrate product creation by type tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-16 Migrate product subscription test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-16 Migrate product name edit tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-16 Migrate SKU edit and delete tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-16 Migrate SKU price entry tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-16 Migrate option creation tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-16 Migrate versionable product draft tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-16 Migrate relation workflow tests to Playwright"
+				}
+			],
+			"group": 16,
+			"helpers": [
+				"modules/test/playwright/pages/commerce/commerce-product-definitions-web/commerceAdminProductDetailsPage.ts"
+			],
+			"integration": {
+			},
+			"jest": [
+			],
+			"junit": {
+			},
+			"name": "Admin catalog",
+			"playwrightSpecs": [
+				"modules/test/playwright/tests/commerce/commerce-product-content-web/main/commerceAdminProductRelations.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProductVersioning.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProducts.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-product-options-web/main/commerceAdminOptions.spec.ts"
+			],
+			"playwrightTests": [
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-web/main/commerceAdminProductRelations.spec.ts",
+					"title": "Product relations created under the Single Approver workflow stay pending through a rejection and become approved once resubmitted and approved"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProducts.spec.ts",
+					"title": "Add, edit, and delete a SKU"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProducts.spec.ts",
+					"title": "Editing the base price and tier prices of a SKU updates its storefront price"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProducts.spec.ts",
+					"title": "Add a SKU with subscriptions"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProducts.spec.ts",
+					"title": "Currency changes based on price lists"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProducts.spec.ts",
+					"title": "Edit a product name and its translation"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProducts.spec.ts",
+					"title": "Publish a ${productType} product"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-options-web/main/commerceAdminOptions.spec.ts",
+					"title": "LPD-45740 Product options can be added from product admins"
+				}
+			],
+			"poshiRemoved": [
+				"CPCommerceProducts::AddGroupedProduct",
+				"CPCommerceProducts::CanCheckDraftProductStatus",
+				"CPCommerceProducts::CanCheckProductPublication",
+				"CPCommerceProductSubscriptions::UseSubscriptions",
+				"CPCommerceProducts::EditAProduct",
+				"CPCommerceProducts::TranslateProductName",
+				"CPCommerceProductSKUs::CanEditPriceListsOnProductSKU",
+				"CPCommerceProductSKUs::CanEditSKUERC",
+				"CPCommerceProductSKUs::CanEditSKUERCOfANewProduct",
+				"CPCommerceProductSKUs::EditASKU",
+				"CPCommerceProductSKUs::RemoveASKU",
+				"CPCommerceProducts::EditSkuAndDelete",
+				"CPCommerceProductSKUs::CanAddPriceListsOnProductSKU",
+				"CPCommerceProductSKUs::CanViewPriceListCurrencyMatchesPriceListCurrencyOnProductSKU",
+				"CPCommerceProductOptions::CreateAnOptionForAllTheFieldType",
+				"CPCommerceProducts::AddAnOptionAndVerifyIfIsPresent",
+				"CPCommerceProductVersioning::CanCheckVersionableProductSaveAsDraftButton",
+				"CPCommerceProductVersioning::CanCreateNewVersionableProductDraftVersion",
+				"CPCommerceProductRelationsWorkflow::CanCreateNewRelationsWithRejectWorkflow",
+				"CPCommerceProductRelationsWorkflow::CanViewProductDetailsRelationsWithApproveWorkflow"
+			],
+			"tag": "@LPD-106244-Grouped-16",
+			"testcaseFilesDeleted": [
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-17 Migrate media edit tests to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-17 Migrate media deletion tests to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-17 Migrate base64 image test to integration"
+				},
+				{
+					"body": "The data loop joins commerceProducts.spec.ts next to the existing Media tab date format test, which already has the attachment and image dependencies.",
+					"title": "LPD-106244-Grouped-17 Migrate product media deletion UI tests to Playwright"
+				}
+			],
+			"group": 17,
+			"helpers": [
+			],
+			"integration": {
+				"modules/apps/commerce/commerce-product-test": {
+					"CPAttachmentFileEntryLocalServiceTest": [
+						"testUpdateCPAttachmentFileEntry"
+					]
+				},
+				"modules/apps/commerce/headless/headless-commerce/headless-commerce-admin-catalog-test": {
+					"AttachmentResourceTest": [
+						"testDeleteAttachment"
+					]
+				}
+			},
+			"jest": [
+			],
+			"junit": {
+			},
+			"name": "Product media",
+			"playwrightSpecs": [
+				"modules/test/playwright/tests/commerce/commerce-product-content-web/main/commerceProducts.spec.ts"
+			],
+			"playwrightTests": [
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-web/main/commerceProducts.spec.ts",
+					"title": "An ${variant.mediaType} can be deleted from the Media tab of a product"
+				}
+			],
+			"poshiRemoved": [
+				"CPCommerceProductMedia::EditAnAttachment",
+				"CPCommerceProductMedia::EditAnImage",
+				"CPCommerceProductMedia::CanDeleteProductAttachmentViaAPI",
+				"CPCommerceProductMedia::CanDeleteProductImageViaAPI",
+				"CPCommerceProducts::CanDeleteProductImageUploadedViaAPI",
+				"CPCommerceProducts::CanUploadProductBase64ImageViaAPI",
+				"CPCommerceProductMedia::RemoveAnAttachment",
+				"CPCommerceProductMedia::RemoveAnImage"
+			],
+			"tag": "@LPD-106244-Grouped-17",
+			"testcaseFilesDeleted": [
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-18 Migrate virtual activation tests to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-18 Migrate virtual product tests to Playwright"
+				}
+			],
+			"group": 18,
+			"helpers": [
+			],
+			"integration": {
+				"modules/apps/commerce/commerce-product-type-virtual-order-test": {
+					"CommerceVirtualOrderItemLocalServiceTest": [
+						"testAddCommerceVirtualOrderItemActivationStatus"
+					]
+				}
+			},
+			"jest": [
+			],
+			"junit": {
+			},
+			"name": "Virtual products",
+			"playwrightSpecs": [
+				"modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProducts.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminVirtualProducts.spec.ts"
+			],
+			"playwrightTests": [
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminVirtualProducts.spec.ts",
+					"title": "LPD-21637 Virtual item details section visible for product and sku"
+				}
+			],
+			"poshiRemoved": [
+				"CPCommerceProductSkusVirtualSettingsOverride::CanDownloadVirtualProductWithSKUOverrideActivationStatusCompleted",
+				"CPCommerceProductSkusVirtualSettingsOverride::CanDownloadVirtualProductWithSKUOverrideActivationStatusPending",
+				"CPCommerceProductSkusVirtualSettingsOverride::CanDownloadVirtualProductWithSKUOverrideActivationStatusPendingAndPaymentMethodActive",
+				"CPCommerceProductSkusVirtualSettingsOverride::CanDownloadVirtualProductWithSKUOverrideActivationStatusProcessing",
+				"CommerceVirtualProducts::CanCheckoutVirtualProductWithNoSavedConfiguration",
+				"CPCommerceProducts::CanAddVirtualProductAndCheckNoShippingOverride",
+				"CommerceVirtualProducts::CanAddSampleURLAfterRemovingSelectedFile"
+			],
+			"tag": "@LPD-106244-Grouped-18",
+			"testcaseFilesDeleted": [
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-19 Migrate mini cart maximum quantity test to Jest"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-19 Migrate quick add same SKU test to Jest"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-19 Migrate quick add quantity rule tests to Jest"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-19 Migrate quick add quantity limit tests to Jest"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-19 Migrate no options accordion test to Jest"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-19 Extract SKU selection helper in mini cart page"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-19 Migrate quick add search and checkout tests to Playwright"
+				},
+				{
+					"body": "The long product name truncation Poshi test is folded into the same mini cart test, since both only need a cart with a second, normal product.",
+					"title": "LPD-106244-Grouped-19 Migrate quick add price on application tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-19 Migrate mini cart quantity merge test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-19 Migrate mini cart widget checkout test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-19 Add quick add chip locator to mini cart page"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-19 Migrate quick add promotion price test to Playwright"
+				}
+			],
+			"group": 19,
+			"helpers": [
+				"modules/test/playwright/pages/commerce/commerceMiniCartPage.ts"
+			],
+			"integration": {
+			},
+			"jest": [
+				"modules/apps/commerce/commerce-frontend-js/test/components/MiniCart/CartItem.js",
+				"modules/apps/commerce/commerce-frontend-js/test/components/MiniCart/CartQuickAdd.js",
+				"modules/apps/commerce/commerce-frontend-js/test/components/MiniCart/util/index.js"
+			],
+			"junit": {
+			},
+			"name": "Quick add and mini cart",
+			"playwrightSpecs": [
+				"modules/test/playwright/tests/commerce/commerce-cart-content-web/main/commerceMiniCart.spec.ts"
+			],
+			"playwrightTests": [
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-cart-content-web/main/commerceMiniCart.spec.ts",
+					"title": "Mini cart shows the Price on Application labels for a SKU with a UOM marked as price on application"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-cart-content-web/main/commerceMiniCart.spec.ts",
+					"title": "A SKU added from the product details and then through quick add stays a single mini cart item"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-cart-content-web/main/commerceMiniCart.spec.ts",
+					"title": "A buyer checks out from the Mini Cart widget"
+				}
+			],
+			"poshiRemoved": [
+				"CommerceQuickAddToCart::CanAddSKUWithMaximumQuantity",
+				"CommerceQuickAddToCart::CanAddSameSKUMultipleTimes",
+				"CommerceQuickAddToCart::CanAddSKUWithMinimumQuantity",
+				"CommerceQuickAddToCart::CanAddSKUWithMultipleQuantities",
+				"CommerceQuickAddToCart::CanAddSKUWithMultipleQuantityWhenItIsHigherOrLowerThanMinimumQuantity",
+				"CommerceQuickAddToCart::CanAddSKUWithAllowedQuantities",
+				"CommerceQuickAddToCart::CannotAddSKUWithAllowedQuantitiesWhenTheyAreHigherThanMaximumQuantity",
+				"CommerceQuickAddToCart::CannotAddSKUWithAllowedQuantitiesWhenTheyAreLowerThanMinimumQuantity",
+				"CommerceQuickAddToCart::CannotAddSKUWithAllowedQuantitiesWhichAreNotMultiples",
+				"CommerceQuickAddToCart::CannotAddSKUWithMultipleQuantityWhenItIsHigherThanMaximumQuantity",
+				"CPCommerceProductOptions::CannotViewTheAccordionForProductsWithNoOptions",
+				"CommerceQuickAddToCart::CanCreateFirstOrderAddingSKUViaQuickAdd",
+				"CommerceQuickAddToCart::CanQuickAddToCartAndCheckout",
+				"CommerceQuickAddToCart::CanSearchSkusOnQuickAddToCart",
+				"CommerceMiniCart::CanSeeProductNameTruncated",
+				"CommercePriceOnApplication::CanAddPriceOnApplicationSkuViaQuickAdd",
+				"CommerceMiniCart::AssertQuantityInMiniCartItemCanBeOverlappedUsingNormalAndQuickAdd",
+				"CommerceMiniCart::CanUseMiniCartWidgetToCheckout",
+				"CommerceQuickAddToCart::CanAddToCartProductWithPromotion"
+			],
+			"tag": "@LPD-106244-Grouped-19",
+			"testcaseFilesDeleted": [
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "Both empty stubs name the widget template scenario that \"CPContentHelper is available in product comparison widget templates\" in productComparison.spec.ts covers for the comparison bar and table widgets.",
+					"title": "LPD-106244-Grouped-20 Drop comparison template tests already covered"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-20 Migrate mini compare items limit test to Jest"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-20 Migrate first selectable quantity test to Jest"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-20 Migrate product details wish list removal test to Playwright"
+				}
+			],
+			"group": 20,
+			"helpers": [
+			],
+			"integration": {
+			},
+			"jest": [
+				"modules/apps/commerce/commerce-frontend-js/test/components/AddToCart/AddToCart.spec.tsx",
+				"modules/apps/commerce/commerce-frontend-js/test/components/MiniCompare/MiniCompare.js"
+			],
+			"junit": {
+			},
+			"name": "Product comparison and details",
+			"playwrightSpecs": [
+				"modules/test/playwright/tests/commerce/commerce-wish-list-web/main/commerceWishLists.spec.ts"
+			],
+			"playwrightTests": [
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-wish-list-web/main/commerceWishLists.spec.ts",
+					"title": "A product added to and removed from the wish list on its product details page leaves the wish list"
+				}
+			],
+			"poshiRemoved": [
+				"CommerceCompare::UseADTInCommerceComparisonBarWidget",
+				"CommerceCompare::UseADTInCommerceComparisonTableWidget",
+				"CommerceCompare::EditMaxNumberOfComparisonItemsInMiniCompare",
+				"CommerceProductDetails::ViewFirstSelectableQuantityInProductDetailsWhenMinimumOrderQuantityIsLowerThanMultipleOrderQuantity",
+				"CommerceProductDetails::RemoveProductFromWishListFromProductDetails"
+			],
+			"tag": "@LPD-106244-Grouped-20",
+			"testcaseFilesDeleted": [
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "The Poshi test ran the same orderByCol injection against the Minium and Speedwell sites. The fix lives in the Sort widget JSP and does not depend on the site initializer, so the test now runs once against an API storefront page with the Sort widget.",
+					"title": "LPD-106244-Grouped-21 Migrate sort widget XSS test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-21 Migrate specification facet search test to Playwright"
+				}
+			],
+			"group": 21,
+			"helpers": [
+			],
+			"integration": {
+			},
+			"jest": [
+			],
+			"junit": {
+			},
+			"name": "Storefront search and sort",
+			"playwrightSpecs": [
+				"modules/test/playwright/tests/commerce/commerce-product-content-search-web/main/facet.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-product-content-search-web/main/sort.spec.ts"
+			],
+			"playwrightTests": [
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-search-web/main/facet.spec.ts",
+					"title": "Specification Facet keeps working when searching products with many specifications"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-search-web/main/sort.spec.ts",
+					"title": "Sort widget does not execute a script injected through orderByCol"
+				}
+			],
+			"poshiRemoved": [
+				"CommerceAccelerators::CannotInjectScriptInSortWidget",
+				"CommerceFacets::CanSpecificationFacetWorkWhenSearchingProducts"
+			],
+			"tag": "@LPD-106244-Grouped-21",
+			"testcaseFilesDeleted": [
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-22 Migrate HTML description test to JUnit"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-22 Migrate promo price test to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-22 Migrate URL separator validation test to JUnit"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-22 Migrate address eligibility test to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-22 Migrate default currencies test to integration"
+				}
+			],
+			"group": 22,
+			"helpers": [
+			],
+			"integration": {
+				"modules/apps/commerce/commerce-currency-test": {
+					"CommerceCurrencyLocalServiceTest": [
+						"testImportDefaultValues"
+					]
+				},
+				"modules/apps/commerce/commerce-test": {
+					"CommerceAddressServiceTest": [
+					],
+					"CommercePricingTest": [
+						"testOrderItemPriceWithPromoLowerThanUnit"
+					]
+				}
+			},
+			"jest": [
+			],
+			"junit": {
+				"modules/apps/commerce/commerce-product-content-web": {
+					"CPDefinitionInfoItemFieldValuesProviderTest": [
+					]
+				},
+				"modules/apps/dynamic-data-mapping/dynamic-data-mapping-form-evaluator-impl": {
+					"IsValidURLSeparatorFunctionTest": [
+						"testInvalidURLSeparator",
+						"testValidURLSeparator"
+					]
+				}
+			},
+			"name": "Commerce service and unit tests",
+			"playwrightSpecs": [
+			],
+			"playwrightTests": [
+			],
+			"poshiRemoved": [
+				"CommerceDisplayPageTemplates::CanDisplayCorrectDesriptionOnParagraphFragment",
+				"CommerceAccelerators::AssertPromoProductPriceTotalIsDifferent",
+				"CommerceProductDetails::CannotSetSpecialCharacterAsProductURLSeparators",
+				"CommerceAddressesEligibility::CanRemoveAChannelFromTheEligibility",
+				"CPCommerceSettings::ViewInstanceCurrenciesAvailable"
+			],
+			"tag": "@LPD-106244-Grouped-22",
+			"testcaseFilesDeleted": [
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-23 Add header actions menu to product details page"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-23 Add image source to product API helper"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-23 Migrate workflow status tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-23 Migrate product save as draft tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-23 Migrate option image API test to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-23 Migrate product image API test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-23 Migrate virtual product setup test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-23 Migrate product friendly URL test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-23 Migrate product schedule test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-23 Migrate products admin list tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-23 Migrate versionable draft tests to Playwright"
+				}
+			],
+			"group": 23,
+			"helpers": [
+				"modules/test/playwright/helpers/HeadlessCommerceAdminCatalogApiHelper.ts",
+				"modules/test/playwright/pages/commerce/commerce-product-definitions-web/commerceAdminProductDetailsPage.ts"
+			],
+			"integration": {
+				"modules/apps/commerce/headless/headless-commerce/headless-commerce-admin-catalog-test": {
+					"AttachmentResourceTest": [
+					]
+				}
+			},
+			"jest": [
+			],
+			"junit": {
+			},
+			"name": "Product workflow and admin",
+			"playwrightSpecs": [
+				"modules/test/playwright/tests/commerce/commerce-product-content-web/main/commerceProducts.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-product-content-web/main/productDetails.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProductVersioning.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProducts.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminVirtualProducts.spec.ts"
+			],
+			"playwrightTests": [
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-web/main/commerceProducts.spec.ts",
+					"title": "A product image posted by URL through the API is shown in the products admin"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-web/main/productDetails.spec.ts",
+					"title": "A product is reachable through its friendly URL once the Product Detail health check is fixed"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProductVersioning.spec.ts",
+					"title": "Saving an approved versionable product as draft creates a single draft version"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProductVersioning.spec.ts",
+					"title": "Converting an approved versionable product to draft keeps its product ID"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProducts.spec.ts",
+					"title": "A product with ${status} status can be duplicated and converted to draft"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProducts.spec.ts",
+					"title": "A product with Pending status can be duplicated and converted to draft"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProducts.spec.ts",
+					"title": "Converting an approved product to draft keeps its edited name"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProducts.spec.ts",
+					"title": "Saving a draft product as draft keeps its edited name"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProducts.spec.ts",
+					"title": "Publish a product with an expiration date"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProducts.spec.ts",
+					"title": "Search, sort and paginate the products and SKUs admin lists"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminVirtualProducts.spec.ts",
+					"title": "Configure the file entry, maximum downloads and sample of a virtual product"
+				}
+			],
+			"poshiRemoved": [
+				"CPCommerceProducts::CanCheckAnyProductWorkflowStatus",
+				"CPCommerceProducts::CanCheckApprovedProductWorkflowStatus",
+				"CPCommerceProducts::CanCheckDeniedProductWorkflowStatus",
+				"CPCommerceProducts::CanCheckDraftProductWorkflowStatus",
+				"CPCommerceProducts::CanCheckExpiredProductWorkflowStatus",
+				"CPCommerceProducts::CanCheckInactiveProductWorkflowStatus",
+				"CPCommerceProducts::CanCheckIncompleteProductWorkflowStatus",
+				"CPCommerceProducts::CanCheckInRecycleBinProductWorkflowStatus",
+				"CPCommerceProducts::CanCheckPendingProductWorkflowStatus",
+				"CPCommerceProducts::CanCheckScheduledProductWorkflowStatus",
+				"CPCommerceProducts::CanCheckApprovedProductSaveAsDraft",
+				"CPCommerceProducts::CanCheckDraftProductSaveAsDraft",
+				"CPCommerceProducts::CanUploadProductImageLinkedToAnOptionValueViaAPI",
+				"CPCommerceProducts::CanUploadProductImageViaAPI",
+				"CPCommerceProducts::ConfigureVirtualProduct",
+				"CPCommerceProducts::UseFriendlyURL",
+				"CPCommerceProducts::UseSchedule",
+				"CPCommerceProducts::UseSearchBarAndPagination",
+				"CPCommerceProducts::UseSkuSearchBarAndPagination",
+				"CPCommerceProducts::UseSortingByNameAndDate",
+				"CPCommerceProductVersioning::CanCheckProductVersionsWithProductVersioningDisabled",
+				"CPCommerceProductVersioning::CanCheckVersionableProductConvertToDraftStatus",
+				"CPCommerceProductVersioning::CanOnlyHaveOneVersionableProductDraftVersion"
+			],
+			"tag": "@LPD-106244-Grouped-23",
+			"testcaseFilesDeleted": [
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-24 Migrate subscription length tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-24 Migrate subscription settings tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-24 Migrate multi-SKU subscription test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-24 Migrate SKU price modal tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-24 Migrate SKU tier price tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-24 Migrate SKU unique ERC test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-24 Migrate SKU currency test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-24 Migrate option media tests to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-24 Migrate adaptive media details test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-24 Migrate custom field media test to integration"
+				}
+			],
+			"group": 24,
+			"helpers": [
+			],
+			"integration": {
+				"modules/apps/commerce/headless/headless-commerce/headless-commerce-admin-catalog-test": {
+					"AttachmentResourceTest": [
+					]
+				}
+			},
+			"jest": [
+			],
+			"junit": {
+			},
+			"name": "SKUs, subscriptions and media",
+			"playwrightSpecs": [
+				"modules/test/playwright/tests/commerce/commerce-product-content-web/main/productDetails.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProducts.spec.ts"
+			],
+			"playwrightTests": [
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-web/main/productDetails.spec.ts",
+					"title": "Buyer views the payment subscription of a product with multiple SKUs on its product details page"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-web/main/productDetails.spec.ts",
+					"title": "Buyer views the product image through adaptive media on the product details page"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProducts.spec.ts",
+					"title": "Editing the base price and tier prices of a SKU updates its storefront price"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProducts.spec.ts",
+					"title": "The ${subscriptionName} length shows the subscription type in singular or plural"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProducts.spec.ts",
+					"title": "Product and SKU subscription configurations are saved"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProducts.spec.ts",
+					"title": "Add price entries for different units of measure from the SKU price modal"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProducts.spec.ts",
+					"title": "A SKU external reference code cannot be used by another SKU"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProducts.spec.ts",
+					"title": "Changing the channel currency does not change the SKU price list currency"
+				}
+			],
+			"poshiRemoved": [
+				"CPCommerceProductSubscriptions::CanViewDeliverySubscriptionTypeFormatInSubscriptionLengthField",
+				"CPCommerceProductSubscriptions::CanViewPaymentSubscriptionTypeFormatInSubscriptionLengthField",
+				"CPCommerceProductSubscriptions::CanViewExactDayOfYearSubscriptionConfigurationCorrectlySaved",
+				"CPCommerceProductSubscriptions::CanViewProductAndSKUSubscriptionConfigurationsCorrectlySaved",
+				"CPCommerceProductSubscriptions::CanViewPaymentSubscriptionOnProductDetailsPageWithMultipleSKU",
+				"CPCommerceProductSKUs::CanAddMultiplePriceEntriesUsingNewPriceModal",
+				"CPCommerceProductSKUs::CanModalShowEntryFieldsCorrectly",
+				"CPCommerceProductSKUs::CanAddTierPriceEntriesOnProductSKU",
+				"CPCommerceProductSKUs::CanDeletePriceListsOnProductSKU",
+				"CPCommerceProductSKUs::CanDeleteTierPriceEntriesOnProductSKU",
+				"CPCommerceProductSKUs::CanEditTierPriceEntriesOnProductSKU",
+				"CPCommerceProductSKUs::CanNotUseTheSameSKUERCForDifferentSKU",
+				"CPCommerceProductSKUs::CanViewChannelCurrencyDoesntChangePriceListOnProductSKU",
+				"CPCommerceProductMedia::AddAnAttachmentToAnOption",
+				"CPCommerceProductMedia::AddAnImageToAnOption",
+				"CPCommerceProductMedia::CanProductDetailsUseAdaptiveMedia",
+				"CPCommerceProductMedia::CanUploadProductAttachmentWithCustomFieldViaAPI"
+			],
+			"tag": "@LPD-106244-Grouped-24",
+			"testcaseFilesDeleted": [
+				"CPCommerceProductSubscriptions.testcase"
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-25 Migrate POA discovery tests to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-25 Migrate POA eligibility tests to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-25 Migrate POA override tests to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-25 Migrate POA admin toggle tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-25 Migrate SKU price POA column tests to Playwright"
+				}
+			],
+			"group": 25,
+			"helpers": [
+			],
+			"integration": {
+				"modules/apps/commerce/commerce-test": {
+					"CommercePricingTest": [
+						"testGetCommerceProductPriceWithPriceOnApplicationDiscovery",
+						"testGetCommerceProductPriceWithPriceOnApplicationEligibility",
+						"testGetCommerceProductPriceWithPriceOnApplicationOverride"
+					]
+				}
+			},
+			"jest": [
+			],
+			"junit": {
+			},
+			"name": "Price on application",
+			"playwrightSpecs": [
+				"modules/test/playwright/tests/commerce/commerce-pricing-web/main/commercePricing.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProducts.spec.ts"
+			],
+			"playwrightTests": [
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-pricing-web/main/commercePricing.spec.ts",
+					"title": "Marking a base promotion or base price list entry as Price on Application disables its price settings and applies only the price list to the storefront"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProducts.spec.ts",
+					"title": "Toggling Price on Application on a SKU base price list entry updates its storefront label"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProducts.spec.ts",
+					"title": "The Price tab of a SKU shows which price list and promotion entries are priced on application"
+				}
+			],
+			"poshiRemoved": [
+				"CommercePriceOnApplication::CanLowerPriceListWinOverPromotionHierarchySetting",
+				"CommercePriceOnApplication::CanLowerPricePromotionWinOverPriceListLowestSetting",
+				"CommercePriceOnApplication::CanLowerPromotionWinOverPriceListHierarchySetting",
+				"CommercePriceOnApplication::CanLowerPromotionWinOverPriceListLowestSetting",
+				"CommercePriceOnApplication::CanPriceListUsePriceOnApplicationAccountEligibility",
+				"CommercePriceOnApplication::CanPriceListUsePriceOnApplicationChannelEligibility",
+				"CommercePriceOnApplication::CanPriceListUsePriceOnApplicationOrderType",
+				"CommercePriceOnApplication::CanPromotionUsePriceOnApplicationAccountEligibility",
+				"CommercePriceOnApplication::CanPromotionUsePriceOnApplicationChannelEligibility",
+				"CommercePriceOnApplication::CanPromotionUsePriceOnApplicationOrderType",
+				"CommercePriceOnApplication::CannotSkuPriceOnApplicationSetOverridePriceList",
+				"CommercePriceOnApplication::CannotSkuPriceOnApplicationSetOverridePromotion",
+				"CommercePriceOnApplication::CanPriceListPriceOverrideSkuPriceOnApplicationSet",
+				"CommercePriceOnApplication::CanPriorityInteractWithPriceLists",
+				"CommercePriceOnApplication::CanPromotionPriceOverrideSkuPriceOnApplicationSet",
+				"CommercePriceOnApplication::CanMarkSkuAsPriceOnApplication",
+				"CommercePriceOnApplication::CanUsePriceOnApplicationOnPriceList",
+				"CommercePriceOnApplication::CanUsePriceOnApplicationOnPromotion",
+				"CommercePriceOnApplication::CanViewPriceOnApplicationColumnInSKUPriceListsTabViaProductsAdmin",
+				"CommercePriceOnApplication::CanViewPriceOnApplicationColumnInSKUPriceListsTabViaSKUsAdmin"
+			],
+			"tag": "@LPD-106244-Grouped-25",
+			"testcaseFilesDeleted": [
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "Covered by \"The mini cart lists the linked SKUs of a bundled order item and drops its edit panel when the cart is closed\" in commerceMiniCart.spec.ts.",
+					"title": "LPD-106244-Grouped-26 Drop mini cart bundle test already covered"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-26 Migrate quick add search results tests to Jest"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-26 Migrate quick add search input tests to Jest"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-26 Migrate quick add SKU chips test to Jest"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-26 Migrate quick add search tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-26 Migrate quick add pricing tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-26 Migrate mini cart widget approval test to Playwright"
+				}
+			],
+			"group": 26,
+			"helpers": [
+			],
+			"integration": {
+			},
+			"jest": [
+				"modules/apps/commerce/commerce-frontend-js/test/components/MiniCart/CartQuickAdd.js"
+			],
+			"junit": {
+			},
+			"name": "Quick add, mini cart and compare",
+			"playwrightSpecs": [
+				"modules/test/playwright/tests/commerce/commerce-cart-content-web/main/commerceMiniCart.spec.ts"
+			],
+			"playwrightTests": [
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-cart-content-web/main/commerceMiniCart.spec.ts",
+					"title": "A buyer without orders searches by SKU and product name, quick adds several SKUs at quantity 1, gets a pending order and checks out"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-cart-content-web/main/commerceMiniCart.spec.ts",
+					"title": "An account member approves and checks out an order from the Mini Cart widget under the buyer order approval workflow"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-cart-content-web/main/commerceMiniCart.spec.ts",
+					"title": "SKUs quick added to the Mini Cart fragment show their price list and promotion prices"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-cart-content-web/main/commerceMiniCart.spec.ts",
+					"title": "A buyer linked to several accounts quick adds a SKU at the price of the selected account"
+				}
+			],
+			"poshiRemoved": [
+				"CommerceMiniCart::ViewMiniCartBundledProductDetails",
+				"CommerceQuickAddToCart::CannotAddNonPurchasableSKUs",
+				"CommerceQuickAddToCart::CannotSelectInvalidSkusOnQuickAddToCart",
+				"CommerceQuickAddToCart::CanUseQuickAddToCartWhenOneProductHasNoSKU",
+				"CommerceQuickAddToCart::CanPasteTextOnQuickAddToCartSearchBar",
+				"CommerceQuickAddToCart::CanPressEnterOnQuickAddToCartSearchBar",
+				"CommerceQuickAddToCart::CanTypeCommaOnQuickAddToCartSearchBar",
+				"CommerceQuickAddToCart::CanTypeSpecialCharactersOnQuickAddToCartSearchBar",
+				"CommerceQuickAddToCart::CanSelectSkusOnQuickAddToCart",
+				"CommerceQuickAddToCart::CanSearchAllCatalogSKUs",
+				"CommerceQuickAddToCart::CanSearchProductNamesOnQuickAddToCart",
+				"CommerceQuickAddToCart::CanSelectMultipleOptionSKU",
+				"CommerceQuickAddToCart::CanAddToCartProductWithPriceList",
+				"CommerceQuickAddToCart::CanUserLinkedToMultipleAccountsUseQuickAddToCart",
+				"CommerceMiniCart::CanUseMiniCartWidgetToCheckoutWithBuyerOrderApprovalWorkflow"
+			],
+			"tag": "@LPD-106244-Grouped-26",
+			"testcaseFilesDeleted": [
+				"CommerceMiniCart.testcase"
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-27 Add empty eligibility to channel details page"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-27 Add order type to delivery cart API helper"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-27 Migrate duplicate qualifier test to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-27 Migrate notification tests to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-27 Migrate payment term test to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-27 Migrate channel settings test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-27 Migrate payment method edit tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-27 Migrate delivery term test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-27 Migrate shipping order type tests to Playwright"
+				}
+			],
+			"group": 27,
+			"helpers": [
+				"modules/test/playwright/helpers/HeadlessCommerceDeliveryCartApiHelper.ts",
+				"modules/test/playwright/pages/commerce/commerce-channel-web/commerceAdminChannelDetailsPage.ts"
+			],
+			"integration": {
+				"modules/apps/commerce/commerce-notification-test": {
+					"CommerceNotificationTest": [
+						"testUpdateCommerceNotificationTemplate"
+					]
+				},
+				"modules/apps/commerce/headless/headless-commerce/headless-commerce-admin-channel-test": {
+					"PaymentMethodGroupRelOrderTypeResourceTest": [
+						"testPostPaymentMethodGroupRelIdPaymentMethodGroupRelOrderType"
+					]
+				},
+				"modules/apps/commerce/headless/headless-commerce/headless-commerce-delivery-cart-test": {
+					"TermResourceTest": [
+						"testGetCartPaymentTermsPage"
+					]
+				}
+			},
+			"jest": [
+			],
+			"junit": {
+			},
+			"name": "Channels",
+			"playwrightSpecs": [
+				"modules/test/playwright/tests/commerce/commerce-channel-web/main/commerceAdminChannelDetails.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-checkout-web/main/checkout.spec.ts"
+			],
+			"playwrightTests": [
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-channel-web/main/commerceAdminChannelDetails.spec.ts",
+					"title": "Channel general settings can be edited and are persisted"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-channel-web/main/commerceAdminChannelDetails.spec.ts",
+					"title": "${paymentMethod} payment method details and configuration can be edited"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-channel-web/main/commerceAdminChannelDetails.spec.ts",
+					"title": "Shipping option eligibility can be set to a delivery term and back to no delivery terms"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-checkout-web/main/checkout.spec.ts",
+					"title": "Shipping options are offered according to their order type eligibility"
+				}
+			],
+			"poshiRemoved": [
+				"CPCommerceChannels::CannotSelectPaymentMethodEligibilitiesTwice",
+				"CPCommerceChannels::CreateNewNotificationTemplate",
+				"CPCommerceChannels::EditNotificationTemplate",
+				"CPCommerceChannels::PaymentMethodEligibleForSpecificPaymentTerms",
+				"CPCommerceChannels::CreateNewChannelCompileAll",
+				"CPCommerceChannels::CanEditPayPalPaymentMethod",
+				"CPCommerceChannels::EditAuthorizePaymentMethod",
+				"CPCommerceChannels::EditMercanetPaymentMethod",
+				"CPCommerceChannels::EditPaypalSubscriptionsPaymentMethod",
+				"CPCommerceChannels::CanSetAndEditDeliveryTermsEligibility",
+				"CPCommerceChannels::ShippingOptionEligibleForAnyOrderType",
+				"CPCommerceChannels::ShippingOptionEligibleForSpecificOrderType"
+			],
+			"tag": "@LPD-106244-Grouped-27",
+			"testcaseFilesDeleted": [
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-28 Add price range facet locators to specification facets page"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-28 Migrate expired SKU price tests to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-28 Migrate specification value search tests to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-28 Migrate search pagination tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-28 Migrate facet filtering tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-28 Migrate price range facet tests to Playwright"
+				}
+			],
+			"group": 28,
+			"helpers": [
+				"modules/test/playwright/pages/commerce/commerce-product-content-search-web/specificationFacetsPage.ts"
+			],
+			"integration": {
+				"modules/apps/commerce/commerce-product-test": {
+					"CPDefinitionHelperTest": [
+						"testSearchCPDefinitionsBySpecificationValue"
+					],
+					"CPDefinitionIndexerTest": [
+						"testGetDocumentWithExpiredCPInstance"
+					]
+				}
+			},
+			"jest": [
+			],
+			"junit": {
+			},
+			"name": "Search and facets",
+			"playwrightSpecs": [
+				"modules/test/playwright/tests/commerce/commerce-product-content-search-web/main/facet.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-product-content-search-web/main/priceRangeFacet.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-product-content-search-web/main/searchResults.spec.ts"
+			],
+			"playwrightTests": [
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-search-web/main/facet.spec.ts",
+					"title": "${widget} - Selecting a term narrows the search results and the URL"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-search-web/main/facet.spec.ts",
+					"title": "Category Facet narrows the search results to the selected category"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-search-web/main/facet.spec.ts",
+					"title": "Commerce facet selections can be cleared"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-search-web/main/facet.spec.ts",
+					"title": "Commerce facets filter cumulatively without the Category Facet"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-search-web/main/priceRangeFacet.spec.ts",
+					"title": "Price Range Facet filters the search results by the selected range and by the minimum and maximum inputs"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-search-web/main/priceRangeFacet.spec.ts",
+					"title": "Price Range Facet applies the custom ranges of its configuration"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-search-web/main/priceRangeFacet.spec.ts",
+					"title": "Price Range Facet keeps the term counts when ranges are selected"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-search-web/main/searchResults.spec.ts",
+					"title": "name"
+				}
+			],
+			"poshiRemoved": [
+				"CommerceFacets::CannotViewExpiredProductSKUByPriceRangeFacet",
+				"CommerceFacets::CanPriceRangeFacetFilterActiveSkuPrice",
+				"CommerceSearch::SearchBarWidgetSearchProductsByDifferentSpecificationValues",
+				"CommerceSearch::SearchBarWidgetSearchProductsBySpecificationValue",
+				"CommerceSearch::DisableSearchResultsWidgetPagination",
+				"CommerceSearch::SearchResultsWidgetEditNumberOfItemsToDisplayFromConfiguration",
+				"CommerceFacets::AssertProductsAreFilteredByCategoryFacet",
+				"CommerceFacets::AssertProductsAreFilteredByOptionFacet",
+				"CommerceFacets::AssertProductsAreFilteredBySpecificationFacet",
+				"CommerceFacets::CanClearSelectionsInCommerceSearchFacets",
+				"CommerceFacets::CanFacetWidgetsWorkWithoutCategoryFacet",
+				"CommerceFacets::CanFilterProductsBySpecificationFacetAndURLUpdatesAccordingly",
+				"CommerceFacets::AssertProductsAreFilteredAfterUpdatingRangesByPriceRangeFacet",
+				"CommerceFacets::AssertProductsAreFilteredByPriceRangeFacet",
+				"CommerceFacets::CanViewTermCountOfPriceRangeFacetPersists"
+			],
+			"tag": "@LPD-106244-Grouped-28",
+			"testcaseFilesDeleted": [
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-29 Add subscription info locators to product details page"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-29 Migrate guest cart merge tests to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-29 Migrate unavailable reorder test to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-29 Migrate deleted product order test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-29 Migrate account reverse sort test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-29 Migrate account permission test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-29 Migrate address XSS test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-29 Migrate availability estimate test to Playwright"
+				}
+			],
+			"group": 29,
+			"helpers": [
+				"modules/test/playwright/pages/commerce/commerce-product-content-web/productDetailsPage.ts"
+			],
+			"integration": {
+				"modules/apps/commerce/commerce-test": {
+					"CommerceOrderLocalServiceTest": [
+						"testMergeGuestCommerceOrder",
+						"testReorderCommerceOrderWithUnavailableProduct"
+					]
+				}
+			},
+			"jest": [
+			],
+			"junit": {
+			},
+			"name": "Checkout and accounts",
+			"playwrightSpecs": [
+				"modules/test/playwright/tests/account-admin-web/main/accountEntriesManagementPortlet.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-order-content-web/main/commerceAdminOrderDetails.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-order-content-web/main/placedOrder.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProductConfigurations.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-theme-minium/main/commerceAccountSelector.spec.ts"
+			],
+			"playwrightTests": [
+				{
+					"spec": "modules/test/playwright/tests/account-admin-web/main/accountEntriesManagementPortlet.spec.ts",
+					"title": "User can reverse the sort direction of the accounts"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-order-content-web/main/commerceAdminOrderDetails.spec.ts",
+					"title": "Scripts injected in account addresses are not executed in the addresses widget and the admin order details"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-order-content-web/main/placedOrder.spec.ts",
+					"title": "A placed order keeps its item details after the product is deleted"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProductConfigurations.spec.ts",
+					"title": "Availability estimates can be added from the Availability Estimates admin"
+				}
+			],
+			"poshiRemoved": [
+				"GuestCheckout::AssertGuestCartItemIsNotTransferredIfSkuIsAlreadyPresent",
+				"GuestCheckout::AssertGuestCartItemIsTransferredToExistingCart",
+				"SFCommerceOrders::CannotReorderUnavailableProduct",
+				"SFCommerceOrders::CanSeeAPlacedOrderWithDeletedProduct",
+				"CommerceAccountManagement::CanSortAccountEntriesUsingReverseSortDirectionButton",
+				"CommerceAccountSelector::CannotCreateAccountInFlowWithoutPermissions",
+				"CPCommerceSettings::CannotExecuteXSSInAddresses",
+				"CPCommerceSettings::CreateNewAvailabilityEstimate"
+			],
+			"tag": "@LPD-106244-Grouped-29",
+			"testcaseFilesDeleted": [
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-30 Add product custom fields to catalog API helper"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-30 Migrate product field mapping tests to JUnit"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-30 Migrate category page fallback test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-30 Migrate product page fallback test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-30 Migrate collection display tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-30 Migrate related diagrams DPT tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-30 Migrate DPT field mapping tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-30 Migrate default DPT marking test to Playwright"
+				}
+			],
+			"group": 30,
+			"helpers": [
+				"modules/test/playwright/helpers/HeadlessCommerceAdminCatalogApiHelper.ts"
+			],
+			"integration": {
+			},
+			"jest": [
+			],
+			"junit": {
+				"modules/apps/commerce/commerce-product-content-web": {
+					"CPDefinitionInfoItemFieldValuesProviderTest": [
+						"testGetInfoItemFieldValues"
+					]
+				}
+			},
+			"name": "Display pages and templates",
+			"playwrightSpecs": [
+				"modules/test/playwright/tests/commerce/commerce-product-asset-categories-web/main/commerceAssetCategories.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-product-content-web/main/productDetails.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-product-content-web/main/productDisplayPageTemplates.spec.ts"
+			],
+			"playwrightTests": [
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-asset-categories-web/main/commerceAssetCategories.spec.ts",
+					"title": "Clicking a category in the categories navigation widget opens the category content page when no default category display page is set"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-web/main/productDetails.spec.ts",
+					"title": "Clicking a product in the catalog opens the product details widget page when no default product display page is set"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-web/main/productDisplayPageTemplates.spec.ts",
+					"title": "Collection Display fragment lists the specifications and the attachments of the displayed product"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-web/main/productDisplayPageTemplates.spec.ts",
+					"title": "Collection Display fragment lists the related diagrams of the displayed product with each list item style"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-web/main/productDisplayPageTemplates.spec.ts",
+					"title": "Heading fragments mapped to product fields show the product values on the product page"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-web/main/productDisplayPageTemplates.spec.ts",
+					"title": "Marking and unmarking a product display page template as default switches the product page"
+				}
+			],
+			"poshiRemoved": [
+				"CommerceDisplayPageTemplates::CanMapDeliverySubscriptionFieldsToFragments",
+				"CommerceDisplayPageTemplates::CanMapPaymentSubscriptionFieldsToFragments",
+				"CommerceDisplayPageTemplates::CanMapShippingFieldsToFragments",
+				"CommerceCategoryDisplayPages::AssertOldLogicIsAppliedIfDefaultCategoryDisplayPageIsNotSet",
+				"CommerceProductDisplayPages::AssertOldLogicIsAppliedIfDefaultProductDisplayPageIsNotSet",
+				"CommerceDisplayPageTemplates::CanAddProductSpecificationsCollectionDisplay",
+				"CommerceDisplayPageTemplates::CanMapProductAttachmentsToACollectionDisplayFragment",
+				"CommerceDisplayPageTemplates::CanDisplayRelatedDiagramsWithDiagramCardListItemStyle",
+				"CommerceDisplayPageTemplates::CanMapRelatedDiagramsToCollectionDisplayFragment",
+				"CommerceDisplayPageTemplates::CanMapBasicInformationFieldsToFragments",
+				"CommerceDisplayPageTemplates::CanMapCategoriesFromDifferentVocabularies",
+				"CommerceDisplayPageTemplates::CanMapProductCustomFieldsToFragments",
+				"CommerceDisplayPageTemplates::CanMarkAndUnmarkCommerceProductDPTAsDefault"
+			],
+			"tag": "@LPD-106244-Grouped-30",
+			"testcaseFilesDeleted": [
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-31 Add option value actions to product options page"
+				},
+				{
+					"body": "Covered by \"A product added to and removed from the wish list on its product details page leaves the wish list\" in commerceWishLists.spec.ts.",
+					"title": "LPD-106244-Grouped-31 Drop wish list details test already covered"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-31 Add delivery subscription to catalog API helper"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-31 Add image option values to catalog API helper"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-31 Add order rule eligibility to order API helper"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-31 Add order type channel to order API helper"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-31 Extract storefront helper in commerceProducts spec"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-31 Extract bundle product helper in commerceProducts spec"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-31 Migrate SKU replacement tests to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-31 Migrate channel stock test to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-31 Migrate incoming quantity tests to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-31 Migrate product details subscription info test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-31 Migrate default option value test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-31 Migrate option image tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-31 Migrate option facet test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-31 Migrate order quantity check test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-31 Migrate option value edit test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-31 Migrate card availability test to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-31 Migrate required in bundle tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-31 Migrate products limit bundle tests to Playwright"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-31 Migrate mini cart bundle rules test to Playwright"
+				}
+			],
+			"group": 31,
+			"helpers": [
+				"modules/test/playwright/helpers/HeadlessCommerceAdminCatalogApiHelper.ts",
+				"modules/test/playwright/helpers/HeadlessCommerceAdminOrderApiHelper.ts",
+				"modules/test/playwright/pages/commerce/commerce-product-definitions-web/commerceAdminProductDetailsProductOptionsPage.ts"
+			],
+			"integration": {
+				"modules/apps/commerce/commerce-inventory-test": {
+					"CommerceInventoryEngineTest": [
+						"testGetStockQuantityUsingMultipleChannels"
+					]
+				},
+				"modules/apps/commerce/commerce-product-test": {
+					"CPInstanceLocalServiceTest": [
+						"testUpdateCPInstanceWithReplacement"
+					]
+				},
+				"modules/apps/commerce/headless/headless-commerce/headless-commerce-delivery-catalog-test": {
+					"SkuResourceTest": [
+					]
+				}
+			},
+			"jest": [
+			],
+			"junit": {
+			},
+			"name": "Bundle rules, options and product details",
+			"playwrightSpecs": [
+				"modules/test/playwright/tests/commerce/commerce-product-content-search-web/main/facet.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-product-content-web/main/commerceProducts.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-product-content-web/main/productCard.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-product-content-web/main/productDetails.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-product-content-web/main/productOptions.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProductConfigurations.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-product-options-web/main/commerceAdminOptions.spec.ts"
+			],
+			"playwrightTests": [
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-search-web/main/facet.spec.ts",
+					"title": "Option Facet shows a facetable product option with its values until the option is no longer facetable"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-web/main/commerceProducts.spec.ts",
+					"title": "A bundle cannot be added to the cart when a product required in the bundle is not purchasable or out of stock"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-web/main/commerceProducts.spec.ts",
+					"title": "The products limit rule with the highest priority applies to a bundled product"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-web/main/commerceProducts.spec.ts",
+					"title": "A products limit rule applies to a bundled product added in separate order items"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-web/main/commerceProducts.spec.ts",
+					"title": "A products limit rule applies to a bundled product only for the eligible account"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-web/main/commerceProducts.spec.ts",
+					"title": "A products limit rule applies to a bundled product only in the eligible channel"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-web/main/commerceProducts.spec.ts",
+					"title": "A products limit rule applies to a bundled product only in orders of the eligible order type"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-web/main/commerceProducts.spec.ts",
+					"title": "A products limit rule applies to a bundled product linked to a decimal unit of measure quantity"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-web/main/commerceProducts.spec.ts",
+					"title": "The mini cart edit panel shows why bundle option values are included or excluded"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-web/main/productCard.spec.ts",
+					"title": "Only the out of stock product card shows an availability label when a product with variants follows it"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-web/main/productDetails.spec.ts",
+					"title": "Product subscription information is shown on the product details page"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-web/main/productOptions.spec.ts",
+					"title": "A default option value is checked on the product details page and added to the cart until it is no longer the default"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-web/main/productOptions.spec.ts",
+					"title": "The images bound to the selected option value are shown on the product details widget and the image gallery fragment"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminProductConfigurations.spec.ts",
+					"title": "Product configuration tab rejects empty and less than minimum order quantities"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-options-web/main/commerceAdminOptions.spec.ts",
+					"title": "Product option values can be edited and deleted from product admins"
+				}
+			],
+			"poshiRemoved": [
+				"CommerceProductDetails::AddProductToWishListFromProductDetails",
+				"CPCommerceProductReplacements::RemoveReplacementProduct",
+				"CPCommerceProductReplacements::ReplacementCanBeSetBetweenDifferentCatalogs",
+				"CPCommerceProductReplacements::SetReplacementProduct",
+				"CommerceProductDetails::CanCheckoutAProductInAChannelWithoutAffectingAnotherChannelStock",
+				"CommerceProductDetails::CanViewMultipleSkusProductIncomingQuantity",
+				"CommerceProductDetails::CanViewSingleSkuProductIncomingQuantity",
+				"CommerceProductDetails::CanAssertSpeedwellProductSubscriptionInformation",
+				"CPCommerceProductOptions::CanAssertDefaultOptionValuesAreChecked",
+				"CPCommerceProductOptions::CanViewProductImageWithOptionSelected",
+				"CPCommerceProductOptions::CanViewProductWithImageUsingImageGallery",
+				"CPCommerceProductOptions::CanViewOptionOnTheOptionFacetWidget",
+				"CPCommerceProductOptions::CannotSaveProductWithInvalidOrderConfiguration",
+				"CPCommerceProductOptions::EditAndRemoveAnOptionWithValues",
+				"CPCommerceProductOptions::CanViewProductWithStockAvailableWhenItFollowsAProductWithoutStock",
+				"CommerceProductBundleRules::CannotRequiredInBundleWorkWhenProductIsNotPurchasable",
+				"CommerceProductBundleRules::CannotRequiredInBundleWorkWhenProductIsOutOfStock",
+				"CommerceProductBundleRules::CanVerifyProductsLimitRulesConsideringRulesPriority",
+				"CommerceProductBundleRules::CanVerifyProductsLimitRuleWithAccountEligibility",
+				"CommerceProductBundleRules::CanVerifyProductsLimitRuleWithChannelEligibility",
+				"CommerceProductBundleRules::CanVerifyProductsLimitRuleWithDecimalUOMQuantity",
+				"CommerceProductBundleRules::CanVerifyProductsLimitRuleWithOrderTypeEligibility",
+				"CommerceProductBundleRules::CanVerifyProductsLimitRuleWithSplittedOrderItems",
+				"CommerceProductBundleRules::CanVerifyIncludedAndExcludedOptionValuesOnTheMinicartEdit"
+			],
+			"tag": "@LPD-106244-Grouped-31",
+			"testcaseFilesDeleted": [
+			]
+		},
+		{
+			"commits": [
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-32 Extract SKU resource helper in SkuResourceTest"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-32 Add virtual settings to virtual order item setup"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-32 Add SKU virtual settings to catalog API helper"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-32 Migrate virtual activation tests to integration"
+				},
+				{
+					"body": "The API half is asserted in SkuResourceTest, and the UI half (unchecking the override and saving resets the SKU virtual settings) extends the existing SKU override Playwright test.",
+					"title": "LPD-106244-Grouped-32 Migrate SKU override disable test to integration"
+				},
+				{
+					"body": "",
+					"title": "LPD-106244-Grouped-32 Migrate virtual order item test to Playwright"
+				},
+				{
+					"body": "CanUseVirtualSkuOverride asserted both the storefront sample button, covered here, and the overriding file, duration and max downloads on the order item, which the CommerceVirtualOrderItemLocalServiceTest activation status loop now asserts.",
+					"title": "LPD-106244-Grouped-32 Migrate virtual SKU override tests to Playwright"
+				}
+			],
+			"group": 32,
+			"helpers": [
+				"modules/test/playwright/helpers/HeadlessCommerceAdminCatalogApiHelper.ts",
+				"modules/test/playwright/tests/commerce/utils/commerce.ts"
+			],
+			"integration": {
+				"modules/apps/commerce/commerce-product-type-virtual-order-test": {
+					"CommerceVirtualOrderItemLocalServiceTest": [
+					]
+				},
+				"modules/apps/commerce/headless/headless-commerce/headless-commerce-admin-catalog-test": {
+					"SkuResourceTest": [
+					]
+				}
+			},
+			"jest": [
+			],
+			"junit": {
+			},
+			"name": "Virtual products and SKU settings",
+			"playwrightSpecs": [
+				"modules/test/playwright/tests/commerce/commerce-order-content-web/main/commerceAdminOrderDetails.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-product-content-web/main/productDetails.spec.ts",
+				"modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminVirtualProducts.spec.ts"
+			],
+			"playwrightTests": [
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-order-content-web/main/commerceAdminOrderDetails.spec.ts",
+					"title": "Admin can view the virtual settings of a virtual order item"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-content-web/main/productDetails.spec.ts",
+					"title": "Virtual product details and the SKU override sample file are shown on the product details page"
+				},
+				{
+					"spec": "modules/test/playwright/tests/commerce/commerce-product-definitions-web/main/commerceAdminVirtualProducts.spec.ts",
+					"title": "LPD-21637 Virtual item details section visible for product and sku"
+				}
+			],
+			"poshiRemoved": [
+				"CommerceVirtualProducts::CanDownloadVirtualProductWhenOrderStatusMatchesActivationStatusCompleted",
+				"CommerceVirtualProducts::CanDownloadVirtualProductWhenOrderStatusMatchesActivationStatusPending",
+				"CommerceVirtualProducts::CanDownloadVirtualProductWhenOrderStatusMatchesActivationStatusProcessing",
+				"CommerceVirtualProducts::CanDisableVirtualProductSKUOverrideCorrectly",
+				"CommerceVirtualProducts::CanViewVirtualProductSettingsOnOrderItemPage",
+				"CPCommerceProductSkusVirtualSettingsOverride::CanViewSingleSkuVirtualProductDetailPageWithSKUOverrideEnabled",
+				"CommerceVirtualProducts::CanUseVirtualSkuOverride"
+			],
+			"tag": "@LPD-106244-Grouped-32",
+			"testcaseFilesDeleted": [
+			]
+		}
+	]
+}
