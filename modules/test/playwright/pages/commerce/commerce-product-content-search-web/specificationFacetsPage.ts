@@ -47,6 +47,7 @@ export class SpecificationFacetsPage {
 	readonly pageLabel: Locator;
 	readonly pageTitle: Locator;
 	readonly panelList: Locator;
+	readonly priceRangeFacetPortlet: Locator;
 	readonly searchFormInput: Locator;
 	readonly searchOptionsAllowEmptySearchesInput: Locator;
 	readonly searchOptionsConfigurationEditButton: Locator;
@@ -116,6 +117,9 @@ export class SpecificationFacetsPage {
 		this.panelList = page
 			.getByTestId('specificationFacetPanel')
 			.getByRole('button');
+		this.priceRangeFacetPortlet = page.locator(
+			'//section[contains(@id, "CPPriceRangeFacetsPortlet")]'
+		);
 		this.searchFormInput = page.getByRole('textbox', {
 			name: 'Search Form',
 		});
@@ -274,6 +278,12 @@ export class SpecificationFacetsPage {
 		await this.facetPortlet(widget).getByLabel('Options').click();
 		await this.configurationMenuItem.click();
 		await this.displayTemplateSelect.waitFor({state: 'visible'});
+	}
+
+	priceRangeFacetTermCount(priceRange: string) {
+		return this.priceRangeFacetPortlet
+			.locator('label.facet-checkbox-label', {hasText: priceRange})
+			.locator('.term-count');
 	}
 
 	async updateFacetConfiguration(
