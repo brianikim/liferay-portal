@@ -84,6 +84,7 @@ export class ProductDetailsPage {
 	readonly productDetailAvailabilityLabel: Locator;
 	readonly productDetailValue: (label: string) => Locator;
 	readonly productDetailQuantitySelector: Locator;
+	readonly productHeaderTitle: Locator;
 	readonly productOptionUploadFormFeedback: Locator;
 	readonly relatedDiagramLink: (name: string) => Locator;
 	readonly productTitle: (productName: string) => Locator;
@@ -115,6 +116,8 @@ export class ProductDetailsPage {
 		shortDescription: string
 	) => Promise<Locator>;
 	readonly skuField: (sku: string) => Promise<Locator>;
+	readonly subscriptionInfo: Locator;
+	readonly subscriptionInfoRow: (subscriptionName: string) => Locator;
 	readonly unitOfMeasureSelect: Locator;
 	readonly unitOfMeasureSelectedOption: Locator;
 	readonly uomCombobox: Locator;
@@ -284,6 +287,7 @@ export class ProductDetailsPage {
 			'spinbutton',
 			{name: 'Quantity Selector'}
 		);
+		this.productHeaderTitle = page.locator('.product-header-title');
 		this.productOptionUploadFormFeedback = page.locator(
 			'.product-option-upload'
 		);
@@ -345,6 +349,11 @@ export class ProductDetailsPage {
 		this.skuField = async (sku: string) => {
 			return page.getByText(sku, {exact: true});
 		};
+		this.subscriptionInfo = page.locator('.commerce-subscription-info');
+		this.subscriptionInfoRow = (subscriptionName: string) =>
+			this.subscriptionInfo
+				.locator('.row')
+				.filter({hasText: subscriptionName});
 		this.unitOfMeasureSelect = page.locator(
 			'select.unit-of-measure-selector'
 		);
