@@ -15,6 +15,7 @@ export class CommerceAdminProductDetailsProductOptionsPage extends CommerceDNDTa
 	readonly optionLink: (optionName: string) => Locator;
 	readonly optionSidePanelCancelButton: Locator;
 	readonly optionSidePanelFrame: FrameLocator;
+	readonly optionValueActionsButton: (optionValueName: string) => Locator;
 	readonly optionValueDeltaPriceInput: Locator;
 	readonly optionValueLink: (optionValueName: string) => Locator;
 	readonly optionValueQuantityInput: Locator;
@@ -67,6 +68,11 @@ export class CommerceAdminProductDetailsProductOptionsPage extends CommerceDNDTa
 				name: 'Cancel',
 			}
 		);
+		this.optionValueActionsButton = (optionValueName: string) =>
+			this.optionSidePanelFrame.getByRole('button', {
+				exact: true,
+				name: `${optionValueName} Actions`,
+			});
 		this.optionValueDeltaPriceInput =
 			this.optionValueSidePanelFrame.getByLabel('Delta Price');
 		this.optionValueLink = (optionValueName: string) =>
@@ -105,6 +111,14 @@ export class CommerceAdminProductDetailsProductOptionsPage extends CommerceDNDTa
 		);
 		this.page = page;
 		this.visibleSidePanels = page.locator(sidePanel);
+	}
+
+	async clickOptionValueAction(action: string, optionValueName: string) {
+		await this.optionValueActionsButton(optionValueName).click();
+
+		await this.optionSidePanelFrame
+			.getByRole('menuitem', {exact: true, name: action})
+			.click();
 	}
 
 	async closeOption() {
