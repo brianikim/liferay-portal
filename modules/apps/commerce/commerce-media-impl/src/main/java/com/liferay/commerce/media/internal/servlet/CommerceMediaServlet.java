@@ -6,6 +6,8 @@
 package com.liferay.commerce.media.internal.servlet;
 
 import com.liferay.account.constants.AccountConstants;
+import com.liferay.account.model.AccountEntry;
+import com.liferay.account.service.AccountEntryLocalService;
 import com.liferay.asset.kernel.model.AssetCategory;
 import com.liferay.asset.kernel.service.AssetCategoryLocalService;
 import com.liferay.commerce.media.CommerceMediaProvider;
@@ -41,6 +43,7 @@ import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
@@ -128,6 +131,32 @@ public class CommerceMediaServlet extends HttpServlet {
 			httpServletRequest, httpServletResponse, contentDisposition);
 	}
 
+	private void _checkCPDefinition(
+			long commerceAccountId, CPDefinition cpDefinition)
+		throws PortalException {
+
+		PermissionChecker permissionChecker =
+			PermissionThreadLocal.getPermissionChecker();
+
+		if (cpDefinition.isAccountGroupFilterEnabled()) {
+			AccountEntry accountEntry =
+				_accountEntryLocalService.fetchAccountEntry(commerceAccountId);
+
+			if (accountEntry == null) {
+				throw new PrincipalException.MustHavePermission(
+					permissionChecker, AccountEntry.class.getName(),
+					commerceAccountId, ActionKeys.VIEW);
+			}
+
+			_accountEntryModelResourcePermission.check(
+				permissionChecker, accountEntry, ActionKeys.VIEW);
+		}
+
+		_commerceProductViewPermission.check(
+			permissionChecker, commerceAccountId,
+			cpDefinition.getCPDefinitionId());
+	}
+
 	private FileEntry _getFileEntry(HttpServletRequest httpServletRequest)
 		throws PortalException {
 
@@ -198,9 +227,7 @@ public class CommerceMediaServlet extends HttpServlet {
 					cpDefinition.getCommerceCatalog(), ActionKeys.VIEW);
 			}
 			else {
-				_commerceProductViewPermission.check(
-					PermissionThreadLocal.getPermissionChecker(),
-					commerceAccountId, cpDefinition.getCPDefinitionId());
+				_checkCPDefinition(commerceAccountId, cpDefinition);
 			}
 
 			return cpDefinition.getGroupId();
@@ -559,9 +586,7 @@ public class CommerceMediaServlet extends HttpServlet {
 			}
 			else {
 				if (sample) {
-					_commerceProductViewPermission.check(
-						PermissionThreadLocal.getPermissionChecker(),
-						commerceAccountId, cpDefinition.getCPDefinitionId());
+					_checkCPDefinition(commerceAccountId, cpDefinition);
 				}
 				else {
 					_sendError(
@@ -651,6 +676,15 @@ public class CommerceMediaServlet extends HttpServlet {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		CommerceMediaServlet.class);
+
+	@Reference
+	private AccountEntryLocalService _accountEntryLocalService;
+
+	@Reference(
+		target = "(model.class.name=com.liferay.account.model.AccountEntry)"
+	)
+	private ModelResourcePermission<AccountEntry>
+		_accountEntryModelResourcePermission;
 
 	@Reference
 	private AssetCategoryLocalService _assetCategoryLocalService;
