@@ -417,6 +417,17 @@ public class CommerceMediaResolverTest {
 					AccountConstants.ACCOUNT_ENTRY_ID_GUEST,
 					cpAttachmentFileEntry.getCPAttachmentFileEntryId()));
 		}
+
+		cpAttachmentFileEntry = _addCPAttachmentFileEntry(
+			cpDefinition, ContentTypes.IMAGE_SVG_XML, "svg");
+
+		Assert.assertEquals(
+			_getURL(
+				_accountEntry.getAccountEntryId(),
+				cpAttachmentFileEntry.getCPAttachmentFileEntryId()),
+			_commerceMediaResolver.getURL(
+				_accountEntry.getAccountEntryId(),
+				cpAttachmentFileEntry.getCPAttachmentFileEntryId()));
 	}
 
 	@Rule
