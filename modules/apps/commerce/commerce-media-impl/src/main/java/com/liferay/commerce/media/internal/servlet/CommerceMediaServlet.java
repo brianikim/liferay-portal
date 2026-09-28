@@ -6,6 +6,7 @@
 package com.liferay.commerce.media.internal.servlet;
 
 import com.liferay.account.constants.AccountConstants;
+import com.liferay.account.service.AccountEntryService;
 import com.liferay.asset.kernel.model.AssetCategory;
 import com.liferay.asset.kernel.service.AssetCategoryLocalService;
 import com.liferay.commerce.media.CommerceMediaProvider;
@@ -128,6 +129,19 @@ public class CommerceMediaServlet extends HttpServlet {
 			httpServletRequest, httpServletResponse, contentDisposition);
 	}
 
+	private void _checkPermissions(
+			long commerceAccountId, CPDefinition cpDefinition)
+		throws PortalException {
+
+		if (cpDefinition.isAccountGroupFilterEnabled()) {
+			_accountEntryService.getAccountEntry(commerceAccountId);
+		}
+
+		_commerceProductViewPermission.check(
+			PermissionThreadLocal.getPermissionChecker(), commerceAccountId,
+			cpDefinition.getCPDefinitionId());
+	}
+
 	private FileEntry _getFileEntry(HttpServletRequest httpServletRequest)
 		throws PortalException {
 
@@ -198,9 +212,7 @@ public class CommerceMediaServlet extends HttpServlet {
 					cpDefinition.getCommerceCatalog(), ActionKeys.VIEW);
 			}
 			else {
-				_commerceProductViewPermission.check(
-					PermissionThreadLocal.getPermissionChecker(),
-					commerceAccountId, cpDefinition.getCPDefinitionId());
+				_checkPermissions(commerceAccountId, cpDefinition);
 			}
 
 			return cpDefinition.getGroupId();
@@ -559,9 +571,7 @@ public class CommerceMediaServlet extends HttpServlet {
 			}
 			else {
 				if (sample) {
-					_commerceProductViewPermission.check(
-						PermissionThreadLocal.getPermissionChecker(),
-						commerceAccountId, cpDefinition.getCPDefinitionId());
+					_checkPermissions(commerceAccountId, cpDefinition);
 				}
 				else {
 					_sendError(
@@ -651,6 +661,9 @@ public class CommerceMediaServlet extends HttpServlet {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		CommerceMediaServlet.class);
+
+	@Reference
+	private AccountEntryService _accountEntryService;
 
 	@Reference
 	private AssetCategoryLocalService _assetCategoryLocalService;
