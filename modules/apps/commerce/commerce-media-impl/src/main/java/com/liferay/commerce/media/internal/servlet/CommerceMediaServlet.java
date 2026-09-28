@@ -59,6 +59,7 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HttpComponentsUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.PropsValues;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portlet.asset.service.permission.AssetCategoryPermission;
 
@@ -246,8 +247,8 @@ public class CommerceMediaServlet extends HttpServlet {
 				_commerceMediaProvider.getDefaultImageFileEntry(
 					_portal.getCompanyId(httpServletRequest), groupId);
 
-			if (ArrayUtil.contains(
-					CommerceMediaConstants.XML_MIME_TYPES,
+			if (!ArrayUtil.contains(
+					PropsValues.MIME_TYPES_WEB_IMAGES,
 					fileEntry.getMimeType())) {
 
 				contentDisposition = HttpHeaders.CONTENT_DISPOSITION_ATTACHMENT;
@@ -517,8 +518,8 @@ public class CommerceMediaServlet extends HttpServlet {
 				return;
 			}
 
-			if (ArrayUtil.contains(
-					CommerceMediaConstants.XML_MIME_TYPES,
+			if (!ArrayUtil.contains(
+					PropsValues.MIME_TYPES_WEB_IMAGES,
 					fileEntry.getMimeType())) {
 
 				contentDisposition = HttpHeaders.CONTENT_DISPOSITION_ATTACHMENT;
