@@ -31,6 +31,7 @@ import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.servlet.HttpHeaders;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
@@ -121,7 +122,7 @@ public class CommerceMediaServletTest {
 				LoggerTestUtil.OFF)) {
 
 			MockHttpServletResponse mockHttpServletResponse = _get(
-				_accountEntry.getAccountEntryId(), cpAttachmentFileEntry,
+				_accountEntry.getAccountEntryId(), cpAttachmentFileEntry, false,
 				user1);
 
 			Assert.assertEquals(
@@ -129,7 +130,7 @@ public class CommerceMediaServletTest {
 				mockHttpServletResponse.getStatus());
 
 			mockHttpServletResponse = _get(
-				_accountEntry.getAccountEntryId(), cpAttachmentFileEntry,
+				_accountEntry.getAccountEntryId(), cpAttachmentFileEntry, false,
 				user2);
 
 			Assert.assertEquals(
@@ -137,7 +138,7 @@ public class CommerceMediaServletTest {
 				mockHttpServletResponse.getStatus());
 
 			mockHttpServletResponse = _get(
-				RandomTestUtil.nextLong(), cpAttachmentFileEntry, user2);
+				RandomTestUtil.nextLong(), cpAttachmentFileEntry, false, user2);
 
 			Assert.assertEquals(
 				HttpServletResponse.SC_NOT_FOUND,
@@ -148,10 +149,55 @@ public class CommerceMediaServletTest {
 			_accountEntry.getAccountEntryId(), user1.getUserId());
 
 		MockHttpServletResponse mockHttpServletResponse = _get(
-			_accountEntry.getAccountEntryId(), cpAttachmentFileEntry, user1);
+			_accountEntry.getAccountEntryId(), cpAttachmentFileEntry, false,
+			user1);
 
 		Assert.assertEquals(
 			HttpServletResponse.SC_OK, mockHttpServletResponse.getStatus());
+
+		_assertContentDisposition(
+			HttpHeaders.CONTENT_DISPOSITION_INLINE, mockHttpServletResponse);
+
+		mockHttpServletResponse = _get(
+			_accountEntry.getAccountEntryId(), cpAttachmentFileEntry, true,
+			user1);
+
+		Assert.assertEquals(
+			HttpServletResponse.SC_OK, mockHttpServletResponse.getStatus());
+
+		_assertContentDisposition(
+			HttpHeaders.CONTENT_DISPOSITION_ATTACHMENT,
+			mockHttpServletResponse);
+
+		String content = "<html><script>alert(1)</script></html>";
+
+		mockHttpServletResponse = _get(
+			_accountEntry.getAccountEntryId(),
+			_addCPAttachmentFileEntry(
+				content.getBytes(), ContentTypes.TEXT_HTML, "html"),
+			false, user2);
+
+		Assert.assertEquals(
+			HttpServletResponse.SC_OK, mockHttpServletResponse.getStatus());
+
+		_assertContentDisposition(
+			HttpHeaders.CONTENT_DISPOSITION_ATTACHMENT,
+			mockHttpServletResponse);
+
+		content = "<svg><script>alert(1)</script></svg>";
+
+		mockHttpServletResponse = _get(
+			_accountEntry.getAccountEntryId(),
+			_addCPAttachmentFileEntry(
+				content.getBytes(), ContentTypes.IMAGE_SVG_XML, "svg"),
+			false, user2);
+
+		Assert.assertEquals(
+			HttpServletResponse.SC_OK, mockHttpServletResponse.getStatus());
+
+		_assertContentDisposition(
+			HttpHeaders.CONTENT_DISPOSITION_ATTACHMENT,
+			mockHttpServletResponse);
 	}
 
 	private CPAttachmentFileEntry _addCPAttachmentFileEntry(
@@ -176,15 +222,29 @@ public class CommerceMediaServletTest {
 			CPAttachmentFileEntryConstants.TYPE_IMAGE, _serviceContext);
 	}
 
+	private void _assertContentDisposition(
+		String expectedContentDisposition,
+		MockHttpServletResponse mockHttpServletResponse) {
+
+		String contentDisposition = mockHttpServletResponse.getHeader(
+			HttpHeaders.CONTENT_DISPOSITION);
+
+		Assert.assertTrue(
+			contentDisposition,
+			contentDisposition.startsWith(expectedContentDisposition));
+	}
+
 	private MockHttpServletResponse _get(
 			long accountEntryId, CPAttachmentFileEntry cpAttachmentFileEntry,
-			User user)
+			boolean download, User user)
 		throws Exception {
 
 		MockHttpServletRequest mockHttpServletRequest =
 			new MockHttpServletRequest("GET", StringPool.BLANK);
 
 		mockHttpServletRequest.setAttribute(WebKeys.USER, user);
+		mockHttpServletRequest.setParameter(
+			"download", String.valueOf(download));
 		mockHttpServletRequest.setPathInfo(
 			StringBundler.concat(
 				"/accounts/", accountEntryId, "/images/",
