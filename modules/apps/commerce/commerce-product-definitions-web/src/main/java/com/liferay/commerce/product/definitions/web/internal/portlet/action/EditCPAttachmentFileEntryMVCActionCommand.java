@@ -6,7 +6,10 @@
 package com.liferay.commerce.product.definitions.web.internal.portlet.action;
 
 import com.liferay.commerce.product.constants.CPPortletKeys;
+import com.liferay.commerce.product.exception.CPAttachmentFileEntryCountException;
 import com.liferay.commerce.product.exception.CPAttachmentFileEntryExpirationDateException;
+import com.liferay.commerce.product.exception.CPAttachmentFileEntryNameException;
+import com.liferay.commerce.product.exception.CPAttachmentFileEntrySizeException;
 import com.liferay.commerce.product.exception.DuplicateCPAttachmentFileEntryException;
 import com.liferay.commerce.product.exception.NoSuchCPAttachmentFileEntryException;
 import com.liferay.commerce.product.model.CPAttachmentFileEntry;
@@ -78,8 +81,11 @@ public class EditCPAttachmentFileEntryMVCActionCommand
 
 				actionResponse.setRenderParameter("mvcPath", "/error.jsp");
 			}
-			else if (exception instanceof
-						CPAttachmentFileEntryExpirationDateException ||
+			else if (exception instanceof CPAttachmentFileEntryCountException ||
+					 exception instanceof
+						 CPAttachmentFileEntryExpirationDateException ||
+					 exception instanceof CPAttachmentFileEntryNameException ||
+					 exception instanceof CPAttachmentFileEntrySizeException ||
 					 exception instanceof
 						 DuplicateCPAttachmentFileEntryException ||
 					 exception instanceof NoSuchFileEntryException) {

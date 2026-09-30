@@ -9,6 +9,9 @@
 long fileEntryId = BeanParamUtil.getLong(cpAttachmentFileEntry, request, "fileEntryId");
 %>
 
+<liferay-ui:error exception="<%= CPAttachmentFileEntryCountException.class %>" message='<%= (type == CPAttachmentFileEntryConstants.TYPE_IMAGE) ? "the-maximum-number-of-images-for-this-product-has-been-reached" : "the-maximum-number-of-attachments-for-this-product-has-been-reached" %>' />
+<liferay-ui:error exception="<%= CPAttachmentFileEntryNameException.class %>" message="please-enter-a-file-with-a-valid-file-type" />
+<liferay-ui:error exception="<%= CPAttachmentFileEntrySizeException.class %>" message="please-enter-a-file-with-a-valid-file-size" />
 <liferay-ui:error exception="<%= DuplicateCPAttachmentFileEntryException.class %>" message="that-attachment-is-already-in-use-on-this-product" />
 <liferay-ui:error exception="<%= NoSuchFileEntryException.class %>" message="please-select-an-existing-file" />
 
