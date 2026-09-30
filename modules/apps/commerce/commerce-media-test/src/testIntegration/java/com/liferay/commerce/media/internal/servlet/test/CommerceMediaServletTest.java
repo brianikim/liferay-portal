@@ -9,6 +9,7 @@ import com.liferay.account.constants.AccountConstants;
 import com.liferay.account.model.AccountEntry;
 import com.liferay.account.model.AccountGroup;
 import com.liferay.account.service.AccountEntryUserRelLocalService;
+import com.liferay.account.service.AccountGroupLocalService;
 import com.liferay.account.service.AccountGroupRelLocalService;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.commerce.account.test.util.CommerceAccountTestUtil;
@@ -22,13 +23,20 @@ import com.liferay.commerce.product.service.CPAttachmentFileEntryLocalService;
 import com.liferay.commerce.product.service.CPDefinitionLocalService;
 import com.liferay.commerce.product.test.util.CPTestUtil;
 import com.liferay.commerce.test.util.CommerceTestUtil;
+import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.ResourceConstants;
+import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.model.role.RoleConstants;
 import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
+import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.servlet.HttpHeaders;
@@ -49,6 +57,8 @@ import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
 
 import jakarta.servlet.Servlet;
 import jakarta.servlet.http.HttpServletResponse;
+
+import java.util.Arrays;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -95,13 +105,14 @@ public class CommerceMediaServletTest {
 
 	@Test
 	public void testDoGet() throws Exception {
-		CPAttachmentFileEntry cpAttachmentFileEntry = _addCPAttachmentFileEntry(
-			FileUtil.getBytes(
-				CommerceMediaServletTest.class, "dependencies/image.jpg"),
-			ContentTypes.IMAGE_JPEG, "jpg");
+		byte[] bytes = FileUtil.getBytes(
+			CommerceMediaServletTest.class, "dependencies/image.jpg");
+
+		CPAttachmentFileEntry cpAttachmentFileEntry1 =
+			_addCPAttachmentFileEntry(bytes, ContentTypes.IMAGE_JPEG, "jpg");
 
 		_cpDefinitionLocalService.updateCPDefinitionAccountGroupFilter(
-			cpAttachmentFileEntry.getClassPK(), true);
+			cpAttachmentFileEntry1.getClassPK(), true);
 
 		AccountGroup accountGroup =
 			CommerceAccountTestUtil.addAccountGroupAndAccountRel(
@@ -111,7 +122,7 @@ public class CommerceMediaServletTest {
 
 		_accountGroupRelLocalService.addAccountGroupRel(
 			accountGroup.getAccountGroupId(), CPDefinition.class.getName(),
-			cpAttachmentFileEntry.getClassPK());
+			cpAttachmentFileEntry1.getClassPK());
 
 		User user1 = UserTestUtil.addUser();
 		User user2 = _userLocalService.getGuestUser(_group.getCompanyId());
@@ -122,15 +133,23 @@ public class CommerceMediaServletTest {
 				LoggerTestUtil.OFF)) {
 
 			MockHttpServletResponse mockHttpServletResponse = _get(
-				_accountEntry.getAccountEntryId(), cpAttachmentFileEntry, false,
-				user1);
+				_accountEntry.getAccountEntryId(), cpAttachmentFileEntry1,
+				false, user1);
 
 			Assert.assertEquals(
 				HttpServletResponse.SC_NOT_FOUND,
 				mockHttpServletResponse.getStatus());
 
 			mockHttpServletResponse = _get(
-				_accountEntry.getAccountEntryId(), cpAttachmentFileEntry, false,
+				_accountEntry.getAccountEntryId(), cpAttachmentFileEntry1,
+				false, user2);
+
+			Assert.assertEquals(
+				HttpServletResponse.SC_NOT_FOUND,
+				mockHttpServletResponse.getStatus());
+
+			mockHttpServletResponse = _get(
+				RandomTestUtil.nextLong(), cpAttachmentFileEntry1, false,
 				user2);
 
 			Assert.assertEquals(
@@ -138,18 +157,40 @@ public class CommerceMediaServletTest {
 				mockHttpServletResponse.getStatus());
 
 			mockHttpServletResponse = _get(
-				RandomTestUtil.nextLong(), cpAttachmentFileEntry, false, user2);
+				AccountConstants.ACCOUNT_ENTRY_ID_GUEST, cpAttachmentFileEntry1,
+				false, user2);
 
 			Assert.assertEquals(
 				HttpServletResponse.SC_NOT_FOUND,
 				mockHttpServletResponse.getStatus());
+
+			CPAttachmentFileEntry cpAttachmentFileEntry2 =
+				_addCPAttachmentFileEntry(
+					bytes, ContentTypes.IMAGE_JPEG, "jpg");
+
+			Role role = _roleLocalService.getRole(
+				_group.getCompanyId(), RoleConstants.GUEST);
+
+			_resourcePermissionLocalService.removeResourcePermission(
+				_group.getCompanyId(), DLFileEntry.class.getName(),
+				ResourceConstants.SCOPE_INDIVIDUAL,
+				String.valueOf(cpAttachmentFileEntry2.getFileEntryId()),
+				role.getRoleId(), ActionKeys.VIEW);
+
+			mockHttpServletResponse = _get(
+				_accountEntry.getAccountEntryId(), cpAttachmentFileEntry2,
+				false, user2);
+
+			Assert.assertFalse(
+				Arrays.equals(
+					bytes, mockHttpServletResponse.getContentAsByteArray()));
 		}
 
 		_accountEntryUserRelLocalService.addAccountEntryUserRel(
 			_accountEntry.getAccountEntryId(), user1.getUserId());
 
 		MockHttpServletResponse mockHttpServletResponse = _get(
-			_accountEntry.getAccountEntryId(), cpAttachmentFileEntry, false,
+			_accountEntry.getAccountEntryId(), cpAttachmentFileEntry1, false,
 			user1);
 
 		Assert.assertEquals(
@@ -159,7 +200,7 @@ public class CommerceMediaServletTest {
 			HttpHeaders.CONTENT_DISPOSITION_INLINE, mockHttpServletResponse);
 
 		mockHttpServletResponse = _get(
-			_accountEntry.getAccountEntryId(), cpAttachmentFileEntry, true,
+			_accountEntry.getAccountEntryId(), cpAttachmentFileEntry1, true,
 			user1);
 
 		Assert.assertEquals(
@@ -168,6 +209,20 @@ public class CommerceMediaServletTest {
 		_assertContentDisposition(
 			HttpHeaders.CONTENT_DISPOSITION_ATTACHMENT,
 			mockHttpServletResponse);
+
+		accountGroup = _accountGroupLocalService.getDefaultAccountGroup(
+			_group.getCompanyId());
+
+		_accountGroupRelLocalService.addAccountGroupRel(
+			accountGroup.getAccountGroupId(), CPDefinition.class.getName(),
+			cpAttachmentFileEntry1.getClassPK());
+
+		mockHttpServletResponse = _get(
+			AccountConstants.ACCOUNT_ENTRY_ID_GUEST, cpAttachmentFileEntry1,
+			false, user2);
+
+		Assert.assertEquals(
+			HttpServletResponse.SC_OK, mockHttpServletResponse.getStatus());
 
 		String content = "<html><script>alert(1)</script></html>";
 
@@ -264,6 +319,9 @@ public class CommerceMediaServletTest {
 	private AccountEntryUserRelLocalService _accountEntryUserRelLocalService;
 
 	@Inject
+	private AccountGroupLocalService _accountGroupLocalService;
+
+	@Inject
 	private AccountGroupRelLocalService _accountGroupRelLocalService;
 
 	private CommerceCatalog _commerceCatalog;
@@ -282,6 +340,12 @@ public class CommerceMediaServletTest {
 
 	@Inject
 	private Portal _portal;
+
+	@Inject
+	private ResourcePermissionLocalService _resourcePermissionLocalService;
+
+	@Inject
+	private RoleLocalService _roleLocalService;
 
 	private ServiceContext _serviceContext;
 
