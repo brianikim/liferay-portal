@@ -134,7 +134,9 @@ public class CommerceMediaServlet extends HttpServlet {
 			long commerceAccountId, CPDefinition cpDefinition)
 		throws PortalException {
 
-		if (cpDefinition.isAccountGroupFilterEnabled()) {
+		if (cpDefinition.isAccountGroupFilterEnabled() &&
+			(commerceAccountId != AccountConstants.ACCOUNT_ENTRY_ID_GUEST)) {
+
 			_accountEntryService.getAccountEntry(commerceAccountId);
 		}
 
@@ -504,7 +506,11 @@ public class CommerceMediaServlet extends HttpServlet {
 
 			FileEntry fileEntry = _getFileEntry(httpServletRequest);
 
-			if (fileEntry == null) {
+			if ((fileEntry == null) ||
+				!_fileEntryModelResourcePermission.contains(
+					PermissionThreadLocal.getPermissionChecker(), fileEntry,
+					ActionKeys.VIEW)) {
+
 				_sendDefaultMediaBytes(
 					groupId, httpServletRequest, httpServletResponse,
 					contentDisposition);
@@ -716,6 +722,12 @@ public class CommerceMediaServlet extends HttpServlet {
 
 	@Reference
 	private File _file;
+
+	@Reference(
+		target = "(model.class.name=com.liferay.portal.kernel.repository.model.FileEntry)"
+	)
+	private ModelResourcePermission<FileEntry>
+		_fileEntryModelResourcePermission;
 
 	@Reference
 	private Portal _portal;
