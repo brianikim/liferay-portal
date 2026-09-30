@@ -9,11 +9,15 @@ import com.liferay.asset.kernel.model.AssetEntry;
 import com.liferay.asset.kernel.service.AssetEntryLocalService;
 import com.liferay.asset.link.constants.AssetLinkConstants;
 import com.liferay.asset.link.service.AssetLinkLocalService;
+import com.liferay.commerce.product.configuration.AttachmentsConfiguration;
+import com.liferay.commerce.product.constants.CPAttachmentFileEntryConstants;
 import com.liferay.commerce.product.constants.CPConstants;
 import com.liferay.commerce.product.constants.CPField;
 import com.liferay.commerce.product.exception.CPAttachmentFileEntryCDNURLException;
 import com.liferay.commerce.product.exception.CPAttachmentFileEntryDisplayDateException;
 import com.liferay.commerce.product.exception.CPAttachmentFileEntryExpirationDateException;
+import com.liferay.commerce.product.exception.CPAttachmentFileEntryNameException;
+import com.liferay.commerce.product.exception.CPAttachmentFileEntrySizeException;
 import com.liferay.commerce.product.exception.DuplicateCPAttachmentFileEntryException;
 import com.liferay.commerce.product.internal.util.CPDefinitionLocalServiceCircularDependencyUtil;
 import com.liferay.commerce.product.model.CPAttachmentFileEntry;
@@ -36,6 +40,7 @@ import com.liferay.petra.sql.dsl.query.GroupByStep;
 import com.liferay.petra.sql.dsl.query.JoinStep;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.aop.AopService;
+import com.liferay.portal.configuration.module.configuration.ConfigurationProvider;
 import com.liferay.portal.dao.orm.custom.sql.CustomSQL;
 import com.liferay.portal.kernel.dao.orm.QueryDefinition;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -70,6 +75,7 @@ import com.liferay.portal.kernel.service.ClassNameLocalService;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.settings.SystemSettingsLocator;
 import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.CalendarFactoryUtil;
@@ -136,6 +142,8 @@ public class CPAttachmentFileEntryLocalServiceImpl
 		if (!_emptyModelManager.isEmptyModel()) {
 			if (!cdnEnabled) {
 				fileEntry = _dlAppLocalService.getFileEntry(fileEntryId);
+
+				_validateImage(classNameId, fileEntry, type);
 
 				fileEntryId = _getFileEntryId(
 					fileEntry, userId, groupId,
@@ -783,6 +791,11 @@ public class CPAttachmentFileEntryLocalServiceImpl
 		if (!cdnEnabled) {
 			fileEntry = _dlAppLocalService.getFileEntry(fileEntryId);
 
+			if (fileEntryId != cpAttachmentFileEntry.getFileEntryId()) {
+				_validateImage(
+					cpAttachmentFileEntry.getClassNameId(), fileEntry, type);
+			}
+
 			fileEntryId = _getFileEntryId(
 				fileEntry, user.getUserId(), cpAttachmentFileEntry.getGroupId(),
 				cpAttachmentFileEntry.getClassName(),
@@ -1158,6 +1171,45 @@ public class CPAttachmentFileEntryLocalServiceImpl
 		}
 	}
 
+	private void _validateImage(
+			long classNameId, FileEntry fileEntry, int type)
+		throws PortalException {
+
+		if ((classNameId != _classNameLocalService.getClassNameId(
+				CPDefinition.class)) ||
+			(type != CPAttachmentFileEntryConstants.TYPE_IMAGE)) {
+
+			return;
+		}
+
+		AttachmentsConfiguration attachmentsConfiguration =
+			_configurationProvider.getConfiguration(
+				AttachmentsConfiguration.class,
+				new SystemSettingsLocator(
+					AttachmentsConfiguration.class.getName()));
+
+		if ((attachmentsConfiguration.imageMaxSize() > 0) &&
+			(fileEntry.getSize() > attachmentsConfiguration.imageMaxSize())) {
+
+			throw new CPAttachmentFileEntrySizeException();
+		}
+
+		for (String imageExtension :
+				attachmentsConfiguration.imageExtensions()) {
+
+			if (StringPool.STAR.equals(imageExtension) ||
+				Objects.equals(
+					MimeTypesUtil.getExtensionContentType(imageExtension),
+					fileEntry.getMimeType())) {
+
+				return;
+			}
+		}
+
+		throw new CPAttachmentFileEntryNameException(
+			"Invalid image for file name " + fileEntry.getFileName());
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(
 		CPAttachmentFileEntryLocalServiceImpl.class);
 
@@ -1169,6 +1221,9 @@ public class CPAttachmentFileEntryLocalServiceImpl
 
 	@Reference
 	private ClassNameLocalService _classNameLocalService;
+
+	@Reference
+	private ConfigurationProvider _configurationProvider;
 
 	@Reference
 	private CPDefinitionPersistence _cpDefinitionPersistence;
