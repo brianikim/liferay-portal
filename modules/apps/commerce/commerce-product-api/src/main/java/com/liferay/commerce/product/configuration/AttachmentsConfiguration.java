@@ -22,6 +22,12 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 )
 public interface AttachmentsConfiguration {
 
+	@Meta.AD(deflt = "*", name = "attachment-extensions", required = false)
+	public String[] attachmentExtensions();
+
+	@Meta.AD(deflt = "0", name = "attachment-max-size", required = false)
+	public long attachmentMaxSize();
+
 	@Meta.AD(
 		deflt = ".gif,.jpeg,.jpg,.png", name = "image-extensions",
 		required = false
@@ -30,5 +36,19 @@ public interface AttachmentsConfiguration {
 
 	@Meta.AD(deflt = "5242880", name = "image-max-size", required = false)
 	public long imageMaxSize();
+
+	@Meta.AD(
+		deflt = "0",
+		description = "maximum-number-of-attachments-per-product-description",
+		name = "maximum-number-of-attachments-per-product", required = false
+	)
+	public int maximumNumberOfAttachmentsPerProduct();
+
+	@Meta.AD(
+		deflt = "0",
+		description = "maximum-number-of-images-per-product-description",
+		name = "maximum-number-of-images-per-product", required = false
+	)
+	public int maximumNumberOfImagesPerProduct();
 
 }
