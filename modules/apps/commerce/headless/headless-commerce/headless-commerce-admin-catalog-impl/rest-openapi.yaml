@@ -1772,7 +1772,7 @@ components:
                     type: boolean
                 attachments:
                     description:
-                        Gallery attachments of type Other; replaces the existing set on write.
+                        Gallery attachments of type Other; on write, entries are added or updated by ID or external reference code, and existing attachments omitted from the request are kept.
                     items:
                         $ref: "#/components/schemas/Attachment"
                     type: array
@@ -1890,7 +1890,7 @@ components:
                     type: integer
                 images:
                     description:
-                        Image attachments of type Image.
+                        Image attachments of type Image; on write, entries are added or updated by ID or external reference code, and existing images omitted from the request are kept.
                     items:
                         $ref: "#/components/schemas/Attachment"
                     type: array
