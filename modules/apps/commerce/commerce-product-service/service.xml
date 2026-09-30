@@ -1531,6 +1531,7 @@
 		<exception>CommerceChannelName</exception>
 		<exception>CommerceChannelType</exception>
 		<exception>CPAttachmentFileEntryCDNURL</exception>
+		<exception>CPAttachmentFileEntryCount</exception>
 		<exception>CPAttachmentFileEntryDisplayDate</exception>
 		<exception>CPAttachmentFileEntryExpirationDate</exception>
 		<exception>CPAttachmentFileEntryName</exception>
