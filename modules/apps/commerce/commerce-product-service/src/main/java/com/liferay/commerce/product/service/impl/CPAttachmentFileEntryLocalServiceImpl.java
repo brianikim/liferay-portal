@@ -14,6 +14,7 @@ import com.liferay.commerce.product.constants.CPAttachmentFileEntryConstants;
 import com.liferay.commerce.product.constants.CPConstants;
 import com.liferay.commerce.product.constants.CPField;
 import com.liferay.commerce.product.exception.CPAttachmentFileEntryCDNURLException;
+import com.liferay.commerce.product.exception.CPAttachmentFileEntryCountException;
 import com.liferay.commerce.product.exception.CPAttachmentFileEntryDisplayDateException;
 import com.liferay.commerce.product.exception.CPAttachmentFileEntryExpirationDateException;
 import com.liferay.commerce.product.exception.CPAttachmentFileEntryNameException;
@@ -38,6 +39,7 @@ import com.liferay.petra.sql.dsl.expression.Expression;
 import com.liferay.petra.sql.dsl.expression.Predicate;
 import com.liferay.petra.sql.dsl.query.GroupByStep;
 import com.liferay.petra.sql.dsl.query.JoinStep;
+import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.configuration.module.configuration.ConfigurationProvider;
@@ -140,10 +142,12 @@ public class CPAttachmentFileEntryLocalServiceImpl
 		FileEntry fileEntry = null;
 
 		if (!_emptyModelManager.isEmptyModel()) {
+			_validateCount(classNameId, classPK, type);
+
 			if (!cdnEnabled) {
 				fileEntry = _dlAppLocalService.getFileEntry(fileEntryId);
 
-				_validateImage(classNameId, fileEntry, type);
+				_validateFileEntry(classNameId, fileEntry, type);
 
 				fileEntryId = _getFileEntryId(
 					fileEntry, userId, groupId,
@@ -786,13 +790,21 @@ public class CPAttachmentFileEntryLocalServiceImpl
 			}
 		}
 
+		if (type != cpAttachmentFileEntry.getType()) {
+			_validateCount(
+				cpAttachmentFileEntry.getClassNameId(),
+				cpAttachmentFileEntry.getClassPK(), type);
+		}
+
 		FileEntry fileEntry = null;
 
 		if (!cdnEnabled) {
 			fileEntry = _dlAppLocalService.getFileEntry(fileEntryId);
 
-			if (fileEntryId != cpAttachmentFileEntry.getFileEntryId()) {
-				_validateImage(
+			if ((fileEntryId != cpAttachmentFileEntry.getFileEntryId()) ||
+				(type != cpAttachmentFileEntry.getType())) {
+
+				_validateFileEntry(
 					cpAttachmentFileEntry.getClassNameId(), fileEntry, type);
 			}
 
@@ -987,6 +999,15 @@ public class CPAttachmentFileEntryLocalServiceImpl
 		}
 	}
 
+	private AttachmentsConfiguration _getAttachmentsConfiguration()
+		throws PortalException {
+
+		return _configurationProvider.getConfiguration(
+			AttachmentsConfiguration.class,
+			new SystemSettingsLocator(
+				AttachmentsConfiguration.class.getName()));
+	}
+
 	private long _getFileEntryId(
 		FileEntry fileEntry, long userId, long groupId, String className,
 		long classPK, ServiceContext serviceContext) {
@@ -1171,35 +1192,84 @@ public class CPAttachmentFileEntryLocalServiceImpl
 		}
 	}
 
-	private void _validateImage(
-			long classNameId, FileEntry fileEntry, int type)
+	private void _validateCount(long classNameId, long classPK, int type)
 		throws PortalException {
 
-		if ((classNameId != _classNameLocalService.getClassNameId(
-				CPDefinition.class)) ||
-			(type != CPAttachmentFileEntryConstants.TYPE_IMAGE)) {
+		if (classNameId != _classNameLocalService.getClassNameId(
+				CPDefinition.class)) {
 
 			return;
 		}
 
 		AttachmentsConfiguration attachmentsConfiguration =
-			_configurationProvider.getConfiguration(
-				AttachmentsConfiguration.class,
-				new SystemSettingsLocator(
-					AttachmentsConfiguration.class.getName()));
+			_getAttachmentsConfiguration();
 
-		if ((attachmentsConfiguration.imageMaxSize() > 0) &&
-			(fileEntry.getSize() > attachmentsConfiguration.imageMaxSize())) {
+		int maximumCount = 0;
+		String typeName = null;
 
+		if (type == CPAttachmentFileEntryConstants.TYPE_IMAGE) {
+			maximumCount =
+				attachmentsConfiguration.maximumNumberOfImagesPerProduct();
+			typeName = "image";
+		}
+		else if (type == CPAttachmentFileEntryConstants.TYPE_OTHER) {
+			maximumCount =
+				attachmentsConfiguration.maximumNumberOfAttachmentsPerProduct();
+			typeName = "attachment";
+		}
+
+		if (maximumCount <= 0) {
+			return;
+		}
+
+		int count = getCPAttachmentFileEntriesCount(
+			classNameId, classPK, type, WorkflowConstants.STATUS_ANY);
+
+		if (count >= maximumCount) {
+			throw new CPAttachmentFileEntryCountException(
+				StringBundler.concat(
+					"Unable to add the ", typeName,
+					" because the maximum number of ", typeName,
+					"s per product is ", maximumCount));
+		}
+	}
+
+	private void _validateFileEntry(
+			long classNameId, FileEntry fileEntry, int type)
+		throws PortalException {
+
+		if (classNameId != _classNameLocalService.getClassNameId(
+				CPDefinition.class)) {
+
+			return;
+		}
+
+		AttachmentsConfiguration attachmentsConfiguration =
+			_getAttachmentsConfiguration();
+
+		String[] extensions = null;
+		long maxSize = 0;
+
+		if (type == CPAttachmentFileEntryConstants.TYPE_IMAGE) {
+			extensions = attachmentsConfiguration.imageExtensions();
+			maxSize = attachmentsConfiguration.imageMaxSize();
+		}
+		else if (type == CPAttachmentFileEntryConstants.TYPE_OTHER) {
+			extensions = attachmentsConfiguration.attachmentExtensions();
+			maxSize = attachmentsConfiguration.attachmentMaxSize();
+		}
+		else {
+			return;
+		}
+
+		if ((maxSize > 0) && (fileEntry.getSize() > maxSize)) {
 			throw new CPAttachmentFileEntrySizeException();
 		}
 
-		for (String imageExtension :
-				attachmentsConfiguration.imageExtensions()) {
-
-			if (StringPool.STAR.equals(imageExtension) ||
+		for (String extension : extensions) {
+			if (StringPool.STAR.equals(extension) ||
 				Objects.equals(
-					MimeTypesUtil.getExtensionContentType(imageExtension),
+					MimeTypesUtil.getExtensionContentType(extension),
 					fileEntry.getMimeType())) {
 
 				return;
@@ -1207,7 +1277,9 @@ public class CPAttachmentFileEntryLocalServiceImpl
 		}
 
 		throw new CPAttachmentFileEntryNameException(
-			"Invalid image for file name " + fileEntry.getFileName());
+			StringBundler.concat(
+				"Invalid MIME type \"", fileEntry.getMimeType(),
+				"\" for file name \"", fileEntry.getFileName(), "\""));
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
