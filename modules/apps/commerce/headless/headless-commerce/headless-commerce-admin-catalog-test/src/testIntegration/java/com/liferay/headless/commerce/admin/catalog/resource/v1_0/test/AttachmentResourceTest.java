@@ -173,8 +173,8 @@ public class AttachmentResourceTest extends BaseAttachmentResourceTestCase {
 			null, TestPropsValues.getUserId(), testGroup.getGroupId(),
 			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
 			TempFileEntryUtil.getTempFileName(
-				RandomTestUtil.randomString() + ".txt"),
-			ContentTypes.TEXT_PLAIN, RandomTestUtil.randomString(),
+				RandomTestUtil.randomString() + ".png"),
+			ContentTypes.IMAGE_PNG, RandomTestUtil.randomString(),
 			StringPool.BLANK, StringPool.BLANK, StringPool.BLANK,
 			new ByteArrayInputStream(RandomTestUtil.randomBytes()), 0, null,
 			null, null, _serviceContext);

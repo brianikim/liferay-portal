@@ -80,7 +80,7 @@ public class CSDiagramSettingTableReferenceDefinitionTest
 		_dlFileEntry = _dlFileEntryLocalService.addFileEntry(
 			null, TestPropsValues.getUserId(), group.getGroupId(),
 			dlFolder.getRepositoryId(), dlFolder.getFolderId(),
-			RandomTestUtil.randomString(), ContentTypes.TEXT_PLAIN,
+			RandomTestUtil.randomString(), ContentTypes.IMAGE_PNG,
 			RandomTestUtil.randomString(), StringPool.BLANK, StringPool.BLANK,
 			StringPool.BLANK,
 			DLFileEntryTypeConstants.FILE_ENTRY_TYPE_ID_BASIC_DOCUMENT, null,

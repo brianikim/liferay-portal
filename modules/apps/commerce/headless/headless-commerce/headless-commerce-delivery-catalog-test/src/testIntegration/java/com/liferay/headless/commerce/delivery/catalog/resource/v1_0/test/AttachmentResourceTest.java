@@ -24,6 +24,7 @@ import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
+import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.test.rule.Inject;
 
@@ -124,8 +125,8 @@ public class AttachmentResourceTest extends BaseAttachmentResourceTestCase {
 		FileEntry fileEntry = _dlAppLocalService.addFileEntry(
 			RandomTestUtil.randomString(), _user.getUserId(),
 			testGroup.getGroupId(), DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
-			RandomTestUtil.randomString(), RandomTestUtil.randomString(), null,
-			null, null, RandomTestUtil.nextDate(), _serviceContext);
+			RandomTestUtil.randomString(), ContentTypes.IMAGE_PNG, null, null,
+			null, RandomTestUtil.nextDate(), _serviceContext);
 
 		Calendar displayDate = Calendar.getInstance();
 		Calendar expirationDate = Calendar.getInstance();
