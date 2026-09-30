@@ -160,7 +160,7 @@ public class Product implements Serializable {
 	private Supplier<Boolean> _activeSupplier;
 
 	@io.swagger.v3.oas.annotations.media.Schema(
-		description = "Gallery attachments of type Other; replaces the existing set on write."
+		description = "Gallery attachments of type Other; on write, entries are added or updated by ID or external reference code, and existing attachments omitted from the request are kept."
 	)
 	@Valid
 	public Attachment[] getAttachments() {
@@ -197,7 +197,7 @@ public class Product implements Serializable {
 	}
 
 	@GraphQLField(
-		description = "Gallery attachments of type Other; replaces the existing set on write."
+		description = "Gallery attachments of type Other; on write, entries are added or updated by ID or external reference code, and existing attachments omitted from the request are kept."
 	)
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected Attachment[] attachments;
@@ -1092,7 +1092,7 @@ public class Product implements Serializable {
 	private Supplier<Long> _idSupplier;
 
 	@io.swagger.v3.oas.annotations.media.Schema(
-		description = "Image attachments of type Image."
+		description = "Image attachments of type Image; on write, entries are added or updated by ID or external reference code, and existing images omitted from the request are kept."
 	)
 	@Valid
 	public Attachment[] getImages() {
@@ -1128,7 +1128,9 @@ public class Product implements Serializable {
 		};
 	}
 
-	@GraphQLField(description = "Image attachments of type Image.")
+	@GraphQLField(
+		description = "Image attachments of type Image; on write, entries are added or updated by ID or external reference code, and existing images omitted from the request are kept."
+	)
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected Attachment[] images;
 
@@ -3773,4 +3775,4 @@ public class Product implements Serializable {
 	private Map<String, Serializable> _extendedProperties;
 
 }
-// LIFERAY-REST-BUILDER-HASH:-1361733506
+// LIFERAY-REST-BUILDER-HASH:1122764970
