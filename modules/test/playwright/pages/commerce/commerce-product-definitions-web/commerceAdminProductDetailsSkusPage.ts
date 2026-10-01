@@ -450,6 +450,11 @@ export class CommerceAdminProductDetailsSkusPage extends CommerceDNDTablePage {
 		await this.skuTab(skuTab).click();
 	}
 
+	async openSkuPriceListEntry(priceListName: string, sku: string) {
+		await this.openSkuTab(sku, 'Price');
+		await this.sidePanelSkuPriceTableRowLink(priceListName).click();
+	}
+
 	async openSkuTab(sku: string, skuTab: string) {
 		await this.skusTableRowLink(sku).click();
 

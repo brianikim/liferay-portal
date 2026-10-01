@@ -19,6 +19,7 @@ import {getRandomInt} from '../../../../utils/getRandomInt';
 import getRandomString from '../../../../utils/getRandomString';
 import {userData} from '../../../../utils/performLogin';
 import {waitForAlert} from '../../../../utils/waitForAlert';
+import {apiStorefrontSetUp} from '../../utils/commerce';
 import {fillLocalizedInput} from '../../utils/fillLocalizedInput';
 
 export const test = mergeTests(
@@ -232,6 +233,154 @@ test(
 		await expect(
 			commerceAdminProductDetailsSkusPage.skusTableRowLink(sku2)
 		).toHaveCount(0);
+	}
+);
+
+test(
+	'Editing the base price and tier prices of a SKU updates its storefront price',
+	{tag: ['@COMMERCE-6022', '@COMMERCE-12218', '@LPD-106244-Grouped-4']},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductDetailsSkusPage,
+		commerceAdminProductPage,
+		commerceThemeClassicCatalogPage,
+		page,
+	}) => {
+		const {catalog, product, site} = await apiStorefrontSetUp(apiHelpers, [
+			{
+				title: 'Catalog',
+				widgetName:
+					'com_liferay_commerce_product_content_search_web_internal_portlet_CPSearchResultsPortlet',
+			},
+		]);
+
+		const basePriceListName = `${catalog.name} Base Price List`;
+		const productCard = commerceThemeClassicCatalogPage.productCard(
+			product.name['en_US']
+		);
+
+		await test.step('Edit the base price list entry', async () => {
+			await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+			await commerceAdminProductDetailsPage.goToProductSkus();
+
+			await commerceAdminProductDetailsSkusPage.openSkuPriceListEntry(
+				basePriceListName,
+				product.skus[0].sku
+			);
+			await commerceAdminProductDetailsSkusPage.sidePanelNestedPriceListPrice.fill(
+				'25'
+			);
+			await commerceAdminProductDetailsSkusPage.sidePanelNestedSaveButton.click();
+
+			await waitForAlert(
+				commerceAdminProductDetailsSkusPage.sidePanelNestedFrame
+			);
+
+			await page.goto(`/web${site.friendlyUrlPath}/catalog`);
+
+			await expect(productCard).toContainText('25.00');
+		});
+
+		await test.step('Add a tier price', async () => {
+			await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+			await commerceAdminProductDetailsPage.goToProductSkus();
+
+			await commerceAdminProductDetailsSkusPage.openSkuPriceListEntry(
+				basePriceListName,
+				product.skus[0].sku
+			);
+			await commerceAdminProductDetailsSkusPage.sidePanelTierPriceAddButton.click();
+			await commerceAdminProductDetailsSkusPage.submitTierPrice('10');
+
+			await expect(
+				commerceAdminProductDetailsSkusPage.sidePanelTierPriceRow(
+					'10.00'
+				)
+			).toBeVisible();
+
+			await page.goto(`/web${site.friendlyUrlPath}/catalog`);
+
+			await expect(productCard).toContainText('10.00');
+		});
+
+		await test.step('Edit the tier price', async () => {
+			await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+			await commerceAdminProductDetailsPage.goToProductSkus();
+
+			await commerceAdminProductDetailsSkusPage.openSkuPriceListEntry(
+				basePriceListName,
+				product.skus[0].sku
+			);
+			await commerceAdminProductDetailsSkusPage.clickTierPriceAction(
+				'Edit',
+				'10.00'
+			);
+			await commerceAdminProductDetailsSkusPage.submitTierPrice('20');
+
+			await expect(
+				commerceAdminProductDetailsSkusPage.sidePanelTierPriceRow(
+					'20.00'
+				)
+			).toBeVisible();
+
+			await page.goto(`/web${site.friendlyUrlPath}/catalog`);
+
+			await expect(productCard).toContainText('20.00');
+		});
+
+		await test.step('Delete the tier price', async () => {
+			await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+			await commerceAdminProductDetailsPage.goToProductSkus();
+
+			await commerceAdminProductDetailsSkusPage.openSkuPriceListEntry(
+				basePriceListName,
+				product.skus[0].sku
+			);
+			await commerceAdminProductDetailsSkusPage.clickTierPriceAction(
+				'Delete',
+				'20.00'
+			);
+
+			await expect(
+				commerceAdminProductDetailsSkusPage.sidePanelTierPriceRow(
+					'20.00'
+				)
+			).toHaveCount(0);
+
+			await page.goto(`/web${site.friendlyUrlPath}/catalog`);
+
+			await expect(productCard).toContainText('25.00');
+		});
+
+		await test.step('Delete the base price list entry', async () => {
+			await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+			await commerceAdminProductDetailsPage.goToProductSkus();
+
+			await commerceAdminProductDetailsSkusPage.openSkuTab(
+				product.skus[0].sku,
+				'Price'
+			);
+			await commerceAdminProductDetailsSkusPage.clickSkuPriceAction(
+				'Delete',
+				basePriceListName
+			);
+
+			await expect(
+				commerceAdminProductDetailsSkusPage.skuPriceTableRow(
+					basePriceListName
+				)
+			).toHaveCount(0);
+
+			await page.goto(`/web${site.friendlyUrlPath}/catalog`);
+
+			await expect(productCard).toContainText('$ 0.00');
+		});
 	}
 );
 
