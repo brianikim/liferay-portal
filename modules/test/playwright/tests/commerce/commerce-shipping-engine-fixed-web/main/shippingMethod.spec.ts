@@ -169,6 +169,102 @@ test(
 );
 
 test(
+	'Flat Rate shipping options can be added, are ordered by priority and can be deleted',
+	{tag: ['@COMMERCE-6111', '@COMMERCE-6114', '@LPD-106244-Grouped-15']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelDetailsPage,
+		commerceAdminChannelsPage,
+		page,
+		site,
+	}) => {
+		const channel =
+			await apiHelpers.headlessCommerceAdminChannel.postChannel({
+				siteGroupId: site.id,
+			});
+
+		await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+			channel.name,
+			'B2B'
+		);
+
+		await commerceAdminChannelDetailsPage.deactivateChannelConfiguration(
+			'Flat Rate',
+			'Shipping Methods'
+		);
+		await commerceAdminChannelDetailsPage.activateChannelConfiguration(
+			'Flat Rate',
+			'Shipping Methods'
+		);
+
+		const shippingOptionName1 = getRandomString();
+		const shippingOptionName2 = getRandomString();
+
+		await commerceAdminChannelDetailsPage.addFlatRateShippingOption(
+			shippingOptionName2,
+			'10',
+			'Expedited Description',
+			'2'
+		);
+		await commerceAdminChannelDetailsPage.addFlatRateShippingOption(
+			shippingOptionName1,
+			'5',
+			'Standard Description',
+			'1'
+		);
+
+		await page.reload();
+
+		await commerceAdminChannelDetailsPage.openShippingOptions('Flat Rate');
+
+		await expect(
+			await commerceAdminChannelDetailsPage.shippingOptionPriorityCell(
+				shippingOptionName1
+			)
+		).toHaveText('1');
+		await expect(
+			await commerceAdminChannelDetailsPage.shippingOptionPriorityCell(
+				shippingOptionName2
+			)
+		).toHaveText('2');
+
+		const shippingOptionRows =
+			await commerceAdminChannelDetailsPage.shippingOptionRows();
+
+		await expect(shippingOptionRows.nth(0)).toContainText(
+			shippingOptionName1
+		);
+		await expect(shippingOptionRows.nth(1)).toContainText(
+			shippingOptionName2
+		);
+
+		await page.reload();
+
+		await commerceAdminChannelDetailsPage.deleteShippingOption(
+			shippingOptionName2,
+			'Flat Rate'
+		);
+
+		await page.reload();
+
+		await commerceAdminChannelDetailsPage.openShippingOptions('Flat Rate');
+
+		await expect(
+			await commerceAdminChannelDetailsPage.getRowByTextFromSidePanelTable(
+				'Shipping Methods',
+				shippingOptionName1
+			)
+		).toBeVisible();
+		await expect(
+			await commerceAdminChannelDetailsPage.getRowByTextFromSidePanelTable(
+				'Shipping Methods',
+				shippingOptionName2
+			)
+		).toHaveCount(0);
+	}
+);
+
+test(
 	'Shipment tracking URL for an order can be updated and viewed',
 	{tag: ['@COMMERCE-9459', '@LPD-56179']},
 	async ({
