@@ -174,6 +174,11 @@ public class AttachmentResourceTest extends BaseAttachmentResourceTestCase {
 		assertEquals(randomAttachment, postAttachment);
 		assertValid(postAttachment);
 
+		_testPostAttachmentWithOptions(
+			_randomImageAttachment(),
+			attachment ->
+				attachmentResource.postProductByExternalReferenceCodeImage(
+					_cProduct.getExternalReferenceCode(), attachment));
 		_testPostProductByExternalReferenceCodeImageWithFileEntryExternalReferenceCode();
 	}
 
