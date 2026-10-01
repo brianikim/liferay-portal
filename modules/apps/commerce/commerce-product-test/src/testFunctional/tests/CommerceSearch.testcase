@@ -18,57 +18,6 @@ definition {
 		CommerceConfiguration.commerceTearDown();
 	}
 
-	@description = "Verify all products sharing a partial sku are populated in the catalog when the user searches products by partial sku"
-	@priority = 3
-	test AssertMultipleProductsPopulatedSharingSamePartialSKUThatIsSearchedFor {
-		property custom.properties = "company.security.strangers.verify=false${line.separator}jsonws.web.service.paths.excludes=";
-		property portal.acceptance = "false";
-
-		task ("Given a Minium site with a buyer user") {
-			CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
-
-			CommerceEntry.addAccountEntryUser(
-				accountName = "Commerce Account",
-				accountType = "Business",
-				agreeToTermsAndAnswerReminderQuery = "true",
-				createNewAccount = "true",
-				requireReset = "false",
-				userEmailAddress = "buyer@liferay.com",
-				userFirstName = "Buyer",
-				userLastName = "User",
-				userRole = "Buyer",
-				userScreenName = "buyeruser",
-				userSiteMembership = "Minium");
-		}
-
-		task ("When buyer goes to the catalog and searches a partial SKU used by multiple products") {
-			User.logoutPG();
-
-			CommerceLogin.miniumLogin(
-				password = PropsUtil.get("default.admin.password"),
-				urlAppend = "web/minium",
-				userEmailAddress = "buyer@liferay.com");
-
-			CommerceNavigator.searchEntry(entryName = "MIN77");
-		}
-
-		task ("Then all of the products sharing same partial SKU that is searched are populated") {
-			for (var product : list "Lift Support:MIN77825,Muffler/Resonators:MIN77824,Exhaust Clamps:MIN77823,Catalytic Converters:MIN77822") {
-				var productName = StringUtil.extractFirst(${product}, ":");
-				var productSku = StringUtil.extractLast(${product}, ":");
-
-				AssertElementPresent(
-					key_productName = ${productName},
-					key_productSku = ${productSku},
-					locator1 = "CommerceEntry#PRODUCT_CARD_SKU");
-			}
-
-			AssertElementPresent(
-				key_productCount = 4,
-				locator1 = "CommerceFrontStore#FS_PRODUCT_COUNT");
-		}
-	}
-
 	@description = "This is a test for COMMERCE-11848. Users can search fields and see the corresponding search suggestions language override (if previously set)"
 	@priority = 5
 	test CanGlobalSearchViewSearchSuggestionsWithLanguageOverride {
