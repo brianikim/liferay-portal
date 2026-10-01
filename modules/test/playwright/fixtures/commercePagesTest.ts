@@ -7,6 +7,7 @@ import {test} from '@playwright/test';
 
 import {CommerceAccountManagementPage} from '../pages/commerce/commerce-account-web/commerceAccountManagementPage';
 import {CommerceChannelDefaultsPage} from '../pages/commerce/commerce-account-web/commerceChannelDefaultsPage';
+import {CommerceAdminAvailabilityEstimatesPage} from '../pages/commerce/commerce-availability-estimate-web/commerceAdminAvailabilityEstimatesPage';
 import {CommerceCartPage} from '../pages/commerce/commerce-cart-content-web/commerceCartPage';
 import {CommerceCartSummaryPage} from '../pages/commerce/commerce-cart-content-web/commerceCartSummaryPage';
 import {CommerceAdminCatalogDetailsPage} from '../pages/commerce/commerce-catalog-web/commerceAdminCatalogDetailsPage';
@@ -89,6 +90,7 @@ const commercePagesTest = test.extend<{
 	attachmentsPage: AttachmentsPage;
 	checkoutPage: CheckoutPage;
 	commerceAccountManagementPage: CommerceAccountManagementPage;
+	commerceAdminAvailabilityEstimatesPage: CommerceAdminAvailabilityEstimatesPage;
 	commerceAdminCatalogDetailsPage: CommerceAdminCatalogDetailsPage;
 	commerceAdminCatalogsPage: CommerceAdminCatalogsPage;
 	commerceAdminChannelDetailsCategoryDisplayPagesPage: CommerceAdminChannelDetailsCategoryDisplayPagesPage;
@@ -174,6 +176,9 @@ const commercePagesTest = test.extend<{
 	},
 	commerceAccountManagementPage: async ({page}, use) => {
 		await use(new CommerceAccountManagementPage(page));
+	},
+	commerceAdminAvailabilityEstimatesPage: async ({page}, use) => {
+		await use(new CommerceAdminAvailabilityEstimatesPage(page));
 	},
 	commerceAdminCatalogDetailsPage: async ({page}, use) => {
 		await use(new CommerceAdminCatalogDetailsPage(page));
