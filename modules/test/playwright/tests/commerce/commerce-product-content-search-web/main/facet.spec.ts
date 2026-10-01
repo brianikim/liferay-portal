@@ -10,11 +10,17 @@ import {dataApiHelpersTest} from '../../../../fixtures/dataApiHelpersTest';
 import {isolatedSiteTest} from '../../../../fixtures/isolatedSiteTest';
 import {loginTest} from '../../../../fixtures/loginTest';
 import {DataApiHelpers} from '../../../../helpers/ApiHelpers';
+import {createCategories} from '../../../../helpers/CreateCategories';
+import {TProduct} from '../../../../helpers/HeadlessCommerceAdminCatalogApiHelper';
 import {
 	FacetWidget,
 	SpecificationFacetsPage,
 } from '../../../../pages/commerce/commerce-product-content-search-web/specificationFacetsPage';
+import getGlobalSiteId from '../../../../utils/getGlobalSiteId';
+import {getRandomInt} from '../../../../utils/getRandomInt';
 import getRandomString from '../../../../utils/getRandomString';
+import getPageDefinition from '../../../layout-content-page-editor-web/main/utils/getPageDefinition';
+import getWidgetDefinition from '../../../layout-content-page-editor-web/main/utils/getWidgetDefinition';
 
 export const test = mergeTests(
 	commercePagesTest,
@@ -31,13 +37,15 @@ type FacetPlan = {
 type SeedFacets = (
 	apiHelpers: DataApiHelpers,
 	catalogId: number,
-	facetPlans: FacetPlan[]
-) => Promise<void>;
+	facetPlans: FacetPlan[],
+	productNamePrefix?: string
+) => Promise<TProduct[]>;
 
 async function seedOptionFacets(
 	apiHelpers: DataApiHelpers,
 	catalogId: number,
-	facetPlans: FacetPlan[]
+	facetPlans: FacetPlan[],
+	productNamePrefix = ''
 ) {
 	const options = [];
 
@@ -52,6 +60,8 @@ async function seedOptionFacets(
 			)
 		);
 	}
+
+	const products = [];
 
 	for (const productValues of toProductValues(facetPlans)) {
 		const productOptions = [];
@@ -77,18 +87,23 @@ async function seedOptionFacets(
 			});
 		});
 
-		await apiHelpers.headlessCommerceAdminCatalog.postProduct({
-			catalogId,
-			name: {en_US: getRandomString()},
-			productOptions,
-		});
+		products.push(
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId,
+				name: {en_US: productNamePrefix + getRandomString()},
+				productOptions,
+			})
+		);
 	}
+
+	return products;
 }
 
 async function seedSpecificationFacets(
 	apiHelpers: DataApiHelpers,
 	catalogId: number,
-	facetPlans: FacetPlan[]
+	facetPlans: FacetPlan[],
+	productNamePrefix = ''
 ) {
 	const specifications = [];
 
@@ -102,6 +117,8 @@ async function seedSpecificationFacets(
 		);
 	}
 
+	const products = [];
+
 	for (const productValues of toProductValues(facetPlans)) {
 		const productSpecifications = [];
 
@@ -114,12 +131,16 @@ async function seedSpecificationFacets(
 			}
 		});
 
-		await apiHelpers.headlessCommerceAdminCatalog.postProduct({
-			catalogId,
-			name: {en_US: getRandomString()},
-			productSpecifications,
-		});
+		products.push(
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId,
+				name: {en_US: productNamePrefix + getRandomString()},
+				productSpecifications,
+			})
+		);
 	}
+
+	return products;
 }
 
 function toProductValues(facetPlans: FacetPlan[]): string[][][] {
@@ -164,6 +185,51 @@ async function setUpFacetPage(
 	return {catalogId: catalog.id, url};
 }
 
+async function setUpFacetSearchPage(
+	apiHelpers: DataApiHelpers,
+	site: Site,
+	widgetNames: string[]
+) {
+	await apiHelpers.headlessCommerceAdminChannel.postChannel({
+		siteGroupId: site.id,
+	});
+
+	const catalog = await apiHelpers.headlessCommerceAdminCatalog.postCatalog({
+		name: getRandomString(),
+	});
+
+	const keyword = getRandomString().replace(/-/g, '');
+
+	const layout = await apiHelpers.headlessDelivery.createSitePage({
+		pageDefinition: getPageDefinition([
+			getWidgetDefinition({
+				id: getRandomString(),
+				widgetConfig: {
+					keywordsParameterName: 'q',
+					searchScope: 'everything',
+				},
+				widgetName:
+					'com_liferay_portal_search_web_search_bar_portlet_SearchBarPortlet',
+			}),
+			...[
+				...widgetNames,
+				'com_liferay_commerce_product_content_search_web_internal_portlet_CPSortPortlet',
+				'com_liferay_commerce_product_content_search_web_internal_portlet_CPSearchResultsPortlet',
+			].map((widgetName) =>
+				getWidgetDefinition({id: getRandomString(), widgetName})
+			),
+		]),
+		siteId: site.id,
+		title: getRandomString(),
+	});
+
+	return {
+		catalogId: catalog.id,
+		keyword,
+		url: `/web/${site.name}/${layout.friendlyUrlPath}?q=${keyword}`,
+	};
+}
+
 async function goToIndexedFacetPage(
 	page: Page,
 	specificationFacetsPage: SpecificationFacetsPage,
@@ -184,12 +250,15 @@ async function goToIndexedFacetPage(
 
 const FACET_WIDGETS: Array<{
 	displayTemplateTerms: string[];
+	filterTickets: string[];
 	seedFacets: SeedFacets;
 	tickets: Record<string, string>;
 	widget: FacetWidget;
+	widgetName: string;
 }> = [
 	{
 		displayTemplateTerms: ['6', '12', '112'],
+		filterTickets: ['@COMMERCE-6165'],
 		seedFacets: seedOptionFacets,
 		tickets: {
 			displayFrequencies: '@COMMERCE-8646',
@@ -201,9 +270,12 @@ const FACET_WIDGETS: Array<{
 			setupTab: '@COMMERCE-8646',
 		},
 		widget: 'Option Facet',
+		widgetName:
+			'com_liferay_commerce_product_content_search_web_internal_portlet_CPOptionFacetsPortlet',
 	},
 	{
 		displayTemplateTerms: ['Cast Iron', 'Neoprene', 'Stainless Steel'],
+		filterTickets: ['@COMMERCE-6166', '@COMMERCE-12603'],
 		seedFacets: seedSpecificationFacets,
 		tickets: {
 			displayFrequencies: '@COMMERCE-8403',
@@ -215,14 +287,18 @@ const FACET_WIDGETS: Array<{
 			setupTab: '@COMMERCE-8384',
 		},
 		widget: 'Specification Facet',
+		widgetName:
+			'com_liferay_commerce_product_content_search_web_internal_portlet_CPSpecificationOptionFacetsPortlet',
 	},
 ];
 
 for (const {
 	displayTemplateTerms,
+	filterTickets,
 	seedFacets,
 	tickets,
 	widget,
+	widgetName,
 } of FACET_WIDGETS) {
 	const maxEntitiesField =
 		widget === 'Option Facet' ? 'Max Options' : 'Max Specifications';
@@ -706,6 +782,72 @@ for (const {
 			).toHaveCount(100);
 		}
 	);
+
+	test(
+		`${widget} - Selecting a term narrows the search results and the URL`,
+		{tag: [...filterTickets, '@LPD-106244-Grouped-9']},
+		async ({apiHelpers, page, site, specificationFacetsPage}) => {
+			const facetName = `${facetPrefix}${getRandomInt()}`;
+
+			const {catalogId, keyword, url} = await setUpFacetSearchPage(
+				apiHelpers,
+				site,
+				[widgetName]
+			);
+
+			const [alphaProduct, betaProduct] = await seedFacets(
+				apiHelpers,
+				catalogId,
+				[{name: facetName, values: [['Alpha'], ['Beta']]}],
+				`${keyword} `
+			);
+
+			await goToIndexedFacetPage(
+				page,
+				specificationFacetsPage,
+				url,
+				widget,
+				facetName
+			);
+
+			const parameterName = await specificationFacetsPage
+				.facetParameterNameInput(widget, facetName)
+				.inputValue();
+
+			for (const {hiddenProduct, term, visibleProduct} of [
+				{
+					hiddenProduct: betaProduct,
+					term: 'Alpha',
+					visibleProduct: alphaProduct,
+				},
+				{
+					hiddenProduct: alphaProduct,
+					term: 'Beta',
+					visibleProduct: betaProduct,
+				},
+			]) {
+				await page.goto(url);
+
+				await specificationFacetsPage
+					.facetTermCheckbox(widget, facetName, term)
+					.click();
+
+				await expect(page).toHaveURL(
+					new RegExp(`[?&]${parameterName}=${term}`)
+				);
+				await expect(
+					specificationFacetsPage.searchResult(
+						visibleProduct.name['en_US']
+					)
+				).toBeVisible();
+				await expect(
+					specificationFacetsPage.searchResult(
+						hiddenProduct.name['en_US']
+					)
+				).toBeHidden();
+			}
+		}
+	);
 }
 
 test(
@@ -787,5 +929,237 @@ test(
 				)
 			).toHaveCount(0);
 		}
+	}
+);
+
+test(
+	'Category Facet narrows the search results to the selected category',
+	{tag: ['@COMMERCE-6169', '@LPD-106244-Grouped-9']},
+	async ({apiHelpers, page, site, specificationFacetsPage}) => {
+		const {catalogId, keyword, url} = await setUpFacetSearchPage(
+			apiHelpers,
+			site,
+			[
+				'com_liferay_portal_search_web_category_facet_portlet_CategoryFacetPortlet',
+			]
+		);
+
+		const categoryName = getRandomString();
+
+		const categories = await createCategories({
+			apiHelpers,
+			categoryNames: [{name: categoryName}],
+			siteId: await getGlobalSiteId(apiHelpers),
+			vocabularyName: getRandomString(),
+		});
+
+		const categorizedProduct =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId,
+				categories,
+				name: {en_US: `${keyword} ${getRandomString()}`},
+			});
+		const uncategorizedProduct =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId,
+				name: {en_US: `${keyword} ${getRandomString()}`},
+			});
+
+		await expect(async () => {
+			await page.goto(url);
+
+			await expect(
+				specificationFacetsPage.categoryFacetCheckbox(categoryName)
+			).toBeVisible({timeout: 5000});
+		}).toPass({timeout: 60000});
+
+		await specificationFacetsPage
+			.categoryFacetCheckbox(categoryName)
+			.click();
+
+		await expect(
+			specificationFacetsPage.searchResult(
+				categorizedProduct.name['en_US']
+			)
+		).toBeVisible();
+		await expect(
+			specificationFacetsPage.searchResult(
+				uncategorizedProduct.name['en_US']
+			)
+		).toBeHidden();
+	}
+);
+
+test(
+	'Commerce facets filter cumulatively without the Category Facet and can be cleared',
+	{tag: ['@COMMERCE-9253', '@COMMERCE-10881', '@LPD-106244-Grouped-9']},
+	async ({apiHelpers, page, site, specificationFacetsPage}) => {
+		const {catalogId, keyword, url} = await setUpFacetSearchPage(
+			apiHelpers,
+			site,
+			[
+				'com_liferay_commerce_product_content_search_web_internal_portlet_CPOptionFacetsPortlet',
+				'com_liferay_commerce_product_content_search_web_internal_portlet_CPPriceRangeFacetsPortlet',
+				'com_liferay_commerce_product_content_search_web_internal_portlet_CPSpecificationOptionFacetsPortlet',
+			]
+		);
+
+		const optionName = `Option${getRandomInt()}`;
+
+		const option = await apiHelpers.headlessCommerceAdminCatalog.postOption(
+			'select',
+			optionName.toLowerCase(),
+			optionName,
+			0,
+			true
+		);
+
+		const specificationName = `Spec${getRandomInt()}`;
+
+		const specification =
+			await apiHelpers.headlessCommerceAdminCatalog.postSpecification(
+				true,
+				0,
+				specificationName
+			);
+
+		const products = [];
+
+		for (const {optionValue, price, specificationValue} of [
+			{optionValue: 'Alpha', price: 150, specificationValue: 'Warranty'},
+			{optionValue: 'Beta', price: 150, specificationValue: 'Warranty'},
+			{optionValue: 'Alpha', price: 30, specificationValue: 'Warranty'},
+			{optionValue: 'Alpha', price: 150, specificationValue: 'Other'},
+		]) {
+			products.push(
+				await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+					catalogId,
+					name: {en_US: `${keyword} ${getRandomString()}`},
+					productOptions: [
+						{
+							facetable: true,
+							fieldType: 'select',
+							key: option.key,
+							name: option.name,
+							optionId: option.id,
+							priceType: 'static',
+							priority: 0,
+							productOptionValues: [
+								{
+									key: 'value-0',
+									name: {en_US: optionValue},
+									priority: 0,
+								},
+							],
+						},
+					],
+					productSpecifications: [
+						{
+							specificationKey: specification.key,
+							value: {en_US: specificationValue},
+						},
+					],
+					skus: [
+						{
+							cost: 0,
+							price,
+							published: true,
+							purchasable: true,
+							sku: getRandomString(),
+						},
+					],
+				})
+			);
+		}
+
+		await expect(async () => {
+			await page.goto(url);
+
+			await expect(
+				specificationFacetsPage.productsAvailableLabel(products.length)
+			).toBeVisible({timeout: 5000});
+		}).toPass({timeout: 60000});
+
+		const facetFilters = [
+			{
+				checkbox: specificationFacetsPage.facetTermCheckbox(
+					'Specification Facet',
+					specificationName,
+					'Warranty'
+				),
+				clearedProductCount: 4,
+				hiddenProducts: [products[3]],
+				portlet: specificationFacetsPage.specificationFacetPortlet,
+				visibleProducts: [products[0], products[1], products[2]],
+			},
+			{
+				checkbox: specificationFacetsPage.priceRangeFacetCheckbox(
+					'$ 100.00 - $ 199.99'
+				),
+				clearedProductCount: 3,
+				hiddenProducts: [products[2], products[3]],
+				portlet: specificationFacetsPage.priceRangeFacetPortlet,
+				visibleProducts: [products[0], products[1]],
+			},
+			{
+				checkbox: specificationFacetsPage.facetTermCheckbox(
+					'Option Facet',
+					optionName,
+					'Alpha'
+				),
+				clearedProductCount: 2,
+				hiddenProducts: [products[1], products[2], products[3]],
+				portlet: specificationFacetsPage.optionFacetPortlet,
+				visibleProducts: [products[0]],
+			},
+		];
+
+		await test.step('Each facet narrows the results of the previous facets', async () => {
+			for (const {
+				checkbox,
+				hiddenProducts,
+				visibleProducts,
+			} of facetFilters) {
+				await checkbox.click();
+
+				await expect(checkbox).toBeChecked();
+				await expect(
+					specificationFacetsPage.productsAvailableLabel(
+						visibleProducts.length
+					)
+				).toBeVisible();
+
+				for (const product of visibleProducts) {
+					await expect(
+						specificationFacetsPage.searchResult(
+							product.name['en_US']
+						)
+					).toBeVisible();
+				}
+
+				for (const product of hiddenProducts) {
+					await expect(
+						specificationFacetsPage.searchResult(
+							product.name['en_US']
+						)
+					).toBeHidden();
+				}
+			}
+		});
+
+		await test.step('Clearing each facet restores the results it filtered out', async () => {
+			for (const {checkbox, clearedProductCount, portlet} of [
+				...facetFilters,
+			].reverse()) {
+				await specificationFacetsPage.facetClearButton(portlet).click();
+
+				await expect(checkbox).not.toBeChecked();
+				await expect(
+					specificationFacetsPage.productsAvailableLabel(
+						clearedProductCount
+					)
+				).toBeVisible();
+			}
+		});
 	}
 );
