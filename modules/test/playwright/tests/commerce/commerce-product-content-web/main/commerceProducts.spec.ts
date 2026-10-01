@@ -1105,6 +1105,121 @@ test('LPD-39067 Can product media and relation show correct date format', async 
 	);
 });
 
+test(
+	'Images, attachments and CDN images can be deleted from the Media tab of a product',
+	{
+		tag: [
+			'@COMMERCE-6026',
+			'@COMMERCE-6033',
+			'@COMMERCE-11209',
+			'@LPD-106244-Grouped-6',
+		],
+	},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsMediaPage,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductPage,
+		page,
+		site,
+	}) => {
+		const attachmentDocument =
+			await apiHelpers.headlessDelivery.postDocument(
+				site.id,
+				createReadStream(
+					path.join(__dirname, '/dependencies/attachment.txt')
+				),
+				{
+					description: getRandomString(),
+					externalReferenceCode: getRandomString(),
+					fileName: getRandomString(),
+					title: getRandomString(),
+					viewableBy: 'Owner',
+				}
+			);
+
+		apiHelpers.data.push({id: attachmentDocument.id, type: 'document'});
+
+		const imageDocument = await apiHelpers.headlessDelivery.postDocument(
+			site.id,
+			createReadStream(path.join(__dirname, '/dependencies/liferay.png')),
+			{
+				description: getRandomString(),
+				externalReferenceCode: getRandomString(),
+				fileName: getRandomString(),
+				title: getRandomString(),
+				viewableBy: 'Owner',
+			}
+		);
+
+		apiHelpers.data.push({id: imageDocument.id, type: 'document'});
+
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		const product =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				name: {en_US: getRandomString()},
+			});
+
+		await apiHelpers.headlessCommerceAdminCatalog.postAttachment(
+			product.productId,
+			attachmentDocument.id,
+			attachmentDocument.title
+		);
+
+		const cdnImageTitle = getRandomString();
+
+		await apiHelpers.headlessCommerceAdminCatalog.postCDNImage(
+			product.productId,
+			`http://www.liferay.com/${getRandomString()}.jpg`,
+			cdnImageTitle
+		);
+		await apiHelpers.headlessCommerceAdminCatalog.postImage(
+			product.productId,
+			imageDocument.id,
+			imageDocument.title
+		);
+
+		await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+		await commerceAdminProductDetailsPage.productMediaLink.click();
+
+		for (const {table, title} of [
+			{
+				table: commerceAdminProductDetailsMediaPage.mediaAttachmentsTable,
+				title: attachmentDocument.title,
+			},
+			{
+				table: commerceAdminProductDetailsMediaPage.mediaImagesTable,
+				title: cdnImageTitle,
+			},
+			{
+				table: commerceAdminProductDetailsMediaPage.mediaImagesTable,
+				title: imageDocument.title,
+			},
+		]) {
+			await expect(
+				commerceAdminProductDetailsMediaPage.mediaTableRow(title, table)
+			).toBeVisible();
+
+			await commerceAdminProductDetailsMediaPage
+				.tableRowActionsButton(title, table)
+				.click();
+			await commerceAdminProductDetailsMediaPage.deleteMenuItem.click();
+
+			await waitForAlert(page);
+
+			await page.reload();
+
+			await expect(
+				commerceAdminProductDetailsMediaPage.mediaTableRow(title, table)
+			).toHaveCount(0);
+		}
+	}
+);
+
 test('LPD-52731 Product shows in catalog after updating Account Group Visibility Filter through Batch API', async ({
 	apiHelpers,
 	globalMenuPage,
