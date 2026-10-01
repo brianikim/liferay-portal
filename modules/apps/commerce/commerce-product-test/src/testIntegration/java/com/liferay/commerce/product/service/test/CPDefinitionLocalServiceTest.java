@@ -526,7 +526,7 @@ public class CPDefinitionLocalServiceTest {
 		frutillaRule.scenario(
 			"Duplicate a product definition"
 		).given(
-			"An approved or a draft product definition"
+			"A product definition in any workflow status"
 		).when(
 			"the product definition and its duplicate are duplicated"
 		).then(
@@ -536,7 +536,14 @@ public class CPDefinitionLocalServiceTest {
 		);
 
 		_testCloneCPDefinition(WorkflowConstants.STATUS_APPROVED);
+		_testCloneCPDefinition(WorkflowConstants.STATUS_DENIED);
 		_testCloneCPDefinition(WorkflowConstants.STATUS_DRAFT);
+		_testCloneCPDefinition(WorkflowConstants.STATUS_EMPTY);
+		_testCloneCPDefinition(WorkflowConstants.STATUS_EXPIRED);
+		_testCloneCPDefinition(WorkflowConstants.STATUS_INACTIVE);
+		_testCloneCPDefinition(WorkflowConstants.STATUS_INCOMPLETE);
+		_testCloneCPDefinition(WorkflowConstants.STATUS_IN_TRASH);
+		_testCloneCPDefinition(WorkflowConstants.STATUS_SCHEDULED);
 	}
 
 	@Test
