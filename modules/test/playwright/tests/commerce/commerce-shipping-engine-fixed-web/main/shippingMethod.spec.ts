@@ -456,12 +456,22 @@ test(
 );
 
 test(
-	'Verify Variable Rate Shipping Option Settings is viewed from Shipping Option',
-	{tag: ['@LPD-71919']},
+	'A Variable Rate shipping option and its settings can be added and deleted',
+	{
+		tag: [
+			'@COMMERCE-6110',
+			'@COMMERCE-6112',
+			'@COMMERCE-6113',
+			'@COMMERCE-6115',
+			'@LPD-71919',
+			'@LPD-106244-Grouped-15',
+		],
+	},
 	async ({
 		apiHelpers,
 		commerceAdminChannelDetailsPage,
 		commerceAdminChannelsPage,
+		page,
 		site,
 	}) => {
 		const channel =
@@ -478,19 +488,60 @@ test(
 			'Variable Rate',
 			'Shipping Methods'
 		);
+
+		const shippingOptionName = getRandomString();
+
 		await commerceAdminChannelDetailsPage.addVariableRateShippingOption(
-			'variable rate'
+			shippingOptionName
 		);
 		await commerceAdminChannelDetailsPage.addVariableRateShippingOptionSetting(
-			'variable rate',
+			shippingOptionName,
 			'10'
 		);
 
 		await expect(
 			await commerceAdminChannelDetailsPage.shippingOptionsSettingsTableLink(
-				'variable rate',
+				shippingOptionName,
 				'Shipping Methods'
 			)
 		).toBeVisible();
+
+		await commerceAdminChannelDetailsPage.deleteShippingOptionSetting(
+			shippingOptionName
+		);
+
+		await page.reload();
+
+		await commerceAdminChannelDetailsPage.openShippingOptionSettings(
+			'Variable Rate',
+			shippingOptionName
+		);
+
+		await expect(
+			await commerceAdminChannelDetailsPage.shippingOptionsSettingsTableLink(
+				shippingOptionName,
+				'Shipping Methods'
+			)
+		).toHaveCount(0);
+
+		await page.reload();
+
+		await commerceAdminChannelDetailsPage.deleteShippingOption(
+			shippingOptionName,
+			'Variable Rate'
+		);
+
+		await page.reload();
+
+		await commerceAdminChannelDetailsPage.openShippingOptions(
+			'Variable Rate'
+		);
+
+		await expect(
+			await commerceAdminChannelDetailsPage.getRowByTextFromSidePanelTable(
+				'Shipping Methods',
+				shippingOptionName
+			)
+		).toHaveCount(0);
 	}
 );
