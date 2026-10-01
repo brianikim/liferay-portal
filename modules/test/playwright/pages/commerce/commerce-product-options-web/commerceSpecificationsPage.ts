@@ -107,8 +107,8 @@ export class CommerceSpecificationsPage {
 		this.visibleToggle = page.getByLabel('Visible', {exact: true});
 	}
 
-	async waitForKey(specificationName) {
-		await this.specificationLabel.fill(specificationName);
-		await this.specificationLabel.waitFor();
+	async search(keywords: string) {
+		await this.searchInput.fill(keywords);
+		await this.searchInput.press('Enter');
 	}
 }
