@@ -2079,8 +2079,15 @@ test(
 );
 
 test(
-	'ERC and status are displayed in the placed order details page',
-	{tag: ['@COMMERCE-8931', '@LPD-100094', '@LPD-106244-Grouped-12']},
+	'ERC, status and non-editable terms are displayed in the placed order details page',
+	{
+		tag: [
+			'@COMMERCE-8931',
+			'@LPD-100094',
+			'@LPD-106244-Grouped-12',
+			'@LPD-106244-Grouped-13',
+		],
+	},
 	async ({
 		apiHelpers,
 		commerceAdminChannelsPage,
@@ -2115,13 +2122,24 @@ test(
 			site.id
 		);
 
+		const deliveryTerm =
+			await apiHelpers.headlessCommerceAdminOrder.postTerm({
+				type: 'delivery-terms',
+			});
+		const paymentTerm =
+			await apiHelpers.headlessCommerceAdminOrder.postTerm({
+				type: 'payment-terms',
+			});
+
 		const externalReferenceCode = getRandomString();
 
 		await apiHelpers.headlessCommerceAdminOrder.postOrder({
 			accountId: account.id,
 			channelId: channel.id,
+			deliveryTermId: deliveryTerm.id,
 			externalReferenceCode,
 			orderStatus: '1',
+			paymentTermId: paymentTerm.id,
 		});
 
 		await performLogout(page);
@@ -2142,6 +2160,13 @@ test(
 		await expect(
 			placedOrdersPage.orderDetailsValue('Order Status')
 		).toContainText('Pending');
+		await expect(
+			placedOrdersPage.termLink(deliveryTerm.label['en_US'])
+		).toBeVisible();
+		await expect(
+			placedOrdersPage.termLink(paymentTerm.label['en_US'])
+		).toBeVisible();
+		await expect(placedOrdersPage.editTermsLink).toHaveCount(0);
 	}
 );
 
