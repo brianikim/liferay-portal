@@ -39,7 +39,16 @@ export const test = mergeTests(
 
 test(
 	'Account Selector in Minium theme working as expected',
-	{tag: ['@COMMERCE-5957', '@COMMERCE-6215', '@LPD-48266', '@LPD-56172']},
+	{
+		tag: [
+			'@COMMERCE-5928',
+			'@COMMERCE-5957',
+			'@COMMERCE-6215',
+			'@LPD-48266',
+			'@LPD-56172',
+			'@LPD-106244-Grouped-14',
+		],
+	},
 	async ({
 		apiHelpers,
 		commerceAdminChannelDetailsPage,
@@ -153,9 +162,7 @@ test(
 			await page.waitForLoadState();
 
 			await expect(
-				commerceThemeMiniumCatalogPage.accountSelectorButton.locator(
-					'.order-id'
-				)
+				commerceThemeMiniumCatalogPage.accountSelectorOrderId
 			).toHaveText(order1.id.toString());
 		});
 		try {
@@ -169,15 +176,11 @@ test(
 				await page.goto(`/web/${site.name}`);
 
 				await expect(
-					commerceThemeMiniumCatalogPage.accountSelectorButton.locator(
-						'.order-id'
-					)
+					commerceThemeMiniumCatalogPage.accountSelectorOrderId
 				).not.toHaveText(order1.id.toString());
 
 				order2Id =
-					await commerceThemeMiniumCatalogPage.accountSelectorButton
-						.locator('.order-id')
-						.textContent();
+					await commerceThemeMiniumCatalogPage.accountSelectorOrderId.textContent();
 			});
 
 			await test.step('Create an order from the create new order button and verify that the new order is selected', async () => {
@@ -191,23 +194,23 @@ test(
 				});
 
 				await expect(
-					commerceThemeMiniumCatalogPage.accountSelectorButton.locator(
-						'.order-id'
-					)
+					commerceThemeMiniumCatalogPage.accountSelectorOrderId
 				).not.toHaveText(order2Id);
 			});
 
 			await test.step('Search for an order in the account selector and select it as active', async () => {
 				await commerceThemeMiniumCatalogPage.accountSelectorButton.click();
 
+				await expect(
+					commerceThemeMiniumCatalogPage.accountSelectorOrdersListTitles
+				).toHaveCount(3);
+
 				await commerceThemeMiniumCatalogPage.accountSelectorSearchOrderInput.fill(
 					order2Id
 				);
 
 				await expect(
-					commerceThemeMiniumCatalogPage.accountSelectorOrdersList.locator(
-						'.table-list-title'
-					)
+					commerceThemeMiniumCatalogPage.accountSelectorOrdersListTitles
 				).toHaveCount(1);
 
 				await commerceThemeMiniumCatalogPage.accountSelectorOrdersList
@@ -221,9 +224,7 @@ test(
 				});
 
 				await expect(
-					commerceThemeMiniumCatalogPage.accountSelectorButton.locator(
-						'.order-id'
-					)
+					commerceThemeMiniumCatalogPage.accountSelectorOrderId
 				).toHaveText(order2Id);
 			});
 
