@@ -13,9 +13,11 @@ import com.liferay.commerce.term.model.CommerceTermEntryRel;
 import com.liferay.commerce.term.service.CommerceTermEntryLocalService;
 import com.liferay.commerce.term.service.CommerceTermEntryRelLocalService;
 import com.liferay.headless.commerce.admin.order.client.dto.v1_0.TermOrderType;
+import com.liferay.headless.commerce.admin.order.client.problem.Problem;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.test.AssertUtils;
 import com.liferay.portal.kernel.test.rule.DataGuard;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
@@ -84,6 +86,20 @@ public class TermOrderTypeResourceTest
 	@Test
 	public void testGraphQLDeleteTermOrderType() throws Exception {
 		super.testGraphQLDeleteTermOrderType();
+	}
+
+	@Override
+	@Test
+	public void testPostTermIdTermOrderType() throws Exception {
+		super.testPostTermIdTermOrderType();
+
+		TermOrderType termOrderType =
+			testPostTermIdTermOrderType_addTermOrderType(randomTermOrderType());
+
+		AssertUtils.assertFailure(
+			Problem.ProblemException.class, "The qualifier is already linked.",
+			() -> termOrderTypeResource.postTermIdTermOrderType(
+				_commerceTermEntry.getCommerceTermEntryId(), termOrderType));
 	}
 
 	@Override
