@@ -2050,8 +2050,8 @@ test(
 );
 
 test(
-	'ERC is displayed in the placed order details page',
-	{tag: ['@COMMERCE-8931', '@LPD-100094']},
+	'ERC and status are displayed in the placed order details page',
+	{tag: ['@COMMERCE-8931', '@LPD-100094', '@LPD-106244-Grouped-12']},
 	async ({
 		apiHelpers,
 		commerceAdminChannelsPage,
@@ -2092,7 +2092,7 @@ test(
 			accountId: account.id,
 			channelId: channel.id,
 			externalReferenceCode,
-			orderStatus: '0',
+			orderStatus: '1',
 		});
 
 		await performLogout(page);
@@ -2110,6 +2110,9 @@ test(
 		await expect(placedOrdersPage.orderDetailsValue('ERC')).toHaveText(
 			externalReferenceCode
 		);
+		await expect(
+			placedOrdersPage.orderDetailsValue('Order Status')
+		).toContainText('Pending');
 	}
 );
 
