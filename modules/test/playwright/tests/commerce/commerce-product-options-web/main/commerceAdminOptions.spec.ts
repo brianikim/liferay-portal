@@ -9,6 +9,7 @@ import {expect, mergeTests} from '@playwright/test';
 
 import {commercePagesTest} from '../../../../fixtures/commercePagesTest';
 import {dataApiHelpersTest} from '../../../../fixtures/dataApiHelpersTest';
+import {globalMenuPagesTest} from '../../../../fixtures/globalMenuPagesTest';
 import {loginTest} from '../../../../fixtures/loginTest';
 import getRandomString from '../../../../utils/getRandomString';
 import {waitForAlert} from '../../../../utils/waitForAlert';
@@ -16,6 +17,7 @@ import {waitForAlert} from '../../../../utils/waitForAlert';
 export const test = mergeTests(
 	commercePagesTest,
 	dataApiHelpersTest,
+	globalMenuPagesTest,
 	loginTest()
 );
 
@@ -238,5 +240,83 @@ test(
 		await commerceAdminProductDetailsProductOptionsPage.deleteMenuItem.click();
 
 		await waitForAlert(page);
+	}
+);
+
+test(
+	'Create, reopen and remove an option from the standalone options portlet',
+	{tag: ['@COMMERCE-6280', '@LPD-106244-Grouped-3']},
+	async ({apiHelpers, commerceAdminOptionsPage, globalMenuPage}) => {
+		const optionKey = 'color-' + getRandomString().toLowerCase();
+		const optionName = 'Color-' + getRandomString();
+
+		const optionSearchParams = new URLSearchParams({
+			filter: `key eq '${optionKey}'`,
+		});
+
+		try {
+			await globalMenuPage.goToCommerce('Options');
+
+			await commerceAdminOptionsPage.createOption(
+				optionName,
+				'Select from List',
+				optionKey
+			);
+
+			await globalMenuPage.goToCommerce('Options');
+
+			await commerceAdminOptionsPage.search(optionName);
+			await commerceAdminOptionsPage.optionLink(optionName).click();
+
+			await expect(commerceAdminOptionsPage.nameInput).toHaveValue(
+				optionName
+			);
+			await expect(commerceAdminOptionsPage.fieldTypeSelect).toHaveValue(
+				'select'
+			);
+			await expect(commerceAdminOptionsPage.keyInput).toHaveValue(
+				optionKey
+			);
+
+			const option = (
+				await apiHelpers.headlessCommerceAdminCatalog.getOptions(
+					optionSearchParams
+				)
+			).items[0];
+
+			await apiHelpers.headlessCommerceAdminCatalog.postOptionValue(
+				option.id,
+				'black',
+				'Black',
+				0
+			);
+
+			await globalMenuPage.goToCommerce('Options');
+
+			await commerceAdminOptionsPage.search(optionName);
+			await commerceAdminOptionsPage.deleteOption(optionName);
+
+			await expect(
+				commerceAdminOptionsPage.optionLink(optionName)
+			).toHaveCount(0);
+			expect(
+				(
+					await apiHelpers.headlessCommerceAdminCatalog.getOptions(
+						optionSearchParams
+					)
+				).items
+			).toHaveLength(0);
+		}
+		finally {
+			const option = (
+				await apiHelpers.headlessCommerceAdminCatalog.getOptions(
+					optionSearchParams
+				)
+			).items[0];
+
+			if (option) {
+				apiHelpers.data.push({id: option.id, type: 'option'});
+			}
+		}
 	}
 );
