@@ -1264,8 +1264,8 @@ test(
 );
 
 test(
-	'Assert date and time are displayed as order date',
-	{tag: '@LPD-33658'},
+	'The order date shows the create time until the Placed Orders widget configuration hides it',
+	{tag: ['@LPD-33658', '@LPD-106244-Grouped-12']},
 	async ({
 		apiHelpers,
 		commerceAdminChannelsPage,
@@ -1302,9 +1302,9 @@ test(
 
 		await selectCurrentAccount(account.id, apiHelpers, site.id);
 
-		await page.goto(
-			`${liferayConfig.environment.baseUrl}/web${site.friendlyUrlPath}${layout.friendlyUrlPath}`
-		);
+		const layoutURL = `${liferayConfig.environment.baseUrl}/web${site.friendlyUrlPath}${layout.friendlyUrlPath}`;
+
+		await page.goto(layoutURL);
 
 		const catalog =
 			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
@@ -1351,47 +1351,83 @@ test(
 			return Liferay.ThemeDisplay.getBCP47LanguageId();
 		});
 
-		await expect(
-			page
-				.getByText(
+		const orderDateTime = page
+			.getByText(
+				getDateCustomFormat(
+					order.createDate,
+					locale,
+					customFormatDateTimeYY.DATE_AND_TIME
+				).replace(/,(?=[^,]*$)/, '')
+			)
+			.or(
+				page.getByText(
 					getDateCustomFormat(
 						order.createDate,
 						locale,
-						customFormatDateTimeYY.DATE_AND_TIME
+						customFormatDateTimeYYYY.DATE_AND_TIME
 					).replace(/,(?=[^,]*$)/, '')
 				)
-				.or(
-					page.getByText(
-						getDateCustomFormat(
-							order.createDate,
-							locale,
-							customFormatDateTimeYYYY.DATE_AND_TIME
-						).replace(/,(?=[^,]*$)/, '')
-					)
-				)
-		).toBeVisible();
+			);
+
+		await expect(orderDateTime).toBeVisible();
 
 		await placedOrdersPage.placedOrderTableViewButton.click();
 
+		await expect(orderDateTime).toBeVisible();
+
+		await page.goto(layoutURL);
+
+		await placedOrdersPage.goToConfiguration();
+
 		await expect(
-			page
-				.getByText(
+			placedOrdersPage.configurationIFrameOrderDateDisplayPanel
+		).toBeVisible();
+
+		await placedOrdersPage.configurationIFrameShowOrderCreateTimeToggle.uncheck();
+		await placedOrdersPage.configurationIFrameSaveButton.click();
+
+		await waitForAlert(
+			placedOrdersPage.configurationIFrame,
+			'Success:You have successfully updated the setup'
+		);
+
+		await page.reload();
+
+		const orderDate = page
+			.getByText(
+				getDateCustomFormat(
+					order.createDate,
+					locale,
+					customFormatDateYY.DATE_AND_TIME
+				),
+				{exact: true}
+			)
+			.or(
+				page.getByText(
 					getDateCustomFormat(
 						order.createDate,
 						locale,
-						customFormatDateTimeYY.DATE_AND_TIME
-					).replace(/,(?=[^,]*$)/, '')
+						customFormatDateYYYY.DATE_AND_TIME
+					),
+					{exact: true}
 				)
-				.or(
-					page.getByText(
-						getDateCustomFormat(
-							order.createDate,
-							locale,
-							customFormatDateTimeYYYY.DATE_AND_TIME
-						).replace(/,(?=[^,]*$)/, '')
-					)
-				)
-		).toBeVisible();
+			);
+
+		await expect(orderDate).toBeVisible();
+		await expect(orderDateTime).toHaveCount(0);
+
+		await placedOrdersPage.placedOrderTableViewButton.click();
+
+		await expect(orderDate).toBeVisible();
+		await expect(orderDateTime).toHaveCount(0);
+
+		await page.goto(layoutURL);
+
+		await placedOrdersPage.goToConfiguration();
+
+		await expect(
+			placedOrdersPage.configurationIFrameShowOrderCreateTimeToggle
+		).not.toBeChecked();
 
 		await page.goto(`/web/${site.name}`);
 	}
