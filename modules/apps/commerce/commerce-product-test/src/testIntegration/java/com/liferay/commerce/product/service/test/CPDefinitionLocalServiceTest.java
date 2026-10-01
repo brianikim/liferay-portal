@@ -1790,6 +1790,9 @@ public class CPDefinitionLocalServiceTest {
 			"the existing draft is set to incomplete"
 		).and(
 			"the new draft is created"
+		).and(
+			"the approved, incomplete, and draft product definitions are " +
+				"deleted independently"
 		);
 
 		CPDefinition cpDefinition1 = CPTestUtil.addCPDefinitionFromCatalog(
@@ -1831,6 +1834,13 @@ public class CPDefinitionLocalServiceTest {
 
 			Assert.assertEquals(
 				WorkflowConstants.STATUS_INCOMPLETE, cpDefinition2.getStatus());
+
+			_assertDeleteCPDefinitionsIndependently(
+				cpDefinition1, cpDefinition2, cpDefinition3);
+
+			Assert.assertNull(
+				_cProductLocalService.fetchCProduct(
+					cpDefinition1.getCProductId()));
 		}
 	}
 
