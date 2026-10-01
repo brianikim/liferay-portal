@@ -76,6 +76,7 @@ import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.Constants;
+import com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
@@ -96,6 +97,8 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import org.frutilla.FrutillaRule;
 
@@ -516,6 +519,24 @@ public class CPDefinitionLocalServiceTest {
 				expirationCalendar.get(Calendar.MINUTE), user.getTimeZone(),
 				null),
 			cpDefinition.getExpirationDate());
+	}
+
+	@Test
+	public void testCloneCPDefinition() throws Exception {
+		frutillaRule.scenario(
+			"Duplicate a product definition"
+		).given(
+			"An approved or a draft product definition"
+		).when(
+			"the product definition and its duplicate are duplicated"
+		).then(
+			"each duplicate is a draft named and URL titled after its source"
+		).and(
+			"each product definition is deleted independently"
+		);
+
+		_testCloneCPDefinition(WorkflowConstants.STATUS_APPROVED);
+		_testCloneCPDefinition(WorkflowConstants.STATUS_DRAFT);
 	}
 
 	@Test
@@ -1425,6 +1446,58 @@ public class CPDefinitionLocalServiceTest {
 			_serviceContext);
 	}
 
+	private void _assertCloneCPDefinition(
+			CPDefinition cpDefinition, CPDefinition cloneCPDefinition)
+		throws Exception {
+
+		cloneCPDefinition = _cpDefinitionLocalService.getCPDefinition(
+			cloneCPDefinition.getCPDefinitionId());
+
+		Assert.assertEquals(
+			WorkflowConstants.STATUS_DRAFT, cloneCPDefinition.getStatus());
+
+		Map<Locale, String> nameMap =
+			_cpDefinitionLocalService.getCPDefinitionNameMap(
+				cpDefinition.getCPDefinitionId());
+
+		String name = "Copy of " + nameMap.get(LocaleUtil.getDefault());
+
+		Map<Locale, String> cloneNameMap =
+			_cpDefinitionLocalService.getCPDefinitionNameMap(
+				cloneCPDefinition.getCPDefinitionId());
+
+		Assert.assertEquals(name, cloneNameMap.get(LocaleUtil.getDefault()));
+
+		Assert.assertEquals(
+			FriendlyURLNormalizerUtil.normalize(name),
+			cloneCPDefinition.getURL(
+				LocaleUtil.toLanguageId(LocaleUtil.getDefault())));
+	}
+
+	private void _assertDeleteCPDefinitionsIndependently(
+			CPDefinition... cpDefinitions)
+		throws Exception {
+
+		for (int i = 0; i < cpDefinitions.length; i++) {
+			CPDefinition cpDefinition = cpDefinitions[i];
+
+			_cpDefinitionLocalService.deleteCPDefinition(
+				cpDefinition.getCPDefinitionId());
+
+			Assert.assertNull(
+				_cpDefinitionLocalService.fetchCPDefinition(
+					cpDefinition.getCPDefinitionId()));
+
+			for (int j = i + 1; j < cpDefinitions.length; j++) {
+				CPDefinition remainingCPDefinition = cpDefinitions[j];
+
+				Assert.assertNotNull(
+					_cpDefinitionLocalService.fetchCPDefinition(
+						remainingCPDefinition.getCPDefinitionId()));
+			}
+		}
+	}
+
 	private void _assertUniqueExternalReferenceCodes(
 		CPDefinitionOptionRel sourceCPDefinitionOptionRel,
 		CPDefinition targetCPDefinition) {
@@ -1464,6 +1537,40 @@ public class CPDefinitionLocalServiceTest {
 			SetUtil.fromCollection(
 				externalReferenceCodes
 			).size());
+	}
+
+	private void _testCloneCPDefinition(int status) throws Exception {
+		CPDefinition cpDefinition1 = CPTestUtil.addCPDefinitionFromCatalog(
+			_commerceCatalog.getGroupId(), SimpleCPTypeConstants.NAME, false,
+			false);
+
+		cpDefinition1.setStatus(status);
+
+		cpDefinition1 = _cpDefinitionLocalService.updateCPDefinition(
+			cpDefinition1);
+
+		String languageId = LocaleUtil.toLanguageId(LocaleUtil.getDefault());
+
+		String url = cpDefinition1.getURL(languageId);
+
+		CPDefinition cpDefinition2 =
+			_cpDefinitionLocalService.cloneCPDefinition(
+				TestPropsValues.getUserId(), cpDefinition1.getCPDefinitionId(),
+				_commerceCatalog.getGroupId(), _serviceContext);
+
+		_assertCloneCPDefinition(cpDefinition1, cpDefinition2);
+
+		Assert.assertEquals(url, cpDefinition1.getURL(languageId));
+
+		CPDefinition cpDefinition3 =
+			_cpDefinitionLocalService.cloneCPDefinition(
+				TestPropsValues.getUserId(), cpDefinition2.getCPDefinitionId(),
+				_commerceCatalog.getGroupId(), _serviceContext);
+
+		_assertCloneCPDefinition(cpDefinition2, cpDefinition3);
+
+		_assertDeleteCPDefinitionsIndependently(
+			cpDefinition1, cpDefinition2, cpDefinition3);
 	}
 
 	private void _testCopyCPDefinition() throws Exception {
