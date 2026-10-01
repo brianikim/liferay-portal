@@ -54,6 +54,7 @@ export class CheckoutPage extends CommerceDNDTablePage {
 	readonly layoutsPage: CommerceLayoutsPage;
 	readonly multishippingTabLink: Locator;
 	readonly multishippingTableLocator: Locator;
+	readonly multiStepNav: Locator;
 	readonly nameInput: Locator;
 	readonly optionsButton: Locator;
 	readonly orderConfirmationContainer: Locator;
@@ -174,6 +175,7 @@ export class CheckoutPage extends CommerceDNDTablePage {
 		this.multishippingTableLocator = page.locator(
 			'div.multishipping-container'
 		);
+		this.multiStepNav = page.locator('.commerce-multi-step-nav');
 		this.nameInput = page.getByPlaceholder('Name', {exact: true});
 		this.optionsButton = page
 			.locator(
