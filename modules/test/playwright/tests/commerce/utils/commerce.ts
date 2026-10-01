@@ -228,6 +228,43 @@ export async function commerceReturnSetUp(
 	};
 }
 
+export async function commerceSearchPageSetUp(
+	apiHelpers: DataApiHelpers,
+	site: Site,
+	widgetDefinitions: PageElement[]
+) {
+	await apiHelpers.headlessCommerceAdminChannel.postChannel({
+		siteGroupId: site.id,
+	});
+
+	const catalog = await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+	const keyword = getRandomString().replace(/-/g, '');
+
+	const layout = await apiHelpers.headlessDelivery.createSitePage({
+		pageDefinition: getPageDefinition([
+			getWidgetDefinition({
+				id: getRandomString(),
+				widgetConfig: {
+					keywordsParameterName: 'q',
+					searchScope: 'everything',
+				},
+				widgetName:
+					'com_liferay_portal_search_web_search_bar_portlet_SearchBarPortlet',
+			}),
+			...widgetDefinitions,
+		]),
+		siteId: site.id,
+		title: getRandomString(),
+	});
+
+	return {
+		catalogId: catalog.id,
+		keyword,
+		url: `/web/${site.name}/${layout.friendlyUrlPath}?q=${keyword}`,
+	};
+}
+
 export async function configureBuyerUserForSite(
 	account: TAccount,
 	apiHelpers: DataApiHelpers,
