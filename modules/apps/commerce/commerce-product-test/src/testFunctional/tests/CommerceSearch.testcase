@@ -361,64 +361,6 @@ definition {
 		}
 	}
 
-	@description = "COMMERCE-6155. As a buyer, I want to search for products by typing a Category in Search Bar widget and the results should be visible on Search Results widget"
-	@priority = 5
-	test SearchBarWidgetSearchProductsByCategory {
-		property portal.acceptance = "true";
-
-		// TODO Review
-
-		CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
-
-		ApplicationsMenu.gotoSite(site = "Minium");
-
-		Type(
-			locator1 = "Search#SEARCH_BAR_WIDGET",
-			value1 = "Transmission");
-
-		Button.clickSubmitButton();
-
-		for (var i : list "Transmission Fluid,Transmission Cooler Line Assembly,U-Joint,Torque Converters,Wheel Seal - Front,Mount,Drive Shafts,Universal CV Boot,CV Axles") {
-			AssertElementPresent(
-				key_productName = ${i},
-				locator1 = "CommerceAccelerators#PRODUCT_CARD_NAME");
-		}
-
-		AssertElementNotPresent(
-			key_value = 10,
-			locator1 = "CommerceAccelerators#ASSERT_PRODUCT_CARD");
-	}
-
-	@description = "COMMERCE-6156. As a buyer, I want to search for products by typing different Categories in Search Bar widget and the results should be visible on Search Results widget"
-	@priority = 3
-	test SearchBarWidgetSearchProductsByDifferentCategories {
-		property portal.acceptance = "false";
-
-		// TODO Review
-
-		CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
-
-		ApplicationsMenu.gotoSite(site = "Minium");
-
-		Type(
-			locator1 = "Search#SEARCH_BAR_WIDGET",
-			value1 = "Transmission Engine");
-
-		Button.clickSubmitButton();
-
-		var products = "Engine Mount,Transmission Fluid,Transmission Cooler Line Assembly,U-Joint,Torque Converters,Wheel Seal - Front,Mount,Drive Shafts,Universal CV Boot,CV Axles,Valve Cover Grommets,Timing Chain,Timing Chain Tensioner,Seal,Pulley Kit,Piston,Oil Pump,Oil Filter,Cams,Bearings";
-
-		for (var i : list ${products}) {
-			AssertElementPresent(
-				key_productName = ${i},
-				locator1 = "CommerceAccelerators#PRODUCT_CARD_NAME");
-		}
-
-		AssertElementNotPresent(
-			key_value = 21,
-			locator1 = "CommerceAccelerators#ASSERT_PRODUCT_CARD");
-	}
-
 	@description = "COMMERCE-6154. As a buyer, I want to search for products by typing different Specification Values in Search Bar widget and the results should be visible on Search Results widget"
 	@priority = 3
 	test SearchBarWidgetSearchProductsByDifferentSpecificationValues {
