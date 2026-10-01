@@ -12,6 +12,7 @@ import {isolatedSiteTest} from '../../../../fixtures/isolatedSiteTest';
 import {loginTest} from '../../../../fixtures/loginTest';
 import {userPersonalBarPagesTest} from '../../../../fixtures/userPersonalBarPagesTest';
 import {DataApiHelpers} from '../../../../helpers/ApiHelpers';
+import {getTableRowCells} from '../../../../pages/commerce/commerce-order-content-web/orderImportPage';
 import {CommerceAdminProductDetailsPage} from '../../../../pages/commerce/commerce-product-definitions-web/commerceAdminProductDetailsPage';
 import {CommerceAdminProductPage} from '../../../../pages/commerce/commerce-product-definitions-web/commerceAdminProductPage';
 import {clickAndExpectToBeVisible} from '../../../../utils/clickAndExpectToBeVisible';
@@ -380,6 +381,251 @@ test(
 			await page.goto(`/web${site.friendlyUrlPath}/catalog`);
 
 			await expect(productCard).toContainText('$ 0.00');
+		});
+	}
+);
+
+test(
+	'The Price tab of a SKU marks its price list and promotion entries as priced on application',
+	{
+		tag: [
+			'@COMMERCE-11548',
+			'@COMMERCE-12210',
+			'@COMMERCE-12211',
+			'@LPD-106244-Grouped-5',
+		],
+	},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductDetailsSkusPage,
+		commerceAdminProductPage,
+		commerceThemeMiniumCatalogPage,
+		page,
+	}) => {
+		const {catalog, product, site} = await apiStorefrontSetUp(apiHelpers, [
+			{
+				title: 'Catalog',
+				widgetName:
+					'com_liferay_commerce_product_content_search_web_internal_portlet_CPSearchResultsPortlet',
+			},
+		]);
+
+		const basePriceListName = `${catalog.name} Base Price List`;
+		const productName = product.name['en_US'];
+		const sku = product.skus[0];
+
+		const priceOnApplicationLabel =
+			commerceThemeMiniumCatalogPage.productCardFragmentPriceOnApplicationLabel(
+				commerceThemeMiniumCatalogPage.productCard(productName)
+			);
+		const productCardPrice =
+			commerceThemeMiniumCatalogPage.productCardPrice(
+				productName,
+				'$ 25.00'
+			);
+
+		await test.step('Set the base price list entry price', async () => {
+			await commerceAdminProductPage.gotoProduct(productName);
+
+			await commerceAdminProductDetailsPage.goToProductSkus();
+
+			await commerceAdminProductDetailsSkusPage.openSkuPriceListEntry(
+				basePriceListName,
+				sku.sku
+			);
+			await commerceAdminProductDetailsSkusPage.sidePanelNestedPriceListPrice.fill(
+				'25'
+			);
+			await commerceAdminProductDetailsSkusPage.sidePanelNestedSaveButton.click();
+
+			await waitForAlert(
+				commerceAdminProductDetailsSkusPage.sidePanelNestedFrame
+			);
+
+			await page.goto(`/web${site.friendlyUrlPath}/catalog`);
+
+			await expect(productCardPrice).toBeVisible();
+		});
+
+		await test.step('Enable Price on Application', async () => {
+			await commerceAdminProductPage.gotoProduct(productName);
+
+			await commerceAdminProductDetailsPage.goToProductSkus();
+
+			await commerceAdminProductDetailsSkusPage.openSkuPriceListEntry(
+				basePriceListName,
+				sku.sku
+			);
+
+			await commerceAdminProductDetailsSkusPage.sidePanelNestedPriceOnApplicationTooltip.hover();
+
+			await expect(
+				commerceAdminProductDetailsSkusPage.sidePanelNestedPriceOnApplicationTooltip
+			).toHaveAttribute(
+				'data-restore-title',
+				'Do not set a base price for this product and instead require that buyers request a quote.'
+			);
+
+			await commerceAdminProductDetailsSkusPage.sidePanelNestedPriceOnApplicationToggle.check();
+			await commerceAdminProductDetailsSkusPage.sidePanelNestedSaveButton.click();
+
+			await waitForAlert(
+				commerceAdminProductDetailsSkusPage.sidePanelNestedFrame
+			);
+
+			await page.goto(`/web${site.friendlyUrlPath}/catalog`);
+
+			await expect(priceOnApplicationLabel).toBeVisible();
+		});
+
+		await test.step('Disable Price on Application', async () => {
+			await commerceAdminProductPage.gotoProduct(productName);
+
+			await commerceAdminProductDetailsPage.goToProductSkus();
+
+			await commerceAdminProductDetailsSkusPage.openSkuPriceListEntry(
+				basePriceListName,
+				sku.sku
+			);
+
+			await expect(
+				commerceAdminProductDetailsSkusPage.sidePanelNestedPriceOnApplicationToggle
+			).toBeChecked();
+
+			await commerceAdminProductDetailsSkusPage.sidePanelNestedPriceOnApplicationToggle.uncheck();
+			await commerceAdminProductDetailsSkusPage.sidePanelNestedSaveButton.click();
+
+			await waitForAlert(
+				commerceAdminProductDetailsSkusPage.sidePanelNestedFrame
+			);
+
+			await page.goto(`/web${site.friendlyUrlPath}/catalog`);
+
+			await expect(productCardPrice).toBeVisible();
+			await expect(priceOnApplicationLabel).toBeHidden();
+		});
+
+		const priceEntries: Array<{name: string; priceEntryId: number}> = [];
+
+		for (const [type, price] of [
+			['price-list', 20],
+			['promotion', 0],
+		] as const) {
+			const priceList =
+				await apiHelpers.headlessCommerceAdminPricing.postPriceList({
+					catalogId: catalog.id,
+					currencyCode: 'USD',
+					name: getRandomString(),
+					type,
+				});
+
+			const priceEntry =
+				await apiHelpers.headlessCommerceAdminPricing.postPriceEntry({
+					price,
+					priceListId: priceList.id,
+					skuId: sku.id,
+				});
+
+			priceEntries.push({
+				name: priceList.name,
+				priceEntryId: priceEntry.priceEntryId,
+			});
+		}
+
+		const basePriceListNames = [
+			basePriceListName,
+			`${catalog.name} Base Promotion`,
+		];
+		const priceListNames = priceEntries.map(({name}) => name);
+
+		const expectPriceOnApplication = async (
+			names: string[],
+			priceOnApplication: 'No' | 'Yes'
+		) => {
+			for (const name of names) {
+				await expect(async () => {
+					expect(
+						await getTableRowCells(
+							commerceAdminProductDetailsSkusPage.sidePanelSkuPriceTable,
+							name
+						)
+					).toMatchObject({
+						'PRICE ON APPLICATION': priceOnApplication,
+					});
+				}).toPass({timeout: 30000});
+			}
+		};
+
+		await test.step('Products admin lists no POA entries', async () => {
+			await commerceAdminProductPage.gotoProduct(productName);
+
+			await commerceAdminProductDetailsPage.goToProductSkus();
+
+			await commerceAdminProductDetailsSkusPage.openSkuTab(
+				sku.sku,
+				'Price'
+			);
+
+			await expectPriceOnApplication(
+				[...basePriceListNames, ...priceListNames],
+				'No'
+			);
+		});
+
+		await test.step('SKUs admin lists no POA entries', async () => {
+			await commerceAdminProductPage.goto();
+
+			await commerceAdminProductPage.productSkusLink.click();
+
+			await commerceAdminProductPage.search(sku.sku);
+
+			await commerceAdminProductDetailsSkusPage.openSkuTab(
+				sku.sku,
+				'Price'
+			);
+
+			await expectPriceOnApplication(
+				[...basePriceListNames, ...priceListNames],
+				'No'
+			);
+		});
+
+		for (const {priceEntryId} of priceEntries) {
+			await apiHelpers.headlessCommerceAdminPricing.patchPriceEntry(
+				priceEntryId,
+				{priceOnApplication: true}
+			);
+		}
+
+		await test.step('Products admin lists the POA entries', async () => {
+			await commerceAdminProductPage.gotoProduct(productName);
+
+			await commerceAdminProductDetailsPage.goToProductSkus();
+
+			await commerceAdminProductDetailsSkusPage.openSkuTab(
+				sku.sku,
+				'Price'
+			);
+
+			await expectPriceOnApplication(basePriceListNames, 'No');
+			await expectPriceOnApplication(priceListNames, 'Yes');
+		});
+
+		await test.step('SKUs admin lists the POA entries', async () => {
+			await commerceAdminProductPage.goto();
+
+			await commerceAdminProductPage.productSkusLink.click();
+
+			await commerceAdminProductPage.search(sku.sku);
+
+			await commerceAdminProductDetailsSkusPage.openSkuTab(
+				sku.sku,
+				'Price'
+			);
+
+			await expectPriceOnApplication(basePriceListNames, 'No');
+			await expectPriceOnApplication(priceListNames, 'Yes');
 		});
 	}
 );
