@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import {expect, mergeTests} from '@playwright/test';
+import {Page, expect, mergeTests} from '@playwright/test';
 
 import {apiHelpersTest} from '../../../../fixtures/apiHelpersTest';
 import {commercePagesTest} from '../../../../fixtures/commercePagesTest';
@@ -11,6 +11,9 @@ import {dataApiHelpersTest} from '../../../../fixtures/dataApiHelpersTest';
 import {isolatedSiteTest} from '../../../../fixtures/isolatedSiteTest';
 import {loginTest} from '../../../../fixtures/loginTest';
 import {userPersonalBarPagesTest} from '../../../../fixtures/userPersonalBarPagesTest';
+import {DataApiHelpers} from '../../../../helpers/ApiHelpers';
+import {CommerceAdminProductDetailsPage} from '../../../../pages/commerce/commerce-product-definitions-web/commerceAdminProductDetailsPage';
+import {CommerceAdminProductPage} from '../../../../pages/commerce/commerce-product-definitions-web/commerceAdminProductPage';
 import {clickAndExpectToBeVisible} from '../../../../utils/clickAndExpectToBeVisible';
 import getRandomString from '../../../../utils/getRandomString';
 import {userData} from '../../../../utils/performLogin';
@@ -25,6 +28,112 @@ export const test = mergeTests(
 	loginTest(),
 	userPersonalBarPagesTest
 );
+
+async function checkProductStatusAfterDuplicationAndConversionToDraft({
+	apiHelpers,
+	commerceAdminProductDetailsPage,
+	commerceAdminProductPage,
+	page,
+	productStatus,
+	status,
+}: {
+	apiHelpers: DataApiHelpers;
+	commerceAdminProductDetailsPage: CommerceAdminProductDetailsPage;
+	commerceAdminProductPage: CommerceAdminProductPage;
+	page: Page;
+	productStatus: number;
+	status: string;
+}) {
+	const catalog = await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+	const product = await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+		catalogId: catalog.id,
+		productStatus,
+	});
+
+	const productName = product.name['en_US'];
+
+	try {
+		await commerceAdminProductPage.gotoProduct(productName);
+
+		await expect(
+			commerceAdminProductDetailsPage.saveAsDraftLink
+		).toHaveCount(0);
+		await expect(
+			commerceAdminProductDetailsPage.workflowStatus(status)
+		).toBeVisible();
+
+		await commerceAdminProductDetailsPage.duplicate(catalog.name);
+
+		await expect(commerceAdminProductDetailsPage.nameInput).toHaveValue(
+			`Copy of ${productName}`
+		);
+		await expect(
+			commerceAdminProductDetailsPage.workflowStatus('Draft')
+		).toBeVisible();
+
+		await commerceAdminProductPage.gotoProduct(productName);
+
+		const updatedProductName = getRandomString();
+
+		await commerceAdminProductDetailsPage.nameInput.fill(
+			updatedProductName
+		);
+
+		page.once('dialog', (dialog) => dialog.dismiss());
+
+		await commerceAdminProductDetailsPage.headerActionsButton.click();
+		await commerceAdminProductDetailsPage
+			.headerActionsMenuItem('Convert to Draft')
+			.click();
+
+		await expect(
+			commerceAdminProductDetailsPage.workflowStatus(status)
+		).toBeVisible();
+
+		page.once('dialog', async (dialog) => {
+			expect(dialog.message()).toBe(
+				'Converting the product status to draft will remove the product from the product catalog. Do you wish to proceed?'
+			);
+
+			await dialog.accept();
+		});
+
+		await commerceAdminProductDetailsPage.headerActionsButton.click();
+		await commerceAdminProductDetailsPage
+			.headerActionsMenuItem('Convert to Draft')
+			.click();
+
+		await expect(
+			commerceAdminProductDetailsPage.saveAsDraftLink
+		).toBeVisible();
+		await expect(
+			commerceAdminProductDetailsPage.workflowStatus('Draft')
+		).toBeVisible();
+
+		await commerceAdminProductPage.gotoProduct(updatedProductName);
+
+		await expect(commerceAdminProductDetailsPage.nameInput).toHaveValue(
+			updatedProductName
+		);
+		await expect(
+			commerceAdminProductDetailsPage.workflowStatus('Draft')
+		).toBeVisible();
+	}
+	finally {
+		const copyProduct = (
+			await apiHelpers.headlessCommerceAdminCatalog.getProducts(
+				new URLSearchParams({
+					filter: `name eq 'Copy of ${productName}'`,
+				})
+			)
+		).items[0];
+
+		if (copyProduct) {
+			apiHelpers.data.push({id: copyProduct.productId, type: 'product'});
+		}
+	}
+}
 
 test(
 	'Add a SKU',
@@ -735,3 +844,52 @@ for (const {productType, tags} of [
 		}
 	);
 }
+
+test(
+	'An approved product can be duplicated and converted to draft',
+	{tag: ['@COMMERCE-9183', '@COMMERCE-9251', '@LPD-106244-Grouped-2']},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductPage,
+		page,
+	}) => {
+		await checkProductStatusAfterDuplicationAndConversionToDraft({
+			apiHelpers,
+			commerceAdminProductDetailsPage,
+			commerceAdminProductPage,
+			page,
+			productStatus: 0,
+			status: 'Approved',
+		});
+	}
+);
+
+test(
+	'A pending product can be duplicated and converted to draft',
+	{tag: ['@COMMERCE-9251', '@LPD-106244-Grouped-2']},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductPage,
+		page,
+		userPersonalBarPage,
+	}) => {
+		await userPersonalBarPage.goToProcessBuilderConfigurationTab();
+		await userPersonalBarPage.enableSingleApproverWorkflowProduct();
+
+		try {
+			await checkProductStatusAfterDuplicationAndConversionToDraft({
+				apiHelpers,
+				commerceAdminProductDetailsPage,
+				commerceAdminProductPage,
+				page,
+				productStatus: 1,
+				status: 'Pending',
+			});
+		}
+		finally {
+			await userPersonalBarPage.disableSingleApproverWorkflowProduct();
+		}
+	}
+);

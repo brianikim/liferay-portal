@@ -107,70 +107,6 @@ definition {
 		}
 	}
 
-	@description = "This is a test for COMMERCE-9183. CanCheckApprovedProductSaveAsDraft"
-	@priority = 3
-	test CanCheckApprovedProductSaveAsDraft {
-		property portal.acceptance = "false";
-
-		CommerceProducts.openProductsAdmin();
-
-		CPCommerceCatalog.newProductsEntry(
-			productCatalog = "Master",
-			productName = "Simple T-Shirt",
-			productType = "Simple");
-
-		AssertElementNotPresent(
-			key_text = "Save as Draft",
-			locator1 = "Button#ANY");
-
-		Type(
-			locator1 = "CommerceEntry#NAME_FIELD",
-			value1 = "Simple T-Shirt 01");
-
-		Click(
-			key_itemName = "",
-			locator1 = "CommerceEntry#SPECIFIC_MENU_ITEM");
-
-		ClickNoError(
-			key_optionValue = "Convert to Draft",
-			locator1 = "CommerceFrontStore#FS_PRODUCT_OPTION");
-
-		AssertConfirm(value1 = "Converting the product status to draft will remove the product from the product catalog. Do you wish to proceed?");
-
-		AssertElementPresent(
-			key_text = "Save as Draft",
-			locator1 = "Button#ANY");
-
-		AssertElementPresent(
-			key_status = "Draft",
-			locator1 = "CommerceEntry#WORKFLOW_STATUS");
-
-		AssertTextEquals(
-			locator1 = "CommerceEntry#NAME_FIELD",
-			value1 = "Simple T-Shirt 01");
-	}
-
-	@description = "This is a test for COMMERCE-9251. CanCheckApprovedProductStatusWorkflow"
-	@priority = 5
-	test CanCheckApprovedProductWorkflowStatus {
-		property portal.acceptance = "true";
-
-		CommerceProducts.addProductWithStatusViaAPI(
-			catalogName = "Master",
-			productStatusCode = 0,
-			productType = "simple");
-
-		CommerceProducts.openProductsAdmin();
-
-		CommerceProducts.checkProductStatusAfterDuplicationAndConvertionToDraft(
-			checkProductFields = "true",
-			compileDescription = "false",
-			entryName = "Approved Product",
-			productCatalog = "Master",
-			productName = "Approved Product",
-			status = "Approved");
-	}
-
 	@description = "This is a test for COMMERCE-9253. CanCheckTheApprovedStatusForSingleApproverWorkflow"
 	@priority = 5
 	test CanCheckApprovedProductWorkflowStatusWithSingleApproverWorkflow {
@@ -469,29 +405,6 @@ definition {
 		User.firstLoginPG();
 
 		CommerceProducts.disableProductSingleApproverWorkflow();
-	}
-
-	@description = "This is a test for COMMERCE-9251. CanCheckPendingProductStatusWorkflow"
-	@priority = 3
-	test CanCheckPendingProductWorkflowStatus {
-		property portal.acceptance = "false";
-
-		CommerceProducts.enableProductSingleApproverWorkflow();
-
-		CommerceProducts.addProductWithStatusViaAPI(
-			catalogName = "Master",
-			productStatusCode = 1,
-			productType = "simple");
-
-		CommerceProducts.openProductsAdmin();
-
-		CommerceProducts.checkProductStatusAfterDuplicationAndConvertionToDraft(
-			checkProductFields = "true",
-			compileDescription = "false",
-			entryName = "Pending Product",
-			productCatalog = "Master",
-			productName = "Pending Product",
-			status = "Pending");
 	}
 
 	@description = "This is a test for COMMERCE-9292. CanCheckThePendingReviewStatusForSingleApproverWorkflow"
