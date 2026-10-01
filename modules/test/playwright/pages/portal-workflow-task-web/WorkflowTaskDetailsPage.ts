@@ -31,6 +31,7 @@ export class WorkflowTaskDetailsPage {
 	readonly replyButton: Locator;
 	readonly reviewActionMenu: Locator;
 	readonly reviewComment: Locator;
+	readonly row: (text: string) => Locator;
 	readonly subscribeButton: Locator;
 	readonly viewButton: Locator;
 	readonly workflowTasksPage: WorkflowTasksPage;
@@ -68,6 +69,8 @@ export class WorkflowTaskDetailsPage {
 			name: 'Open Actions Menu',
 		});
 		this.reviewComment = page.getByRole('textbox', {name: 'Comment'});
+		this.row = (text: string) =>
+			page.getByRole('row').filter({hasText: text});
 		this.subscribeButton = page.getByLabel('Subscribe to Comments');
 		this.commentsTextbox = page.frameLocator('iframe').getByRole('textbox');
 		this.viewButton = page.getByRole('button', {name: 'View'});
