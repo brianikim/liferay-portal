@@ -369,6 +369,13 @@ export class CommerceLayoutsPage {
 		await source.dragTo(target);
 	}
 
+	async addOrder(orderTypeName: string) {
+		await this.addOrderButton.click();
+
+		await this.orderTypeModalInput.selectOption({label: orderTypeName});
+		await this.orderTypeModalButton.click();
+	}
+
 	async addProductFragment(itemName: string) {
 		await this.productMenuItem.click();
 
