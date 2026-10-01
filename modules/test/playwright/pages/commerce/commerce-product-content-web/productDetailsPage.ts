@@ -69,6 +69,7 @@ export class ProductDetailsPage {
 	) => Locator;
 	readonly optionSelectorValues: (optionName: string) => Locator;
 	readonly optionValue: (optionValueName: string) => Locator;
+	readonly optionValueText: (optionValueName: string) => Locator;
 	readonly page: Page;
 	readonly pageTitle: Locator;
 	readonly paginationText: (text: string) => Locator;
@@ -261,6 +262,8 @@ export class ProductDetailsPage {
 			this.optionSelector(optionName).locator('option');
 		this.optionValue = (optionValueName: string) =>
 			page.getByRole('option', {name: optionValueName});
+		this.optionValueText = (optionValueName: string) =>
+			page.getByText(optionValueName, {exact: true});
 		this.page = page;
 		this.paginationText = (text: string) => page.getByText(text);
 		this.pinAddToCartButton = page

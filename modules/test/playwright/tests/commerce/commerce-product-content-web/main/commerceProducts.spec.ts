@@ -459,8 +459,12 @@ test('COMMERCE-12809 As a buyer, I want to be able to verify the included and ex
 
 		await page.goto(`/web/${site.name}/p/${bundleProduct.name.en_US}`);
 
-		await expect(page.getByText('Value1', {exact: true})).toBeVisible();
-		await expect(page.getByText('Value3', {exact: true})).toBeVisible();
+		await expect(
+			productDetailsPage.optionValueText('Value1')
+		).toBeVisible();
+		await expect(
+			productDetailsPage.optionValueText('Value3')
+		).toBeVisible();
 
 		await productDetailsPage.optionSelector('Option2').click();
 
@@ -746,198 +750,299 @@ test('LPD-33807 Mapped product add to cart', async ({
 	await expect(cartItems.items[0].quantity).toEqual(2);
 });
 
-test('COMMERCE-12805 As a buyer, I want to be able to verify the included and excluded option values are disabled with reason messages', async ({
-	apiHelpers,
-	commerceAdminProductPage,
-	commerceInstanceSettingsPage,
-	globalMenuPage,
-	page,
-	productDetailsPage,
-	site,
-	widgetPagePage,
-}) => {
-	await commerceInstanceSettingsPage.toggleShowUnselectableOptions(true);
+test(
+	'COMMERCE-12805 As a buyer, I want to be able to verify the included and excluded option values are disabled with reason messages',
+	{tag: ['@COMMERCE-12808', '@LPD-106244-Grouped-8']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelsPage,
+		commerceAdminProductPage,
+		commerceInstanceSettingsPage,
+		commerceMiniCartPage,
+		page,
+		productDetailsPage,
+		site,
+	}) => {
+		test.setTimeout(180000);
 
-	try {
-		const layout = await apiHelpers.jsonWebServicesLayout.addLayout({
-			groupId: site.id,
-			title: getRandomString(),
-		});
+		await commerceInstanceSettingsPage.toggleShowUnselectableOptions(true);
 
-		await apiHelpers.headlessCommerceAdminChannel.postChannel({
-			siteGroupId: site.id,
-		});
-
-		const catalog =
-			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
-
-		const product1 =
-			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
-				catalogId: catalog.id,
-				name: {en_US: 'Product1'},
-			});
-		const product2 =
-			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
-				catalogId: catalog.id,
-				name: {en_US: 'Product2'},
-			});
-		const product3 =
-			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
-				catalogId: catalog.id,
-				name: {en_US: 'Product3'},
-			});
-		const product4 =
-			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
-				catalogId: catalog.id,
-				name: {en_US: 'Product4'},
-			});
-
-		await Promise.all([
-			apiHelpers.headlessCommerceAdminCatalog.postProductRelatedProduct(
-				product1.productId,
-				{productId: product3.productId, type: 'requires-in-bundle'}
-			),
-			apiHelpers.headlessCommerceAdminCatalog.postProductRelatedProduct(
-				product2.productId,
-				{productId: product4.productId, type: 'incompatible-in-bundle'}
-			),
-		]);
-
-		const option1 =
-			await apiHelpers.headlessCommerceAdminCatalog.postOption(
-				'select',
-				'option1',
-				'Option1',
-				1
-			);
-		const option2 =
-			await apiHelpers.headlessCommerceAdminCatalog.postOption(
-				'select',
-				'option2',
-				'Option2',
-				1
+		try {
+			const {buyerUser} = await setUpBundleStorefront(
+				apiHelpers,
+				commerceAdminChannelsPage,
+				page,
+				site
 			);
 
-		const bundleProduct =
-			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
-				catalogId: catalog.id,
-				name: {en_US: getRandomString()},
-				productOptions: [
+			const catalog =
+				await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+			const product1 =
+				await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+					catalogId: catalog.id,
+					name: {en_US: 'Product1'},
+					productConfiguration: {allowBackOrder: true},
+				});
+			const product2 =
+				await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+					catalogId: catalog.id,
+					name: {en_US: 'Product2'},
+					productConfiguration: {allowBackOrder: true},
+				});
+			const product3 =
+				await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+					catalogId: catalog.id,
+					name: {en_US: 'Product3'},
+					productConfiguration: {allowBackOrder: true},
+				});
+			const product4 =
+				await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+					catalogId: catalog.id,
+					name: {en_US: 'Product4'},
+					productConfiguration: {allowBackOrder: true},
+				});
+
+			await Promise.all([
+				apiHelpers.headlessCommerceAdminCatalog.postProductRelatedProduct(
+					product1.productId,
+					{productId: product3.productId, type: 'requires-in-bundle'}
+				),
+				apiHelpers.headlessCommerceAdminCatalog.postProductRelatedProduct(
+					product2.productId,
 					{
-						fieldType: 'select',
-						key: 'option1',
-						name: {
-							en_US: 'Option1',
+						productId: product4.productId,
+						type: 'incompatible-in-bundle',
+					}
+				),
+			]);
+
+			const option1 =
+				await apiHelpers.headlessCommerceAdminCatalog.postOption(
+					'select',
+					'option1',
+					'Option1',
+					1
+				);
+			const option2 =
+				await apiHelpers.headlessCommerceAdminCatalog.postOption(
+					'select',
+					'option2',
+					'Option2',
+					1
+				);
+
+			const bundleProduct =
+				await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+					catalogId: catalog.id,
+					name: {en_US: getRandomString()},
+					productConfiguration: {allowBackOrder: true},
+					productOptions: [
+						{
+							fieldType: 'select',
+							key: 'option1',
+							name: {
+								en_US: 'Option1',
+							},
+							optionId: option1.id,
+							priceType: 'static',
+							priority: 1,
+							productOptionValues: [
+								{
+									deltaPrice: 0.0,
+									key: 'value1',
+									name: {
+										en_US: 'Value1',
+									},
+									priority: 1,
+									quantity: 1,
+									skuId: product1.skus[0].id,
+								},
+								{
+									deltaPrice: 0.0,
+									key: 'value2',
+									name: {
+										en_US: 'Value2',
+									},
+									preselected: true,
+									priority: 2,
+									quantity: 1,
+									skuId: product2.skus[0].id,
+								},
+							],
+							skuContributor: true,
 						},
-						optionId: option1.id,
-						priceType: 'static',
-						priority: 1,
-						productOptionValues: [
-							{
-								deltaPrice: 0.0,
-								key: 'value1',
-								name: {
-									en_US: 'Value1',
-								},
-								priority: 1,
-								quantity: 1,
-								skuId: product1.skus[0].id,
+						{
+							fieldType: 'select',
+							key: 'option2',
+							name: {
+								en_US: 'Option2',
 							},
-							{
-								deltaPrice: 0.0,
-								key: 'value2',
-								name: {
-									en_US: 'Value2',
+							optionId: option2.id,
+							priceType: 'static',
+							priority: 2,
+							productOptionValues: [
+								{
+									deltaPrice: 0.0,
+									key: 'value3',
+									name: {
+										en_US: 'Value3',
+									},
+									priority: 1,
+									quantity: 1,
+									skuId: product3.skus[0].id,
 								},
-								preselected: true,
-								priority: 2,
-								quantity: 1,
-								skuId: product2.skus[0].id,
-							},
-						],
-						skuContributor: true,
-					},
-					{
-						fieldType: 'select',
-						key: 'option2',
-						name: {
-							en_US: 'Option2',
+								{
+									deltaPrice: 0.0,
+									key: 'value4',
+									name: {
+										en_US: 'Value4',
+									},
+									preselected: true,
+									priority: 2,
+									quantity: 1,
+									skuId: product4.skus[0].id,
+								},
+							],
+							skuContributor: true,
 						},
-						optionId: option2.id,
-						priceType: 'static',
-						priority: 2,
-						productOptionValues: [
-							{
-								deltaPrice: 0.0,
-								key: 'value3',
-								name: {
-									en_US: 'Value3',
-								},
-								priority: 1,
-								quantity: 1,
-								skuId: product3.skus[0].id,
-							},
-							{
-								deltaPrice: 0.0,
-								key: 'value4',
-								name: {
-									en_US: 'Value4',
-								},
-								preselected: true,
-								priority: 2,
-								quantity: 1,
-								skuId: product4.skus[0].id,
-							},
-						],
-						skuContributor: true,
-					},
-				],
+					],
+				});
+
+			await commerceAdminProductPage.gotoProduct(
+				bundleProduct.name['en_US']
+			);
+
+			await commerceAdminProductPage.generateSkus();
+
+			await performLogout(page);
+			await performLoginViaApi({
+				page,
+				screenName: buyerUser.alternateName,
 			});
 
-		await globalMenuPage.goToCommerce('Products');
+			const productURL = `/web${site.friendlyUrlPath}/p/${bundleProduct.urls['en_US']}`;
 
-		await commerceAdminProductPage.managementToolbarSearchInput.fill(
-			bundleProduct.name.en_US
-		);
-		await commerceAdminProductPage.managementToolbarSearchInput.press(
-			'Enter'
-		);
+			await test.step('Verify the preselected excluded option values cannot be added to the cart', async () => {
+				await page.goto(productURL);
 
-		await page
-			.getByRole('link', {exact: true, name: bundleProduct.name.en_US})
-			.click();
+				await expect(
+					productDetailsPage.optionValueText('Value2')
+				).toBeVisible();
+				await expect(
+					productDetailsPage.optionValueText('Value4')
+				).toBeVisible();
 
-		await commerceAdminProductPage.generateSkus();
+				await productDetailsPage.addToCartButton.click();
 
-		const account = await apiHelpers.headlessAdminUser.postAccount({
-			name: getRandomString(),
-			type: 'person',
-		});
+				await waitForAlert(
+					page,
+					'Danger:Product4 cannot be combined with Product2.',
+					{type: 'danger'}
+				);
+			});
 
-		await apiHelpers.headlessAdminUser.assignUserToAccountByEmailAddress(
-			account.id,
-			['test@liferay.com']
-		);
+			await test.step('Add the included option values to the cart', async () => {
+				await productDetailsPage.optionSelector('Option2').click();
+				await productDetailsPage.optionValue('Value3').click();
+				await productDetailsPage.optionSelector('Option1').click();
+				await productDetailsPage.optionValue('Value1').click();
+				await productDetailsPage.addToCartButton.click();
 
-		await page.goto(`/web${site.friendlyUrlPath}${layout.friendlyURL}`);
+				await commerceMiniCartPage.open();
 
-		await widgetPagePage.addPortlet('Product Details');
+				await expect(
+					commerceMiniCartPage.miniCartItem(
+						bundleProduct.name['en_US']
+					)
+				).toBeVisible();
+			});
 
-		await page.goto(`/web/${site.name}/p/${bundleProduct.name.en_US}`);
+			await test.step('Verify the mini cart edit panel explains an incomplete bundle', async () => {
+				await page.goto(productURL);
 
-		await expect(page.getByText('Value2', {exact: true})).toBeVisible();
-		await expect(page.getByText('Value4', {exact: true})).toBeVisible();
+				await commerceMiniCartPage.editItemOptions(
+					bundleProduct.name['en_US'],
+					[
+						{optionName: 'Option1', optionValueName: 'Value1'},
+						{optionName: 'Option2', optionValueName: 'Value4'},
+					]
+				);
 
-		await productDetailsPage.addToCartButton.click();
+				await expect(
+					commerceMiniCartPage.miniCartSaveButton
+				).toBeDisabled();
 
-		await expect(
-			page.getByText('Danger:Product4 cannot be combined with Product2.')
-		).toBeVisible();
+				await commerceMiniCartPage
+					.miniCartEditItemOptionSelect('Option1')
+					.click();
+
+				await expect(
+					commerceMiniCartPage.miniCartEditItemOptionValue('Value1')
+				).toContainText(
+					'Product1 requires Product3 to be purchased also.'
+				);
+				await expect(
+					commerceMiniCartPage.miniCartEditItemOptionValue('Value2')
+				).toContainText('Product2 cannot be combined with Product4.');
+
+				await commerceMiniCartPage
+					.miniCartEditItemOptionSelect('Option2')
+					.click();
+
+				for (const optionValueName of ['Value3', 'Value4']) {
+					await expect(
+						commerceMiniCartPage.miniCartEditItemOptionValue(
+							optionValueName
+						)
+					).not.toContainText(/requires|cannot be combined/);
+				}
+			});
+
+			await test.step('Verify the mini cart edit panel explains an incompatible bundle', async () => {
+				await page.goto(productURL);
+
+				await commerceMiniCartPage.editItemOptions(
+					bundleProduct.name['en_US'],
+					[
+						{optionName: 'Option1', optionValueName: 'Value2'},
+						{optionName: 'Option2', optionValueName: 'Value3'},
+					]
+				);
+
+				await commerceMiniCartPage
+					.miniCartEditItemOptionSelect('Option2')
+					.click();
+
+				await expect(
+					commerceMiniCartPage.miniCartEditItemOptionValue('Value4')
+				).toContainText('Product4 cannot be combined with Product2.');
+				await expect(
+					commerceMiniCartPage.miniCartEditItemOptionValue('Value3')
+				).not.toContainText(/requires|cannot be combined/);
+
+				await commerceMiniCartPage
+					.miniCartEditItemOptionSelect('Option1')
+					.click();
+
+				for (const optionValueName of ['Value1', 'Value2']) {
+					await expect(
+						commerceMiniCartPage.miniCartEditItemOptionValue(
+							optionValueName
+						)
+					).not.toContainText(/requires|cannot be combined/);
+				}
+			});
+		}
+		finally {
+			await performLoginViaApi({page, screenName: 'test'});
+
+			await commerceInstanceSettingsPage.toggleShowUnselectableOptions(
+				false
+			);
+		}
 	}
-	finally {
-		await commerceInstanceSettingsPage.toggleShowUnselectableOptions(false);
-	}
-});
+);
 
 test('LPD-33075 Verify buyers can view the SKU of a product on the product card if it set.', async ({
 	apiHelpers,
