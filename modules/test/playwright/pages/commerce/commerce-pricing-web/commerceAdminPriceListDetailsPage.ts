@@ -60,6 +60,8 @@ export class CommerceAdminPriceListDetailsPage extends CommerceDNDTablePage {
 	readonly sidePanelFrame: FrameLocator;
 	readonly sidePanelOverrideDiscountToggle: Locator;
 	readonly sidePanelPriceInput: Locator;
+	readonly sidePanelPriceOnApplicationToggle: Locator;
+	readonly sidePanelPriceSettingsDisabledFieldset: Locator;
 	readonly sidePanelSaveButton: Locator;
 	readonly skuLink: (price: string) => Locator;
 	readonly skuRowActionsButton: (sku: string) => Locator;
@@ -213,6 +215,13 @@ export class CommerceAdminPriceListDetailsPage extends CommerceDNDTablePage {
 		this.sidePanelPriceInput = this.sidePanelFrame
 			.getByLabel('Price List Price')
 			.or(this.sidePanelFrame.getByLabel('Promotion Price'));
+		this.sidePanelPriceOnApplicationToggle = this.sidePanelFrame.getByLabel(
+			'Price on Application'
+		);
+		this.sidePanelPriceSettingsDisabledFieldset =
+			this.sidePanelFrame.locator(
+				'fieldset.price-entry-price-settings.disabled'
+			);
 		this.sidePanelSaveButton = this.sidePanelFrame.getByRole('button', {
 			name: 'Save',
 		});
@@ -291,5 +300,13 @@ export class CommerceAdminPriceListDetailsPage extends CommerceDNDTablePage {
 		await this.eligibilityEntryCell(entryName).click();
 
 		await this.eligibilityTab.click();
+	}
+
+	async openSkuEntry(sku: string) {
+		await this.entriesTab.click();
+
+		await this.searchByValue(sku);
+
+		await this.skusTableRowLink(sku).click();
 	}
 }
