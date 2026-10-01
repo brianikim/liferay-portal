@@ -20,6 +20,7 @@ import com.liferay.commerce.media.constants.CommerceMediaConstants;
 import com.liferay.commerce.product.constants.CPAttachmentFileEntryConstants;
 import com.liferay.commerce.product.model.CPAttachmentFileEntry;
 import com.liferay.commerce.product.model.CPDefinition;
+import com.liferay.commerce.product.model.CPInstance;
 import com.liferay.commerce.product.model.CommerceCatalog;
 import com.liferay.commerce.product.service.CPAttachmentFileEntryLocalService;
 import com.liferay.commerce.product.service.CPDefinitionLocalService;
@@ -63,6 +64,7 @@ import jakarta.servlet.Servlet;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -152,6 +154,17 @@ public class CommerceMediaServletTest {
 			fileEntry.getFileEntryId(), null, false, null, 0, false,
 			_serviceContext);
 
+		List<CPInstance> cpInstances = cpDefinition.getCPInstances();
+
+		CPInstance cpInstance = cpInstances.get(0);
+
+		_cpDefinitionVirtualSettingLocalService.addCPDefinitionVirtualSetting(
+			CPInstance.class.getName(), cpInstance.getCPInstanceId(),
+			fileEntry.getFileEntryId(), null,
+			CommerceOrderConstants.ORDER_STATUS_PENDING, 0, 0, true,
+			fileEntry.getFileEntryId(), null, false, null, 0, true,
+			_serviceContext);
+
 		User user1 = UserTestUtil.addUser();
 		User user2 = _userLocalService.getGuestUser(_group.getCompanyId());
 
@@ -213,16 +226,39 @@ public class CommerceMediaServletTest {
 				Arrays.equals(
 					bytes, mockHttpServletResponse.getContentAsByteArray()));
 
-			mockHttpServletResponse = _serviceVirtualProductSampleRequest(
-				_accountEntry.getAccountEntryId(), cpDefinition, fileEntry,
+			mockHttpServletResponse = _serviceVirtualSampleRequest(
+				_accountEntry.getAccountEntryId(),
+				cpDefinition.getCPDefinitionId(), fileEntry,
+				CommerceMediaConstants.URL_SEPARATOR_VIRTUAL_PRODUCT_SAMPLE,
 				user2);
 
 			Assert.assertEquals(
 				HttpServletResponse.SC_UNAUTHORIZED,
 				mockHttpServletResponse.getStatus());
 
-			mockHttpServletResponse = _serviceVirtualProductSampleRequest(
-				RandomTestUtil.nextLong(), cpDefinition, fileEntry, user2);
+			mockHttpServletResponse = _serviceVirtualSampleRequest(
+				RandomTestUtil.nextLong(), cpDefinition.getCPDefinitionId(),
+				fileEntry,
+				CommerceMediaConstants.URL_SEPARATOR_VIRTUAL_PRODUCT_SAMPLE,
+				user2);
+
+			Assert.assertEquals(
+				HttpServletResponse.SC_UNAUTHORIZED,
+				mockHttpServletResponse.getStatus());
+
+			mockHttpServletResponse = _serviceVirtualSampleRequest(
+				_accountEntry.getAccountEntryId(), cpInstance.getCPInstanceId(),
+				fileEntry,
+				CommerceMediaConstants.URL_SEPARATOR_VIRTUAL_SKU_SAMPLE, user2);
+
+			Assert.assertEquals(
+				HttpServletResponse.SC_UNAUTHORIZED,
+				mockHttpServletResponse.getStatus());
+
+			mockHttpServletResponse = _serviceVirtualSampleRequest(
+				RandomTestUtil.nextLong(), cpInstance.getCPInstanceId(),
+				fileEntry,
+				CommerceMediaConstants.URL_SEPARATOR_VIRTUAL_SKU_SAMPLE, user2);
 
 			Assert.assertEquals(
 				HttpServletResponse.SC_UNAUTHORIZED,
@@ -253,8 +289,18 @@ public class CommerceMediaServletTest {
 			HttpHeaders.CONTENT_DISPOSITION_ATTACHMENT,
 			mockHttpServletResponse);
 
-		mockHttpServletResponse = _serviceVirtualProductSampleRequest(
-			_accountEntry.getAccountEntryId(), cpDefinition, fileEntry, user1);
+		mockHttpServletResponse = _serviceVirtualSampleRequest(
+			_accountEntry.getAccountEntryId(), cpDefinition.getCPDefinitionId(),
+			fileEntry,
+			CommerceMediaConstants.URL_SEPARATOR_VIRTUAL_PRODUCT_SAMPLE, user1);
+
+		Assert.assertEquals(
+			HttpServletResponse.SC_OK, mockHttpServletResponse.getStatus());
+
+		mockHttpServletResponse = _serviceVirtualSampleRequest(
+			_accountEntry.getAccountEntryId(), cpInstance.getCPInstanceId(),
+			fileEntry, CommerceMediaConstants.URL_SEPARATOR_VIRTUAL_SKU_SAMPLE,
+			user1);
 
 		Assert.assertEquals(
 			HttpServletResponse.SC_OK, mockHttpServletResponse.getStatus());
@@ -362,9 +408,9 @@ public class CommerceMediaServletTest {
 		return mockHttpServletResponse;
 	}
 
-	private MockHttpServletResponse _serviceVirtualProductSampleRequest(
-			long accountEntryId, CPDefinition cpDefinition, FileEntry fileEntry,
-			User user)
+	private MockHttpServletResponse _serviceVirtualSampleRequest(
+			long accountEntryId, long classPK, FileEntry fileEntry,
+			String urlSeparator, User user)
 		throws Exception {
 
 		MockHttpServletRequest mockHttpServletRequest =
@@ -373,9 +419,7 @@ public class CommerceMediaServletTest {
 		mockHttpServletRequest.setAttribute(WebKeys.USER, user);
 		mockHttpServletRequest.setPathInfo(
 			StringBundler.concat(
-				"/accounts/", accountEntryId,
-				CommerceMediaConstants.URL_SEPARATOR_VIRTUAL_PRODUCT_SAMPLE,
-				cpDefinition.getCPDefinitionId(),
+				"/accounts/", accountEntryId, urlSeparator, classPK,
 				CommerceMediaConstants.URL_SEPARATOR_FILE,
 				fileEntry.getFileEntryId()));
 
