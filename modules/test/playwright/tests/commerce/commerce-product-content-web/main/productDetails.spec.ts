@@ -4,7 +4,7 @@
  */
 
 import {expect, mergeTests} from '@playwright/test';
-import {createReadStream} from 'fs';
+import {createReadStream, readFileSync} from 'fs';
 import path from 'node:path';
 
 import {accountsPagesTest} from '../../../../fixtures/accountsPagesTest';
@@ -203,106 +203,220 @@ test('LPD-31658 Users cannot view and download owner limited product attachments
 	}
 });
 
-test('COMMERCE-9677 As a buyer, I want to be able to view a virtual product Detail page', async ({
-	apiHelpers,
-	page,
-	productDetailsPage,
-	site,
-	widgetPagePage,
-}) => {
-	const layout = await apiHelpers.jsonWebServicesLayout.addLayout({
-		groupId: site.id,
-		title: getRandomString(),
-	});
-
-	await apiHelpers.headlessCommerceAdminChannel.postChannel({
-		siteGroupId: site.id,
-	});
-
-	const catalog = await apiHelpers.headlessCommerceAdminCatalog.postCatalog({
-		name: 'View product details',
-	});
-
-	const virtualProduct =
-		await apiHelpers.headlessCommerceAdminCatalog.postProduct({
-			catalogId: catalog.id,
-			description: {en_US: 'Full description'},
-			name: {en_US: getRandomString()},
-			productType: 'virtual',
-			productVirtualSettings: {
-				activationStatus: 1,
-				duration: 4,
-				maxUsages: 4,
-				sampleURL: 'http://www.google.com',
-				useSample: true,
-			},
-			shortDescription: {en_US: 'Short description'},
-			skus: [
-				{
-					cost: 0,
-					gtin: 'GTIN1',
-					manufacturerPartNumber: 'mpn',
-					price: 0,
-					published: true,
-					purchasable: true,
-					sku: 'SkuVirtual',
-				},
-			],
+test(
+	'COMMERCE-9677 As a buyer, I want to be able to view a virtual product Detail page',
+	{tag: ['@COMMERCE-11344', '@COMMERCE-11379', '@LPD-106244-Grouped-7']},
+	async ({apiHelpers, page, productDetailsPage, site, widgetPagePage}) => {
+		const layout = await apiHelpers.jsonWebServicesLayout.addLayout({
+			groupId: site.id,
+			title: getRandomString(),
 		});
 
-	const basePriceListId =
-		await apiHelpers.headlessCommerceAdminPricing.getBasePriceListId(
-			catalog.id
+		const channel =
+			await apiHelpers.headlessCommerceAdminChannel.postChannel({
+				siteGroupId: site.id,
+			});
+
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog({
+				name: 'View product details',
+			});
+
+		const specification =
+			await apiHelpers.headlessCommerceAdminCatalog.postSpecification(
+				true,
+				0,
+				getRandomString()
+			);
+
+		const imageAttachment = readFileSync(
+			path.join(__dirname, '/dependencies/liferay.png')
+		).toString('base64');
+		const imageTitles = [getRandomString(), getRandomString()];
+
+		const virtualProduct =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				description: {en_US: 'Full description'},
+				images: imageTitles.map((imageTitle) => ({
+					attachment: imageAttachment,
+					title: {en_US: imageTitle},
+				})),
+				name: {en_US: getRandomString()},
+				productConfiguration: {
+					displayAvailability: true,
+					displayStockQuantity: true,
+					minOrderQuantity: 4,
+				},
+				productSpecifications: [
+					{
+						specificationKey: specification.key,
+						value: {en_US: '6 Months'},
+					},
+				],
+				productType: 'virtual',
+				productVirtualSettings: {
+					activationStatus: 1,
+					duration: 4,
+					maxUsages: 4,
+					url: 'http://www.liferay.com/file',
+				},
+				shortDescription: {en_US: 'Short description'},
+				skus: [
+					{
+						cost: 0,
+						gtin: 'GTIN1',
+						manufacturerPartNumber: 'mpn',
+						price: 0,
+						published: true,
+						purchasable: true,
+						sku: 'SkuVirtual',
+					},
+				],
+			});
+
+		await apiHelpers.headlessCommerceAdminCatalog.patchSku(
+			String(virtualProduct.skus[0].id),
+			{
+				sku: 'SkuVirtual',
+				skuVirtualSettings: {
+					activationStatus: 0,
+					override: true,
+					sampleURL: 'http://www.liferay.com/sample',
+					url: 'http://www.liferay.com/file',
+					useSample: true,
+				},
+			}
 		);
 
-	await apiHelpers.headlessCommerceAdminPricing.postPriceEntry({
-		price: 100,
-		priceListId: basePriceListId.items[0].id,
-		skuId: virtualProduct.skus[0].id,
-	});
-
-	const basePromoPriceListId =
-		await apiHelpers.headlessCommerceAdminPricing.getBasePromoPriceListId(
-			catalog.id
+		await apiHelpers.headlessCommerceAdminCatalog.patchProductSubscriptionConfiguration(
+			virtualProduct.productId,
+			{
+				deliverySubscriptionEnable: true,
+				deliverySubscriptionLength: 10,
+				deliverySubscriptionType: 'monthly',
+				deliverySubscriptionTypeSettings: {
+					deliveryMonthDay: 15,
+					deliveryMonthlyMode: 1,
+				},
+				enable: true,
+				length: 10,
+				subscriptionType: 'yearly',
+				subscriptionTypeSettings: {yearlyMode: 0},
+			}
 		);
 
-	await apiHelpers.headlessCommerceAdminPricing.postPriceEntry({
-		price: 50,
-		priceListId: basePromoPriceListId.items[0].id,
-		skuId: virtualProduct.skus[0].id,
-	});
+		const basePriceListId =
+			await apiHelpers.headlessCommerceAdminPricing.getBasePriceListId(
+				catalog.id
+			);
 
-	await apiHelpers.headlessCommerceAdminPricing.postDiscount();
+		await apiHelpers.headlessCommerceAdminPricing.postPriceEntry({
+			price: 100,
+			priceListId: basePriceListId.items[0].id,
+			skuId: virtualProduct.skus[0].id,
+		});
 
-	await page.goto(`/web${site.friendlyUrlPath}${layout.friendlyURL}`);
+		const basePromoPriceListId =
+			await apiHelpers.headlessCommerceAdminPricing.getBasePromoPriceListId(
+				catalog.id
+			);
 
-	await widgetPagePage.addPortlet('Product Details');
+		await apiHelpers.headlessCommerceAdminPricing.postPriceEntry({
+			price: 50,
+			priceListId: basePromoPriceListId.items[0].id,
+			skuId: virtualProduct.skus[0].id,
+		});
 
-	await page.goto(`/web/${site.name}/p/${virtualProduct.name['en_US']}`);
+		await apiHelpers.headlessCommerceAdminPricing.postDiscount({
+			discountProducts: [{productId: virtualProduct.productId}],
+			percentageLevel1: 20,
+			usePercentage: true,
+		});
 
-	await expect(await productDetailsPage.skuField('SkuVirtual')).toBeVisible();
-	await expect(await productDetailsPage.mpnField('mpn')).toBeVisible();
-	await expect(await productDetailsPage.gtinField('GTIN1')).toBeVisible();
-	await expect(
-		await productDetailsPage.shortDescriptionField('Short description')
-	).toBeVisible();
-	await expect(await productDetailsPage.priceField('$ 100.00')).toBeVisible();
-	await expect(await productDetailsPage.priceField('$ 100.00')).toHaveClass(
-		/price-value-inactive/
-	);
-	await expect(
-		await productDetailsPage.promoPriceField('$ 50.00')
-	).toBeVisible();
-	await expect(
-		await productDetailsPage.promoPriceField('$ 50.00')
-	).toHaveClass(/price-value-promo/);
-	await expect(
-		await productDetailsPage.fullDescriptionField('Full description')
-	).toBeVisible();
-	await expect(
-		await productDetailsPage.downloadSampleField('Download Sample File')
-	).toBeVisible();
-});
+		const warehouse =
+			await apiHelpers.headlessCommerceAdminInventoryApiHelper.postWarehouses(
+				{
+					active: true,
+					latitude: getRandomInt(),
+					longitude: getRandomInt(),
+					warehouseItems: [{quantity: 60, sku: 'SkuVirtual'}],
+				}
+			);
+
+		await apiHelpers.headlessCommerceAdminInventoryApiHelper.postWarehousesChannels(
+			warehouse.id,
+			channel.id
+		);
+
+		await page.goto(`/web${site.friendlyUrlPath}${layout.friendlyURL}`);
+
+		await widgetPagePage.addPortlet('Product Details');
+
+		await page.goto(`/web/${site.name}/p/${virtualProduct.name['en_US']}`);
+
+		await expect(
+			await productDetailsPage.skuField('SkuVirtual')
+		).toBeVisible();
+		await expect(await productDetailsPage.mpnField('mpn')).toBeVisible();
+		await expect(await productDetailsPage.gtinField('GTIN1')).toBeVisible();
+		await expect(
+			await productDetailsPage.shortDescriptionField('Short description')
+		).toBeVisible();
+		await expect(
+			await productDetailsPage.priceField('$ 100.00')
+		).toBeVisible();
+		await expect(
+			await productDetailsPage.priceField('$ 100.00')
+		).toHaveClass(/price-value-inactive/);
+		await expect(
+			await productDetailsPage.promoPriceField('$ 50.00')
+		).toBeVisible();
+		await expect(
+			await productDetailsPage.promoPriceField('$ 50.00')
+		).toHaveClass(/price-value-promo/);
+		await expect(productDetailsPage.discountValue).toContainText('20');
+		await expect(productDetailsPage.finalPrice).toHaveText('$ 40.00');
+		await expect(
+			productDetailsPage.productDetailAvailabilityLabel
+		).toHaveText('Available');
+		await expect(productDetailsPage.inStockQuantity).toContainText(
+			'60 in Stock'
+		);
+		await expect(
+			productDetailsPage.minimumQuantityMessage(4)
+		).toBeVisible();
+
+		await expect(
+			productDetailsPage.subscriptionInfoRow('Delivery Subscription')
+		).toContainText('Every 10 Months');
+		await expect(
+			productDetailsPage.subscriptionInfoRow('Payment Subscription')
+		).toContainText('Every 10 Years');
+
+		for (const imageTitle of imageTitles) {
+			await expect(
+				productDetailsPage.productImage(imageTitle)
+			).toBeVisible();
+		}
+
+		await expect(
+			await productDetailsPage.fullDescriptionField('Full description')
+		).toBeVisible();
+		await expect(
+			await productDetailsPage.downloadSampleField('Download Sample File')
+		).toBeVisible();
+
+		await productDetailsPage.specificationsTab.click();
+
+		await expect(productDetailsPage.specificationList).toContainText(
+			specification.title['en_US']
+		);
+		await expect(productDetailsPage.specificationList).toContainText(
+			'6 Months'
+		);
+	}
+);
 
 test(
 	'User can see SKU updated on the product details page when values are selected from multiple options',
