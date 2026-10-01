@@ -6,6 +6,7 @@
 import {Locator, Page} from '@playwright/test';
 
 export class CommerceAdminProductDetailsConfigurationPage {
+	readonly availabilityEstimateSelect: Locator;
 	readonly page: Page;
 	readonly publishLink: Locator;
 	readonly minStockQuantityInput: Locator;
@@ -15,6 +16,9 @@ export class CommerceAdminProductDetailsConfigurationPage {
 	readonly successAlert: Locator;
 
 	constructor(page: Page) {
+		this.availabilityEstimateSelect = page.getByLabel(
+			'Availability Estimate'
+		);
 		this.page = page;
 		this.publishLink = page.getByRole('link', {name: 'Publish'});
 		this.minStockQuantityInput = page.getByTestId('minStockQuantityInput');
