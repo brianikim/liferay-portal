@@ -27,6 +27,7 @@ import com.liferay.commerce.product.test.util.CPTestUtil;
 import com.liferay.commerce.product.type.simple.constants.SimpleCPTypeConstants;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.lang.SafeCloseable;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.lazy.referencing.LazyReferencingThreadLocal;
 import com.liferay.portal.kernel.model.Group;
@@ -568,6 +569,7 @@ public class CPDefinitionOptionRelLocalServiceTest {
 		Assert.assertTrue(
 			Validator.isNull(cpDefinitionOptionRel.getPriceType()));
 
+		_testUpdateCPDefinitionOptionRelPriceTypeWithDefinedExternally();
 		_testUpdateCPDefinitionOptionRelPriceTypeWithDeletedOptionValue();
 	}
 
@@ -715,6 +717,48 @@ public class CPDefinitionOptionRelLocalServiceTest {
 		}
 	}
 
+	private void _testUpdateCPDefinitionOptionRelPriceTypeWithDefinedExternally()
+		throws Exception {
+
+		CPDefinition cpDefinition = CPTestUtil.addCPDefinition(
+			_commerceCatalog.getGroupId());
+
+		CPDefinitionOptionRel cpDefinitionOptionRel =
+			CPTestUtil.addCPDefinitionOptionRel(
+				_commerceCatalog.getGroupId(), cpDefinition.getCPDefinitionId(),
+				false, 0);
+
+		_cpDefinitionOptionRels.add(cpDefinitionOptionRel);
+
+		CPDefinitionOptionRelPriceTypeException
+			cpDefinitionOptionRelPriceTypeException = Assert.assertThrows(
+				CPDefinitionOptionRelPriceTypeException.class,
+				() -> _updatePriceType(
+					cpDefinitionOptionRel, true,
+					CPConstants.PRODUCT_OPTION_PRICE_TYPE_STATIC));
+
+		Assert.assertEquals(
+			"Price type must be dynamic",
+			cpDefinitionOptionRelPriceTypeException.getMessage());
+
+		cpDefinitionOptionRelPriceTypeException = Assert.assertThrows(
+			CPDefinitionOptionRelPriceTypeException.class,
+			() -> _updatePriceType(
+				cpDefinitionOptionRel, true, StringPool.BLANK));
+
+		Assert.assertEquals(
+			"Price type must be dynamic",
+			cpDefinitionOptionRelPriceTypeException.getMessage());
+
+		CPDefinitionOptionRel curCPDefinitionOptionRel =
+			_cpDefinitionOptionRelLocalService.getCPDefinitionOptionRel(
+				cpDefinitionOptionRel.getCPDefinitionOptionRelId());
+
+		Assert.assertFalse(curCPDefinitionOptionRel.isDefinedExternally());
+		Assert.assertTrue(
+			Validator.isNull(curCPDefinitionOptionRel.getPriceType()));
+	}
+
 	private void _testUpdateCPDefinitionOptionRelPriceTypeWithDeletedOptionValue()
 		throws Exception {
 
@@ -767,6 +811,16 @@ public class CPDefinitionOptionRelLocalServiceTest {
 			CPDefinitionOptionRel cpDefinitionOptionRel, String priceType)
 		throws Exception {
 
+		return _updatePriceType(
+			cpDefinitionOptionRel, cpDefinitionOptionRel.isDefinedExternally(),
+			priceType);
+	}
+
+	private CPDefinitionOptionRel _updatePriceType(
+			CPDefinitionOptionRel cpDefinitionOptionRel,
+			boolean definedExternally, String priceType)
+		throws Exception {
+
 		return _cpDefinitionOptionRelLocalService.updateCPDefinitionOptionRel(
 			cpDefinitionOptionRel.getCPDefinitionOptionRelId(),
 			cpDefinitionOptionRel.getCPOptionId(),
@@ -774,8 +828,7 @@ public class CPDefinitionOptionRelLocalServiceTest {
 			cpDefinitionOptionRel.getDescriptionMap(),
 			cpDefinitionOptionRel.getCommerceOptionTypeKey(),
 			cpDefinitionOptionRel.getInfoItemServiceKey(),
-			cpDefinitionOptionRel.getPriority(),
-			cpDefinitionOptionRel.isDefinedExternally(),
+			cpDefinitionOptionRel.getPriority(), definedExternally,
 			cpDefinitionOptionRel.isFacetable(),
 			cpDefinitionOptionRel.isRequired(),
 			cpDefinitionOptionRel.isSkuContributor(), priceType,
