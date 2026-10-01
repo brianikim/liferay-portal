@@ -13,11 +13,13 @@ import com.liferay.commerce.constants.CommerceOrderConstants;
 import com.liferay.commerce.context.CommerceContext;
 import com.liferay.commerce.currency.model.CommerceCurrency;
 import com.liferay.commerce.currency.test.util.CommerceCurrencyTestUtil;
+import com.liferay.commerce.exception.CommerceOrderValidatorException;
 import com.liferay.commerce.inventory.model.CommerceInventoryWarehouse;
 import com.liferay.commerce.model.CommerceAddress;
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.model.CommerceOrderItem;
 import com.liferay.commerce.model.CommerceShippingMethod;
+import com.liferay.commerce.order.CommerceOrderValidatorResult;
 import com.liferay.commerce.payment.model.CommercePaymentMethodGroupRel;
 import com.liferay.commerce.payment.service.CommercePaymentMethodGroupRelLocalService;
 import com.liferay.commerce.payment.test.util.TestCommercePaymentMethod;
@@ -29,6 +31,7 @@ import com.liferay.commerce.product.model.CPInstance;
 import com.liferay.commerce.product.model.CommerceCatalog;
 import com.liferay.commerce.product.model.CommerceChannel;
 import com.liferay.commerce.product.service.CPConfigurationEntryLocalService;
+import com.liferay.commerce.product.service.CPDefinitionLocalService;
 import com.liferay.commerce.product.service.CommerceChannelAccountEntryRelLocalService;
 import com.liferay.commerce.product.test.util.CPTestUtil;
 import com.liferay.commerce.service.CommerceAddressLocalService;
@@ -664,6 +667,37 @@ public class CommerceOrderLocalServiceTest {
 				_commerceOrder.getCommerceOrderId()));
 	}
 
+	@Test
+	public void testReorderCommerceOrder() throws Exception {
+		CommerceTestUtil.addCommerceOrderItem(
+			_commerceOrder.getCommerceOrderId(), _cpInstance.getCPInstanceId(),
+			BigDecimal.ONE, _commerceContext);
+
+		_cpDefinitionLocalService.updateCPDefinitionChannelFilter(
+			_cpInstance.getCPDefinitionId(), true);
+
+		CommerceOrderValidatorException commerceOrderValidatorException =
+			Assert.assertThrows(
+				CommerceOrderValidatorException.class,
+				() -> _commerceOrderLocalService.reorderCommerceOrder(
+					_user.getUserId(), _commerceOrder.getCommerceOrderId(),
+					_commerceContext));
+
+		List<CommerceOrderValidatorResult> commerceOrderValidatorResults =
+			commerceOrderValidatorException.getCommerceOrderValidatorResults();
+
+		Assert.assertEquals(
+			commerceOrderValidatorResults.toString(), 1,
+			commerceOrderValidatorResults.size());
+
+		CommerceOrderValidatorResult commerceOrderValidatorResult =
+			commerceOrderValidatorResults.get(0);
+
+		Assert.assertEquals(
+			"One or more products are no longer available.",
+			commerceOrderValidatorResult.getLocalizedMessage());
+	}
+
 	@Rule
 	public FrutillaRule frutillaRule = new FrutillaRule();
 
@@ -730,6 +764,9 @@ public class CommerceOrderLocalServiceTest {
 
 	@Inject
 	private CPConfigurationEntryLocalService _cpConfigurationEntryLocalService;
+
+	@Inject
+	private CPDefinitionLocalService _cpDefinitionLocalService;
 
 	private CPInstance _cpInstance;
 	private Group _group;
