@@ -14,6 +14,7 @@ export class CommerceAdminProductPage extends CommerceDNDTablePage {
 	readonly addVirtualProductFileEntryButton: Locator;
 	readonly addVirtualSkuFileEntryButton: Locator;
 	readonly globalMenuPage: GlobalMenuPage;
+	readonly columnHeader: (name: string) => Locator;
 	readonly creationMenuItem: (menuItemName: string) => Locator;
 	readonly creationMenuNewButton: Locator;
 	readonly deleteMenuItem: Locator;
@@ -32,7 +33,22 @@ export class CommerceAdminProductPage extends CommerceDNDTablePage {
 	readonly modalMenuItem: (catalogName: string) => Locator;
 	readonly modalPlaceHolder: Locator;
 	readonly modalSubmitButton: Locator;
+	readonly paginationItemsButton: (itemsCount: number) => Locator;
+	readonly paginationNextButton: Locator;
+	readonly paginationResults: (
+		start: number,
+		end: number,
+		total: number
+	) => Locator;
 	readonly productSkuTableRowLink: (sku: string) => Locator;
+	readonly productVersionRow: (
+		productName: string,
+		status: string
+	) => Locator;
+	readonly productVersionRowLink: (
+		productName: string,
+		status: string
+	) => Locator;
 	readonly productSkuVirtualFileEntryCancelButton: Locator;
 	readonly productSkuVirtualFileEntrySaveButton: Locator;
 	readonly productSkuVirtualFileEntryURLInput: Locator;
@@ -45,6 +61,7 @@ export class CommerceAdminProductPage extends CommerceDNDTablePage {
 	readonly productsTableRowLink: (productName: string) => Locator;
 	readonly spareProductMenuButton: Locator;
 	readonly specificProductMenuLink: (productName: string) => Promise<Locator>;
+	readonly tableBodyRow: (index: number) => Locator;
 	readonly validProductCheckbox: (productName: string) => Promise<Locator>;
 	readonly virtualSettingsOverrideLink: Locator;
 
@@ -64,6 +81,8 @@ export class CommerceAdminProductPage extends CommerceDNDTablePage {
 			.getByRole('button', {exact: true, name: 'Add File Entry'})
 			.first();
 		this.globalMenuPage = new GlobalMenuPage(page);
+		this.columnHeader = (name: string) =>
+			this.table.getByRole('columnheader', {exact: true, name});
 		this.creationMenuItem = (menuItemName: string) =>
 			page.getByRole('menuitem', {
 				exact: true,
@@ -109,8 +128,20 @@ export class CommerceAdminProductPage extends CommerceDNDTablePage {
 			exact: true,
 			name: 'Submit',
 		});
+		this.paginationItemsButton = (itemsCount: number) =>
+			page.getByRole('button', {name: `${itemsCount} Items`});
+		this.paginationNextButton = page.locator('[data-testid="nextArrow"]');
+		this.paginationResults = (start: number, end: number, total: number) =>
+			page.getByText(`Showing ${start} to ${end} of ${total} entries.`);
 		this.productSkuTableRowLink = (sku: string) =>
 			page.getByRole('link', {name: sku});
+		this.productVersionRow = (productName: string, status: string) =>
+			this.productsTableRow(productName).filter({hasText: status});
+		this.productVersionRowLink = (productName: string, status: string) =>
+			this.productVersionRow(productName, status).getByRole('link', {
+				exact: true,
+				name: productName,
+			});
 		this.productSkuVirtualFileEntryCancelButton = page
 			.frameLocator('iframe')
 			.frameLocator('iframe >> nth=1')
@@ -152,6 +183,8 @@ export class CommerceAdminProductPage extends CommerceDNDTablePage {
 		this.specificProductMenuLink = async (productName: string) => {
 			return page.getByRole('link', {name: productName});
 		};
+		this.tableBodyRow = (index: number) =>
+			this.table.locator('tbody tr').nth(index);
 		this.validProductCheckbox = async (productName: string) => {
 			return page
 				.frameLocator('#modalIframe')
@@ -223,5 +256,10 @@ export class CommerceAdminProductPage extends CommerceDNDTablePage {
 			await this.managementToolbarSearchInput.press('Enter');
 			await this.productsTableRowLink(productName).click();
 		}).toPass();
+	}
+
+	async search(keywords: string) {
+		await this.managementToolbarSearchInput.fill(keywords);
+		await this.managementToolbarSearchInput.press('Enter');
 	}
 }
