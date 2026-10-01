@@ -5,6 +5,34 @@
 
 import {FrameLocator, Locator, Page, expect} from '@playwright/test';
 
+export type ProductSubscriptionName =
+	| 'Delivery Subscription'
+	| 'Payment Subscription';
+
+export const SUBSCRIPTION_FIELD_IDS = {
+	'Delivery Subscription': {
+		cycleLengthContainer: 'deliveryCycleLengthContainer',
+		enabled: 'deliverySubscriptionEnabled',
+		length: 'deliverySubscriptionLength',
+		type: 'deliverySubscriptionType',
+		yearlyMode:
+			'deliverySubscriptionTypeSettings--yearly--deliveryYearlyMode--',
+		yearlyMonth:
+			'deliverySubscriptionTypeSettings--yearly--deliveryMonth--',
+		yearlyMonthDay:
+			'deliverySubscriptionTypeSettings--yearly--deliveryMonthDay--',
+	},
+	'Payment Subscription': {
+		cycleLengthContainer: 'cycleLengthContainer',
+		enabled: 'subscriptionEnabled',
+		length: 'subscriptionLength',
+		type: 'subscriptionType',
+		yearlyMode: 'subscriptionTypeSettings--yearly--yearlyMode--',
+		yearlyMonth: 'subscriptionTypeSettings--yearly--month--',
+		yearlyMonthDay: 'subscriptionTypeSettings--yearly--monthDay--',
+	},
+};
+
 export class CommerceAdminProductDetailsPage {
 	readonly addExistingSpecificationValueTextbox: Locator;
 	readonly addSpecification: Locator;
@@ -47,6 +75,7 @@ export class CommerceAdminProductDetailsPage {
 	readonly page: Page;
 	readonly productConfigurationLink: Locator;
 	readonly productDetailsInput: (inputName: string) => Promise<Locator>;
+	readonly productDetailsLink: Locator;
 	readonly productDiagramLink: Locator;
 	readonly productGroupsLink: Locator;
 	readonly productId: Locator;
@@ -54,11 +83,36 @@ export class CommerceAdminProductDetailsPage {
 	readonly productOptionsLink: Locator;
 	readonly productRelationsLink: Locator;
 	readonly productSkusLink: Locator;
+	readonly productSubscriptionLink: Locator;
 	readonly productVisibilityLink: Locator;
 	readonly publishLink: Locator;
 	readonly saveAsDraftLink: Locator;
 	readonly selectedCatalogOption: Locator;
 	readonly shortDescriptionInput: Locator;
+	readonly subscriptionEnabledInput: (
+		subscriptionName: ProductSubscriptionName
+	) => Locator;
+	readonly subscriptionEnabledLabel: (
+		subscriptionName: ProductSubscriptionName
+	) => Locator;
+	readonly subscriptionLengthInput: (
+		subscriptionName: ProductSubscriptionName
+	) => Locator;
+	readonly subscriptionLengthSuffix: (
+		subscriptionName: ProductSubscriptionName
+	) => Locator;
+	readonly subscriptionTypeSelect: (
+		subscriptionName: ProductSubscriptionName
+	) => Locator;
+	readonly subscriptionYearlyModeSelect: (
+		subscriptionName: ProductSubscriptionName
+	) => Locator;
+	readonly subscriptionYearlyMonthDayInput: (
+		subscriptionName: ProductSubscriptionName
+	) => Locator;
+	readonly subscriptionYearlyMonthSelect: (
+		subscriptionName: ProductSubscriptionName
+	) => Locator;
 	readonly textTableCell: (text: string) => Locator;
 	readonly visibleToggle: Locator;
 	readonly workflowStatus: (label: string) => Locator;
@@ -170,6 +224,10 @@ export class CommerceAdminProductDetailsPage {
 		});
 		this.productDetailsInput = async (inputName: string) =>
 			page.getByLabel(inputName);
+		this.productDetailsLink = page.getByRole('link', {
+			exact: true,
+			name: 'Details',
+		});
 		this.productDiagramLink = page.getByRole('link', {
 			name: 'Diagram',
 		});
@@ -190,6 +248,10 @@ export class CommerceAdminProductDetailsPage {
 		this.productSkusLink = page.getByRole('link', {
 			name: 'Skus',
 		});
+		this.productSubscriptionLink = page.getByRole('link', {
+			exact: true,
+			name: 'Subscription',
+		});
 		this.productVisibilityLink = page.getByRole('link', {
 			name: 'Visibility',
 		});
@@ -204,6 +266,54 @@ export class CommerceAdminProductDetailsPage {
 		this.shortDescriptionInput = page.locator(
 			'textarea[id$="_shortDescriptionMapAsXML"]'
 		);
+		this.subscriptionEnabledInput = (
+			subscriptionName: ProductSubscriptionName
+		) =>
+			page.locator(
+				`input[id$="_${SUBSCRIPTION_FIELD_IDS[subscriptionName].enabled}"]`
+			);
+		this.subscriptionEnabledLabel = (
+			subscriptionName: ProductSubscriptionName
+		) =>
+			page.locator(
+				`label[for$="_${SUBSCRIPTION_FIELD_IDS[subscriptionName].enabled}"]`
+			);
+		this.subscriptionLengthInput = (
+			subscriptionName: ProductSubscriptionName
+		) =>
+			page.locator(
+				`input[id$="_${SUBSCRIPTION_FIELD_IDS[subscriptionName].length}"]`
+			);
+		this.subscriptionLengthSuffix = (
+			subscriptionName: ProductSubscriptionName
+		) =>
+			page.locator(
+				`[id$="_${SUBSCRIPTION_FIELD_IDS[subscriptionName].cycleLengthContainer}"] .input-group-text`
+			);
+		this.subscriptionTypeSelect = (
+			subscriptionName: ProductSubscriptionName
+		) =>
+			page.locator(
+				`select[id$="_${SUBSCRIPTION_FIELD_IDS[subscriptionName].type}"]`
+			);
+		this.subscriptionYearlyModeSelect = (
+			subscriptionName: ProductSubscriptionName
+		) =>
+			page.locator(
+				`select[name$="_${SUBSCRIPTION_FIELD_IDS[subscriptionName].yearlyMode}"]`
+			);
+		this.subscriptionYearlyMonthDayInput = (
+			subscriptionName: ProductSubscriptionName
+		) =>
+			page.locator(
+				`input[name$="_${SUBSCRIPTION_FIELD_IDS[subscriptionName].yearlyMonthDay}"]`
+			);
+		this.subscriptionYearlyMonthSelect = (
+			subscriptionName: ProductSubscriptionName
+		) =>
+			page.locator(
+				`select[name$="_${SUBSCRIPTION_FIELD_IDS[subscriptionName].yearlyMonth}"]`
+			);
 		this.textTableCell = (text: string) =>
 			this.page.getByRole('cell', {
 				exact: true,
