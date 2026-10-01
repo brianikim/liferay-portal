@@ -123,66 +123,34 @@ test('LPD-26249 Configure options and Product options', async ({
 	).toBeVisible();
 });
 
-test('LPD-45740 Product options can be added from product admins', async ({
-	apiHelpers,
-	commerceAdminProductDetailsPage,
-	commerceAdminProductDetailsProductOptionsPage,
-	commerceAdminProductPage,
-	page,
-}) => {
-	await page.goto('/');
-
-	const catalog = await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
-
-	const product = await apiHelpers.headlessCommerceAdminCatalog.postProduct({
-		catalogId: catalog.id,
-		name: {en_US: 'Simple T-Shirt'},
-	});
-
-	await commerceAdminProductPage.gotoProduct(product.name['en_US']);
-
-	await commerceAdminProductDetailsPage.goToProductOptions();
-
-	const optionName = getRandomString();
-
-	await commerceAdminProductDetailsProductOptionsPage.addOptionsSearch.fill(
-		optionName
-	);
-
-	await commerceAdminProductDetailsProductOptionsPage.createNewOptionsButton.click();
-
-	await waitForAlert(page, 'Success:Option Created');
-
-	await page.reload();
-
-	await expect(
-		(
-			await commerceAdminProductDetailsProductOptionsPage.tableRow(
-				0,
-				optionName,
-				true
-			)
-		).row
-	).toBeVisible();
-});
-
 test(
-	'Product options can be deleted from product admins',
-	{tag: ['@LPD-45740']},
+	'Product options can be added, edited and deleted from product admins',
+	{
+		tag: [
+			'@COMMERCE-6017',
+			'@COMMERCE-6019',
+			'@COMMERCE-6269',
+			'@LPD-45740',
+			'@LPD-106244-Grouped-3',
+		],
+	},
 	async ({
 		apiHelpers,
+		commerceAdminOptionsPage,
 		commerceAdminProductDetailsPage,
 		commerceAdminProductDetailsProductOptionsPage,
 		commerceAdminProductPage,
+		globalMenuPage,
 		page,
 	}) => {
-		await page.goto('/');
+		const optionName = getRandomString();
 
 		const option = await apiHelpers.headlessCommerceAdminCatalog.postOption(
 			'select',
-			'color',
-			'Color',
-			1
+			'color-' + getRandomString().toLowerCase(),
+			optionName,
+			1,
+			true
 		);
 
 		const catalog =
@@ -191,32 +159,23 @@ test(
 		const product =
 			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
 				catalogId: catalog.id,
-				name: {en_US: 'Simple T-Shirt'},
+				name: {en_US: getRandomString()},
 				productOptions: [
 					{
+						facetable: true,
 						fieldType: 'select',
-						key: 'color',
-						name: {
-							en_US: 'Color',
-						},
+						key: option.key,
+						name: {en_US: optionName},
 						optionId: option.id,
 						priority: 1,
 						productOptionValues: [
 							{
 								key: 'black',
-								name: {
-									en_US: 'Black',
-								},
+								name: {en_US: 'Black'},
 								priority: 1,
 							},
-							{
-								key: 'white',
-								name: {
-									en_US: 'White',
-								},
-								priority: 2,
-							},
 						],
+						required: true,
 						skuContributor: true,
 					},
 				],
@@ -226,23 +185,179 @@ test(
 
 		await commerceAdminProductDetailsPage.goToProductOptions();
 
-		await expect(
-			(
-				await commerceAdminProductDetailsProductOptionsPage.tableRow(
-					0,
-					option.name['en_US'],
-					true
+		await test.step('Edit and delete an option value', async () => {
+			await commerceAdminProductDetailsProductOptionsPage.openOption(
+				optionName
+			);
+
+			await commerceAdminProductDetailsProductOptionsPage
+				.optionValueLink('Black')
+				.click();
+
+			await commerceAdminProductDetailsProductOptionsPage.optionValueNameInput.fill(
+				'Red'
+			);
+			await commerceAdminProductDetailsProductOptionsPage.optionValueKeyInput.fill(
+				'red'
+			);
+			await commerceAdminProductDetailsProductOptionsPage.optionValueSaveButton.click();
+
+			await waitForAlert(
+				commerceAdminProductDetailsProductOptionsPage.optionValueSidePanelFrame
+			);
+
+			await commerceAdminProductDetailsProductOptionsPage.closeOptionValue();
+			await commerceAdminProductDetailsProductOptionsPage.closeOption();
+
+			await page.reload();
+
+			await commerceAdminProductDetailsProductOptionsPage.openOption(
+				optionName
+			);
+
+			await expect(
+				commerceAdminProductDetailsProductOptionsPage.optionValueLink(
+					'Red'
 				)
-			).row
-		).toBeVisible();
+			).toBeVisible();
 
-		await commerceAdminProductDetailsProductOptionsPage
-			.optionActionsButton(option.name['en_US'])
-			.click();
+			await commerceAdminProductDetailsProductOptionsPage.clickOptionValueAction(
+				'Delete',
+				'Red'
+			);
 
-		await commerceAdminProductDetailsProductOptionsPage.deleteMenuItem.click();
+			await waitForAlert(
+				commerceAdminProductDetailsProductOptionsPage.optionSidePanelFrame
+			);
 
-		await waitForAlert(page);
+			await page.reload();
+
+			await commerceAdminProductDetailsProductOptionsPage.openOption(
+				optionName
+			);
+
+			await expect(
+				commerceAdminProductDetailsProductOptionsPage.optionValueRow(
+					'Red'
+				)
+			).toHaveCount(0);
+
+			await commerceAdminProductDetailsProductOptionsPage.closeOption();
+		});
+
+		await test.step('Delete a product option', async () => {
+			await commerceAdminProductDetailsProductOptionsPage
+				.optionActionsButton(optionName)
+				.click();
+			await commerceAdminProductDetailsProductOptionsPage.deleteMenuItem.click();
+
+			await waitForAlert(page);
+
+			await page.reload();
+
+			await expect(
+				commerceAdminProductDetailsProductOptionsPage.optionLink(
+					optionName
+				)
+			).toHaveCount(0);
+		});
+
+		const fieldTypeOptionNames: string[] = [];
+
+		try {
+			await test.step('Add a product option of every field type', async () => {
+				for (const fieldType of [
+					'Text',
+					'Single Selection',
+					'Multiple Selection',
+					'Date',
+					'Numeric',
+					'Boolean',
+				]) {
+					const fieldTypeOptionName = getRandomString();
+
+					fieldTypeOptionNames.push(fieldTypeOptionName);
+
+					await commerceAdminProductDetailsProductOptionsPage.addOptionsSearch.fill(
+						fieldTypeOptionName
+					);
+					await commerceAdminProductDetailsProductOptionsPage.createNewOptionsButton.click();
+
+					await waitForAlert(page, 'Success:Option Created');
+
+					await page.reload();
+
+					const optionRow = (
+						await commerceAdminProductDetailsProductOptionsPage.tableRow(
+							0,
+							fieldTypeOptionName,
+							true
+						)
+					).row;
+
+					await expect(optionRow).toBeVisible();
+					await expect(optionRow).toContainText('Select from List');
+
+					await commerceAdminProductDetailsProductOptionsPage.openOption(
+						fieldTypeOptionName
+					);
+
+					await commerceAdminProductDetailsProductOptionsPage.optionFieldTypeSelect.selectOption(
+						{label: fieldType}
+					);
+					await commerceAdminProductDetailsProductOptionsPage.optionSaveButton.click();
+
+					await waitForAlert(
+						commerceAdminProductDetailsProductOptionsPage.optionSidePanelFrame
+					);
+
+					await commerceAdminProductDetailsProductOptionsPage.closeOption();
+
+					await page.reload();
+
+					await expect(
+						(
+							await commerceAdminProductDetailsProductOptionsPage.tableRow(
+								0,
+								fieldTypeOptionName,
+								true
+							)
+						).row
+					).toContainText(fieldType);
+				}
+			});
+
+			await test.step('Find the added options in the options portlet', async () => {
+				await globalMenuPage.goToCommerce('Options');
+
+				for (const fieldTypeOptionName of fieldTypeOptionNames) {
+					await commerceAdminOptionsPage.search(fieldTypeOptionName);
+
+					await expect(
+						commerceAdminOptionsPage.optionLink(fieldTypeOptionName)
+					).toBeVisible();
+				}
+			});
+		}
+		finally {
+			for (const fieldTypeOptionName of fieldTypeOptionNames) {
+				const fieldTypeOption = (
+					await apiHelpers.headlessCommerceAdminCatalog.getOptions(
+						new URLSearchParams({search: fieldTypeOptionName})
+					)
+				).items.find(
+					(item: {name: {en_US: string}}) =>
+						item.name['en_US'] === fieldTypeOptionName
+				);
+
+				if (fieldTypeOption) {
+					apiHelpers.data.push({
+						id: fieldTypeOption.id,
+						type: 'option',
+					});
+				}
+			}
+		}
 	}
 );
 
