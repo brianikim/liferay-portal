@@ -135,6 +135,67 @@ describe('MiniCart Quick Add', () => {
 		}
 	});
 
+	it('keeps the search text without errors when it is pasted, submitted, or contains special characters', async () => {
+		for (const [enterSearch, search, expectedSKUs] of [
+			[
+				(combobox) =>
+					fireEvent.paste(combobox, {
+						clipboardData: {getData: () => 'MIN55861'},
+					}),
+				'MIN55861',
+				['MIN55861'],
+			],
+			[
+				(combobox) => {
+					fireEvent.change(combobox, {target: {value: 'abc123'}});
+					fireEvent.keyDown(combobox, {key: 'Enter'});
+				},
+				'abc123',
+				[],
+			],
+			[
+				(combobox) => {
+					fireEvent.change(combobox, {target: {value: ',abc123,'}});
+					fireEvent.keyDown(combobox, {key: ','});
+				},
+				',abc123,',
+				[],
+			],
+			[
+				(combobox) =>
+					fireEvent.change(combobox, {
+						target: {value: "!|/\\£$%&/'()=€{}[]+-;*°§"},
+					}),
+				"!|/\\£$%&/'()=€{}[]+-;*°§",
+				[],
+			],
+		]) {
+			mockProductsSearch(
+				expectedSKUs.map((sku) =>
+					getProduct('U-Joint', [{id: 101, purchasable: true, sku}])
+				)
+			);
+
+			const {baseElement, getByRole, queryByText, unmount} =
+				renderCartQuickAdd();
+
+			const combobox = getByRole('combobox');
+
+			enterSearch(combobox);
+
+			await waitForProductsSearch();
+
+			expect(
+				new URL(fetchMock.lastUrl()).searchParams.get('search')
+			).toBe(search);
+			expect(combobox).toHaveValue(search);
+			expect(getSearchResultSKUs(baseElement)).toEqual(expectedSKUs);
+			expect(queryByText(/error-colon/)).not.toBeInTheDocument();
+
+			unmount();
+		}
+	});
+
 	it('lists only the purchasable SKUs of the products found', async () => {
 		for (const [search, products, expectedSKUs] of [
 			[
