@@ -2033,3 +2033,65 @@ test(
 		);
 	}
 );
+
+test(
+	'Buyer views the product image through adaptive media on the product details page',
+	{tag: ['@COMMERCE-12627', '@LPD-106244-Grouped-6']},
+	async ({apiHelpers, page, productDetailsPage}) => {
+		const {product, site} = await apiStorefrontSetUp(apiHelpers, [
+			{
+				title: 'Product Details',
+				widgetName:
+					'com_liferay_commerce_product_content_web_internal_portlet_CPContentPortlet',
+			},
+		]);
+
+		const {buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id
+		);
+
+		const documentTitle = getRandomString();
+
+		const document = await apiHelpers.headlessDelivery.postDocument(
+			site.id,
+			createReadStream(path.join(__dirname, '/dependencies/liferay.png')),
+			{
+				fileName: `${documentTitle}.png`,
+				title: documentTitle,
+				viewableBy: 'Anyone',
+			}
+		);
+
+		apiHelpers.data.push({id: document.id, type: 'document'});
+
+		await apiHelpers.headlessCommerceAdminCatalog.postImage(
+			product.productId,
+			document.id,
+			documentTitle
+		);
+
+		await performLogout(page);
+		await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+		const productDetailsURL = `/web${site.friendlyUrlPath}/p/${product.urls['en_US']}`;
+
+		await expect
+			.poll(
+				async () => {
+					const response = await page.request.get(productDetailsURL);
+
+					return response.text();
+				},
+				{timeout: 30000}
+			)
+			.toContain('/o/adaptive-media/image/');
+
+		await page.goto(productDetailsURL);
+
+		await expect(
+			productDetailsPage.galleryAdaptiveMediaSource.first()
+		).toBeAttached();
+		await expect(productDetailsPage.galleryImage.first()).toBeVisible();
+	}
+);
