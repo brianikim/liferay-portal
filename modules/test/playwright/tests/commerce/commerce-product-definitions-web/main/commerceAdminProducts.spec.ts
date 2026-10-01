@@ -1429,3 +1429,58 @@ test(
 		});
 	}
 );
+
+test(
+	'A SKU external reference code cannot be used by another SKU',
+	{tag: ['@COMMERCE-9891', '@LPD-106244-Grouped-4']},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductDetailsSkusPage,
+		commerceAdminProductPage,
+	}) => {
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		const externalReferenceCode = getRandomString();
+
+		const publishSkuExternalReferenceCode = async () => {
+			const product =
+				await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+					catalogId: catalog.id,
+				});
+
+			await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+			await commerceAdminProductDetailsPage.goToProductSkus();
+
+			await commerceAdminProductDetailsSkusPage
+				.skusTableRowLink(product.skus[0].sku)
+				.click();
+			await commerceAdminProductDetailsSkusPage.sidePanelDetailsSkuExternalReferenceCodeInput.fill(
+				externalReferenceCode
+			);
+			await commerceAdminProductDetailsSkusPage.sidePanelDetailsSkuPublishButton.click();
+
+			return product;
+		};
+
+		await publishSkuExternalReferenceCode();
+
+		await waitForAlert(commerceAdminProductDetailsSkusPage.sidePanelFrame);
+
+		const product = await publishSkuExternalReferenceCode();
+
+		await waitForAlert(
+			commerceAdminProductDetailsSkusPage.sidePanelFrame,
+			'Error:Please enter a unique external reference code.',
+			{autoClose: false, type: 'danger'}
+		);
+
+		const {skus} = await apiHelpers.headlessCommerceAdminCatalog.getProduct(
+			product.productId
+		);
+
+		expect(skus[0].externalReferenceCode).not.toBe(externalReferenceCode);
+	}
+);
