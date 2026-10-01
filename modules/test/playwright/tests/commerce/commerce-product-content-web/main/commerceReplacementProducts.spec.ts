@@ -3,23 +3,31 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import {expect, mergeTests} from '@playwright/test';
+import {Page, expect, mergeTests} from '@playwright/test';
 
 import {commercePagesTest} from '../../../../fixtures/commercePagesTest';
 import {dataApiHelpersTest} from '../../../../fixtures/dataApiHelpersTest';
 import {featureFlagsTest} from '../../../../fixtures/featureFlagsTest';
 import {isolatedSiteTest} from '../../../../fixtures/isolatedSiteTest';
 import {loginTest} from '../../../../fixtures/loginTest';
+import {DataApiHelpers} from '../../../../helpers/ApiHelpers';
+import {TProduct} from '../../../../helpers/HeadlessCommerceAdminCatalogApiHelper';
+import {CommerceAdminChannelsPage} from '../../../../pages/commerce/commerce-channel-web/commerceAdminChannelsPage';
 import {getTableRowCells} from '../../../../pages/commerce/commerce-order-content-web/orderImportPage';
+import {CommerceMiniCartPage} from '../../../../pages/commerce/commerceMiniCartPage';
 import getRandomString from '../../../../utils/getRandomString';
+import {hoverAndExpectToBeVisible} from '../../../../utils/hoverAndExpectToBeVisible';
 import {
 	performLoginViaApi,
 	performLogout,
 	userData,
 } from '../../../../utils/performLogin';
+import {waitForAlert} from '../../../../utils/waitForAlert';
+import getFragmentDefinition from '../../../layout-content-page-editor-web/main/utils/getFragmentDefinition';
 import getPageDefinition from '../../../layout-content-page-editor-web/main/utils/getPageDefinition';
 import getWidgetDefinition from '../../../layout-content-page-editor-web/main/utils/getWidgetDefinition';
 import {
+	apiStorefrontSetUp,
 	createAccountWithBuyerUser,
 	getSkusByName,
 	miniumSetUp,
@@ -35,6 +43,90 @@ export const test = mergeTests(
 	isolatedSiteTest,
 	loginTest()
 );
+
+type TPricingSetUp = {
+	apiHelpers: DataApiHelpers;
+	catalogId: number;
+	replacementProduct: TProduct;
+};
+
+async function quickAddDiscontinuedSku(
+	apiHelpers: DataApiHelpers,
+	commerceAdminChannelsPage: CommerceAdminChannelsPage,
+	commerceMiniCartPage: CommerceMiniCartPage,
+	page: Page,
+	{
+		allowBackOrder,
+		setUpPricing,
+	}: {
+		allowBackOrder: boolean;
+		setUpPricing?: (pricingSetUp: TPricingSetUp) => Promise<void>;
+	}
+) {
+	const {
+		catalog,
+		channel,
+		product: replacementProduct,
+		site,
+	} = await apiStorefrontSetUp(apiHelpers);
+
+	await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+		channel.name,
+		'B2B'
+	);
+
+	await waitForAlert(page);
+
+	const layout = await apiHelpers.headlessDelivery.createSitePage({
+		pageDefinition: getPageDefinition([
+			getFragmentDefinition({
+				id: getRandomString(),
+				key: 'COMMERCE_CART_FRAGMENTS-mini-cart',
+			}),
+		]),
+		siteId: site.id,
+		title: getRandomString(),
+	});
+
+	const discontinuedProduct =
+		await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+			catalogId: catalog.id,
+			name: {en_US: getRandomString()},
+			productConfiguration: {allowBackOrder},
+			skus: [
+				{
+					cost: 0,
+					discontinued: true,
+					price: 10,
+					published: true,
+					purchasable: true,
+					replacementSkuId: replacementProduct.skus[0].id,
+					sku: getRandomString(),
+				},
+			],
+		});
+
+	await setUpPricing?.({
+		apiHelpers,
+		catalogId: catalog.id,
+		replacementProduct,
+	});
+
+	const {buyerUser} = await createAccountWithBuyerUser(apiHelpers, site.id);
+
+	await performLogout(page);
+	await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+	await page.goto(`/web${site.friendlyUrlPath}${layout.friendlyUrlPath}`, {
+		waitUntil: 'networkidle',
+	});
+
+	const discontinuedSku = discontinuedProduct.skus[0].sku;
+
+	await commerceMiniCartPage.quickAddToCart(discontinuedSku);
+
+	return {discontinuedSku, replacementProduct};
+}
 
 test.afterEach(async ({page}) => {
 	await performLoginViaApi({page, screenName: 'test'});
@@ -808,3 +900,199 @@ test(
 		).toHaveCount(0);
 	}
 );
+
+test(
+	'A discontinued SKU that allows back orders is not replaced when it is quick added to the Mini Cart fragment',
+	{tag: ['@COMMERCE-12006', '@LPD-106244-Grouped-10']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelsPage,
+		commerceMiniCartPage,
+		page,
+	}) => {
+		const {discontinuedSku} = await quickAddDiscontinuedSku(
+			apiHelpers,
+			commerceAdminChannelsPage,
+			commerceMiniCartPage,
+			page,
+			{allowBackOrder: true}
+		);
+
+		await expect(
+			commerceMiniCartPage.miniCartSku(discontinuedSku)
+		).toBeVisible();
+		await expect(
+			commerceMiniCartPage.miniCartReplacementLabels
+		).toHaveCount(0);
+
+		await page.reload();
+
+		await commerceMiniCartPage.open();
+
+		await expect(
+			commerceMiniCartPage.miniCartSku(discontinuedSku)
+		).toBeVisible();
+	}
+);
+
+for (const {assertPrices, description, setUpPricing, tags} of [
+	{
+		assertPrices: async (
+			commerceMiniCartPage: CommerceMiniCartPage,
+			productName: string
+		) => {
+			await expect(
+				commerceMiniCartPage.miniCartItemListPrice(productName)
+			).toHaveText('$ 10.00');
+		},
+		description:
+			'A discontinued SKU without stock is replaced when it is quick added to the Mini Cart fragment',
+		tags: ['@COMMERCE-12005', '@COMMERCE-12037'],
+	},
+	{
+		assertPrices: async (
+			commerceMiniCartPage: CommerceMiniCartPage,
+			productName: string
+		) => {
+			await expect(
+				commerceMiniCartPage.miniCartItemNetPrice(productName)
+			).toContainText('$ 5.00');
+		},
+		description:
+			'A discount applies to the replacement SKU of a discontinued SKU quick added to the Mini Cart fragment',
+		setUpPricing: async ({
+			apiHelpers,
+			replacementProduct,
+		}: TPricingSetUp) => {
+			await apiHelpers.headlessCommerceAdminPricing.postDiscount({
+				discountProducts: [{productId: replacementProduct.productId}],
+				level: 'L1',
+				percentageLevel1: 50,
+				target: 'products',
+				usePercentage: true,
+			});
+		},
+		tags: ['@COMMERCE-12035'],
+	},
+	{
+		assertPrices: async (
+			commerceMiniCartPage: CommerceMiniCartPage,
+			productName: string
+		) => {
+			await expect(
+				commerceMiniCartPage.miniCartItemListPrice(productName)
+			).toHaveText('$ 10.00');
+			await expect(
+				commerceMiniCartPage.miniCartItemPromoPrice(productName)
+			).toHaveText('$ 2.00');
+		},
+		description:
+			'A promotion applies to the replacement SKU of a discontinued SKU quick added to the Mini Cart fragment',
+		setUpPricing: async ({
+			apiHelpers,
+			catalogId,
+			replacementProduct,
+		}: TPricingSetUp) => {
+			const basePromoPriceList =
+				await apiHelpers.headlessCommerceAdminPricing.getBasePromoPriceList(
+					catalogId
+				);
+
+			await apiHelpers.headlessCommerceAdminPricing.postPriceEntry({
+				price: 2,
+				priceListId: basePromoPriceList.items[0].id,
+				skuId: replacementProduct.skus[0].id,
+			});
+		},
+		tags: ['@COMMERCE-12034'],
+	},
+	{
+		assertPrices: async (commerceMiniCartPage: CommerceMiniCartPage) => {
+			await expect(
+				commerceMiniCartPage.miniCartPriceOnApplicationInfoMessage
+			).toBeVisible();
+			await expect(commerceMiniCartPage.submitButton).toBeDisabled();
+			await expect(
+				commerceMiniCartPage.requestAQuoteButton
+			).toBeEnabled();
+		},
+		description:
+			'A price on application replacement SKU of a discontinued SKU quick added to the Mini Cart fragment requires a quote',
+		setUpPricing: async ({
+			apiHelpers,
+			catalogId,
+			replacementProduct,
+		}: TPricingSetUp) => {
+			const basePriceList =
+				await apiHelpers.headlessCommerceAdminPricing.getBasePriceList(
+					catalogId
+				);
+
+			const {items} =
+				await apiHelpers.headlessCommerceAdminPricing.getPriceListEntries(
+					basePriceList.items[0].id,
+					{filter: `skuId eq ${replacementProduct.skus[0].id}`}
+				);
+
+			await apiHelpers.headlessCommerceAdminPricing.patchPriceEntry(
+				items[0].priceEntryId,
+				{priceOnApplication: true}
+			);
+		},
+		tags: ['@COMMERCE-12036'],
+	},
+]) {
+	test(
+		description,
+		{tag: [...tags, '@LPD-106244-Grouped-10']},
+		async ({
+			apiHelpers,
+			commerceAdminChannelsPage,
+			commerceMiniCartPage,
+			page,
+		}) => {
+			const {discontinuedSku, replacementProduct} =
+				await quickAddDiscontinuedSku(
+					apiHelpers,
+					commerceAdminChannelsPage,
+					commerceMiniCartPage,
+					page,
+					{allowBackOrder: false, setUpPricing}
+				);
+
+			const replacementProductName = replacementProduct.name.en_US;
+			const replacementSku = replacementProduct.skus[0].sku;
+
+			await expect(
+				commerceMiniCartPage.miniCartSku(replacementSku)
+			).toBeVisible();
+			await expect(
+				commerceMiniCartPage.miniCartItemReplacementLabel(
+					replacementProductName
+				)
+			).toBeVisible();
+			await expect(
+				commerceMiniCartPage.miniCartReplacementInfoMessage
+			).toBeVisible();
+
+			await hoverAndExpectToBeVisible({
+				target: commerceMiniCartPage.miniCartReplacementTooltip(
+					discontinuedSku
+				),
+				trigger: commerceMiniCartPage.miniCartItemInfoButton(
+					replacementProductName
+				),
+			});
+
+			await assertPrices(commerceMiniCartPage, replacementProductName);
+
+			await page.reload();
+
+			await commerceMiniCartPage.open();
+
+			await expect(
+				commerceMiniCartPage.miniCartSku(replacementSku)
+			).toBeVisible();
+		}
+	);
+}
