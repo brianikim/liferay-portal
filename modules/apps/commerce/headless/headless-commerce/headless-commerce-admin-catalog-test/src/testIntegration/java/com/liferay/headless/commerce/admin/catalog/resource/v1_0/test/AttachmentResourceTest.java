@@ -8,6 +8,7 @@ package com.liferay.headless.commerce.admin.catalog.resource.v1_0.test;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.commerce.product.configuration.CProductVersionConfiguration;
 import com.liferay.commerce.product.constants.CPAttachmentFileEntryConstants;
+import com.liferay.commerce.product.model.CPAttachmentFileEntry;
 import com.liferay.commerce.product.model.CPDefinition;
 import com.liferay.commerce.product.model.CPOption;
 import com.liferay.commerce.product.model.CPOptionValue;
@@ -18,6 +19,13 @@ import com.liferay.commerce.product.service.CPDefinitionLocalService;
 import com.liferay.commerce.product.test.util.CPTestUtil;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
+import com.liferay.expando.kernel.model.ExpandoColumn;
+import com.liferay.expando.kernel.model.ExpandoColumnConstants;
+import com.liferay.expando.kernel.model.ExpandoTable;
+import com.liferay.expando.kernel.service.ExpandoColumnLocalService;
+import com.liferay.expando.kernel.service.ExpandoTableLocalService;
+import com.liferay.headless.commerce.admin.catalog.client.custom.field.CustomField;
+import com.liferay.headless.commerce.admin.catalog.client.custom.field.CustomValue;
 import com.liferay.headless.commerce.admin.catalog.client.dto.v1_0.Attachment;
 import com.liferay.headless.commerce.admin.catalog.client.dto.v1_0.AttachmentBase64;
 import com.liferay.headless.commerce.admin.catalog.client.pagination.Page;
@@ -53,6 +61,7 @@ import com.liferay.portal.test.rule.Inject;
 import java.io.ByteArrayInputStream;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -159,6 +168,7 @@ public class AttachmentResourceTest extends BaseAttachmentResourceTestCase {
 
 		super.testPostProductByExternalReferenceCodeAttachment();
 
+		_testPostProductByExternalReferenceCodeAttachmentWithCustomFields();
 		_testPostProductByExternalReferenceCodeAttachmentWithFileEntryExternalReferenceCode();
 	}
 
@@ -654,6 +664,65 @@ public class AttachmentResourceTest extends BaseAttachmentResourceTestCase {
 			GetterUtil.getLong(getAttachment.getFileEntryId()));
 	}
 
+	private void _testPostProductByExternalReferenceCodeAttachmentWithCustomFields()
+		throws Exception {
+
+		ExpandoTable expandoTable = _expandoTableLocalService.fetchDefaultTable(
+			testCompany.getCompanyId(), CPAttachmentFileEntry.class.getName());
+
+		if (expandoTable == null) {
+			expandoTable = _expandoTableLocalService.addDefaultTable(
+				testCompany.getCompanyId(),
+				CPAttachmentFileEntry.class.getName());
+
+			_expandoTables.add(expandoTable);
+		}
+
+		ExpandoColumn expandoColumn = _expandoColumnLocalService.addColumn(
+			expandoTable.getTableId(), RandomTestUtil.randomString(),
+			ExpandoColumnConstants.STRING);
+
+		String customFieldValue = RandomTestUtil.randomString();
+
+		Attachment randomAttachment = randomAttachment();
+
+		randomAttachment.setCustomFields(
+			new CustomField[] {
+				new CustomField() {
+					{
+						customValue = new CustomValue() {
+							{
+								data = customFieldValue;
+							}
+						};
+						dataType = "Text";
+						name = expandoColumn.getName();
+					}
+				}
+			});
+
+		Attachment postAttachment =
+			attachmentResource.postProductByExternalReferenceCodeAttachment(
+				_cProduct.getExternalReferenceCode(), randomAttachment);
+
+		Attachment getAttachment =
+			attachmentResource.getAttachmentByExternalReferenceCode(
+				postAttachment.getExternalReferenceCode());
+
+		CustomField[] customFields = getAttachment.getCustomFields();
+
+		Assert.assertEquals(
+			Arrays.toString(customFields), 1, customFields.length);
+
+		CustomField customField = customFields[0];
+
+		Assert.assertEquals(expandoColumn.getName(), customField.getName());
+
+		CustomValue customValue = customField.getCustomValue();
+
+		Assert.assertEquals(customFieldValue, customValue.getData());
+	}
+
 	private void _testPostProductByExternalReferenceCodeAttachmentWithFileEntryExternalReferenceCode()
 		throws Exception {
 
@@ -930,6 +999,15 @@ public class AttachmentResourceTest extends BaseAttachmentResourceTestCase {
 
 	@Inject
 	private DLAppLocalService _dlAppLocalService;
+
+	@Inject
+	private ExpandoColumnLocalService _expandoColumnLocalService;
+
+	@Inject
+	private ExpandoTableLocalService _expandoTableLocalService;
+
+	@DeleteAfterTestRun
+	private List<ExpandoTable> _expandoTables = new ArrayList<>();
 
 	private ServiceContext _serviceContext;
 
