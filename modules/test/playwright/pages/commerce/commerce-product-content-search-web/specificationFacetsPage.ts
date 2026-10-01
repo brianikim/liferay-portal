@@ -31,6 +31,7 @@ export class SpecificationFacetsPage {
 	readonly addOptionFacetLabel: Locator;
 	readonly addSpecificationFacetLabel: Locator;
 	readonly addWidgetButton: Locator;
+	readonly categoryFacetPortlet: Locator;
 	readonly configurationMenuItem: Locator;
 	readonly configurationSaveButton: Locator;
 	readonly displayFrequenciesCheckbox: Locator;
@@ -47,6 +48,10 @@ export class SpecificationFacetsPage {
 	readonly pageLabel: Locator;
 	readonly pageTitle: Locator;
 	readonly panelList: Locator;
+	readonly priceRangeFacetGoButton: Locator;
+	readonly priceRangeFacetMaximumInput: Locator;
+	readonly priceRangeFacetMinimumInput: Locator;
+	readonly priceRangeFacetPortlet: Locator;
 	readonly searchFormInput: Locator;
 	readonly searchOptionsAllowEmptySearchesInput: Locator;
 	readonly searchOptionsConfigurationEditButton: Locator;
@@ -54,6 +59,9 @@ export class SpecificationFacetsPage {
 	readonly searchBarPortlet: Locator;
 	readonly searchBarScopeSelect: Locator;
 	readonly searchOptionsConfigurationSaveButton: Locator;
+	readonly searchResultsPaginationBar: Locator;
+	readonly searchResultsPaginationResults: Locator;
+	readonly searchResultsPortlet: Locator;
 	readonly selectSpecificationFacetPageInput: Locator;
 	readonly specificationFacetConfigurationEditButton: Locator;
 	readonly specificationFacetOrderSpecificationInput: Locator;
@@ -72,6 +80,9 @@ export class SpecificationFacetsPage {
 			.filter({hasText: /^Specification Facet$/})
 			.getByRole('button', {exact: true, name: 'Add Content'});
 		this.addWidgetButton = page.getByTestId('add');
+		this.categoryFacetPortlet = page.locator(
+			'//section[contains(@id, "CategoryFacetPortlet")]'
+		);
 		this.configurationMenuItem = page.getByRole('menuitem', {
 			exact: true,
 			name: 'Configuration',
@@ -116,6 +127,17 @@ export class SpecificationFacetsPage {
 		this.panelList = page
 			.getByTestId('specificationFacetPanel')
 			.getByRole('button');
+		this.priceRangeFacetPortlet = page.locator(
+			'//section[contains(@id, "CPPriceRangeFacetsPortlet")]'
+		);
+		this.priceRangeFacetGoButton = this.priceRangeFacetPortlet.getByRole(
+			'button',
+			{name: 'Go'}
+		);
+		this.priceRangeFacetMaximumInput =
+			this.priceRangeFacetPortlet.getByLabel('Maximum');
+		this.priceRangeFacetMinimumInput =
+			this.priceRangeFacetPortlet.getByLabel('Minimum');
 		this.searchFormInput = page.getByRole('textbox', {
 			name: 'Search Form',
 		});
@@ -129,6 +151,14 @@ export class SpecificationFacetsPage {
 			.frameLocator('#modalIframe')
 			.getByTestId('searchOptionsFooter')
 			.getByRole('button', {exact: true, name: 'Save'});
+		this.searchResultsPortlet = page.locator(
+			'//section[contains(@id, "CPSearchResultsPortlet")]'
+		);
+		this.searchResultsPaginationBar =
+			this.searchResultsPortlet.locator('.pagination-bar');
+		this.searchResultsPaginationResults = this.searchResultsPortlet.locator(
+			'.pagination-results'
+		);
 		this.searchBarDestinationInput = page
 			.frameLocator('iframe[id="modalIframe"]')
 			.getByLabel('Destination Page');
@@ -222,6 +252,23 @@ export class SpecificationFacetsPage {
 		await this.configurationSaveButton.click();
 	}
 
+	categoryFacetCheckbox(categoryName: string) {
+		return this.categoryFacetPortlet.getByRole('checkbox', {
+			name: categoryName,
+		});
+	}
+
+	facetClearButton(portlet: Locator) {
+		return portlet.getByRole('button', {name: 'Clear'});
+	}
+
+	facetParameterNameInput(widget: FacetWidget, facetName: string) {
+		return this.facetPortlet(widget)
+			.locator('form')
+			.filter({has: this.page.getByTestId(facetName)})
+			.locator('.facet-parameter-name');
+	}
+
 	facetPortlet(widget: FacetWidget) {
 		return widget === 'Option Facet'
 			? this.optionFacetPortlet
@@ -242,6 +289,12 @@ export class SpecificationFacetsPage {
 		return this.facetPortlet(widget)
 			.getByTestId(facetName)
 			.locator('li.facet-value');
+	}
+
+	facetTermCheckbox(widget: FacetWidget, facetName: string, term: string) {
+		return this.facetTerms(widget, facetName)
+			.filter({hasText: term})
+			.getByRole('checkbox');
 	}
 
 	facetTermFrequencies(widget: FacetWidget) {
@@ -274,6 +327,36 @@ export class SpecificationFacetsPage {
 		await this.facetPortlet(widget).getByLabel('Options').click();
 		await this.configurationMenuItem.click();
 		await this.displayTemplateSelect.waitFor({state: 'visible'});
+	}
+
+	priceRangeFacetCheckbox(priceRange: string) {
+		return this.priceRangeFacetPortlet.getByRole('checkbox', {
+			name: priceRange,
+		});
+	}
+
+	priceRangeFacetTermCount(priceRange: string) {
+		return this.priceRangeFacetPortlet
+			.locator('label.facet-checkbox-label', {hasText: priceRange})
+			.locator('.term-count');
+	}
+
+	productsAvailableLabel(productCount: number) {
+		return this.page.getByText(`${productCount} Products Available`);
+	}
+
+	searchResult(productName: string) {
+		return this.searchResultsPortlet.getByText(productName);
+	}
+
+	searchResultsItemsPerPageButton(itemsPerPage: number) {
+		return this.searchResultsPortlet
+			.locator('.pagination-items-per-page')
+			.getByRole('button', {name: `${itemsPerPage} Entries`});
+	}
+
+	unavailableErrorMessage(widget: FacetWidget) {
+		return this.page.getByText(`${widget} is temporarily unavailable.`);
 	}
 
 	async updateFacetConfiguration(
