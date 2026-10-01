@@ -12,7 +12,9 @@ export class AccountManagementWidgetPage extends AccountsPage {
 	readonly accountCell: (accountName: string) => Locator;
 	readonly editButton: Locator;
 	readonly manageOrganizationsButton: Locator;
+	readonly orderDirectionIcon: (direction: 'down' | 'up') => Locator;
 	readonly page: Page;
+	readonly reverseOrderDirectionButton: Locator;
 	readonly searchInput: Locator;
 	readonly selectAccountButton: Locator;
 
@@ -30,6 +32,10 @@ export class AccountManagementWidgetPage extends AccountsPage {
 		this.manageOrganizationsButton = page
 			.getByRole('button', {name: 'Manage Organizations'})
 			.or(page.getByRole('menuitem', {name: 'Manage Organizations'}));
+		this.orderDirectionIcon = (direction: 'down' | 'up') =>
+			this.reverseOrderDirectionButton.locator(
+				`.lexicon-icon-order-list-${direction}`
+			);
 
 		// @ts-ignore
 
@@ -40,6 +46,9 @@ export class AccountManagementWidgetPage extends AccountsPage {
 			)
 		);
 		this.page = page;
+		this.reverseOrderDirectionButton = page
+			.getByTitle('Reverse Order Direction')
+			.first();
 		this.searchInput = page.locator('input[placeholder="Search for"]');
 		this.selectAccountButton = page
 			.getByRole('link', {name: 'Select Account'})
