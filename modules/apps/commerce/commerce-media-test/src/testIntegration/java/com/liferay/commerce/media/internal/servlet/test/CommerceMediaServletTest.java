@@ -13,8 +13,10 @@ import com.liferay.account.service.AccountGroupLocalService;
 import com.liferay.account.service.AccountGroupRelLocalService;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.commerce.account.test.util.CommerceAccountTestUtil;
+import com.liferay.commerce.constants.CommerceOrderConstants;
 import com.liferay.commerce.currency.model.CommerceCurrency;
 import com.liferay.commerce.currency.test.util.CommerceCurrencyTestUtil;
+import com.liferay.commerce.media.constants.CommerceMediaConstants;
 import com.liferay.commerce.product.constants.CPAttachmentFileEntryConstants;
 import com.liferay.commerce.product.model.CPAttachmentFileEntry;
 import com.liferay.commerce.product.model.CPDefinition;
@@ -22,6 +24,8 @@ import com.liferay.commerce.product.model.CommerceCatalog;
 import com.liferay.commerce.product.service.CPAttachmentFileEntryLocalService;
 import com.liferay.commerce.product.service.CPDefinitionLocalService;
 import com.liferay.commerce.product.test.util.CPTestUtil;
+import com.liferay.commerce.product.type.virtual.constants.VirtualCPTypeConstants;
+import com.liferay.commerce.product.type.virtual.service.CPDefinitionVirtualSettingLocalService;
 import com.liferay.commerce.test.util.CommerceTestUtil;
 import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
@@ -124,6 +128,30 @@ public class CommerceMediaServletTest {
 			accountGroup.getAccountGroupId(), CPDefinition.class.getName(),
 			cpAttachmentFileEntry1.getClassPK());
 
+		CPDefinition cpDefinition = CPTestUtil.addCPDefinitionFromCatalog(
+			_commerceCatalog.getGroupId(), VirtualCPTypeConstants.NAME, true,
+			true);
+
+		_cpDefinitionLocalService.updateCPDefinitionAccountGroupFilter(
+			cpDefinition.getCPDefinitionId(), true);
+
+		_accountGroupRelLocalService.addAccountGroupRel(
+			accountGroup.getAccountGroupId(), CPDefinition.class.getName(),
+			cpDefinition.getCPDefinitionId());
+
+		FileEntry fileEntry = _dlAppLocalService.addFileEntry(
+			null, _user.getUserId(), _commerceCatalog.getGroupId(),
+			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
+			RandomTestUtil.randomString() + ".jpg", ContentTypes.IMAGE_JPEG,
+			bytes, null, null, null, _serviceContext);
+
+		_cpDefinitionVirtualSettingLocalService.addCPDefinitionVirtualSetting(
+			CPDefinition.class.getName(), cpDefinition.getCPDefinitionId(),
+			fileEntry.getFileEntryId(), null,
+			CommerceOrderConstants.ORDER_STATUS_PENDING, 0, 0, true,
+			fileEntry.getFileEntryId(), null, false, null, 0, false,
+			_serviceContext);
+
 		User user1 = UserTestUtil.addUser();
 		User user2 = _userLocalService.getGuestUser(_group.getCompanyId());
 
@@ -184,6 +212,21 @@ public class CommerceMediaServletTest {
 			Assert.assertFalse(
 				Arrays.equals(
 					bytes, mockHttpServletResponse.getContentAsByteArray()));
+
+			mockHttpServletResponse = _serviceVirtualProductSampleRequest(
+				_accountEntry.getAccountEntryId(), cpDefinition, fileEntry,
+				user2);
+
+			Assert.assertEquals(
+				HttpServletResponse.SC_UNAUTHORIZED,
+				mockHttpServletResponse.getStatus());
+
+			mockHttpServletResponse = _serviceVirtualProductSampleRequest(
+				RandomTestUtil.nextLong(), cpDefinition, fileEntry, user2);
+
+			Assert.assertEquals(
+				HttpServletResponse.SC_UNAUTHORIZED,
+				mockHttpServletResponse.getStatus());
 		}
 
 		_accountEntryUserRelLocalService.addAccountEntryUserRel(
@@ -209,6 +252,12 @@ public class CommerceMediaServletTest {
 		_assertContentDisposition(
 			HttpHeaders.CONTENT_DISPOSITION_ATTACHMENT,
 			mockHttpServletResponse);
+
+		mockHttpServletResponse = _serviceVirtualProductSampleRequest(
+			_accountEntry.getAccountEntryId(), cpDefinition, fileEntry, user1);
+
+		Assert.assertEquals(
+			HttpServletResponse.SC_OK, mockHttpServletResponse.getStatus());
 
 		accountGroup = _accountGroupLocalService.getDefaultAccountGroup(
 			_group.getCompanyId());
@@ -313,6 +362,31 @@ public class CommerceMediaServletTest {
 		return mockHttpServletResponse;
 	}
 
+	private MockHttpServletResponse _serviceVirtualProductSampleRequest(
+			long accountEntryId, CPDefinition cpDefinition, FileEntry fileEntry,
+			User user)
+		throws Exception {
+
+		MockHttpServletRequest mockHttpServletRequest =
+			new MockHttpServletRequest("GET", StringPool.BLANK);
+
+		mockHttpServletRequest.setAttribute(WebKeys.USER, user);
+		mockHttpServletRequest.setPathInfo(
+			StringBundler.concat(
+				"/accounts/", accountEntryId,
+				CommerceMediaConstants.URL_SEPARATOR_VIRTUAL_PRODUCT_SAMPLE,
+				cpDefinition.getCPDefinitionId(),
+				CommerceMediaConstants.URL_SEPARATOR_FILE,
+				fileEntry.getFileEntryId()));
+
+		MockHttpServletResponse mockHttpServletResponse =
+			new MockHttpServletResponse();
+
+		_servlet.service(mockHttpServletRequest, mockHttpServletResponse);
+
+		return mockHttpServletResponse;
+	}
+
 	private AccountEntry _accountEntry;
 
 	@Inject
@@ -332,6 +406,10 @@ public class CommerceMediaServletTest {
 
 	@Inject
 	private CPDefinitionLocalService _cpDefinitionLocalService;
+
+	@Inject
+	private CPDefinitionVirtualSettingLocalService
+		_cpDefinitionVirtualSettingLocalService;
 
 	@Inject
 	private DLAppLocalService _dlAppLocalService;
