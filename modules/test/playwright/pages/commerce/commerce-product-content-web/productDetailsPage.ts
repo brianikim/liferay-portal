@@ -21,6 +21,7 @@ export class ProductDetailsPage {
 	readonly categoryLink: (name: string) => Locator;
 	readonly collectionDisplayEmptyMessage: Locator;
 	readonly collectionDisplayListItem: (text: string) => Locator;
+	readonly collectionDisplayListItemDownloadLink: (text: string) => Locator;
 	readonly diagramCard: (name: string) => Locator;
 	readonly diagramSvgPin: (sequence: string) => Locator;
 	readonly diagramTooltip: Locator;
@@ -179,6 +180,10 @@ export class ProductDetailsPage {
 		this.collectionDisplayEmptyMessage = page.getByText('No Results Found');
 		this.collectionDisplayListItem = (text: string) =>
 			page.locator('li.list-group-item').filter({hasText: text});
+		this.collectionDisplayListItemDownloadLink = (text: string) =>
+			this.collectionDisplayListItem(text).getByRole('link', {
+				name: 'Download',
+			});
 		this.diagramCard = (name: string) =>
 			page.locator('.cp-renderer .product-card').filter({hasText: name});
 		this.diagramSvgPin = (sequence: string) =>
