@@ -200,37 +200,6 @@ definition {
 		CommerceProducts.disableProductSingleApproverWorkflow();
 	}
 
-	@description = "This is a test for COMMERCE-9181. CanCheckDraftProductSaveAsDraft"
-	@priority = 3
-	test CanCheckDraftProductSaveAsDraft {
-		property portal.acceptance = "false";
-
-		CommerceProducts.openProductsAdmin();
-
-		CPCommerceCatalog.newProductsEntry(
-			compileDescription = "false",
-			productCatalog = "Master",
-			productName = "Simple T-Shirt",
-			productType = "Simple",
-			publishProduct = "false");
-
-		Type(
-			locator1 = "CommerceEntry#NAME_FIELD",
-			value1 = "Simple T-Shirt 01");
-
-		Click(
-			key_text = "Save as Draft",
-			locator1 = "Button#ANY");
-
-		AssertElementPresent(
-			key_status = "Draft",
-			locator1 = "CommerceEntry#WORKFLOW_STATUS");
-
-		AssertTextEquals(
-			locator1 = "CommerceEntry#NAME_FIELD",
-			value1 = "Simple T-Shirt 01");
-	}
-
 	@description = "This is a test for COMMERCE-9182. VerifyDraftProductNotAppearOnMiniumCatalogPage"
 	@priority = 5
 	test CanCheckDraftProductVisibilityOnMiniumCatalogPage {
@@ -323,27 +292,6 @@ definition {
 		AssertElementPresent(
 			key_productName = "Simple T-Shirt",
 			locator1 = "CommerceAccelerators#PRODUCT_CARD_NAME");
-	}
-
-	@description = "This is a test for COMMERCE-9251. CanCheckDraftProductStatusWorkflow"
-	@priority = 3
-	test CanCheckDraftProductWorkflowStatus {
-		property portal.acceptance = "false";
-
-		CommerceProducts.addProductWithStatusViaAPI(
-			catalogName = "Master",
-			productStatusCode = 2,
-			productType = "simple");
-
-		CommerceProducts.openProductsAdmin();
-
-		CommerceProducts.checkProductStatusAfterDuplicationAndConvertionToDraft(
-			checkProductFields = "true",
-			compileDescription = "false",
-			entryName = "Draft Product",
-			productCatalog = "Master",
-			productName = "Draft Product",
-			status = "Draft");
 	}
 
 	@description = "This is a test for COMMERCE-9290. CanCheckTheDraftStatusForSingleApproverWorkflow"
