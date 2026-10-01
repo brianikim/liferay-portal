@@ -13,6 +13,7 @@ export class ProductDetailsPage {
 	readonly attachments: Locator;
 	readonly attachmentItem: (title: string) => Promise<Locator>;
 	readonly attachmentItems: Locator;
+	readonly availabilityEstimate: Locator;
 	readonly diagramPin: (pinSequence: string) => Promise<Locator>;
 	readonly breadcrumb: Locator;
 	readonly breadcrumbLink: (name: string) => Locator;
@@ -35,6 +36,8 @@ export class ProductDetailsPage {
 	) => Promise<Locator>;
 	readonly galleryAdaptiveMediaSource: Locator;
 	readonly galleryImage: Locator;
+	readonly galleryMainImage: Locator;
+	readonly galleryThumbnail: (title: string) => Locator;
 	readonly gtinField: (gtin: string) => Promise<Locator>;
 	readonly inStockQuantity: Locator;
 	readonly layoutsPage: CommerceLayoutsPage;
@@ -65,6 +68,7 @@ export class ProductDetailsPage {
 		container?: Locator | Page
 	) => Locator;
 	readonly optionSelectorValues: (optionName: string) => Locator;
+	readonly optionValue: (optionValueName: string) => Locator;
 	readonly page: Page;
 	readonly pageTitle: Locator;
 	readonly paginationText: (text: string) => Locator;
@@ -89,6 +93,8 @@ export class ProductDetailsPage {
 	readonly productDetailAvailabilityLabel: Locator;
 	readonly productDetailValue: (label: string) => Locator;
 	readonly productDetailQuantitySelector: Locator;
+	readonly productDetailsPortlet: Locator;
+	readonly productHeaderTitle: Locator;
 	readonly productImage: (title: string) => Locator;
 	readonly productOptionUploadFormFeedback: Locator;
 	readonly relatedDiagramLink: (name: string) => Locator;
@@ -147,6 +153,7 @@ export class ProductDetailsPage {
 			return page.getByText(title);
 		};
 		this.attachmentItems = this.attachments.locator('li.list-group-item');
+		this.availabilityEstimate = page.locator('.availability-estimate');
 		this.diagramPin = async (pinSequence: string) => {
 			return page
 				.locator("[class='pin-node-text']")
@@ -195,6 +202,13 @@ export class ProductDetailsPage {
 			'.product-gallery picture source[srcset*="/o/adaptive-media/image/"]'
 		);
 		this.galleryImage = page.locator('.product-gallery picture img');
+		this.galleryMainImage = page.locator(
+			'.product-gallery .main-image img'
+		);
+		this.galleryThumbnail = (title: string) =>
+			page
+				.locator('.product-gallery .gallery-thumbnails')
+				.getByRole('img', {name: title});
 		this.gtinField = async (gtin: string) => {
 			return page.getByText(gtin);
 		};
@@ -245,6 +259,8 @@ export class ProductDetailsPage {
 		};
 		this.optionSelectorValues = (optionName: string) =>
 			this.optionSelector(optionName).locator('option');
+		this.optionValue = (optionValueName: string) =>
+			page.getByRole('option', {name: optionValueName});
 		this.page = page;
 		this.paginationText = (text: string) => page.getByText(text);
 		this.pinAddToCartButton = page
@@ -308,6 +324,10 @@ export class ProductDetailsPage {
 			'spinbutton',
 			{name: 'Quantity Selector'}
 		);
+		this.productDetailsPortlet = page.locator(
+			'[id^="portlet_com_liferay_commerce_product_content_web_internal_portlet_CPContentPortlet"]'
+		);
+		this.productHeaderTitle = page.locator('.product-header-title');
 		this.productImage = (title: string) =>
 			page.getByRole('img', {name: title}).first();
 		this.productOptionUploadFormFeedback = page.locator(
