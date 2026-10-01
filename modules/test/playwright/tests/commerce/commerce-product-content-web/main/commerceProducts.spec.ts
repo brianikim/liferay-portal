@@ -17,6 +17,8 @@ import {pageViewModePagesTest} from '../../../../fixtures/pageViewModePagesTest'
 import {DataApiHelpers} from '../../../../helpers/ApiHelpers';
 import {liferayConfig} from '../../../../liferay.config';
 import {CommerceAdminChannelsPage} from '../../../../pages/commerce/commerce-channel-web/commerceAdminChannelsPage';
+import {ProductDetailsPage} from '../../../../pages/commerce/commerce-product-content-web/productDetailsPage';
+import {CommerceMiniCartPage} from '../../../../pages/commerce/commerceMiniCartPage';
 import {getRandomInt} from '../../../../utils/getRandomInt';
 import getRandomString from '../../../../utils/getRandomString';
 import performLogin, {
@@ -27,7 +29,12 @@ import {waitForAlert} from '../../../../utils/waitForAlert';
 import getFragmentDefinition from '../../../layout-content-page-editor-web/main/utils/getFragmentDefinition';
 import getPageDefinition from '../../../layout-content-page-editor-web/main/utils/getPageDefinition';
 import getWidgetDefinition from '../../../layout-content-page-editor-web/main/utils/getWidgetDefinition';
-import {createAccountWithBuyerUser, miniumSetUp} from '../../utils/commerce';
+import {
+	assignBuyerUserToAccount,
+	createAccountWithBuyerUser,
+	miniumSetUp,
+	selectCurrentAccount,
+} from '../../utils/commerce';
 
 export const test = mergeTests(
 	commercePagesTest,
@@ -40,6 +47,16 @@ export const test = mergeTests(
 	loginTest(),
 	pageViewModePagesTest
 );
+
+function getProductsLimitTypeSettings(
+	externalReferenceCode: string,
+	quantity: string
+) {
+	return (
+		`products-limit-field-product-external-reference-codes=${externalReferenceCode}\n` +
+		`products-limit-field-product-quantity=${quantity}\n`
+	);
+}
 
 async function postBundleProduct(
 	apiHelpers: DataApiHelpers,
@@ -112,16 +129,24 @@ async function setUpBundleStorefront(
 	page: Page,
 	site: Site
 ) {
-	for (const widgetName of [
-		'com_liferay_commerce_checkout_web_internal_portlet_CommerceCheckoutPortlet',
-		'com_liferay_commerce_order_content_web_internal_portlet_CommerceOpenOrderContentPortlet',
+	for (const {title, widgetName} of [
+		{
+			title: 'Checkout',
+			widgetName:
+				'com_liferay_commerce_checkout_web_internal_portlet_CommerceCheckoutPortlet',
+		},
+		{
+			title: 'Pending Orders',
+			widgetName:
+				'com_liferay_commerce_order_content_web_internal_portlet_CommerceOpenOrderContentPortlet',
+		},
 	]) {
 		await apiHelpers.headlessDelivery.createSitePage({
 			pageDefinition: getPageDefinition([
 				getWidgetDefinition({id: getRandomString(), widgetName}),
 			]),
 			siteId: site.id,
-			title: getRandomString(),
+			title,
 		});
 	}
 
@@ -158,6 +183,44 @@ async function setUpBundleStorefront(
 	);
 
 	return {account, buyerUser, channel};
+}
+
+async function submitBundleToCheckout(
+	{
+		bundleProduct,
+		commerceMiniCartPage,
+		page,
+		productDetailsPage,
+		site,
+	}: {
+		bundleProduct: {urls?: {[key: string]: string}};
+		commerceMiniCartPage: CommerceMiniCartPage;
+		page: Page;
+		productDetailsPage: ProductDetailsPage;
+		site: Site;
+	},
+	addToCartCount: number
+) {
+	await page.goto(
+		`/web${site.friendlyUrlPath}/p/${bundleProduct.urls['en_US']}`
+	);
+
+	for (let index = 0; index < addToCartCount; index++) {
+		await Promise.all([
+			page.waitForResponse(
+				(response) =>
+					response
+						.url()
+						.includes('/headless-commerce-delivery-cart/') &&
+					response.request().method() === 'POST'
+			),
+			productDetailsPage.addToCartButton.click(),
+		]);
+	}
+
+	await commerceMiniCartPage.miniCartButton.click();
+
+	await commerceMiniCartPage.submitButton.click();
 }
 
 test('LPD-5780 Modal title and product name appear properly in product menu', async ({
@@ -215,6 +278,7 @@ test('COMMERCE-12809 As a buyer, I want to be able to verify the included and ex
 	commerceInstanceSettingsPage,
 	globalMenuPage,
 	page,
+	productDetailsPage,
 	site,
 	widgetPagePage,
 }) => {
@@ -398,28 +462,28 @@ test('COMMERCE-12809 As a buyer, I want to be able to verify the included and ex
 		await expect(page.getByText('Value1', {exact: true})).toBeVisible();
 		await expect(page.getByText('Value3', {exact: true})).toBeVisible();
 
-		await page.getByLabel('Option2').click();
+		await productDetailsPage.optionSelector('Option2').click();
 
 		await expect(
-			page.getByRole('option', {
-				name: 'Value3 No more than 0.9 products in this product range can be purchased together.',
-			})
+			productDetailsPage.optionValue(
+				'Value3 No more than 0.9 products in this product range can be purchased together.'
+			)
 		).toBeVisible();
 
-		await expect(page.getByRole('option', {name: 'Value4'})).toBeVisible();
+		await expect(productDetailsPage.optionValue('Value4')).toBeVisible();
 
-		await page.getByRole('option', {name: 'Value4'}).click();
-		await page.getByLabel('Option1').click();
+		await productDetailsPage.optionValue('Value4').click();
+		await productDetailsPage.optionSelector('Option1').click();
 
 		await expect(
-			page.getByRole('option', {
-				name: 'Value1 Product1 requires Product3 to be purchased also.',
-			})
+			productDetailsPage.optionValue(
+				'Value1 Product1 requires Product3 to be purchased also.'
+			)
 		).toBeVisible();
 		await expect(
-			page.getByRole('option', {
-				name: 'Value2 Product2 cannot be combined with Product4.',
-			})
+			productDetailsPage.optionValue(
+				'Value2 Product2 cannot be combined with Product4.'
+			)
 		).toBeVisible();
 	}
 	finally {
@@ -1914,11 +1978,10 @@ test(
 		await test.step('Create an active order rule limiting both products to two', async () => {
 			await apiHelpers.headlessCommerceAdminOrder.postOrderRule({
 				type: 'products-limit',
-				typeSettings:
-					'products-limit-field-product-external-reference-codes=' +
-					`${bundleProduct.externalReferenceCode},` +
-					`${linkedProduct.externalReferenceCode}\n` +
-					'products-limit-field-product-quantity=2\n',
+				typeSettings: getProductsLimitTypeSettings(
+					`${bundleProduct.externalReferenceCode},${linkedProduct.externalReferenceCode}`,
+					'2'
+				),
 			});
 		});
 
@@ -2176,6 +2239,529 @@ test(
 			await productDetailsPage.addToCartButton.click();
 
 			await waitForAlert(page, alertMessage, {type: 'danger'});
+		}
+	}
+);
+
+test(
+	'A products limit rule applies to a bundled product added in separate order items',
+	{tag: ['@COMMERCE-12798', '@LPD-106244-Grouped-8']},
+	async ({
+		apiHelpers,
+		checkoutPage,
+		commerceAdminChannelsPage,
+		commerceMiniCartPage,
+		page,
+		productDetailsPage,
+		site,
+	}) => {
+		test.setTimeout(180000);
+
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog({
+				name: getRandomString(),
+			});
+
+		const {buyerUser, channel} = await setUpBundleStorefront(
+			apiHelpers,
+			commerceAdminChannelsPage,
+			page,
+			site
+		);
+
+		const linkedProduct =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				name: {en_US: getRandomString()},
+				productConfiguration: {allowBackOrder: true},
+			});
+
+		const bundleProduct = await postBundleProduct(apiHelpers, {
+			catalogId: catalog.id,
+			name: getRandomString(),
+			optionName: 'Option1',
+			productOptionValue: {quantity: 1, skuId: linkedProduct.skus[0].id},
+		});
+
+		await apiHelpers.headlessCommerceAdminOrder.postOrderRule({
+			type: 'products-limit',
+			typeSettings: getProductsLimitTypeSettings(
+				linkedProduct.externalReferenceCode,
+				'1.9'
+			),
+		});
+
+		await commerceAdminChannelsPage.goto();
+
+		await (
+			await commerceAdminChannelsPage.channelsTableRowLink(channel.name)
+		).click();
+
+		await commerceAdminChannelsPage
+			.ordersTabToggle('Show Separate Order Items')
+			.click();
+		await commerceAdminChannelsPage.headerActionsSaveButton.click();
+
+		await waitForAlert(page);
+
+		await performLogout(page);
+		await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+		await submitBundleToCheckout(
+			{
+				bundleProduct,
+				commerceMiniCartPage,
+				page,
+				productDetailsPage,
+				site,
+			},
+			2
+		);
+
+		await expect(
+			commerceMiniCartPage.productsLimitErrorMessage('1.9')
+		).toBeVisible();
+		await expect(checkoutPage.multiStepNav).toBeHidden();
+	}
+);
+
+test(
+	'A products limit rule applies to a bundled product only for the eligible account',
+	{tag: ['@COMMERCE-12800', '@LPD-106244-Grouped-8']},
+	async ({
+		apiHelpers,
+		checkoutPage,
+		commerceAdminChannelsPage,
+		commerceMiniCartPage,
+		page,
+		productDetailsPage,
+		site,
+	}) => {
+		test.setTimeout(180000);
+
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog({
+				name: getRandomString(),
+			});
+
+		const {account, buyerUser} = await setUpBundleStorefront(
+			apiHelpers,
+			commerceAdminChannelsPage,
+			page,
+			site
+		);
+
+		const linkedProduct =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				name: {en_US: getRandomString()},
+				productConfiguration: {allowBackOrder: true},
+			});
+
+		const bundleProduct = await postBundleProduct(apiHelpers, {
+			catalogId: catalog.id,
+			name: getRandomString(),
+			optionName: 'Option1',
+			productOptionValue: {quantity: 1, skuId: linkedProduct.skus[0].id},
+		});
+
+		const eligibleAccount = await apiHelpers.headlessAdminUser.postAccount({
+			name: getRandomString(),
+			type: 'business',
+		});
+
+		await assignBuyerUserToAccount(eligibleAccount, apiHelpers, buyerUser);
+
+		await apiHelpers.headlessCommerceAdminOrder.postOrderRule({
+			orderRuleAccount: [{accountId: eligibleAccount.id}],
+			type: 'products-limit',
+			typeSettings: getProductsLimitTypeSettings(
+				linkedProduct.externalReferenceCode,
+				'1'
+			),
+		});
+
+		await performLogout(page);
+		await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+		await selectCurrentAccount(account.id, apiHelpers, site.id);
+
+		await submitBundleToCheckout(
+			{
+				bundleProduct,
+				commerceMiniCartPage,
+				page,
+				productDetailsPage,
+				site,
+			},
+			2
+		);
+
+		await expect(checkoutPage.multiStepNav).toBeVisible();
+		await expect(
+			commerceMiniCartPage.productsLimitErrorMessage('1')
+		).toHaveCount(0);
+
+		await selectCurrentAccount(eligibleAccount.id, apiHelpers, site.id);
+
+		await submitBundleToCheckout(
+			{
+				bundleProduct,
+				commerceMiniCartPage,
+				page,
+				productDetailsPage,
+				site,
+			},
+			2
+		);
+
+		await expect(
+			commerceMiniCartPage.productsLimitErrorMessage('1')
+		).toBeVisible();
+		await expect(checkoutPage.multiStepNav).toBeHidden();
+	}
+);
+
+test(
+	'A products limit rule applies to a bundled product only in the eligible channel',
+	{tag: ['@COMMERCE-12801', '@LPD-106244-Grouped-8']},
+	async ({
+		apiHelpers,
+		checkoutPage,
+		commerceAdminChannelsPage,
+		commerceMiniCartPage,
+		page,
+		productDetailsPage,
+		site,
+	}) => {
+		test.setTimeout(180000);
+
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog({
+				name: getRandomString(),
+			});
+
+		const {buyerUser} = await setUpBundleStorefront(
+			apiHelpers,
+			commerceAdminChannelsPage,
+			page,
+			site
+		);
+
+		const linkedProduct =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				name: {en_US: getRandomString()},
+				productConfiguration: {allowBackOrder: true},
+			});
+
+		const bundleProduct = await postBundleProduct(apiHelpers, {
+			catalogId: catalog.id,
+			name: getRandomString(),
+			optionName: 'Option1',
+			productOptionValue: {quantity: 1, skuId: linkedProduct.skus[0].id},
+		});
+
+		const eligibleSite = await apiHelpers.headlessAdminSite.postSite({
+			name: getRandomString(),
+		});
+
+		const {buyerUser: eligibleSiteBuyerUser, channel: eligibleChannel} =
+			await setUpBundleStorefront(
+				apiHelpers,
+				commerceAdminChannelsPage,
+				page,
+				eligibleSite
+			);
+
+		await apiHelpers.headlessCommerceAdminOrder.postOrderRule({
+			orderRuleChannel: [{channelId: eligibleChannel.id}],
+			type: 'products-limit',
+			typeSettings: getProductsLimitTypeSettings(
+				linkedProduct.externalReferenceCode,
+				'1'
+			),
+		});
+
+		await performLogout(page);
+		await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+		await submitBundleToCheckout(
+			{
+				bundleProduct,
+				commerceMiniCartPage,
+				page,
+				productDetailsPage,
+				site,
+			},
+			2
+		);
+
+		await expect(checkoutPage.multiStepNav).toBeVisible();
+		await expect(
+			commerceMiniCartPage.productsLimitErrorMessage('1')
+		).toHaveCount(0);
+
+		await performLogout(page);
+		await performLoginViaApi({
+			page,
+			screenName: eligibleSiteBuyerUser.alternateName,
+		});
+
+		await submitBundleToCheckout(
+			{
+				bundleProduct,
+				commerceMiniCartPage,
+				page,
+				productDetailsPage,
+				site: eligibleSite,
+			},
+			2
+		);
+
+		await expect(
+			commerceMiniCartPage.productsLimitErrorMessage('1')
+		).toBeVisible();
+		await expect(checkoutPage.multiStepNav).toBeHidden();
+	}
+);
+
+test(
+	'A products limit rule applies to a bundled product only in orders of the eligible order type',
+	{tag: ['@COMMERCE-12802', '@LPD-106244-Grouped-8']},
+	async ({
+		apiHelpers,
+		checkoutPage,
+		commerceAdminChannelsPage,
+		commerceLayoutsPage,
+		commerceMiniCartPage,
+		page,
+		productDetailsPage,
+		site,
+	}) => {
+		test.setTimeout(180000);
+
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog({
+				name: getRandomString(),
+			});
+
+		const {buyerUser, channel} = await setUpBundleStorefront(
+			apiHelpers,
+			commerceAdminChannelsPage,
+			page,
+			site
+		);
+
+		const linkedProduct =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				name: {en_US: getRandomString()},
+				productConfiguration: {allowBackOrder: true},
+			});
+
+		const bundleProduct = await postBundleProduct(apiHelpers, {
+			catalogId: catalog.id,
+			name: getRandomString(),
+			optionName: 'Option1',
+			productOptionValue: {quantity: 1, skuId: linkedProduct.skus[0].id},
+		});
+
+		const orderTypes = [];
+
+		for (let index = 0; index < 2; index++) {
+			const orderType =
+				await apiHelpers.headlessCommerceAdminOrder.postOrderType({
+					active: true,
+				});
+
+			await apiHelpers.headlessCommerceAdminOrder.postOrderTypeIdOrderTypeChannel(
+				{channelId: channel.id, orderTypeId: orderType.id}
+			);
+
+			orderTypes.push(orderType);
+		}
+
+		const orderRule =
+			await apiHelpers.headlessCommerceAdminOrder.postOrderRule({
+				type: 'products-limit',
+				typeSettings: getProductsLimitTypeSettings(
+					linkedProduct.externalReferenceCode,
+					'1'
+				),
+			});
+
+		await apiHelpers.headlessCommerceAdminOrder.postOrderRuleIdOrderRuleOrderType(
+			{orderRuleId: orderRule.id, orderTypeId: orderTypes[1].id}
+		);
+
+		await performLogout(page);
+		await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+		await page.goto(`/web${site.friendlyUrlPath}/pending-orders`, {
+			waitUntil: 'networkidle',
+		});
+
+		await commerceLayoutsPage.addOrder(orderTypes[0].name['en_US']);
+
+		await expect(page).not.toHaveURL(/pending-orders$/);
+
+		await submitBundleToCheckout(
+			{
+				bundleProduct,
+				commerceMiniCartPage,
+				page,
+				productDetailsPage,
+				site,
+			},
+			2
+		);
+
+		await expect(checkoutPage.multiStepNav).toBeVisible();
+		await expect(
+			commerceMiniCartPage.productsLimitErrorMessage('1')
+		).toHaveCount(0);
+
+		await page.goto(`/web${site.friendlyUrlPath}/pending-orders`, {
+			waitUntil: 'networkidle',
+		});
+
+		await commerceLayoutsPage.addOrder(orderTypes[1].name['en_US']);
+
+		await expect(page).not.toHaveURL(/pending-orders$/);
+
+		await submitBundleToCheckout(
+			{
+				bundleProduct,
+				commerceMiniCartPage,
+				page,
+				productDetailsPage,
+				site,
+			},
+			2
+		);
+
+		await expect(
+			commerceMiniCartPage.productsLimitErrorMessage('1')
+		).toBeVisible();
+		await expect(checkoutPage.multiStepNav).toBeHidden();
+	}
+);
+
+test(
+	'A products limit rule applies to a bundled product linked to a decimal unit of measure quantity',
+	{tag: ['@COMMERCE-12797', '@LPD-106244-Grouped-8']},
+	async ({
+		apiHelpers,
+		checkoutPage,
+		commerceAdminChannelsPage,
+		commerceInstanceSettingsPage,
+		commerceMiniCartPage,
+		page,
+		productDetailsPage,
+		site,
+	}) => {
+		test.setTimeout(180000);
+
+		await commerceInstanceSettingsPage.toggleShowUnselectableOptions(true);
+
+		try {
+			const catalog =
+				await apiHelpers.headlessCommerceAdminCatalog.postCatalog({
+					name: getRandomString(),
+				});
+
+			const {buyerUser} = await setUpBundleStorefront(
+				apiHelpers,
+				commerceAdminChannelsPage,
+				page,
+				site
+			);
+
+			const linkedProduct =
+				await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+					catalogId: catalog.id,
+					name: {en_US: getRandomString()},
+					productConfiguration: {
+						allowBackOrder: true,
+						multipleOrderQuantity: 1.2,
+					},
+				});
+
+			const unitOfMeasureKey = `uom-${getRandomInt()}`;
+
+			await apiHelpers.headlessCommerceAdminCatalog.postSkuUnitOfMeasure(
+				linkedProduct.skus[0].id,
+				{
+					basePrice: 10,
+					incrementalOrderQuantity: 1.2,
+					key: unitOfMeasureKey,
+				}
+			);
+
+			const bundleProduct = await postBundleProduct(apiHelpers, {
+				catalogId: catalog.id,
+				name: getRandomString(),
+				optionName: 'Option1',
+				productOptionValue: {
+					quantity: 1.2,
+					skuId: linkedProduct.skus[0].id,
+					unitOfMeasureKey,
+				},
+			});
+
+			await apiHelpers.headlessCommerceAdminOrder.postOrderRule({
+				type: 'products-limit',
+				typeSettings: getProductsLimitTypeSettings(
+					linkedProduct.externalReferenceCode,
+					'1.1'
+				),
+			});
+
+			await performLogout(page);
+			await performLoginViaApi({
+				page,
+				screenName: buyerUser.alternateName,
+			});
+
+			await page.goto(
+				`/web${site.friendlyUrlPath}/p/${bundleProduct.urls['en_US']}`
+			);
+
+			await expect(
+				productDetailsPage.optionSelector('Option1')
+			).toContainText('Value1');
+
+			await productDetailsPage.optionSelector('Option1').click();
+
+			await expect(
+				productDetailsPage.optionValue(
+					'Value1 No more than 1.1 products in this product range can be purchased together.'
+				)
+			).toBeVisible();
+
+			await submitBundleToCheckout(
+				{
+					bundleProduct,
+					commerceMiniCartPage,
+					page,
+					productDetailsPage,
+					site,
+				},
+				1
+			);
+
+			await expect(
+				commerceMiniCartPage.productsLimitErrorMessage('1.1')
+			).toBeVisible();
+			await expect(checkoutPage.multiStepNav).toBeHidden();
+		}
+		finally {
+			await performLoginViaApi({page, screenName: 'test'});
+
+			await commerceInstanceSettingsPage.toggleShowUnselectableOptions(
+				false
+			);
 		}
 	}
 );
