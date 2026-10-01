@@ -24,10 +24,12 @@ export class ProductDetailsPage {
 	readonly diagramTooltipSubtitleLink: (name: string) => Locator;
 	readonly diagramTooltipTitleLink: (name: string) => Locator;
 	readonly diagramTooltipViewLink: Locator;
+	readonly discountValue: Locator;
 	readonly downloadAttachmentLink: Locator;
 	readonly downloadSampleField: (
 		downloadSampleText: string
 	) => Promise<Locator>;
+	readonly finalPrice: Locator;
 	readonly fullDescriptionField: (
 		fullDescription: string
 	) => Promise<Locator>;
@@ -46,6 +48,7 @@ export class ProductDetailsPage {
 	readonly mappedProductRowAt: (index: number) => Locator;
 	readonly mappedProductSelectAllCheckbox: Locator;
 	readonly mappedProductsTable: Locator;
+	readonly minimumQuantityMessage: (quantity: number) => Locator;
 	readonly mpnField: (mpn: string) => Promise<Locator>;
 	readonly nameField: (name: string) => Promise<Locator>;
 	readonly optionField: (
@@ -86,6 +89,7 @@ export class ProductDetailsPage {
 	readonly productDetailAvailabilityLabel: Locator;
 	readonly productDetailValue: (label: string) => Locator;
 	readonly productDetailQuantitySelector: Locator;
+	readonly productImage: (title: string) => Locator;
 	readonly productOptionUploadFormFeedback: Locator;
 	readonly relatedDiagramLink: (name: string) => Locator;
 	readonly productTitle: (productName: string) => Locator;
@@ -117,7 +121,10 @@ export class ProductDetailsPage {
 		shortDescription: string
 	) => Promise<Locator>;
 	readonly skuField: (sku: string) => Promise<Locator>;
+	readonly specificationList: Locator;
+	readonly specificationsTab: Locator;
 	readonly subscriptionInfo: Locator;
+	readonly subscriptionInfoRow: (subscriptionName: string) => Locator;
 	readonly unitOfMeasureSelect: Locator;
 	readonly unitOfMeasureSelectedOption: Locator;
 	readonly uomCombobox: Locator;
@@ -178,6 +185,9 @@ export class ProductDetailsPage {
 		this.downloadSampleField = async (downloadSampleText: string) => {
 			return page.getByRole('link', {name: downloadSampleText});
 		};
+		this.finalPrice = page.locator(
+			'div.price-container .price-value-final'
+		);
 		this.fullDescriptionField = async (fullDescription: string) => {
 			return page.getByText(fullDescription, {exact: true});
 		};
@@ -208,6 +218,10 @@ export class ProductDetailsPage {
 			'.shop-by-diagram-table thead input[type="checkbox"]'
 		);
 		this.mappedProductsTable = page.locator('.shop-by-diagram-table');
+		this.minimumQuantityMessage = (quantity: number) =>
+			page.getByText(`Minimum Quantity per Order: ${quantity}`, {
+				exact: true,
+			});
 		this.mpnField = async (mpn: string) => {
 			return page.getByText(mpn, {exact: true});
 		};
@@ -244,6 +258,9 @@ export class ProductDetailsPage {
 			'[class*="dynamic-field"] .node-value'
 		);
 		this.priceContainer = page.locator('div.price-container');
+		this.discountValue = this.priceContainer.locator(
+			'.price-value-discount'
+		);
 		this.priceFragment = page.locator('span.price');
 		this.priceFragmentDiscount = this.priceFragment.locator(
 			'.price-value-discount'
@@ -291,6 +308,8 @@ export class ProductDetailsPage {
 			'spinbutton',
 			{name: 'Quantity Selector'}
 		);
+		this.productImage = (title: string) =>
+			page.getByRole('img', {name: title}).first();
 		this.productOptionUploadFormFeedback = page.locator(
 			'.product-option-upload'
 		);
@@ -352,7 +371,15 @@ export class ProductDetailsPage {
 		this.skuField = async (sku: string) => {
 			return page.getByText(sku, {exact: true});
 		};
+		this.specificationList = page.locator('.specification-list');
+		this.specificationsTab = page.getByRole('tab', {
+			name: 'Specifications',
+		});
 		this.subscriptionInfo = page.locator('.commerce-subscription-info');
+		this.subscriptionInfoRow = (subscriptionName: string) =>
+			this.subscriptionInfo
+				.locator('.row')
+				.filter({hasText: subscriptionName});
 		this.unitOfMeasureSelect = page.locator(
 			'select.unit-of-measure-selector'
 		);
