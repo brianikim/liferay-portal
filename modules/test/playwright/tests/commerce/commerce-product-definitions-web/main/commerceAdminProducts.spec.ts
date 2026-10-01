@@ -1289,60 +1289,69 @@ test(
 	}
 );
 
-test(
-	'Publish a Grouped product',
-	{tag: ['@COMMERCE-6302', '@LPD-106244-Grouped-2']},
-	async ({
-		apiHelpers,
-		commerceAdminProductDetailsPage,
-		commerceAdminProductPage,
-	}) => {
-		const catalog =
-			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+for (const {productType, tags} of [
+	{productType: 'Grouped', tags: ['@COMMERCE-6302', '@LPD-106244-Grouped-2']},
+	{productType: 'Virtual', tags: ['@COMMERCE-6301', '@LPD-106244-Grouped-7']},
+]) {
+	test(
+		`Publish a ${productType} product`,
+		{tag: tags},
+		async ({
+			apiHelpers,
+			commerceAdminProductDetailsPage,
+			commerceAdminProductPage,
+		}) => {
+			const catalog =
+				await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
 
-		const productName = getRandomString();
+			const productName = getRandomString();
 
-		try {
-			await commerceAdminProductPage.goto();
+			try {
+				await commerceAdminProductPage.goto();
 
-			await commerceAdminProductPage.addButton.click();
-			await commerceAdminProductPage
-				.menuItemProductType('Grouped')
-				.click();
-			await commerceAdminProductPage.modalFieldName.fill(productName);
-			await commerceAdminProductPage.modalPlaceHolder.fill(catalog.name);
-			await commerceAdminProductPage.modalMenuItem(catalog.name).click();
-			await commerceAdminProductPage.modalSubmitButton.click();
+				await commerceAdminProductPage.addButton.click();
+				await commerceAdminProductPage
+					.menuItemProductType(productType)
+					.click();
+				await commerceAdminProductPage.modalFieldName.fill(productName);
+				await commerceAdminProductPage.modalPlaceHolder.fill(
+					catalog.name
+				);
+				await commerceAdminProductPage
+					.modalMenuItem(catalog.name)
+					.click();
+				await commerceAdminProductPage.modalSubmitButton.click();
 
-			await expect(commerceAdminProductDetailsPage.nameInput).toHaveValue(
-				productName
-			);
-			await expect(
-				commerceAdminProductDetailsPage.selectedCatalogOption
-			).toHaveText(catalog.name);
-			await expect(
-				commerceAdminProductDetailsPage.workflowStatus('Draft')
-			).toBeVisible();
+				await expect(
+					commerceAdminProductDetailsPage.nameInput
+				).toHaveValue(productName);
+				await expect(
+					commerceAdminProductDetailsPage.selectedCatalogOption
+				).toHaveText(catalog.name);
+				await expect(
+					commerceAdminProductDetailsPage.workflowStatus('Draft')
+				).toBeVisible();
 
-			await commerceAdminProductDetailsPage.publish();
+				await commerceAdminProductDetailsPage.publish();
 
-			await expect(
-				commerceAdminProductDetailsPage.workflowStatus('Approved')
-			).toBeVisible();
+				await expect(
+					commerceAdminProductDetailsPage.workflowStatus('Approved')
+				).toBeVisible();
 
-			await commerceAdminProductDetailsPage.backLink.click();
+				await commerceAdminProductDetailsPage.backLink.click();
 
-			await commerceAdminProductPage.search(productName);
+				await commerceAdminProductPage.search(productName);
 
-			await expect(
-				commerceAdminProductPage.productsTableRow(productName)
-			).toContainText('Grouped');
+				await expect(
+					commerceAdminProductPage.productsTableRow(productName)
+				).toContainText(productType);
+			}
+			finally {
+				await addProductToCleanUp(apiHelpers, productName);
+			}
 		}
-		finally {
-			await addProductToCleanUp(apiHelpers, productName);
-		}
-	}
-);
+	);
+}
 
 test(
 	'An approved product can be duplicated and converted to draft',
