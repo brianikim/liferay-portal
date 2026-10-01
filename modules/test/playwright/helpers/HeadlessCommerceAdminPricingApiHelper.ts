@@ -171,10 +171,16 @@ export class HeadlessCommerceAdminPricingApiHelper {
 
 	async getPriceListEntries(
 		priceListId: number,
-		{pageSize = 200}: {pageSize?: number} = {}
+		{filter, pageSize = 200}: {filter?: string; pageSize?: number} = {}
 	) {
+		const searchParams = new URLSearchParams({pageSize: String(pageSize)});
+
+		if (filter) {
+			searchParams.append('filter', filter);
+		}
+
 		return this.apiHelpers.get(
-			`${this.apiHelpers.baseUrl}${this.basePath}/price-lists/${priceListId}/price-entries?pageSize=${pageSize}`
+			`${this.apiHelpers.baseUrl}${this.basePath}/price-lists/${priceListId}/price-entries?${searchParams.toString()}`
 		);
 	}
 
