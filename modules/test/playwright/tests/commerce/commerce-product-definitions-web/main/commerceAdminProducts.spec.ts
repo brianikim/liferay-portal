@@ -11,8 +11,11 @@ import {dataApiHelpersTest} from '../../../../fixtures/dataApiHelpersTest';
 import {isolatedSiteTest} from '../../../../fixtures/isolatedSiteTest';
 import {loginTest} from '../../../../fixtures/loginTest';
 import {userPersonalBarPagesTest} from '../../../../fixtures/userPersonalBarPagesTest';
+import {clickAndExpectToBeVisible} from '../../../../utils/clickAndExpectToBeVisible';
 import getRandomString from '../../../../utils/getRandomString';
 import {userData} from '../../../../utils/performLogin';
+import {waitForAlert} from '../../../../utils/waitForAlert';
+import {fillLocalizedInput} from '../../utils/fillLocalizedInput';
 
 export const test = mergeTests(
 	apiHelpersTest,
@@ -22,6 +25,23 @@ export const test = mergeTests(
 	loginTest(),
 	userPersonalBarPagesTest
 );
+
+async function addProductToCleanUp(
+	apiHelpers: DataApiHelpers,
+	productName: string
+) {
+	const product = (
+		await apiHelpers.headlessCommerceAdminCatalog.getProducts(
+			new URLSearchParams({
+				filter: `name eq '${productName}'`,
+			})
+		)
+	).items[0];
+
+	if (product) {
+		apiHelpers.data.push({id: product.productId, type: 'product'});
+	}
+}
 
 test(
 	'Add a SKU',
@@ -474,5 +494,172 @@ test(
 		await expect(
 			commerceAdminProductDetailsPage.nameInputLocaleSelector
 		).toHaveText('es-ES');
+	}
+);
+
+test(
+	'Create, publish, edit and delete a simple product',
+	{
+		tag: [
+			'@COMMERCE-5808',
+			'@COMMERCE-6303',
+			'@COMMERCE-9179',
+			'@COMMERCE-9180',
+			'@LPD-106244-Grouped-2',
+		],
+	},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductPage,
+		page,
+	}) => {
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		const expirationDate = new Date();
+
+		expirationDate.setFullYear(expirationDate.getFullYear() + 1);
+
+		const formattedExpirationDate = [
+			String(expirationDate.getMonth() + 1).padStart(2, '0'),
+			String(expirationDate.getDate()).padStart(2, '0'),
+			expirationDate.getFullYear(),
+		].join('/');
+		const productName = getRandomString();
+		const shortDescription = getRandomString();
+		const translatedProductName = getRandomString();
+		const updatedProductName = getRandomString();
+
+		try {
+			await test.step('Create a simple product', async () => {
+				await commerceAdminProductPage.goto();
+
+				await commerceAdminProductPage.addButton.click();
+				await commerceAdminProductPage
+					.menuItemProductType('Simple')
+					.click();
+				await commerceAdminProductPage.modalFieldName.fill(productName);
+				await commerceAdminProductPage.modalPlaceHolder.fill(
+					catalog.name
+				);
+				await commerceAdminProductPage
+					.modalMenuItem(catalog.name)
+					.click();
+				await commerceAdminProductPage.modalSubmitButton.click();
+
+				await expect(
+					commerceAdminProductDetailsPage.nameInput
+				).toHaveValue(productName);
+				await expect(
+					commerceAdminProductDetailsPage.publishLink
+				).toBeVisible();
+				await expect(
+					commerceAdminProductDetailsPage.saveAsDraftLink
+				).toBeVisible();
+				await expect(
+					commerceAdminProductDetailsPage.selectedCatalogOption
+				).toHaveText(catalog.name);
+				await expect(
+					commerceAdminProductDetailsPage.workflowStatus('Draft')
+				).toBeVisible();
+			});
+
+			await test.step('Publish the product with a short description and an expiration date', async () => {
+				await fillLocalizedInput(
+					commerceAdminProductDetailsPage.shortDescriptionInput,
+					shortDescription
+				);
+				await commerceAdminProductDetailsPage.neverExpireToggle.uncheck();
+				await commerceAdminProductDetailsPage.expirationDateInput.fill(
+					formattedExpirationDate
+				);
+				await commerceAdminProductDetailsPage.publish();
+
+				await expect(
+					commerceAdminProductDetailsPage.workflowStatus('Approved')
+				).toBeVisible();
+			});
+
+			await test.step('Edit the product name and its translation', async () => {
+				await commerceAdminProductDetailsPage.nameInput.fill(
+					updatedProductName
+				);
+				await commerceAdminProductDetailsPage.publish();
+
+				await expect(
+					commerceAdminProductDetailsPage.nameInput
+				).toHaveValue(updatedProductName);
+
+				await clickAndExpectToBeVisible({
+					autoClick: true,
+					target: commerceAdminProductDetailsPage.nameInputLocaleMenuItem(
+						'es-ES'
+					),
+					trigger:
+						commerceAdminProductDetailsPage.nameInputLocaleSelector,
+				});
+				await commerceAdminProductDetailsPage.nameInput.fill(
+					translatedProductName
+				);
+				await commerceAdminProductDetailsPage.publish();
+			});
+
+			await test.step('Reopen the product and verify its saved values', async () => {
+				await commerceAdminProductPage.gotoProduct(updatedProductName);
+
+				await expect(
+					commerceAdminProductDetailsPage.expirationDateInput
+				).toHaveValue(formattedExpirationDate);
+				await expect(
+					commerceAdminProductDetailsPage.nameInput
+				).toHaveValue(updatedProductName);
+				await expect(
+					commerceAdminProductDetailsPage.neverExpireToggle
+				).not.toBeChecked();
+				await expect(
+					commerceAdminProductDetailsPage.shortDescriptionInput
+				).toHaveValue(shortDescription);
+				await expect(
+					commerceAdminProductDetailsPage.workflowStatus('Approved')
+				).toBeVisible();
+
+				const product = (
+					await apiHelpers.headlessCommerceAdminCatalog.getProducts(
+						new URLSearchParams({
+							filter: `name eq '${updatedProductName}'`,
+						})
+					)
+				).items[0];
+
+				expect(product.name).toMatchObject({
+					en_US: updatedProductName,
+					es_ES: translatedProductName,
+				});
+			});
+
+			await test.step('Delete the product from the products list', async () => {
+				await commerceAdminProductDetailsPage.backLink.click();
+
+				await commerceAdminProductPage.search(updatedProductName);
+				await commerceAdminProductPage
+					.productRowActionsButton(updatedProductName)
+					.click();
+				await commerceAdminProductPage.deleteMenuItem.click();
+
+				await waitForAlert(page);
+
+				await expect(
+					commerceAdminProductPage.productsTableRow(
+						updatedProductName
+					)
+				).toHaveCount(0);
+			});
+		}
+		finally {
+			for (const name of [productName, updatedProductName]) {
+				await addProductToCleanUp(apiHelpers, name);
+			}
+		}
 	}
 );
