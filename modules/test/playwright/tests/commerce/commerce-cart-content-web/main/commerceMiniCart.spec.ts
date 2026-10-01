@@ -32,6 +32,7 @@ import getWidgetDefinition from '../../../layout-content-page-editor-web/main/ut
 import {
 	TProductOptionSpec,
 	apiStorefrontSetUp,
+	assignBuyerUserToAccount,
 	createAccountWithBuyerUser,
 	createProductWithOptions,
 	expectBrakeFluidCartItems,
@@ -3678,5 +3679,232 @@ test(
 		await expect(
 			commerceThemeMiniumCatalogPage.quantitySelector(cartItem)
 		).toHaveValue('2');
+	}
+);
+
+test(
+	'SKUs quick added to the Mini Cart fragment show their price list and promotion prices',
+	{tag: ['@COMMERCE-10587', '@COMMERCE-10620', '@LPD-106244-Grouped-10']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelsPage,
+		commerceMiniCartPage,
+		page,
+	}) => {
+		const {catalog, channel, product, site} =
+			await apiStorefrontSetUp(apiHelpers);
+
+		await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+			channel.name,
+			'B2B'
+		);
+
+		await waitForAlert(page);
+
+		const layout = await apiHelpers.headlessDelivery.createSitePage({
+			pageDefinition: getPageDefinition([
+				getFragmentDefinition({
+					id: getRandomString(),
+					key: 'COMMERCE_CART_FRAGMENTS-mini-cart',
+				}),
+			]),
+			siteId: site.id,
+			title: getRandomString(),
+		});
+
+		const basePromoPriceList =
+			await apiHelpers.headlessCommerceAdminPricing.getBasePromoPriceList(
+				catalog.id
+			);
+
+		await apiHelpers.headlessCommerceAdminPricing.postPriceEntry({
+			price: 9,
+			priceListId: basePromoPriceList.items[0].id,
+			skuId: product.skus[0].id,
+		});
+
+		const priceListProduct =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				name: {en_US: getRandomString()},
+				productConfiguration: {allowBackOrder: true},
+				skus: [
+					{
+						cost: 0,
+						price: 10,
+						published: true,
+						purchasable: true,
+						sku: getRandomString(),
+					},
+				],
+			});
+
+		const priceList =
+			await apiHelpers.headlessCommerceAdminPricing.postPriceList({
+				catalogId: catalog.id,
+				currencyCode: 'USD',
+				name: getRandomString(),
+				type: 'price-list',
+			});
+
+		await apiHelpers.headlessCommerceAdminPricing.postPriceEntry({
+			price: 15,
+			priceListId: priceList.id,
+			skuId: priceListProduct.skus[0].id,
+		});
+
+		const {buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id
+		);
+
+		await performLogout(page);
+		await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+		await page.goto(
+			`/web${site.friendlyUrlPath}${layout.friendlyUrlPath}`,
+			{waitUntil: 'networkidle'}
+		);
+
+		await commerceMiniCartPage.open();
+
+		const skuNames = [product.skus[0].sku, priceListProduct.skus[0].sku];
+
+		for (const skuName of skuNames) {
+			await commerceMiniCartPage.selectQuickAddToCartSku(skuName);
+
+			await expect(
+				commerceMiniCartPage.quickAddToCartChip(skuName)
+			).toBeVisible();
+		}
+
+		await commerceMiniCartPage.quickAddToCartButton.click();
+
+		for (const skuName of skuNames) {
+			await expect(
+				commerceMiniCartPage.miniCartSku(skuName)
+			).toBeVisible();
+		}
+
+		await expect(
+			commerceMiniCartPage.miniCartItemListPrice(product.name.en_US)
+		).toHaveText('$ 10.00');
+		await expect(
+			commerceMiniCartPage.miniCartItemPromoPrice(product.name.en_US)
+		).toHaveText('$ 9.00');
+		await expect(
+			commerceMiniCartPage.miniCartItemListPrice(
+				priceListProduct.name.en_US
+			)
+		).toHaveText('$ 15.00');
+	}
+);
+
+test(
+	'A buyer linked to several accounts quick adds a SKU at the price of the selected account',
+	{tag: ['@COMMERCE-10588', '@LPD-106244-Grouped-10']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelsPage,
+		commerceMiniCartPage,
+		commerceThemeMiniumCatalogPage,
+		page,
+	}) => {
+		const {channel, product, site} = await apiStorefrontSetUp(apiHelpers);
+
+		await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+			channel.name,
+			'B2B'
+		);
+
+		await waitForAlert(page);
+
+		const layout = await apiHelpers.headlessDelivery.createSitePage({
+			pageDefinition: getPageDefinition([
+				getFragmentDefinition({
+					id: getRandomString(),
+					key: 'COMMERCE_ACCOUNT_FRAGMENTS-account-selector',
+				}),
+				getFragmentDefinition({
+					id: getRandomString(),
+					key: 'COMMERCE_CART_FRAGMENTS-mini-cart',
+				}),
+			]),
+			siteId: site.id,
+			title: getRandomString(),
+		});
+
+		const accountName = `Commerce Account ${getRandomInt()}`;
+
+		const {account: account1, buyerUser} =
+			await createAccountWithBuyerUser(apiHelpers, site.id, {
+				accountName: `${accountName} 1`,
+			});
+
+		const account2 = await apiHelpers.headlessAdminUser.postAccount({
+			name: `${accountName} 2`,
+			type: 'business',
+		});
+
+		await assignBuyerUserToAccount(account2, apiHelpers, buyerUser);
+
+		const discount =
+			await apiHelpers.headlessCommerceAdminPricing.postDiscount({
+				discountProducts: [{productId: product.productId}],
+				percentageLevel1: 20,
+				target: 'products',
+				usePercentage: true,
+			});
+
+		await apiHelpers.headlessCommerceAdminPricing.postDiscountAccount(
+			discount.id,
+			account2.id
+		);
+
+		await performLogout(page);
+		await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+		await page.goto(
+			`/web${site.friendlyUrlPath}${layout.friendlyUrlPath}`,
+			{waitUntil: 'networkidle'}
+		);
+
+		await expect(
+			commerceThemeMiniumCatalogPage.accountSelectorSelectedAccount
+		).toHaveText(account1.name);
+
+		const skuName = product.skus[0].sku;
+
+		await commerceMiniCartPage.open();
+
+		await commerceMiniCartPage.selectQuickAddToCartSku(skuName);
+
+		await commerceMiniCartPage.quickAddToCartButton.click();
+
+		await expect(
+			commerceMiniCartPage.miniCartItemListPrice(product.name.en_US)
+		).toHaveText('$ 10.00');
+
+		await commerceMiniCartPage.close();
+
+		await commerceThemeMiniumCatalogPage.openAccountSelectorDropdown();
+
+		await commerceThemeMiniumCatalogPage
+			.accountSelectorAccount(account2.name)
+			.click();
+
+		await expect(
+			commerceThemeMiniumCatalogPage.accountSelectorSelectedAccount
+		).toHaveText(account2.name);
+
+		await commerceMiniCartPage.open();
+
+		await commerceMiniCartPage.selectQuickAddToCartSku(skuName);
+
+		await commerceMiniCartPage.quickAddToCartButton.click();
+
+		await expect(
+			commerceMiniCartPage.miniCartItemNetPrice(product.name.en_US)
+		).toContainText('$ 8.00');
 	}
 );
