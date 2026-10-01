@@ -23,7 +23,7 @@ import {waitForAlert} from '../../../../utils/waitForAlert';
 import getFragmentDefinition from '../../../layout-content-page-editor-web/main/utils/getFragmentDefinition';
 import getPageDefinition from '../../../layout-content-page-editor-web/main/utils/getPageDefinition';
 import getWidgetDefinition from '../../../layout-content-page-editor-web/main/utils/getWidgetDefinition';
-import {miniumSetUp} from '../../utils/commerce';
+import {createBuyerUserForAccount, miniumSetUp} from '../../utils/commerce';
 
 export const test = mergeTests(
 	apiHelpersTest,
@@ -273,8 +273,15 @@ test(
 );
 
 test(
-	'Cancelling the in-flow account creation does not create the account',
-	{tag: ['@COMMERCE-9022', '@LPD-104785']},
+	'In-flow accounts require a name, are not created on cancel, can be searched and selected, and cannot be created by a buyer',
+	{
+		tag: [
+			'@COMMERCE-5956',
+			'@COMMERCE-9022',
+			'@LPD-104785',
+			'@LPD-106244-Grouped-14',
+		],
+	},
 	async ({
 		apiHelpers,
 		commerceAdminChannelsPage,
@@ -322,6 +329,20 @@ test(
 			});
 		});
 
+		await test.step('Check that the account cannot be created without a name', async () => {
+			await commerceThemeMiniumCatalogPage.createNewAccountModalCreateButton.click();
+
+			expect(
+				await commerceThemeMiniumCatalogPage.createNewAccountModalNameInput.evaluate(
+					(element: HTMLInputElement) => element.validity.valueMissing
+				)
+			).toBe(true);
+
+			await expect(
+				commerceThemeMiniumCatalogPage.createNewAccountModalTitle
+			).toBeVisible();
+		});
+
 		await test.step('Type an account name and cancel', async () => {
 			await commerceThemeMiniumCatalogPage.createNewAccountModalNameInput.fill(
 				accountName
@@ -352,6 +373,118 @@ test(
 			expect(
 				await apiHelpers.headlessAdminUser.getAccountByName(accountName)
 			).toBeUndefined();
+		});
+
+		const accountNamePrefix = getRandomString();
+
+		const accountName1 = `${accountNamePrefix}1`;
+		const accountName2 = `${accountNamePrefix}2`;
+
+		await test.step('Create two accounts in flow', async () => {
+			await page.reload({waitUntil: 'networkidle'});
+
+			for (const createdAccountName of [accountName1, accountName2]) {
+				await commerceThemeMiniumCatalogPage.openAccountSelectorDropdown();
+
+				await clickAndExpectToBeVisible({
+					target: commerceThemeMiniumCatalogPage.createNewAccountModal,
+					trigger:
+						commerceThemeMiniumCatalogPage.createNewAccountButton,
+				});
+
+				await commerceThemeMiniumCatalogPage.createNewAccountModalNameInput.fill(
+					createdAccountName
+				);
+
+				await clickAndExpectToBeHidden({
+					target: commerceThemeMiniumCatalogPage.createNewAccountModal,
+					trigger:
+						commerceThemeMiniumCatalogPage.createNewAccountModalCreateButton,
+				});
+
+				const account =
+					await apiHelpers.headlessAdminUser.getAccountByName(
+						createdAccountName
+					);
+
+				apiHelpers.data.push({id: account.id, type: 'account'});
+
+				await expect(
+					commerceThemeMiniumCatalogPage.accountSelectorSelectedAccount
+				).toHaveText(createdAccountName);
+			}
+		});
+
+		await test.step('Search the accounts and select the first one', async () => {
+			await commerceThemeMiniumCatalogPage.openAccountSelectorDropdown();
+
+			await commerceThemeMiniumCatalogPage.accountSelectorSearchAccountInput.fill(
+				accountNamePrefix
+			);
+
+			for (const createdAccountName of [accountName1, accountName2]) {
+				await expect(
+					commerceThemeMiniumCatalogPage.accountSelectorAccount(
+						createdAccountName
+					)
+				).toBeVisible();
+			}
+
+			await commerceThemeMiniumCatalogPage.accountSelectorSearchAccountInput.fill(
+				accountName1
+			);
+
+			await expect(
+				commerceThemeMiniumCatalogPage.accountSelectorAccount(
+					accountName2
+				)
+			).toBeHidden();
+
+			await commerceThemeMiniumCatalogPage
+				.accountSelectorAccount(accountName1)
+				.click();
+
+			await expect(
+				commerceThemeMiniumCatalogPage.accountSelectorSelectedAccount
+			).toHaveText(accountName1);
+
+			await page.reload({waitUntil: 'networkidle'});
+
+			await expect(
+				commerceThemeMiniumCatalogPage.accountSelectorSelectedAccount
+			).toHaveText(accountName1);
+		});
+
+		await test.step('Check that a buyer cannot create an account in flow', async () => {
+			const account1 =
+				await apiHelpers.headlessAdminUser.getAccountByName(
+					accountName1
+				);
+
+			const buyerUser = await createBuyerUserForAccount(
+				account1,
+				apiHelpers,
+				site.id
+			);
+
+			await performLogout(page);
+			await performLoginViaApi({
+				page,
+				screenName: buyerUser.alternateName,
+			});
+
+			await page.goto(`/web/${site.name}/${layout.friendlyUrlPath}`, {
+				waitUntil: 'networkidle',
+			});
+
+			await commerceThemeMiniumCatalogPage.openAccountSelectorDropdown();
+
+			await expect(
+				commerceThemeMiniumCatalogPage.accountSelectorSearchAccountInput
+			).toBeVisible();
+			await expect(
+				commerceThemeMiniumCatalogPage.createNewAccountButton
+			).toBeHidden();
 		});
 	}
 );
