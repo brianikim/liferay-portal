@@ -46,6 +46,7 @@ export class CommerceAdminChannelDetailsPage {
 	) => Promise<Locator>;
 	readonly countryTab: Locator;
 	readonly currencyTab: Locator;
+	readonly defaultDisplayPageName: Locator;
 	readonly detailsButton: (tableName: string) => Promise<Locator>;
 	readonly discountsTargetPriceTypeSelect: Locator;
 	readonly eligibilityEntryCell: (
@@ -62,6 +63,7 @@ export class CommerceAdminChannelDetailsPage {
 		isNestedFrame: boolean,
 		tableName: string
 	) => Promise<Locator>;
+	readonly emptyResultsMessage: Locator;
 	readonly errorMessage: (text: string) => Locator;
 	readonly frameSaveButton: (
 		isNestedFrame: boolean,
@@ -272,6 +274,9 @@ export class CommerceAdminChannelDetailsPage {
 				.getByRole('button')
 				.first();
 		};
+		this.defaultDisplayPageName = page.locator(
+			'[id$="_displayPageNameInput"]'
+		);
 		this.detailsButton = async (tableName: string) => {
 			return (await this.sidePanelNestedFrame(tableName)).getByRole(
 				'button',
@@ -328,6 +333,9 @@ export class CommerceAdminChannelDetailsPage {
 				eligibilityOption
 			);
 		};
+		this.emptyResultsMessage = page.getByText(
+			'Sorry, no results were found.'
+		);
 		this.errorMessage = (text: string) =>
 			page.locator('.alert-danger').filter({hasText: text});
 		this.frameSaveButton = async (
