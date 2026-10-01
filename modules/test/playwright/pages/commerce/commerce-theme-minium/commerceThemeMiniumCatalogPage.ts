@@ -17,6 +17,7 @@ export class CommerceThemeMiniumCatalogPage {
 	readonly accountSelectorOrderId: Locator;
 	readonly accountSelectorOrderLink: (orderId: string) => Locator;
 	readonly accountSelectorOrdersList: Locator;
+	readonly accountSelectorOrdersListTitles: Locator;
 	readonly accountSelectorOrderWorkflowStatus: Locator;
 	readonly accountSelectorSearchAccountInput: Locator;
 	readonly accountSelectorSearchOrderInput: Locator;
@@ -33,7 +34,9 @@ export class CommerceThemeMiniumCatalogPage {
 	readonly createNewAccountButton: Locator;
 	readonly createNewAccountModal: Locator;
 	readonly createNewAccountModalCancelButton: Locator;
+	readonly createNewAccountModalCreateButton: Locator;
 	readonly createNewAccountModalNameInput: Locator;
+	readonly createNewAccountModalTitle: Locator;
 	readonly createNewOrderButton: Locator;
 	readonly firstCardItem: Locator;
 	readonly firstCardItemAddToCartButton: Locator;
@@ -139,6 +142,8 @@ export class CommerceThemeMiniumCatalogPage {
 				.locator('.orders-table')
 				.getByRole('button', {exact: true, name: orderId});
 		this.accountSelectorOrdersList = page.locator('.orders-list');
+		this.accountSelectorOrdersListTitles =
+			this.accountSelectorOrdersList.locator('.table-list-title');
 		this.accountSelectorOrderWorkflowStatus =
 			this.accountSelectorButton.locator('.workflow-status');
 		this.accountSelectorSearchAccountInput =
@@ -179,8 +184,17 @@ export class CommerceThemeMiniumCatalogPage {
 		this.createNewAccountModal = page.locator('.modal-content');
 		this.createNewAccountModalCancelButton =
 			this.createNewAccountModal.getByRole('button', {name: 'Cancel'});
+		this.createNewAccountModalCreateButton =
+			this.createNewAccountModal.getByRole('button', {
+				exact: true,
+				name: 'Create',
+			});
 		this.createNewAccountModalNameInput =
 			this.createNewAccountModal.locator('input[name="accountName"]');
+		this.createNewAccountModalTitle = this.createNewAccountModal.getByRole(
+			'heading',
+			{name: 'Create New Account'}
+		);
 		this.createNewOrderButton = page.getByRole('button', {
 			name: 'Create New Order',
 		});
