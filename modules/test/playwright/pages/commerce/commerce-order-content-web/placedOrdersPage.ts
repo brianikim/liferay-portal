@@ -10,11 +10,14 @@ import {CommerceDNDTablePage} from '../commerceDNDTablePage';
 import {CommerceLayoutsPage} from './commerceLayoutsPage';
 
 export class PlacedOrdersPage extends CommerceDNDTablePage {
+	readonly adtEntry: (text: string) => Locator;
 	readonly commerceBillingAddress: Locator;
 	readonly configurationIFrame: FrameLocator;
 	readonly configurationIFrameDisplayTemplateSelector: Locator;
+	readonly configurationIFrameOrderDateDisplayPanel: Locator;
 	readonly configurationIFrameSaveButton: Locator;
 	readonly configurationIFrameShowFullAddressToggle: Locator;
+	readonly configurationIFrameShowOrderCreateTimeToggle: Locator;
 	readonly configurationIFrameShowPhoneNumberToggle: Locator;
 	readonly configurationMenuItem: Locator;
 	readonly expandProductButton: Locator;
@@ -34,6 +37,7 @@ export class PlacedOrdersPage extends CommerceDNDTablePage {
 	readonly pageTitle: Locator;
 	readonly panelList: Locator;
 	readonly placedOrderTableViewButton: Locator;
+	readonly portlet: Locator;
 	readonly searchButton: Locator;
 	readonly searchInput: Locator;
 	readonly commerceShippingAddress: Locator;
@@ -45,6 +49,8 @@ export class PlacedOrdersPage extends CommerceDNDTablePage {
 			'#portlet_com_liferay_commerce_order_content_web_internal_portlet_CommerceOrderContentPortlet .fds table'
 		);
 
+		this.adtEntry = (text: string) =>
+			this.portlet.locator('p', {hasText: text});
 		this.commerceBillingAddress = page.getByTestId(
 			'commerceBillingAddress'
 		);
@@ -55,12 +61,18 @@ export class PlacedOrdersPage extends CommerceDNDTablePage {
 			this.configurationIFrame.locator(
 				'[id="_com_liferay_portlet_configuration_web_portlet_PortletConfigurationPortlet_displayStyle"]'
 			);
+		this.configurationIFrameOrderDateDisplayPanel =
+			this.configurationIFrame.getByText('Order Date Display', {
+				exact: true,
+			});
 		this.configurationIFrameSaveButton = this.configurationIFrame.getByRole(
 			'button',
 			{name: 'Save'}
 		);
 		this.configurationIFrameShowFullAddressToggle =
 			this.configurationIFrame.getByLabel('Show Order Full Address');
+		this.configurationIFrameShowOrderCreateTimeToggle =
+			this.configurationIFrame.getByLabel('Show Order Create Time');
 		this.configurationIFrameShowPhoneNumberToggle =
 			this.configurationIFrame.getByLabel('Show Order Phone Number');
 
@@ -116,6 +128,9 @@ export class PlacedOrdersPage extends CommerceDNDTablePage {
 			.getByTestId('specificationFacetPanel')
 			.getByRole('button');
 		this.placedOrderTableViewButton = this.table.getByLabel('View');
+		this.portlet = page.locator(
+			'#portlet_com_liferay_commerce_order_content_web_internal_portlet_CommerceOrderContentPortlet'
+		);
 		this.searchButton = page.getByRole('button', {
 			exact: true,
 			name: 'Search',
