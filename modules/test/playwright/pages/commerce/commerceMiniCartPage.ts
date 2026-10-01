@@ -19,6 +19,8 @@ export class CommerceMiniCartPage {
 	readonly miniCartOverlay: Locator;
 	readonly miniCartEditItemPanel: Locator;
 	readonly miniCartEditItemInactivePrice: Locator;
+	readonly miniCartEditItemOptionSelect: (optionName: string) => Locator;
+	readonly miniCartEditItemOptionValue: (optionValueName: string) => Locator;
 	readonly miniCartEditItemOptionValues: (optionName: string) => Locator;
 	readonly miniCartEditItemPrice: (priceName: string) => Locator;
 	readonly miniCartItemDiscountLevels: (product: string | Locator) => Locator;
@@ -70,6 +72,7 @@ export class CommerceMiniCartPage {
 		container?: Locator | Page
 	) => Promise<Locator>;
 	readonly proceedAsGuest: Locator;
+	readonly productsLimitErrorMessage: (quantity: string) => Locator;
 	readonly quickAddToCartButton: Locator;
 	readonly quickAddToCartSku: (sku: string) => Locator;
 	readonly requestAQuoteButton: Locator;
@@ -116,6 +119,10 @@ export class CommerceMiniCartPage {
 			);
 		this.miniCartItemNetPrice = (product: string | Locator) =>
 			this._cartItem(product).locator('.price-value-final');
+		this.miniCartEditItemOptionSelect = (optionName: string) =>
+			this.miniCartEditItemPanel.getByLabel(optionName);
+		this.miniCartEditItemOptionValue = (optionValueName: string) =>
+			page.getByRole('option', {name: new RegExp(`^${optionValueName}`)});
 		this.miniCartEditItemOptionValues = (optionName: string) =>
 			this.miniCartEditItemPanel.getByLabel(optionName).locator('option');
 		this.miniCartEditItemPrice = (priceName: string) =>
@@ -231,6 +238,12 @@ export class CommerceMiniCartPage {
 		this.proceedAsGuest = page.getByRole('button', {
 			name: 'Proceed as Guest',
 		});
+		this.productsLimitErrorMessage = (quantity: string) =>
+			page
+				.getByRole('dialog')
+				.getByText(
+					`No more than ${quantity} products in this product range can be purchased together.`
+				);
 		this.requestAQuoteButton = page
 			.locator('.mini-cart-wrapper')
 			.getByRole('button', {
@@ -286,6 +299,23 @@ export class CommerceMiniCartPage {
 			await this.miniCartButtonClose.click();
 
 			await expect(this.miniCartOpenDrawer).toHaveCount(0);
+		}
+	}
+
+	async editItemOptions(
+		productName: string,
+		options: {optionName: string; optionValueName: string}[]
+	) {
+		await this.open();
+
+		await this.miniCartItemActionsButton(
+			this.miniCartItem(productName)
+		).click();
+		await this.editMenuItem.click();
+
+		for (const {optionName, optionValueName} of options) {
+			await this.miniCartEditItemOptionSelect(optionName).click();
+			await this.miniCartEditItemOptionValue(optionValueName).click();
 		}
 	}
 
