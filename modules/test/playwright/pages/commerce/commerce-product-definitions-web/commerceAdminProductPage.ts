@@ -22,6 +22,7 @@ export class CommerceAdminProductPage extends CommerceDNDTablePage {
 	readonly errorAlert: Locator;
 	readonly productRowActionsButton: (productName: string) => Locator;
 	readonly productsTableRow: (productName: string) => Locator;
+	readonly productsTableRowImage: (productName: string) => Locator;
 	readonly managementToolbarSearchInput: Locator;
 	readonly modalAddButton: Locator;
 	readonly modalBody: Locator;
@@ -100,6 +101,8 @@ export class CommerceAdminProductPage extends CommerceDNDTablePage {
 		this.errorAlert = page.locator('.alert-danger');
 		this.productsTableRow = (productName: string) =>
 			page.getByRole('row').filter({hasText: productName});
+		this.productsTableRowImage = (productName: string) =>
+			this.productsTableRow(productName).locator('img.sticker-img');
 		this.productRowActionsButton = (productName: string) =>
 			page
 				.getByRole('row')
