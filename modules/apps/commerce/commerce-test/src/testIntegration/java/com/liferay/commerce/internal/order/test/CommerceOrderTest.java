@@ -405,20 +405,7 @@ public class CommerceOrderTest {
 
 		for (CommerceOrder commerceOrder : randomOrders) {
 			if (RandomTestUtil.randomBoolean()) {
-				CommerceAddress commerceAddress = _addAddressToAccount(
-					commerceOrder.getCommerceAccountId());
-
-				commerceOrder.setBillingAddressId(
-					commerceAddress.getCommerceAddressId());
-				commerceOrder.setShippingAddressId(
-					commerceAddress.getCommerceAddressId());
-
-				commerceOrder = _commerceOrderLocalService.updateCommerceOrder(
-					commerceOrder);
-
-				placedCommerceOrders.add(
-					_commerceOrderEngine.checkoutCommerceOrder(
-						commerceOrder, _user.getUserId()));
+				placedCommerceOrders.add(_checkoutCommerceOrder(commerceOrder));
 			}
 		}
 
@@ -594,19 +581,7 @@ public class CommerceOrderTest {
 
 		// Checkout the first order
 
-		CommerceAddress commerceAddress = _addAddressToAccount(
-			accountEntry.getAccountEntryId());
-
-		commerceOrder.setBillingAddressId(
-			commerceAddress.getCommerceAddressId());
-		commerceOrder.setShippingAddressId(
-			commerceAddress.getCommerceAddressId());
-
-		commerceOrder = _commerceOrderLocalService.updateCommerceOrder(
-			commerceOrder);
-
-		commerceOrder = _commerceOrderEngine.checkoutCommerceOrder(
-			commerceOrder, _user.getUserId());
+		commerceOrder = _checkoutCommerceOrder(commerceOrder);
 
 		ordersCountByUser = _getUserOrdersCount(commerceChannelGroupId, true);
 
@@ -624,19 +599,7 @@ public class CommerceOrderTest {
 
 		// Checkout the second order
 
-		CommerceAddress secondCommerceAddress = _addAddressToAccount(
-			secondAccountEntry.getAccountEntryId());
-
-		secondCommerceOrder.setBillingAddressId(
-			secondCommerceAddress.getCommerceAddressId());
-		secondCommerceOrder.setShippingAddressId(
-			secondCommerceAddress.getCommerceAddressId());
-
-		secondCommerceOrder = _commerceOrderLocalService.updateCommerceOrder(
-			secondCommerceOrder);
-
-		secondCommerceOrder = _commerceOrderEngine.checkoutCommerceOrder(
-			secondCommerceOrder, _user.getUserId());
+		secondCommerceOrder = _checkoutCommerceOrder(secondCommerceOrder);
 
 		ordersCountByUser = _getUserOrdersCount(commerceChannelGroupId, true);
 
@@ -703,9 +666,6 @@ public class CommerceOrderTest {
 
 		_commerceOrderLocalService.deleteCommerceOrder(commerceOrder);
 		_commerceOrderLocalService.deleteCommerceOrder(secondCommerceOrder);
-		_commerceAddressLocalService.deleteCommerceAddress(commerceAddress);
-		_commerceAddressLocalService.deleteCommerceAddress(
-			secondCommerceAddress);
 		_accountEntryLocalService.deleteAccountEntry(accountEntry);
 		_accountEntryLocalService.deleteAccountEntry(secondAccountEntry);
 		_organizationLocalService.deleteUserOrganization(
@@ -912,19 +872,7 @@ public class CommerceOrderTest {
 				accountEntry.getAccountEntryId(), _commerceCurrency.getCode(),
 				0);
 
-		CommerceAddress commerceAddress = _addAddressToAccount(
-			accountEntry.getAccountEntryId());
-
-		commerceOrder.setBillingAddressId(
-			commerceAddress.getCommerceAddressId());
-		commerceOrder.setShippingAddressId(
-			commerceAddress.getCommerceAddressId());
-
-		commerceOrder = _commerceOrderLocalService.updateCommerceOrder(
-			commerceOrder);
-
-		commerceOrder = _commerceOrderEngine.checkoutCommerceOrder(
-			commerceOrder, _user.getUserId());
+		commerceOrder = _checkoutCommerceOrder(commerceOrder);
 
 		int ordersCountByAccountId =
 			_commerceOrderService.getPlacedCommerceOrdersCount(
@@ -1093,7 +1041,30 @@ public class CommerceOrderTest {
 	@Rule
 	public FrutillaRule frutillaRule = new FrutillaRule();
 
-	private CommerceAddress _addAddressToAccount(long commerceAccountId)
+	private Role _addSalesAgentRole() throws Exception {
+		Role role = _roleLocalService.addRole(
+			RandomTestUtil.randomString(), _user.getUserId(), null, 0,
+			"Sales Agent",
+			HashMapBuilder.put(
+				_serviceContext.getLocale(), "Sales Agent"
+			).build(),
+			null, 1, null, _serviceContext);
+
+		_resourcePermissionLocalService.addResourcePermission(
+			_serviceContext.getCompanyId(), Organization.class.getName(), 1,
+			String.valueOf(role.getCompanyId()), role.getRoleId(),
+			"MANAGE_AVAILABLE_ACCOUNTS");
+
+		_resourcePermissionLocalService.addResourcePermission(
+			_serviceContext.getCompanyId(),
+			"com.liferay.account.model.AccountEntry", 1,
+			String.valueOf(role.getCompanyId()), role.getRoleId(),
+			"MANAGE_ORGANIZATIONS");
+
+		return role;
+	}
+
+	private CommerceOrder _checkoutCommerceOrder(CommerceOrder commerceOrder)
 		throws Exception {
 
 		_country = _countryLocalService.fetchCountryByNumber(
@@ -1116,38 +1087,28 @@ public class CommerceOrderTest {
 				_country.getCountryId(), "ZZ");
 		}
 
-		return _commerceAddressLocalService.addCommerceAddress(
-			StringPool.BLANK, AccountEntry.class.getName(), commerceAccountId,
-			_country.getCountryId(), _region.getRegionId(),
-			RandomTestUtil.randomString(), RandomTestUtil.randomString(),
-			RandomTestUtil.randomString(), RandomTestUtil.randomString(),
-			RandomTestUtil.randomString(), RandomTestUtil.randomString(),
-			RandomTestUtil.randomString(), StringPool.BLANK,
-			CommerceAddressConstants.ADDRESS_TYPE_BILLING_AND_SHIPPING,
-			String.valueOf(30133), _serviceContext);
-	}
+		CommerceAddress commerceAddress =
+			_commerceAddressLocalService.addCommerceAddress(
+				StringPool.BLANK, AccountEntry.class.getName(),
+				commerceOrder.getCommerceAccountId(), _country.getCountryId(),
+				_region.getRegionId(), RandomTestUtil.randomString(),
+				RandomTestUtil.randomString(), RandomTestUtil.randomString(),
+				RandomTestUtil.randomString(), RandomTestUtil.randomString(),
+				RandomTestUtil.randomString(), RandomTestUtil.randomString(),
+				StringPool.BLANK,
+				CommerceAddressConstants.ADDRESS_TYPE_BILLING_AND_SHIPPING,
+				String.valueOf(30133), _serviceContext);
 
-	private Role _addSalesAgentRole() throws Exception {
-		Role role = _roleLocalService.addRole(
-			RandomTestUtil.randomString(), _user.getUserId(), null, 0,
-			"Sales Agent",
-			HashMapBuilder.put(
-				_serviceContext.getLocale(), "Sales Agent"
-			).build(),
-			null, 1, null, _serviceContext);
+		commerceOrder.setBillingAddressId(
+			commerceAddress.getCommerceAddressId());
+		commerceOrder.setShippingAddressId(
+			commerceAddress.getCommerceAddressId());
 
-		_resourcePermissionLocalService.addResourcePermission(
-			_serviceContext.getCompanyId(), Organization.class.getName(), 1,
-			String.valueOf(role.getCompanyId()), role.getRoleId(),
-			"MANAGE_AVAILABLE_ACCOUNTS");
+		commerceOrder = _commerceOrderLocalService.updateCommerceOrder(
+			commerceOrder);
 
-		_resourcePermissionLocalService.addResourcePermission(
-			_serviceContext.getCompanyId(),
-			"com.liferay.account.model.AccountEntry", 1,
-			String.valueOf(role.getCompanyId()), role.getRoleId(),
-			"MANAGE_ORGANIZATIONS");
-
-		return role;
+		return _commerceOrderEngine.checkoutCommerceOrder(
+			commerceOrder, _user.getUserId());
 	}
 
 	private List<CommerceOrder> _getUserOrders(long groupId, boolean negate)
