@@ -27,13 +27,17 @@ import com.liferay.headless.commerce.admin.catalog.client.dto.v1_0.Sku;
 import com.liferay.headless.commerce.admin.catalog.client.dto.v1_0.SkuOption;
 import com.liferay.headless.commerce.admin.catalog.client.dto.v1_0.SkuUnitOfMeasure;
 import com.liferay.headless.commerce.admin.catalog.client.dto.v1_0.SkuVirtualSettings;
+import com.liferay.headless.commerce.admin.catalog.client.pagination.Page;
+import com.liferay.headless.commerce.admin.catalog.client.pagination.Pagination;
 import com.liferay.headless.commerce.admin.catalog.client.resource.v1_0.SkuResource;
 import com.liferay.headless.commerce.core.util.LanguageUtils;
 import com.liferay.journal.constants.JournalFolderConstants;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.service.JournalArticleLocalService;
 import com.liferay.journal.test.util.JournalTestUtil;
+import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.lang.SafeCloseable;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
@@ -120,6 +124,14 @@ public class SkuResourceTest extends BaseSkuResourceTestCase {
 		}
 	}
 
+	@Override
+	@Test
+	public void testGetProductIdSkusPage() throws Exception {
+		super.testGetProductIdSkusPage();
+
+		_testGetProductIdSkusPageWithDeletedCPDefinitionOptionRel();
+	}
+
 	@Ignore
 	@Override
 	@Test
@@ -154,8 +166,8 @@ public class SkuResourceTest extends BaseSkuResourceTestCase {
 		super.testPatchSku();
 
 		_testPatchSkuExternalReferenceCode();
-		_testPatchSkuWithReplacementSku();
 		_testPatchSkuWithPricing();
+		_testPatchSkuWithReplacementSku();
 		_testPatchSkuWithShipping();
 		_testPatchSkuWithUnitOfMeasure();
 	}
@@ -404,6 +416,43 @@ public class SkuResourceTest extends BaseSkuResourceTestCase {
 		return sku;
 	}
 
+	private void _testGetProductIdSkusPageWithDeletedCPDefinitionOptionRel()
+		throws Exception {
+
+		CPDefinitionOptionRel cpDefinitionOptionRel =
+			CPTestUtil.addCPDefinitionOptionRel(
+				testGroup.getGroupId(), _cpDefinition.getCPDefinitionId(), true,
+				2);
+
+		List<CPInstance> cpInstances = _cpInstanceLocalService.buildCPInstances(
+			_cpDefinition.getCPDefinitionId(),
+			ServiceContextTestUtil.getServiceContext(
+				_cpDefinition.getGroupId()));
+
+		Assert.assertEquals(cpInstances.toString(), 2, cpInstances.size());
+
+		_cpDefinitionOptionRelLocalService.deleteCPDefinitionOptionRel(
+			cpDefinitionOptionRel);
+
+		Page<Sku> page = skuResource.getProductIdSkusPage(
+			_cProduct.getCProductId(), Pagination.of(1, 20));
+
+		List<Long> skuIds = TransformUtil.transform(
+			page.getItems(), Sku::getId);
+
+		for (CPInstance cpInstance : cpInstances) {
+			Assert.assertTrue(
+				skuIds.toString(),
+				skuIds.contains(cpInstance.getCPInstanceId()));
+
+			CPInstance curCPInstance = _cpInstanceLocalService.getCPInstance(
+				cpInstance.getCPInstanceId());
+
+			Assert.assertEquals(
+				WorkflowConstants.STATUS_INACTIVE, curCPInstance.getStatus());
+		}
+	}
+
 	private void _testPatchSkuExternalReferenceCode() throws Exception {
 		Sku sku = testPatchSku_addSku();
 
@@ -419,6 +468,42 @@ public class SkuResourceTest extends BaseSkuResourceTestCase {
 			patchSku.getExternalReferenceCode(),
 			randomSku.getExternalReferenceCode());
 		assertValid(patchSku);
+
+		patchSku = skuResource.patchSku(
+			sku.getId(),
+			new Sku() {
+				{
+					externalReferenceCode = StringPool.BLANK;
+				}
+			});
+
+		Assert.assertEquals(
+			randomSku.getExternalReferenceCode(),
+			patchSku.getExternalReferenceCode());
+
+		Sku getSku = skuResource.getSku(sku.getId());
+
+		Assert.assertEquals(
+			randomSku.getExternalReferenceCode(),
+			getSku.getExternalReferenceCode());
+
+		patchSku = skuResource.patchSku(
+			sku.getId(),
+			new Sku() {
+				{
+					externalReferenceCode = StringPool.SPACE;
+				}
+			});
+
+		Assert.assertEquals(
+			randomSku.getExternalReferenceCode(),
+			patchSku.getExternalReferenceCode());
+
+		getSku = skuResource.getSku(sku.getId());
+
+		Assert.assertEquals(
+			randomSku.getExternalReferenceCode(),
+			getSku.getExternalReferenceCode());
 	}
 
 	private void _testPatchSkuWithPricing() throws Exception {
