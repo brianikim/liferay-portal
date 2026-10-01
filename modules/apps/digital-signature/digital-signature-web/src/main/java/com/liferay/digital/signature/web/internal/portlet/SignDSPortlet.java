@@ -12,6 +12,7 @@ import com.liferay.digital.signature.manager.DSRecipientManager;
 import com.liferay.digital.signature.manager.DSRecipientViewDefinitionManager;
 import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.digital.signature.model.DSRecipientViewDefinition;
+import com.liferay.digital.signature.request.DSRequestManager;
 import com.liferay.digital.signature.web.internal.constants.DigitalSignatureWebKeys;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.json.JSONUtil;
@@ -162,6 +163,10 @@ public class SignDSPortlet extends MVCPortlet {
 			return;
 		}
 
+		_dsRequestManager.updateDSRequest(
+			themeDisplay.getCompanyId(), themeDisplay.getScopeGroupId(),
+			dsEnvelopeId);
+
 		String status = dsRecipient.getStatus();
 
 		renderRequest.setAttribute(
@@ -237,6 +242,9 @@ public class SignDSPortlet extends MVCPortlet {
 
 	@Reference
 	private DSRecipientViewDefinitionManager _dsRecipientViewDefinitionManager;
+
+	@Reference
+	private DSRequestManager _dsRequestManager;
 
 	@Reference
 	private Portal _portal;

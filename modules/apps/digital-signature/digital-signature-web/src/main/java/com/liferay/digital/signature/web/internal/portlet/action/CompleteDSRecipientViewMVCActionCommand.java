@@ -9,6 +9,7 @@ import com.liferay.digital.signature.constants.DigitalSignaturePortletKeys;
 import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
+import com.liferay.digital.signature.request.DSRequestManager;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -107,6 +108,8 @@ public class CompleteDSRecipientViewMVCActionCommand
 		long groupId = themeDisplay.getScopeGroupId();
 
 		try {
+			_dsRequestManager.updateDSRequest(companyId, groupId, dsEnvelopeId);
+
 			DSRecipient dsRecipient = _getSignedDSRecipient(
 				_dsEnvelopeManager.getDSEnvelope(
 					companyId, groupId, dsEnvelopeId,
@@ -137,6 +140,9 @@ public class CompleteDSRecipientViewMVCActionCommand
 
 	@Reference
 	private DSEnvelopeManager _dsEnvelopeManager;
+
+	@Reference
+	private DSRequestManager _dsRequestManager;
 
 	@Reference
 	private Language _language;

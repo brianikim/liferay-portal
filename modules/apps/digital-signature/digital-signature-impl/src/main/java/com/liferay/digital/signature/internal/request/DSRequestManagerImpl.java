@@ -175,6 +175,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 							).put(
 								"sentDate",
 								_toDate(dsRecipient.getSentLocalDateTime())
+							).put(
+								"signingOrder", dsRecipient.getRoutingOrder()
 							).build(),
 							serviceContext);
 					}
@@ -357,7 +359,9 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			return false;
 		}
 
-		if (digitalSignatureConfiguration.enabled()) {
+		if (digitalSignatureConfiguration.enabled() &&
+			digitalSignatureConfiguration.enableEmbeddedView()) {
+
 			return true;
 		}
 
