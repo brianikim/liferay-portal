@@ -16,6 +16,7 @@ import {clickAndExpectToBeVisible} from '../../../../utils/clickAndExpectToBeVis
 import getGlobalSiteId from '../../../../utils/getGlobalSiteId';
 import getRandomString from '../../../../utils/getRandomString';
 import {waitForAlert} from '../../../../utils/waitForAlert';
+import {apiStorefrontSetUp} from '../../utils/commerce';
 
 export const test = mergeTests(
 	dataApiHelpersTest,
@@ -1503,5 +1504,91 @@ test(
 		await expect(
 			page.getByRole('button', {exact: true, name: 'Set as Not Visible'})
 		).toHaveCount(0);
+	}
+);
+
+test(
+	'An availability estimate is shown on the product details page of an unavailable product',
+	{tag: '@LPD-106244-Grouped-8'},
+	async ({
+		apiHelpers,
+		commerceAdminAvailabilityEstimatesPage,
+		commerceAdminProductDetailsConfigurationPage,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductPage,
+		page,
+		productDetailsPage,
+	}) => {
+		const {product, site} = await apiStorefrontSetUp(apiHelpers, [
+			{
+				title: getRandomString(),
+				widgetName:
+					'com_liferay_commerce_product_content_web_internal_portlet_CPContentPortlet',
+			},
+		]);
+
+		const title = getRandomString();
+
+		let availabilityEstimateAdded = false;
+
+		try {
+			await test.step('Add an availability estimate', async () => {
+				await commerceAdminAvailabilityEstimatesPage.goto();
+
+				await commerceAdminAvailabilityEstimatesPage.addAvailabilityEstimate(
+					title
+				);
+
+				availabilityEstimateAdded = true;
+
+				await expect(
+					commerceAdminAvailabilityEstimatesPage.availabilityEstimateLink(
+						title
+					)
+				).toBeVisible();
+			});
+
+			await test.step('Select the availability estimate in the product configuration', async () => {
+				await commerceAdminProductPage.gotoProduct(
+					product.name['en_US']
+				);
+
+				await commerceAdminProductDetailsPage.goToProductConfiguration();
+
+				await commerceAdminProductDetailsConfigurationPage.availabilityEstimateSelect.selectOption(
+					{label: title}
+				);
+				await commerceAdminProductDetailsConfigurationPage.publishLink.click();
+
+				await waitForAlert(page);
+
+				await page.reload();
+
+				await expect(
+					commerceAdminProductDetailsConfigurationPage.availabilityEstimateSelect.locator(
+						'option:checked'
+					)
+				).toHaveText(title);
+			});
+
+			await test.step('View the availability estimate on the product details page', async () => {
+				await page.goto(
+					`/web${site.friendlyUrlPath}/p/${product.urls['en_US']}`
+				);
+
+				await expect(
+					productDetailsPage.availabilityEstimate
+				).toHaveText(title);
+			});
+		}
+		finally {
+			if (availabilityEstimateAdded) {
+				await commerceAdminAvailabilityEstimatesPage.goto();
+
+				await commerceAdminAvailabilityEstimatesPage.deleteAvailabilityEstimate(
+					title
+				);
+			}
+		}
 	}
 );
