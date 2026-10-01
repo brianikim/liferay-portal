@@ -1562,3 +1562,89 @@ test(
 		).toContainText('€ 0.00');
 	}
 );
+
+for (const subscriptionName of [
+	'Delivery Subscription',
+	'Payment Subscription',
+] as const) {
+	test(
+		`The ${subscriptionName} length shows the subscription type in singular or plural`,
+		{tag: ['@COMMERCE-9744', '@COMMERCE-9798', '@LPD-106244-Grouped-4']},
+		async ({
+			apiHelpers,
+			commerceAdminProductDetailsPage,
+			commerceAdminProductPage,
+			page,
+		}) => {
+			const catalog =
+				await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+			const product =
+				await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+					catalogId: catalog.id,
+				});
+
+			await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+			await commerceAdminProductDetailsPage.productSubscriptionLink.click();
+
+			await commerceAdminProductDetailsPage
+				.subscriptionEnabledLabel(subscriptionName)
+				.click();
+
+			const subscriptionLengthInput =
+				commerceAdminProductDetailsPage.subscriptionLengthInput(
+					subscriptionName
+				);
+			const subscriptionLengthSuffix =
+				commerceAdminProductDetailsPage.subscriptionLengthSuffix(
+					subscriptionName
+				);
+			const subscriptionTypeSelect =
+				commerceAdminProductDetailsPage.subscriptionTypeSelect(
+					subscriptionName
+				);
+
+			await expect(
+				subscriptionTypeSelect.locator('option:checked')
+			).toHaveText('Day');
+			await expect(subscriptionLengthInput).toHaveValue('1');
+			await expect(subscriptionLengthSuffix).toHaveText('Day');
+
+			for (const subscriptionType of ['Week', 'Month', 'Year']) {
+				await subscriptionTypeSelect.selectOption({
+					label: subscriptionType,
+				});
+
+				await commerceAdminProductDetailsPage.publishLink.click();
+
+				await waitForAlert(page);
+
+				await expect(subscriptionLengthSuffix).toHaveText(
+					subscriptionType
+				);
+			}
+
+			await subscriptionLengthInput.fill('2');
+
+			for (const {subscriptionType, subscriptionTypeSuffix} of [
+				{subscriptionType: 'Day', subscriptionTypeSuffix: 'Days'},
+				{subscriptionType: 'Week', subscriptionTypeSuffix: 'Weeks'},
+				{subscriptionType: 'Month', subscriptionTypeSuffix: 'Months'},
+				{subscriptionType: 'Year', subscriptionTypeSuffix: 'Years'},
+			]) {
+				await subscriptionTypeSelect.selectOption({
+					label: subscriptionType,
+				});
+
+				await commerceAdminProductDetailsPage.publishLink.click();
+
+				await waitForAlert(page);
+
+				await expect(subscriptionLengthSuffix).toHaveText(
+					subscriptionTypeSuffix
+				);
+			}
+		}
+	);
+}
