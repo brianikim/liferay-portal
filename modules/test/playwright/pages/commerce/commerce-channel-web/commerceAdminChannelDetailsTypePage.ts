@@ -9,6 +9,7 @@ import {searchTableRowByValue} from '../commerceDNDTablePage';
 
 export class CommerceAdminChannelDetailsTypePage {
 	readonly page: Page;
+	readonly typeDescription: Locator;
 	readonly typeLinkTab: Locator;
 	readonly typeTable: Locator;
 	readonly typeTableRow: (
@@ -21,6 +22,9 @@ export class CommerceAdminChannelDetailsTypePage {
 
 	constructor(page: Page) {
 		this.page = page;
+		this.typeDescription = page.locator(
+			'div:has(> header:has-text("Type")) > .description'
+		);
 		this.typeLinkTab = page.getByRole('link', {name: 'Type'});
 		this.typeTable = page
 			.frameLocator('iframe[title="Select Site"]')
