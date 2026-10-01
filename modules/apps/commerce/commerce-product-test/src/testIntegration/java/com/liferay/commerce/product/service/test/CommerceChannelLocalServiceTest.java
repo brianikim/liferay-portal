@@ -15,6 +15,7 @@ import com.liferay.commerce.product.exception.NoSuchChannelException;
 import com.liferay.commerce.product.model.CommerceChannel;
 import com.liferay.commerce.product.service.CommerceChannelLocalService;
 import com.liferay.petra.lang.SafeCloseable;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.lazy.referencing.LazyReferencingThreadLocal;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.GroupConstants;
@@ -31,6 +32,9 @@ import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
+
+import java.util.Collections;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -140,6 +144,36 @@ public class CommerceChannelLocalServiceTest {
 
 		Assert.assertNotEquals(
 			WorkflowConstants.STATUS_EMPTY, commerceChannel.getStatus());
+	}
+
+	@Test
+	public void testSearch() throws Exception {
+		CommerceChannel commerceChannel =
+			_commerceChannelLocalService.addCommerceChannel(
+				null, AccountConstants.ACCOUNT_ENTRY_ID_DEFAULT,
+				_group.getGroupId(), RandomTestUtil.randomString(),
+				CommerceChannelConstants.CHANNEL_TYPE_SITE, null,
+				_commerceCurrency.getCode(), _serviceContext);
+
+		_commerceChannelLocalService.addCommerceChannel(
+			null, AccountConstants.ACCOUNT_ENTRY_ID_DEFAULT,
+			_group.getGroupId(), RandomTestUtil.randomString(),
+			CommerceChannelConstants.CHANNEL_TYPE_SITE, null,
+			_commerceCurrency.getCode(), _serviceContext);
+
+		Assert.assertEquals(
+			Collections.singletonList(commerceChannel),
+			_commerceChannelLocalService.search(
+				_serviceContext.getCompanyId(), commerceChannel.getName(),
+				QueryUtil.ALL_POS, QueryUtil.ALL_POS, null));
+
+		List<CommerceChannel> commerceChannels =
+			_commerceChannelLocalService.search(
+				_serviceContext.getCompanyId(), RandomTestUtil.randomString(),
+				QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
+
+		Assert.assertTrue(
+			commerceChannels.toString(), commerceChannels.isEmpty());
 	}
 
 	@Test
