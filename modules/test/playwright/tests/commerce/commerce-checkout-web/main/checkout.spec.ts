@@ -1139,11 +1139,12 @@ test(
 
 test(
 	'Create a full Checkout flow functional test for stable run 1',
-	{tag: ['@LPD-56215']},
+	{tag: ['@LPD-56215', '@LPD-106244-Grouped-15']},
 	async ({
 		apiHelpers,
 		commerceAdminCatalogsPage,
 		commerceAdminChannelDetailsPage,
+		commerceAdminChannelDetailsTypePage,
 		commerceAdminChannelsPage,
 		commerceAdminProductDetailsPage,
 		commerceAdminProductDetailsSkusPage,
@@ -1219,6 +1220,23 @@ test(
 			);
 
 			apiHelpers.data.push({id: channel.id, type: 'channel'});
+
+			await page.reload();
+
+			await expect(
+				commerceAdminChannelDetailsPage.channelNameInput
+			).toHaveValue(channel.name);
+			await expect(
+				commerceAdminChannelDetailsPage.channelCurrencySelect.locator(
+					'option:checked'
+				)
+			).toHaveText('US Dollar');
+
+			await commerceAdminChannelDetailsTypePage.typeLinkTab.click();
+
+			await expect(
+				commerceAdminChannelDetailsTypePage.typeDescription
+			).toHaveText('Site');
 		});
 
 		await test.step('Create a Warehouse', async () => {
