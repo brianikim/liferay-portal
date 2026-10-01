@@ -103,6 +103,7 @@ public class CPDefinitionHelperTest {
 			"The results will contain only the products matching the keywords"
 		);
 
+		_testSearchWithAssetCategoryNames();
 		_testSearchWithPartialSku();
 		_testSearchWithSku();
 	}
@@ -287,6 +288,34 @@ public class CPDefinitionHelperTest {
 			TransformUtil.transform(
 				cpDataSourceResult.getCPCatalogEntries(),
 				cpCatalogEntry -> cpCatalogEntry.getCPDefinitionId()));
+	}
+
+	private void _testSearchWithAssetCategoryNames() throws Exception {
+		CPInstance[] cpInstances = _addCPInstances(
+			_commerceCatalog.getGroupId(), 3);
+
+		AssetCategory assetCategory1 = CPTestUtil.addCategoryToCPDefinitions(
+			_commerceCatalog.getGroupId(), cpInstances[0].getCPDefinitionId());
+		AssetCategory assetCategory2 = CPTestUtil.addCategoryToCPDefinitions(
+			_commerceCatalog.getGroupId(), cpInstances[1].getCPDefinitionId());
+
+		Assert.assertEquals(
+			Collections.singleton(cpInstances[0].getCPDefinitionId()),
+			_searchCPDefinitionIds(assetCategory1.getName()));
+		Assert.assertEquals(
+			SetUtil.fromArray(
+				new long[] {
+					cpInstances[0].getCPDefinitionId(),
+					cpInstances[1].getCPDefinitionId()
+				}),
+			_searchCPDefinitionIds(
+				assetCategory1.getName() + StringPool.SPACE +
+					assetCategory2.getName()));
+
+		AssetCategoryLocalServiceUtil.deleteCategory(
+			assetCategory1.getCategoryId());
+		AssetCategoryLocalServiceUtil.deleteCategory(
+			assetCategory2.getCategoryId());
 	}
 
 	private void _testSearchWithPartialSku() throws Exception {
