@@ -4,12 +4,17 @@
  */
 
 import {expect, mergeTests} from '@playwright/test';
+import {readFileSync} from 'fs';
+import path from 'path';
 
 import {apiHelpersTest} from '../../../../fixtures/apiHelpersTest';
 import {commercePagesTest} from '../../../../fixtures/commercePagesTest';
 import {dataApiHelpersTest} from '../../../../fixtures/dataApiHelpersTest';
 import {globalMenuPagesTest} from '../../../../fixtures/globalMenuPagesTest';
 import {loginTest} from '../../../../fixtures/loginTest';
+import {clickAndExpectToBeVisible} from '../../../../utils/clickAndExpectToBeVisible';
+import createTempFile from '../../../../utils/createTempFile';
+import getRandomString from '../../../../utils/getRandomString';
 import {waitForAlert} from '../../../../utils/waitForAlert';
 
 export const test = mergeTests(
@@ -89,3 +94,113 @@ test('LPD-21637 Virtual item details section visible for product and sku', async
 			.getByText('http://test-virtual-product-sku-details-section.com')
 	).toBeVisible();
 });
+
+test(
+	'Configure the file entry, maximum downloads and sample of a virtual product',
+	{tag: ['@COMMERCE-6751', '@COMMERCE-9800', '@LPD-106244-Grouped-7']},
+	async ({apiHelpers, commerceAdminProductPage, page}) => {
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		const virtualProduct =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				productType: 'virtual',
+			});
+
+		const fileContent = readFileSync(
+			path.join(__dirname, '/dependencies/attachment.txt')
+		);
+		const fileEntryName = `${getRandomString()}.txt`;
+		const sampleFileName = `${getRandomString()}.txt`;
+
+		await test.step('Configure the file entry, maximum downloads and sample', async () => {
+			await commerceAdminProductPage.gotoProduct(
+				virtualProduct.name.en_US
+			);
+
+			await commerceAdminProductPage.productVirtualLink.click();
+			await commerceAdminProductPage.addVirtualProductFileEntryButton.click();
+			await commerceAdminProductPage.productVirtualFileEntrySelectButton.click();
+			await commerceAdminProductPage.productVirtualFileEntryItemSelectorFileInput.setInputFiles(
+				createTempFile(fileEntryName, fileContent)
+			);
+			await commerceAdminProductPage.productVirtualFileEntryItemSelectorAddButton.click();
+			await commerceAdminProductPage.productVirtualFileEntrySaveButton.click();
+			await commerceAdminProductPage.productVirtualFileEntryCancelButton.click();
+
+			await expect(
+				commerceAdminProductPage.productVirtualFileEntry(fileEntryName)
+			).toBeVisible();
+
+			await clickAndExpectToBeVisible({
+				target: commerceAdminProductPage.productVirtualMaxUsagesInput,
+				trigger:
+					commerceAdminProductPage.productVirtualBaseInformationLink,
+			});
+
+			await commerceAdminProductPage.productVirtualMaxUsagesInput.fill(
+				'10'
+			);
+
+			await clickAndExpectToBeVisible({
+				target: commerceAdminProductPage.productVirtualEnableSampleToggle,
+				trigger: commerceAdminProductPage.productVirtualSampleLink,
+			});
+
+			await commerceAdminProductPage.productVirtualEnableSampleToggle.check();
+			await commerceAdminProductPage.productVirtualSelectSampleFileButton.click();
+			await commerceAdminProductPage.productVirtualSampleItemSelectorFileInput.setInputFiles(
+				createTempFile(sampleFileName, fileContent)
+			);
+			await commerceAdminProductPage.productVirtualSampleItemSelectorAddButton.click();
+			await commerceAdminProductPage.productVirtualSaveButton.click();
+
+			await waitForAlert(page);
+
+			await page.reload();
+
+			await expect(
+				commerceAdminProductPage.productVirtualFileEntry(fileEntryName)
+			).toBeVisible();
+			await expect(
+				commerceAdminProductPage.productVirtualEnableSampleToggle
+			).toBeChecked();
+			await expect(
+				commerceAdminProductPage.productVirtualMaxUsagesInput
+			).toHaveValue('10');
+			await expect(
+				commerceAdminProductPage.productVirtualSampleFileEntryNameInput
+			).toContainText(sampleFileName);
+		});
+
+		await test.step('Replace the sample file with a sample file URL', async () => {
+			await clickAndExpectToBeVisible({
+				target: commerceAdminProductPage.productVirtualSampleFileEntryRemoveButton,
+				trigger: commerceAdminProductPage.productVirtualSampleLink,
+			});
+
+			await commerceAdminProductPage.productVirtualSampleFileEntryRemoveButton.click();
+
+			await expect(
+				commerceAdminProductPage.productVirtualSampleFileEntryNameInput
+			).not.toContainText(sampleFileName);
+
+			await commerceAdminProductPage.productVirtualSampleFileURLInput.fill(
+				'http://www.liferay.com/sample'
+			);
+			await commerceAdminProductPage.productVirtualSaveButton.click();
+
+			await waitForAlert(page);
+
+			await page.reload();
+
+			await expect(
+				commerceAdminProductPage.productVirtualSampleFileEntryNameInput
+			).not.toContainText(sampleFileName);
+			await expect(
+				commerceAdminProductPage.productVirtualSampleFileURLInput
+			).toHaveValue('http://www.liferay.com/sample');
+		});
+	}
+);
