@@ -509,6 +509,8 @@ public class CPDefinitionOptionRelLocalServiceTest {
 
 		Assert.assertTrue(
 			Validator.isNull(cpDefinitionOptionRel.getPriceType()));
+
+		_testUpdateCPDefinitionOptionRelPriceTypeWithDeletedOptionValue();
 	}
 
 	@Test
@@ -653,6 +655,54 @@ public class CPDefinitionOptionRelLocalServiceTest {
 			Assert.assertEquals(
 				newPriceType, cpDefinitionOptionRel.getPriceType());
 		}
+	}
+
+	private void _testUpdateCPDefinitionOptionRelPriceTypeWithDeletedOptionValue()
+		throws Exception {
+
+		CPDefinition cpDefinition = CPTestUtil.addCPDefinition(
+			_commerceCatalog.getGroupId());
+
+		CPDefinitionOptionRel cpDefinitionOptionRel =
+			CPTestUtil.addCPDefinitionOptionRel(
+				_commerceCatalog.getGroupId(), cpDefinition.getCPDefinitionId(),
+				true, 1);
+
+		_cpDefinitionOptionRels.add(cpDefinitionOptionRel);
+
+		Assert.assertTrue(
+			Validator.isNull(cpDefinitionOptionRel.getPriceType()));
+
+		cpDefinitionOptionRel = _updatePriceType(
+			cpDefinitionOptionRel,
+			CPConstants.PRODUCT_OPTION_PRICE_TYPE_STATIC);
+
+		Assert.assertEquals(
+			CPConstants.PRODUCT_OPTION_PRICE_TYPE_STATIC,
+			cpDefinitionOptionRel.getPriceType());
+
+		List<CPDefinitionOptionValueRel> cpDefinitionOptionValueRels =
+			cpDefinitionOptionRel.getCPDefinitionOptionValueRels();
+
+		_cpDefinitionOptionValueRelLocalService.
+			deleteCPDefinitionOptionValueRel(
+				cpDefinitionOptionValueRels.get(0));
+
+		cpDefinitionOptionRel = _updatePriceType(
+			cpDefinitionOptionRel,
+			CPConstants.PRODUCT_OPTION_PRICE_TYPE_DYNAMIC);
+
+		Assert.assertEquals(
+			CPConstants.PRODUCT_OPTION_PRICE_TYPE_DYNAMIC,
+			cpDefinitionOptionRel.getPriceType());
+
+		cpDefinitionOptionRel = _updatePriceType(
+			cpDefinitionOptionRel,
+			CPConstants.PRODUCT_OPTION_PRICE_TYPE_STATIC);
+
+		Assert.assertEquals(
+			CPConstants.PRODUCT_OPTION_PRICE_TYPE_STATIC,
+			cpDefinitionOptionRel.getPriceType());
 	}
 
 	private CPDefinitionOptionRel _updatePriceType(
