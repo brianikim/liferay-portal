@@ -217,3 +217,93 @@ test('LPD-30466 Verify users without edit permission cannot click on channel nam
 		await performLogin(page, 'test');
 	}
 });
+
+test(
+	'Payment method eligibility can be set to a payment term and back to no payment terms',
+	{tag: ['@LPD-106244-Grouped-15']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelDetailsPage,
+		commerceAdminChannelsPage,
+		page,
+		site,
+	}) => {
+		const tableName = 'Payment Methods';
+
+		const channel =
+			await apiHelpers.headlessCommerceAdminChannel.postChannel({
+				siteGroupId: site.id,
+			});
+
+		const paymentTerm =
+			await apiHelpers.headlessCommerceAdminOrder.postTerm({
+				type: 'payment-terms',
+			});
+
+		await commerceAdminChannelsPage.goto();
+
+		await (
+			await commerceAdminChannelsPage.channelsTableRowLink(channel.name)
+		).click();
+
+		await commerceAdminChannelDetailsPage.activateChannelConfiguration(
+			'PayPal',
+			tableName
+		);
+
+		const paymentTermCell =
+			await commerceAdminChannelDetailsPage.eligibilityEntryCell(
+				false,
+				paymentTerm.name,
+				tableName
+			);
+
+		for (const {eligibilityOption, paymentTermCount, paymentTermLabel} of [
+			{
+				eligibilityOption: 'Specific Payment Terms',
+				paymentTermCount: 1,
+				paymentTermLabel: paymentTerm.label['en_US'],
+			},
+			{
+				eligibilityOption: 'No Payment Terms',
+				paymentTermCount: 0,
+				paymentTermLabel: '',
+			},
+		]) {
+			await page.reload();
+
+			await (
+				await commerceAdminChannelDetailsPage.generalCommerceAdminChannelTableLink(
+					'PayPal'
+				)
+			).click();
+
+			await commerceAdminChannelDetailsPage.setEntryEligibility(
+				eligibilityOption,
+				paymentTermLabel,
+				tableName
+			);
+
+			await (
+				await commerceAdminChannelDetailsPage.generalCommerceAdminChannelTableLink(
+					'PayPal'
+				)
+			).click();
+			await (
+				await commerceAdminChannelDetailsPage.eligibilityTab(
+					false,
+					tableName
+				)
+			).click();
+
+			await expect(paymentTermCell).toHaveCount(paymentTermCount);
+
+			await (
+				await commerceAdminChannelDetailsPage.closeSidePanelFrame(
+					false,
+					tableName
+				)
+			).click();
+		}
+	}
+);
