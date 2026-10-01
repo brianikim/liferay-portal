@@ -17,10 +17,14 @@ import {
 	performLoginViaApi,
 	performLogout,
 } from '../../../../utils/performLogin';
+import {waitForAlert} from '../../../../utils/waitForAlert';
 import getFragmentDefinition from '../../../layout-content-page-editor-web/main/utils/getFragmentDefinition';
 import getPageDefinition from '../../../layout-content-page-editor-web/main/utils/getPageDefinition';
 import getWidgetDefinition from '../../../layout-content-page-editor-web/main/utils/getWidgetDefinition';
-import {createAccountWithBuyerUser} from '../../utils/commerce';
+import {
+	apiStorefrontSetUp,
+	createAccountWithBuyerUser,
+} from '../../utils/commerce';
 
 export const test = mergeTests(
 	commercePagesTest,
@@ -282,6 +286,94 @@ test(
 				);
 			}
 		});
+	}
+);
+
+test(
+	'Marking a base promotion or base price list entry as Price on Application disables its price settings and applies only the price list to the storefront',
+	{tag: ['@COMMERCE-11683', '@COMMERCE-11707', '@LPD-106244-Grouped-5']},
+	async ({
+		apiHelpers,
+		commerceAdminPriceListDetailsPage,
+		commerceAdminPriceListsPage,
+		commerceAdminPromotionsPage,
+		commerceThemeMiniumCatalogPage,
+		page,
+	}) => {
+		const {catalog, product, site} = await apiStorefrontSetUp(apiHelpers, [
+			{
+				title: 'Catalog',
+				widgetName:
+					'com_liferay_commerce_product_content_search_web_internal_portlet_CPSearchResultsPortlet',
+			},
+		]);
+
+		const productName = product.name['en_US'];
+		const skuName = product.skus[0].sku;
+
+		const priceOnApplicationLabel =
+			commerceThemeMiniumCatalogPage.productCardFragmentPriceOnApplicationLabel(
+				commerceThemeMiniumCatalogPage.productCard(productName)
+			);
+		const productCardPrice =
+			commerceThemeMiniumCatalogPage.productCardPrice(
+				productName,
+				'$ 10.00'
+			);
+
+		for (const {
+			commerceAdminPage,
+			hiddenLocator,
+			priceListName,
+			visibleLocator,
+		} of [
+			{
+				commerceAdminPage: commerceAdminPromotionsPage,
+				hiddenLocator: priceOnApplicationLabel,
+				priceListName: `${catalog.name} Base Promotion`,
+				visibleLocator: productCardPrice,
+			},
+			{
+				commerceAdminPage: commerceAdminPriceListsPage,
+				hiddenLocator: productCardPrice,
+				priceListName: `${catalog.name} Base Price List`,
+				visibleLocator: priceOnApplicationLabel,
+			},
+		]) {
+			await commerceAdminPage.goto();
+
+			await (
+				await commerceAdminPage.tableRowLink({
+					colIndex: 0,
+					rowValue: priceListName,
+				})
+			).click();
+
+			await commerceAdminPriceListDetailsPage.openSkuEntry(skuName);
+
+			await commerceAdminPriceListDetailsPage.sidePanelPriceOnApplicationToggle.check();
+			await commerceAdminPriceListDetailsPage.sidePanelSaveButton.click();
+
+			await waitForAlert(
+				commerceAdminPriceListDetailsPage.sidePanelFrame
+			);
+
+			await page.reload();
+
+			await commerceAdminPriceListDetailsPage.openSkuEntry(skuName);
+
+			await expect(
+				commerceAdminPriceListDetailsPage.sidePanelPriceOnApplicationToggle
+			).toBeChecked();
+			await expect(
+				commerceAdminPriceListDetailsPage.sidePanelPriceSettingsDisabledFieldset
+			).toBeVisible();
+
+			await page.goto(`/web${site.friendlyUrlPath}/catalog`);
+
+			await expect(visibleLocator).toBeVisible();
+			await expect(hiddenLocator).toBeHidden();
+		}
 	}
 );
 
