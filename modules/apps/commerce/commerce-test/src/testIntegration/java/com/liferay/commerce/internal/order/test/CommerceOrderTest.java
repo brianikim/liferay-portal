@@ -733,6 +733,28 @@ public class CommerceOrderTest {
 
 		Assert.assertEquals(commerceOrder, actualCommerceOrder);
 
+		_commerceOrderLocalService.addCommerceOrder(
+			_user.getUserId(), commerceChannelGroupId,
+			accountEntry.getAccountEntryId(), _commerceCurrency.getCode(), 0);
+
+		String commerceOrderId = String.valueOf(
+			commerceOrder.getCommerceOrderId());
+
+		ordersCountByAccountId =
+			_commerceOrderService.getPendingCommerceOrdersCount(
+				commerceChannelGroupId, accountEntry.getAccountEntryId(),
+				commerceOrderId);
+
+		Assert.assertEquals(1, ordersCountByAccountId);
+
+		commerceOrders = _commerceOrderService.getPendingCommerceOrders(
+			commerceChannelGroupId, accountEntry.getAccountEntryId(),
+			commerceOrderId, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
+
+		Assert.assertEquals(
+			commerceOrders.toString(), 1, commerceOrders.size());
+		Assert.assertEquals(commerceOrder, commerceOrders.get(0));
+
 		_commerceOrderLocalService.deleteCommerceOrders(commerceChannelGroupId);
 		_accountEntryLocalService.deleteAccountEntry(accountEntry);
 	}
@@ -900,6 +922,30 @@ public class CommerceOrderTest {
 		actualCommerceOrder = commerceOrders.get(0);
 
 		Assert.assertEquals(commerceOrder, actualCommerceOrder);
+
+		_checkoutCommerceOrder(
+			_commerceOrderLocalService.addCommerceOrder(
+				_user.getUserId(), commerceChannelGroupId,
+				accountEntry.getAccountEntryId(), _commerceCurrency.getCode(),
+				0));
+
+		String commerceOrderId = String.valueOf(
+			commerceOrder.getCommerceOrderId());
+
+		ordersCountByAccountId =
+			_commerceOrderService.getPlacedCommerceOrdersCount(
+				commerceChannelGroupId, accountEntry.getAccountEntryId(),
+				commerceOrderId);
+
+		Assert.assertEquals(1, ordersCountByAccountId);
+
+		commerceOrders = _commerceOrderService.getPlacedCommerceOrders(
+			commerceChannelGroupId, accountEntry.getAccountEntryId(),
+			commerceOrderId, QueryUtil.ALL_POS, QueryUtil.ALL_POS);
+
+		Assert.assertEquals(
+			commerceOrders.toString(), 1, commerceOrders.size());
+		Assert.assertEquals(commerceOrder, commerceOrders.get(0));
 
 		_commerceOrderLocalService.deleteCommerceOrders(commerceChannelGroupId);
 		_accountEntryLocalService.deleteAccountEntry(accountEntry);
