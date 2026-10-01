@@ -14,10 +14,12 @@ import {CommerceLayoutsPage} from './commerceLayoutsPage';
 
 export class PendingOrdersPage extends CommerceDNDTablePage {
 	readonly approveButton: Locator;
+	readonly cancelButton: Locator;
 	readonly checkoutButton: Locator;
 	readonly deleteMenuItem: Locator;
 	readonly doneButton: Locator;
 	readonly editMenuItem: Locator;
+	readonly emptyResultsMessage: Locator;
 	readonly errorMessageCloseButton: Locator;
 	readonly importFromCSVMenuItem: Locator;
 	readonly importerTypeMenuButton: Locator;
@@ -63,6 +65,10 @@ export class PendingOrdersPage extends CommerceDNDTablePage {
 			exact: true,
 			name: 'Approve',
 		});
+		this.cancelButton = page.getByRole('button', {
+			exact: true,
+			name: 'Cancel',
+		});
 		this.checkoutButton = page.getByText('Checkout');
 		this.doneButton = page.getByRole('button', {
 			exact: true,
@@ -76,6 +82,11 @@ export class PendingOrdersPage extends CommerceDNDTablePage {
 			exact: true,
 			name: 'Edit',
 		});
+		this.emptyResultsMessage = page
+			.locator(
+				'#portlet_com_liferay_commerce_order_content_web_internal_portlet_CommerceOpenOrderContentPortlet'
+			)
+			.getByText('No Results Found');
 		this.errorMessageCloseButton = page.getByRole('button', {
 			exact: true,
 			name: 'Close',
