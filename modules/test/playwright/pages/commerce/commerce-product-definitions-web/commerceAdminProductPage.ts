@@ -41,11 +41,24 @@ export class CommerceAdminProductPage extends CommerceDNDTablePage {
 		end: number,
 		total: number
 	) => Locator;
+	readonly productSkuShippingOverrideTitle: Locator;
+	readonly productSkuSidePanelFrame: FrameLocator;
 	readonly productSkuTableRowLink: (sku: string) => Locator;
+	readonly productSkuVirtualActivationStatusSelect: Locator;
+	readonly productSkuVirtualActivationStatusSelectedOption: Locator;
+	readonly productSkuVirtualBaseInformationButton: Locator;
+	readonly productSkuVirtualDurationInput: Locator;
+	readonly productSkuVirtualEnableSampleToggle: Locator;
+	readonly productSkuVirtualFileEntry: (name: string) => Locator;
 	readonly productSkuVirtualFileEntryCancelButton: Locator;
+	readonly productSkuVirtualFileEntryFrame: FrameLocator;
 	readonly productSkuVirtualFileEntrySaveButton: Locator;
 	readonly productSkuVirtualFileEntryURLInput: Locator;
+	readonly productSkuVirtualMaxUsagesInput: Locator;
 	readonly productSkuVirtualOverrideToggle: Locator;
+	readonly productSkuVirtualSampleButton: Locator;
+	readonly productSkuVirtualSampleFileURLInput: Locator;
+	readonly productSkuVirtualSaveButton: Locator;
 	readonly productSkusLink: Locator;
 	readonly productVersionRow: (
 		productName: string,
@@ -55,10 +68,25 @@ export class CommerceAdminProductPage extends CommerceDNDTablePage {
 		productName: string,
 		status: string
 	) => Locator;
+	readonly productVirtualBaseInformationLink: Locator;
+	readonly productVirtualEnableSampleToggle: Locator;
+	readonly productVirtualFileEntry: (name: string) => Locator;
 	readonly productVirtualFileEntryCancelButton: Locator;
+	readonly productVirtualFileEntryItemSelectorAddButton: Locator;
+	readonly productVirtualFileEntryItemSelectorFileInput: Locator;
 	readonly productVirtualFileEntrySaveButton: Locator;
+	readonly productVirtualFileEntrySelectButton: Locator;
 	readonly productVirtualFileEntryURLInput: Locator;
 	readonly productVirtualLink: Locator;
+	readonly productVirtualMaxUsagesInput: Locator;
+	readonly productVirtualSampleFileEntryNameInput: Locator;
+	readonly productVirtualSampleFileEntryRemoveButton: Locator;
+	readonly productVirtualSampleFileURLInput: Locator;
+	readonly productVirtualSampleItemSelectorAddButton: Locator;
+	readonly productVirtualSampleItemSelectorFileInput: Locator;
+	readonly productVirtualSampleLink: Locator;
+	readonly productVirtualSaveButton: Locator;
+	readonly productVirtualSelectSampleFileButton: Locator;
 	readonly productsTableRowLink: (productName: string) => Locator;
 	readonly spareProductMenuButton: Locator;
 	readonly specificProductMenuLink: (productName: string) => Promise<Locator>;
@@ -136,23 +164,60 @@ export class CommerceAdminProductPage extends CommerceDNDTablePage {
 		this.paginationNextButton = page.locator('[data-testid="nextArrow"]');
 		this.paginationResults = (start: number, end: number, total: number) =>
 			page.getByText(`Showing ${start} to ${end} of ${total} entries.`);
+		this.productSkuSidePanelFrame = page.frameLocator('iframe');
+		this.productSkuShippingOverrideTitle =
+			this.productSkuSidePanelFrame.getByText('Shipping Override', {
+				exact: true,
+			});
 		this.productSkuTableRowLink = (sku: string) =>
 			page.getByRole('link', {name: sku});
-		this.productSkuVirtualFileEntryCancelButton = page
-			.frameLocator('iframe')
-			.frameLocator('iframe >> nth=1')
-			.getByRole('button', {exact: true, name: 'Cancel'});
-		this.productSkuVirtualFileEntrySaveButton = page
-			.frameLocator('iframe')
-			.frameLocator('iframe >> nth=1')
-			.getByRole('button', {exact: true, name: 'Save'});
-		this.productSkuVirtualFileEntryURLInput = page
-			.frameLocator('iframe')
-			.frameLocator('iframe >> nth=1')
-			.getByLabel('URL');
-		this.productSkuVirtualOverrideToggle = page
-			.frameLocator('iframe')
-			.getByLabel('Override', {exact: true});
+		this.productSkuVirtualActivationStatusSelect =
+			this.productSkuSidePanelFrame.getByLabel('Activation Status');
+		this.productSkuVirtualActivationStatusSelectedOption =
+			this.productSkuVirtualActivationStatusSelect.locator(
+				'option:checked'
+			);
+		this.productSkuVirtualBaseInformationButton =
+			this.productSkuSidePanelFrame.getByRole('button', {
+				exact: true,
+				name: 'Base Information',
+			});
+		this.productSkuVirtualDurationInput =
+			this.productSkuSidePanelFrame.getByLabel('Duration');
+		this.productSkuVirtualEnableSampleToggle =
+			this.productSkuSidePanelFrame.getByLabel('Enable Sample');
+		this.productSkuVirtualFileEntry = (name: string) =>
+			this.productSkuSidePanelFrame.getByText(name);
+		this.productSkuVirtualFileEntryFrame =
+			this.productSkuSidePanelFrame.frameLocator('iframe >> nth=1');
+		this.productSkuVirtualFileEntryCancelButton =
+			this.productSkuVirtualFileEntryFrame.getByRole('button', {
+				exact: true,
+				name: 'Cancel',
+			});
+		this.productSkuVirtualFileEntrySaveButton =
+			this.productSkuVirtualFileEntryFrame.getByRole('button', {
+				exact: true,
+				name: 'Save',
+			});
+		this.productSkuVirtualFileEntryURLInput =
+			this.productSkuVirtualFileEntryFrame.getByLabel('URL');
+		this.productSkuVirtualMaxUsagesInput =
+			this.productSkuSidePanelFrame.getByLabel('Max Number of Downloads');
+		this.productSkuVirtualOverrideToggle =
+			this.productSkuSidePanelFrame.getByLabel('Override', {exact: true});
+		this.productSkuVirtualSampleButton =
+			this.productSkuSidePanelFrame.getByRole('button', {
+				exact: true,
+				name: 'Sample',
+			});
+		this.productSkuVirtualSampleFileURLInput =
+			this.productSkuSidePanelFrame.getByLabel('Sample File URL');
+		this.productSkuVirtualSaveButton =
+			this.productSkuSidePanelFrame.getByRole('button', {
+				exact: true,
+				name: 'Save',
+			});
 		this.productSkusLink = page.getByRole('link', {
 			exact: true,
 			name: 'SKUs',
@@ -164,12 +229,29 @@ export class CommerceAdminProductPage extends CommerceDNDTablePage {
 				exact: true,
 				name: productName,
 			});
+		this.productVirtualBaseInformationLink = page.locator(
+			'fieldset#baseInformation > a'
+		);
+		this.productVirtualEnableSampleToggle =
+			page.getByLabel('Enable Sample');
+		this.productVirtualFileEntry = (name: string) => page.getByText(name);
 		this.productVirtualFileEntryCancelButton = page
 			.frameLocator('iframe >> nth=1')
 			.getByRole('button', {exact: true, name: 'Cancel'});
+		this.productVirtualFileEntryItemSelectorAddButton = page
+			.frameLocator('iframe >> nth=1')
+			.frameLocator('iframe[title="Select File"]')
+			.getByRole('button', {exact: true, name: 'Add'});
+		this.productVirtualFileEntryItemSelectorFileInput = page
+			.frameLocator('iframe >> nth=1')
+			.frameLocator('iframe[title="Select File"]')
+			.locator('input[type="file"]');
 		this.productVirtualFileEntrySaveButton = page
 			.frameLocator('iframe >> nth=1')
 			.getByRole('button', {exact: true, name: 'Save'});
+		this.productVirtualFileEntrySelectButton = page
+			.frameLocator('iframe >> nth=1')
+			.getByRole('button', {exact: true, name: 'Select'});
 		this.productVirtualFileEntryURLInput = page
 			.frameLocator('iframe >> nth=1')
 			.getByLabel('URL');
@@ -177,6 +259,31 @@ export class CommerceAdminProductPage extends CommerceDNDTablePage {
 			exact: true,
 			name: 'Virtual',
 		});
+		this.productVirtualMaxUsagesInput = page.getByLabel(
+			'Max Number of Downloads'
+		);
+		this.productVirtualSampleFileEntryNameInput = page.locator(
+			'[id$="_sampleFileEntryNameInput"]'
+		);
+		this.productVirtualSampleFileEntryRemoveButton = page
+			.locator('[id$="_sampleFileEntryRemove"]')
+			.getByRole('button');
+		this.productVirtualSampleFileURLInput =
+			page.getByLabel('Sample File URL');
+		this.productVirtualSampleItemSelectorAddButton = page
+			.frameLocator('iframe[title="Select File"]')
+			.getByRole('button', {exact: true, name: 'Add'});
+		this.productVirtualSampleItemSelectorFileInput = page
+			.frameLocator('iframe[title="Select File"]')
+			.locator('input[type="file"]');
+		this.productVirtualSampleLink = page.locator('fieldset#sample > a');
+		this.productVirtualSaveButton = page.getByRole('button', {
+			exact: true,
+			name: 'Save',
+		});
+		this.productVirtualSelectSampleFileButton = page.locator(
+			'[id$="_selectSampleFile"]'
+		);
 		this.productsTableRowLink = (productName: string) =>
 			page.getByRole('link', {exact: true, name: productName});
 		this.spareProductMenuButton = page.getByRole('menuitem', {
