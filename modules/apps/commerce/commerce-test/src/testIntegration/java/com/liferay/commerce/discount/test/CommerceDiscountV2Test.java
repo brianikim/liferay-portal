@@ -945,6 +945,28 @@ public class CommerceDiscountV2Test {
 		Assert.assertEquals(
 			expectedPrice5.stripTrailingZeros(),
 			actualPrice5.stripTrailingZeros());
+
+		commerceDiscount31.setActive(false);
+
+		_commerceDiscountLocalService.updateCommerceDiscount(
+			commerceDiscount31);
+
+		commerceProductPrice3 =
+			_commerceProductPriceCalculation.getCommerceProductPrice(
+				cpInstance3.getCPInstanceId(), BigDecimal.ONE, StringPool.BLANK,
+				commerceContext);
+
+		expectedPrice3 = _subtractPercentage(
+			commercePriceEntry3.getPrice(), commerceDiscount21.getLevel1());
+
+		CommerceMoney finalPriceCommerceMoney3 =
+			commerceProductPrice3.getFinalPrice();
+
+		actualPrice3 = finalPriceCommerceMoney3.getPrice();
+
+		Assert.assertEquals(
+			expectedPrice3.stripTrailingZeros(),
+			actualPrice3.stripTrailingZeros());
 	}
 
 	@Test
