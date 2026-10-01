@@ -17,6 +17,10 @@ export class ProductDetailsPage {
 	readonly diagramPin: (pinSequence: string) => Promise<Locator>;
 	readonly breadcrumb: Locator;
 	readonly breadcrumbLink: (name: string) => Locator;
+	readonly categoryContentPortlet: Locator;
+	readonly collectionDisplayEmptyMessage: Locator;
+	readonly collectionDisplayListItem: (text: string) => Locator;
+	readonly diagramCard: (name: string) => Locator;
 	readonly diagramSvgPin: (sequence: string) => Locator;
 	readonly diagramTooltip: Locator;
 	readonly diagramTooltipExternalName: (name: string) => Locator;
@@ -39,6 +43,9 @@ export class ProductDetailsPage {
 	readonly galleryMainImage: Locator;
 	readonly galleryThumbnail: (title: string) => Locator;
 	readonly gtinField: (gtin: string) => Promise<Locator>;
+	readonly headerTitle: (title: string) => Locator;
+	readonly headingFragment: (text: string) => Locator;
+	readonly headingFragments: Locator;
 	readonly inStockQuantity: Locator;
 	readonly layoutsPage: CommerceLayoutsPage;
 	readonly mappedProductAddToCartButton: Locator;
@@ -163,6 +170,14 @@ export class ProductDetailsPage {
 		this.breadcrumb = page.getByLabel('Breadcrumb');
 		this.breadcrumbLink = (name: string) =>
 			this.breadcrumb.getByRole('link', {name});
+		this.categoryContentPortlet = page.locator(
+			'[id^="portlet_com_liferay_commerce_product_content_web_internal_portlet_CPCategoryContentPortlet"]'
+		);
+		this.collectionDisplayEmptyMessage = page.getByText('No Results Found');
+		this.collectionDisplayListItem = (text: string) =>
+			page.locator('li.list-group-item').filter({hasText: text});
+		this.diagramCard = (name: string) =>
+			page.locator('.cp-renderer .product-card').filter({hasText: name});
 		this.diagramSvgPin = (sequence: string) =>
 			page
 				.locator('text.pin')
@@ -213,6 +228,11 @@ export class ProductDetailsPage {
 		this.gtinField = async (gtin: string) => {
 			return page.getByText(gtin);
 		};
+		this.headerTitle = (title: string) =>
+			page.getByTestId('headerTitle').filter({hasText: title});
+		this.headingFragment = (text: string) =>
+			this.headingFragments.filter({hasText: text});
+		this.headingFragments = page.locator('.component-heading');
 		this.inStockQuantity = page.locator(
 			'span[data-text-cp-instance-stock-quantity]'
 		);
