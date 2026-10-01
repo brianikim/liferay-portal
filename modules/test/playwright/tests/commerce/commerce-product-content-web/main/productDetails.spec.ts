@@ -31,9 +31,11 @@ import {waitForAlert} from '../../../../utils/waitForAlert';
 import getPageDefinition from '../../../layout-content-page-editor-web/main/utils/getPageDefinition';
 import getWidgetDefinition from '../../../layout-content-page-editor-web/main/utils/getWidgetDefinition';
 import {
+	apiStorefrontSetUp,
 	configureBuyerUserForSite,
 	createAccountWithBuyerUser,
 	createChannelAccountManagerUser,
+	createProductWithOptions,
 	deployProductFragmentsOnDefaultDPT,
 	miniumSetUp,
 } from '../../utils/commerce';
@@ -1960,5 +1962,74 @@ test(
 				0
 			);
 		});
+	}
+);
+
+test(
+	'Buyer views the payment subscription of a product with multiple SKUs on its product details page',
+	{tag: ['@COMMERCE-9743', '@LPD-106244-Grouped-4']},
+	async ({
+		apiHelpers,
+		commerceAdminProductPage,
+		page,
+		productDetailsPage,
+	}) => {
+		const {catalog, site} = await apiStorefrontSetUp(apiHelpers, [
+			{
+				title: 'Product Details',
+				widgetName:
+					'com_liferay_commerce_product_content_web_internal_portlet_CPContentPortlet',
+			},
+		]);
+
+		const {buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id
+		);
+
+		const optionName = getRandomString();
+
+		const {product} = await createProductWithOptions(
+			apiHelpers,
+			commerceAdminProductPage,
+			{
+				catalogId: catalog.id,
+				optionSpecs: [
+					{
+						fieldType: 'select',
+						name: optionName,
+						skuContributor: true,
+						values: [
+							{key: 'value-1', name: 'Value 1'},
+							{key: 'value-2', name: 'Value 2'},
+						],
+					},
+				],
+			}
+		);
+
+		await apiHelpers.headlessCommerceAdminCatalog.patchProductSubscriptionConfiguration(
+			product.productId,
+			{enable: true, length: 1, subscriptionType: 'daily'}
+		);
+
+		await performLogout(page);
+		await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+		await page.goto(
+			`/web${site.friendlyUrlPath}/p/${product.urls['en_US']}`
+		);
+
+		await productDetailsPage.selectOption('Value 1', optionName);
+
+		await expect(productDetailsPage.subscriptionInfo).toContainText(
+			'Payment Subscription'
+		);
+		await expect(productDetailsPage.subscriptionInfo).toContainText(
+			'Every 1 Day'
+		);
+		await expect(productDetailsPage.subscriptionInfo).not.toContainText(
+			'Delivery Subscription'
+		);
 	}
 );
