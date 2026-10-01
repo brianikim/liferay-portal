@@ -27,7 +27,14 @@ export const test = mergeTests(
 
 test(
 	'Virtual settings can be configured for a product and overridden for its SKU',
-	{tag: ['@COMMERCE-6301', '@LPD-21637', '@LPD-106244-Grouped-7']},
+	{
+		tag: [
+			'@COMMERCE-6301',
+			'@COMMERCE-11343',
+			'@LPD-21637',
+			'@LPD-106244-Grouped-7',
+		],
+	},
 	async ({apiHelpers, commerceAdminProductPage, page}) => {
 		const catalog =
 			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
@@ -106,6 +113,81 @@ test(
 					productSkuVirtualFileEntryURL
 				)
 			).toBeVisible();
+
+			await clickAndExpectToBeVisible({
+				target: commerceAdminProductPage.productSkuVirtualActivationStatusSelect,
+				trigger:
+					commerceAdminProductPage.productSkuVirtualBaseInformationButton,
+			});
+
+			await commerceAdminProductPage.productSkuVirtualActivationStatusSelect.selectOption(
+				{label: 'Pending'}
+			);
+			await commerceAdminProductPage.productSkuVirtualDurationInput.fill(
+				'3'
+			);
+			await commerceAdminProductPage.productSkuVirtualMaxUsagesInput.fill(
+				'3'
+			);
+
+			await clickAndExpectToBeVisible({
+				target: commerceAdminProductPage.productSkuVirtualEnableSampleToggle,
+				trigger: commerceAdminProductPage.productSkuVirtualSampleButton,
+			});
+
+			await commerceAdminProductPage.productSkuVirtualEnableSampleToggle.check();
+			await commerceAdminProductPage.productSkuVirtualSampleFileURLInput.fill(
+				'http://test-virtual-product-sku-sample.com'
+			);
+			await commerceAdminProductPage.productSkuVirtualSaveButton.click();
+
+			await waitForAlert(
+				commerceAdminProductPage.productSkuSidePanelFrame
+			);
+		});
+
+		await test.step('Disabling the SKU override resets its virtual settings', async () => {
+			await commerceAdminProductPage.productSkuVirtualOverrideToggle.uncheck();
+			await commerceAdminProductPage.productSkuVirtualSaveButton.click();
+
+			await waitForAlert(
+				commerceAdminProductPage.productSkuSidePanelFrame
+			);
+
+			await page.reload();
+
+			await commerceAdminProductPage.productSkusLink.click();
+			await commerceAdminProductPage
+				.productSkuTableRowLink('VirtualSku')
+				.click();
+			await commerceAdminProductPage.virtualSettingsOverrideLink.click();
+			await commerceAdminProductPage.productSkuVirtualOverrideToggle.check();
+
+			await clickAndExpectToBeVisible({
+				target: commerceAdminProductPage.productSkuVirtualActivationStatusSelect,
+				trigger:
+					commerceAdminProductPage.productSkuVirtualBaseInformationButton,
+			});
+
+			await expect(
+				commerceAdminProductPage.productSkuVirtualActivationStatusSelect.locator(
+					'option:checked'
+				)
+			).toHaveText('Completed');
+			await expect(
+				commerceAdminProductPage.productSkuVirtualDurationInput
+			).toHaveValue('0');
+			await expect(
+				commerceAdminProductPage.productSkuVirtualEnableSampleToggle
+			).not.toBeChecked();
+			await expect(
+				commerceAdminProductPage.productSkuVirtualFileEntry(
+					productSkuVirtualFileEntryURL
+				)
+			).toHaveCount(0);
+			await expect(
+				commerceAdminProductPage.productSkuVirtualMaxUsagesInput
+			).toHaveValue('0');
 		});
 	}
 );
