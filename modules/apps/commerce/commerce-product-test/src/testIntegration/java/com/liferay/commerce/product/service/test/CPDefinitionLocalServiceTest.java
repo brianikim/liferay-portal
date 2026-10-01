@@ -164,6 +164,9 @@ public class CPDefinitionLocalServiceTest {
 			"hasDefaultInstance is false"
 		).then(
 			"product definition should be APPROVED"
+		).and(
+			"a product definition added while a workflow is active stays a " +
+				"draft"
 		);
 
 		CPDefinition cpDefinition = CPTestUtil.addCPDefinitionFromCatalog(
@@ -172,6 +175,36 @@ public class CPDefinitionLocalServiceTest {
 
 		Assert.assertEquals(
 			WorkflowConstants.STATUS_APPROVED, cpDefinition.getStatus());
+
+		WorkflowDefinitionLink workflowDefinitionLink =
+			_workflowDefinitionLinkLocalService.addWorkflowDefinitionLink(
+				null, TestPropsValues.getUserId(),
+				TestPropsValues.getCompanyId(), _commerceCatalog.getGroupId(),
+				CPDefinition.class.getName(), 0, 0, "Single Approver", 1);
+
+		try {
+			int workflowTaskCount =
+				_workflowTaskManager.getWorkflowTaskCountByUserRoles(
+					TestPropsValues.getCompanyId(), TestPropsValues.getUserId(),
+					false);
+
+			cpDefinition = CPTestUtil.addCPDefinitionFromCatalog(
+				_commerceCatalog.getGroupId(), SimpleCPTypeConstants.NAME,
+				false, false);
+
+			Assert.assertEquals(
+				WorkflowConstants.STATUS_DRAFT, cpDefinition.getStatus());
+
+			Assert.assertEquals(
+				workflowTaskCount,
+				_workflowTaskManager.getWorkflowTaskCountByUserRoles(
+					TestPropsValues.getCompanyId(), TestPropsValues.getUserId(),
+					false));
+		}
+		finally {
+			_workflowDefinitionLinkLocalService.deleteWorkflowDefinitionLink(
+				workflowDefinitionLink);
+		}
 	}
 
 	@Test
