@@ -663,3 +663,66 @@ test(
 		}
 	}
 );
+
+for (const {productType, tags} of [
+	{productType: 'Grouped', tags: ['@COMMERCE-6302']},
+]) {
+	test(
+		`Publish a ${productType} product`,
+		{tag: [...tags, '@LPD-106244-Grouped-2']},
+		async ({
+			apiHelpers,
+			commerceAdminProductDetailsPage,
+			commerceAdminProductPage,
+		}) => {
+			const catalog =
+				await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+			const productName = getRandomString();
+
+			try {
+				await commerceAdminProductPage.goto();
+
+				await commerceAdminProductPage.addButton.click();
+				await commerceAdminProductPage
+					.menuItemProductType(productType)
+					.click();
+				await commerceAdminProductPage.modalFieldName.fill(productName);
+				await commerceAdminProductPage.modalPlaceHolder.fill(
+					catalog.name
+				);
+				await commerceAdminProductPage
+					.modalMenuItem(catalog.name)
+					.click();
+				await commerceAdminProductPage.modalSubmitButton.click();
+
+				await expect(
+					commerceAdminProductDetailsPage.nameInput
+				).toHaveValue(productName);
+				await expect(
+					commerceAdminProductDetailsPage.selectedCatalogOption
+				).toHaveText(catalog.name);
+				await expect(
+					commerceAdminProductDetailsPage.workflowStatus('Draft')
+				).toBeVisible();
+
+				await commerceAdminProductDetailsPage.publish();
+
+				await expect(
+					commerceAdminProductDetailsPage.workflowStatus('Approved')
+				).toBeVisible();
+
+				await commerceAdminProductDetailsPage.backLink.click();
+
+				await commerceAdminProductPage.search(productName);
+
+				await expect(
+					commerceAdminProductPage.productsTableRow(productName)
+				).toContainText(productType);
+			}
+			finally {
+				await addProductToCleanUp(apiHelpers, productName);
+			}
+		}
+	);
+}
