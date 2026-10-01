@@ -31,6 +31,8 @@ export class ProductDetailsPage {
 	readonly fullDescriptionField: (
 		fullDescription: string
 	) => Promise<Locator>;
+	readonly galleryAdaptiveMediaSource: Locator;
+	readonly galleryImage: Locator;
 	readonly gtinField: (gtin: string) => Promise<Locator>;
 	readonly inStockQuantity: Locator;
 	readonly layoutsPage: CommerceLayoutsPage;
@@ -179,6 +181,10 @@ export class ProductDetailsPage {
 		this.fullDescriptionField = async (fullDescription: string) => {
 			return page.getByText(fullDescription, {exact: true});
 		};
+		this.galleryAdaptiveMediaSource = page.locator(
+			'.product-gallery picture source[srcset*="/o/adaptive-media/image/"]'
+		);
+		this.galleryImage = page.locator('.product-gallery picture img');
 		this.gtinField = async (gtin: string) => {
 			return page.getByText(gtin);
 		};
