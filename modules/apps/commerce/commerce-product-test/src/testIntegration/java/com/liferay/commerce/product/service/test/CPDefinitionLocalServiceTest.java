@@ -74,6 +74,7 @@ import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
+import com.liferay.portal.kernel.util.BigDecimalUtil;
 import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil;
@@ -588,9 +589,13 @@ public class CPDefinitionLocalServiceTest {
 			"A product definition and its clone"
 		).when(
 			"changing the price of the cloned"
+		).and(
+			"changing the price of the parent"
 		).then(
 			"the product price of the parent product is different from " +
 				"cloned product"
+		).and(
+			"the product price of the cloned product is unchanged"
 		);
 
 		CPInstance cpInstance = CPTestUtil.addCPInstanceWithRandomSku(
@@ -633,6 +638,19 @@ public class CPDefinitionLocalServiceTest {
 		Assert.assertNotEquals(
 			commercePriceEntry.getPrice(),
 			duplicateCommercePriceEntry.getPrice());
+
+		_commercePriceEntryLocalService.updatePricingInfo(
+			commercePriceEntry.getCommercePriceEntryId(),
+			commercePriceEntry.isBulkPricing(), new BigDecimal("60"), false,
+			BigDecimal.ZERO, null, _serviceContext);
+
+		duplicateCommercePriceEntry =
+			_commercePriceEntryLocalService.getCommercePriceEntry(
+				duplicateCommercePriceEntry.getCommercePriceEntryId());
+
+		Assert.assertTrue(
+			BigDecimalUtil.eq(
+				BigDecimal.TEN, duplicateCommercePriceEntry.getPrice()));
 	}
 
 	@Test
