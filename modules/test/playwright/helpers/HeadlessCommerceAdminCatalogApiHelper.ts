@@ -369,9 +369,17 @@ export class HeadlessCommerceAdminCatalogApiHelper {
 		);
 	}
 
-	async getOptions() {
+	async getOptions(searchParams = new URLSearchParams()) {
 		return this.apiHelpers.get(
-			`${this.apiHelpers.baseUrl}${this.basePath}/options`
+			`${this.apiHelpers.baseUrl}${
+				this.basePath
+			}/options?${searchParams.toString()}`
+		);
+	}
+
+	async getOptionValue(optionValueId: number) {
+		return this.apiHelpers.get(
+			`${this.apiHelpers.baseUrl}${this.basePath}/optionValues/${optionValueId}`
 		);
 	}
 
@@ -678,6 +686,28 @@ export class HeadlessCommerceAdminCatalogApiHelper {
 		}
 
 		return postOptionCategory;
+	}
+
+	async postOptionValue(
+		optionId: number,
+		key: string = 'key-' + getRandomInt(),
+		name: string = 'OptionValue' + getRandomInt(),
+		priority: number = getRandomInt()
+	) {
+		const postOptionValue = await this.apiHelpers.post(
+			`${this.apiHelpers.baseUrl}${this.basePath}/options/${optionId}/optionValues`,
+			{
+				data: {
+					key,
+					name: {
+						en_US: name,
+					},
+					priority,
+				},
+			}
+		);
+
+		return postOptionValue;
 	}
 
 	async postPin(productId: number, pin: TPin): Promise<TPin> {
