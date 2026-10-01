@@ -1917,16 +1917,24 @@ test(
 
 test(
 	'A products limit rule counts a bundle product together with its bundled product',
-	{tag: ['@COMMERCE-12889', '@LPD-106024']},
+	{
+		tag: [
+			'@COMMERCE-12799',
+			'@COMMERCE-12889',
+			'@LPD-106024',
+			'@LPD-106244-Grouped-8',
+		],
+	},
 	async ({
 		apiHelpers,
+		checkoutPage,
 		commerceAdminChannelsPage,
 		commerceMiniCartPage,
 		page,
 		productDetailsPage,
 		site,
 	}) => {
-		test.setTimeout(120000);
+		test.setTimeout(180000);
 
 		const catalog =
 			await apiHelpers.headlessCommerceAdminCatalog.postCatalog({
@@ -1977,6 +1985,7 @@ test(
 
 		await test.step('Create an active order rule limiting both products to two', async () => {
 			await apiHelpers.headlessCommerceAdminOrder.postOrderRule({
+				priority: 0,
 				type: 'products-limit',
 				typeSettings: getProductsLimitTypeSettings(
 					`${bundleProduct.externalReferenceCode},${linkedProduct.externalReferenceCode}`,
@@ -2012,14 +2021,36 @@ test(
 
 		await test.step('Verify the order is rejected because the two products total three', async () => {
 			await expect(
-				page
-					.getByRole('dialog')
-					.getByText(
-						'No more than 2 products in this product range can be purchased together.'
-					)
+				commerceMiniCartPage.productsLimitErrorMessage('2')
 			).toBeVisible();
 
-			await expect(page.locator('.commerce-multi-step-nav')).toBeHidden();
+			await expect(checkoutPage.multiStepNav).toBeHidden();
+		});
+
+		await test.step('Verify a higher priority rule on the linked product applies instead', async () => {
+			await apiHelpers.headlessCommerceAdminOrder.postOrderRule({
+				priority: 1,
+				type: 'products-limit',
+				typeSettings: getProductsLimitTypeSettings(
+					linkedProduct.externalReferenceCode,
+					'1.1'
+				),
+			});
+
+			await page.goto(`/web/${site.name}/p/${bundleProductName}`);
+
+			await commerceMiniCartPage.miniCartButton.click();
+
+			await commerceMiniCartPage.submitButton.click();
+
+			await expect(
+				commerceMiniCartPage.productsLimitErrorMessage('1.1')
+			).toBeVisible();
+			await expect(
+				commerceMiniCartPage.productsLimitErrorMessage('2')
+			).toHaveCount(0);
+
+			await expect(checkoutPage.multiStepNav).toBeHidden();
 		});
 	}
 );
