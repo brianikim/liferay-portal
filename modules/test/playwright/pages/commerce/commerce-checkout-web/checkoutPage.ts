@@ -28,6 +28,7 @@ type TAddress = {
 
 export class CheckoutPage extends CommerceDNDTablePage {
 	readonly activeCheckoutStep: Locator;
+	readonly checkoutStepLabel: (label: string) => Locator;
 	readonly checkoutStepLabels: Locator;
 	readonly assertDataDeliveryGroupModal: (data: string) => Locator;
 	readonly addressInput: Locator;
@@ -101,6 +102,8 @@ export class CheckoutPage extends CommerceDNDTablePage {
 	readonly subtypeMenuItem: (name: string) => Locator;
 	readonly subtypeResetModalTitle: Locator;
 	readonly subtypeResetSubtypeInput: Locator;
+	readonly termDescriptionModal: (label: string) => Locator;
+	readonly termMoreInfoLink: (label: string) => Locator;
 	readonly orderSummaryShippingMethod: Locator;
 	readonly useAsBillingCheckbox: Locator;
 	readonly viewDeliveryGroupTableButton: Locator;
@@ -114,6 +117,8 @@ export class CheckoutPage extends CommerceDNDTablePage {
 		this.activeCheckoutStep = page.locator(
 			'.multi-step-item.active .multi-step-indicator-label'
 		);
+		this.checkoutStepLabel = (label: string) =>
+			page.locator('.multi-step-indicator-label', {hasText: label});
 		this.checkoutStepLabels = page.locator('.multi-step-indicator-label');
 		this.addressInput = page.getByPlaceholder('Address', {exact: true});
 		this.cityInput = page.getByPlaceholder('City', {exact: true});
@@ -287,6 +292,13 @@ export class CheckoutPage extends CommerceDNDTablePage {
 		this.subtypeResetSubtypeInput = page
 			.getByLabel('Reset Subtype')
 			.getByPlaceholder('Subtype');
+		this.termDescriptionModal = (label: string) =>
+			page.getByRole('dialog').filter({hasText: label});
+		this.termMoreInfoLink = (label: string) =>
+			page
+				.locator('.list-group-item')
+				.filter({has: page.getByLabel(label, {exact: true})})
+				.getByRole('link', {name: 'More Info'});
 		this.orderSummaryShippingMethod = page.locator('div.shipping-method');
 		this.useAsBillingCheckbox = page.locator(
 			'[id="_com_liferay_commerce_checkout_web_internal_portlet_CommerceCheckoutPortlet_use-as-billing"]'
