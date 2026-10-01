@@ -41,6 +41,7 @@ import {
 	findSkuByOptionValueKeys,
 	getSkusByName,
 	miniumSetUp,
+	selectCurrentAccount,
 	setUpBrakeFluidUnitsOfMeasure,
 	unitOfMeasurePriceLabel,
 	zeroWarehouseStock,
@@ -85,6 +86,16 @@ async function checkoutWithStandardDelivery(checkoutPage: CheckoutPage) {
 		},
 		'Standard Delivery'
 	);
+}
+
+async function getCartWorkflowStatusLabel(
+	apiHelpers: DataApiHelpers,
+	cartId: number
+) {
+	const {workflowStatusInfo} =
+		await apiHelpers.headlessCommerceDeliveryCart.getCart(cartId);
+
+	return workflowStatusInfo.label;
 }
 
 test.afterEach(async ({page}) => {
@@ -3924,5 +3935,115 @@ test(
 		await expect(
 			commerceMiniCartPage.miniCartItemNetPrice(product.name.en_US)
 		).toContainText('$ 8.00');
+	}
+);
+
+test(
+	'An account member approves and checks out an order from the Mini Cart widget under the buyer order approval workflow',
+	{tag: ['@COMMERCE-7870', '@COMMERCE-10247', '@LPD-106244-Grouped-10']},
+	async ({
+		apiHelpers,
+		checkoutPage,
+		commerceAdminChannelDetailsPage,
+		commerceAdminChannelsPage,
+		commerceMiniCartPage,
+		page,
+		pendingOrdersPage,
+	}) => {
+		const {channel, product, site} = await apiStorefrontSetUp(apiHelpers, [
+			{
+				title: 'Checkout',
+				widgetName:
+					'com_liferay_commerce_checkout_web_internal_portlet_CommerceCheckoutPortlet',
+			},
+			{
+				title: 'Mini Cart',
+				widgetName:
+					'com_liferay_commerce_cart_content_web_internal_portlet_CommerceCartContentMiniPortlet',
+			},
+		]);
+
+		await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+			channel.name,
+			'B2B'
+		);
+
+		await waitForAlert(page);
+
+		await addStandardDeliveryShippingOption(
+			commerceAdminChannelDetailsPage
+		);
+
+		await commerceAdminChannelsPage.changeCommerceChannelBuyerOrderApprovalWorkflow(
+			'Single Approver (Version 1)',
+			channel.name
+		);
+
+		const account = await apiHelpers.headlessAdminUser.postAccount({
+			name: getRandomString(),
+			type: 'business',
+		});
+
+		await apiHelpers.headlessAdminUser.assignUserToAccountByEmailAddress(
+			account.id,
+			['test@liferay.com']
+		);
+
+		const cart = await apiHelpers.headlessCommerceDeliveryCart.postCart(
+			{
+				accountId: account.id,
+				cartItems: [
+					{options: '[]', quantity: 1, skuId: product.skus[0].id},
+				],
+			},
+			channel.id
+		);
+
+		await selectCurrentAccount(account.id, apiHelpers, site.id);
+
+		await page.goto(`/web${site.friendlyUrlPath}/mini-cart`, {
+			waitUntil: 'networkidle',
+		});
+
+		await test.step('The order is submitted for approval', async () => {
+			await commerceMiniCartPage.miniCartWidgetButton('Submit').click();
+
+			await expect
+				.poll(() => getCartWorkflowStatusLabel(apiHelpers, cart.id))
+				.toBe('pending');
+		});
+
+		await test.step('Canceling the approval keeps the order pending, and rejecting it denies the order', async () => {
+			await commerceMiniCartPage.miniCartWidgetButton('Approve').click();
+			await pendingOrdersPage.cancelButton.click();
+
+			await expect
+				.poll(() => getCartWorkflowStatusLabel(apiHelpers, cart.id))
+				.toBe('pending');
+
+			await commerceMiniCartPage.miniCartWidgetButton('Reject').click();
+			await pendingOrdersPage.doneButton.click();
+
+			await expect
+				.poll(() => getCartWorkflowStatusLabel(apiHelpers, cart.id))
+				.toBe('denied');
+		});
+
+		await test.step('The resubmitted order is approved', async () => {
+			await commerceMiniCartPage.miniCartWidgetButton('Resubmit').click();
+			await pendingOrdersPage.doneButton.click();
+			await commerceMiniCartPage.miniCartWidgetButton('Approve').click();
+			await pendingOrdersPage.doneButton.click();
+
+			await expect
+				.poll(() => getCartWorkflowStatusLabel(apiHelpers, cart.id))
+				.toBe('approved');
+		});
+
+		await test.step('The approved order is checked out from the Mini Cart widget', async () => {
+			await commerceMiniCartPage.miniCartWidgetCheckoutButton.click();
+
+			await checkoutWithStandardDelivery(checkoutPage);
+		});
 	}
 );
