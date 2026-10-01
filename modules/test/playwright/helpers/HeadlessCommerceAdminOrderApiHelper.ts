@@ -56,6 +56,8 @@ type TOrderRule = {
 	active?: boolean;
 	id?: number;
 	name?: string;
+	orderRuleAccount?: Array<{accountId: number}>;
+	orderRuleChannel?: Array<{channelId: number}>;
 	priority?: number;
 	type: string;
 	typeSettings?: string;
@@ -73,6 +75,12 @@ type TOrderType = {
 	name?: {
 		[key: string]: string;
 	};
+};
+
+type TOrderTypeChannel = {
+	channelId: number;
+	orderTypeChannelId?: number;
+	orderTypeId: number;
 };
 
 type TTerm = {
@@ -298,6 +306,16 @@ export class HeadlessCommerceAdminOrderApiHelper {
 		}
 
 		return orderRuleOrderType;
+	}
+
+	async postOrderTypeIdOrderTypeChannel(orderTypeChannel: TOrderTypeChannel) {
+		return this.apiHelpers.post(
+			`${this.apiHelpers.baseUrl}${this.basePath}/order-types/${orderTypeChannel.orderTypeId}/order-type-channels`,
+			{
+				data: orderTypeChannel,
+				failOnStatusCode: true,
+			}
+		);
 	}
 
 	async postTerm(terms: TTerm) {
