@@ -17,6 +17,7 @@ export class CommerceAdminProductDetailsProductOptionsPage extends CommerceDNDTa
 	readonly optionSaveButton: Locator;
 	readonly optionSidePanelCancelButton: Locator;
 	readonly optionSidePanelFrame: FrameLocator;
+	readonly optionUseInFacetedNavigationCheckbox: Locator;
 	readonly optionValueActionsButton: (optionValueName: string) => Locator;
 	readonly optionValueDeltaPriceInput: Locator;
 	readonly optionValueKeyInput: Locator;
@@ -78,6 +79,8 @@ export class CommerceAdminProductDetailsProductOptionsPage extends CommerceDNDTa
 				name: 'Cancel',
 			}
 		);
+		this.optionUseInFacetedNavigationCheckbox =
+			this.optionSidePanelFrame.getByLabel('Use in Faceted Navigation');
 		this.optionValueActionsButton = (optionValueName: string) =>
 			this.optionSidePanelFrame.getByRole('button', {
 				exact: true,
