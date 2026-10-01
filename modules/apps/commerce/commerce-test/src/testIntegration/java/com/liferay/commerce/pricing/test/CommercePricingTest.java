@@ -296,6 +296,7 @@ public class CommercePricingTest {
 	public void testGetCommerceProductPrice() throws Exception {
 		_testGetCommerceProductPriceWithPriceOnApplicationDiscovery();
 		_testGetCommerceProductPriceWithPriceOnApplicationEligibility();
+		_testGetCommerceProductPriceWithPriceOnApplicationOverride();
 	}
 
 	@Test
@@ -1465,10 +1466,6 @@ public class CommercePricingTest {
 	private void _testGetCommerceProductPriceWithPriceOnApplicationDiscovery()
 		throws Exception {
 
-		CommerceContext commerceContext = new TestCommerceContext(
-			_accountEntry, _commerceCurrency, _commerceChannel, _user, _group,
-			null);
-
 		CPInstance cpInstance = _addCPInstance();
 
 		_addCatalogBaseCommercePriceEntry(
@@ -1483,6 +1480,10 @@ public class CommercePricingTest {
 		_addCommercePriceList(
 			cpInstance, CommercePriceListConstants.TYPE_PRICE_LIST, 0.0,
 			BigDecimal.valueOf(30), false);
+
+		CommerceContext commerceContext = new TestCommerceContext(
+			_accountEntry, _commerceCurrency, _commerceChannel, _user, _group,
+			null);
 
 		_assertCommerceProductPrice(
 			commerceContext, cpInstance, false, false, BigDecimal.valueOf(40),
@@ -1690,6 +1691,137 @@ public class CommercePricingTest {
 		_assertCommerceProductPrice(
 			ineligibleCommerceContext, cpInstance, true, true, BigDecimal.ZERO,
 			BigDecimal.ZERO);
+	}
+
+	private void _testGetCommerceProductPriceWithPriceOnApplicationOverride()
+		throws Exception {
+
+		CPInstance cpInstance = _addCPInstance();
+
+		_addCatalogBaseCommercePriceEntry(
+			cpInstance, CommercePriceListConstants.TYPE_PRICE_LIST,
+			BigDecimal.ZERO, true);
+
+		CommercePriceList commercePriceList1 = _addCommercePriceList(
+			cpInstance, CommercePriceListConstants.TYPE_PRICE_LIST, 0.0,
+			BigDecimal.valueOf(20), false);
+
+		CommerceContext commerceContext = new TestCommerceContext(
+			_accountEntry, _commerceCurrency, _commerceChannel, _user, _group,
+			null);
+
+		_assertCommerceProductPrice(
+			commerceContext, cpInstance, false, false, BigDecimal.valueOf(20),
+			BigDecimal.ZERO);
+
+		_commercePriceListLocalService.deleteCommercePriceList(
+			commercePriceList1);
+
+		_assertCommerceProductPrice(
+			commerceContext, cpInstance, true, true, BigDecimal.ZERO,
+			BigDecimal.ZERO);
+
+		cpInstance = _addCPInstance();
+
+		_addCatalogBaseCommercePriceEntry(
+			cpInstance, CommercePriceListConstants.TYPE_PRICE_LIST,
+			BigDecimal.ZERO, true);
+
+		CommercePriceList commercePriceList2 = _addCommercePriceList(
+			cpInstance, CommercePriceListConstants.TYPE_PROMOTION, 0.0,
+			BigDecimal.valueOf(20), false);
+
+		_assertCommerceProductPrice(
+			commerceContext, cpInstance, false, true, BigDecimal.ZERO,
+			BigDecimal.valueOf(20));
+
+		_commercePriceListLocalService.deleteCommercePriceList(
+			commercePriceList2);
+
+		_assertCommerceProductPrice(
+			commerceContext, cpInstance, true, true, BigDecimal.ZERO,
+			BigDecimal.ZERO);
+
+		_testGetCommerceProductPriceWithPriceOnApplicationOverride(
+			commerceContext, BigDecimal.ZERO);
+		_testGetCommerceProductPriceWithPriceOnApplicationOverride(
+			commerceContext, BigDecimal.valueOf(18));
+
+		cpInstance = _addCPInstance();
+
+		_addCatalogBaseCommercePriceEntry(
+			cpInstance, CommercePriceListConstants.TYPE_PRICE_LIST,
+			BigDecimal.valueOf(24), false);
+
+		CommercePriceList commercePriceList3 = _addCommercePriceList(
+			cpInstance, CommercePriceListConstants.TYPE_PRICE_LIST, 1.0,
+			BigDecimal.ZERO, true);
+		CommercePriceList commercePriceList4 = _addCommercePriceList(
+			cpInstance, CommercePriceListConstants.TYPE_PRICE_LIST, 0.0,
+			BigDecimal.valueOf(15), false);
+
+		_assertCommerceProductPrice(
+			commerceContext, cpInstance, true, true, BigDecimal.ZERO,
+			BigDecimal.ZERO);
+
+		commercePriceList3.setPriority(0.0);
+
+		_commercePriceListLocalService.updateCommercePriceList(
+			commercePriceList3);
+
+		commercePriceList4.setPriority(1.0);
+
+		_commercePriceListLocalService.updateCommercePriceList(
+			commercePriceList4);
+
+		_assertCommerceProductPrice(
+			commerceContext, cpInstance, false, false, BigDecimal.valueOf(15),
+			BigDecimal.ZERO);
+
+		cpInstance = _addCPInstance();
+
+		CommercePriceEntry commercePriceEntry =
+			_addCatalogBaseCommercePriceEntry(
+				cpInstance, CommercePriceListConstants.TYPE_PRICE_LIST,
+				BigDecimal.valueOf(24), false);
+
+		_addCatalogBaseCommercePriceEntry(
+			cpInstance, CommercePriceListConstants.TYPE_PROMOTION,
+			BigDecimal.ZERO, true);
+
+		_assertCommerceProductPrice(
+			commerceContext, cpInstance, false, false, BigDecimal.valueOf(24),
+			BigDecimal.ZERO);
+
+		commercePriceEntry.setPriceOnApplication(true);
+
+		_commercePriceEntryLocalService.updateCommercePriceEntry(
+			commercePriceEntry);
+
+		_assertCommerceProductPrice(
+			commerceContext, cpInstance, true, true, BigDecimal.ZERO,
+			BigDecimal.ZERO);
+	}
+
+	private void _testGetCommerceProductPriceWithPriceOnApplicationOverride(
+			CommerceContext commerceContext, BigDecimal promoPrice)
+		throws Exception {
+
+		CPInstance cpInstance = _addCPInstance();
+
+		_addCatalogBaseCommercePriceEntry(
+			cpInstance, CommercePriceListConstants.TYPE_PRICE_LIST,
+			BigDecimal.ZERO, true);
+		_addCommercePriceList(
+			cpInstance, CommercePriceListConstants.TYPE_PRICE_LIST, 0.0,
+			BigDecimal.valueOf(20), false);
+		_addCommercePriceList(
+			cpInstance, CommercePriceListConstants.TYPE_PROMOTION, 0.0,
+			promoPrice, false);
+
+		_assertCommerceProductPrice(
+			commerceContext, cpInstance, false, false, BigDecimal.valueOf(20),
+			promoPrice);
 	}
 
 	private static final int _SCALE = 10;
