@@ -414,6 +414,32 @@ public class CommerceMediaResolverTest {
 					AccountConstants.ACCOUNT_ENTRY_ID_GUEST,
 					cpAttachmentFileEntry.getCPAttachmentFileEntryId()));
 		}
+
+		FileEntry fileEntry = _dlAppLocalService.addFileEntry(
+			null, _user.getUserId(), _group.getGroupId(),
+			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
+			RandomTestUtil.randomString() + ".svg", ContentTypes.IMAGE_SVG_XML,
+			RandomTestUtil.randomBytes(), null, null, null, _serviceContext);
+
+		cpAttachmentFileEntry =
+			_cpAttachmentFileEntryLocalService.addCPAttachmentFileEntry(
+				null, _user.getUserId(), _group.getGroupId(),
+				PortalUtil.getClassNameId(CPDefinition.class.getName()),
+				cpDefinition.getCPDefinitionId(), fileEntry.getFileEntryId(),
+				false, null, displayDateMonth, displayDateDay, displayDateYear,
+				displayDateHour, displayDateMinute, expirationDateMonth,
+				expirationDateDay, expirationDateYear, expirationDateHour,
+				expirationDateMinute, true, true,
+				RandomTestUtil.randomLocaleStringMap(), null, 0D,
+				CPAttachmentFileEntryConstants.TYPE_IMAGE, _serviceContext);
+
+		Assert.assertEquals(
+			_getURL(
+				_accountEntry.getAccountEntryId(),
+				cpAttachmentFileEntry.getCPAttachmentFileEntryId()),
+			_commerceMediaResolver.getURL(
+				_accountEntry.getAccountEntryId(),
+				cpAttachmentFileEntry.getCPAttachmentFileEntryId()));
 	}
 
 	@Rule
