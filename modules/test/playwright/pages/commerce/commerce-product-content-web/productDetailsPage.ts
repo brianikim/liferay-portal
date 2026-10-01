@@ -115,6 +115,7 @@ export class ProductDetailsPage {
 		shortDescription: string
 	) => Promise<Locator>;
 	readonly skuField: (sku: string) => Promise<Locator>;
+	readonly subscriptionInfo: Locator;
 	readonly unitOfMeasureSelect: Locator;
 	readonly unitOfMeasureSelectedOption: Locator;
 	readonly uomCombobox: Locator;
@@ -345,6 +346,7 @@ export class ProductDetailsPage {
 		this.skuField = async (sku: string) => {
 			return page.getByText(sku, {exact: true});
 		};
+		this.subscriptionInfo = page.locator('.commerce-subscription-info');
 		this.unitOfMeasureSelect = page.locator(
 			'select.unit-of-measure-selector'
 		);
