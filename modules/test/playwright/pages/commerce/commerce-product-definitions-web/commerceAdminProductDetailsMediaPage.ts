@@ -10,9 +10,12 @@ import {searchTableRowByValue} from '../commerceDNDTablePage';
 export class CommerceAdminProductDetailsMediaPage {
 	readonly addImageButton: Locator;
 	readonly creationMenuNewButton: Locator;
+	readonly deleteMenuItem: Locator;
 	readonly mediaAttachmentsTable: Locator;
 	readonly mediaForm: Locator;
 	readonly mediaImagesTable: Locator;
+	readonly mediaTableRow: (title: string, table: Locator) => Locator;
+	readonly mediaTableRowImage: (title: string, table: Locator) => Locator;
 	readonly page: Page;
 	readonly tableRow: (
 		tableName: Locator,
@@ -20,6 +23,7 @@ export class CommerceAdminProductDetailsMediaPage {
 		value: number | string,
 		strictEqual?: boolean
 	) => Promise<{column: Locator; row: Locator}>;
+	readonly tableRowActionsButton: (title: string, table: Locator) => Locator;
 	readonly tableRowModifiedDateField: (
 		rowValue: string,
 		table: Locator
@@ -27,6 +31,10 @@ export class CommerceAdminProductDetailsMediaPage {
 
 	constructor(page: Page) {
 		this.addImageButton = page.getByLabel('Add Image');
+		this.deleteMenuItem = page.getByRole('menuitem', {
+			exact: true,
+			name: 'Delete',
+		});
 		this.mediaForm = page.locator(
 			'#_com_liferay_commerce_product_definitions_web_internal_portlet_CPDefinitionsPortlet_fm'
 		);
@@ -34,6 +42,10 @@ export class CommerceAdminProductDetailsMediaPage {
 			.locator('.fds table')
 			.nth(1);
 		this.mediaImagesTable = this.mediaForm.locator('table').nth(0);
+		this.mediaTableRow = (title: string, table: Locator) =>
+			table.getByRole('row').filter({hasText: title});
+		this.mediaTableRowImage = (title: string, table: Locator) =>
+			this.mediaTableRow(title, table).locator('img.sticker-img');
 		this.page = page;
 		this.tableRow = async (
 			table: Locator,
@@ -48,6 +60,8 @@ export class CommerceAdminProductDetailsMediaPage {
 				strictEqual
 			);
 		};
+		this.tableRowActionsButton = (title: string, table: Locator) =>
+			table.getByRole('button', {exact: true, name: `${title} Actions`});
 		this.tableRowModifiedDateField = async (rowValue, table) => {
 			const tableRow = await this.tableRow(table, 1, rowValue, true);
 
