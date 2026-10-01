@@ -1917,3 +1917,75 @@ test(
 		});
 	}
 );
+
+test(
+	'A product image posted by URL through the API is shown in the products admin',
+	{tag: ['@COMMERCE-9448', '@LPD-106244-Grouped-6']},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsMediaPage,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductPage,
+		site,
+	}) => {
+		const documentTitle = getRandomString();
+
+		const document = await apiHelpers.headlessDelivery.postDocument(
+			site.id,
+			createReadStream(path.join(__dirname, '/dependencies/liferay.png')),
+			{
+				fileName: `${documentTitle}.png`,
+				title: documentTitle,
+				viewableBy: 'Anyone',
+			}
+		);
+
+		apiHelpers.data.push({id: document.id, type: 'document'});
+
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		const imageTitle = getRandomString();
+		const productName = getRandomString();
+
+		await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+			catalogId: catalog.id,
+			images: [
+				{
+					src: `${liferayConfig.environment.baseUrl}${document.contentUrl}`,
+					title: {en_US: imageTitle},
+				},
+			],
+			name: {en_US: productName},
+		});
+
+		const {images} =
+			await apiHelpers.headlessCommerceAdminCatalog.getProductByName(
+				productName,
+				{catalogId: catalog.id, nestedFields: 'images'}
+			);
+
+		const imageSrc = new RegExp(`/images/${images[0].id}\\?`);
+
+		await commerceAdminProductPage.goto();
+
+		await commerceAdminProductPage.search(productName);
+
+		await expect(
+			commerceAdminProductPage.productsTableRowImage(productName)
+		).toHaveAttribute('src', imageSrc);
+
+		await commerceAdminProductPage
+			.productsTableRowLink(productName)
+			.click();
+
+		await commerceAdminProductDetailsPage.productMediaLink.click();
+
+		await expect(
+			commerceAdminProductDetailsMediaPage.mediaTableRowImage(
+				imageTitle,
+				commerceAdminProductDetailsMediaPage.mediaImagesTable
+			)
+		).toHaveAttribute('src', imageSrc);
+	}
+);
