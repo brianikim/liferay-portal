@@ -37,9 +37,12 @@ export class CommerceAdminProductDetailsSkusPage extends CommerceDNDTablePage {
 		currencyCode: string
 	) => Locator;
 	readonly sidePanelNestedPriceListPrice: Locator;
+	readonly sidePanelNestedPriceOnApplicationToggle: Locator;
+	readonly sidePanelNestedPriceOnApplicationTooltip: Locator;
 	readonly sidePanelNestedSaveButton: Locator;
 	readonly sidePanelSaveButton: Locator;
 	readonly sidePanelSkuInventoryQuantity: Locator;
+	readonly sidePanelSkuPriceTable: Locator;
 	readonly sidePanelSkuPriceTableRowLink: (priceListName: string) => Locator;
 	readonly sidePanelSubscriptionEnabledLabel: (
 		subscriptionName: ProductSubscriptionName
@@ -189,6 +192,12 @@ export class CommerceAdminProductDetailsSkusPage extends CommerceDNDTablePage {
 				.first();
 		this.sidePanelNestedPriceListPrice =
 			this.sidePanelNestedFrame.getByLabel('Price List');
+		this.sidePanelNestedPriceOnApplicationToggle =
+			this.sidePanelNestedFrame.getByLabel('Price on Application');
+		this.sidePanelNestedPriceOnApplicationTooltip =
+			this.sidePanelNestedFrame
+				.locator('label', {hasText: 'Price on Application'})
+				.locator('.lfr-portal-tooltip');
 		this.sidePanelNestedSaveButton = this.sidePanelNestedFrame.getByRole(
 			'button',
 			{exact: true, name: 'Save'}
@@ -201,6 +210,7 @@ export class CommerceAdminProductDetailsSkusPage extends CommerceDNDTablePage {
 			'textbox',
 			{name: 'commerce-inventory-warehouse-'}
 		);
+		this.sidePanelSkuPriceTable = this.sidePanelFrame.locator('table');
 		this.sidePanelSkuPriceTableRowLink = (priceListName: string) =>
 			this.sidePanelFrame.getByRole('link', {
 				exact: true,
