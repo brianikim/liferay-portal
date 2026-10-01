@@ -866,3 +866,81 @@ test(
 		}
 	}
 );
+
+test(
+	'A draft product can be duplicated and saved as draft',
+	{tag: ['@COMMERCE-9181', '@COMMERCE-9251', '@LPD-106244-Grouped-2']},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductPage,
+		page,
+	}) => {
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		const product =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				productStatus: 2,
+			});
+
+		const productName = product.name['en_US'];
+
+		try {
+			await commerceAdminProductPage.gotoProduct(productName);
+
+			await expect(
+				commerceAdminProductDetailsPage.saveAsDraftLink
+			).toBeVisible();
+			await expect(
+				commerceAdminProductDetailsPage.workflowStatus('Draft')
+			).toBeVisible();
+
+			await commerceAdminProductDetailsPage.duplicate(catalog.name);
+
+			await expect(commerceAdminProductDetailsPage.nameInput).toHaveValue(
+				`Copy of ${productName}`
+			);
+			await expect(
+				commerceAdminProductDetailsPage.workflowStatus('Draft')
+			).toBeVisible();
+
+			await commerceAdminProductPage.gotoProduct(productName);
+
+			const updatedProductName = getRandomString();
+
+			await commerceAdminProductDetailsPage.nameInput.fill(
+				updatedProductName
+			);
+			await commerceAdminProductDetailsPage.saveAsDraftLink.click();
+
+			await waitForAlert(page);
+
+			await commerceAdminProductPage.gotoProduct(updatedProductName);
+
+			await expect(commerceAdminProductDetailsPage.nameInput).toHaveValue(
+				updatedProductName
+			);
+			await expect(
+				commerceAdminProductDetailsPage.workflowStatus('Draft')
+			).toBeVisible();
+
+			await commerceAdminProductDetailsPage.headerActionsButton.click();
+
+			await expect(
+				commerceAdminProductDetailsPage.headerActionsMenuItem(
+					'Duplicate'
+				)
+			).toBeVisible();
+			await expect(
+				commerceAdminProductDetailsPage.headerActionsMenuItem(
+					'Convert to Draft'
+				)
+			).toHaveCount(0);
+		}
+		finally {
+			await addProductToCleanUp(apiHelpers, `Copy of ${productName}`);
+		}
+	}
+);
