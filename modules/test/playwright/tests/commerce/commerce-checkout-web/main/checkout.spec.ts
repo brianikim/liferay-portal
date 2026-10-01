@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import {expect, mergeTests} from '@playwright/test';
+import {Page, expect, mergeTests} from '@playwright/test';
 
 import {accountsPagesTest} from '../../../../fixtures/accountsPagesTest';
 import {commercePagesTest} from '../../../../fixtures/commercePagesTest';
@@ -19,19 +19,30 @@ import {pageViewModePagesTest} from '../../../../fixtures/pageViewModePagesTest'
 import {productMenuPageTest} from '../../../../fixtures/productMenuPageTest';
 import {systemSettingsPageTest} from '../../../../fixtures/systemSettingsPageTest';
 import {DataApiHelpers} from '../../../../helpers/ApiHelpers';
+import {TRole} from '../../../../helpers/HeadlessAdminUserApiHelper';
 import {liferayConfig} from '../../../../liferay.config';
+import {CommerceAdminChannelDetailsPage} from '../../../../pages/commerce/commerce-channel-web/commerceAdminChannelDetailsPage';
+import {CommerceAdminChannelsPage} from '../../../../pages/commerce/commerce-channel-web/commerceAdminChannelsPage';
+import {CheckoutPage} from '../../../../pages/commerce/commerce-checkout-web/checkoutPage';
+import {OrderDetailsPage} from '../../../../pages/commerce/commerce-order-content-web/orderDetailsPage';
+import {PendingOrdersPage} from '../../../../pages/commerce/commerce-order-content-web/pendingOrdersPage';
 import {getRandomInt} from '../../../../utils/getRandomInt';
 import getRandomString from '../../../../utils/getRandomString';
 import {
 	performLoginViaApi,
 	performLogout,
+	performUserSwitch,
 	userData,
 } from '../../../../utils/performLogin';
 import {waitForAlert} from '../../../../utils/waitForAlert';
 import getFragmentDefinition from '../../../layout-content-page-editor-web/main/utils/getFragmentDefinition';
 import getPageDefinition from '../../../layout-content-page-editor-web/main/utils/getPageDefinition';
 import getWidgetDefinition from '../../../layout-content-page-editor-web/main/utils/getWidgetDefinition';
-import {createAccountWithBuyerUser, miniumSetUp} from '../../utils/commerce';
+import {
+	apiStorefrontSetUp,
+	createAccountWithBuyerUser,
+	miniumSetUp,
+} from '../../utils/commerce';
 import {getDateFormatted, setFutureDate} from '../../utils/date';
 
 export const test = mergeTests(
@@ -52,6 +63,202 @@ export const test = mergeTests(
 	productMenuPageTest,
 	systemSettingsPageTest
 );
+
+async function setUpTermsCheckout({
+	apiHelpers,
+	checkoutPage,
+	commerceAdminChannelDetailsPage,
+	commerceAdminChannelsPage,
+	orderDetailsPage,
+	page,
+	pendingOrdersPage,
+	rolePermissions,
+	termDescription,
+}: {
+	apiHelpers: DataApiHelpers;
+	checkoutPage: CheckoutPage;
+	commerceAdminChannelDetailsPage: CommerceAdminChannelDetailsPage;
+	commerceAdminChannelsPage: CommerceAdminChannelsPage;
+	orderDetailsPage: OrderDetailsPage;
+	page: Page;
+	pendingOrdersPage: PendingOrdersPage;
+	rolePermissions?: TRole['rolePermissions'];
+	termDescription?: string;
+}) {
+	const {channel, product, site} = await apiStorefrontSetUp(apiHelpers, [
+		{
+			title: 'Checkout',
+			widgetName:
+				'com_liferay_commerce_checkout_web_internal_portlet_CommerceCheckoutPortlet',
+		},
+		{
+			title: 'Pending Orders',
+			widgetName:
+				'com_liferay_commerce_order_content_web_internal_portlet_CommerceOpenOrderContentPortlet',
+		},
+	]);
+
+	await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+		channel.name,
+		'B2B'
+	);
+
+	await waitForAlert(page);
+
+	await (
+		await commerceAdminChannelDetailsPage.generalCommerceAdminChannelTableLink(
+			'Flat Rate'
+		)
+	).click();
+	await commerceAdminChannelDetailsPage.activateChannelConfiguration(
+		'Flat Rate',
+		'Shipping Methods'
+	);
+	await commerceAdminChannelDetailsPage.addFlatRateShippingOption(
+		'Standard Delivery'
+	);
+
+	const deliveryTermProperties = {
+		...(termDescription && {description: {en_US: termDescription}}),
+		type: 'delivery-terms',
+	};
+
+	const deliveryTerms = [
+		await apiHelpers.headlessCommerceAdminOrder.postTerm(
+			deliveryTermProperties
+		),
+		await apiHelpers.headlessCommerceAdminOrder.postTerm(
+			deliveryTermProperties
+		),
+	];
+
+	for (const deliveryTerm of deliveryTerms) {
+		await commerceAdminChannelsPage.addFlatRateDeliveryTermEligibility(
+			commerceAdminChannelDetailsPage,
+			channel.name,
+			deliveryTerm.label['en_US']
+		);
+	}
+
+	const paymentTermProperties = {
+		...(termDescription && {description: {en_US: termDescription}}),
+		type: 'payment-terms',
+	};
+
+	const paymentTerms = [
+		await apiHelpers.headlessCommerceAdminOrder.postTerm(
+			paymentTermProperties
+		),
+		await apiHelpers.headlessCommerceAdminOrder.postTerm(
+			paymentTermProperties
+		),
+	];
+
+	await commerceAdminChannelsPage.goto();
+
+	await (
+		await commerceAdminChannelsPage.channelsTableRowLink(channel.name)
+	).click();
+	await commerceAdminChannelDetailsPage.activateChannelConfiguration(
+		'Money Order',
+		'Payment Methods'
+	);
+
+	for (const paymentTerm of paymentTerms) {
+		await commerceAdminChannelsPage.addMoneyOrderPaymentTermEligibility(
+			commerceAdminChannelDetailsPage,
+			channel.name,
+			paymentTerm.label['en_US']
+		);
+	}
+
+	let account: {id?: number};
+	let buyerUser: {alternateName?: string};
+
+	if (rolePermissions) {
+		account = await apiHelpers.headlessAdminUser.postAccount({
+			name: 'Commerce Account ' + getRandomString(),
+			type: 'business',
+		});
+
+		const role = await apiHelpers.headlessAdminUser.postRole({
+			name: 'Test Buyer ' + getRandomString(),
+			rolePermissions,
+		});
+
+		const user = await apiHelpers.headlessAdminUser.postUserAccount();
+
+		userData[user.alternateName] = {
+			name: user.givenName,
+			password: 'test',
+			surname: user.familyName,
+		};
+
+		await apiHelpers.headlessAdminUser.assignUserToAccountByEmailAddress(
+			account.id,
+			[user.emailAddress]
+		);
+
+		const siteMemberRole =
+			await apiHelpers.headlessAdminUser.getRoleByName('Site Member');
+
+		await apiHelpers.headlessAdminUser.assignUserToSite(
+			siteMemberRole.id,
+			site.id,
+			user.id
+		);
+
+		await apiHelpers.headlessAdminUser.postRoleByExternalReferenceCodeUserAccountAssociation(
+			role.externalReferenceCode,
+			user.id
+		);
+
+		buyerUser = user;
+	}
+	else {
+		({account, buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id
+		));
+	}
+
+	const cart = await apiHelpers.headlessCommerceDeliveryCart.postCart(
+		{
+			accountId: account.id,
+			cartItems: [
+				{
+					options: '[]',
+					quantity: 1,
+					skuId: product.skus[0].id,
+				},
+			],
+		},
+		channel.id
+	);
+
+	await performUserSwitch(page, buyerUser.alternateName);
+
+	await pendingOrdersPage.gotoOrder(site.friendlyUrlPath, cart.id);
+
+	await orderDetailsPage.checkoutButton.click();
+
+	await checkoutPage.addAddress({
+		city: 'Test City',
+		countryLabel: 'United States',
+		name: 'Test Name',
+		regionLabel: 'Florida',
+		street: 'Test Street',
+		zip: '12345',
+	});
+	await checkoutPage.continueButton.click();
+
+	await page.waitForURL((url) => url.href.includes('shipping-method'));
+
+	await checkoutPage.shippingMethodRadio('Standard Delivery').check();
+	await checkoutPage.continueButton.click();
+
+	return {cart, deliveryTerms, paymentTerms};
+}
 
 test(
 	'Checkout widget configuration to display full addresses and phone number',
@@ -2717,6 +2924,162 @@ test(
 			expect(persistedDeliveryDate.getDate()).toBe(
 				requestedDeliveryDate.getDate()
 			);
+		});
+	}
+);
+
+test(
+	'Buyer can view every eligible term with its rich text description, change it before completing checkout, and the order stores the selected terms',
+	{tag: ['@COMMERCE-9088', '@LPD-106244-Grouped-13']},
+	async ({
+		apiHelpers,
+		checkoutPage,
+		commerceAdminChannelDetailsPage,
+		commerceAdminChannelsPage,
+		orderDetailsPage,
+		page,
+		pendingOrdersPage,
+	}) => {
+		test.setTimeout(600000);
+
+		const {cart, deliveryTerms, paymentTerms} = await setUpTermsCheckout({
+			apiHelpers,
+			checkoutPage,
+			commerceAdminChannelDetailsPage,
+			commerceAdminChannelsPage,
+			orderDetailsPage,
+			page,
+			pendingOrdersPage,
+			termDescription:
+				'<ul><li><u><em><strong>Bulleted Term</strong></em></u></li></ul><ol><li>Numbered Term</li></ol>',
+		});
+
+		const [deliveryTerm1, deliveryTerm2] = deliveryTerms;
+		const [paymentTerm1, paymentTerm2] = paymentTerms;
+
+		await test.step('Every eligible delivery term is listed with its rich text description', async () => {
+			await page.waitForURL((url) => url.href.includes('delivery-terms'));
+
+			await expect(
+				checkoutPage.deliveryTermOption(deliveryTerm1.label['en_US'])
+			).toBeVisible();
+			await expect(
+				checkoutPage.deliveryTermOption(deliveryTerm2.label['en_US'])
+			).toBeVisible();
+
+			await checkoutPage
+				.termMoreInfoLink(deliveryTerm1.label['en_US'])
+				.click();
+
+			const termDescriptionModal = checkoutPage.termDescriptionModal(
+				deliveryTerm1.label['en_US']
+			);
+
+			await expect(termDescriptionModal.locator('strong')).toHaveText(
+				'Bulleted Term'
+			);
+			await expect(termDescriptionModal.locator('ol li')).toHaveText(
+				'Numbered Term'
+			);
+
+			await page.keyboard.press('Escape');
+
+			await checkoutPage
+				.deliveryTermOption(deliveryTerm1.label['en_US'])
+				.check();
+			await checkoutPage.continueButton.click();
+		});
+
+		await test.step('Every eligible payment term is listed with its rich text description', async () => {
+			await page.waitForURL((url) => url.href.includes('payment-terms'));
+
+			await expect(
+				checkoutPage.paymentTermOption(paymentTerm1.label['en_US'])
+			).toBeVisible();
+			await expect(
+				checkoutPage.paymentTermOption(paymentTerm2.label['en_US'])
+			).toBeVisible();
+
+			await checkoutPage
+				.termMoreInfoLink(paymentTerm1.label['en_US'])
+				.click();
+
+			const termDescriptionModal = checkoutPage.termDescriptionModal(
+				paymentTerm1.label['en_US']
+			);
+
+			await expect(termDescriptionModal.locator('strong')).toHaveText(
+				'Bulleted Term'
+			);
+			await expect(termDescriptionModal.locator('ol li')).toHaveText(
+				'Numbered Term'
+			);
+
+			await page.keyboard.press('Escape');
+
+			await checkoutPage
+				.paymentTermOption(paymentTerm1.label['en_US'])
+				.check();
+			await checkoutPage.continueButton.click();
+
+			await page.waitForURL((url) => url.href.includes('order-summary'));
+
+			await expect(
+				checkoutPage.deliveryTermLink(deliveryTerm1.label['en_US'])
+			).toBeVisible();
+			await expect(
+				checkoutPage.paymentTermLink(paymentTerm1.label['en_US'])
+			).toBeVisible();
+		});
+
+		await test.step('The selected terms can be changed before completing checkout', async () => {
+			await checkoutPage.previousButton.click();
+
+			await page.waitForURL((url) => url.href.includes('payment-terms'));
+
+			await checkoutPage.previousButton.click();
+
+			await page.waitForURL((url) => url.href.includes('delivery-terms'));
+
+			await checkoutPage
+				.deliveryTermOption(deliveryTerm2.label['en_US'])
+				.check();
+			await checkoutPage.continueButton.click();
+
+			await page.waitForURL((url) => url.href.includes('payment-terms'));
+
+			await checkoutPage
+				.paymentTermOption(paymentTerm2.label['en_US'])
+				.check();
+			await checkoutPage.continueButton.click();
+
+			await page.waitForURL((url) => url.href.includes('order-summary'));
+
+			await expect(
+				checkoutPage.deliveryTermLink(deliveryTerm2.label['en_US'])
+			).toBeVisible();
+			await expect(
+				checkoutPage.paymentTermLink(paymentTerm2.label['en_US'])
+			).toBeVisible();
+			await expect(
+				checkoutPage.deliveryTermLink(deliveryTerm1.label['en_US'])
+			).toHaveCount(0);
+			await expect(
+				checkoutPage.paymentTermLink(paymentTerm1.label['en_US'])
+			).toHaveCount(0);
+		});
+
+		await test.step('The placed order stores the selected terms', async () => {
+			await checkoutPage.continueButton.click();
+
+			await expect(checkoutPage.orderSuccessMessage).toBeVisible();
+
+			const order = await apiHelpers.headlessCommerceAdminOrder.getOrder(
+				cart.id
+			);
+
+			expect(order.deliveryTermId).toBe(deliveryTerm2.id);
+			expect(order.paymentTermId).toBe(paymentTerm2.id);
 		});
 	}
 );
