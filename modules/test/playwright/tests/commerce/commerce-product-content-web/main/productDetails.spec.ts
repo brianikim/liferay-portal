@@ -2209,3 +2209,44 @@ test(
 		await expect(productDetailsPage.galleryImage.first()).toBeVisible();
 	}
 );
+
+test(
+	'A product is reachable through its friendly URL once the Product Detail health check is fixed',
+	{tag: ['@COMMERCE-6304', '@LPD-106244-Grouped-8']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelDetailsPage,
+		commerceAdminChannelsPage,
+		page,
+		productDetailsPage,
+	}) => {
+		const {channel, product, site} = await apiStorefrontSetUp(apiHelpers);
+
+		const productURL = `/web${site.friendlyUrlPath}/p/${product.urls['en_US']}`;
+
+		await page.goto(productURL);
+
+		await expect(productDetailsPage.productHeaderTitle).toHaveCount(0);
+
+		await commerceAdminChannelsPage.goto();
+
+		await (
+			await commerceAdminChannelsPage.channelsTableRowLink(channel.name)
+		).click();
+
+		await (
+			await commerceAdminChannelDetailsPage.commerceChannelHealthChecksTableRowAction(
+				'Fix Issue',
+				'Product Detail'
+			)
+		).click();
+
+		await waitForAlert(page);
+
+		await page.goto(productURL);
+
+		await expect(productDetailsPage.productHeaderTitle).toHaveText(
+			product.name['en_US']
+		);
+	}
+);
