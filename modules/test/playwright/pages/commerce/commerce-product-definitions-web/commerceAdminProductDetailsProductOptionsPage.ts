@@ -12,11 +12,16 @@ export class CommerceAdminProductDetailsProductOptionsPage extends CommerceDNDTa
 	readonly createNewOptionsButton: Locator;
 	readonly deleteMenuItem: Locator;
 	readonly optionActionsButton: (optionName: string) => Locator;
+	readonly optionFieldTypeSelect: Locator;
 	readonly optionLink: (optionName: string) => Locator;
+	readonly optionSaveButton: Locator;
 	readonly optionSidePanelCancelButton: Locator;
 	readonly optionSidePanelFrame: FrameLocator;
+	readonly optionValueActionsButton: (optionValueName: string) => Locator;
 	readonly optionValueDeltaPriceInput: Locator;
+	readonly optionValueKeyInput: Locator;
 	readonly optionValueLink: (optionValueName: string) => Locator;
+	readonly optionValueNameInput: Locator;
 	readonly optionValueQuantityInput: Locator;
 	readonly optionValueRow: (optionValueName: string) => Locator;
 	readonly optionValueSaveButton: Locator;
@@ -58,6 +63,12 @@ export class CommerceAdminProductDetailsProductOptionsPage extends CommerceDNDTa
 		this.optionLink = (optionName: string) =>
 			page.getByRole('link', {exact: true, name: optionName});
 		this.optionSidePanelFrame = page.frameLocator(sidePanelIframe);
+		this.optionFieldTypeSelect =
+			this.optionSidePanelFrame.getByLabel('Field Type');
+		this.optionSaveButton = this.optionSidePanelFrame.getByRole('button', {
+			exact: true,
+			name: 'Save',
+		});
 		this.optionValueSidePanelFrame =
 			this.optionSidePanelFrame.frameLocator(sidePanelIframe);
 		this.optionSidePanelCancelButton = this.optionSidePanelFrame.getByRole(
@@ -67,13 +78,26 @@ export class CommerceAdminProductDetailsProductOptionsPage extends CommerceDNDTa
 				name: 'Cancel',
 			}
 		);
+		this.optionValueActionsButton = (optionValueName: string) =>
+			this.optionSidePanelFrame.getByRole('button', {
+				exact: true,
+				name: `${optionValueName} Actions`,
+			});
 		this.optionValueDeltaPriceInput =
 			this.optionValueSidePanelFrame.getByLabel('Delta Price');
+		this.optionValueKeyInput = this.optionValueSidePanelFrame.getByLabel(
+			'Key',
+			{exact: true}
+		);
 		this.optionValueLink = (optionValueName: string) =>
 			this.optionSidePanelFrame.getByRole('link', {
 				exact: true,
 				name: optionValueName,
 			});
+		this.optionValueNameInput = this.optionValueSidePanelFrame.getByLabel(
+			'Name',
+			{exact: true}
+		);
 		this.optionValueQuantityInput = this.optionValueSidePanelFrame.locator(
 			'input[name$="_quantity"]'
 		);
@@ -105,6 +129,14 @@ export class CommerceAdminProductDetailsProductOptionsPage extends CommerceDNDTa
 		);
 		this.page = page;
 		this.visibleSidePanels = page.locator(sidePanel);
+	}
+
+	async clickOptionValueAction(action: string, optionValueName: string) {
+		await this.optionValueActionsButton(optionValueName).click();
+
+		await this.optionSidePanelFrame
+			.getByRole('menuitem', {exact: true, name: action})
+			.click();
 	}
 
 	async closeOption() {
