@@ -37,6 +37,7 @@ import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.util.Base64;
 import com.liferay.portal.kernel.util.ContentTypes;
+import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
@@ -192,6 +193,7 @@ public class AttachmentResourceTest extends BaseAttachmentResourceTestCase {
 		assertEquals(randomAttachment, postAttachment);
 		assertValid(postAttachment);
 
+		_testPostProductIdImageWithBase64();
 		_testPostProductIdImageWithFileEntryExternalReferenceCode();
 		_testPostProductIdImageWithOptions();
 	}
@@ -767,6 +769,49 @@ public class AttachmentResourceTest extends BaseAttachmentResourceTestCase {
 		Assert.assertEquals(
 			fileEntry.getFileEntryId(),
 			GetterUtil.getLong(postAttachment.getFileEntryId()));
+	}
+
+	private void _testPostProductIdImageWithBase64() throws Exception {
+		String base64EncodedContent = Base64.encode(
+			FileUtil.getBytes(
+				AttachmentResourceTest.class, "dependencies/image.jpg"));
+
+		Attachment postAttachment = attachmentResource.postProductIdImage(
+			_cProduct.getCProductId(),
+			new Attachment() {
+				{
+					attachment = base64EncodedContent;
+					contentType = ContentTypes.IMAGE_PNG;
+					externalReferenceCode = RandomTestUtil.randomString();
+					neverExpire = true;
+					title = HashMapBuilder.put(
+						"en_US", RandomTestUtil.randomString(5)
+					).build();
+				}
+			});
+
+		FileEntry fileEntry = _dlAppLocalService.getFileEntry(
+			postAttachment.getFileEntryId());
+
+		Assert.assertEquals("png", fileEntry.getExtension());
+
+		postAttachment = attachmentResource.postProductIdImage(
+			_cProduct.getCProductId(),
+			new Attachment() {
+				{
+					attachment = base64EncodedContent;
+					externalReferenceCode = RandomTestUtil.randomString();
+					neverExpire = true;
+					title = HashMapBuilder.put(
+						"en_US", RandomTestUtil.randomString(5)
+					).build();
+				}
+			});
+
+		fileEntry = _dlAppLocalService.getFileEntry(
+			postAttachment.getFileEntryId());
+
+		Assert.assertEquals("jpg", fileEntry.getExtension());
 	}
 
 	private void _testPostProductIdImageWithFileEntryExternalReferenceCode()
