@@ -20,6 +20,7 @@ export class PlacedOrdersPage extends CommerceDNDTablePage {
 	readonly configurationIFrameShowOrderCreateTimeToggle: Locator;
 	readonly configurationIFrameShowPhoneNumberToggle: Locator;
 	readonly configurationMenuItem: Locator;
+	readonly editTermsLink: Locator;
 	readonly expandProductButton: Locator;
 	readonly layoutsPage: CommerceLayoutsPage;
 	readonly optionsButton: Locator;
@@ -32,6 +33,9 @@ export class PlacedOrdersPage extends CommerceDNDTablePage {
 	readonly orderItemActionsButton: Locator;
 	readonly orderItemActionsButtonEdit: Locator;
 	readonly orderItemActionsButtonFor: (productName: string) => Locator;
+	readonly orderItemProductName: (productName: string) => Locator;
+	readonly orderItemRow: (productName: string) => Locator;
+	readonly orderItemRowCell: (productName: string, text: string) => Locator;
 	readonly page: Page;
 	readonly pageLabel: Locator;
 	readonly pageTitle: Locator;
@@ -41,6 +45,7 @@ export class PlacedOrdersPage extends CommerceDNDTablePage {
 	readonly searchButton: Locator;
 	readonly searchInput: Locator;
 	readonly commerceShippingAddress: Locator;
+	readonly termLink: (label: string) => Locator;
 	readonly viewButton: Locator;
 
 	constructor(page: Page) {
@@ -80,6 +85,11 @@ export class PlacedOrdersPage extends CommerceDNDTablePage {
 			exact: true,
 			name: 'Configuration',
 		});
+		this.editTermsLink = page
+			.locator(
+				'#portlet_com_liferay_commerce_order_content_web_internal_portlet_CommerceOrderContentPortlet'
+			)
+			.getByRole('link', {exact: true, name: 'Edit'});
 		this.expandProductButton = page
 			.locator('.autofit-col-toggle')
 			.getByRole('button');
@@ -117,6 +127,15 @@ export class PlacedOrdersPage extends CommerceDNDTablePage {
 				exact: true,
 				name: `${productName} Actions`,
 			});
+		this.orderItemProductName = (productName: string) =>
+			this.orderItemRow(productName).getByText(productName);
+		this.orderItemRow = (productName: string) =>
+			page.getByRole('row').filter({hasText: productName});
+		this.orderItemRowCell = (productName: string, text: string) =>
+			this.orderItemRow(productName).getByRole('cell', {
+				exact: true,
+				name: text,
+			});
 		this.page = page;
 		this.pageLabel = page
 			.getByTestId('layoutHref')
@@ -139,6 +158,8 @@ export class PlacedOrdersPage extends CommerceDNDTablePage {
 		this.commerceShippingAddress = page.getByTestId(
 			'commerceShippingAddress'
 		);
+		this.termLink = (label: string) =>
+			this.portlet.getByRole('link', {exact: true, name: label});
 		this.viewButton = page.getByLabel('View');
 	}
 
