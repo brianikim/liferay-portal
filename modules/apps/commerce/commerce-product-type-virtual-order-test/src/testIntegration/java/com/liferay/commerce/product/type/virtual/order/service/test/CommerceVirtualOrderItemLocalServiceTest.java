@@ -29,6 +29,7 @@ import com.liferay.commerce.product.type.virtual.order.model.CommerceVirtualOrde
 import com.liferay.commerce.product.type.virtual.order.service.CommerceVirtualOrderItemLocalService;
 import com.liferay.commerce.product.type.virtual.order.util.CommerceVirtualOrderItemChecker;
 import com.liferay.commerce.product.type.virtual.service.CPDVirtualSettingFileEntryLocalServiceUtil;
+import com.liferay.commerce.product.type.virtual.service.CPDefinitionVirtualSettingLocalService;
 import com.liferay.commerce.product.type.virtual.test.util.VirtualCPTypeTestUtil;
 import com.liferay.commerce.service.CommerceOrderLocalService;
 import com.liferay.commerce.subscription.CommerceSubscriptionEntryHelper;
@@ -53,6 +54,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import org.frutilla.FrutillaRule;
 
@@ -185,6 +187,55 @@ public class CommerceVirtualOrderItemLocalServiceTest {
 					null, commerceVirtualOrderItem.getEndDate());
 			}
 		}
+
+		_testAddCommerceVirtualOrderItemWithActivationStatus(
+			CommerceOrderConstants.ORDER_STATUS_COMPLETED,
+			CommerceOrderConstants.ORDER_STATUS_PENDING,
+			CommerceOrderPaymentConstants.STATUS_COMPLETED,
+			CommerceOrderConstants.ORDER_STATUS_PENDING, true,
+			CommerceOrderConstants.ORDER_STATUS_PENDING, 1);
+		_testAddCommerceVirtualOrderItemWithActivationStatus(
+			CommerceOrderConstants.ORDER_STATUS_COMPLETED, null,
+			CommerceOrderPaymentConstants.STATUS_PENDING,
+			CommerceOrderConstants.ORDER_STATUS_COMPLETED, true,
+			CommerceOrderConstants.ORDER_STATUS_COMPLETED, 1);
+		_testAddCommerceVirtualOrderItemWithActivationStatus(
+			CommerceOrderConstants.ORDER_STATUS_COMPLETED, null,
+			CommerceOrderPaymentConstants.STATUS_PENDING,
+			CommerceOrderConstants.ORDER_STATUS_PENDING, false,
+			CommerceOrderConstants.ORDER_STATUS_COMPLETED, 1);
+		_testAddCommerceVirtualOrderItemWithActivationStatus(
+			CommerceOrderConstants.ORDER_STATUS_PENDING,
+			CommerceOrderConstants.ORDER_STATUS_COMPLETED,
+			CommerceOrderPaymentConstants.STATUS_PENDING,
+			CommerceOrderConstants.ORDER_STATUS_COMPLETED, true,
+			CommerceOrderConstants.ORDER_STATUS_COMPLETED, 1);
+		_testAddCommerceVirtualOrderItemWithActivationStatus(
+			CommerceOrderConstants.ORDER_STATUS_PENDING,
+			CommerceOrderConstants.ORDER_STATUS_PROCESSING,
+			CommerceOrderPaymentConstants.STATUS_PENDING,
+			CommerceOrderConstants.ORDER_STATUS_PROCESSING, true,
+			CommerceOrderConstants.ORDER_STATUS_PROCESSING, 1);
+		_testAddCommerceVirtualOrderItemWithActivationStatus(
+			CommerceOrderConstants.ORDER_STATUS_PENDING, null,
+			CommerceOrderPaymentConstants.STATUS_PENDING,
+			CommerceOrderConstants.ORDER_STATUS_PENDING, true,
+			CommerceOrderConstants.ORDER_STATUS_PENDING, 1);
+		_testAddCommerceVirtualOrderItemWithActivationStatus(
+			CommerceOrderConstants.ORDER_STATUS_PROCESSING,
+			CommerceOrderConstants.ORDER_STATUS_PENDING,
+			CommerceOrderPaymentConstants.STATUS_PENDING,
+			CommerceOrderConstants.ORDER_STATUS_PENDING, true,
+			CommerceOrderConstants.ORDER_STATUS_PENDING, 1);
+		_testAddCommerceVirtualOrderItemWithActivationStatus(
+			CommerceOrderConstants.ORDER_STATUS_PROCESSING, null,
+			CommerceOrderPaymentConstants.STATUS_PENDING,
+			CommerceOrderConstants.ORDER_STATUS_PROCESSING, true,
+			CommerceOrderConstants.ORDER_STATUS_PROCESSING, 1);
+		_testAddCommerceVirtualOrderItemWithActivationStatus(
+			null, null, CommerceOrderPaymentConstants.STATUS_PENDING,
+			CommerceOrderConstants.ORDER_STATUS_COMPLETED, true,
+			CommerceOrderConstants.ORDER_STATUS_COMPLETED, 0);
 	}
 
 	@Test
@@ -397,6 +448,135 @@ public class CommerceVirtualOrderItemLocalServiceTest {
 		return _commerceOrderLocalService.updateCommerceOrder(commerceOrder);
 	}
 
+	private void _testAddCommerceVirtualOrderItemWithActivationStatus(
+			Integer cpDefinitionActivationStatus,
+			Integer cpInstanceActivationStatus, int paymentStatus,
+			int orderStatus, boolean expectedActive,
+			int expectedActivationStatus,
+			int expectedCommerceVirtualOrderItemFileEntriesCount)
+		throws Exception {
+
+		CPDefinition cpDefinition = CPTestUtil.addCPDefinitionFromCatalog(
+			_commerceCatalog.getGroupId(), VirtualCPTypeConstants.NAME, true,
+			true);
+
+		long expectedDuration = 0;
+		long expectedFileEntryId = 0;
+		int expectedMaxUsages = 0;
+
+		if (cpDefinitionActivationStatus != null) {
+			DLFolder dlFolder = DLTestUtil.addDLFolder(
+				_commerceCatalog.getGroupId());
+
+			DLFileEntry dlFileEntry = DLTestUtil.addDLFileEntry(
+				dlFolder.getFolderId());
+
+			CPDefinitionVirtualSetting cpDefinitionVirtualSetting =
+				VirtualCPTypeTestUtil.addCPDefinitionVirtualSetting(
+					_commerceCatalog.getGroupId(),
+					cpDefinition.getModelClassName(),
+					cpDefinition.getCPDefinitionId(),
+					dlFileEntry.getFileEntryId(), cpDefinitionActivationStatus,
+					TimeUnit.DAYS.toMillis(1), 0, 0);
+
+			expectedDuration = cpDefinitionVirtualSetting.getDuration();
+			expectedMaxUsages = cpDefinitionVirtualSetting.getMaxUsages();
+
+			expectedFileEntryId = dlFileEntry.getFileEntryId();
+		}
+
+		List<CPInstance> cpInstances = cpDefinition.getCPInstances();
+
+		CPInstance cpInstance = cpInstances.get(0);
+
+		if (cpInstanceActivationStatus != null) {
+			DLFolder dlFolder = DLTestUtil.addDLFolder(
+				_commerceCatalog.getGroupId());
+
+			DLFileEntry dlFileEntry = DLTestUtil.addDLFileEntry(
+				dlFolder.getFolderId());
+
+			CPDefinitionVirtualSetting cpDefinitionVirtualSetting =
+				VirtualCPTypeTestUtil.addCPDefinitionVirtualSetting(
+					_commerceCatalog.getGroupId(), CPInstance.class.getName(),
+					cpInstance.getCPInstanceId(), dlFileEntry.getFileEntryId(),
+					cpInstanceActivationStatus, TimeUnit.DAYS.toMillis(3), 0,
+					0);
+
+			cpDefinitionVirtualSetting.setOverride(true);
+
+			cpDefinitionVirtualSetting =
+				_cpDefinitionVirtualSettingLocalService.
+					updateCPDefinitionVirtualSetting(
+						cpDefinitionVirtualSetting);
+
+			expectedDuration = cpDefinitionVirtualSetting.getDuration();
+			expectedMaxUsages = cpDefinitionVirtualSetting.getMaxUsages();
+
+			expectedFileEntryId = dlFileEntry.getFileEntryId();
+		}
+
+		CommerceTestUtil.updateBackOrderCPDefinitionInventory(cpDefinition);
+
+		CommercePriceList commercePriceList =
+			_commercePriceListLocalService.fetchCatalogBaseCommercePriceList(
+				cpDefinition.getGroupId());
+
+		_commercePriceEntryLocalService.addCommercePriceEntry(
+			null, cpDefinition.getCProductId(), cpInstance.getCPInstanceUuid(),
+			commercePriceList.getCommercePriceListId(), BigDecimal.ZERO, false,
+			BigDecimal.ZERO, null,
+			ServiceContextTestUtil.getServiceContext(_user.getGroupId()));
+
+		CommerceOrder commerceOrder = CommerceTestUtil.addB2CCommerceOrder(
+			_user.getUserId(), _commerceChannel.getGroupId(),
+			_commerceCurrency);
+
+		_commerceOrders.add(commerceOrder);
+
+		CommerceOrderItem commerceOrderItem =
+			CommerceTestUtil.addCommerceOrderItem(
+				commerceOrder.getCommerceOrderId(),
+				cpInstance.getCPInstanceId(), BigDecimal.ONE);
+
+		commerceOrder = _setCommerceOrderStatuses(
+			_commerceOrderLocalService.getCommerceOrder(
+				commerceOrder.getCommerceOrderId()),
+			paymentStatus, orderStatus);
+
+		_commerceVirtualOrderItemChecker.checkCommerceVirtualOrderItems(
+			commerceOrder.getCommerceOrderId());
+
+		CommerceVirtualOrderItem commerceVirtualOrderItem =
+			_commerceVirtualOrderItemLocalService.
+				fetchCommerceVirtualOrderItemByCommerceOrderItemId(
+					commerceOrderItem.getCommerceOrderItemId());
+
+		Assert.assertEquals(
+			expectedActivationStatus,
+			commerceVirtualOrderItem.getActivationStatus());
+		Assert.assertEquals(
+			expectedDuration, commerceVirtualOrderItem.getDuration());
+		Assert.assertEquals(
+			expectedMaxUsages, commerceVirtualOrderItem.getMaxUsages());
+		Assert.assertEquals(
+			expectedActive, commerceVirtualOrderItem.isActive());
+		Assert.assertEquals(
+			expectedCommerceVirtualOrderItemFileEntriesCount,
+			commerceVirtualOrderItem.
+				getCommerceVirtualOrderItemFileEntriesCount());
+
+		for (CommerceVirtualOrderItemFileEntry
+				commerceVirtualOrderItemFileEntry :
+					commerceVirtualOrderItem.
+						getCommerceVirtualOrderItemFileEntries()) {
+
+			Assert.assertEquals(
+				expectedFileEntryId,
+				commerceVirtualOrderItemFileEntry.getFileEntryId());
+		}
+	}
+
 	private CommerceCatalog _commerceCatalog;
 	private CommerceChannel _commerceChannel;
 
@@ -426,6 +606,10 @@ public class CommerceVirtualOrderItemLocalServiceTest {
 
 	@Inject
 	private CPDefinitionLocalService _cpDefinitionLocalService;
+
+	@Inject
+	private CPDefinitionVirtualSettingLocalService
+		_cpDefinitionVirtualSettingLocalService;
 
 	@Inject
 	private CPInstanceLocalService _cpInstanceLocalService;
