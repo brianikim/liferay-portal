@@ -9,6 +9,8 @@ import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.commerce.product.configuration.CProductVersionConfiguration;
 import com.liferay.commerce.product.constants.CPAttachmentFileEntryConstants;
 import com.liferay.commerce.product.model.CPDefinition;
+import com.liferay.commerce.product.model.CPOption;
+import com.liferay.commerce.product.model.CPOptionValue;
 import com.liferay.commerce.product.model.CProduct;
 import com.liferay.commerce.product.model.CommerceCatalog;
 import com.liferay.commerce.product.service.CPAttachmentFileEntryLocalService;
@@ -20,12 +22,14 @@ import com.liferay.headless.commerce.admin.catalog.client.dto.v1_0.Attachment;
 import com.liferay.headless.commerce.admin.catalog.client.dto.v1_0.AttachmentBase64;
 import com.liferay.headless.commerce.admin.catalog.client.pagination.Page;
 import com.liferay.headless.commerce.admin.catalog.client.pagination.Pagination;
+import com.liferay.petra.function.UnsafeFunction;
 import com.liferay.petra.function.UnsafeSupplier;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.service.ClassNameLocalService;
@@ -49,6 +53,7 @@ import java.io.ByteArrayInputStream;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.junit.Assert;
@@ -461,6 +466,41 @@ public class AttachmentResourceTest extends BaseAttachmentResourceTestCase {
 			_cProduct.getExternalReferenceCode(), randomAttachment());
 	}
 
+	private void _assertOptions(
+			Attachment attachment,
+			UnsafeFunction<Attachment, Attachment, Exception> unsafeFunction)
+		throws Exception {
+
+		CPOption cpOption = CPTestUtil.addCPOption(
+			testGroup.getGroupId(), true);
+
+		CPOptionValue cpOptionValue = CPTestUtil.addCPOptionValue(cpOption);
+
+		CPTestUtil.addCPDefinitionOptionRel(
+			testGroup.getGroupId(), _cpDefinition.getCPDefinitionId(),
+			cpOption.getCPOptionId());
+
+		attachment.setOptions(
+			HashMapBuilder.put(
+				cpOption.getKey(), cpOptionValue.getKey()
+			).build());
+
+		Attachment postAttachment = unsafeFunction.apply(attachment);
+
+		Map<String, String> expectedOptions = HashMapBuilder.put(
+			cpOption.getKey(),
+			String.valueOf(JSONUtil.put(cpOptionValue.getKey()))
+		).build();
+
+		Assert.assertEquals(expectedOptions, postAttachment.getOptions());
+
+		Attachment getAttachment =
+			attachmentResource.getAttachmentByExternalReferenceCode(
+				postAttachment.getExternalReferenceCode());
+
+		Assert.assertEquals(expectedOptions, getAttachment.getOptions());
+	}
+
 	private Attachment _randomImageAttachment() throws Exception {
 		FileEntry fileEntry = _dlAppLocalService.addFileEntry(
 			null, TestPropsValues.getUserId(), testGroup.getGroupId(),
@@ -771,6 +811,13 @@ public class AttachmentResourceTest extends BaseAttachmentResourceTestCase {
 			GetterUtil.getLong(postAttachment.getFileEntryId()));
 	}
 
+	private void _testPostProductIdAttachmentWithOptions() throws Exception {
+		_assertOptions(
+			randomAttachment(),
+			attachment -> attachmentResource.postProductIdAttachment(
+				_cProduct.getCProductId(), attachment));
+	}
+
 	private void _testPostProductIdImageWithBase64() throws Exception {
 		String base64EncodedContent = Base64.encode(
 			FileUtil.getBytes(
@@ -838,6 +885,13 @@ public class AttachmentResourceTest extends BaseAttachmentResourceTestCase {
 		Assert.assertEquals(
 			fileEntry.getFileEntryId(),
 			GetterUtil.getLong(postAttachment.getFileEntryId()));
+	}
+
+	private void _testPostProductIdImageWithOptions() throws Exception {
+		_assertOptions(
+			_randomImageAttachment(),
+			attachment -> attachmentResource.postProductIdImage(
+				_cProduct.getCProductId(), attachment));
 	}
 
 	@DeleteAfterTestRun
