@@ -101,84 +101,121 @@ test(
 );
 
 test(
-	'Key is not automatically generated when writing new Specifications label',
-	{tag: '@LPD-28891'},
-	async ({apiHelpers, commerceSpecificationsPage, globalMenuPage}) => {
+	'Specification groups and labels can be created',
+	{tag: ['@LPD-28891', '@LPD-106244-Grouped-2']},
+	async ({apiHelpers, commerceSpecificationsPage, globalMenuPage, page}) => {
+		const groupTitle = getRandomString();
+		const specificationKey = getRandomString();
+		const specificationTitle = getRandomString();
+
 		try {
-			await globalMenuPage.goToCommerce('Specifications');
+			await test.step('Create a specification label', async () => {
+				await globalMenuPage.goToCommerce('Specifications');
 
-			await expect(
-				commerceSpecificationsPage.createNewSpecificationsProduct
-			).toBeVisible();
+				await commerceSpecificationsPage.createNewSpecificationsProduct.click();
+				await fillLocalizedInput(
+					commerceSpecificationsPage.specificationLabel,
+					specificationTitle
+				);
+				await fillLocalizedInput(
+					commerceSpecificationsPage.addDescriptionSpecifications,
+					`${specificationTitle} Description`
+				);
+				await commerceSpecificationsPage.keyContent.fill(
+					specificationKey
+				);
 
-			await commerceSpecificationsPage.createNewSpecificationsProduct.click();
-			await commerceSpecificationsPage.waitForKey('Specification 1');
-			await commerceSpecificationsPage.addDescriptionSpecifications.fill(
-				'Specification-1 Description'
-			);
+				await expect(commerceSpecificationsPage.keyContent).toHaveValue(
+					specificationKey
+				);
 
-			await expect(
-				commerceSpecificationsPage.addDescriptionSpecifications
-			).toBeVisible();
+				await commerceSpecificationsPage.saveButton.click();
 
-			await commerceSpecificationsPage.keyContent.fill('specification-1');
+				await waitForAlert(page);
 
-			await expect(commerceSpecificationsPage.keyContent).toHaveValue(
-				'specification-1'
-			);
+				await commerceSpecificationsPage.goBack.click();
 
-			await commerceSpecificationsPage.saveButton.click();
+				await commerceSpecificationsPage.search(specificationTitle);
+				await commerceSpecificationsPage
+					.specificationNameLink(specificationTitle)
+					.click();
 
-			await expect(
-				commerceSpecificationsPage.successMessage
-			).toBeVisible();
+				await expect(
+					commerceSpecificationsPage.specificationLabel
+				).toHaveValue(specificationTitle);
+				await expect(
+					commerceSpecificationsPage.addDescriptionSpecifications
+				).toHaveValue(`${specificationTitle} Description`);
+				await expect(commerceSpecificationsPage.keyContent).toHaveValue(
+					specificationKey
+				);
+			});
 
-			await commerceSpecificationsPage.goBack.click();
-			await commerceSpecificationsPage.goToSpecificationGroup.click();
-			await commerceSpecificationsPage.createNewSpecificationsProductGroup.click();
-			await commerceSpecificationsPage.groupTitle.fill(
-				'Specification group'
-			);
-			await commerceSpecificationsPage.addDescriptionSpecificationsGroup.fill(
-				'Specification group Description'
-			);
+			await test.step('Create a specification group', async () => {
+				await globalMenuPage.goToCommerce('Specifications');
 
-			await expect(commerceSpecificationsPage.keyContent).toHaveValue(
-				'Specification group'
-			);
+				await commerceSpecificationsPage.goToSpecificationGroup.click();
+				await commerceSpecificationsPage.createNewSpecificationsProductGroup.click();
+				await fillLocalizedInput(
+					commerceSpecificationsPage.groupTitle,
+					groupTitle
+				);
+				await fillLocalizedInput(
+					commerceSpecificationsPage.addDescriptionSpecificationsGroup,
+					`${groupTitle} Description`
+				);
 
-			await commerceSpecificationsPage.saveButton.click();
+				await expect(commerceSpecificationsPage.keyContent).toHaveValue(
+					groupTitle
+				);
 
-			await expect(
-				commerceSpecificationsPage.successMessage
-			).toBeVisible();
+				await commerceSpecificationsPage.saveButton.click();
+
+				await waitForAlert(page);
+
+				await commerceSpecificationsPage.goBack.click();
+
+				await commerceSpecificationsPage.search(groupTitle);
+				await commerceSpecificationsPage
+					.specificationNameLink(groupTitle)
+					.click();
+
+				await expect(commerceSpecificationsPage.groupTitle).toHaveValue(
+					groupTitle
+				);
+				await expect(
+					commerceSpecificationsPage.addDescriptionSpecificationsGroup
+				).toHaveValue(`${groupTitle} Description`);
+				await expect(commerceSpecificationsPage.keyContent).toHaveValue(
+					groupTitle
+				);
+			});
 		}
 		finally {
-			const specifications =
-				await apiHelpers.headlessCommerceAdminCatalog.getSpecifications();
+			const specification = (
+				await apiHelpers.headlessCommerceAdminCatalog.getSpecifications(
+					new URLSearchParams({search: specificationTitle})
+				)
+			).items.find((item) => item.title.en_US === specificationTitle);
 
-			for (let i = 0; i < specifications.totalCount; i++) {
-				if (specifications.items[i].title.en_US === 'Specification 1') {
-					apiHelpers.data.push({
-						id: specifications.items[i].id,
-						type: 'specification',
-					});
-				}
+			if (specification) {
+				apiHelpers.data.push({
+					id: specification.id,
+					type: 'specification',
+				});
 			}
 
-			const optionCategory =
-				await apiHelpers.headlessCommerceAdminCatalog.getOptionCategories();
+			const optionCategory = (
+				await apiHelpers.headlessCommerceAdminCatalog.getOptionCategories(
+					new URLSearchParams({filter: `key eq '${groupTitle}'`})
+				)
+			).items.find((item) => item.title.en_US === groupTitle);
 
-			for (let i = 0; i < optionCategory.totalCount; i++) {
-				if (
-					optionCategory.items[i].title.en_US ===
-					'Specification group'
-				) {
-					apiHelpers.data.push({
-						id: optionCategory.items[i].id,
-						type: 'optionCategory',
-					});
-				}
+			if (optionCategory) {
+				apiHelpers.data.push({
+					id: optionCategory.id,
+					type: 'optionCategory',
+				});
 			}
 		}
 	}
