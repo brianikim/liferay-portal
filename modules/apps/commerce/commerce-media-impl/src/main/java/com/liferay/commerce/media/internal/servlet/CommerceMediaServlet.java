@@ -6,6 +6,7 @@
 package com.liferay.commerce.media.internal.servlet;
 
 import com.liferay.account.constants.AccountConstants;
+import com.liferay.account.exception.NoSuchEntryException;
 import com.liferay.account.service.AccountEntryService;
 import com.liferay.asset.kernel.model.AssetCategory;
 import com.liferay.asset.kernel.service.AssetCategoryLocalService;
@@ -130,7 +131,7 @@ public class CommerceMediaServlet extends HttpServlet {
 			httpServletRequest, httpServletResponse, contentDisposition);
 	}
 
-	private void _checkPermissions(
+	private void _checkPermission(
 			long commerceAccountId, CPDefinition cpDefinition)
 		throws PortalException {
 
@@ -215,7 +216,7 @@ public class CommerceMediaServlet extends HttpServlet {
 					cpDefinition.getCommerceCatalog(), ActionKeys.VIEW);
 			}
 			else {
-				_checkPermissions(commerceAccountId, cpDefinition);
+				_checkPermission(commerceAccountId, cpDefinition);
 			}
 
 			return cpDefinition.getGroupId();
@@ -578,7 +579,7 @@ public class CommerceMediaServlet extends HttpServlet {
 			}
 			else {
 				if (sample) {
-					_checkPermissions(commerceAccountId, cpDefinition);
+					_checkPermission(commerceAccountId, cpDefinition);
 				}
 				else {
 					_sendError(
@@ -650,7 +651,9 @@ public class CommerceMediaServlet extends HttpServlet {
 				_log.debug(portalException);
 			}
 
-			if (portalException instanceof PrincipalException) {
+			if ((portalException instanceof NoSuchEntryException) ||
+				(portalException instanceof PrincipalException)) {
+
 				_sendError(
 					httpServletResponse, HttpServletResponse.SC_UNAUTHORIZED,
 					"You do not have permission to access the requested " +
