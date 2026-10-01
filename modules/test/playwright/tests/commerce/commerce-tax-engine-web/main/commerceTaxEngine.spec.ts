@@ -423,6 +423,125 @@ test(
 	}
 );
 
+test(
+	'Tax engines can be reactivated and the Remote engine can be configured',
+	{tag: ['@COMMERCE-6118', '@COMMERCE-6122', '@LPD-106244-Grouped-15']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelDetailsPage,
+		commerceAdminChannelsPage,
+		page,
+	}) => {
+		const site =
+			await apiHelpers.headlessAdminUser.getSiteByFriendlyUrlPath(
+				'guest'
+			);
+
+		const channel =
+			await apiHelpers.headlessCommerceAdminChannel.postChannel({
+				siteGroupId: site.id,
+			});
+
+		await commerceAdminChannelsPage.goto();
+
+		await (
+			await commerceAdminChannelsPage.channelsTableRowLink(channel.name)
+		).click();
+
+		const taxEngines = [
+			'Avalara',
+			'By Address',
+			'Fixed Tax Rate',
+			'Remote',
+		];
+
+		for (const taxEngine of taxEngines) {
+			await commerceAdminChannelDetailsPage.deactivateChannelConfiguration(
+				taxEngine,
+				'Tax Calculations'
+			);
+		}
+
+		await page.reload();
+
+		for (const taxEngine of taxEngines) {
+			await expect(
+				commerceAdminChannelDetailsPage.channelConfigurationStatusLabel(
+					taxEngine
+				)
+			).not.toHaveClass(/label-success/);
+		}
+
+		for (const taxEngine of taxEngines) {
+			await commerceAdminChannelDetailsPage.activateChannelConfiguration(
+				taxEngine,
+				'Tax Calculations'
+			);
+		}
+
+		await page.reload();
+
+		for (const taxEngine of taxEngines) {
+			await expect(
+				commerceAdminChannelDetailsPage.channelConfigurationStatusLabel(
+					taxEngine
+				)
+			).toHaveClass(/label-success/);
+		}
+
+		const remoteConfiguration = [
+			{
+				label: 'Tax Value Endpoint URL',
+				value: 'http://localhost:8080/web/test',
+			},
+			{label: 'Tax Value Endpoint Authorization Token', value: 'Test'},
+		];
+
+		await commerceAdminChannelDetailsPage.openConfiguration(
+			'Remote',
+			'Tax Calculations'
+		);
+
+		for (const {label, value} of remoteConfiguration) {
+			await (
+				await commerceAdminChannelDetailsPage.sidePanelFrameInput(
+					label,
+					'Tax Calculations'
+				)
+			).fill(value);
+		}
+
+		await (
+			await commerceAdminChannelDetailsPage.frameSaveButton(
+				false,
+				'Tax Calculations'
+			)
+		).click();
+
+		await waitForAlert(
+			await commerceAdminChannelDetailsPage.sidePanelFrame(
+				'Tax Calculations'
+			)
+		);
+
+		await page.reload();
+
+		await commerceAdminChannelDetailsPage.openConfiguration(
+			'Remote',
+			'Tax Calculations'
+		);
+
+		for (const {label, value} of remoteConfiguration) {
+			await expect(
+				await commerceAdminChannelDetailsPage.sidePanelFrameInput(
+					label,
+					'Tax Calculations'
+				)
+			).toHaveValue(value);
+		}
+	}
+);
+
 test("COMMERCE-7000 No XSS is present when the user updates a tax categories entry's details URL", async ({
 	apiHelpers,
 	newTaxCategoryPage,
