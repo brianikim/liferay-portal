@@ -9,12 +9,19 @@ export class CommerceAdminProductDetailsConfigurationPage {
 	readonly page: Page;
 	readonly publishLink: Locator;
 	readonly minStockQuantityInput: Locator;
+	readonly orderQuantityFormGroup: (label: string) => Locator;
+	readonly orderQuantityInput: (label: string) => Locator;
 	readonly purchasableInput: Locator;
+	readonly successAlert: Locator;
 
 	constructor(page: Page) {
 		this.page = page;
 		this.publishLink = page.getByRole('link', {name: 'Publish'});
 		this.minStockQuantityInput = page.getByTestId('minStockQuantityInput');
+		this.orderQuantityFormGroup = (label: string) =>
+			page.locator('.form-group').filter({has: page.getByLabel(label)});
+		this.orderQuantityInput = (label: string) => page.getByLabel(label);
 		this.purchasableInput = page.getByTestId('purchasableInput');
+		this.successAlert = page.locator('.alert-success');
 	}
 }
