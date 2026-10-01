@@ -265,8 +265,8 @@ test(
 );
 
 test(
-	'Shipment tracking URL for an order can be updated and viewed',
-	{tag: ['@COMMERCE-9459', '@LPD-56179']},
+	'Shipment tracking URL for an order can be updated and viewed, and the shipping method tracking URL can be edited and cleared',
+	{tag: ['@COMMERCE-9459', '@LPD-56179', '@LPD-106244-Grouped-15']},
 	async ({
 		apiHelpers,
 		commerceAdminChannelDetailsPage,
@@ -490,6 +490,42 @@ test(
 		await expect(
 			await page.getByText('www.variableratecarriersite.com/')
 		).toBeVisible();
+
+		await commerceAdminChannelsPage.goto();
+
+		await (
+			await commerceAdminChannelsPage.channelsTableRowLink(channel.name)
+		).click();
+
+		for (const trackingURL of ['www.flatratecarriersite2.com/', '']) {
+			await commerceAdminChannelDetailsPage.setShippingMethodTrackingURL(
+				'Flat Rate',
+				trackingURL,
+				'Shipping Methods'
+			);
+
+			await page.reload();
+
+			await (
+				await commerceAdminChannelDetailsPage.generalCommerceAdminChannelTableLink(
+					'Flat Rate'
+				)
+			).click();
+
+			await expect(
+				await commerceAdminChannelDetailsPage.sidePanelFrameInput(
+					'Tracking URL',
+					'Shipping Methods'
+				)
+			).toHaveValue(trackingURL);
+
+			await (
+				await commerceAdminChannelDetailsPage.closeSidePanelFrame(
+					false,
+					'Shipping Methods'
+				)
+			).click();
+		}
 	}
 );
 
