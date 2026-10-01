@@ -23,6 +23,7 @@ export class ProductDetailsPage {
 	readonly collectionDisplayListItem: (text: string) => Locator;
 	readonly collectionDisplayListItemDownloadLink: (text: string) => Locator;
 	readonly diagramCard: (name: string) => Locator;
+	readonly diagramLink: (name: string) => Locator;
 	readonly diagramSvgPin: (sequence: string) => Locator;
 	readonly diagramTooltip: Locator;
 	readonly diagramTooltipExternalName: (name: string) => Locator;
@@ -186,6 +187,7 @@ export class ProductDetailsPage {
 			});
 		this.diagramCard = (name: string) =>
 			page.locator('.cp-renderer .product-card').filter({hasText: name});
+		this.diagramLink = (name: string) => page.getByRole('link', {name});
 		this.diagramSvgPin = (sequence: string) =>
 			page
 				.locator('text.pin')
