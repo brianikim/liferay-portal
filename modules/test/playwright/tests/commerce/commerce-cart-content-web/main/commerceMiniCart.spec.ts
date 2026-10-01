@@ -3604,3 +3604,79 @@ test(
 		});
 	}
 );
+
+test(
+	'A SKU added from the product details and then through quick add stays a single mini cart item',
+	{tag: ['@COMMERCE-10529', '@COMMERCE-10680', '@LPD-106244-Grouped-10']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelsPage,
+		commerceMiniCartPage,
+		commerceThemeMiniumCatalogPage,
+		page,
+		productDetailsPage,
+	}) => {
+		const {channel, product, site} = await apiStorefrontSetUp(apiHelpers);
+
+		await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+			channel.name,
+			'B2B'
+		);
+
+		await waitForAlert(page);
+
+		await apiHelpers.headlessDelivery.createSitePage({
+			pageDefinition: getPageDefinition([
+				getWidgetDefinition({
+					id: getRandomString(),
+					widgetName:
+						'com_liferay_commerce_product_content_web_internal_portlet_CPContentPortlet',
+				}),
+				getFragmentDefinition({
+					id: getRandomString(),
+					key: 'COMMERCE_CART_FRAGMENTS-mini-cart',
+				}),
+			]),
+			siteId: site.id,
+			title: getRandomString(),
+		});
+
+		const {buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id
+		);
+
+		await performLogout(page);
+		await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+		await page.goto(
+			`/web${site.friendlyUrlPath}/p/${product.urls['en_US']}`,
+			{waitUntil: 'networkidle'}
+		);
+
+		await productDetailsPage.productDetailAddToCartButton.click();
+
+		await commerceMiniCartPage.open();
+
+		const skuName = product.skus[0].sku;
+
+		const cartItem = commerceMiniCartPage.miniCartItemForSku(skuName);
+
+		await expect(
+			commerceThemeMiniumCatalogPage.quantitySelector(cartItem)
+		).toHaveValue('1');
+
+		await commerceMiniCartPage.selectQuickAddToCartSku(skuName);
+
+		await expect(
+			commerceMiniCartPage.quickAddToCartChip(skuName)
+		).toBeVisible();
+
+		await commerceMiniCartPage.quickAddToCartButton.click();
+
+		await expect(cartItem).toHaveCount(1);
+		await expect(
+			commerceThemeMiniumCatalogPage.quantitySelector(cartItem)
+		).toHaveValue('2');
+	}
+);
