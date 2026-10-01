@@ -32,6 +32,7 @@ export class CommerceChannelDefaultsPage {
 		name: string,
 		exact?: boolean
 	) => Locator;
+	readonly defaultDeliveryCommerceTermEntriesRow: (name: string) => Locator;
 	readonly defaultPaymentCommerceTermEntries: Locator;
 	readonly defaultPaymentCommerceTermEntriesActionsButton: Locator;
 	readonly defaultPaymentCommerceTermEntriesButton: Locator;
@@ -39,6 +40,7 @@ export class CommerceChannelDefaultsPage {
 		name: string,
 		exact?: boolean
 	) => Locator;
+	readonly defaultPaymentCommerceTermEntriesRow: (name: string) => Locator;
 	readonly defaultShippingCommerceAddresses: Locator;
 	readonly defaultShippingCommerceAddressesActions: Locator;
 	readonly defaultShippingCommerceAddressesButton: Locator;
@@ -52,6 +54,7 @@ export class CommerceChannelDefaultsPage {
 	readonly editFrameOverrideCheckbox: Locator;
 	readonly editFramePriceListSelect: Locator;
 	readonly editFrameSaveButton: Locator;
+	readonly editFrameTermOptions: Locator;
 	readonly editFrameTermSelect: Locator;
 	readonly deleteMenuItem: Locator;
 	readonly editMenuItem: Locator;
@@ -135,6 +138,10 @@ export class CommerceChannelDefaultsPage {
 				exact,
 				name,
 			});
+		this.defaultDeliveryCommerceTermEntriesRow = (name: string) =>
+			this.defaultDeliveryCommerceTermEntries
+				.getByRole('row')
+				.filter({hasText: name});
 		this.defaultPaymentCommerceTermEntries = page.getByTestId(
 			'defaultPaymentCommerceTermEntries'
 		);
@@ -154,6 +161,10 @@ export class CommerceChannelDefaultsPage {
 				exact,
 				name,
 			});
+		this.defaultPaymentCommerceTermEntriesRow = (name: string) =>
+			this.defaultPaymentCommerceTermEntries
+				.getByRole('row')
+				.filter({hasText: name});
 		this.defaultShippingCommerceAddresses = page.getByTestId(
 			'defaultShippingCommerceAddresses'
 		);
@@ -187,6 +198,7 @@ export class CommerceChannelDefaultsPage {
 			name: 'Save',
 		});
 		this.editFrameTermSelect = this.editFrame.getByLabel('Term');
+		this.editFrameTermOptions = this.editFrameTermSelect.locator('option');
 		this.channelEntry = (channelEntryName: string) => {
 			return page.getByTestId(new RegExp(`.*${channelEntryName}.*`, 'g'));
 		};
