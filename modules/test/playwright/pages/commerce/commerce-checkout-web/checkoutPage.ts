@@ -376,6 +376,29 @@ export class CheckoutPage extends CommerceDNDTablePage {
 		}
 	}
 
+	async performCheckoutWithShippingMethod(
+		shippingAddress: TAddress,
+		shippingMethod: string
+	) {
+		await this.addAddress(shippingAddress);
+
+		await this.continueButton.click();
+
+		await this.page.waitForURL((url) =>
+			url.href.includes('shipping-method')
+		);
+
+		await this.shippingMethodRadio(shippingMethod).check();
+
+		await this.continueButton.click();
+
+		await this.page.waitForURL((url) => url.href.includes('order-summary'));
+
+		await this.continueButton.click();
+
+		await expect(this.orderSuccessMessage).toBeVisible();
+	}
+
 	async checkoutAsBuyer(siteName: string, buyerScreenName: string) {
 		await performLogout(this.page);
 		await performLoginViaApi({
