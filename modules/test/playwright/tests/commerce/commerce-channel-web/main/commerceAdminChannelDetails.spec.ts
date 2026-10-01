@@ -458,3 +458,260 @@ test(
 		}
 	}
 );
+
+for (const {configurations, description, name, paymentMethod, tag} of [
+	{
+		configurations: [
+			{
+				checkboxes: [],
+				inputs: {
+					'Client ID': 'PayPal Client ID',
+					'Merchant ID': 'MerchantID',
+				},
+				secretInputs: {'Client Secret': 'PayPal Client Secret'},
+				selects: {Mode: 'Sandbox'},
+			},
+		],
+		description: 'PayPal Description',
+		name: 'PayPal New Name',
+		paymentMethod: 'PayPal',
+		tag: '@COMMERCE-12919',
+	},
+	{
+		configurations: [
+			{
+				checkboxes: [
+					'Require CAPTCHA',
+					'Require Card Code Verification',
+					'Show Bank Account',
+					'Show Credit Card',
+					'Show Store Name',
+				],
+				inputs: {},
+				secretInputs: {},
+				selects: {Environment: 'Sandbox'},
+			},
+		],
+		description: 'Test',
+		name: 'Authorize.Net',
+		paymentMethod: 'Authorize.Net',
+		tag: '@COMMERCE-6109',
+	},
+	{
+		configurations: [
+			{
+				checkboxes: [],
+				inputs: {},
+				secretInputs: {},
+				selects: {Environment: 'Test'},
+			},
+			{
+				checkboxes: [],
+				inputs: {},
+				secretInputs: {},
+				selects: {Environment: 'Production'},
+			},
+		],
+		description: 'Test',
+		name: 'Mercanet',
+		paymentMethod: 'Mercanet',
+		tag: '@COMMERCE-6107',
+	},
+	{
+		configurations: [
+			{
+				checkboxes: [],
+				inputs: {'Payment Attempts Max Count': '1'},
+				secretInputs: {},
+				selects: {Mode: 'Sandbox'},
+			},
+		],
+		description: 'Test',
+		name: 'PayPal Subscriptions',
+		paymentMethod: 'PayPal Subscriptions',
+		tag: '@COMMERCE-6106',
+	},
+]) {
+	test(
+		`${paymentMethod} payment method details and configuration can be edited`,
+		{tag: [tag, '@LPD-106244-Grouped-15']},
+		async ({
+			apiHelpers,
+			commerceAdminChannelDetailsPage,
+			commerceAdminChannelsPage,
+			page,
+			site,
+		}) => {
+			const tableName = 'Payment Methods';
+
+			const channel =
+				await apiHelpers.headlessCommerceAdminChannel.postChannel({
+					siteGroupId: site.id,
+				});
+
+			const descriptionInput =
+				await commerceAdminChannelDetailsPage.sidePanelFrameInput(
+					'Description',
+					tableName,
+					true
+				);
+			const nameInput =
+				await commerceAdminChannelDetailsPage.sidePanelFrameInput(
+					'Name',
+					tableName,
+					true
+				);
+			const priorityInput =
+				await commerceAdminChannelDetailsPage.sidePanelFrameInput(
+					'Priority',
+					tableName
+				);
+
+			await test.step('Edit the payment method details', async () => {
+				await commerceAdminChannelsPage.goto();
+
+				await (
+					await commerceAdminChannelsPage.channelsTableRowLink(
+						channel.name
+					)
+				).click();
+
+				await (
+					await commerceAdminChannelDetailsPage.generalCommerceAdminChannelTableLink(
+						paymentMethod
+					)
+				).click();
+
+				await nameInput.fill(name);
+				await descriptionInput.fill(description);
+				await priorityInput.fill('3.0');
+				await commerceAdminChannelDetailsPage.isActive.check();
+
+				await (
+					await commerceAdminChannelDetailsPage.frameSaveButton(
+						false,
+						tableName
+					)
+				).click();
+
+				await waitForAlert(
+					await commerceAdminChannelDetailsPage.sidePanelFrame(
+						tableName
+					)
+				);
+			});
+
+			await test.step('The payment method details are persisted', async () => {
+				await page.reload();
+
+				await (
+					await commerceAdminChannelDetailsPage.generalCommerceAdminChannelTableLink(
+						name
+					)
+				).click();
+
+				await expect(nameInput).toHaveValue(name);
+				await expect(descriptionInput).toHaveValue(description);
+				await expect(priorityInput).toHaveValue('3.0');
+				await expect(
+					commerceAdminChannelDetailsPage.isActive
+				).toBeChecked();
+			});
+
+			await test.step('Edit and persist the payment method configuration', async () => {
+				for (const {
+					checkboxes,
+					inputs,
+					secretInputs,
+					selects,
+				} of configurations) {
+					await page.reload();
+
+					await commerceAdminChannelDetailsPage.openConfiguration(
+						name,
+						tableName
+					);
+
+					for (const checkbox of checkboxes) {
+						await (
+							await commerceAdminChannelDetailsPage.sidePanelFrameInput(
+								checkbox,
+								tableName
+							)
+						).check();
+					}
+
+					for (const [label, value] of Object.entries({
+						...inputs,
+						...secretInputs,
+					})) {
+						await (
+							await commerceAdminChannelDetailsPage.sidePanelFrameInput(
+								label,
+								tableName
+							)
+						).fill(value);
+					}
+
+					for (const [label, value] of Object.entries(selects)) {
+						await (
+							await commerceAdminChannelDetailsPage.sidePanelFrameInput(
+								label,
+								tableName
+							)
+						).selectOption({label: value});
+					}
+
+					await (
+						await commerceAdminChannelDetailsPage.frameSaveButton(
+							false,
+							tableName
+						)
+					).click();
+
+					await waitForAlert(
+						await commerceAdminChannelDetailsPage.sidePanelFrame(
+							tableName
+						)
+					);
+
+					await page.reload();
+
+					await commerceAdminChannelDetailsPage.openConfiguration(
+						name,
+						tableName
+					);
+
+					for (const checkbox of checkboxes) {
+						await expect(
+							await commerceAdminChannelDetailsPage.sidePanelFrameInput(
+								checkbox,
+								tableName
+							)
+						).toBeChecked();
+					}
+
+					for (const [label, value] of Object.entries(inputs)) {
+						await expect(
+							await commerceAdminChannelDetailsPage.sidePanelFrameInput(
+								label,
+								tableName
+							)
+						).toHaveValue(value);
+					}
+
+					for (const [label, value] of Object.entries(selects)) {
+						await expect(
+							(
+								await commerceAdminChannelDetailsPage.sidePanelFrameInput(
+									label,
+									tableName
+								)
+							).locator('option:checked')
+						).toHaveText(value);
+					}
+				}
+			});
+		}
+	);
+}
