@@ -1321,11 +1321,12 @@ test(
 );
 
 for (const {productType, tags} of [
-	{productType: 'Grouped', tags: ['@COMMERCE-6302']},
+	{productType: 'Grouped', tags: ['@COMMERCE-6302', '@LPD-106244-Grouped-2']},
+	{productType: 'Virtual', tags: ['@COMMERCE-6301', '@LPD-106244-Grouped-7']},
 ]) {
 	test(
 		`Publish a ${productType} product`,
-		{tag: [...tags, '@LPD-106244-Grouped-2']},
+		{tag: tags},
 		async ({
 			apiHelpers,
 			commerceAdminProductDetailsPage,
