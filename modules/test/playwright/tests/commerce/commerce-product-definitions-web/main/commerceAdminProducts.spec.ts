@@ -425,100 +425,6 @@ test(
 );
 
 test(
-	'Add a SKU with subscriptions',
-	{tag: '@COMMERCE-6024'},
-	async ({
-		apiHelpers,
-		commerceAdminProductDetailsPage,
-		commerceAdminProductDetailsSkusPage,
-		commerceAdminProductPage,
-	}) => {
-		const catalog =
-			await apiHelpers.headlessCommerceAdminCatalog.postCatalog({
-				name: 'Master',
-			});
-
-		const product =
-			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
-				catalogId: catalog.id,
-				name: {en_US: 'Simple T-Shirt'},
-				productType: 'simple',
-			});
-
-		await commerceAdminProductPage.gotoProduct(product.name['en_US']);
-
-		await commerceAdminProductDetailsPage.goToProductSkus();
-
-		await commerceAdminProductDetailsSkusPage.skuAddButton.click();
-
-		await commerceAdminProductDetailsSkusPage.skuAddModalSkuInput.fill(
-			'BLACKSKU'
-		);
-
-		await commerceAdminProductDetailsSkusPage.skuAddModalSkuPublishButton.click();
-
-		await expect(
-			commerceAdminProductDetailsSkusPage.skuAddModalSuccessMessage
-		).toBeVisible();
-
-		await commerceAdminProductDetailsSkusPage
-			.skusTableRowLink('BLACKSKU')
-			.click();
-
-		await commerceAdminProductDetailsSkusPage.goToSkuTab('Subscriptions');
-
-		const overrideToggle =
-			commerceAdminProductDetailsSkusPage.sidePanelFrame.getByLabel(
-				'Override Subscription Settings'
-			);
-
-		await overrideToggle.check();
-
-		await expect(
-			commerceAdminProductDetailsSkusPage.sidePanelFrame.getByText(
-				'Payment Subscription'
-			)
-		).toBeVisible();
-
-		await expect(
-			commerceAdminProductDetailsSkusPage.sidePanelFrame.getByText(
-				'Delivery Subscription'
-			)
-		).toBeVisible();
-
-		await commerceAdminProductDetailsSkusPage.sidePanelSaveButton.click();
-
-		await expect(
-			commerceAdminProductDetailsSkusPage.sidePanelFrame.getByText(
-				'Success:Your request completed successfully.'
-			)
-		).toBeVisible();
-
-		await overrideToggle.uncheck();
-
-		await commerceAdminProductDetailsSkusPage.sidePanelSaveButton.click();
-
-		await expect(
-			commerceAdminProductDetailsSkusPage.sidePanelFrame.getByText(
-				'Success:Your request completed successfully.'
-			)
-		).toBeVisible();
-
-		await expect(
-			commerceAdminProductDetailsSkusPage.sidePanelFrame.getByText(
-				'Payment Subscription'
-			)
-		).not.toBeVisible();
-
-		await expect(
-			commerceAdminProductDetailsSkusPage.sidePanelFrame.getByText(
-				'Delivery Subscription'
-			)
-		).not.toBeVisible();
-	}
-);
-
-test(
 	'Add price entries for price lists, currencies and units of measure from the SKU price modal',
 	{
 		tag: [
@@ -1648,3 +1554,231 @@ for (const subscriptionName of [
 		}
 	);
 }
+
+test(
+	'Product and SKU subscription configurations are saved',
+	{
+		tag: [
+			'@COMMERCE-6024',
+			'@COMMERCE-6085',
+			'@COMMERCE-9806',
+			'@COMMERCE-11150',
+			'@LPD-106244-Grouped-4',
+		],
+	},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductDetailsSkusPage,
+		commerceAdminProductPage,
+		page,
+	}) => {
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		const product =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+			});
+
+		await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+		await test.step('Configure the product delivery subscription', async () => {
+			await commerceAdminProductDetailsPage.productSubscriptionLink.click();
+
+			await commerceAdminProductDetailsPage
+				.subscriptionEnabledLabel('Delivery Subscription')
+				.click();
+			await commerceAdminProductDetailsPage
+				.subscriptionTypeSelect('Delivery Subscription')
+				.selectOption({label: 'Year'});
+			await commerceAdminProductDetailsPage
+				.subscriptionYearlyModeSelect('Delivery Subscription')
+				.selectOption({label: 'Exact Day of Year'});
+			await commerceAdminProductDetailsPage
+				.subscriptionYearlyMonthSelect('Delivery Subscription')
+				.selectOption({label: 'March'});
+			await commerceAdminProductDetailsPage
+				.subscriptionYearlyMonthDayInput('Delivery Subscription')
+				.fill('5');
+			await commerceAdminProductDetailsPage
+				.subscriptionLengthInput('Delivery Subscription')
+				.fill('5');
+			await commerceAdminProductDetailsPage.publishLink.click();
+
+			await waitForAlert(page);
+
+			await commerceAdminProductDetailsPage.productDetailsLink.click();
+			await commerceAdminProductDetailsPage.productSubscriptionLink.click();
+
+			await expect(
+				commerceAdminProductDetailsPage.subscriptionEnabledInput(
+					'Delivery Subscription'
+				)
+			).toBeChecked();
+			await expect(
+				commerceAdminProductDetailsPage
+					.subscriptionTypeSelect('Delivery Subscription')
+					.locator('option:checked')
+			).toHaveText('Year');
+			await expect(
+				commerceAdminProductDetailsPage
+					.subscriptionYearlyModeSelect('Delivery Subscription')
+					.locator('option:checked')
+			).toHaveText('Exact Day of Year');
+			await expect(
+				commerceAdminProductDetailsPage
+					.subscriptionYearlyMonthSelect('Delivery Subscription')
+					.locator('option:checked')
+			).toHaveText('March');
+			await expect(
+				commerceAdminProductDetailsPage.subscriptionYearlyMonthDayInput(
+					'Delivery Subscription'
+				)
+			).toHaveValue('5');
+			await expect(
+				commerceAdminProductDetailsPage.subscriptionLengthInput(
+					'Delivery Subscription'
+				)
+			).toHaveValue('5');
+		});
+
+		await test.step('Configure the product payment subscription', async () => {
+			await commerceAdminProductDetailsPage
+				.subscriptionEnabledLabel('Payment Subscription')
+				.click();
+			await commerceAdminProductDetailsPage.publishLink.click();
+
+			await waitForAlert(page);
+
+			await expect(
+				commerceAdminProductDetailsPage
+					.subscriptionTypeSelect('Payment Subscription')
+					.locator('option:checked')
+			).toHaveText('Day');
+
+			await commerceAdminProductDetailsPage
+				.subscriptionTypeSelect('Payment Subscription')
+				.selectOption({label: 'Year'});
+			await commerceAdminProductDetailsPage.publishLink.click();
+
+			await waitForAlert(page);
+
+			await commerceAdminProductDetailsPage.productDetailsLink.click();
+			await commerceAdminProductDetailsPage.productSubscriptionLink.click();
+
+			await expect(
+				commerceAdminProductDetailsPage.subscriptionEnabledInput(
+					'Delivery Subscription'
+				)
+			).toBeChecked();
+			await expect(
+				commerceAdminProductDetailsPage.subscriptionEnabledInput(
+					'Payment Subscription'
+				)
+			).toBeChecked();
+			await expect(
+				commerceAdminProductDetailsPage
+					.subscriptionTypeSelect('Payment Subscription')
+					.locator('option:checked')
+			).toHaveText('Year');
+			await expect(
+				commerceAdminProductDetailsPage
+					.subscriptionYearlyModeSelect('Payment Subscription')
+					.locator('option:checked')
+			).toHaveText('Order Date');
+		});
+
+		await test.step('Override the SKU subscription settings', async () => {
+			await commerceAdminProductDetailsPage.goToProductSkus();
+
+			await commerceAdminProductDetailsSkusPage.openSkuTab(
+				product.skus[0].sku,
+				'Subscriptions'
+			);
+			await commerceAdminProductDetailsSkusPage.sidePanelSubscriptionOverrideToggle.check();
+
+			await expect(
+				commerceAdminProductDetailsSkusPage.sidePanelSubscriptionSection(
+					'Delivery Subscription'
+				)
+			).toBeVisible();
+			await expect(
+				commerceAdminProductDetailsSkusPage.sidePanelSubscriptionSection(
+					'Payment Subscription'
+				)
+			).toBeVisible();
+
+			await commerceAdminProductDetailsSkusPage
+				.sidePanelSubscriptionEnabledLabel('Delivery Subscription')
+				.click();
+			await commerceAdminProductDetailsSkusPage.sidePanelSaveButton.click();
+
+			await waitForAlert(
+				commerceAdminProductDetailsSkusPage.sidePanelFrame
+			);
+
+			await expect(
+				commerceAdminProductDetailsSkusPage
+					.sidePanelSubscriptionTypeSelect('Delivery Subscription')
+					.locator('option:checked')
+			).toHaveText('Day');
+
+			await commerceAdminProductDetailsSkusPage
+				.sidePanelSubscriptionTypeSelect('Delivery Subscription')
+				.selectOption({label: 'Year'});
+
+			await expect(
+				commerceAdminProductDetailsSkusPage
+					.sidePanelSubscriptionYearlyModeSelect(
+						'Delivery Subscription'
+					)
+					.locator('option:checked')
+			).toHaveText('Order Date');
+
+			await commerceAdminProductDetailsSkusPage.sidePanelSaveButton.click();
+
+			await waitForAlert(
+				commerceAdminProductDetailsSkusPage.sidePanelFrame
+			);
+
+			await expect(
+				commerceAdminProductDetailsSkusPage
+					.sidePanelSubscriptionTypeSelect('Delivery Subscription')
+					.locator('option:checked')
+			).toHaveText('Year');
+			await expect(
+				commerceAdminProductDetailsSkusPage
+					.sidePanelSubscriptionYearlyModeSelect(
+						'Delivery Subscription'
+					)
+					.locator('option:checked')
+			).toHaveText('Order Date');
+			await expect(
+				commerceAdminProductDetailsSkusPage.sidePanelSubscriptionLengthInput(
+					'Delivery Subscription'
+				)
+			).toHaveValue('1');
+		});
+
+		await test.step('Stop overriding the SKU subscription settings', async () => {
+			await commerceAdminProductDetailsSkusPage.sidePanelSubscriptionOverrideToggle.uncheck();
+			await commerceAdminProductDetailsSkusPage.sidePanelSaveButton.click();
+
+			await waitForAlert(
+				commerceAdminProductDetailsSkusPage.sidePanelFrame
+			);
+
+			await expect(
+				commerceAdminProductDetailsSkusPage.sidePanelSubscriptionSection(
+					'Delivery Subscription'
+				)
+			).toBeHidden();
+			await expect(
+				commerceAdminProductDetailsSkusPage.sidePanelSubscriptionSection(
+					'Payment Subscription'
+				)
+			).toBeHidden();
+		});
+	}
+);
