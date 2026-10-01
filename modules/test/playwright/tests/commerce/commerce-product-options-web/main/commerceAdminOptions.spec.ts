@@ -8,14 +8,17 @@
 import {expect, mergeTests} from '@playwright/test';
 
 import {commercePagesTest} from '../../../../fixtures/commercePagesTest';
+import {customFieldsPagesTest} from '../../../../fixtures/customFieldsPagesTest';
 import {dataApiHelpersTest} from '../../../../fixtures/dataApiHelpersTest';
 import {globalMenuPagesTest} from '../../../../fixtures/globalMenuPagesTest';
 import {loginTest} from '../../../../fixtures/loginTest';
+import {TCustomField} from '../../../../helpers/CustomFieldTypesHelper';
 import getRandomString from '../../../../utils/getRandomString';
 import {waitForAlert} from '../../../../utils/waitForAlert';
 
 export const test = mergeTests(
 	commercePagesTest,
+	customFieldsPagesTest,
 	dataApiHelpersTest,
 	globalMenuPagesTest,
 	loginTest()
@@ -314,6 +317,68 @@ test(
 			if (option) {
 				apiHelpers.data.push({id: option.id, type: 'option'});
 			}
+		}
+	}
+);
+
+test(
+	'Custom fields can be returned from the option value API',
+	{tag: ['@COMMERCE-11715', '@LPD-106244-Grouped-3']},
+	async ({
+		addCustomFieldPage,
+		apiHelpers,
+		commerceAdminOptionsPage,
+		globalMenuPage,
+		viewAttributesPage,
+	}) => {
+		const option =
+			await apiHelpers.headlessCommerceAdminCatalog.postOption();
+
+		const optionValue =
+			await apiHelpers.headlessCommerceAdminCatalog.postOptionValue(
+				option.id
+			);
+
+		const customField: TCustomField = {
+			fieldName: 'CF-' + getRandomString(),
+			fieldType: 'inputField',
+			resource: 'Product Option Value',
+		};
+
+		await addCustomFieldPage.addCustomField(customField);
+
+		try {
+			await globalMenuPage.goToCommerce('Options');
+
+			await commerceAdminOptionsPage.search(option.name['en_US']);
+			await commerceAdminOptionsPage
+				.optionLink(option.name['en_US'])
+				.click();
+
+			const customFieldValue = getRandomString();
+
+			await commerceAdminOptionsPage.setOptionValueCustomField(
+				optionValue.name['en_US'],
+				customField.fieldName,
+				customFieldValue
+			);
+
+			const {customFields} =
+				await apiHelpers.headlessCommerceAdminCatalog.getOptionValue(
+					optionValue.id
+				);
+
+			expect(
+				customFields.find(
+					({name}: {name: string}) => name === customField.fieldName
+				).customValue.data
+			).toBe(customFieldValue);
+		}
+		finally {
+			await viewAttributesPage.deleteCustomField(
+				customField.fieldName,
+				customField.resource
+			);
 		}
 	}
 );
