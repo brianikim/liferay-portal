@@ -24,10 +24,12 @@ import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.search.SearchContext;
+import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.CompanyTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
+import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
@@ -104,6 +106,7 @@ public class CPDefinitionHelperTest {
 		);
 
 		_testSearchWithAssetCategoryNames();
+		_testSearchWithDraftCPDefinition();
 		_testSearchWithPartialSku();
 		_testSearchWithSku();
 	}
@@ -316,6 +319,33 @@ public class CPDefinitionHelperTest {
 			assetCategory1.getCategoryId());
 		AssetCategoryLocalServiceUtil.deleteCategory(
 			assetCategory2.getCategoryId());
+	}
+
+	private void _testSearchWithDraftCPDefinition() throws Exception {
+		CPInstance cpInstance = CPTestUtil.addCPInstanceFromCatalog(
+			_commerceCatalog.getGroupId());
+
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(
+				_commerceCatalog.getGroupId());
+
+		CPDefinition cpDefinition = _cpDefinitionLocalService.updateStatus(
+			TestPropsValues.getUserId(), cpInstance.getCPDefinitionId(),
+			WorkflowConstants.STATUS_DRAFT, serviceContext,
+			Collections.emptyMap());
+
+		Assert.assertEquals(
+			Collections.emptySet(),
+			_searchCPDefinitionIds(cpDefinition.getName()));
+
+		_cpDefinitionLocalService.updateStatus(
+			TestPropsValues.getUserId(), cpDefinition.getCPDefinitionId(),
+			WorkflowConstants.STATUS_APPROVED, serviceContext,
+			Collections.emptyMap());
+
+		Assert.assertEquals(
+			Collections.singleton(cpDefinition.getCPDefinitionId()),
+			_searchCPDefinitionIds(cpDefinition.getName()));
 	}
 
 	private void _testSearchWithPartialSku() throws Exception {
