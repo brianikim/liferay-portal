@@ -207,6 +207,35 @@ public class TermResourceTest extends BaseTermResourceTestCase {
 	}
 
 	@Override
+	@Test
+	public void testGetCartPaymentTermsPage() throws Exception {
+		super.testGetCartPaymentTermsPage();
+
+		CommercePaymentMethodGroupRel commercePaymentMethodGroupRel =
+			_commercePaymentMethodGroupRelLocalService.
+				addCommercePaymentMethodGroupRel(
+					_user.getUserId(), _commerceChannel.getGroupId(),
+					Collections.singletonMap(
+						LocaleUtil.US, RandomTestUtil.randomString()),
+					Collections.singletonMap(
+						LocaleUtil.US, RandomTestUtil.randomString()),
+					true, null, RandomTestUtil.randomString(), 1, null);
+
+		Term term = _addPaymentTerm(
+			commercePaymentMethodGroupRel, randomTerm());
+
+		Page<Term> page = termResource.getCartPaymentTermsPage(
+			_commerceOrder.getCommerceOrderId());
+
+		List<Long> termIds = TransformUtil.transform(
+			page.getItems(), Term::getId);
+
+		Assert.assertFalse(termIds.toString(), termIds.contains(term.getId()));
+
+		Assert.assertEquals(2, page.getTotalCount());
+	}
+
+	@Override
 	protected Term testGetCartByExternalReferenceCodeDeliveryTermsPage_addTerm(
 			String externalReferenceCode, Term term)
 		throws Exception {
@@ -227,7 +256,7 @@ public class TermResourceTest extends BaseTermResourceTestCase {
 			String externalReferenceCode, Term term)
 		throws Exception {
 
-		return _addPaymentTerm(term);
+		return _addPaymentTerm(_commercePaymentMethodGroupRel, term);
 	}
 
 	@Override
@@ -254,7 +283,7 @@ public class TermResourceTest extends BaseTermResourceTestCase {
 	protected Term testGetCartPaymentTermsPage_addTerm(Long cartId, Term term)
 		throws Exception {
 
-		return _addPaymentTerm(term);
+		return _addPaymentTerm(_commercePaymentMethodGroupRel, term);
 	}
 
 	@Override
@@ -286,7 +315,11 @@ public class TermResourceTest extends BaseTermResourceTestCase {
 		};
 	}
 
-	private Term _addPaymentTerm(Term term) throws Exception {
+	private Term _addPaymentTerm(
+			CommercePaymentMethodGroupRel commercePaymentMethodGroupRel,
+			Term term)
+		throws Exception {
+
 		CommerceTermEntry commerceTermEntry = _addTerm(
 			term, CommerceTermEntryConstants.TYPE_PAYMENT_TERMS);
 
@@ -294,7 +327,7 @@ public class TermResourceTest extends BaseTermResourceTestCase {
 			addCommercePaymentMethodGroupRelQualifier(
 				CommerceTermEntry.class.getName(),
 				commerceTermEntry.getCommerceTermEntryId(),
-				_commercePaymentMethodGroupRel.
+				commercePaymentMethodGroupRel.
 					getCommercePaymentMethodGroupRelId());
 
 		return new Term() {
