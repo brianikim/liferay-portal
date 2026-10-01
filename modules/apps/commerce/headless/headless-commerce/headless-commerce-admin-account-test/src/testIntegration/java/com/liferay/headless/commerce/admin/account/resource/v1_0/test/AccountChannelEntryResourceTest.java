@@ -25,6 +25,8 @@ import com.liferay.commerce.term.model.CommerceTermEntry;
 import com.liferay.commerce.term.service.CommerceTermEntryLocalServiceUtil;
 import com.liferay.commerce.test.util.CommerceTestUtil;
 import com.liferay.headless.commerce.admin.account.client.dto.v1_0.AccountChannelEntry;
+import com.liferay.headless.commerce.admin.account.client.pagination.Page;
+import com.liferay.headless.commerce.admin.account.client.pagination.Pagination;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.model.Address;
 import com.liferay.portal.kernel.model.Country;
@@ -53,6 +55,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -145,6 +148,26 @@ public class AccountChannelEntryResourceTest
 
 		UserLocalServiceUtil.addRoleUser(
 			role.getRoleId(), _commerceUser.getUserId());
+	}
+
+	@Override
+	@Test
+	public void testGetAccountIdAccountChannelDeliveryTermsPage()
+		throws Exception {
+
+		super.testGetAccountIdAccountChannelDeliveryTermsPage();
+
+		_testGetAccountIdAccountChannelDeliveryTermsPageWithDeletedCommerceTermEntry();
+	}
+
+	@Override
+	@Test
+	public void testGetAccountIdAccountChannelPaymentTermsPage()
+		throws Exception {
+
+		super.testGetAccountIdAccountChannelPaymentTermsPage();
+
+		_testGetAccountIdAccountChannelPaymentTermsPageWithDeletedCommerceTermEntry();
 	}
 
 	@Ignore
@@ -1307,6 +1330,82 @@ public class AccountChannelEntryResourceTest
 
 		return accountChannelEntryResource.postAccountIdAccountChannelUser(
 			_accountEntry.getAccountEntryId(), accountChannelEntry);
+	}
+
+	private void _testGetAccountIdAccountChannelDeliveryTermsPageWithDeletedCommerceTermEntry()
+		throws Exception {
+
+		Page<AccountChannelEntry> page =
+			accountChannelEntryResource.
+				getAccountIdAccountChannelDeliveryTermsPage(
+					_accountEntry.getAccountEntryId(), Pagination.of(1, 10));
+
+		long totalCount = page.getTotalCount();
+
+		CommerceTermEntry commerceTermEntry = _addCommerceTermEntry(
+			CommerceTermEntryConstants.TYPE_DELIVERY_TERMS);
+
+		AccountChannelEntry accountChannelEntry = randomAccountChannelEntry();
+
+		accountChannelEntry.setClassPK(commerceTermEntry.getPrimaryKey());
+
+		accountChannelEntryResource.postAccountIdAccountChannelDeliveryTerm(
+			_accountEntry.getAccountEntryId(), accountChannelEntry);
+
+		page =
+			accountChannelEntryResource.
+				getAccountIdAccountChannelDeliveryTermsPage(
+					_accountEntry.getAccountEntryId(), Pagination.of(1, 10));
+
+		Assert.assertEquals(totalCount + 1, page.getTotalCount());
+
+		CommerceTermEntryLocalServiceUtil.deleteCommerceTermEntry(
+			commerceTermEntry);
+
+		page =
+			accountChannelEntryResource.
+				getAccountIdAccountChannelDeliveryTermsPage(
+					_accountEntry.getAccountEntryId(), Pagination.of(1, 10));
+
+		Assert.assertEquals(totalCount, page.getTotalCount());
+	}
+
+	private void _testGetAccountIdAccountChannelPaymentTermsPageWithDeletedCommerceTermEntry()
+		throws Exception {
+
+		Page<AccountChannelEntry> page =
+			accountChannelEntryResource.
+				getAccountIdAccountChannelPaymentTermsPage(
+					_accountEntry.getAccountEntryId(), Pagination.of(1, 10));
+
+		long totalCount = page.getTotalCount();
+
+		CommerceTermEntry commerceTermEntry = _addCommerceTermEntry(
+			CommerceTermEntryConstants.TYPE_PAYMENT_TERMS);
+
+		AccountChannelEntry accountChannelEntry = randomAccountChannelEntry();
+
+		accountChannelEntry.setClassPK(commerceTermEntry.getPrimaryKey());
+
+		accountChannelEntryResource.postAccountIdAccountChannelPaymentTerm(
+			_accountEntry.getAccountEntryId(), accountChannelEntry);
+
+		page =
+			accountChannelEntryResource.
+				getAccountIdAccountChannelPaymentTermsPage(
+					_accountEntry.getAccountEntryId(), Pagination.of(1, 10));
+
+		Assert.assertEquals(totalCount + 1, page.getTotalCount());
+
+		CommerceTermEntryLocalServiceUtil.deleteCommerceTermEntry(
+			commerceTermEntry);
+
+		page =
+			accountChannelEntryResource.
+				getAccountIdAccountChannelPaymentTermsPage(
+					_accountEntry.getAccountEntryId(), Pagination.of(1, 10));
+
+		Assert.assertEquals(totalCount, page.getTotalCount());
 	}
 
 	@DeleteAfterTestRun
