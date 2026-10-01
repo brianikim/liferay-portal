@@ -16,6 +16,10 @@ export class CommerceAdminProductDetailsPage {
 	readonly dropdownProductSpecification: (
 		chooseEditOrDelete: string
 	) => Promise<Locator>;
+	readonly duplicateFrame: FrameLocator;
+	readonly duplicateFrameCatalogInput: Locator;
+	readonly duplicateFrameCatalogMenuItem: (catalogName: string) => Locator;
+	readonly duplicateFrameSubmitButton: Locator;
 	readonly editFrameSaveButton: Locator;
 	readonly editFrameSpecificationProduct: (
 		specificationValue: string
@@ -26,14 +30,20 @@ export class CommerceAdminProductDetailsPage {
 		specificationName: string
 	) => Locator;
 	readonly ellipsisFrameProductSpecification: FrameLocator;
+	readonly expirationDateInput: Locator;
 	readonly frameChooseSpecification: (specificationName: string) => Locator;
 	readonly frameChooseSpecificationValue: (
 		specificationValue: string
 	) => Promise<string[]>;
 	readonly frameDropdownSpecification: Locator;
 	readonly frameSubmitSpecification: Locator;
+	readonly headerActionsButton: Locator;
+	readonly headerActionsMenuItem: (name: string) => Locator;
 	readonly menuItemSpecification: (chooseAddOrCreate: string) => Locator;
+	readonly nameInput: Locator;
+	readonly nameInputLocaleMenuItem: (locale: string) => Locator;
 	readonly nameInputLocaleSelector: Locator;
+	readonly neverExpireToggle: Locator;
 	readonly page: Page;
 	readonly productConfigurationLink: Locator;
 	readonly productDetailsInput: (inputName: string) => Promise<Locator>;
@@ -46,8 +56,12 @@ export class CommerceAdminProductDetailsPage {
 	readonly productSkusLink: Locator;
 	readonly productVisibilityLink: Locator;
 	readonly publishLink: Locator;
+	readonly saveAsDraftLink: Locator;
+	readonly selectedCatalogOption: Locator;
+	readonly shortDescriptionInput: Locator;
 	readonly textTableCell: (text: string) => Locator;
 	readonly visibleToggle: Locator;
+	readonly workflowStatus: (label: string) => Locator;
 
 	constructor(page: Page) {
 		this.addSpecification = page
@@ -71,6 +85,18 @@ export class CommerceAdminProductDetailsPage {
 		) => {
 			return page.getByRole('menuitem', {name: chooseEditOrDelete});
 		};
+		this.duplicateFrame = page.frameLocator('iframe[title="Duplicate"]');
+		this.duplicateFrameCatalogInput =
+			this.duplicateFrame.getByPlaceholder('Type Here');
+		this.duplicateFrameCatalogMenuItem = (catalogName: string) =>
+			this.duplicateFrame.getByRole('menuitem', {
+				exact: true,
+				name: catalogName,
+			});
+		this.duplicateFrameSubmitButton = this.duplicateFrame.getByRole(
+			'button',
+			{exact: true, name: 'Submit'}
+		);
 		this.editFrameSpecificationProduct = async (
 			specificationValue: string
 		) => {
@@ -97,6 +123,9 @@ export class CommerceAdminProductDetailsPage {
 			this.ellipsisFrameProductSpecification.locator(
 				'[id="_com_liferay_commerce_product_definitions_web_internal_portlet_CPDefinitionsPortlet_value"]'
 			);
+		this.expirationDateInput = page.locator(
+			'input[id*="expirationDate"][placeholder="mm/dd/yyyy"]'
+		);
 		this.editSuccessMessage =
 			this.ellipsisFrameProductSpecification.getByText(
 				'Success:Your request completed successfully.'
@@ -120,12 +149,21 @@ export class CommerceAdminProductDetailsPage {
 			'button',
 			{name: 'Submit'}
 		);
+		this.headerActionsButton = page
+			.locator('#dropdown-header-container')
+			.getByRole('button', {name: 'Actions'});
+		this.headerActionsMenuItem = (name: string) =>
+			page.getByRole('menuitem', {exact: true, name});
 		this.menuItemSpecification = (chooseAddOrCreate: string) => {
 			return page.getByRole('menuitem', {name: chooseAddOrCreate});
 		};
+		this.nameInput = page.locator('input[id$="_nameMapAsXML"]');
+		this.nameInputLocaleMenuItem = (locale: string) =>
+			page.getByRole('menuitem', {name: locale});
 		this.nameInputLocaleSelector = page.locator(
 			'[id$="nameMapAsXMLBoundingBox"] .input-localized-trigger'
 		);
+		this.neverExpireToggle = page.getByLabel('Never Expire');
 		this.page = page;
 		this.productConfigurationLink = page.getByRole('link', {
 			name: 'Configuration',
@@ -156,6 +194,16 @@ export class CommerceAdminProductDetailsPage {
 			name: 'Visibility',
 		});
 		this.publishLink = page.getByRole('link', {name: 'Publish'});
+		this.saveAsDraftLink = page.getByRole('link', {
+			exact: true,
+			name: 'Save as Draft',
+		});
+		this.selectedCatalogOption = page.locator(
+			'select[name$="_commerceCatalogGroupId"] option:checked'
+		);
+		this.shortDescriptionInput = page.locator(
+			'textarea[id$="_shortDescriptionMapAsXML"]'
+		);
 		this.textTableCell = (text: string) =>
 			this.page.getByRole('cell', {
 				exact: true,
@@ -165,6 +213,8 @@ export class CommerceAdminProductDetailsPage {
 			'Visible',
 			{exact: true}
 		);
+		this.workflowStatus = (label: string) =>
+			page.locator('.workflow-status').getByText(label, {exact: true});
 	}
 
 	async addExistingProductSpecification(
@@ -217,6 +267,14 @@ export class CommerceAdminProductDetailsPage {
 			);
 		}
 		await this.frameSubmitSpecification.click();
+	}
+
+	async duplicate(catalogName: string) {
+		await this.headerActionsButton.click();
+		await this.headerActionsMenuItem('Duplicate').click();
+		await this.duplicateFrameCatalogInput.fill(catalogName);
+		await this.duplicateFrameCatalogMenuItem(catalogName).click();
+		await this.duplicateFrameSubmitButton.click();
 	}
 
 	async editOrDeleteProductSpecification(
