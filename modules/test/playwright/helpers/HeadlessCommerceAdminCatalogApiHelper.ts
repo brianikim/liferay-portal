@@ -615,6 +615,25 @@ export class HeadlessCommerceAdminCatalogApiHelper {
 		return catalog;
 	}
 
+	async postCDNImage(
+		productId: number,
+		cdnURL: string,
+		title: string = 'Image' + getRandomInt()
+	) {
+		const postCDNImage = await this.apiHelpers.post(
+			`${this.apiHelpers.baseUrl}${this.basePath}/products/${productId}/images`,
+			{
+				data: {
+					cdnEnabled: true,
+					cdnURL,
+					title: {en_US: title},
+				},
+			}
+		);
+
+		return postCDNImage;
+	}
+
 	async postImage(
 		productId: number,
 		fileEntryId: number,
