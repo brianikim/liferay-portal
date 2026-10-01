@@ -58,7 +58,6 @@ import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
 import com.liferay.portal.kernel.dao.orm.QueryDefinition;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
-import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.lazy.referencing.LazyReferencingThreadLocal;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.User;
@@ -74,6 +73,7 @@ import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
+import com.liferay.portal.kernel.util.BigDecimalUtil;
 import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil;
@@ -523,116 +523,9 @@ public class CPDefinitionLocalServiceTest {
 
 	@Test
 	public void testCloneCPDefinition() throws Exception {
-		frutillaRule.scenario(
-			"Duplicate a product definition"
-		).given(
-			"A product definition in any workflow status"
-		).when(
-			"the product definition and its duplicate are duplicated"
-		).then(
-			"each duplicate is a draft named and URL titled after its source"
-		).and(
-			"each product definition is deleted independently"
-		);
-
-		_testCloneCPDefinition(WorkflowConstants.STATUS_APPROVED);
-		_testCloneCPDefinition(WorkflowConstants.STATUS_DENIED);
-		_testCloneCPDefinition(WorkflowConstants.STATUS_DRAFT);
-		_testCloneCPDefinition(WorkflowConstants.STATUS_EMPTY);
-		_testCloneCPDefinition(WorkflowConstants.STATUS_EXPIRED);
-		_testCloneCPDefinition(WorkflowConstants.STATUS_INACTIVE);
-		_testCloneCPDefinition(WorkflowConstants.STATUS_INCOMPLETE);
-		_testCloneCPDefinition(WorkflowConstants.STATUS_IN_TRASH);
-		_testCloneCPDefinition(WorkflowConstants.STATUS_SCHEDULED);
-	}
-
-	@Test
-	public void testCloneCPDefinitionOptionRelExternalReferenceCodes()
-		throws Exception {
-
-		frutillaRule.scenario(
-			"Duplicate a product that carries options"
-		).given(
-			"A product with one option and two option values"
-		).when(
-			"The product is duplicated"
-		).then(
-			"The duplicated option and option values carry their own " +
-				"external reference codes"
-		);
-
-		CPInstance cpInstance = CPTestUtil.addCPInstanceWithRandomSku(
-			_commerceCatalog.getGroupId());
-
-		CPDefinitionOptionRel cpDefinitionOptionRel =
-			CPTestUtil.addCPDefinitionOptionRel(
-				_commerceCatalog.getGroupId(), cpInstance.getCPDefinitionId(),
-				true, 2);
-
-		CPDefinition duplicateCPDefinition =
-			_cpDefinitionLocalService.cloneCPDefinition(
-				TestPropsValues.getUserId(), cpInstance.getCPDefinitionId(),
-				_commerceCatalog.getGroupId(), _serviceContext);
-
-		_assertUniqueExternalReferenceCodes(
-			cpDefinitionOptionRel, duplicateCPDefinition);
-	}
-
-	@Test
-	public void testClonedProductPriceChangeDoesNotAffectParent()
-		throws PortalException {
-
-		frutillaRule.scenario(
-			"Change Price of a cloned product sku"
-		).given(
-			"A product definition and its clone"
-		).when(
-			"changing the price of the cloned"
-		).then(
-			"the product price of the parent product is different from " +
-				"cloned product"
-		);
-
-		CPInstance cpInstance = CPTestUtil.addCPInstanceWithRandomSku(
-			_commerceCatalog.getGroupId(), new BigDecimal(5));
-
-		Assert.assertEquals(
-			WorkflowConstants.STATUS_APPROVED, cpInstance.getStatus());
-
-		CPDefinition duplicateCPDefinition =
-			_cpDefinitionLocalService.cloneCPDefinition(
-				TestPropsValues.getUserId(), cpInstance.getCPDefinitionId(),
-				cpInstance.getGroupId(), _serviceContext);
-
-		CPInstance duplicateCPInstance = _cpInstanceLocalService.getCPInstance(
-			duplicateCPDefinition.getCPDefinitionId(), cpInstance.getSku());
-
-		CommercePriceList commercePriceList =
-			_commercePriceListLocalService.fetchCatalogBaseCommercePriceList(
-				duplicateCPInstance.getGroupId());
-
-		CommercePriceEntry duplicateCommercePriceEntry =
-			_commercePriceEntryLocalService.fetchCommercePriceEntry(
-				commercePriceList.getCommercePriceListId(),
-				duplicateCPInstance.getCPInstanceUuid(), StringPool.BLANK);
-
-		duplicateCommercePriceEntry =
-			_commercePriceEntryLocalService.updatePricingInfo(
-				duplicateCommercePriceEntry.getCommercePriceEntryId(),
-				duplicateCommercePriceEntry.isBulkPricing(), BigDecimal.TEN,
-				false, BigDecimal.ZERO, null, _serviceContext);
-
-		CommercePriceEntry commercePriceEntry =
-			_commercePriceEntryLocalService.fetchCommercePriceEntry(
-				commercePriceList.getCommercePriceListId(),
-				cpInstance.getCPInstanceUuid(), StringPool.BLANK);
-
-		Assert.assertEquals(
-			BigDecimal.TEN, duplicateCommercePriceEntry.getPrice());
-
-		Assert.assertNotEquals(
-			commercePriceEntry.getPrice(),
-			duplicateCommercePriceEntry.getPrice());
+		_testCloneCPDefinition();
+		_testCloneCPDefinitionOptionRelExternalReferenceCodes();
+		_testCloneCPDefinitionPriceChangeDoesNotAffectParent();
 	}
 
 	@Test
