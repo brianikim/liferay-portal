@@ -19,6 +19,7 @@ import {
 } from '../../../../utils/performLogin';
 import {waitForAlert} from '../../../../utils/waitForAlert';
 import {
+	completedVirtualOrderItemSetUp,
 	createAccountWithBuyerUser,
 	createProductWithOptions,
 	findSkuByOptionValueKeys,
@@ -1548,5 +1549,34 @@ test(
 				await expect(row).toContainText(value);
 			}
 		});
+	}
+);
+
+test(
+	'Admin can view the virtual settings of a virtual order item',
+	{tag: ['@COMMERCE-9794', '@LPD-106244-Grouped-7']},
+	async ({
+		apiHelpers,
+		commerceAdminOrderDetailsPage,
+		commerceAdminOrdersPage,
+	}) => {
+		const virtualFileURL = `http://${getRandomString()}.com`;
+
+		const {order} = await completedVirtualOrderItemSetUp(apiHelpers, 1, {
+			activationStatus: 0,
+			url: virtualFileURL,
+		});
+
+		await commerceAdminOrdersPage.goto();
+
+		await commerceAdminOrdersPage.tableRowOrderIdLink(order.id).click();
+
+		await commerceAdminOrderDetailsPage.orderItemActions.click();
+		await commerceAdminOrderDetailsPage.orderItemActionEdit.click();
+		await commerceAdminOrderDetailsPage.orderItemVirtualSettingsLink.click();
+
+		await expect(
+			commerceAdminOrderDetailsPage.orderItemText(virtualFileURL)
+		).toBeVisible();
 	}
 );
