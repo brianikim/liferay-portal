@@ -713,3 +713,111 @@ for (const {configurations, description, name, paymentMethod, tag} of [
 		}
 	);
 }
+
+test(
+	'Shipping option eligibility can be set to a delivery term and back to no delivery terms',
+	{tag: '@LPD-106244-Grouped-15'},
+	async ({
+		apiHelpers,
+		commerceAdminChannelDetailsPage,
+		commerceAdminChannelsPage,
+		page,
+		site,
+	}) => {
+		const tableName = 'Shipping Methods';
+
+		const channel =
+			await apiHelpers.headlessCommerceAdminChannel.postChannel({
+				siteGroupId: site.id,
+			});
+
+		const deliveryTerm =
+			await apiHelpers.headlessCommerceAdminOrder.postTerm({
+				type: 'delivery-terms',
+			});
+
+		await commerceAdminChannelsPage.goto();
+
+		await (
+			await commerceAdminChannelsPage.channelsTableRowLink(channel.name)
+		).click();
+
+		await commerceAdminChannelDetailsPage.activateChannelConfiguration(
+			'Flat Rate',
+			tableName
+		);
+		await commerceAdminChannelDetailsPage.addFlatRateShippingOption(
+			'Standard Delivery'
+		);
+
+		const deliveryTermCell =
+			await commerceAdminChannelDetailsPage.eligibilityEntryCell(
+				true,
+				deliveryTerm.name,
+				tableName
+			);
+
+		for (const {
+			deliveryTermCount,
+			deliveryTermLabel,
+			eligibilityOption,
+		} of [
+			{
+				deliveryTermCount: 1,
+				deliveryTermLabel: deliveryTerm.label['en_US'],
+				eligibilityOption: 'Specific Delivery Terms',
+			},
+			{
+				deliveryTermCount: 0,
+				deliveryTermLabel: '',
+				eligibilityOption: 'No Delivery Terms',
+			},
+		]) {
+			await page.reload();
+
+			await (
+				await commerceAdminChannelDetailsPage.generalCommerceAdminChannelTableLink(
+					'Flat Rate'
+				)
+			).click();
+
+			await commerceAdminChannelDetailsPage.setEntryEligibility(
+				eligibilityOption,
+				deliveryTermLabel,
+				tableName,
+				'Standard Delivery'
+			);
+
+			await (
+				await commerceAdminChannelDetailsPage.shippingOptionsTableLink(
+					'Standard Delivery',
+					tableName
+				)
+			).click();
+			await (
+				await commerceAdminChannelDetailsPage.detailsButton(tableName)
+			).click();
+			await (
+				await commerceAdminChannelDetailsPage.eligibilityTab(
+					true,
+					tableName
+				)
+			).click();
+
+			await expect(deliveryTermCell).toHaveCount(deliveryTermCount);
+
+			await (
+				await commerceAdminChannelDetailsPage.closeSidePanelFrame(
+					true,
+					tableName
+				)
+			).click();
+			await (
+				await commerceAdminChannelDetailsPage.closeSidePanelFrame(
+					false,
+					tableName
+				)
+			).click();
+		}
+	}
+);
