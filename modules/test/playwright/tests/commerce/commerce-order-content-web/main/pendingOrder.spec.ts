@@ -31,6 +31,8 @@ import getFragmentDefinition from '../../../layout-content-page-editor-web/main/
 import getPageDefinition from '../../../layout-content-page-editor-web/main/utils/getPageDefinition';
 import getWidgetDefinition from '../../../layout-content-page-editor-web/main/utils/getWidgetDefinition';
 import {
+	apiStorefrontSetUp,
+	assignBuyerUserToAccount,
 	configureBuyerUserForSite,
 	configureOperationsManagerUserForSite,
 	configureOrderManagerUserForSite,
@@ -38,6 +40,7 @@ import {
 	createProductWithOptions,
 	findSkuByOptionValueKeys,
 	miniumSetUp,
+	selectCurrentAccount,
 } from '../../utils/commerce';
 
 export const test = mergeTests(
@@ -2347,5 +2350,156 @@ test(
 		});
 
 		await performLoginViaApi({page, screenName: 'test'});
+	}
+);
+
+test(
+	'A buyer creates an order with an order type, switches the active account and deletes the order from the pending order details page',
+	{
+		tag: [
+			'@COMMERCE-12909',
+			'@COMMERCE-6374',
+			'@COMMERCE-6380',
+			'@LPD-106244-Grouped-12',
+		],
+	},
+	async ({
+		apiHelpers,
+		commerceAdminChannelsPage,
+		commerceLayoutsPage,
+		commerceThemeMiniumCatalogPage,
+		page,
+		pendingOrdersPage,
+	}) => {
+		const {channel, site} = await apiStorefrontSetUp(apiHelpers);
+
+		await commerceAdminChannelsPage.changeCommerceChannelSiteType(
+			channel.name,
+			'B2B'
+		);
+
+		await waitForAlert(page);
+
+		const layout = await apiHelpers.headlessDelivery.createSitePage({
+			pageDefinition: getPageDefinition([
+				getFragmentDefinition({
+					id: getRandomString(),
+					key: 'COMMERCE_ACCOUNT_FRAGMENTS-account-selector',
+				}),
+				getWidgetDefinition({
+					id: getRandomString(),
+					widgetName:
+						'com_liferay_commerce_order_content_web_internal_portlet_CommerceOpenOrderContentPortlet',
+				}),
+			]),
+			siteId: site.id,
+			title: getRandomString(),
+		});
+
+		const {account: account1, buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id
+		);
+
+		const account2 = await apiHelpers.headlessAdminUser.postAccount({
+			name: `Commerce Account ${getRandomString()}`,
+			type: 'business',
+		});
+
+		await assignBuyerUserToAccount(account2, apiHelpers, buyerUser);
+
+		await apiHelpers.headlessCommerceAdminOrder.postOrderType({
+			active: true,
+		});
+
+		const orderType =
+			await apiHelpers.headlessCommerceAdminOrder.postOrderType({
+				active: true,
+			});
+
+		await performLogout(page);
+		await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+		await selectCurrentAccount(account1.id, apiHelpers, site.id);
+
+		const layoutURL = `/web${site.friendlyUrlPath}${layout.friendlyUrlPath}`;
+
+		await page.goto(layoutURL, {waitUntil: 'networkidle'});
+
+		await commerceLayoutsPage.addOrderButton.click();
+		await commerceLayoutsPage.orderTypeModalInput.selectOption({
+			label: orderType.name['en_US'],
+		});
+		await commerceLayoutsPage.orderTypeModalButton.click();
+
+		await expect(pendingOrdersPage.orderType).toHaveText(
+			orderType.name['en_US']
+		);
+
+		const orderId = await pendingOrdersPage.orderId.innerText();
+
+		const orderRow = pendingOrdersPage.orderItemsTableRowWith(orderId);
+
+		await test.step('The order created from the Pending Orders page is listed with its order type', async () => {
+			await page.goto(layoutURL, {waitUntil: 'networkidle'});
+
+			await expect(orderRow).toContainText(orderType.name['en_US']);
+			await expect(orderRow).toContainText('Approved');
+		});
+
+		await test.step('Switching the active account from the pending order details page redirects to the Pending Orders list', async () => {
+			for (const account of [account2, account1]) {
+				await orderRow.getByLabel('View').click();
+
+				await expect(pendingOrdersPage.orderId).toHaveText(orderId);
+				await expect(page).toHaveURL(
+					new RegExp(`${layoutURL}/-/pending-order/`)
+				);
+
+				await commerceThemeMiniumCatalogPage.openAccountSelectorDropdown();
+
+				await commerceThemeMiniumCatalogPage
+					.accountSelectorAccount(account.name)
+					.click();
+
+				await expect(page).toHaveURL(
+					new RegExp(
+						`${layoutURL}\\?p_p_id=com_liferay_commerce_order_content_web_internal_portlet_CommerceOpenOrderContentPortlet`
+					)
+				);
+				await expect(
+					commerceThemeMiniumCatalogPage.accountSelectorSelectedAccount
+				).toHaveText(account.name);
+				await expect(orderRow).toBeVisible();
+			}
+		});
+
+		await test.step('Deleting the pending order from its details page removes it from the Pending Orders list', async () => {
+			await orderRow.getByLabel('View').click();
+
+			await expect(async () => {
+				await pendingOrdersPage.orderActionsButton.click();
+
+				await expect(pendingOrdersPage.deleteMenuItem).toBeVisible({
+					timeout: 500,
+				});
+			}).toPass({timeout: 5000});
+
+			page.once('dialog', async (dialog) => {
+				expect(dialog.message()).toContain(
+					'Are you sure you want to delete this? It will be deleted immediately.'
+				);
+
+				await dialog.accept();
+			});
+
+			await pendingOrdersPage.deleteMenuItem.click();
+
+			await expect(pendingOrdersPage.deleteMenuItem).toBeHidden();
+
+			await page.goto(layoutURL, {waitUntil: 'networkidle'});
+
+			await expect(orderRow).toHaveCount(0);
+		});
 	}
 );
