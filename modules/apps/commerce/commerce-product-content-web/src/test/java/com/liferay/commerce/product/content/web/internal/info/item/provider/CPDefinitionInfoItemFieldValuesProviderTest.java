@@ -74,6 +74,30 @@ public class CPDefinitionInfoItemFieldValuesProviderTest {
 
 		CPDefinition cpDefinition = _createMockCPDefinition();
 
+		Mockito.doReturn(
+			5
+		).when(
+			cpDefinition
+		).getDeliverySubscriptionLength();
+
+		Mockito.doReturn(
+			"monthly"
+		).when(
+			cpDefinition
+		).getDeliverySubscriptionType();
+
+		Mockito.doReturn(
+			"deliveryMonthDay=1\ndeliveryMonthlyMode=1"
+		).when(
+			cpDefinition
+		).getDeliverySubscriptionTypeSettings();
+
+		Mockito.doReturn(
+			7.0
+		).when(
+			cpDefinition
+		).getDepth();
+
 		String description = "<p>" + RandomTestUtil.randomString() + "</p>";
 
 		Mockito.doReturn(
@@ -83,6 +107,78 @@ public class CPDefinitionInfoItemFieldValuesProviderTest {
 		).when(
 			cpDefinition
 		).getDescriptionMap();
+
+		Mockito.doReturn(
+			2.0
+		).when(
+			cpDefinition
+		).getHeight();
+
+		Mockito.doReturn(
+			3.0
+		).when(
+			cpDefinition
+		).getShippingExtraPrice();
+
+		Mockito.doReturn(
+			10
+		).when(
+			cpDefinition
+		).getSubscriptionLength();
+
+		Mockito.doReturn(
+			"weekly"
+		).when(
+			cpDefinition
+		).getSubscriptionType();
+
+		Mockito.doReturn(
+			"weekDay=2"
+		).when(
+			cpDefinition
+		).getSubscriptionTypeSettings();
+
+		Mockito.doReturn(
+			1.0
+		).when(
+			cpDefinition
+		).getWeight();
+
+		Mockito.doReturn(
+			5.0
+		).when(
+			cpDefinition
+		).getWidth();
+
+		Mockito.doReturn(
+			true
+		).when(
+			cpDefinition
+		).isDeliverySubscriptionEnabled();
+
+		Mockito.doReturn(
+			true
+		).when(
+			cpDefinition
+		).isFreeShipping();
+
+		Mockito.doReturn(
+			true
+		).when(
+			cpDefinition
+		).isShipSeparately();
+
+		Mockito.doReturn(
+			true
+		).when(
+			cpDefinition
+		).isShippable();
+
+		Mockito.doReturn(
+			true
+		).when(
+			cpDefinition
+		).isSubscriptionEnabled();
 
 		InfoItemFieldValues infoItemFieldValues =
 			_cpDefinitionInfoItemFieldValuesProvider.getInfoItemFieldValues(
@@ -98,6 +194,30 @@ public class CPDefinitionInfoItemFieldValuesProviderTest {
 
 		Assert.assertEquals(
 			description, infoFieldValue.getValue(LocaleUtil.US));
+
+		_assertInfoFieldValue(
+			infoItemFieldValues, "deliverySubscriptionEnabled", true);
+		_assertInfoFieldValue(
+			infoItemFieldValues, "deliverySubscriptionLength", 5);
+		_assertInfoFieldValue(
+			infoItemFieldValues, "deliverySubscriptionType", "monthly");
+		_assertInfoFieldValue(
+			infoItemFieldValues, "deliverySubscriptionTypeSettings",
+			"deliveryMonthDay=1\ndeliveryMonthlyMode=1");
+		_assertInfoFieldValue(infoItemFieldValues, "depth", 7.0);
+		_assertInfoFieldValue(infoItemFieldValues, "freeShipping", true);
+		_assertInfoFieldValue(infoItemFieldValues, "height", 2.0);
+		_assertInfoFieldValue(infoItemFieldValues, "shipSeparately", true);
+		_assertInfoFieldValue(infoItemFieldValues, "shippable", true);
+		_assertInfoFieldValue(infoItemFieldValues, "shippingExtraPrice", 3.0);
+		_assertInfoFieldValue(infoItemFieldValues, "subscriptionEnabled", true);
+		_assertInfoFieldValue(infoItemFieldValues, "subscriptionLength", 10);
+		_assertInfoFieldValue(
+			infoItemFieldValues, "subscriptionType", "weekly");
+		_assertInfoFieldValue(
+			infoItemFieldValues, "subscriptionTypeSettings", "weekDay=2");
+		_assertInfoFieldValue(infoItemFieldValues, "weight", 1.0);
+		_assertInfoFieldValue(infoItemFieldValues, "width", 5.0);
 	}
 
 	@Test
@@ -181,6 +301,16 @@ public class CPDefinitionInfoItemFieldValuesProviderTest {
 				cpDefinition);
 
 		Assert.assertNotNull(values);
+	}
+
+	private void _assertInfoFieldValue(
+		InfoItemFieldValues infoItemFieldValues, String name,
+		Object expectedValue) {
+
+		InfoFieldValue<Object> infoFieldValue =
+			infoItemFieldValues.getInfoFieldValue(name);
+
+		Assert.assertEquals(name, expectedValue, infoFieldValue.getValue());
 	}
 
 	private CPDefinition _createMockCPDefinition() {
