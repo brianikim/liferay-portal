@@ -6,6 +6,7 @@
 package com.liferay.headless.commerce.admin.catalog.resource.v1_0.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.commerce.product.constants.CPDefinitionLinkTypeConstants;
 import com.liferay.commerce.product.model.CPDefinition;
 import com.liferay.commerce.product.model.CProduct;
 import com.liferay.commerce.product.model.CommerceCatalog;
@@ -79,6 +80,7 @@ public class RelatedProductResourceTest
 
 		_testPostProductIdRelatedProductWithLazyReferencingDisabled();
 		_testPostProductIdRelatedProductWithLazyReferencingEnabled();
+		_testPostProductIdRelatedProductWithRequiresInBundleType();
 		_testPostRelatedProductsBatch();
 	}
 
@@ -276,6 +278,40 @@ public class RelatedProductResourceTest
 
 		Assert.assertEquals(
 			SimpleCPTypeConstants.NAME, postRelatedProduct.getProductType());
+	}
+
+	private void _testPostProductIdRelatedProductWithRequiresInBundleType()
+		throws Exception {
+
+		relatedProductResource.postProductIdRelatedProduct(
+			_cpDefinition1.getCProductId(),
+			new RelatedProduct() {
+				{
+					priority = 0.0;
+					productId = _cpDefinition2.getCProductId();
+					type = CPDefinitionLinkTypeConstants.REQUIRES_IN_BUNDLE;
+				}
+			});
+
+		Page<RelatedProduct> productIdRelatedProductsPage =
+			relatedProductResource.getProductIdRelatedProductsPage(
+				_cpDefinition1.getCProductId(),
+				CPDefinitionLinkTypeConstants.REQUIRES_IN_BUNDLE,
+				Pagination.of(1, 10));
+
+		Assert.assertEquals(1, productIdRelatedProductsPage.getTotalCount());
+
+		List<RelatedProduct> relatedProducts =
+			(List<RelatedProduct>)productIdRelatedProductsPage.getItems();
+
+		RelatedProduct relatedProduct = relatedProducts.get(0);
+
+		Assert.assertEquals(
+			(Long)_cpDefinition2.getCProductId(),
+			relatedProduct.getProductId());
+		Assert.assertEquals(
+			CPDefinitionLinkTypeConstants.REQUIRES_IN_BUNDLE,
+			relatedProduct.getType());
 	}
 
 	private void _testPostRelatedProductsBatch() throws Exception {
