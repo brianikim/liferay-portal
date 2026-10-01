@@ -20,6 +20,7 @@ import {DisplayPageTemplatesPage} from '../../../../pages/layout-page-template-a
 import getGlobalSiteId from '../../../../utils/getGlobalSiteId';
 import {getRandomInt} from '../../../../utils/getRandomInt';
 import getRandomString from '../../../../utils/getRandomString';
+import {waitForAlert} from '../../../../utils/waitForAlert';
 import {
 	apiStorefrontSetUp,
 	deployProductFragmentsOnDefaultDPT,
@@ -500,5 +501,131 @@ test(
 				);
 			}
 		}
+	}
+);
+
+test(
+	'Marking and unmarking a product display page template as default switches the product page',
+	{tag: ['@COMMERCE-7833', '@LPD-106244-Grouped-19']},
+	async ({
+		apiHelpers,
+		commerceAdminChannelDetailsPage,
+		commerceAdminChannelsPage,
+		commerceThemeMiniumCatalogPage,
+		displayPageTemplatesPage,
+		page,
+		pageEditorPage,
+		productDetailsPage,
+	}) => {
+		const productDetailsLayoutTitle = getRandomString();
+
+		const {channel, product, site} = await apiStorefrontSetUp(apiHelpers, [
+			{
+				title: 'Catalog',
+				widgetName:
+					'com_liferay_commerce_product_content_search_web_internal_portlet_CPSearchResultsPortlet',
+			},
+			{
+				title: productDetailsLayoutTitle,
+				widgetName:
+					'com_liferay_commerce_product_content_web_internal_portlet_CPContentPortlet',
+			},
+		]);
+
+		const headingText = getRandomString();
+
+		const displayPageTemplateName =
+			await deployProductFragmentsOnDefaultDPT(apiHelpers, {
+				displayPageTemplatesPage,
+				fragmentNames: [],
+				onFragmentsAdded: async () => {
+					await pageEditorPage.addFragment(
+						'Basic Components',
+						'Heading'
+					);
+
+					await pageEditorPage.editTextEditable(
+						await pageEditorPage.getFragmentId('Heading'),
+						'element-text',
+						headingText
+					);
+				},
+				pageEditorPage,
+				site,
+			});
+
+		const heading = productDetailsPage.headingFragment(headingText);
+
+		await gotoProductPage(page, site, product);
+
+		await expect(heading).toBeVisible();
+
+		await displayPageTemplatesPage.goto(site.friendlyUrlPath);
+
+		const dialogPromise = page
+			.waitForEvent('dialog')
+			.then(async (dialog) => {
+				await dialog.accept();
+
+				return dialog.message();
+			});
+
+		await displayPageTemplatesPage.clickMoreActions(
+			displayPageTemplateName,
+			'Unmark as Default'
+		);
+
+		expect(await dialogPromise).toBe(
+			'Some assets might be set to use the default display page. Are you sure you want to unmark this?'
+		);
+
+		await waitForAlert(page);
+
+		await commerceAdminChannelsPage.goto();
+
+		await (
+			await commerceAdminChannelsPage.channelsTableRowLink(channel.name)
+		).click();
+
+		await commerceAdminChannelDetailsPage.goToTab('Product Display Pages');
+
+		await expect(
+			commerceAdminChannelDetailsPage.defaultDisplayPageName
+		).toHaveText('None');
+		await expect(
+			commerceAdminChannelDetailsPage.emptyResultsMessage
+		).toBeVisible();
+
+		await page.goto(`/web${site.friendlyUrlPath}/catalog`);
+
+		await commerceThemeMiniumCatalogPage
+			.productLink(product.name['en_US'])
+			.first()
+			.click();
+
+		await expect(page).toHaveURL(
+			new RegExp(`/web${site.friendlyUrlPath}/p/${product.urls['en_US']}`)
+		);
+		await expect(heading).toHaveCount(0);
+		await expect(
+			productDetailsPage.headerTitle(productDetailsLayoutTitle)
+		).toBeVisible();
+		await expect(
+			await productDetailsPage.nameField(product.name['en_US'])
+		).toBeVisible();
+		await expect(
+			await productDetailsPage.priceField('$ 10.00')
+		).toBeVisible();
+		await expect(
+			await productDetailsPage.skuField(product.skus[0].sku)
+		).toBeVisible();
+
+		await displayPageTemplatesPage.goto(site.friendlyUrlPath);
+
+		await displayPageTemplatesPage.markAsDefault(displayPageTemplateName);
+
+		await gotoProductPage(page, site, product);
+
+		await expect(heading).toBeVisible();
 	}
 );
