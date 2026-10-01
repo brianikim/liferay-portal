@@ -353,6 +353,55 @@ describe('Add to Cart', () => {
 			});
 		});
 
+		it('Must start at the first multiple and flag the unmet rules when minOrderQuantity is lower than multipleOrderQuantity', async () => {
+			const addToCart = renderWithConfiguration({
+				minOrderQuantity: 4,
+				multipleOrderQuantity: 5,
+			});
+
+			const {input} = getLocators(addToCart);
+
+			expect(input).toHaveValue(5);
+
+			fireEvent.focus(input);
+
+			for (const quantity of [1, 4]) {
+				fireEvent.change(input, {target: {value: quantity}});
+
+				expect(input).toHaveValue(quantity);
+
+				await waitFor(() => {
+					expect(input.closest('.form-group')).toHaveClass(
+						'has-error'
+					);
+					expect(
+						screen.getByText(/min-quantity-per-order-is-5/)
+					).toHaveClass('text-danger');
+					expect(
+						screen.getByText(/quantity-must-be-a-multiple-of-5/)
+					).toHaveClass('text-danger');
+				});
+			}
+
+			for (const quantity of [5, 20]) {
+				fireEvent.change(input, {target: {value: quantity}});
+
+				expect(input).toHaveValue(quantity);
+
+				await waitFor(() => {
+					expect(input.closest('.form-group')).not.toHaveClass(
+						'has-error'
+					);
+					expect(
+						screen.getByText(/min-quantity-per-order-is-5/)
+					).not.toHaveClass('text-danger');
+					expect(
+						screen.getByText(/quantity-must-be-a-multiple-of-5/)
+					).not.toHaveClass('text-danger');
+				});
+			}
+		});
+
 		it('Must render an allowedOrderQuantities dropdown with only the listed quantities', () => {
 			renderWithConfiguration({
 				allowedOrderQuantities: [2, 3, 6],
