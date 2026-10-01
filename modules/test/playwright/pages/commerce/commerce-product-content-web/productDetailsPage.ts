@@ -18,6 +18,7 @@ export class ProductDetailsPage {
 	readonly breadcrumb: Locator;
 	readonly breadcrumbLink: (name: string) => Locator;
 	readonly categoryContentPortlet: Locator;
+	readonly categoryLink: (name: string) => Locator;
 	readonly collectionDisplayEmptyMessage: Locator;
 	readonly collectionDisplayListItem: (text: string) => Locator;
 	readonly diagramCard: (name: string) => Locator;
@@ -173,6 +174,8 @@ export class ProductDetailsPage {
 		this.categoryContentPortlet = page.locator(
 			'[id^="portlet_com_liferay_commerce_product_content_web_internal_portlet_CPCategoryContentPortlet"]'
 		);
+		this.categoryLink = (name: string) =>
+			page.getByRole('link', {exact: true, name});
 		this.collectionDisplayEmptyMessage = page.getByText('No Results Found');
 		this.collectionDisplayListItem = (text: string) =>
 			page.locator('li.list-group-item').filter({hasText: text});
