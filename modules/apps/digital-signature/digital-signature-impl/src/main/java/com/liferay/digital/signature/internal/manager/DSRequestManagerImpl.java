@@ -5,7 +5,6 @@
 
 package com.liferay.digital.signature.internal.manager;
 
-import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfigurationUtil;
 import com.liferay.digital.signature.constants.DSRequestConstants;
 import com.liferay.digital.signature.constants.DSRequestRecipientConstants;
@@ -188,6 +187,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 								"sentDate",
 								() -> _toDate(
 									dsRecipient.getSentLocalDateTime())
+							).put(
+								"signingOrder", dsRecipient.getRoutingOrder()
 							).build(),
 							serviceContext);
 					}
@@ -380,11 +381,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	}
 
 	private boolean _isEnabled(long companyId, long groupId) {
-		DigitalSignatureConfiguration digitalSignatureConfiguration =
-			DigitalSignatureConfigurationUtil.getDigitalSignatureConfiguration(
-				companyId, groupId);
-
-		return digitalSignatureConfiguration.enabled();
+		return DigitalSignatureConfigurationUtil.isEmbeddedViewEnabled(
+			companyId, groupId);
 	}
 
 	private Date _toDate(LocalDateTime localDateTime) {
