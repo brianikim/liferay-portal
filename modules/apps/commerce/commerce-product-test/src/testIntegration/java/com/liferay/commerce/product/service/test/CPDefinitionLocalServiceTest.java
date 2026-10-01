@@ -76,6 +76,7 @@ import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.Constants;
+import com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
@@ -96,6 +97,8 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import org.frutilla.FrutillaRule;
 
@@ -516,6 +519,24 @@ public class CPDefinitionLocalServiceTest {
 				expirationCalendar.get(Calendar.MINUTE), user.getTimeZone(),
 				null),
 			cpDefinition.getExpirationDate());
+	}
+
+	@Test
+	public void testCloneCPDefinition() throws Exception {
+		frutillaRule.scenario(
+			"Duplicate a product definition"
+		).given(
+			"An approved or a draft product definition"
+		).when(
+			"the product definition and its duplicate are duplicated"
+		).then(
+			"each duplicate is a draft named and URL titled after its source"
+		).and(
+			"each product definition is deleted independently"
+		);
+
+		_testCloneCPDefinition(WorkflowConstants.STATUS_APPROVED);
+		_testCloneCPDefinition(WorkflowConstants.STATUS_DRAFT);
 	}
 
 	@Test
@@ -1418,6 +1439,58 @@ public class CPDefinitionLocalServiceTest {
 	@Rule
 	public final FrutillaRule frutillaRule = new FrutillaRule();
 
+	private void _assertCloneCPDefinition(
+			CPDefinition cpDefinition, CPDefinition cloneCPDefinition)
+		throws Exception {
+
+		cloneCPDefinition = _cpDefinitionLocalService.getCPDefinition(
+			cloneCPDefinition.getCPDefinitionId());
+
+		Assert.assertEquals(
+			WorkflowConstants.STATUS_DRAFT, cloneCPDefinition.getStatus());
+
+		Map<Locale, String> nameMap =
+			_cpDefinitionLocalService.getCPDefinitionNameMap(
+				cpDefinition.getCPDefinitionId());
+
+		String name = "Copy of " + nameMap.get(LocaleUtil.getDefault());
+
+		Map<Locale, String> cloneNameMap =
+			_cpDefinitionLocalService.getCPDefinitionNameMap(
+				cloneCPDefinition.getCPDefinitionId());
+
+		Assert.assertEquals(name, cloneNameMap.get(LocaleUtil.getDefault()));
+
+		Assert.assertEquals(
+			FriendlyURLNormalizerUtil.normalize(name),
+			cloneCPDefinition.getURL(
+				LocaleUtil.toLanguageId(LocaleUtil.getDefault())));
+	}
+
+	private void _assertDeleteCPDefinitionsIndependently(
+			CPDefinition... cpDefinitions)
+		throws Exception {
+
+		for (int i = 0; i < cpDefinitions.length; i++) {
+			CPDefinition cpDefinition = cpDefinitions[i];
+
+			_cpDefinitionLocalService.deleteCPDefinition(
+				cpDefinition.getCPDefinitionId());
+
+			Assert.assertNull(
+				_cpDefinitionLocalService.fetchCPDefinition(
+					cpDefinition.getCPDefinitionId()));
+
+			for (int j = i + 1; j < cpDefinitions.length; j++) {
+				CPDefinition remainingCPDefinition = cpDefinitions[j];
+
+				Assert.assertNotNull(
+					_cpDefinitionLocalService.fetchCPDefinition(
+						remainingCPDefinition.getCPDefinitionId()));
+			}
+		}
+	}
+
 	private void _assertUniqueExternalReferenceCodes(
 		CPDefinitionOptionRel sourceCPDefinitionOptionRel,
 		CPDefinition targetCPDefinition) {
@@ -1457,6 +1530,169 @@ public class CPDefinitionLocalServiceTest {
 			SetUtil.fromCollection(
 				externalReferenceCodes
 			).size());
+	}
+
+	private void _testCloneCPDefinition() throws Exception {
+		frutillaRule.scenario(
+			"Duplicate a product definition"
+		).given(
+			"A product definition in any workflow status"
+		).when(
+			"the product definition and its duplicate are duplicated"
+		).then(
+			"each duplicate is a draft named and URL titled after its source"
+		).and(
+			"each product definition is deleted independently"
+		);
+
+		_testCloneCPDefinition(WorkflowConstants.STATUS_APPROVED);
+		_testCloneCPDefinition(WorkflowConstants.STATUS_DENIED);
+		_testCloneCPDefinition(WorkflowConstants.STATUS_DRAFT);
+		_testCloneCPDefinition(WorkflowConstants.STATUS_EMPTY);
+		_testCloneCPDefinition(WorkflowConstants.STATUS_EXPIRED);
+		_testCloneCPDefinition(WorkflowConstants.STATUS_INACTIVE);
+		_testCloneCPDefinition(WorkflowConstants.STATUS_INCOMPLETE);
+		_testCloneCPDefinition(WorkflowConstants.STATUS_IN_TRASH);
+		_testCloneCPDefinition(WorkflowConstants.STATUS_SCHEDULED);
+	}
+
+	private void _testCloneCPDefinition(int status) throws Exception {
+		CPDefinition cpDefinition1 = CPTestUtil.addCPDefinitionFromCatalog(
+			_commerceCatalog.getGroupId(), SimpleCPTypeConstants.NAME, false,
+			false);
+
+		cpDefinition1.setStatus(status);
+
+		cpDefinition1 = _cpDefinitionLocalService.updateCPDefinition(
+			cpDefinition1);
+
+		String languageId = LocaleUtil.toLanguageId(LocaleUtil.getDefault());
+
+		String url = cpDefinition1.getURL(languageId);
+
+		CPDefinition cpDefinition2 =
+			_cpDefinitionLocalService.cloneCPDefinition(
+				TestPropsValues.getUserId(), cpDefinition1.getCPDefinitionId(),
+				_commerceCatalog.getGroupId(), _serviceContext);
+
+		_assertCloneCPDefinition(cpDefinition1, cpDefinition2);
+
+		Assert.assertEquals(url, cpDefinition1.getURL(languageId));
+
+		CPDefinition cpDefinition3 =
+			_cpDefinitionLocalService.cloneCPDefinition(
+				TestPropsValues.getUserId(), cpDefinition2.getCPDefinitionId(),
+				_commerceCatalog.getGroupId(), _serviceContext);
+
+		_assertCloneCPDefinition(cpDefinition2, cpDefinition3);
+
+		_assertDeleteCPDefinitionsIndependently(
+			cpDefinition1, cpDefinition2, cpDefinition3);
+	}
+
+	private void _testCloneCPDefinitionOptionRelExternalReferenceCodes()
+		throws Exception {
+
+		frutillaRule.scenario(
+			"Duplicate a product that carries options"
+		).given(
+			"A product with one option and two option values"
+		).when(
+			"The product is duplicated"
+		).then(
+			"The duplicated option and option values carry their own " +
+				"external reference codes"
+		);
+
+		CPInstance cpInstance = CPTestUtil.addCPInstanceWithRandomSku(
+			_commerceCatalog.getGroupId());
+
+		CPDefinitionOptionRel cpDefinitionOptionRel =
+			CPTestUtil.addCPDefinitionOptionRel(
+				_commerceCatalog.getGroupId(), cpInstance.getCPDefinitionId(),
+				true, 2);
+
+		CPDefinition duplicateCPDefinition =
+			_cpDefinitionLocalService.cloneCPDefinition(
+				TestPropsValues.getUserId(), cpInstance.getCPDefinitionId(),
+				_commerceCatalog.getGroupId(), _serviceContext);
+
+		_assertUniqueExternalReferenceCodes(
+			cpDefinitionOptionRel, duplicateCPDefinition);
+	}
+
+	private void _testCloneCPDefinitionPriceChangeDoesNotAffectParent()
+		throws Exception {
+
+		frutillaRule.scenario(
+			"Change Price of a cloned product sku"
+		).given(
+			"A product definition and its clone"
+		).when(
+			"changing the price of the cloned"
+		).and(
+			"changing the price of the parent"
+		).then(
+			"the product price of the parent product is different from " +
+				"cloned product"
+		).and(
+			"the product price of the cloned product is unchanged"
+		);
+
+		CPInstance cpInstance = CPTestUtil.addCPInstanceWithRandomSku(
+			_commerceCatalog.getGroupId(), new BigDecimal(5));
+
+		Assert.assertEquals(
+			WorkflowConstants.STATUS_APPROVED, cpInstance.getStatus());
+
+		CPDefinition duplicateCPDefinition =
+			_cpDefinitionLocalService.cloneCPDefinition(
+				TestPropsValues.getUserId(), cpInstance.getCPDefinitionId(),
+				cpInstance.getGroupId(), _serviceContext);
+
+		CPInstance duplicateCPInstance = _cpInstanceLocalService.getCPInstance(
+			duplicateCPDefinition.getCPDefinitionId(), cpInstance.getSku());
+
+		CommercePriceList commercePriceList =
+			_commercePriceListLocalService.fetchCatalogBaseCommercePriceList(
+				duplicateCPInstance.getGroupId());
+
+		CommercePriceEntry duplicateCommercePriceEntry =
+			_commercePriceEntryLocalService.fetchCommercePriceEntry(
+				commercePriceList.getCommercePriceListId(),
+				duplicateCPInstance.getCPInstanceUuid(), StringPool.BLANK);
+
+		duplicateCommercePriceEntry =
+			_commercePriceEntryLocalService.updatePricingInfo(
+				duplicateCommercePriceEntry.getCommercePriceEntryId(),
+				duplicateCommercePriceEntry.isBulkPricing(), BigDecimal.TEN,
+				false, BigDecimal.ZERO, null, _serviceContext);
+
+		CommercePriceEntry commercePriceEntry =
+			_commercePriceEntryLocalService.fetchCommercePriceEntry(
+				commercePriceList.getCommercePriceListId(),
+				cpInstance.getCPInstanceUuid(), StringPool.BLANK);
+
+		Assert.assertTrue(
+			BigDecimalUtil.eq(
+				BigDecimal.TEN, duplicateCommercePriceEntry.getPrice()));
+
+		Assert.assertNotEquals(
+			commercePriceEntry.getPrice(),
+			duplicateCommercePriceEntry.getPrice());
+
+		_commercePriceEntryLocalService.updatePricingInfo(
+			commercePriceEntry.getCommercePriceEntryId(),
+			commercePriceEntry.isBulkPricing(), new BigDecimal("60"), false,
+			BigDecimal.ZERO, null, _serviceContext);
+
+		duplicateCommercePriceEntry =
+			_commercePriceEntryLocalService.getCommercePriceEntry(
+				duplicateCommercePriceEntry.getCommercePriceEntryId());
+
+		Assert.assertTrue(
+			BigDecimalUtil.eq(
+				BigDecimal.TEN, duplicateCommercePriceEntry.getPrice()));
 	}
 
 	private void _testCopyCPDefinition() throws Exception {
