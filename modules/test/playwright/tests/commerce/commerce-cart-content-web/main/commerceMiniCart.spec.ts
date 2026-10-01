@@ -1493,8 +1493,15 @@ test(
 );
 
 test(
-	'Mini cart shows the Price on Application labels for a SKU with a UOM marked as price on application',
-	{tag: ['@LPD-92604']},
+	'Mini cart shows the Price on Application labels for a SKU with a UOM marked as price on application and truncates long product names',
+	{
+		tag: [
+			'@COMMERCE-11551',
+			'@COMMERCE-12621',
+			'@LPD-92604',
+			'@LPD-106244-Grouped-10',
+		],
+	},
 	async ({
 		apiHelpers,
 		commerceAdminChannelsPage,
@@ -1563,6 +1570,14 @@ test(
 			unitOfMeasureKey: skuUnitOfMeasure.key,
 		});
 
+		const longNameProduct =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+				name: {
+					en_US: `This Is a Product With a Very Long Name That Will Be Truncated ${getRandomString()}`,
+				},
+			});
+
 		const {account, buyerUser} = await createAccountWithBuyerUser(
 			apiHelpers,
 			site.id
@@ -1576,8 +1591,7 @@ test(
 						options: '[]',
 						quantity: 1,
 						replacedSkuId: 0,
-						skuId: sku.id,
-						skuUnitOfMeasure: {key: skuUnitOfMeasure.key},
+						skuId: longNameProduct.skus[0].id,
 					},
 				],
 			},
@@ -1589,20 +1603,39 @@ test(
 
 		await page.goto(`/web${site.friendlyUrlPath}${layout.friendlyUrlPath}`);
 
-		await test.step('Mini cart shows the Request a Quote button, the info message and the Price on Application label for a SKU UOM marked as price on application', async () => {
-			await commerceMiniCartPage.miniCartButton.click();
+		await test.step('Mini cart shows the Request a Quote button, the info message and the Price on Application label for a SKU UOM marked as price on application quick added next to a normal product', async () => {
+			await commerceMiniCartPage.quickAddToCart(sku.sku);
 
 			await expect(
 				commerceMiniCartPage.requestAQuoteButton
 			).toBeVisible();
+			await expect(commerceMiniCartPage.submitButton).toBeDisabled();
 			await expect(
 				commerceMiniCartPage.miniCartPriceOnApplicationInfoMessage
 			).toBeVisible();
 			await expect(
-				commerceMiniCartPage
-					.miniCartItem(product.name.en_US)
-					.getByText('Price on Application', {exact: true})
+				commerceMiniCartPage.miniCartItemPriceOnApplicationLabel(
+					product.name.en_US
+				)
 			).toBeVisible();
+		});
+
+		await test.step('Mini cart truncates a long product name', async () => {
+			const longNameItemName = commerceMiniCartPage.miniCartItemName(
+				longNameProduct.name.en_US
+			);
+
+			await expect(longNameItemName).toHaveCSS(
+				'text-overflow',
+				'ellipsis'
+			);
+
+			expect(
+				await longNameItemName.evaluate(
+					(element: HTMLElement) =>
+						element.offsetWidth < element.scrollWidth
+				)
+			).toBe(true);
 		});
 	}
 );
