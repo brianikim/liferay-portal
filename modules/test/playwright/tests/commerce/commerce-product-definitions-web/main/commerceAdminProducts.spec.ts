@@ -519,13 +519,25 @@ test(
 );
 
 test(
-	'Currency changes based on price lists',
-	{tag: '@LPD-52938'},
+	'Add price entries for price lists, currencies and units of measure from the SKU price modal',
+	{
+		tag: [
+			'@COMMERCE-11084',
+			'@COMMERCE-12218',
+			'@COMMERCE-12289',
+			'@COMMERCE-12290',
+			'@LPD-52938',
+			'@LPD-106244-Grouped-4',
+		],
+	},
 	async ({
 		apiHelpers,
+		commerceAdminPriceListDetailsPage,
+		commerceAdminPriceListsPage,
 		commerceAdminProductDetailsPage,
 		commerceAdminProductDetailsSkusPage,
 		commerceAdminProductPage,
+		page,
 	}) => {
 		const catalog =
 			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
@@ -533,69 +545,226 @@ test(
 		const product =
 			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
 				catalogId: catalog.id,
+				skus: [
+					{
+						cost: 0,
+						price: 50,
+						published: true,
+						purchasable: true,
+						sku: getRandomString(),
+					},
+				],
 			});
-
-		const productSkus = await apiHelpers.headlessCommerceAdminCatalog
-			.getProduct(product.productId)
-			.then((product) => {
-				return product.skus;
-			});
-
-		const currencies =
-			await apiHelpers.headlessCommerceAdminCatalog.getCurrenciesPage('');
-
-		const currencyEUR = currencies.items.find(
-			(item) => item.name['en_US'] === 'Euro'
-		);
-		const currencyUSD = currencies.items.find(
-			(item) => item.name['en_US'] === 'US Dollar'
-		);
 
 		const priceListEUR =
 			await apiHelpers.headlessCommerceAdminPricing.postPriceList({
 				catalogId: catalog.id,
-				currencyCode: currencyEUR.code,
-				name: 'EUR-pl',
+				currencyCode: 'EUR',
+				name: 'EUR-pl ' + getRandomString(),
 				type: 'price-list',
 			});
 		const priceListUSD =
 			await apiHelpers.headlessCommerceAdminPricing.postPriceList({
 				catalogId: catalog.id,
-				currencyCode: currencyUSD.code,
-				name: 'USD-pl',
+				currencyCode: 'USD',
+				name: 'USD-pl ' + getRandomString(),
 				type: 'price-list',
 			});
 
-		await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+		const basePriceListName = `${catalog.name} Base Price List`;
+		const sku = product.skus[0];
 
-		await commerceAdminProductDetailsPage.goToProductSkus();
+		await test.step('Add price entries for two price lists', async () => {
+			await commerceAdminProductPage.gotoProduct(product.name['en_US']);
 
-		await commerceAdminProductDetailsSkusPage
-			.skusTableRowLink(`${productSkus[0].sku}`)
-			.click();
-		await commerceAdminProductDetailsSkusPage.goToSkuTab('Price');
-		await commerceAdminProductDetailsSkusPage.skuPriceAddButton.click();
-		await commerceAdminProductDetailsSkusPage.skuPriceListSelect.selectOption(
-			priceListEUR.name
-		);
+			await commerceAdminProductDetailsPage.goToProductSkus();
 
-		await expect(
-			commerceAdminProductDetailsSkusPage.skuPriceAddModal.getByText(
-				'EUR',
-				{exact: true}
-			)
-		).toBeVisible();
+			await commerceAdminProductDetailsSkusPage.openSkuTab(
+				sku.sku,
+				'Price'
+			);
+			await commerceAdminProductDetailsSkusPage.skuPriceAddButton.click();
 
-		await commerceAdminProductDetailsSkusPage.skuPriceListSelect.selectOption(
-			priceListUSD.name
-		);
+			await expect(
+				commerceAdminProductDetailsSkusPage.skuPriceListSelect.locator(
+					'option:checked'
+				)
+			).toHaveText(basePriceListName);
+			await expect(
+				commerceAdminProductDetailsSkusPage.skuPriceAddModalUnitOfMeasureSelect
+			).toHaveCount(0);
+			await expect(
+				commerceAdminProductDetailsSkusPage.skuPriceAddModalUnitPriceInput
+			).toHaveValue(/^50(\.0+)?$/);
 
-		await expect(
-			commerceAdminProductDetailsSkusPage.skuPriceAddModal.getByText(
-				'USD',
-				{exact: true}
-			)
-		).toBeVisible();
+			await commerceAdminProductDetailsSkusPage.skuPriceListSelect.selectOption(
+				priceListEUR.name
+			);
+
+			await expect(
+				commerceAdminProductDetailsSkusPage.skuPriceAddModalCurrency(
+					'EUR'
+				)
+			).toBeVisible();
+
+			await commerceAdminProductDetailsSkusPage.skuPriceListSelect.selectOption(
+				priceListUSD.name
+			);
+
+			await expect(
+				commerceAdminProductDetailsSkusPage.skuPriceAddModalCurrency(
+					'USD'
+				)
+			).toBeVisible();
+
+			await commerceAdminProductDetailsSkusPage.skuPriceAddModalUnitPriceInput.fill(
+				'10'
+			);
+			await commerceAdminProductDetailsSkusPage.skuPriceAddModalAddEntryButton.click();
+			await commerceAdminProductDetailsSkusPage.skuPriceListSelect
+				.nth(1)
+				.selectOption(priceListEUR.name);
+			await commerceAdminProductDetailsSkusPage.skuPriceAddModalUnitPriceInput
+				.nth(1)
+				.fill('20');
+			await commerceAdminProductDetailsSkusPage.skuPriceAddModalAddButton.click();
+
+			await commerceAdminProductDetailsSkusPage.goToSkuTab('Price');
+
+			await expect(
+				commerceAdminProductDetailsSkusPage.skuPriceTableRow(
+					priceListUSD.name
+				)
+			).toContainText('$ 10.00');
+			await expect(
+				commerceAdminProductDetailsSkusPage.skuPriceTableRow(
+					priceListEUR.name
+				)
+			).toContainText('€ 20.00');
+		});
+
+		await test.step('Change the currency of a price list', async () => {
+			await commerceAdminProductDetailsSkusPage
+				.sidePanelSkuPriceTableRowLink(priceListUSD.name)
+				.click();
+
+			await expect(
+				commerceAdminProductDetailsSkusPage.sidePanelNestedPriceListCurrency(
+					'USD'
+				)
+			).toBeVisible();
+
+			await commerceAdminPriceListsPage.goto();
+
+			await commerceAdminPriceListsPage
+				.priceListLink(priceListUSD.name)
+				.click();
+			await commerceAdminPriceListDetailsPage.currencySelect.selectOption(
+				{
+					label: 'EUR',
+				}
+			);
+			await commerceAdminPriceListDetailsPage.publishButton.click();
+
+			await waitForAlert(page);
+
+			await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+			await commerceAdminProductDetailsPage.goToProductSkus();
+
+			await commerceAdminProductDetailsSkusPage.openSkuTab(
+				sku.sku,
+				'Price'
+			);
+			await commerceAdminProductDetailsSkusPage
+				.sidePanelSkuPriceTableRowLink(priceListUSD.name)
+				.click();
+
+			await expect(
+				commerceAdminProductDetailsSkusPage.sidePanelNestedPriceListCurrency(
+					'EUR'
+				)
+			).toBeVisible();
+		});
+
+		await test.step('Add price entries for two units of measure', async () => {
+			for (const index of [1, 2]) {
+				await apiHelpers.headlessCommerceAdminCatalog.postSkuUnitOfMeasure(
+					sku.id,
+					{
+						basePrice: index,
+						key: `uom${index}`,
+						name: {en_US: `uom${index}`},
+						priority: index,
+					}
+				);
+			}
+
+			await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+			await commerceAdminProductDetailsPage.goToProductSkus();
+
+			await commerceAdminProductDetailsSkusPage.openSkuTab(
+				sku.sku,
+				'Price'
+			);
+
+			await expect(
+				commerceAdminProductDetailsSkusPage.skuPriceTableRow(
+					catalog.name
+				)
+			).toHaveCount(4);
+
+			await commerceAdminProductDetailsSkusPage.skuPriceAddButton.click();
+
+			await expect(
+				commerceAdminProductDetailsSkusPage.skuPriceListSelect.locator(
+					'option:checked'
+				)
+			).toHaveText(basePriceListName);
+			await expect(
+				commerceAdminProductDetailsSkusPage.skuPriceAddModalUnitOfMeasureSelect.locator(
+					'option:checked'
+				)
+			).toHaveText('uom1');
+			await expect(
+				commerceAdminProductDetailsSkusPage.skuPriceAddModalUnitPriceInput
+			).toHaveValue(/^1(\.0+)?$/);
+
+			await commerceAdminProductDetailsSkusPage.skuPriceListSelect.selectOption(
+				priceListUSD.name
+			);
+			await commerceAdminProductDetailsSkusPage.skuPriceAddModalUnitOfMeasureSelect.selectOption(
+				'uom1'
+			);
+			await commerceAdminProductDetailsSkusPage.skuPriceAddModalUnitPriceInput.fill(
+				'30'
+			);
+			await commerceAdminProductDetailsSkusPage.skuPriceAddModalAddEntryButton.click();
+			await commerceAdminProductDetailsSkusPage.skuPriceListSelect
+				.nth(1)
+				.selectOption(priceListEUR.name);
+			await commerceAdminProductDetailsSkusPage.skuPriceAddModalUnitOfMeasureSelect
+				.nth(1)
+				.selectOption('uom2');
+			await commerceAdminProductDetailsSkusPage.skuPriceAddModalUnitPriceInput
+				.nth(1)
+				.fill('90');
+			await commerceAdminProductDetailsSkusPage.skuPriceAddModalAddButton.click();
+
+			await commerceAdminProductDetailsSkusPage.goToSkuTab('Price');
+
+			await expect(
+				commerceAdminProductDetailsSkusPage
+					.skuPriceTableRow(priceListUSD.name)
+					.filter({hasText: 'uom1'})
+			).toContainText('€ 30.00');
+			await expect(
+				commerceAdminProductDetailsSkusPage
+					.skuPriceTableRow(priceListEUR.name)
+					.filter({hasText: 'uom2'})
+			).toContainText('€ 90.00');
+		});
 	}
 );
 
