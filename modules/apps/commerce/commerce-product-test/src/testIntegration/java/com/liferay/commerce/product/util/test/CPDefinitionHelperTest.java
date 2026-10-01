@@ -14,8 +14,10 @@ import com.liferay.commerce.product.data.source.CPDataSourceResult;
 import com.liferay.commerce.product.helper.CPDefinitionHelper;
 import com.liferay.commerce.product.model.CPDefinition;
 import com.liferay.commerce.product.model.CPInstance;
+import com.liferay.commerce.product.model.CPSpecificationOption;
 import com.liferay.commerce.product.model.CommerceCatalog;
 import com.liferay.commerce.product.service.CPDefinitionLocalService;
+import com.liferay.commerce.product.service.CPDefinitionSpecificationOptionValueLocalService;
 import com.liferay.commerce.product.service.CommerceCatalogLocalService;
 import com.liferay.commerce.product.test.util.CPTestUtil;
 import com.liferay.petra.function.transform.TransformUtil;
@@ -114,6 +116,7 @@ public class CPDefinitionHelperTest {
 		_testSearchWithDraftCPDefinition();
 		_testSearchWithPartialSku();
 		_testSearchWithSku();
+		_testSearchWithSpecificationValues();
 	}
 
 	@Test
@@ -400,6 +403,41 @@ public class CPDefinitionHelperTest {
 					cpInstance2.getSku()));
 	}
 
+	private void _testSearchWithSpecificationValues() throws Exception {
+		CPInstance[] cpInstances = _addCPInstances(
+			_commerceCatalog.getGroupId(), 3);
+
+		String[] values = new String[cpInstances.length];
+
+		CPSpecificationOption cpSpecificationOption =
+			CPTestUtil.addCPSpecificationOption(
+				_commerceCatalog.getGroupId(), true);
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(
+				_commerceCatalog.getGroupId());
+
+		for (int i = 0; i < cpInstances.length; i++) {
+			values[i] = RandomTestUtil.randomString();
+
+			_cpDefinitionSpecificationOptionValueLocalService.
+				addCPDefinitionSpecificationOptionValue(
+					StringPool.BLANK, cpInstances[i].getCPDefinitionId(),
+					cpSpecificationOption.getCPSpecificationOptionId(), 0,
+					RandomTestUtil.randomDouble(),
+					Collections.singletonMap(LocaleUtil.US, values[i]), true,
+					serviceContext);
+		}
+
+		Assert.assertEquals(
+			Collections.singleton(cpInstances[0].getCPDefinitionId()),
+			_searchCPDefinitionIds(values[0]));
+		Assert.assertEquals(
+			SetUtil.fromArray(
+				cpInstances[0].getCPDefinitionId(),
+				cpInstances[1].getCPDefinitionId()),
+			_searchCPDefinitionIds(values[0] + StringPool.SPACE + values[1]));
+	}
+
 	private static final int _CP_INSTANCES_COUNT = 10;
 
 	private static Company _company;
@@ -414,6 +452,10 @@ public class CPDefinitionHelperTest {
 
 	@Inject
 	private CPDefinitionLocalService _cpDefinitionLocalService;
+
+	@Inject
+	private CPDefinitionSpecificationOptionValueLocalService
+		_cpDefinitionSpecificationOptionValueLocalService;
 
 	@Inject
 	private IndexerRegistry _indexerRegistry;
