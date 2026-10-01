@@ -736,6 +736,21 @@ public class CPInstanceLocalServiceTest {
 
 			Assert.assertNotNull(cpInstanceReplacementCPInstanceUuidException);
 		}
+
+		cpDefinition = cpInstance3.getCPDefinition();
+
+		try {
+			_updateCPInstance(
+				cpInstance3, cpInstance3.getCPInstanceUuid(),
+				cpDefinition.getCProductId());
+
+			Assert.fail();
+		}
+		catch (CPInstanceReplacementCPInstanceUuidException
+					cpInstanceReplacementCPInstanceUuidException) {
+
+			Assert.assertNotNull(cpInstanceReplacementCPInstanceUuidException);
+		}
 	}
 
 	@Rule
