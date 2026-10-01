@@ -42,6 +42,8 @@ export class CommerceMiniCartPage {
 	readonly miniCartItemHideOptionsButton: (
 		product: string | Locator
 	) => Locator;
+	readonly miniCartItemInfoButton: (product: string | Locator) => Locator;
+	readonly miniCartItemName: (product: string | Locator) => Locator;
 	readonly miniCartItemShowOptionsButton: (
 		product: string | Locator
 	) => Locator;
@@ -55,16 +57,24 @@ export class CommerceMiniCartPage {
 	readonly miniCartItemPriceOnApplication: (
 		product: string | Locator
 	) => Locator;
+	readonly miniCartItemPriceOnApplicationLabel: (
+		product: string | Locator
+	) => Locator;
 	readonly miniCartItemPromoPrice: (product: string | Locator) => Locator;
 	readonly miniCartItemReplacementLabel: (productName: string) => Locator;
 	readonly miniCartItemUnitOfMeasure: (product: string | Locator) => Locator;
 	readonly miniCartReplacementInfoMessage: Locator;
+	readonly miniCartReplacementLabels: Locator;
+	readonly miniCartReplacementTooltip: (sku: string) => Locator;
 	readonly miniCartResume: Locator;
 	readonly miniCartSaveButton: Locator;
 	readonly miniCartSku: (skuName: string) => Locator;
 	readonly miniCartSummaryItem: (label: string) => Locator;
 	readonly miniCartTotalPrice: Locator;
 	readonly miniCartUnitOfMeasureSelector: Locator;
+	readonly miniCartWidget: Locator;
+	readonly miniCartWidgetButton: (name: string) => Locator;
+	readonly miniCartWidgetCheckoutButton: Locator;
 	readonly page: Page;
 	readonly editQuantitySelector: Locator;
 	readonly priceField: (
@@ -74,6 +84,7 @@ export class CommerceMiniCartPage {
 	readonly proceedAsGuest: Locator;
 	readonly productsLimitErrorMessage: (quantity: string) => Locator;
 	readonly quickAddToCartButton: Locator;
+	readonly quickAddToCartChip: (sku: string) => Locator;
 	readonly quickAddToCartSku: (sku: string) => Locator;
 	readonly requestAQuoteButton: Locator;
 	readonly reviewOrderButton: Locator;
@@ -169,6 +180,10 @@ export class CommerceMiniCartPage {
 				exact: true,
 				name: 'Hide Options',
 			});
+		this.miniCartItemInfoButton = (product: string | Locator) =>
+			this._cartItem(product).getByLabel('Info', {exact: true});
+		this.miniCartItemName = (product: string | Locator) =>
+			this._cartItem(product).locator('.item-name');
 		this.miniCartItemShowOptionsButton = (product: string | Locator) =>
 			this._cartItem(product).getByRole('button', {
 				exact: true,
@@ -194,6 +209,12 @@ export class CommerceMiniCartPage {
 			this._cartItem(product).locator(
 				'.price-on-application.price-value'
 			);
+		this.miniCartItemPriceOnApplicationLabel = (
+			product: string | Locator
+		) =>
+			this._cartItem(product).getByText('Price on Application', {
+				exact: true,
+			});
 		this.miniCartItemPromoPrice = (product: string | Locator) =>
 			this._cartItem(product).locator(
 				'.mini-cart-item-price .price-value-promo'
@@ -212,6 +233,14 @@ export class CommerceMiniCartPage {
 		this.miniCartReplacementInfoMessage = page.getByText(
 			'There are replacement products in your cart.'
 		);
+		this.miniCartReplacementLabels = this.miniCartItemsContainer.getByText(
+			'Replacement',
+			{exact: true}
+		);
+		this.miniCartReplacementTooltip = (sku: string) =>
+			page
+				.getByRole('tooltip')
+				.getByText(`Replacement Product for ${sku}.`, {exact: true});
 		this.miniCartResume = page.locator('.mini-cart-header-resume');
 		this.miniCartSaveButton = page
 			.locator('.mini-cart-footer')
@@ -231,6 +260,15 @@ export class CommerceMiniCartPage {
 		);
 		this.miniCartUnitOfMeasureSelector = page.locator(
 			'select[name="minicart-uom-selector"]'
+		);
+		this.miniCartWidget = page.locator(
+			'#portlet_com_liferay_commerce_cart_content_web_internal_portlet_CommerceCartContentMiniPortlet'
+		);
+		this.miniCartWidgetButton = (name: string) =>
+			this.miniCartWidget.getByRole('button', {exact: true, name});
+		this.miniCartWidgetCheckoutButton = this.miniCartWidget.getByText(
+			'Checkout',
+			{exact: true}
 		);
 		this.priceField = async (price: string, container = this.page) => {
 			return container.getByText(price);
@@ -258,6 +296,8 @@ export class CommerceMiniCartPage {
 			name: 'Review Order',
 		});
 		this.quickAddToCartButton = page.getByTestId('quickAddToCartButton');
+		this.quickAddToCartChip = (sku) =>
+			page.locator('.form-control-tag-group').getByText(sku);
 		this.quickAddToCartSku = (sku) =>
 			page.getByRole('menuitem', {name: sku});
 		this.selectOption = (optionLabel: string, optionName: string) =>
@@ -334,12 +374,8 @@ export class CommerceMiniCartPage {
 
 		await expect(this.miniCartButtonClose).toBeVisible();
 
-		await expect(async () => {
-			await this.searchProductsInput.fill(sku);
-			await expect(this.quickAddToCartSku(sku)).toBeVisible();
-		}).toPass();
+		await this.selectQuickAddToCartSku(sku);
 
-		await this.quickAddToCartSku(sku).click();
 		await this.quickAddToCartButton.click();
 	}
 
@@ -348,6 +384,15 @@ export class CommerceMiniCartPage {
 			this.miniCartEditItemPanel.getByLabel(optionName),
 			optionLabel
 		);
+	}
+
+	async selectQuickAddToCartSku(sku: string) {
+		await expect(async () => {
+			await this.searchProductsInput.fill(sku);
+			await expect(this.quickAddToCartSku(sku)).toBeVisible();
+		}).toPass();
+
+		await this.quickAddToCartSku(sku).click();
 	}
 
 	async showItemOptions(product: string | Locator) {
