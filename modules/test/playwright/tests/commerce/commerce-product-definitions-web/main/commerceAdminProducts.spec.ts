@@ -137,13 +137,23 @@ async function checkProductStatusAfterDuplicationAndConversionToDraft({
 }
 
 test(
-	'Add a SKU',
-	{tag: '@COMMERCE-6021'},
+	'Add, edit, and delete a SKU',
+	{
+		tag: [
+			'@COMMERCE-5807',
+			'@COMMERCE-6021',
+			'@COMMERCE-6022',
+			'@COMMERCE-6023',
+			'@COMMERCE-9891',
+			'@LPD-106244-Grouped-4',
+		],
+	},
 	async ({
 		apiHelpers,
 		commerceAdminProductDetailsPage,
 		commerceAdminProductDetailsSkusPage,
 		commerceAdminProductPage,
+		page,
 	}) => {
 		const catalog =
 			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
@@ -157,19 +167,64 @@ test(
 
 		await commerceAdminProductDetailsPage.goToProductSkus();
 
+		const sku1 = 'SKU1' + getRandomString();
+
 		await commerceAdminProductDetailsSkusPage.skuAddButton.click();
-
 		await commerceAdminProductDetailsSkusPage.skuAddModalSkuInput.fill(
-			'BLACKSKU'
+			sku1
 		);
-
 		await commerceAdminProductDetailsSkusPage.skuAddModalSkuPurchasableToggle.check();
-
 		await commerceAdminProductDetailsSkusPage.skuAddModalSkuPublishButton.click();
 
 		await expect(
 			commerceAdminProductDetailsSkusPage.skuAddModalSuccessMessage
 		).toBeVisible();
+
+		const externalReferenceCode = getRandomString();
+		const sku2 = 'SKU2' + getRandomString();
+
+		await commerceAdminProductDetailsSkusPage
+			.skusTableRowLink(sku1)
+			.click();
+		await commerceAdminProductDetailsSkusPage.sidePanelDetailsSkuFieldName.fill(
+			sku2
+		);
+		await commerceAdminProductDetailsSkusPage.sidePanelDetailsSkuExternalReferenceCodeInput.fill(
+			externalReferenceCode
+		);
+		await commerceAdminProductDetailsSkusPage.sidePanelDetailsSkuPublishButton.click();
+
+		await waitForAlert(commerceAdminProductDetailsSkusPage.sidePanelFrame);
+
+		await page.reload();
+
+		await expect(
+			commerceAdminProductDetailsSkusPage.skusTableRowLink(sku1)
+		).toHaveCount(0);
+
+		await commerceAdminProductDetailsSkusPage
+			.skusTableRowLink(sku2)
+			.click();
+
+		await expect(
+			commerceAdminProductDetailsSkusPage.sidePanelDetailsSkuFieldName
+		).toHaveValue(sku2);
+		await expect(
+			commerceAdminProductDetailsSkusPage.sidePanelDetailsSkuExternalReferenceCodeInput
+		).toHaveValue(externalReferenceCode);
+
+		await page.reload();
+
+		page.once('dialog', (dialog) => dialog.accept());
+
+		await commerceAdminProductPage.productRowActionsButton(sku2).click();
+		await commerceAdminProductPage.deleteMenuItem.click();
+
+		await waitForAlert(page);
+
+		await expect(
+			commerceAdminProductDetailsSkusPage.skusTableRowLink(sku2)
+		).toHaveCount(0);
 	}
 );
 
