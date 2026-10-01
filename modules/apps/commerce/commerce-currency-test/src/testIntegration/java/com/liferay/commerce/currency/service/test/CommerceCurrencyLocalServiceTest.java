@@ -22,7 +22,9 @@ import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
+import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.test.rule.Inject;
@@ -159,6 +161,41 @@ public class CommerceCurrencyLocalServiceTest {
 	}
 
 	@Test
+	public void testImportDefaultValues() throws Exception {
+		CommerceCurrency commerceCurrency =
+			_commerceCurrencyLocalService.getCommerceCurrency(
+				TestPropsValues.getCompanyId(), "BRL");
+
+		_commerceCurrencyLocalService.deleteCommerceCurrency(commerceCurrency);
+
+		Assert.assertNull(
+			_commerceCurrencyLocalService.fetchCommerceCurrency(
+				TestPropsValues.getCompanyId(), "BRL"));
+
+		_commerceCurrencyLocalService.importDefaultValues(
+			false,
+			ServiceContextTestUtil.getServiceContext(
+				TestPropsValues.getGroupId()));
+
+		_assertCommerceCurrencyName("AUD", "Australian Dollar");
+		_assertCommerceCurrencyName("BRL", "Brazilian Real");
+		_assertCommerceCurrencyName("CAD", "Canadian Dollar");
+		_assertCommerceCurrencyName("CNY", "Chinese Yuan Renminbi");
+		_assertCommerceCurrencyName("EUR", "Euro");
+		_assertCommerceCurrencyName("GBP", "British Pound");
+		_assertCommerceCurrencyName("HKD", "Hong Kong Dollar");
+		_assertCommerceCurrencyName("INR", "Indian Rupee");
+		_assertCommerceCurrencyName("JPY", "Japanese Yen");
+		_assertCommerceCurrencyName("USD", "US Dollar");
+
+		_commerceCurrencyLocalService.deleteCommerceCurrency(
+			_commerceCurrencyLocalService.getCommerceCurrency(
+				TestPropsValues.getCompanyId(), "BRL"));
+
+		_commerceCurrencyLocalService.addCommerceCurrency(commerceCurrency);
+	}
+
+	@Test
 	public void testUpdateCommerceCurrency() throws Exception {
 		AssertUtils.assertFailure(
 			CommerceCurrencyRateException.class, null,
@@ -211,6 +248,16 @@ public class CommerceCurrencyLocalServiceTest {
 			commerceCurrency.getCommerceCurrencyId());
 
 		Assert.assertEquals(oldExchangeRate, commerceCurrency.getRate());
+	}
+
+	private void _assertCommerceCurrencyName(String code, String name)
+		throws Exception {
+
+		CommerceCurrency commerceCurrency =
+			_commerceCurrencyLocalService.getCommerceCurrency(
+				TestPropsValues.getCompanyId(), code);
+
+		Assert.assertEquals(name, commerceCurrency.getName(LocaleUtil.US));
 	}
 
 	@Inject
