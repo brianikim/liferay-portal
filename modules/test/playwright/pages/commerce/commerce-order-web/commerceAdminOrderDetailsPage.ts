@@ -41,6 +41,8 @@ export class CommerceAdminOrderDetailsPage extends CommerceDNDTablePage {
 	readonly orderItemMeasurementUnits: Locator;
 	readonly orderItemQuantityColumn: (quantity: string) => Promise<Locator>;
 	readonly orderItemSaveButton: Locator;
+	readonly orderItemText: (text: string) => Locator;
+	readonly orderItemVirtualSettingsLink: Locator;
 	readonly orderNote: (note: string) => Promise<Locator>;
 	readonly orderNotesLink: Locator;
 	readonly orderNotesTextArea: Locator;
@@ -154,6 +156,12 @@ export class CommerceAdminOrderDetailsPage extends CommerceDNDTablePage {
 		this.orderItemSaveButton = this.orderItemFrame.getByRole('button', {
 			name: 'Save',
 		});
+		this.orderItemText = (text: string) =>
+			this.orderItemFrame.getByText(text);
+		this.orderItemVirtualSettingsLink = this.orderItemFrame.getByRole(
+			'link',
+			{exact: true, name: 'Virtual Settings'}
+		);
 		this.orderNote = async (tabName: string) => {
 			return page.getByText(tabName);
 		};
