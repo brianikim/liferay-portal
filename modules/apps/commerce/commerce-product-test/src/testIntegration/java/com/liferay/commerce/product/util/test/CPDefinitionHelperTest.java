@@ -23,6 +23,8 @@ import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Company;
+import com.liferay.portal.kernel.search.Indexer;
+import com.liferay.portal.kernel.search.IndexerRegistry;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
@@ -37,7 +39,10 @@ import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
 
+import java.math.BigDecimal;
+
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -344,12 +349,26 @@ public class CPDefinitionHelperTest {
 	}
 
 	private void _testSearchWithPartialSku() throws Exception {
+		Set<Long> cpDefinitionIds = new HashSet<>();
+
+		Indexer<CPDefinition> indexer = _indexerRegistry.getIndexer(
+			CPDefinition.class);
+		String skuPrefix = RandomTestUtil.randomString();
+
+		for (int i = 0; i < 4; i++) {
+			CPInstance cpInstance = CPTestUtil.addCPInstanceFromCatalog(
+				_commerceCatalog.getGroupId(), BigDecimal.TEN, skuPrefix + i);
+
+			indexer.reindex(cpInstance.getCPDefinition());
+
+			cpDefinitionIds.add(cpInstance.getCPDefinitionId());
+		}
+
+		Assert.assertEquals(cpDefinitionIds, _searchCPDefinitionIds(skuPrefix));
+
 		CPInstance cpInstance =
 			CPTestUtil.addCPInstanceWithRandomSkuFromCatalog(
 				_commerceCatalog.getGroupId());
-
-		CPTestUtil.addCPInstanceWithRandomSkuFromCatalog(
-			_commerceCatalog.getGroupId());
 
 		String sku = cpInstance.getSku();
 
@@ -395,5 +414,8 @@ public class CPDefinitionHelperTest {
 
 	@Inject
 	private CPDefinitionLocalService _cpDefinitionLocalService;
+
+	@Inject
+	private IndexerRegistry _indexerRegistry;
 
 }
