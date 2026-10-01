@@ -169,6 +169,7 @@ public class SkuResourceTest extends BaseSkuResourceTestCase {
 		_testPatchSkuWithPricing();
 		_testPatchSkuWithReplacementSku();
 		_testPatchSkuWithShipping();
+		_testPatchSkuWithSkuVirtualSettings();
 		_testPatchSkuWithUnitOfMeasure();
 	}
 
@@ -596,6 +597,51 @@ public class SkuResourceTest extends BaseSkuResourceTestCase {
 		Assert.assertEquals(patchSku.getWidth(), randomSku.getWidth());
 
 		assertValid(patchSku);
+	}
+
+	private void _testPatchSkuWithSkuVirtualSettings() throws Exception {
+		SkuResource skuResource = _getSkuVirtualSettingsSkuResource();
+
+		Sku randomSku = randomSku();
+
+		randomSku.setSkuVirtualSettings(
+			new SkuVirtualSettings() {
+				{
+					activationStatus = 0;
+					duration = 3L;
+					maxUsages = RandomTestUtil.nextInt();
+					override = true;
+					sampleURL = "https://liferay.com";
+					termsOfUseRequired = false;
+					url = "https://liferay.com";
+					useSample = true;
+				}
+			});
+
+		Sku postSku = skuResource.postProductIdSku(
+			_cpDefinition.getCProductId(), randomSku);
+
+		SkuVirtualSettings postSkuVirtualSettings =
+			postSku.getSkuVirtualSettings();
+
+		Assert.assertEquals(
+			Long.valueOf(3), postSkuVirtualSettings.getDuration());
+
+		skuResource.patchSku(
+			postSku.getId(),
+			new Sku() {
+				{
+					skuVirtualSettings = new SkuVirtualSettings() {
+						{
+							override = false;
+						}
+					};
+				}
+			});
+
+		Sku getSku = skuResource.getSku(postSku.getId());
+
+		Assert.assertNull(getSku.getSkuVirtualSettings());
 	}
 
 	private void _testPatchSkuWithUnitOfMeasure() throws Exception {
