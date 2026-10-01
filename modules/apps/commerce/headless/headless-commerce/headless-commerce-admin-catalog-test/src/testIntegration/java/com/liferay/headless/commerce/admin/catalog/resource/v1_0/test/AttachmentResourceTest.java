@@ -708,6 +708,16 @@ public class AttachmentResourceTest extends BaseAttachmentResourceTestCase {
 			GetterUtil.getLong(postAttachment.getFileEntryId()));
 	}
 
+	private void _testPostProductByExternalReferenceCodeImageWithOptions()
+		throws Exception {
+
+		_assertOptions(
+			_randomImageAttachment(),
+			attachment ->
+				attachmentResource.postProductByExternalReferenceCodeImage(
+					_cProduct.getExternalReferenceCode(), attachment));
+	}
+
 	private void _testPostProductIdAttachmentProductVersioning()
 		throws Exception {
 
