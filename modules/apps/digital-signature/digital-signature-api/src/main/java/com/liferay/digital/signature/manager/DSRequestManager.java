@@ -7,8 +7,11 @@ package com.liferay.digital.signature.manager;
 
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRequest;
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import org.osgi.annotation.versioning.ProviderType;
@@ -28,6 +31,17 @@ public interface DSRequestManager {
 
 	public Map<Long, DSRequest> getDSRequests(
 		long companyId, Collection<Long> fileEntryIds);
+
+	public List<DSRequest> getSiteDSRequests(
+		long companyId, long siteGroupId, String search, int start, int end);
+
+	public int getSiteDSRequestsCount(
+		long companyId, long siteGroupId, String search);
+
+	public boolean hasPermission(
+			PermissionChecker permissionChecker, DSRequest dsRequest,
+			String actionId)
+		throws PortalException;
 
 	public void sendDSRequestNotifications(
 		long companyId, long groupId, DSRequest dsRequest);
