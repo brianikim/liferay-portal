@@ -34,4 +34,8 @@ public class DSRequestConstants {
 		STATUS_SIGNED
 	};
 
+	public static final String[] STATUSES_REQUEST_TERMINAL = {
+		STATUS_COMPLETED, STATUS_DECLINED, STATUS_EXPIRED, STATUS_VOIDED
+	};
+
 }
