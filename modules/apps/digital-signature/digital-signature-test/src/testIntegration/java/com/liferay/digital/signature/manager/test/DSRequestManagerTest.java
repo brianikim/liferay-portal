@@ -82,6 +82,8 @@ public class DSRequestManagerTest {
 			).put(
 				"enabled", true
 			).put(
+				"enableEmbeddedView", true
+			).put(
 				"environment", RandomTestUtil.randomString()
 			).put(
 				"integrationKey", RandomTestUtil.randomString()
