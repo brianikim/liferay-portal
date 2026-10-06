@@ -100,7 +100,7 @@ public class DSRequestManagerTest {
 	public void testAddDSRequest() throws Exception {
 		long companyId = TestPropsValues.getCompanyId();
 
-		DSEnvelope dsEnvelope = _createDSEnvelope();
+		DSEnvelope dsEnvelope = _getDSEnvelope();
 
 		_dsRequestManager.addDSRequest(
 			companyId, _group.getGroupId(), TestPropsValues.getUserId(),
@@ -161,19 +161,19 @@ public class DSRequestManagerTest {
 		Assert.assertEquals(expectedEmailAddresses, actualEmailAddresses);
 	}
 
-	private DSEnvelope _createDSEnvelope() {
+	private DSEnvelope _getDSEnvelope() {
 		DSEnvelope dsEnvelope = new DSEnvelope();
 
 		dsEnvelope.setDSEnvelopeId(RandomTestUtil.randomString());
 		dsEnvelope.setDSRecipients(
-			ListUtil.fromArray(_createDSRecipient(), _createDSRecipient()));
+			ListUtil.fromArray(_getDSRecipient(), _getDSRecipient()));
 		dsEnvelope.setEmailSubject(RandomTestUtil.randomString());
 		dsEnvelope.setStatus("sent");
 
 		return dsEnvelope;
 	}
 
-	private DSRecipient _createDSRecipient() {
+	private DSRecipient _getDSRecipient() {
 		DSRecipient dsRecipient = new DSRecipient();
 
 		dsRecipient.setDSRecipientId(RandomTestUtil.randomString());
