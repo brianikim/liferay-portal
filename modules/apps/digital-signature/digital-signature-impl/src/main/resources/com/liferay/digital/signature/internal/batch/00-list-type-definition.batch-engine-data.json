@@ -15,9 +15,21 @@
 			"externalReferenceCode": "L_DS_REQUEST_RECIPIENT_STATUSES",
 			"listTypeEntries": [
 				{
+					"externalReferenceCode": "COMPLETED",
+					"key": "completed",
+					"name": "Completed",
+					"system": true
+				},
+				{
 					"externalReferenceCode": "CREATED",
 					"key": "created",
 					"name": "Created",
+					"system": true
+				},
+				{
+					"externalReferenceCode": "DECLINED",
+					"key": "declined",
+					"name": "Declined",
 					"system": true
 				},
 				{
@@ -31,18 +43,6 @@
 					"key": "signed",
 					"name": "Signed",
 					"system": true
-				},
-				{
-					"externalReferenceCode": "COMPLETED",
-					"key": "completed",
-					"name": "Completed",
-					"system": true
-				},
-				{
-					"externalReferenceCode": "DECLINED",
-					"key": "declined",
-					"name": "Declined",
-					"system": true
 				}
 			],
 			"name": "DS Request Recipient Statuses",
@@ -52,21 +52,15 @@
 			"externalReferenceCode": "L_DS_REQUEST_STATUSES",
 			"listTypeEntries": [
 				{
-					"externalReferenceCode": "CREATED",
-					"key": "created",
-					"name": "Created",
-					"system": true
-				},
-				{
-					"externalReferenceCode": "SENT",
-					"key": "sent",
-					"name": "Sent",
-					"system": true
-				},
-				{
 					"externalReferenceCode": "COMPLETED",
 					"key": "completed",
 					"name": "Completed",
+					"system": true
+				},
+				{
+					"externalReferenceCode": "CREATED",
+					"key": "created",
+					"name": "Created",
 					"system": true
 				},
 				{
@@ -76,15 +70,21 @@
 					"system": true
 				},
 				{
-					"externalReferenceCode": "VOIDED",
-					"key": "voided",
-					"name": "Voided",
-					"system": true
-				},
-				{
 					"externalReferenceCode": "EXPIRED",
 					"key": "expired",
 					"name": "Expired",
+					"system": true
+				},
+				{
+					"externalReferenceCode": "SENT",
+					"key": "sent",
+					"name": "Sent",
+					"system": true
+				},
+				{
+					"externalReferenceCode": "VOIDED",
+					"key": "voided",
+					"name": "Voided",
 					"system": true
 				}
 			],
