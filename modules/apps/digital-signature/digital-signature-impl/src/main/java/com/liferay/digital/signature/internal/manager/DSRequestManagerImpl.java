@@ -13,7 +13,6 @@ import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
-import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.object.constants.ObjectDefinitionConstants;
 import com.liferay.object.constants.ObjectEntryFolderConstants;
 import com.liferay.object.entry.util.ObjectEntryThreadLocal;
@@ -33,8 +32,6 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.User;
-import com.liferay.portal.kernel.search.Indexer;
-import com.liferay.portal.kernel.search.IndexerRegistryUtil;
 import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
@@ -185,10 +182,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 							serviceContext);
 					}
 
-					for (long fileEntryId : fileEntryIds) {
-						_reindexFileEntry(fileEntryId);
-					}
-
 					return null;
 				});
 		}
@@ -210,15 +203,12 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			return;
 		}
 
-		ObjectDefinition documentObjectDefinition = _fetchObjectDefinition(
-			companyId, "L_DS_REQUEST_DOCUMENT");
 		ObjectDefinition recipientObjectDefinition = _fetchObjectDefinition(
 			companyId, "L_DS_REQUEST_RECIPIENT");
 		ObjectDefinition requestObjectDefinition = _fetchObjectDefinition(
 			companyId, "L_DS_REQUEST");
 
-		if ((documentObjectDefinition == null) ||
-			(recipientObjectDefinition == null) ||
+		if ((recipientObjectDefinition == null) ||
 			(requestObjectDefinition == null)) {
 
 			return;
@@ -232,12 +222,10 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				return;
 			}
 
-			String documentFieldName = _getRelationshipFieldName(
-				requestObjectDefinition, "dsRequestToDSRequestDocuments");
 			String recipientFieldName = _getRelationshipFieldName(
 				requestObjectDefinition, "dsRequestToDSRequestRecipients");
 
-			if ((documentFieldName == null) || (recipientFieldName == null)) {
+			if (recipientFieldName == null) {
 				return;
 			}
 
@@ -263,10 +251,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				_updateRecipientStatuses(
 					companyId, groupId, dsRecipients, recipientObjectDefinition,
 					recipientFieldName, requestId);
-
-				_reindexRequestDocuments(
-					companyId, documentFieldName, documentObjectDefinition,
-					requestId);
 			}
 		}
 		catch (Exception exception) {
@@ -394,36 +378,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				companyId, groupId);
 
 		return digitalSignatureConfiguration.enabled();
-	}
-
-	private void _reindexFileEntry(long fileEntryId) {
-		try {
-			Indexer<?> indexer = IndexerRegistryUtil.nullSafeGetIndexer(
-				DLFileEntry.class);
-
-			indexer.reindex(DLFileEntry.class.getName(), fileEntryId);
-		}
-		catch (Exception exception) {
-			_log.error(
-				"Unable to reindex file entry " + fileEntryId, exception);
-		}
-	}
-
-	private void _reindexRequestDocuments(
-			long companyId, String documentFieldName,
-			ObjectDefinition objectDefinition, long requestId)
-		throws Exception {
-
-		for (Map<String, Serializable> documentValues :
-				_getValuesList(
-					companyId,
-					StringBundler.concat(
-						"(", documentFieldName, " eq '", requestId, "')"),
-					objectDefinition, null)) {
-
-			_reindexFileEntry(
-				GetterUtil.getLong(documentValues.get("fileEntryId")));
-		}
 	}
 
 	private Date _toDate(LocalDateTime localDateTime) {
