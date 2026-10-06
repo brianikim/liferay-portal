@@ -394,14 +394,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		return digitalSignatureConfiguration.enabled();
 	}
 
-	private void _putIfNotNull(
-		Map<String, Serializable> values, String name, Serializable value) {
-
-		if (value != null) {
-			values.put(name, value);
-		}
-	}
-
 	private void _reindexFileEntry(long fileEntryId) {
 		try {
 			Indexer<?> indexer = IndexerRegistryUtil.nullSafeGetIndexer(
@@ -477,14 +469,13 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				).put(
 					"requestRecipientStatus",
 					_getRequestRecipientStatus(dsRecipient.getStatus())
+				).put(
+					"requestRecipientStatusDate",
+					() -> _toDate(dsRecipient.getStatusLocalDateTime())
+				).put(
+					"sentDate",
+					() -> _toDate(dsRecipient.getSentLocalDateTime())
 				).build();
-
-			_putIfNotNull(
-				values, "requestRecipientStatusDate",
-				_toDate(dsRecipient.getStatusLocalDateTime()));
-			_putIfNotNull(
-				values, "sentDate",
-				_toDate(dsRecipient.getSentLocalDateTime()));
 
 			_objectEntryLocalService.updateObjectEntry(
 				objectEntry.getUserId(), recipientId,
@@ -511,15 +502,14 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			HashMapBuilder.<String, Serializable>putAll(
 				objectEntry.getValues()
 			).put(
+				"requestExpirationDate",
+				() -> _toDate(dsEnvelope.getExpireLocalDateTime())
+			).put(
 				"requestStatus", _getRequestStatus(dsEnvelope)
+			).put(
+				"requestStatusDate",
+				() -> _toDate(dsEnvelope.getStatusChangedLocalDateTime())
 			).build();
-
-		_putIfNotNull(
-			values, "requestExpirationDate",
-			_toDate(dsEnvelope.getExpireLocalDateTime()));
-		_putIfNotNull(
-			values, "requestStatusDate",
-			_toDate(dsEnvelope.getStatusChangedLocalDateTime()));
 
 		_objectEntryLocalService.updateObjectEntry(
 			objectEntry.getUserId(), requestId,
