@@ -111,7 +111,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					String languageId = LocaleUtil.toLanguageId(
 						LocaleUtil.getSiteDefault());
 
-					ServiceContext serviceContext = _createServiceContext(
+					ServiceContext serviceContext = _getServiceContext(
 						companyId, groupId, userId);
 
 					ObjectEntry requestObjectEntry =
@@ -130,7 +130,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 								"requestExpirationDate",
 								_toDate(dsEnvelope.getExpireLocalDateTime())
 							).put(
-								"requestStatus", _toRequestStatus(dsEnvelope)
+								"requestStatus", _getRequestStatus(dsEnvelope)
 							).build(),
 							serviceContext);
 
@@ -171,7 +171,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 									companyId, dsRecipient.getEmailAddress())
 							).put(
 								"requestRecipientStatus",
-								_toRecipientStatus(dsRecipient.getStatus())
+								_getRequestRecipientStatus(
+									dsRecipient.getStatus())
 							).put(
 								"sentDate",
 								_toDate(dsRecipient.getSentLocalDateTime())
@@ -239,7 +240,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				dsRecipients.put(dsRecipient.getDSRecipientId(), dsRecipient);
 			}
 
-			String requestStatus = _toRequestStatus(dsEnvelope);
+			String requestStatus = _getRequestStatus(dsEnvelope);
 
 			for (Map<String, Serializable> requestValues :
 					_getValuesList(
@@ -270,18 +271,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					providerRequestId,
 				exception);
 		}
-	}
-
-	private ServiceContext _createServiceContext(
-		long companyId, long groupId, long userId) {
-
-		ServiceContext serviceContext = new ServiceContext();
-
-		serviceContext.setCompanyId(companyId);
-		serviceContext.setScopeGroupId(groupId);
-		serviceContext.setUserId(userId);
-
-		return serviceContext;
 	}
 
 	private ObjectDefinition _fetchObjectDefinition(
@@ -324,6 +313,53 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			objectRelationship.getObjectFieldId2());
 
 		return objectField.getName();
+	}
+
+	private String _getRequestRecipientStatus(String status) {
+		status = StringUtil.toLowerCase(GetterUtil.getString(status));
+
+		if (ArrayUtil.contains(_REQUEST_RECIPIENT_STATUSES, status)) {
+			return status;
+		}
+
+		return "sent";
+	}
+
+	private String _getRequestStatus(DSEnvelope dsEnvelope) {
+		String status = StringUtil.toLowerCase(
+			GetterUtil.getString(dsEnvelope.getStatus()));
+
+		if (Objects.equals(status, "voided")) {
+			LocalDateTime expireLocalDateTime =
+				dsEnvelope.getExpireLocalDateTime();
+			LocalDateTime statusChangedLocalDateTime =
+				dsEnvelope.getStatusChangedLocalDateTime();
+
+			if ((expireLocalDateTime != null) &&
+				(statusChangedLocalDateTime != null) &&
+				!statusChangedLocalDateTime.isBefore(expireLocalDateTime)) {
+
+				return "expired";
+			}
+		}
+
+		if (ArrayUtil.contains(_REQUEST_STATUSES, status)) {
+			return status;
+		}
+
+		return "sent";
+	}
+
+	private ServiceContext _getServiceContext(
+		long companyId, long groupId, long userId) {
+
+		ServiceContext serviceContext = new ServiceContext();
+
+		serviceContext.setCompanyId(companyId);
+		serviceContext.setScopeGroupId(groupId);
+		serviceContext.setUserId(userId);
+
+		return serviceContext;
 	}
 
 	private List<Map<String, Serializable>> _getValuesList(
@@ -410,41 +446,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		return Date.from(localDateTime.toInstant(ZoneOffset.UTC));
 	}
 
-	private String _toRecipientStatus(String status) {
-		status = StringUtil.toLowerCase(GetterUtil.getString(status));
-
-		if (ArrayUtil.contains(_DS_RECIPIENT_STATUSES, status)) {
-			return status;
-		}
-
-		return "sent";
-	}
-
-	private String _toRequestStatus(DSEnvelope dsEnvelope) {
-		String status = StringUtil.toLowerCase(
-			GetterUtil.getString(dsEnvelope.getStatus()));
-
-		if (Objects.equals(status, "voided")) {
-			LocalDateTime expireLocalDateTime =
-				dsEnvelope.getExpireLocalDateTime();
-			LocalDateTime statusChangedLocalDateTime =
-				dsEnvelope.getStatusChangedLocalDateTime();
-
-			if ((expireLocalDateTime != null) &&
-				(statusChangedLocalDateTime != null) &&
-				!statusChangedLocalDateTime.isBefore(expireLocalDateTime)) {
-
-				return "expired";
-			}
-		}
-
-		if (ArrayUtil.contains(_DS_ENVELOPE_STATUSES, status)) {
-			return status;
-		}
-
-		return "sent";
-	}
-
 	private void _updateRecipientStatuses(
 			long companyId, long groupId,
 			ObjectDefinition recipientObjectDefinition,
@@ -483,7 +484,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					objectEntry.getValues()
 				).put(
 					"requestRecipientStatus",
-					_toRecipientStatus(dsRecipient.getStatus())
+					_getRequestRecipientStatus(dsRecipient.getStatus())
 				).build();
 
 			_putIfNotNull(
@@ -495,7 +496,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 			_objectEntryLocalService.updateObjectEntry(
 				objectEntry.getUserId(), recipientId, 0, values,
-				_createServiceContext(
+				_getServiceContext(
 					companyId, groupId, objectEntry.getUserId()));
 		}
 	}
@@ -528,15 +529,15 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 		_objectEntryLocalService.updateObjectEntry(
 			objectEntry.getUserId(), requestId, 0, values,
-			_createServiceContext(companyId, groupId, objectEntry.getUserId()));
+			_getServiceContext(companyId, groupId, objectEntry.getUserId()));
 	}
 
-	private static final String[] _DS_ENVELOPE_STATUSES = {
-		"completed", "created", "declined", "expired", "sent", "voided"
+	private static final String[] _REQUEST_RECIPIENT_STATUSES = {
+		"completed", "created", "declined", "sent", "signed"
 	};
 
-	private static final String[] _DS_RECIPIENT_STATUSES = {
-		"completed", "created", "declined", "sent", "signed"
+	private static final String[] _REQUEST_STATUSES = {
+		"completed", "created", "declined", "expired", "sent", "voided"
 	};
 
 	private static final Log _log = LogFactoryUtil.getLog(
