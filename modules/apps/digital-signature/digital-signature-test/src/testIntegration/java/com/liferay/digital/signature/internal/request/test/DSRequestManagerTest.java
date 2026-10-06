@@ -7,6 +7,7 @@ package com.liferay.digital.signature.internal.request.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
+import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.digital.signature.request.DSRequestManager;
@@ -23,18 +24,24 @@ import com.liferay.petra.sql.dsl.expression.Predicate;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.module.configuration.ConfigurationProvider;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
+import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
 
 import java.io.Serializable;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -93,29 +100,11 @@ public class DSRequestManagerTest {
 
 	@Test
 	public void testAddDSRequest() throws Exception {
-		long companyId = TestPropsValues.getCompanyId();
-
 		DSEnvelope dsEnvelope = _getDSEnvelope();
 
-		_dsRequestManager.addDSRequest(
-			companyId, TestPropsValues.getGroupId(),
-			TestPropsValues.getUserId(), dsEnvelope,
-			new long[] {RandomTestUtil.randomLong()});
+		_addDSRequest(dsEnvelope);
 
-		ObjectDefinition requestObjectDefinition =
-			_objectDefinitionLocalService.
-				fetchObjectDefinitionByExternalReferenceCode(
-					"L_DS_REQUEST", companyId);
-
-		List<Map<String, Serializable>> requestValuesList = _getValuesList(
-			companyId,
-			"(providerRequestId eq '" + dsEnvelope.getDSEnvelopeId() + "')",
-			requestObjectDefinition);
-
-		Assert.assertEquals(
-			requestValuesList.toString(), 1, requestValuesList.size());
-
-		Map<String, Serializable> requestValues = requestValuesList.get(0);
+		Map<String, Serializable> requestValues = _getRequestValues(dsEnvelope);
 
 		Assert.assertEquals("sent", requestValues.get("requestStatus"));
 
@@ -127,34 +116,31 @@ public class DSRequestManagerTest {
 
 		Set<String> actualEmailAddresses = new HashSet<>();
 
-		ObjectDefinition recipientObjectDefinition =
-			_objectDefinitionLocalService.
-				fetchObjectDefinitionByExternalReferenceCode(
-					"L_DS_REQUEST_RECIPIENT", companyId);
-
-		ObjectRelationship objectRelationship =
-			_objectRelationshipLocalService.fetchObjectRelationship(
-				requestObjectDefinition.getObjectDefinitionId(),
-				"dsRequestToDSRequestRecipients");
-
-		ObjectField objectField = _objectFieldLocalService.getObjectField(
-			objectRelationship.getObjectFieldId2());
-
-		long requestId = GetterUtil.getLong(
-			requestValues.get(requestObjectDefinition.getPKObjectFieldName()));
-
 		for (Map<String, Serializable> recipientValues :
-				_getValuesList(
-					companyId,
-					StringBundler.concat(
-						"(", objectField.getName(), " eq '", requestId, "')"),
-					recipientObjectDefinition)) {
+				_getRecipientValuesList(requestValues)) {
 
 			actualEmailAddresses.add(
 				GetterUtil.getString(recipientValues.get("emailAddress")));
 		}
 
 		Assert.assertEquals(expectedEmailAddresses, actualEmailAddresses);
+	}
+
+	@Test
+	public void testUpdateDSRequest() throws Exception {
+		LocalDateTime localDateTime = LocalDateTime.ofEpochSecond(
+			System.currentTimeMillis() / 1000, 0, ZoneOffset.UTC);
+
+		_testUpdateDSRequest(
+			"completed", localDateTime.plusDays(1), "completed", localDateTime);
+		_testUpdateDSRequest("expired", localDateTime, "voided", localDateTime);
+	}
+
+	private void _addDSRequest(DSEnvelope dsEnvelope) throws Exception {
+		_dsRequestManager.addDSRequest(
+			TestPropsValues.getCompanyId(), TestPropsValues.getGroupId(),
+			TestPropsValues.getUserId(), dsEnvelope,
+			new long[] {RandomTestUtil.randomLong()});
 	}
 
 	private DSEnvelope _getDSEnvelope() {
@@ -180,16 +166,119 @@ public class DSRequestManagerTest {
 		return dsRecipient;
 	}
 
+	private ObjectDefinition _getObjectDefinition(String externalReferenceCode)
+		throws Exception {
+
+		return _objectDefinitionLocalService.
+			fetchObjectDefinitionByExternalReferenceCode(
+				externalReferenceCode, TestPropsValues.getCompanyId());
+	}
+
+	private List<Map<String, Serializable>> _getRecipientValuesList(
+			Map<String, Serializable> requestValues)
+		throws Exception {
+
+		ObjectDefinition requestObjectDefinition = _getObjectDefinition(
+			"L_DS_REQUEST");
+
+		ObjectRelationship objectRelationship =
+			_objectRelationshipLocalService.fetchObjectRelationship(
+				requestObjectDefinition.getObjectDefinitionId(),
+				"dsRequestToDSRequestRecipients");
+
+		ObjectField objectField = _objectFieldLocalService.getObjectField(
+			objectRelationship.getObjectFieldId2());
+
+		return _getValuesList(
+			StringBundler.concat(
+				"(", objectField.getName(), " eq '",
+				GetterUtil.getLong(
+					requestValues.get(
+						requestObjectDefinition.getPKObjectFieldName())),
+				"')"),
+			_getObjectDefinition("L_DS_REQUEST_RECIPIENT"));
+	}
+
+	private Map<String, Serializable> _getRequestValues(DSEnvelope dsEnvelope)
+		throws Exception {
+
+		List<Map<String, Serializable>> requestValuesList = _getValuesList(
+			"(providerRequestId eq '" + dsEnvelope.getDSEnvelopeId() + "')",
+			_getObjectDefinition("L_DS_REQUEST"));
+
+		Assert.assertEquals(
+			requestValuesList.toString(), 1, requestValuesList.size());
+
+		return requestValuesList.get(0);
+	}
+
 	private List<Map<String, Serializable>> _getValuesList(
-			long companyId, String filterString,
-			ObjectDefinition objectDefinition)
+			String filterString, ObjectDefinition objectDefinition)
 		throws Exception {
 
 		return _objectEntryLocalService.getValuesList(
-			0, companyId, TestPropsValues.getUserId(),
+			0, TestPropsValues.getCompanyId(), TestPropsValues.getUserId(),
 			objectDefinition.getObjectDefinitionId(),
 			_filterFactory.create(filterString, objectDefinition), null,
 			QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
+	}
+
+	private void _testUpdateDSRequest(
+			String expectedRequestStatus, LocalDateTime expireLocalDateTime,
+			String status, LocalDateTime statusChangedLocalDateTime)
+		throws Exception {
+
+		DSEnvelope dsEnvelope = _getDSEnvelope();
+
+		_addDSRequest(dsEnvelope);
+
+		for (DSRecipient dsRecipient : dsEnvelope.getDSRecipients()) {
+			dsRecipient.setStatus("completed");
+			dsRecipient.setStatusLocalDateTime(statusChangedLocalDateTime);
+		}
+
+		dsEnvelope.setExpireLocalDateTime(expireLocalDateTime);
+		dsEnvelope.setStatus(status);
+		dsEnvelope.setStatusChangedLocalDateTime(statusChangedLocalDateTime);
+
+		DSEnvelopeManager dsEnvelopeManager =
+			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager",
+				ProxyUtil.newProxyInstance(
+					DSEnvelopeManager.class.getClassLoader(),
+					new Class<?>[] {DSEnvelopeManager.class},
+					(proxy, method, arguments) -> dsEnvelope));
+
+		try {
+			_dsRequestManager.updateDSRequest(
+				TestPropsValues.getCompanyId(), TestPropsValues.getGroupId(),
+				dsEnvelope.getDSEnvelopeId());
+		}
+		finally {
+			ReflectionTestUtil.setFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager);
+		}
+
+		Map<String, Serializable> requestValues = _getRequestValues(dsEnvelope);
+
+		Assert.assertEquals(
+			Date.from(expireLocalDateTime.toInstant(ZoneOffset.UTC)),
+			requestValues.get("requestExpirationDate"));
+		Assert.assertEquals(
+			expectedRequestStatus, requestValues.get("requestStatus"));
+		Assert.assertEquals(
+			Date.from(statusChangedLocalDateTime.toInstant(ZoneOffset.UTC)),
+			requestValues.get("requestStatusDate"));
+
+		for (Map<String, Serializable> recipientValues :
+				_getRecipientValuesList(requestValues)) {
+
+			Assert.assertEquals(
+				"completed", recipientValues.get("requestRecipientStatus"));
+			Assert.assertEquals(
+				Date.from(statusChangedLocalDateTime.toInstant(ZoneOffset.UTC)),
+				recipientValues.get("requestRecipientStatusDate"));
+		}
 	}
 
 	@Inject
