@@ -259,8 +259,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				_updateRequestStatus(companyId, groupId, dsEnvelope, requestId);
 
 				_updateRecipientStatuses(
-					companyId, groupId, dsRecipients, recipientFieldName,
-					recipientObjectDefinition, requestId);
+					companyId, groupId, dsRecipients, recipientObjectDefinition,
+					recipientFieldName, requestId);
 
 				_reindexRequestDocuments(
 					companyId, documentFieldName, documentObjectDefinition,
@@ -299,13 +299,12 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	}
 
 	private String _getRelationshipFieldName(
-			ObjectDefinition requestObjectDefinition, String relationshipName)
+			ObjectDefinition objectDefinition, String relationshipName)
 		throws Exception {
 
 		ObjectRelationship objectRelationship =
 			_objectRelationshipLocalService.fetchObjectRelationship(
-				requestObjectDefinition.getObjectDefinitionId(),
-				relationshipName);
+				objectDefinition.getObjectDefinitionId(), relationshipName);
 
 		if (objectRelationship == null) {
 			return null;
@@ -418,12 +417,12 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 	private void _reindexRequestDocuments(
 			long companyId, String documentFieldName,
-			ObjectDefinition documentObjectDefinition, long requestId)
+			ObjectDefinition objectDefinition, long requestId)
 		throws Exception {
 
 		for (Map<String, Serializable> documentValues :
 				_getValuesList(
-					companyId, documentObjectDefinition,
+					companyId, objectDefinition,
 					StringBundler.concat(
 						"(", documentFieldName, " eq '", requestId, "')"),
 					null)) {
@@ -443,13 +442,13 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 	private void _updateRecipientStatuses(
 			long companyId, long groupId, Map<String, DSRecipient> dsRecipients,
-			String recipientFieldName,
-			ObjectDefinition recipientObjectDefinition, long requestId)
+			ObjectDefinition objectDefinition, String recipientFieldName,
+			long requestId)
 		throws Exception {
 
 		for (Map<String, Serializable> recipientValues :
 				_getValuesList(
-					companyId, recipientObjectDefinition,
+					companyId, objectDefinition,
 					StringBundler.concat(
 						"(", recipientFieldName, " eq '", requestId, "')"),
 					null)) {
@@ -463,8 +462,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			}
 
 			long recipientId = GetterUtil.getLong(
-				recipientValues.get(
-					recipientObjectDefinition.getPKObjectFieldName()));
+				recipientValues.get(objectDefinition.getPKObjectFieldName()));
 
 			ObjectEntry objectEntry = _objectEntryLocalService.fetchObjectEntry(
 				recipientId);
