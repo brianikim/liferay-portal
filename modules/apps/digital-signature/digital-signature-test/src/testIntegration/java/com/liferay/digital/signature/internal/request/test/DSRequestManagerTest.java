@@ -23,10 +23,7 @@ import com.liferay.petra.sql.dsl.expression.Predicate;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.module.configuration.ConfigurationProvider;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
-import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
-import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
-import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -85,8 +82,6 @@ public class DSRequestManagerTest {
 			).put(
 				"siteSettingsStrategy", "always-inherit"
 			).build());
-
-		_group = GroupTestUtil.addGroup();
 	}
 
 	@After
@@ -103,8 +98,9 @@ public class DSRequestManagerTest {
 		DSEnvelope dsEnvelope = _getDSEnvelope();
 
 		_dsRequestManager.addDSRequest(
-			companyId, _group.getGroupId(), TestPropsValues.getUserId(),
-			dsEnvelope, new long[] {RandomTestUtil.randomLong()});
+			companyId, TestPropsValues.getGroupId(),
+			TestPropsValues.getUserId(), dsEnvelope,
+			new long[] {RandomTestUtil.randomLong()});
 
 		ObjectDefinition requestObjectDefinition =
 			_objectDefinitionLocalService.
@@ -206,9 +202,6 @@ public class DSRequestManagerTest {
 		filter = "filter.factory.key=" + ObjectDefinitionConstants.STORAGE_TYPE_DEFAULT
 	)
 	private FilterFactory<Predicate> _filterFactory;
-
-	@DeleteAfterTestRun
-	private Group _group;
 
 	@Inject
 	private ObjectDefinitionLocalService _objectDefinitionLocalService;
