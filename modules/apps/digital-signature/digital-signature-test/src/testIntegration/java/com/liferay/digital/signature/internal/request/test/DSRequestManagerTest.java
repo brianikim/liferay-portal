@@ -70,7 +70,7 @@ public class DSRequestManagerTest {
 		_configurationProvider.saveCompanyConfiguration(
 			DigitalSignatureConfiguration.class, TestPropsValues.getCompanyId(),
 			HashMapDictionaryBuilder.<String, Object>put(
-				"accountBaseURI", "https://demo.docusign.net/restapi"
+				"accountBaseURI", RandomTestUtil.randomString()
 			).put(
 				"apiAccountId", RandomTestUtil.randomString()
 			).put(
@@ -78,9 +78,7 @@ public class DSRequestManagerTest {
 			).put(
 				"enabled", true
 			).put(
-				"enableEmbeddedView", true
-			).put(
-				"environment", "sandbox"
+				"environment", RandomTestUtil.randomString()
 			).put(
 				"integrationKey", RandomTestUtil.randomString()
 			).put(
