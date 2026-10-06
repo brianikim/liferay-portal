@@ -7,6 +7,7 @@ package com.liferay.digital.signature.manager.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
+import com.liferay.digital.signature.constants.DSRequestConstants;
 import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
@@ -106,7 +107,8 @@ public class DSRequestManagerTest {
 
 		Map<String, Serializable> requestValues = _getRequestValues(dsEnvelope);
 
-		Assert.assertEquals("sent", requestValues.get("requestStatus"));
+		Assert.assertEquals(
+			DSRequestConstants.STATUS_SENT, requestValues.get("requestStatus"));
 
 		Set<String> expectedEmailAddresses = new HashSet<>();
 
