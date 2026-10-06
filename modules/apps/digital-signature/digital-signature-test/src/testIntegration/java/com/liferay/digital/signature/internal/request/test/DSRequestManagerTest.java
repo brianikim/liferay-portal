@@ -7,7 +7,6 @@ package com.liferay.digital.signature.internal.request.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
-import com.liferay.digital.signature.model.DSDocument;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.digital.signature.request.DSRequestManager;
@@ -98,14 +97,14 @@ public class DSRequestManagerTest {
 	}
 
 	@Test
-	public void testAddDSRequests() throws Exception {
+	public void testAddDSRequest() throws Exception {
 		long companyId = TestPropsValues.getCompanyId();
 
-		long fileEntryId = RandomTestUtil.randomInt();
+		DSEnvelope dsEnvelope = _createDSEnvelope();
 
 		_dsRequestManager.addDSRequest(
 			companyId, _group.getGroupId(), TestPropsValues.getUserId(),
-			_createDSEnvelope(fileEntryId), new long[] {fileEntryId});
+			dsEnvelope, new long[] {RandomTestUtil.randomLong()});
 
 		ObjectDefinition requestObjectDefinition =
 			_objectDefinitionLocalService.
@@ -114,7 +113,7 @@ public class DSRequestManagerTest {
 
 		List<Map<String, Serializable>> requestValuesList = _getValuesList(
 			companyId, requestObjectDefinition,
-			"(fileEntryId eq " + fileEntryId + ")");
+			"(providerRequestId eq '" + dsEnvelope.getDSEnvelopeId() + "')");
 
 		Assert.assertEquals(
 			requestValuesList.toString(), 1, requestValuesList.size());
@@ -122,8 +121,6 @@ public class DSRequestManagerTest {
 		Map<String, Serializable> requestValues = requestValuesList.get(0);
 
 		Assert.assertEquals("sent", requestValues.get("requestStatus"));
-		Assert.assertEquals(
-			"env-" + fileEntryId, requestValues.get("providerRequestId"));
 
 		ObjectDefinition recipientObjectDefinition =
 			_objectDefinitionLocalService.
@@ -141,57 +138,47 @@ public class DSRequestManagerTest {
 		long requestId = GetterUtil.getLong(
 			requestValues.get(requestObjectDefinition.getPKObjectFieldName()));
 
-		List<Map<String, Serializable>> recipientValuesList = _getValuesList(
-			companyId, recipientObjectDefinition,
-			StringBundler.concat(
-				"(", objectField.getName(), " eq '", requestId, "')"));
+		Set<String> expectedEmailAddresses = new HashSet<>();
 
-		Assert.assertEquals(
-			recipientValuesList.toString(), 2, recipientValuesList.size());
+		for (DSRecipient dsRecipient : dsEnvelope.getDSRecipients()) {
+			expectedEmailAddresses.add(dsRecipient.getEmailAddress());
+		}
 
-		Set<String> emailAddresses = new HashSet<>();
+		Set<String> actualEmailAddresses = new HashSet<>();
 
-		for (Map<String, Serializable> recipientValues : recipientValuesList) {
-			emailAddresses.add(
+		for (Map<String, Serializable> recipientValues :
+				_getValuesList(
+					companyId, recipientObjectDefinition,
+					StringBundler.concat(
+						"(", objectField.getName(), " eq '", requestId,
+						"')"))) {
+
+			actualEmailAddresses.add(
 				GetterUtil.getString(recipientValues.get("emailAddress")));
 		}
 
-		Assert.assertTrue(
-			emailAddresses.toString(),
-			emailAddresses.contains("ray.chen@liferay.com"));
-		Assert.assertTrue(
-			emailAddresses.toString(),
-			emailAddresses.contains("mei.lin@liferay.com"));
+		Assert.assertEquals(expectedEmailAddresses, actualEmailAddresses);
 	}
 
-	private DSEnvelope _createDSEnvelope(long fileEntryId) {
+	private DSEnvelope _createDSEnvelope() {
 		DSEnvelope dsEnvelope = new DSEnvelope();
 
-		DSDocument dsDocument = new DSDocument();
-
-		dsDocument.setDSDocumentId(String.valueOf(fileEntryId));
-
-		dsEnvelope.setDSDocuments(ListUtil.fromArray(dsDocument));
-
-		dsEnvelope.setDSEnvelopeId("env-" + fileEntryId);
+		dsEnvelope.setDSEnvelopeId(RandomTestUtil.randomString());
 		dsEnvelope.setDSRecipients(
-			ListUtil.fromArray(
-				_createDSRecipient("1", "ray.chen@liferay.com", "Ray Chen"),
-				_createDSRecipient("2", "mei.lin@liferay.com", "Mei Lin")));
-		dsEnvelope.setEmailSubject("Please sign");
+			ListUtil.fromArray(_createDSRecipient(), _createDSRecipient()));
+		dsEnvelope.setEmailSubject(RandomTestUtil.randomString());
 		dsEnvelope.setStatus("sent");
 
 		return dsEnvelope;
 	}
 
-	private DSRecipient _createDSRecipient(
-		String dsRecipientId, String emailAddress, String name) {
-
+	private DSRecipient _createDSRecipient() {
 		DSRecipient dsRecipient = new DSRecipient();
 
-		dsRecipient.setDSRecipientId(dsRecipientId);
-		dsRecipient.setEmailAddress(emailAddress);
-		dsRecipient.setName(name);
+		dsRecipient.setDSRecipientId(RandomTestUtil.randomString());
+		dsRecipient.setEmailAddress(
+			RandomTestUtil.randomString() + "@liferay.com");
+		dsRecipient.setName(RandomTestUtil.randomString());
 		dsRecipient.setStatus("sent");
 
 		return dsRecipient;
