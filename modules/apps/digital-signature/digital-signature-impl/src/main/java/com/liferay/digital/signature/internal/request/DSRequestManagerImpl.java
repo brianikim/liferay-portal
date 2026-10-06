@@ -230,10 +230,12 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				return;
 			}
 
+			String documentFieldName = _getRelationshipFieldName(
+				requestObjectDefinition, "dsRequestToDSRequestDocuments");
 			String recipientFieldName = _getRelationshipFieldName(
 				requestObjectDefinition, "dsRequestToDSRequestRecipients");
 
-			if (recipientFieldName == null) {
+			if ((documentFieldName == null) || (recipientFieldName == null)) {
 				return;
 			}
 
@@ -242,8 +244,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			for (DSRecipient dsRecipient : dsEnvelope.getDSRecipients()) {
 				dsRecipients.put(dsRecipient.getDSRecipientId(), dsRecipient);
 			}
-
-			String requestStatus = _getRequestStatus(dsEnvelope);
 
 			for (Map<String, Serializable> requestValues :
 					_getValuesList(
@@ -256,16 +256,15 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					requestValues.get(
 						requestObjectDefinition.getPKObjectFieldName()));
 
-				_updateRequestStatus(
-					companyId, groupId, requestId, dsEnvelope, requestStatus);
+				_updateRequestStatus(companyId, groupId, dsEnvelope, requestId);
 
 				_updateRecipientStatuses(
-					companyId, groupId, recipientObjectDefinition,
-					recipientFieldName, requestId, dsRecipients);
+					companyId, groupId, dsRecipients, recipientFieldName,
+					recipientObjectDefinition, requestId);
 
 				_reindexRequestDocuments(
-					companyId, documentObjectDefinition,
-					requestObjectDefinition, requestId);
+					companyId, documentFieldName, documentObjectDefinition,
+					requestId);
 			}
 		}
 		catch (Exception exception) {
@@ -418,16 +417,9 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	}
 
 	private void _reindexRequestDocuments(
-			long companyId, ObjectDefinition documentObjectDefinition,
-			ObjectDefinition requestObjectDefinition, long requestId)
+			long companyId, String documentFieldName,
+			ObjectDefinition documentObjectDefinition, long requestId)
 		throws Exception {
-
-		String documentFieldName = _getRelationshipFieldName(
-			requestObjectDefinition, "dsRequestToDSRequestDocuments");
-
-		if (documentFieldName == null) {
-			return;
-		}
 
 		for (Map<String, Serializable> documentValues :
 				_getValuesList(
@@ -450,10 +442,9 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	}
 
 	private void _updateRecipientStatuses(
-			long companyId, long groupId,
-			ObjectDefinition recipientObjectDefinition,
-			String recipientFieldName, long requestId,
-			Map<String, DSRecipient> dsRecipients)
+			long companyId, long groupId, Map<String, DSRecipient> dsRecipients,
+			String recipientFieldName,
+			ObjectDefinition recipientObjectDefinition, long requestId)
 		throws Exception {
 
 		for (Map<String, Serializable> recipientValues :
@@ -508,8 +499,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	}
 
 	private void _updateRequestStatus(
-			long companyId, long groupId, long requestId, DSEnvelope dsEnvelope,
-			String requestStatus)
+			long companyId, long groupId, DSEnvelope dsEnvelope, long requestId)
 		throws Exception {
 
 		ObjectEntry objectEntry = _objectEntryLocalService.fetchObjectEntry(
@@ -523,7 +513,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			HashMapBuilder.<String, Serializable>putAll(
 				objectEntry.getValues()
 			).put(
-				"requestStatus", requestStatus
+				"requestStatus", _getRequestStatus(dsEnvelope)
 			).build();
 
 		_putIfNotNull(
