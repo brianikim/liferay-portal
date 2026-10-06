@@ -13,6 +13,7 @@ import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.digital.signature.request.DSRequestManager;
 import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.object.constants.ObjectDefinitionConstants;
+import com.liferay.object.entry.util.ObjectEntryThreadLocal;
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.model.ObjectEntry;
 import com.liferay.object.model.ObjectField;
@@ -32,8 +33,6 @@ import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.IndexerRegistryUtil;
 import com.liferay.portal.kernel.search.Sort;
-import com.liferay.portal.kernel.security.permission.PermissionChecker;
-import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.transaction.Propagation;
@@ -332,12 +331,12 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			String filterString, Sort[] sorts)
 		throws Exception {
 
-		PermissionChecker permissionChecker =
-			PermissionThreadLocal.getPermissionChecker();
+		boolean skipObjectEntryResourcePermission =
+			ObjectEntryThreadLocal.isSkipObjectEntryResourcePermission();
+
+		ObjectEntryThreadLocal.setSkipObjectEntryResourcePermission(true);
 
 		try {
-			PermissionThreadLocal.setPermissionChecker(null);
-
 			return _objectEntryLocalService.getValuesList(
 				0, companyId, objectDefinition.getUserId(),
 				objectDefinition.getObjectDefinitionId(),
@@ -345,7 +344,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				QueryUtil.ALL_POS, QueryUtil.ALL_POS, sorts);
 		}
 		finally {
-			PermissionThreadLocal.setPermissionChecker(permissionChecker);
+			ObjectEntryThreadLocal.setSkipObjectEntryResourcePermission(
+				skipObjectEntryResourcePermission);
 		}
 	}
 
