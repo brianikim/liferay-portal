@@ -180,12 +180,12 @@ public class DSRequestManagerTest {
 			Map<String, Serializable> requestValues)
 		throws Exception {
 
-		ObjectDefinition requestObjectDefinition = _getObjectDefinition(
+		ObjectDefinition dsRequestObjectDefinition = _getObjectDefinition(
 			"L_DS_REQUEST");
 
 		ObjectRelationship objectRelationship =
 			_objectRelationshipLocalService.fetchObjectRelationship(
-				requestObjectDefinition.getObjectDefinitionId(),
+				dsRequestObjectDefinition.getObjectDefinitionId(),
 				"dsRequestToDSRequestRecipients");
 
 		ObjectField objectField = _objectFieldLocalService.getObjectField(
@@ -196,7 +196,7 @@ public class DSRequestManagerTest {
 				"(", objectField.getName(), " eq '",
 				GetterUtil.getLong(
 					requestValues.get(
-						requestObjectDefinition.getPKObjectFieldName())),
+						dsRequestObjectDefinition.getPKObjectFieldName())),
 				"')"),
 			_getObjectDefinition("L_DS_REQUEST_RECIPIENT"));
 	}

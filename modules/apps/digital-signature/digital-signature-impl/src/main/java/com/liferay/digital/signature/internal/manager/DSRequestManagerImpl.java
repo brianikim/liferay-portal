@@ -76,22 +76,22 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			return;
 		}
 
-		ObjectDefinition documentObjectDefinition =
+		ObjectDefinition dsRequestDocumentObjectDefinition =
 			_objectDefinitionLocalService.
 				fetchObjectDefinitionByExternalReferenceCode(
 					"L_DS_REQUEST_DOCUMENT", companyId);
-		ObjectDefinition recipientObjectDefinition =
+		ObjectDefinition dsRequestRecipientObjectDefinition =
 			_objectDefinitionLocalService.
 				fetchObjectDefinitionByExternalReferenceCode(
 					"L_DS_REQUEST_RECIPIENT", companyId);
-		ObjectDefinition requestObjectDefinition =
+		ObjectDefinition dsRequestObjectDefinition =
 			_objectDefinitionLocalService.
 				fetchObjectDefinitionByExternalReferenceCode(
 					"L_DS_REQUEST", companyId);
 
-		if ((documentObjectDefinition == null) ||
-			(recipientObjectDefinition == null) ||
-			(requestObjectDefinition == null)) {
+		if ((dsRequestDocumentObjectDefinition == null) ||
+			(dsRequestRecipientObjectDefinition == null) ||
+			(dsRequestObjectDefinition == null)) {
 
 			return;
 		}
@@ -101,10 +101,10 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				_transactionConfig,
 				() -> {
 					String documentFieldName = _getRelationshipFieldName(
-						requestObjectDefinition,
+						dsRequestObjectDefinition,
 						"dsRequestToDSRequestDocuments");
 					String recipientFieldName = _getRelationshipFieldName(
-						requestObjectDefinition,
+						dsRequestObjectDefinition,
 						"dsRequestToDSRequestRecipients");
 
 					if ((documentFieldName == null) ||
@@ -116,10 +116,10 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					ServiceContext serviceContext = _getServiceContext(
 						companyId, groupId, userId);
 
-					ObjectEntry requestObjectEntry =
+					ObjectEntry dsRequestObjectEntry =
 						_objectEntryLocalService.addObjectEntry(
 							0, userId,
-							requestObjectDefinition.getObjectDefinitionId(),
+							dsRequestObjectDefinition.getObjectDefinitionId(),
 							ObjectEntryFolderConstants.
 								PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
 							null,
@@ -142,13 +142,14 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					for (long fileEntryId : fileEntryIds) {
 						_objectEntryLocalService.addObjectEntry(
 							0, userId,
-							documentObjectDefinition.getObjectDefinitionId(),
+							dsRequestDocumentObjectDefinition.
+								getObjectDefinitionId(),
 							ObjectEntryFolderConstants.
 								PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
 							null,
 							HashMapBuilder.<String, Serializable>put(
 								documentFieldName,
-								requestObjectEntry.getObjectEntryId()
+								dsRequestObjectEntry.getObjectEntryId()
 							).put(
 								"fileEntryId", fileEntryId
 							).build(),
@@ -160,13 +161,14 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 						_objectEntryLocalService.addObjectEntry(
 							0, userId,
-							recipientObjectDefinition.getObjectDefinitionId(),
+							dsRequestRecipientObjectDefinition.
+								getObjectDefinitionId(),
 							ObjectEntryFolderConstants.
 								PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
 							null,
 							HashMapBuilder.<String, Serializable>put(
 								recipientFieldName,
-								requestObjectEntry.getObjectEntryId()
+								dsRequestObjectEntry.getObjectEntryId()
 							).put(
 								"emailAddress", dsRecipient.getEmailAddress()
 							).put(
@@ -211,17 +213,17 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			return;
 		}
 
-		ObjectDefinition recipientObjectDefinition =
+		ObjectDefinition dsRequestRecipientObjectDefinition =
 			_objectDefinitionLocalService.
 				fetchObjectDefinitionByExternalReferenceCode(
 					"L_DS_REQUEST_RECIPIENT", companyId);
-		ObjectDefinition requestObjectDefinition =
+		ObjectDefinition dsRequestObjectDefinition =
 			_objectDefinitionLocalService.
 				fetchObjectDefinitionByExternalReferenceCode(
 					"L_DS_REQUEST", companyId);
 
-		if ((recipientObjectDefinition == null) ||
-			(requestObjectDefinition == null)) {
+		if ((dsRequestRecipientObjectDefinition == null) ||
+			(dsRequestObjectDefinition == null)) {
 
 			return;
 		}
@@ -235,7 +237,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			}
 
 			String recipientFieldName = _getRelationshipFieldName(
-				requestObjectDefinition, "dsRequestToDSRequestRecipients");
+				dsRequestObjectDefinition, "dsRequestToDSRequestRecipients");
 
 			if (recipientFieldName == null) {
 				return;
@@ -252,17 +254,18 @@ public class DSRequestManagerImpl implements DSRequestManager {
 						companyId,
 						StringBundler.concat(
 							"(providerRequestId eq '", providerRequestId, "')"),
-						requestObjectDefinition, null)) {
+						dsRequestObjectDefinition, null)) {
 
 				long requestId = GetterUtil.getLong(
 					requestValues.get(
-						requestObjectDefinition.getPKObjectFieldName()));
+						dsRequestObjectDefinition.getPKObjectFieldName()));
 
 				_updateRequestStatus(companyId, groupId, dsEnvelope, requestId);
 
 				_updateRecipientStatuses(
-					companyId, groupId, dsRecipients, recipientObjectDefinition,
-					recipientFieldName, requestId);
+					companyId, groupId, dsRecipients,
+					dsRequestRecipientObjectDefinition, recipientFieldName,
+					requestId);
 			}
 		}
 		catch (Exception exception) {
