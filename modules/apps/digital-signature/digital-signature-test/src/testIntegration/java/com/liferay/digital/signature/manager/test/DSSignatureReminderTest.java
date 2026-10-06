@@ -17,10 +17,7 @@ import com.liferay.object.service.ObjectEntryLocalService;
 import com.liferay.object.service.ObjectFieldLocalService;
 import com.liferay.object.service.ObjectRelationshipLocalService;
 import com.liferay.portal.configuration.module.configuration.ConfigurationProvider;
-import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
-import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
-import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
@@ -59,7 +56,7 @@ public class DSSignatureReminderTest {
 		_configurationProvider.saveCompanyConfiguration(
 			DigitalSignatureConfiguration.class, TestPropsValues.getCompanyId(),
 			HashMapDictionaryBuilder.<String, Object>put(
-				"accountBaseURI", "https://demo.docusign.net/restapi"
+				"accountBaseURI", RandomTestUtil.randomString()
 			).put(
 				"apiAccountId", RandomTestUtil.randomString()
 			).put(
@@ -69,7 +66,7 @@ public class DSSignatureReminderTest {
 			).put(
 				"enableEmbeddedView", true
 			).put(
-				"environment", "sandbox"
+				"environment", RandomTestUtil.randomString()
 			).put(
 				"integrationKey", RandomTestUtil.randomString()
 			).put(
@@ -79,8 +76,6 @@ public class DSSignatureReminderTest {
 			).put(
 				"siteSettingsStrategy", "always-inherit"
 			).build());
-
-		_group = GroupTestUtil.addGroup();
 	}
 
 	@After
@@ -133,7 +128,7 @@ public class DSSignatureReminderTest {
 					"requestStatus", requestStatus
 				).build(),
 				ServiceContextTestUtil.getServiceContext(
-					_group.getGroupId(), userId));
+					TestPropsValues.getGroupId(), userId));
 
 		ObjectRelationship objectRelationship =
 			_objectRelationshipLocalService.fetchObjectRelationship(
@@ -157,7 +152,7 @@ public class DSSignatureReminderTest {
 				"requestRecipientStatus", "sent"
 			).build(),
 			ServiceContextTestUtil.getServiceContext(
-				_group.getGroupId(), userId));
+				TestPropsValues.getGroupId(), userId));
 	}
 
 	@Inject
@@ -165,9 +160,6 @@ public class DSSignatureReminderTest {
 
 	@Inject
 	private DSRequestManager _dsRequestManager;
-
-	@DeleteAfterTestRun
-	private Group _group;
 
 	@Inject
 	private ObjectDefinitionLocalService _objectDefinitionLocalService;
