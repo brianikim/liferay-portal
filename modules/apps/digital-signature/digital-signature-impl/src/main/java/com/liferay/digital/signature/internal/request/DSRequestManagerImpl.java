@@ -354,11 +354,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			DigitalSignatureConfigurationUtil.getDigitalSignatureConfiguration(
 				companyId, groupId);
 
-		if (digitalSignatureConfiguration.enabled()) {
-			return true;
-		}
-
-		return false;
+		return digitalSignatureConfiguration.enabled();
 	}
 
 	private void _putIfNotNull(
