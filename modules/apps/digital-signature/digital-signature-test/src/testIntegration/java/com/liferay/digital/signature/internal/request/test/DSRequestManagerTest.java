@@ -122,6 +122,14 @@ public class DSRequestManagerTest {
 
 		Assert.assertEquals("sent", requestValues.get("requestStatus"));
 
+		Set<String> expectedEmailAddresses = new HashSet<>();
+
+		for (DSRecipient dsRecipient : dsEnvelope.getDSRecipients()) {
+			expectedEmailAddresses.add(dsRecipient.getEmailAddress());
+		}
+
+		Set<String> actualEmailAddresses = new HashSet<>();
+
 		ObjectDefinition recipientObjectDefinition =
 			_objectDefinitionLocalService.
 				fetchObjectDefinitionByExternalReferenceCode(
@@ -137,14 +145,6 @@ public class DSRequestManagerTest {
 
 		long requestId = GetterUtil.getLong(
 			requestValues.get(requestObjectDefinition.getPKObjectFieldName()));
-
-		Set<String> expectedEmailAddresses = new HashSet<>();
-
-		for (DSRecipient dsRecipient : dsEnvelope.getDSRecipients()) {
-			expectedEmailAddresses.add(dsRecipient.getEmailAddress());
-		}
-
-		Set<String> actualEmailAddresses = new HashSet<>();
 
 		for (Map<String, Serializable> recipientValues :
 				_getValuesList(
@@ -179,7 +179,6 @@ public class DSRequestManagerTest {
 		dsRecipient.setEmailAddress(
 			RandomTestUtil.randomString() + "@liferay.com");
 		dsRecipient.setName(RandomTestUtil.randomString());
-		dsRecipient.setStatus("sent");
 
 		return dsRecipient;
 	}
