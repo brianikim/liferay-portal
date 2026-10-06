@@ -12,11 +12,9 @@
 	},
 	"items": [
 		{
-			"accountEntryRestricted": false,
 			"active": true,
 			"className": "com.liferay.object.model.ObjectDefinition#D5S3",
 			"enableCategorization": false,
-			"enableFormContainer": false,
 			"enableIndexSearch": true,
 			"externalReferenceCode": "L_DS_REQUEST_DOCUMENT",
 			"label": {
@@ -61,11 +59,9 @@
 			"titleObjectFieldName": "fileEntryId"
 		},
 		{
-			"accountEntryRestricted": false,
 			"active": true,
 			"className": "com.liferay.object.model.ObjectDefinition#D5S2",
 			"enableCategorization": false,
-			"enableFormContainer": false,
 			"enableIndexSearch": true,
 			"externalReferenceCode": "L_DS_REQUEST_RECIPIENT",
 			"label": {
@@ -241,11 +237,9 @@
 			"titleObjectFieldName": "emailAddress"
 		},
 		{
-			"accountEntryRestricted": false,
 			"active": true,
 			"className": "com.liferay.object.model.ObjectDefinition#D5S1",
 			"enableCategorization": false,
-			"enableFormContainer": false,
 			"enableIndexSearch": true,
 			"externalReferenceCode": "L_DS_REQUEST",
 			"label": {
