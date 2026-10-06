@@ -12,6 +12,43 @@
 	},
 	"items": [
 		{
+			"externalReferenceCode": "L_DS_REQUEST_RECIPIENT_STATUSES",
+			"listTypeEntries": [
+				{
+					"externalReferenceCode": "CREATED",
+					"key": "created",
+					"name": "Created",
+					"system": true
+				},
+				{
+					"externalReferenceCode": "SENT",
+					"key": "sent",
+					"name": "Sent",
+					"system": true
+				},
+				{
+					"externalReferenceCode": "SIGNED",
+					"key": "signed",
+					"name": "Signed",
+					"system": true
+				},
+				{
+					"externalReferenceCode": "COMPLETED",
+					"key": "completed",
+					"name": "Completed",
+					"system": true
+				},
+				{
+					"externalReferenceCode": "DECLINED",
+					"key": "declined",
+					"name": "Declined",
+					"system": true
+				}
+			],
+			"name": "DS Request Recipient Statuses",
+			"system": true
+		},
+		{
 			"externalReferenceCode": "L_DS_REQUEST_STATUSES",
 			"listTypeEntries": [
 				{
@@ -52,43 +89,6 @@
 				}
 			],
 			"name": "DS Request Statuses",
-			"system": true
-		},
-		{
-			"externalReferenceCode": "L_DS_REQUEST_RECIPIENT_STATUSES",
-			"listTypeEntries": [
-				{
-					"externalReferenceCode": "CREATED",
-					"key": "created",
-					"name": "Created",
-					"system": true
-				},
-				{
-					"externalReferenceCode": "SENT",
-					"key": "sent",
-					"name": "Sent",
-					"system": true
-				},
-				{
-					"externalReferenceCode": "SIGNED",
-					"key": "signed",
-					"name": "Signed",
-					"system": true
-				},
-				{
-					"externalReferenceCode": "COMPLETED",
-					"key": "completed",
-					"name": "Completed",
-					"system": true
-				},
-				{
-					"externalReferenceCode": "DECLINED",
-					"key": "declined",
-					"name": "Declined",
-					"system": true
-				}
-			],
-			"name": "DS Request Recipient Statuses",
 			"system": true
 		}
 	]

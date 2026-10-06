@@ -14,6 +14,55 @@
 		{
 			"accountEntryRestricted": false,
 			"active": true,
+			"className": "com.liferay.object.model.ObjectDefinition#D5S3",
+			"enableCategorization": false,
+			"enableFormContainer": false,
+			"enableIndexSearch": true,
+			"externalReferenceCode": "L_DS_REQUEST_DOCUMENT",
+			"label": {
+				"en_US": "DS Request Document"
+			},
+			"modifiable": true,
+			"name": "DSRequestDocument",
+			"objectDefinitionSettings": [
+				{
+					"name": "visible",
+					"value": "true"
+				}
+			],
+			"objectFields": [
+				{
+					"DBType": "Long",
+					"businessType": "LongInteger",
+					"externalReferenceCode": "FILE_ENTRY_ID",
+					"indexed": true,
+					"indexedAsKeyword": false,
+					"label": {
+						"en_US": "File Entry ID"
+					},
+					"name": "fileEntryId",
+					"required": true,
+					"state": false,
+					"system": true,
+					"type": "Long"
+				}
+			],
+			"panelCategoryKey": "",
+			"parameterRequired": false,
+			"pluralLabel": {
+				"en_US": "DS Request Documents"
+			},
+			"portlet": false,
+			"scope": "company",
+			"status": {
+				"code": 0
+			},
+			"system": true,
+			"titleObjectFieldName": "fileEntryId"
+		},
+		{
+			"accountEntryRestricted": false,
+			"active": true,
 			"className": "com.liferay.object.model.ObjectDefinition#D5S2",
 			"enableCategorization": false,
 			"enableFormContainer": false,
@@ -190,55 +239,6 @@
 			},
 			"system": true,
 			"titleObjectFieldName": "emailAddress"
-		},
-		{
-			"accountEntryRestricted": false,
-			"active": true,
-			"className": "com.liferay.object.model.ObjectDefinition#D5S3",
-			"enableCategorization": false,
-			"enableFormContainer": false,
-			"enableIndexSearch": true,
-			"externalReferenceCode": "L_DS_REQUEST_DOCUMENT",
-			"label": {
-				"en_US": "DS Request Document"
-			},
-			"modifiable": true,
-			"name": "DSRequestDocument",
-			"objectDefinitionSettings": [
-				{
-					"name": "visible",
-					"value": "true"
-				}
-			],
-			"objectFields": [
-				{
-					"DBType": "Long",
-					"businessType": "LongInteger",
-					"externalReferenceCode": "FILE_ENTRY_ID",
-					"indexed": true,
-					"indexedAsKeyword": false,
-					"label": {
-						"en_US": "File Entry ID"
-					},
-					"name": "fileEntryId",
-					"required": true,
-					"state": false,
-					"system": true,
-					"type": "Long"
-				}
-			],
-			"panelCategoryKey": "",
-			"parameterRequired": false,
-			"pluralLabel": {
-				"en_US": "DS Request Documents"
-			},
-			"portlet": false,
-			"scope": "company",
-			"status": {
-				"code": 0
-			},
-			"system": true,
-			"titleObjectFieldName": "fileEntryId"
 		},
 		{
 			"accountEntryRestricted": false,
