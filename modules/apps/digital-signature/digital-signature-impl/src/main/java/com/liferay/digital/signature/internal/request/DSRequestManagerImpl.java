@@ -13,6 +13,7 @@ import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.digital.signature.request.DSRequestManager;
 import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.object.constants.ObjectDefinitionConstants;
+import com.liferay.object.constants.ObjectEntryFolderConstants;
 import com.liferay.object.entry.util.ObjectEntryThreadLocal;
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.model.ObjectEntry;
@@ -41,7 +42,6 @@ import com.liferay.portal.kernel.transaction.TransactionInvokerUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
-import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 
@@ -108,17 +108,16 @@ public class DSRequestManagerImpl implements DSRequestManager {
 						return null;
 					}
 
-					String languageId = LocaleUtil.toLanguageId(
-						LocaleUtil.getSiteDefault());
-
 					ServiceContext serviceContext = _getServiceContext(
 						companyId, groupId, userId);
 
 					ObjectEntry requestObjectEntry =
 						_objectEntryLocalService.addObjectEntry(
 							0, userId,
-							requestObjectDefinition.getObjectDefinitionId(), 0,
-							languageId,
+							requestObjectDefinition.getObjectDefinitionId(),
+							ObjectEntryFolderConstants.
+								PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
+							null,
 							HashMapBuilder.<String, Serializable>put(
 								"emailSubject", dsEnvelope.getEmailSubject()
 							).put(
@@ -137,8 +136,10 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					for (long fileEntryId : fileEntryIds) {
 						_objectEntryLocalService.addObjectEntry(
 							0, userId,
-							documentObjectDefinition.getObjectDefinitionId(), 0,
-							languageId,
+							documentObjectDefinition.getObjectDefinitionId(),
+							ObjectEntryFolderConstants.
+								PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
+							null,
 							HashMapBuilder.<String, Serializable>put(
 								documentFieldName,
 								requestObjectEntry.getObjectEntryId()
@@ -154,7 +155,9 @@ public class DSRequestManagerImpl implements DSRequestManager {
 						_objectEntryLocalService.addObjectEntry(
 							0, userId,
 							recipientObjectDefinition.getObjectDefinitionId(),
-							0, languageId,
+							ObjectEntryFolderConstants.
+								PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
+							null,
 							HashMapBuilder.<String, Serializable>put(
 								recipientFieldName,
 								requestObjectEntry.getObjectEntryId()
@@ -495,7 +498,10 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				_toDate(dsRecipient.getSentLocalDateTime()));
 
 			_objectEntryLocalService.updateObjectEntry(
-				objectEntry.getUserId(), recipientId, 0, values,
+				objectEntry.getUserId(), recipientId,
+				ObjectEntryFolderConstants.
+					PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
+				values,
 				_getServiceContext(
 					companyId, groupId, objectEntry.getUserId()));
 		}
@@ -528,7 +534,9 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			_toDate(dsEnvelope.getStatusChangedLocalDateTime()));
 
 		_objectEntryLocalService.updateObjectEntry(
-			objectEntry.getUserId(), requestId, 0, values,
+			objectEntry.getUserId(), requestId,
+			ObjectEntryFolderConstants.PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
+			values,
 			_getServiceContext(companyId, groupId, objectEntry.getUserId()));
 	}
 
