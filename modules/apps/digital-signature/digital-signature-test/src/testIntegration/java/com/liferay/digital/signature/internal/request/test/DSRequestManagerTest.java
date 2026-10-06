@@ -112,8 +112,9 @@ public class DSRequestManagerTest {
 					"L_DS_REQUEST", companyId);
 
 		List<Map<String, Serializable>> requestValuesList = _getValuesList(
-			companyId, requestObjectDefinition,
-			"(providerRequestId eq '" + dsEnvelope.getDSEnvelopeId() + "')");
+			companyId,
+			"(providerRequestId eq '" + dsEnvelope.getDSEnvelopeId() + "')",
+			requestObjectDefinition);
 
 		Assert.assertEquals(
 			requestValuesList.toString(), 1, requestValuesList.size());
@@ -148,10 +149,10 @@ public class DSRequestManagerTest {
 
 		for (Map<String, Serializable> recipientValues :
 				_getValuesList(
-					companyId, recipientObjectDefinition,
+					companyId,
 					StringBundler.concat(
-						"(", objectField.getName(), " eq '", requestId,
-						"')"))) {
+						"(", objectField.getName(), " eq '", requestId, "')"),
+					recipientObjectDefinition)) {
 
 			actualEmailAddresses.add(
 				GetterUtil.getString(recipientValues.get("emailAddress")));
@@ -184,8 +185,8 @@ public class DSRequestManagerTest {
 	}
 
 	private List<Map<String, Serializable>> _getValuesList(
-			long companyId, ObjectDefinition objectDefinition,
-			String filterString)
+			long companyId, String filterString,
+			ObjectDefinition objectDefinition)
 		throws Exception {
 
 		return _objectEntryLocalService.getValuesList(

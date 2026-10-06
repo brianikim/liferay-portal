@@ -247,10 +247,10 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 			for (Map<String, Serializable> requestValues :
 					_getValuesList(
-						companyId, requestObjectDefinition,
+						companyId,
 						StringBundler.concat(
 							"(providerRequestId eq '", providerRequestId, "')"),
-						null)) {
+						requestObjectDefinition, null)) {
 
 				long requestId = GetterUtil.getLong(
 					requestValues.get(
@@ -364,8 +364,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	}
 
 	private List<Map<String, Serializable>> _getValuesList(
-			long companyId, ObjectDefinition objectDefinition,
-			String filterString, Sort[] sorts)
+			long companyId, String filterString,
+			ObjectDefinition objectDefinition, Sort[] sorts)
 		throws Exception {
 
 		boolean skipObjectEntryResourcePermission =
@@ -422,10 +422,10 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 		for (Map<String, Serializable> documentValues :
 				_getValuesList(
-					companyId, objectDefinition,
+					companyId,
 					StringBundler.concat(
 						"(", documentFieldName, " eq '", requestId, "')"),
-					null)) {
+					objectDefinition, null)) {
 
 			_reindexFileEntry(
 				GetterUtil.getLong(documentValues.get("fileEntryId")));
@@ -448,10 +448,10 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 		for (Map<String, Serializable> recipientValues :
 				_getValuesList(
-					companyId, objectDefinition,
+					companyId,
 					StringBundler.concat(
 						"(", recipientFieldName, " eq '", requestId, "')"),
-					null)) {
+					objectDefinition, null)) {
 
 			DSRecipient dsRecipient = dsRecipients.get(
 				GetterUtil.getString(
