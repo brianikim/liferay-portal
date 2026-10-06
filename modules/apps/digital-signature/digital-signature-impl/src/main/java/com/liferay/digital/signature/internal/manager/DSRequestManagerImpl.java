@@ -126,7 +126,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 								dsEnvelope.getDSEnvelopeId()
 							).put(
 								"requestExpirationDate",
-								_toDate(dsEnvelope.getExpireLocalDateTime())
+								() -> _toDate(
+									dsEnvelope.getExpireLocalDateTime())
 							).put(
 								"requestStatus", _getRequestStatus(dsEnvelope)
 							).build(),
@@ -177,7 +178,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 									dsRecipient.getStatus())
 							).put(
 								"sentDate",
-								_toDate(dsRecipient.getSentLocalDateTime())
+								() -> _toDate(
+									dsRecipient.getSentLocalDateTime())
 							).build(),
 							serviceContext);
 					}
