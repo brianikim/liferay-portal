@@ -129,7 +129,7 @@ public class DSRequest implements Serializable {
 				DSRequestConstants.STATUSES_TERMINAL, _status) &&
 			_expirationDate.before(new Date())) {
 
-			return "expired";
+			return DSRequestConstants.STATUS_EXPIRED;
 		}
 
 		return _status;
@@ -144,7 +144,9 @@ public class DSRequest implements Serializable {
 	}
 
 	public boolean isRequestable() {
-		if (isTerminal() && !Objects.equals(getStatus(), "completed")) {
+		if (isTerminal() &&
+			!Objects.equals(getStatus(), DSRequestConstants.STATUS_COMPLETED)) {
+
 			return true;
 		}
 
