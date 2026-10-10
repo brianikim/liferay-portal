@@ -62,7 +62,6 @@ import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.HtmlUtil;
-import com.liferay.portal.kernel.util.HttpComponentsUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.Portal;
@@ -870,7 +869,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		return fileEntryIdsMap;
 	}
 
-	private Locale _getLocale(long userId, long siteGroupId) throws Exception {
+	private Locale _getLocale(long siteGroupId, long userId) throws Exception {
 		User user = _userLocalService.fetchUser(userId);
 
 		if (user != null) {
@@ -878,16 +877,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 
 		return _portal.getSiteDefaultLocale(siteGroupId);
-	}
-
-	private String _getLoginURL(String url) {
-		String path = HttpComponentsUtil.getPath(url);
-
-		return HttpComponentsUtil.addParameter(
-			StringBundler.concat(
-				url.substring(0, url.length() - path.length()),
-				_portal.getPathMain(), "/portal/login"),
-			"redirect", path);
 	}
 
 	private long _getRecipientUserId(long companyId, String emailAddress) {
@@ -1086,7 +1075,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 		try {
 			Locale locale = _getLocale(
-				dsRequestRecipient.getUserId(), dsRequest.getSiteGroupId());
+				dsRequest.getSiteGroupId(), dsRequestRecipient.getUserId());
 
 			String subject = dsRequest.getEmailSubject();
 
@@ -1100,10 +1089,9 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				companyId, PropsKeys.ADMIN_EMAIL_FROM_ADDRESS);
 			String fromName = PrefsPropsUtil.getString(
 				companyId, PropsKeys.ADMIN_EMAIL_FROM_NAME);
-			String url = _getLoginURL(
-				_signDSURLProvider.getURL(
-					companyId, dsRequest.getSiteGroupId(),
-					dsRequest.getDSRequestId()));
+			String url = _signDSURLProvider.getURL(
+				companyId, dsRequest.getSiteGroupId(),
+				dsRequest.getDSRequestId());
 
 			MailMessage mailMessage = new MailMessage(
 				new InternetAddress(fromAddress, fromName),
