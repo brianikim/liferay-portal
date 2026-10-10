@@ -223,12 +223,11 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 
 		try {
-			Map<Long, DSRequest> dsRequestsByDSRequestId =
-				_getDSRequestsByDSRequestId(
-					companyId, Collections.singleton(dsRequestId),
-					dsRequestRecipientObjectDefinition);
+			Map<Long, DSRequest> dsRequestsMap = _getDSRequestsMap(
+				companyId, Collections.singleton(dsRequestId),
+				dsRequestRecipientObjectDefinition);
 
-			return dsRequestsByDSRequestId.get(dsRequestId);
+			return dsRequestsMap.get(dsRequestId);
 		}
 		catch (Exception exception) {
 			_log.error(
@@ -255,17 +254,12 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			_objectDefinitionLocalService.
 				fetchObjectDefinitionByExternalReferenceCode(
 					"L_DS_REQUEST_DOCUMENT", companyId);
-		ObjectDefinition dsRequestObjectDefinition =
-			_objectDefinitionLocalService.
-				fetchObjectDefinitionByExternalReferenceCode(
-					"L_DS_REQUEST", companyId);
 		ObjectDefinition dsRequestRecipientObjectDefinition =
 			_objectDefinitionLocalService.
 				fetchObjectDefinitionByExternalReferenceCode(
 					"L_DS_REQUEST_RECIPIENT", companyId);
 
 		if ((dsRequestDocumentObjectDefinition == null) ||
-			(dsRequestObjectDefinition == null) ||
 			(dsRequestRecipientObjectDefinition == null)) {
 
 			return dsRequests;
@@ -280,17 +274,14 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				return dsRequests;
 			}
 
-			Map<Long, DSRequest> dsRequestsByDSRequestId =
-				_getDSRequestsByDSRequestId(
-					companyId,
-					new HashSet<>(dsRequestIdsByFileEntryId.values()),
-					dsRequestRecipientObjectDefinition);
+			Map<Long, DSRequest> dsRequestsMap = _getDSRequestsMap(
+				companyId, new HashSet<>(dsRequestIdsByFileEntryId.values()),
+				dsRequestRecipientObjectDefinition);
 
 			for (Map.Entry<Long, Long> entry :
 					dsRequestIdsByFileEntryId.entrySet()) {
 
-				DSRequest dsRequest = dsRequestsByDSRequestId.get(
-					entry.getValue());
+				DSRequest dsRequest = dsRequestsMap.get(entry.getValue());
 
 				if (dsRequest != null) {
 					dsRequests.put(entry.getKey(), dsRequest);
@@ -761,12 +752,11 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			return dsRequests;
 		}
 
-		Map<Long, DSRequest> dsRequestsByDSRequestId =
-			_getDSRequestsByDSRequestId(
-				companyId, dsRequestIds, dsRequestRecipientObjectDefinition);
+		Map<Long, DSRequest> dsRequestsMap = _getDSRequestsMap(
+			companyId, dsRequestIds, dsRequestRecipientObjectDefinition);
 
 		for (long dsRequestId : dsRequestIds) {
-			DSRequest dsRequest = dsRequestsByDSRequestId.get(dsRequestId);
+			DSRequest dsRequest = dsRequestsMap.get(dsRequestId);
 
 			if (dsRequest != null) {
 				dsRequests.add(dsRequest);
@@ -776,14 +766,14 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		return dsRequests;
 	}
 
-	private Map<Long, DSRequest> _getDSRequestsByDSRequestId(
+	private Map<Long, DSRequest> _getDSRequestsMap(
 			long companyId, Set<Long> dsRequestIds,
 			ObjectDefinition dsRequestRecipientObjectDefinition)
 		throws Exception {
 
-		Map<Long, DSRequest> dsRequestsByDSRequestId = new HashMap<>();
+		Map<Long, DSRequest> dsRequestsMap = new HashMap<>();
 
-		Map<Long, List<DSRequestRecipient>> dsRequestRecipientsByDSRequestId =
+		Map<Long, List<DSRequestRecipient>> dsRequestRecipientsMap =
 			new HashMap<>();
 
 		for (Map<String, Serializable> recipientValues :
@@ -795,7 +785,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					dsRequestRecipientObjectDefinition, null)) {
 
 			List<DSRequestRecipient> dsRequestRecipients =
-				dsRequestRecipientsByDSRequestId.computeIfAbsent(
+				dsRequestRecipientsMap.computeIfAbsent(
 					MapUtil.getLong(
 						recipientValues,
 						"r_dsRequestToDSRequestRecipients_l_dsRequestId"),
@@ -805,14 +795,14 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 
 		for (List<DSRequestRecipient> dsRequestRecipients :
-				dsRequestRecipientsByDSRequestId.values()) {
+				dsRequestRecipientsMap.values()) {
 
 			dsRequestRecipients.sort(
 				Comparator.comparingInt(DSRequestRecipient::getSigningOrder));
 		}
 
-		Map<Long, List<Long>> fileEntryIdsByDSRequestId =
-			_getFileEntryIdsByDSRequestId(companyId, dsRequestIds);
+		Map<Long, List<Long>> fileEntryIdsMap = _getFileEntryIdsMap(
+			companyId, dsRequestIds);
 
 		for (long dsRequestId : dsRequestIds) {
 			ObjectEntry dsRequestObjectEntry =
@@ -822,14 +812,14 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				continue;
 			}
 
-			dsRequestsByDSRequestId.put(
+			dsRequestsMap.put(
 				dsRequestId,
 				new DSRequest(
 					dsRequestObjectEntry.getCompanyId(),
 					dsRequestObjectEntry.getCreateDate(), dsRequestId,
-					dsRequestRecipientsByDSRequestId.getOrDefault(
+					dsRequestRecipientsMap.getOrDefault(
 						dsRequestId, Collections.emptyList()),
-					fileEntryIdsByDSRequestId.getOrDefault(
+					fileEntryIdsMap.getOrDefault(
 						dsRequestId, Collections.emptyList()),
 					_getRequesterEmailAddress(dsRequestObjectEntry),
 					_getRequesterName(dsRequestObjectEntry),
@@ -837,7 +827,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					dsRequestObjectEntry.getValues()));
 		}
 
-		return dsRequestsByDSRequestId;
+		return dsRequestsMap;
 	}
 
 	private int _getDSRequestsCount(
@@ -893,11 +883,11 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			_language.get(locale, "review-and-sign"), "</a></p>");
 	}
 
-	private Map<Long, List<Long>> _getFileEntryIdsByDSRequestId(
+	private Map<Long, List<Long>> _getFileEntryIdsMap(
 			long companyId, Set<Long> dsRequestIds)
 		throws Exception {
 
-		Map<Long, List<Long>> fileEntryIdsByDSRequestId = new HashMap<>();
+		Map<Long, List<Long>> fileEntryIdsMap = new HashMap<>();
 
 		ObjectDefinition dsRequestDocumentObjectDefinition =
 			_objectDefinitionLocalService.
@@ -905,7 +895,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					"L_DS_REQUEST_DOCUMENT", companyId);
 
 		if (dsRequestDocumentObjectDefinition == null) {
-			return fileEntryIdsByDSRequestId;
+			return fileEntryIdsMap;
 		}
 
 		for (Map<String, Serializable> documentValues :
@@ -916,7 +906,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 						StringUtil.merge(dsRequestIds, "', '"), "'))"),
 					dsRequestDocumentObjectDefinition, null)) {
 
-			List<Long> fileEntryIds = fileEntryIdsByDSRequestId.computeIfAbsent(
+			List<Long> fileEntryIds = fileEntryIdsMap.computeIfAbsent(
 				MapUtil.getLong(
 					documentValues,
 					"r_dsRequestToDSRequestDocuments_l_dsRequestId"),
@@ -925,7 +915,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			fileEntryIds.add(MapUtil.getLong(documentValues, "fileEntryId"));
 		}
 
-		return fileEntryIdsByDSRequestId;
+		return fileEntryIdsMap;
 	}
 
 	private Locale _getLocale(long userId, long siteGroupId) throws Exception {
