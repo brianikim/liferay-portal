@@ -268,21 +268,18 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 
 		try {
-			Map<Long, Long> dsRequestIdsByFileEntryId =
-				_getDSRequestIdsByFileEntryId(
-					companyId, dsRequestDocumentObjectDefinition, fileEntryIds);
+			Map<Long, Long> dsRequestIdsMap = _getDSRequestIdsMap(
+				companyId, dsRequestDocumentObjectDefinition, fileEntryIds);
 
-			if (dsRequestIdsByFileEntryId.isEmpty()) {
+			if (dsRequestIdsMap.isEmpty()) {
 				return dsRequests;
 			}
 
 			Map<Long, DSRequest> dsRequestsMap = _getDSRequestsMap(
-				companyId, new HashSet<>(dsRequestIdsByFileEntryId.values()),
+				companyId, new HashSet<>(dsRequestIdsMap.values()),
 				dsRequestRecipientObjectDefinition);
 
-			for (Map.Entry<Long, Long> entry :
-					dsRequestIdsByFileEntryId.entrySet()) {
-
+			for (Map.Entry<Long, Long> entry : dsRequestIdsMap.entrySet()) {
 				DSRequest dsRequest = dsRequestsMap.get(entry.getValue());
 
 				if (dsRequest != null) {
@@ -643,14 +640,14 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 	}
 
-	private Map<Long, Long> _getDSRequestIdsByFileEntryId(
+	private Map<Long, Long> _getDSRequestIdsMap(
 			long companyId, ObjectDefinition dsRequestDocumentObjectDefinition,
 			Collection<Long> fileEntryIds)
 		throws Exception {
 
-		Map<Long, Long> dsRequestIdsByFileEntryId = new HashMap<>();
+		Map<Long, Long> dsRequestIdsMap = new HashMap<>();
 
-		for (Map<String, Serializable> documentValues :
+		for (Map<String, Serializable> values :
 				_getValuesList(
 					companyId,
 					StringBundler.concat(
@@ -661,14 +658,13 @@ public class DSRequestManagerImpl implements DSRequestManager {
 						new Sort(Field.CREATE_DATE, Sort.LONG_TYPE, true)
 					})) {
 
-			dsRequestIdsByFileEntryId.putIfAbsent(
-				MapUtil.getLong(documentValues, "fileEntryId"),
+			dsRequestIdsMap.putIfAbsent(
+				MapUtil.getLong(values, "fileEntryId"),
 				MapUtil.getLong(
-					documentValues,
-					"r_dsRequestToDSRequestDocuments_l_dsRequestId"));
+					values, "r_dsRequestToDSRequestDocuments_l_dsRequestId"));
 		}
 
-		return dsRequestIdsByFileEntryId;
+		return dsRequestIdsMap;
 	}
 
 	private List<DSRequest> _getDSRequests(
@@ -731,6 +727,30 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		return dsRequests;
 	}
 
+	private int _getDSRequestsCount(
+			long companyId, String filterString, String search)
+		throws Exception {
+
+		if (!_isEnabled(companyId, 0)) {
+			return 0;
+		}
+
+		ObjectDefinition dsRequestObjectDefinition =
+			_objectDefinitionLocalService.
+				fetchObjectDefinitionByExternalReferenceCode(
+					"L_DS_REQUEST", companyId);
+
+		if (dsRequestObjectDefinition == null) {
+			return 0;
+		}
+
+		return _objectEntryLocalService.getValuesListCount(
+			new Long[] {0L}, companyId, dsRequestObjectDefinition.getUserId(),
+			dsRequestObjectDefinition.getObjectDefinitionId(),
+			_filterFactory.create(filterString, dsRequestObjectDefinition),
+			false, search);
+	}
+
 	private Map<Long, DSRequest> _getDSRequestsMap(
 			long companyId, Set<Long> dsRequestIds,
 			ObjectDefinition dsRequestRecipientObjectDefinition)
@@ -741,7 +761,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		Map<Long, List<DSRequestRecipient>> dsRequestRecipientsMap =
 			new HashMap<>();
 
-		for (Map<String, Serializable> recipientValues :
+		for (Map<String, Serializable> values :
 				_getValuesList(
 					companyId,
 					StringBundler.concat(
@@ -752,11 +772,11 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			List<DSRequestRecipient> dsRequestRecipients =
 				dsRequestRecipientsMap.computeIfAbsent(
 					MapUtil.getLong(
-						recipientValues,
+						values,
 						"r_dsRequestToDSRequestRecipients_l_dsRequestId"),
 					dsRequestId -> new ArrayList<>());
 
-			dsRequestRecipients.add(new DSRequestRecipient(recipientValues));
+			dsRequestRecipients.add(new DSRequestRecipient(values));
 		}
 
 		for (List<DSRequestRecipient> dsRequestRecipients :
@@ -795,30 +815,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		return dsRequestsMap;
 	}
 
-	private int _getDSRequestsCount(
-			long companyId, String filterString, String search)
-		throws Exception {
-
-		if (!_isEnabled(companyId, 0)) {
-			return 0;
-		}
-
-		ObjectDefinition dsRequestObjectDefinition =
-			_objectDefinitionLocalService.
-				fetchObjectDefinitionByExternalReferenceCode(
-					"L_DS_REQUEST", companyId);
-
-		if (dsRequestObjectDefinition == null) {
-			return 0;
-		}
-
-		return _objectEntryLocalService.getValuesListCount(
-			new Long[] {0L}, companyId, dsRequestObjectDefinition.getUserId(),
-			dsRequestObjectDefinition.getObjectDefinitionId(),
-			_filterFactory.create(filterString, dsRequestObjectDefinition),
-			false, search);
-	}
-
 	private String _getEmailBody(String emailBody, Locale locale, String url) {
 		String message = emailBody;
 
@@ -849,7 +845,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			return fileEntryIdsMap;
 		}
 
-		for (Map<String, Serializable> documentValues :
+		for (Map<String, Serializable> values :
 				_getValuesList(
 					companyId,
 					StringBundler.concat(
@@ -859,11 +855,10 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 			List<Long> fileEntryIds = fileEntryIdsMap.computeIfAbsent(
 				MapUtil.getLong(
-					documentValues,
-					"r_dsRequestToDSRequestDocuments_l_dsRequestId"),
+					values, "r_dsRequestToDSRequestDocuments_l_dsRequestId"),
 				dsRequestId -> new ArrayList<>());
 
-			fileEntryIds.add(MapUtil.getLong(documentValues, "fileEntryId"));
+			fileEntryIds.add(MapUtil.getLong(values, "fileEntryId"));
 		}
 
 		return fileEntryIdsMap;
@@ -1045,8 +1040,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			DigitalSignatureConfigurationUtil.getDigitalSignatureConfiguration(
 				companyId, groupId);
 
-		if (digitalSignatureConfiguration.enabled() &&
-			digitalSignatureConfiguration.enableEmbeddedView()) {
+		if (digitalSignatureConfiguration.embeddedViewEnabled() &&
+			digitalSignatureConfiguration.enabled()) {
 
 			return true;
 		}

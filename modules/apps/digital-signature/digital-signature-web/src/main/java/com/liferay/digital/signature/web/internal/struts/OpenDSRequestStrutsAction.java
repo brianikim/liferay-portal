@@ -9,15 +9,19 @@ import com.liferay.digital.signature.constants.DigitalSignaturePortletKeys;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.petra.string.StringBundler;
+import com.liferay.portal.kernel.exception.NoSuchLayoutException;
 import com.liferay.portal.kernel.exception.NoSuchModelException;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.GroupConstants;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutConstants;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.service.LayoutService;
+import com.liferay.portal.kernel.service.permission.LayoutPermissionUtil;
 import com.liferay.portal.kernel.struts.StrutsAction;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HttpComponentsUtil;
@@ -66,7 +70,10 @@ public class OpenDSRequestStrutsAction implements StrutsAction {
 			ParamUtil.getLong(httpServletRequest, "dsRequestId"));
 
 		if ((dsRequest == null) ||
-			(dsRequest.getCompanyId() != themeDisplay.getCompanyId())) {
+			(dsRequest.getCompanyId() != themeDisplay.getCompanyId()) ||
+			!_dsRequestManager.hasPermission(
+				themeDisplay.getPermissionChecker(), dsRequest,
+				ActionKeys.VIEW)) {
 
 			_portal.sendError(
 				HttpServletResponse.SC_NOT_FOUND, new NoSuchModelException(),
@@ -75,11 +82,20 @@ public class OpenDSRequestStrutsAction implements StrutsAction {
 			return null;
 		}
 
+		Layout layout = _getLayout(
+			themeDisplay.getCompanyId(), dsRequest.getSiteGroupId(),
+			themeDisplay.getPermissionChecker());
+
+		if (layout == null) {
+			_portal.sendError(
+				HttpServletResponse.SC_NOT_FOUND, new NoSuchLayoutException(),
+				httpServletRequest, httpServletResponse);
+
+			return null;
+		}
+
 		String url = StringBundler.concat(
-			_portal.getLayoutFullURL(
-				_getLayout(
-					themeDisplay.getCompanyId(), dsRequest.getSiteGroupId()),
-				themeDisplay),
+			_portal.getLayoutFullURL(layout, themeDisplay),
 			"/-/digital_signature/sign/", dsRequest.getDSRequestId());
 
 		String windowState = WindowState.MAXIMIZED.toString();
@@ -106,7 +122,28 @@ public class OpenDSRequestStrutsAction implements StrutsAction {
 		return null;
 	}
 
-	private Layout _getLayout(long companyId, long groupId) throws Exception {
+	private Layout _fetchFirstLayout(long groupId, boolean privateLayout)
+		throws Exception {
+
+		for (Layout layout :
+				_layoutService.getLayouts(
+					groupId, privateLayout,
+					LayoutConstants.DEFAULT_PARENT_LAYOUT_ID)) {
+
+			if (!layout.isHidden() && layout.isPublished() &&
+				(layout.isTypeContent() || layout.isTypePortlet())) {
+
+				return layout;
+			}
+		}
+
+		return null;
+	}
+
+	private Layout _getLayout(
+			long companyId, long groupId, PermissionChecker permissionChecker)
+		throws Exception {
+
 		Group group = _groupLocalService.fetchGroup(groupId);
 
 		if (group == null) {
@@ -119,15 +156,19 @@ public class OpenDSRequestStrutsAction implements StrutsAction {
 			DigitalSignaturePortletKeys.SIGN_DIGITAL_SIGNATURE);
 
 		if (plid != LayoutConstants.DEFAULT_PLID) {
-			return _layoutLocalService.getLayout(plid);
+			Layout layout = _layoutLocalService.getLayout(plid);
+
+			if (LayoutPermissionUtil.contains(
+					permissionChecker, layout, ActionKeys.VIEW)) {
+
+				return layout;
+			}
 		}
 
-		Layout layout = _layoutService.fetchFirstLayout(
-			group.getGroupId(), false, true);
+		Layout layout = _fetchFirstLayout(group.getGroupId(), false);
 
 		if (layout == null) {
-			layout = _layoutService.fetchFirstLayout(
-				group.getGroupId(), true, true);
+			layout = _fetchFirstLayout(group.getGroupId(), true);
 		}
 
 		if (layout != null) {

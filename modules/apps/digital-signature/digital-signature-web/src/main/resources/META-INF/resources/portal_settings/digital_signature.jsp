@@ -20,7 +20,7 @@ DigitalSignatureConfiguration digitalSignatureConfiguration = (DigitalSignatureC
 <c:if test='<%= FeatureFlagManagerUtil.isEnabled(themeDisplay.getCompanyId(), "LPD-69290") %>'>
 	<div class="row">
 		<div class="col-md-12">
-			<aui:input checked="<%= digitalSignatureConfiguration.enableEmbeddedView() %>" inlineLabel="right" label='<%= LanguageUtil.get(resourceBundle, "enable-embedded-view") %>' labelCssClass="simple-toggle-switch" name="enableEmbeddedView" type="toggle-switch" value="<%= digitalSignatureConfiguration.enableEmbeddedView() %>" />
+			<aui:input checked="<%= digitalSignatureConfiguration.embeddedViewEnabled() %>" inlineLabel="right" label='<%= LanguageUtil.get(resourceBundle, "enable-embedded-view") %>' labelCssClass="simple-toggle-switch" name="embeddedViewEnabled" type="toggle-switch" value="<%= digitalSignatureConfiguration.embeddedViewEnabled() %>" />
 		</div>
 	</div>
 </c:if>

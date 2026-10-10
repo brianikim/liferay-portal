@@ -103,10 +103,10 @@ public class CollectDigitalSignaturePortlet extends MVCPortlet {
 						themeDisplay.getSiteGroupId());
 
 			renderRequest.setAttribute(
-				DigitalSignatureWebKeys.DIGITAL_SIGNATURE_ENABLE_EMBEDDED_VIEW,
+				DigitalSignatureWebKeys.DIGITAL_SIGNATURE_EMBEDDED_VIEW_ENABLED,
 				FeatureFlagManagerUtil.isEnabled(
 					themeDisplay.getCompanyId(), "LPD-69290") &&
-				digitalSignatureConfiguration.enableEmbeddedView());
+				digitalSignatureConfiguration.embeddedViewEnabled());
 
 			renderRequest.setAttribute(
 				DigitalSignatureWebKeys.DIGITAL_SIGNATURE_FILE_ENTRIES,
