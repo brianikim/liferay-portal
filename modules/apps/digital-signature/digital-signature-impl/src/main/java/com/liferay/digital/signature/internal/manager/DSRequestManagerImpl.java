@@ -31,6 +31,7 @@ import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.sql.dsl.expression.Predicate;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
+import com.liferay.portal.kernel.exception.NoSuchUserException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.language.Language;
@@ -137,6 +138,21 @@ public class DSRequestManagerImpl implements DSRequestManager {
 						" already has a signature request with status \"",
 						dsRequest.getStatus(), "\""));
 			}
+		}
+
+		for (DSRecipient dsRecipient : dsEnvelope.getDSRecipients()) {
+			User recipientUser = _userLocalService.fetchUserByEmailAddress(
+				companyId, dsRecipient.getEmailAddress());
+
+			if (recipientUser == null) {
+				throw new NoSuchUserException(
+					"No user exists with the email address " +
+						dsRecipient.getEmailAddress());
+			}
+
+			dsRecipient.setDSClientUserId(
+				String.valueOf(recipientUser.getUserId()));
+			dsRecipient.setName(recipientUser.getFullName());
 		}
 
 		User user = _userLocalService.getUser(userId);
@@ -1084,19 +1100,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			return;
 		}
 
-		long companyId = dsRequest.getCompanyId();
-
 		try {
-			String url = _getLoginURL(
-				_signDSURLProvider.getURL(
-					companyId, dsRequest.getSiteGroupId(),
-					dsRequest.getDSRequestId()));
-
-			String fromAddress = PrefsPropsUtil.getString(
-				companyId, PropsKeys.ADMIN_EMAIL_FROM_ADDRESS);
-			String fromName = PrefsPropsUtil.getString(
-				companyId, PropsKeys.ADMIN_EMAIL_FROM_NAME);
-
 			Locale locale = _getLocale(
 				dsRequestRecipient.getUserId(), dsRequest.getSiteGroupId());
 
@@ -1105,6 +1109,17 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			if (Validator.isNull(subject)) {
 				subject = _language.get(locale, "you-have-a-document-to-sign");
 			}
+
+			long companyId = dsRequest.getCompanyId();
+
+			String fromAddress = PrefsPropsUtil.getString(
+				companyId, PropsKeys.ADMIN_EMAIL_FROM_ADDRESS);
+			String fromName = PrefsPropsUtil.getString(
+				companyId, PropsKeys.ADMIN_EMAIL_FROM_NAME);
+			String url = _getLoginURL(
+				_signDSURLProvider.getURL(
+					companyId, dsRequest.getSiteGroupId(),
+					dsRequest.getDSRequestId()));
 
 			MailMessage mailMessage = new MailMessage(
 				new InternetAddress(fromAddress, fromName),
