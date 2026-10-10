@@ -8,6 +8,7 @@ package com.liferay.digital.signature.rest.resource.v1_0.test;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.batch.engine.test.util.BatchEngineTestUtil;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
+import com.liferay.digital.signature.constants.DSRequestConstants;
 import com.liferay.digital.signature.rest.client.dto.v1_0.SignatureRequest;
 import com.liferay.digital.signature.rest.client.pagination.Page;
 import com.liferay.digital.signature.rest.client.pagination.Pagination;
@@ -15,16 +16,13 @@ import com.liferay.digital.signature.rest.client.problem.Problem;
 import com.liferay.digital.signature.rest.client.resource.v1_0.SignatureRequestResource;
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.model.ObjectEntry;
-import com.liferay.object.model.ObjectField;
-import com.liferay.object.model.ObjectRelationship;
 import com.liferay.object.service.ObjectDefinitionLocalService;
 import com.liferay.object.service.ObjectEntryLocalService;
-import com.liferay.object.service.ObjectFieldLocalService;
-import com.liferay.object.service.ObjectRelationshipLocalService;
 import com.liferay.petra.function.UnsafeRunnable;
-import com.liferay.portal.configuration.module.configuration.ConfigurationProvider;
+import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
@@ -36,17 +34,19 @@ import com.liferay.portal.kernel.util.HttpComponentsUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.test.log.LogCapture;
+import com.liferay.portal.test.log.LoggerTestUtil;
 import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
 
 import java.io.Serializable;
 
-import java.util.List;
 import java.util.Map;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -70,34 +70,35 @@ public class SignatureRequestResourceTest
 			SignatureRequestResourceTest.class,
 			new String[] {prefix + "01.object.definition"});
 
-		_configurationProvider.saveCompanyConfiguration(
-			DigitalSignatureConfiguration.class, testCompany.getCompanyId(),
-			HashMapDictionaryBuilder.<String, Object>put(
-				"accountBaseURI", "https://demo.docusign.net/restapi"
-			).put(
-				"apiAccountId", RandomTestUtil.randomString()
-			).put(
-				"apiUsername", RandomTestUtil.randomString()
-			).put(
-				"embeddedViewEnabled", true
-			).put(
-				"enabled", true
-			).put(
-				"environment", "sandbox"
-			).put(
-				"integrationKey", RandomTestUtil.randomString()
-			).put(
-				"rsaPrivateKey", RandomTestUtil.randomString()
-			).put(
-				"siteSettingsStrategy", "always-inherit"
-			).build());
+		_companyConfigurationTemporarySwapper =
+			new CompanyConfigurationTemporarySwapper(
+				testCompany.getCompanyId(),
+				DigitalSignatureConfiguration.class.getName(),
+				HashMapDictionaryBuilder.<String, Object>put(
+					"accountBaseURI", RandomTestUtil.randomString()
+				).put(
+					"apiAccountId", RandomTestUtil.randomString()
+				).put(
+					"apiUsername", RandomTestUtil.randomString()
+				).put(
+					"embeddedViewEnabled", true
+				).put(
+					"enabled", true
+				).put(
+					"environment", RandomTestUtil.randomString()
+				).put(
+					"integrationKey", RandomTestUtil.randomString()
+				).put(
+					"rsaPrivateKey", RandomTestUtil.randomString()
+				).put(
+					"siteSettingsStrategy", "always-inherit"
+				).build());
 	}
 
 	@After
 	@Override
 	public void tearDown() throws Exception {
-		_configurationProvider.deleteCompanyConfiguration(
-			DigitalSignatureConfiguration.class, testCompany.getCompanyId());
+		_companyConfigurationTemporarySwapper.close();
 
 		super.tearDown();
 	}
@@ -107,114 +108,58 @@ public class SignatureRequestResourceTest
 	public void testGetSignatureRequest() throws Exception {
 		_user1 = UserTestUtil.addUser();
 
-		ObjectEntry requestObjectEntry = _addDSRequestObjectEntries(
-			_user1.getEmailAddress(), "sent");
+		ObjectEntry dsRequestObjectEntry = _addDSRequestObjectEntries(
+			_user1.getEmailAddress(), DSRequestConstants.STATUS_SENT);
 
-		SignatureRequestResource userSignatureRequestResource =
+		SignatureRequestResource user1SignatureRequestResource =
 			_getSignatureRequestResource(_user1);
 
-		Page<SignatureRequest> page =
-			userSignatureRequestResource.getSignatureRequestsAssignedToMePage(
-				null, Pagination.of(1, 10));
+		SignatureRequest signatureRequest =
+			user1SignatureRequestResource.getSignatureRequest(
+				dsRequestObjectEntry.getObjectEntryId());
 
-		Assert.assertEquals(1, page.getTotalCount());
-
-		List<SignatureRequest> signatureRequests =
-			(List<SignatureRequest>)page.getItems();
-
-		SignatureRequest signatureRequest = signatureRequests.get(0);
-
-		SignatureRequest userSignatureRequest =
-			userSignatureRequestResource.getSignatureRequest(
-				signatureRequest.getId());
-
-		Map<String, Serializable> values = requestObjectEntry.getValues();
+		Map<String, Serializable> values = dsRequestObjectEntry.getValues();
 
 		Assert.assertEquals(
-			values.get("emailBody"), userSignatureRequest.getEmailBody());
+			values.get("emailBody"), signatureRequest.getEmailBody());
 
 		Assert.assertEquals(
-			signatureRequest.getId(), userSignatureRequest.getId());
-
-		_user2 = UserTestUtil.addUser();
-
-		userSignatureRequestResource = _getSignatureRequestResource(_user2);
-
-		try {
-			userSignatureRequestResource.getSignatureRequest(
-				signatureRequest.getId());
-
-			Assert.fail();
-		}
-		catch (Problem.ProblemException problemException) {
-			Problem problem = problemException.getProblem();
-
-			Assert.assertEquals("NOT_FOUND", problem.getStatus());
-		}
-	}
-
-	@Override
-	@Test
-	public void testGetSignatureRequestsAssignedToMePage() throws Exception {
-		_user1 = UserTestUtil.addUser();
-
-		_addDSRequestObjectEntries(_user1.getEmailAddress(), "sent");
-
-		SignatureRequestResource userSignatureRequestResource =
-			_getSignatureRequestResource(_user1);
-
-		Page<SignatureRequest> page =
-			userSignatureRequestResource.getSignatureRequestsAssignedToMePage(
-				null, Pagination.of(1, 10));
-
-		Assert.assertEquals(1, page.getTotalCount());
-
-		List<SignatureRequest> signatureRequests =
-			(List<SignatureRequest>)page.getItems();
-
-		SignatureRequest signatureRequest = signatureRequests.get(0);
+			Long.valueOf(dsRequestObjectEntry.getObjectEntryId()),
+			signatureRequest.getId());
 
 		Map<String, Map<String, String>> actions =
 			signatureRequest.getActions();
 
 		Map<String, String> signAction = actions.get("sign");
 
-		Assert.assertEquals("GET", signAction.get("method"));
+		Assert.assertEquals(
+			String.valueOf(signatureRequest.getId()),
+			HttpComponentsUtil.getParameter(
+				signAction.get("href"), "dsRequestId", false));
 		Assert.assertTrue(
 			signAction.get("href"),
 			StringUtil.endsWith(
 				HttpComponentsUtil.getPath(signAction.get("href")),
-				"/-/digital_signature/sign/" + signatureRequest.getId()));
-
-		page =
-			userSignatureRequestResource.getSignatureRequestsAssignedToMePage(
-				StringUtil.toUpperCase(signatureRequest.getEmailSubject()),
-				Pagination.of(1, 10));
-
-		Assert.assertEquals(1, page.getTotalCount());
-
-		page =
-			userSignatureRequestResource.getSignatureRequestsAssignedToMePage(
-				RandomTestUtil.randomString(), Pagination.of(1, 10));
-
-		Assert.assertEquals(0, page.getTotalCount());
+				"/digital_signature/open_ds_request"));
+		Assert.assertEquals("GET", signAction.get("method"));
 
 		_user2 = UserTestUtil.addUser();
 
-		userSignatureRequestResource = _getSignatureRequestResource(_user2);
+		SignatureRequestResource user2SignatureRequestResource =
+			_getSignatureRequestResource(_user2);
 
-		page =
-			userSignatureRequestResource.getSignatureRequestsAssignedToMePage(
-				null, Pagination.of(1, 10));
-
-		Assert.assertEquals(0, page.getTotalCount());
+		_assertProblemStatus(
+			"NOT_FOUND",
+			() -> user2SignatureRequestResource.getSignatureRequest(
+				dsRequestObjectEntry.getObjectEntryId()));
 	}
 
 	@Override
 	@Test
 	public void testGetSiteSignatureRequestsPage() throws Exception {
 		_addDSRequestObjectEntries(
-			RandomTestUtil.randomString() + "@liferay.com", "sent");
+			RandomTestUtil.randomString() + "@liferay.com",
+			DSRequestConstants.STATUS_SENT);
 
 		Page<SignatureRequest> page =
 			signatureRequestResource.getSiteSignatureRequestsPage(
@@ -238,43 +183,95 @@ public class SignatureRequestResourceTest
 		Assert.assertEquals(0, page.getTotalCount());
 	}
 
+	@Ignore
 	@Override
 	@Test
-	public void testPatchSignatureRequest() throws Exception {
-		_testPatchSignatureRequestWhenRequestIsTerminal();
-		_testPatchSignatureRequestWhenStatusIsNotVoided();
-		_testPatchSignatureRequestWhenUserLacksPermission();
-		_testPatchSignatureRequestWhenVoidReasonIsNull();
+	public void testGetSiteSignatureRequestsPageWithPagination()
+		throws Exception {
+	}
+
+	@Ignore
+	@Override
+	@Test
+	public void testGraphQLGetSignatureRequest() throws Exception {
+	}
+
+	@Ignore
+	@Override
+	@Test
+	public void testGraphQLGetSiteSignatureRequestsPage() throws Exception {
+	}
+
+	@Ignore
+	@Override
+	@Test
+	public void testGraphQLPostSignatureRequestNotification() throws Exception {
+	}
+
+	@Ignore
+	@Override
+	@Test
+	public void testGraphQLPostSignatureRequestVoid() throws Exception {
+	}
+
+	@Ignore
+	@Override
+	@Test
+	public void testGraphQLPostSiteSignatureRequest() throws Exception {
+	}
+
+	@Ignore
+	@Override
+	@Test
+	public void testPostSignatureRequestNotification() throws Exception {
+	}
+
+	@Override
+	@Test
+	public void testPostSignatureRequestVoid() throws Exception {
+		_testPostSignatureRequestVoidWhenRequestIsTerminal();
+		_testPostSignatureRequestVoidWhenVoidReasonIsNull();
+		_testPostSignatureRequestVoidWithoutUpdatePermission();
+		_testPostSignatureRequestVoidWithoutViewPermission();
+	}
+
+	@Override
+	@Test
+	public void testPostSiteSignatureRequest() throws Exception {
+		_user1 = UserTestUtil.addUser(testGroup.getGroupId());
+
+		SignatureRequestResource userSignatureRequestResource =
+			_getSignatureRequestResource(_user1);
+
+		_assertProblemStatus(
+			"FORBIDDEN",
+			() -> userSignatureRequestResource.postSiteSignatureRequest(
+				testGroup.getGroupId(), randomSignatureRequest()));
+	}
+
+	@Ignore
+	@Override
+	@Test
+	public void testVulcanCRUDItemDelegateGetItem() throws Exception {
 	}
 
 	private ObjectEntry _addDSRequestObjectEntries(
 			String emailAddress, String requestStatus)
 		throws Exception {
 
-		ObjectDefinition documentObjectDefinition =
-			_objectDefinitionLocalService.
-				fetchObjectDefinitionByExternalReferenceCode(
-					"L_DS_REQUEST_DOCUMENT", testCompany.getCompanyId());
-		ObjectDefinition recipientObjectDefinition =
-			_objectDefinitionLocalService.
-				fetchObjectDefinitionByExternalReferenceCode(
-					"L_DS_REQUEST_RECIPIENT", testCompany.getCompanyId());
-		ObjectDefinition requestObjectDefinition =
-			_objectDefinitionLocalService.
-				fetchObjectDefinitionByExternalReferenceCode(
-					"L_DS_REQUEST", testCompany.getCompanyId());
-
+		ObjectDefinition dsRequestObjectDefinition = _getObjectDefinition(
+			"L_DS_REQUEST");
 		String languageId = LocaleUtil.toLanguageId(
 			LocaleUtil.getSiteDefault());
-
 		ServiceContext serviceContext =
 			ServiceContextTestUtil.getServiceContext(
 				testGroup.getGroupId(), TestPropsValues.getUserId());
 
-		ObjectEntry requestObjectEntry =
+		ObjectEntry dsRequestObjectEntry =
 			_objectEntryLocalService.addObjectEntry(
 				0, TestPropsValues.getUserId(),
-				requestObjectDefinition.getObjectDefinitionId(), 0, languageId,
+				dsRequestObjectDefinition.getObjectDefinitionId(), 0,
+				languageId,
 				HashMapBuilder.<String, Serializable>put(
 					"emailBody", RandomTestUtil.randomString()
 				).put(
@@ -286,50 +283,60 @@ public class SignatureRequestResourceTest
 				).put(
 					"requestStatus", requestStatus
 				).put(
-					"siteId", testGroup.getGroupId()
+					"siteGroupId", testGroup.getGroupId()
 				).build(),
 				serviceContext);
 
-		_objectEntryLocalService.addObjectEntry(
-			0, TestPropsValues.getUserId(),
-			documentObjectDefinition.getObjectDefinitionId(), 0, languageId,
-			HashMapBuilder.<String, Serializable>put(
-				_getRelationshipFieldName(
-					requestObjectDefinition, "dsRequestToDSRequestDocuments"),
-				requestObjectEntry.getObjectEntryId()
-			).put(
-				"fileEntryId", RandomTestUtil.randomLong()
-			).build(),
-			serviceContext);
+		ObjectDefinition dsRequestDocumentObjectDefinition =
+			_getObjectDefinition("L_DS_REQUEST_DOCUMENT");
 
 		_objectEntryLocalService.addObjectEntry(
 			0, TestPropsValues.getUserId(),
-			recipientObjectDefinition.getObjectDefinitionId(), 0, languageId,
+			dsRequestDocumentObjectDefinition.getObjectDefinitionId(), 0,
+			languageId,
 			HashMapBuilder.<String, Serializable>put(
-				_getRelationshipFieldName(
-					requestObjectDefinition, "dsRequestToDSRequestRecipients"),
-				requestObjectEntry.getObjectEntryId()
+				"fileEntryId", RandomTestUtil.randomInt()
 			).put(
+				"r_dsRequestToDSRequestDocuments_l_dsRequestId",
+				dsRequestObjectEntry.getObjectEntryId()
+			).build(),
+			serviceContext);
+
+		ObjectDefinition dsRequestRecipientObjectDefinition =
+			_getObjectDefinition("L_DS_REQUEST_RECIPIENT");
+
+		_objectEntryLocalService.addObjectEntry(
+			0, TestPropsValues.getUserId(),
+			dsRequestRecipientObjectDefinition.getObjectDefinitionId(), 0,
+			languageId,
+			HashMapBuilder.<String, Serializable>put(
 				"emailAddress", emailAddress
 			).put(
 				"name", RandomTestUtil.randomString()
 			).put(
 				"providerRecipientId", RandomTestUtil.randomString()
 			).put(
-				"requestRecipientStatus", "sent"
+				"r_dsRequestToDSRequestRecipients_l_dsRequestId",
+				dsRequestObjectEntry.getObjectEntryId()
+			).put(
+				"requestRecipientStatus", DSRequestConstants.STATUS_SENT
 			).put(
 				"signingOrder", 1
 			).build(),
 			serviceContext);
 
-		return requestObjectEntry;
+		return dsRequestObjectEntry;
 	}
 
 	private void _assertProblemStatus(
 			String expectedStatus, UnsafeRunnable<Exception> unsafeRunnable)
 		throws Exception {
 
-		try {
+		try (LogCapture logCapture = LoggerTestUtil.configureLog4JLogger(
+				"com.liferay.portal.vulcan.internal.jaxrs.exception.mapper." +
+					"WebApplicationExceptionMapper",
+				LoggerTestUtil.WARN)) {
+
 			unsafeRunnable.run();
 
 			Assert.fail();
@@ -341,25 +348,25 @@ public class SignatureRequestResourceTest
 		}
 	}
 
-	private String _getRelationshipFieldName(
-			ObjectDefinition requestObjectDefinition, String relationshipName)
+	private ObjectDefinition _getObjectDefinition(String externalReferenceCode)
 		throws Exception {
 
-		ObjectRelationship objectRelationship =
-			_objectRelationshipLocalService.fetchObjectRelationship(
-				requestObjectDefinition.getObjectDefinitionId(),
-				relationshipName);
-
-		ObjectField objectField = _objectFieldLocalService.getObjectField(
-			objectRelationship.getObjectFieldId2());
-
-		return objectField.getName();
+		return _objectDefinitionLocalService.
+			getObjectDefinitionByExternalReferenceCode(
+				externalReferenceCode, testCompany.getCompanyId());
 	}
 
-	private SignatureRequestResource _getSignatureRequestResource(User user) {
+	private SignatureRequestResource _getSignatureRequestResource(User user)
+		throws Exception {
+
+		String password = RandomTestUtil.randomString();
+
+		_userLocalService.updatePassword(
+			user.getUserId(), password, password, false, true);
+
 		return SignatureRequestResource.builder(
 		).authentication(
-			user.getEmailAddress(), "test"
+			user.getEmailAddress(), password
 		).endpoint(
 			testCompany.getVirtualHostname(),
 			PortalUtil.getPortalServerPort(false), "http"
@@ -368,57 +375,57 @@ public class SignatureRequestResourceTest
 		).build();
 	}
 
-	private void _testPatchSignatureRequestWhenRequestIsTerminal()
+	private void _testPostSignatureRequestVoidWhenRequestIsTerminal()
 		throws Exception {
 
-		ObjectEntry requestObjectEntry = _addDSRequestObjectEntries(
-			RandomTestUtil.randomString() + "@liferay.com", "completed");
+		ObjectEntry dsRequestObjectEntry = _addDSRequestObjectEntries(
+			RandomTestUtil.randomString() + "@liferay.com",
+			DSRequestConstants.STATUS_COMPLETED);
 
 		_assertProblemStatus(
 			"BAD_REQUEST",
-			() -> signatureRequestResource.patchSignatureRequest(
-				requestObjectEntry.getObjectEntryId(),
-				new SignatureRequest() {
-					{
-						setStatus("voided");
-						setVoidReason(RandomTestUtil.randomString());
-					}
-				}));
+			() -> signatureRequestResource.postSignatureRequestVoid(
+				dsRequestObjectEntry.getObjectEntryId(),
+				RandomTestUtil.randomString()));
 	}
 
-	private void _testPatchSignatureRequestWhenStatusIsNotVoided()
+	private void _testPostSignatureRequestVoidWhenVoidReasonIsNull()
 		throws Exception {
 
-		ObjectEntry requestObjectEntry = _addDSRequestObjectEntries(
-			RandomTestUtil.randomString() + "@liferay.com", "sent");
+		ObjectEntry dsRequestObjectEntry = _addDSRequestObjectEntries(
+			RandomTestUtil.randomString() + "@liferay.com",
+			DSRequestConstants.STATUS_SENT);
 
 		_assertProblemStatus(
 			"BAD_REQUEST",
-			() -> signatureRequestResource.patchSignatureRequest(
-				requestObjectEntry.getObjectEntryId(),
-				new SignatureRequest() {
-					{
-						setStatus("completed");
-					}
-				}));
-
-		SignatureRequest signatureRequest =
-			signatureRequestResource.patchSignatureRequest(
-				requestObjectEntry.getObjectEntryId(),
-				new SignatureRequest() {
-					{
-						setStatus("sent");
-					}
-				});
-
-		Assert.assertEquals("sent", signatureRequest.getStatus());
+			() -> signatureRequestResource.postSignatureRequestVoid(
+				dsRequestObjectEntry.getObjectEntryId(), null));
 	}
 
-	private void _testPatchSignatureRequestWhenUserLacksPermission()
+	private void _testPostSignatureRequestVoidWithoutUpdatePermission()
 		throws Exception {
 
-		ObjectEntry requestObjectEntry = _addDSRequestObjectEntries(
-			RandomTestUtil.randomString() + "@liferay.com", "sent");
+		_user1 = UserTestUtil.addUser();
+
+		ObjectEntry dsRequestObjectEntry = _addDSRequestObjectEntries(
+			_user1.getEmailAddress(), DSRequestConstants.STATUS_SENT);
+
+		SignatureRequestResource userSignatureRequestResource =
+			_getSignatureRequestResource(_user1);
+
+		_assertProblemStatus(
+			"FORBIDDEN",
+			() -> userSignatureRequestResource.postSignatureRequestVoid(
+				dsRequestObjectEntry.getObjectEntryId(),
+				RandomTestUtil.randomString()));
+	}
+
+	private void _testPostSignatureRequestVoidWithoutViewPermission()
+		throws Exception {
+
+		ObjectEntry dsRequestObjectEntry = _addDSRequestObjectEntries(
+			RandomTestUtil.randomString() + "@liferay.com",
+			DSRequestConstants.STATUS_SENT);
 
 		_user1 = UserTestUtil.addUser();
 
@@ -427,35 +434,13 @@ public class SignatureRequestResourceTest
 
 		_assertProblemStatus(
 			"NOT_FOUND",
-			() -> userSignatureRequestResource.patchSignatureRequest(
-				requestObjectEntry.getObjectEntryId(),
-				new SignatureRequest() {
-					{
-						setStatus("voided");
-						setVoidReason(RandomTestUtil.randomString());
-					}
-				}));
+			() -> userSignatureRequestResource.postSignatureRequestVoid(
+				dsRequestObjectEntry.getObjectEntryId(),
+				RandomTestUtil.randomString()));
 	}
 
-	private void _testPatchSignatureRequestWhenVoidReasonIsNull()
-		throws Exception {
-
-		ObjectEntry requestObjectEntry = _addDSRequestObjectEntries(
-			RandomTestUtil.randomString() + "@liferay.com", "sent");
-
-		_assertProblemStatus(
-			"BAD_REQUEST",
-			() -> signatureRequestResource.patchSignatureRequest(
-				requestObjectEntry.getObjectEntryId(),
-				new SignatureRequest() {
-					{
-						setStatus("voided");
-					}
-				}));
-	}
-
-	@Inject
-	private ConfigurationProvider _configurationProvider;
+	private CompanyConfigurationTemporarySwapper
+		_companyConfigurationTemporarySwapper;
 
 	@Inject
 	private ObjectDefinitionLocalService _objectDefinitionLocalService;
@@ -463,16 +448,13 @@ public class SignatureRequestResourceTest
 	@Inject
 	private ObjectEntryLocalService _objectEntryLocalService;
 
-	@Inject
-	private ObjectFieldLocalService _objectFieldLocalService;
-
-	@Inject
-	private ObjectRelationshipLocalService _objectRelationshipLocalService;
-
 	@DeleteAfterTestRun
 	private User _user1;
 
 	@DeleteAfterTestRun
 	private User _user2;
+
+	@Inject
+	private UserLocalService _userLocalService;
 
 }

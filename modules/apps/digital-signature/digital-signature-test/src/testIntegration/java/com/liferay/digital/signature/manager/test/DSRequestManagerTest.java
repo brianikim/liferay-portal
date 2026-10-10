@@ -27,6 +27,7 @@ import com.liferay.petra.sql.dsl.expression.Predicate;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
+import com.liferay.portal.kernel.exception.NoSuchUserException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
@@ -47,13 +48,9 @@ import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
-import com.liferay.portal.kernel.util.HttpComponentsUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.MapUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
-import com.liferay.portal.kernel.util.SetUtil;
-import com.liferay.portal.kernel.util.URLCodec;
 import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
@@ -207,7 +204,8 @@ public class DSRequestManagerTest {
 
 		DSRecipient dsRecipient2 = _createDSRecipient();
 
-		dsRecipient2.setName(RandomTestUtil.randomString(281));
+		dsRecipient2.setDSRecipientId(RandomTestUtil.randomString(281));
+		dsRecipient2.setEmailAddress(user.getEmailAddress());
 
 		DSEnvelope dsEnvelope2 = _createDSEnvelope();
 
@@ -234,7 +232,7 @@ public class DSRequestManagerTest {
 			AssertUtils.assertFailure(
 				ObjectEntryValuesException.ExceedsTextMaxLength.class,
 				"Object entry value exceeds the maximum length of 280 " +
-					"characters for object field \"name\"",
+					"characters for object field \"providerRecipientId\"",
 				() -> _dsRequestManager.addDSRequest(
 					TestPropsValues.getCompanyId(), _group.getGroupId(),
 					TestPropsValues.getUserId(), dsEnvelope2,
@@ -340,32 +338,21 @@ public class DSRequestManagerTest {
 	}
 
 	@Test
-	public void testContainsPermission() throws Exception {
-		_user = UserTestUtil.addUser();
+	public void testAddDSRequestWhenRecipientIsNotUser() throws Exception {
+		DSRecipient dsRecipient = _createDSRecipient();
 
-		DSRequest dsRequest = _addDSRequest(
-			_user.getEmailAddress(), DSRequestConstants.STATUS_SENT);
+		DSEnvelope dsEnvelope = _createDSEnvelope();
 
-		PermissionChecker permissionChecker =
-			PermissionCheckerFactoryUtil.create(_user);
+		dsEnvelope.setDSRecipients(ListUtil.fromArray(dsRecipient));
 
-		Assert.assertTrue(
-			_dsRequestManager.containsPermission(
-				permissionChecker, dsRequest, ActionKeys.UPDATE));
-		Assert.assertTrue(
-			_dsRequestManager.containsPermission(
-				permissionChecker, dsRequest, ActionKeys.VIEW));
-
-		_otherUser = UserTestUtil.addUser();
-
-		permissionChecker = PermissionCheckerFactoryUtil.create(_otherUser);
-
-		Assert.assertFalse(
-			_dsRequestManager.containsPermission(
-				permissionChecker, dsRequest, ActionKeys.UPDATE));
-		Assert.assertFalse(
-			_dsRequestManager.containsPermission(
-				permissionChecker, dsRequest, ActionKeys.VIEW));
+		AssertUtils.assertFailure(
+			NoSuchUserException.class,
+			"No user exists with the email address " +
+				dsRecipient.getEmailAddress(),
+			() -> _dsRequestManager.addDSRequest(
+				TestPropsValues.getCompanyId(), TestPropsValues.getGroupId(),
+				TestPropsValues.getUserId(), dsEnvelope,
+				new long[] {RandomTestUtil.randomInt()}));
 	}
 
 	@Test
@@ -386,11 +373,9 @@ public class DSRequestManagerTest {
 	public void testFetchDSRequestWhenExpirationDateIsPast() throws Exception {
 		DSEnvelope dsEnvelope = _createDSEnvelope();
 
-		dsEnvelope.setExpireLocalDateTime(
-			LocalDateTime.now(
-			).minusDays(
-				1
-			));
+		LocalDateTime localDateTime = LocalDateTime.now();
+
+		dsEnvelope.setExpireLocalDateTime(localDateTime.minusDays(1));
 
 		DSRequest dsRequest = _addDSRequest(
 			dsEnvelope, RandomTestUtil.randomInt());
@@ -405,68 +390,68 @@ public class DSRequestManagerTest {
 	}
 
 	@Test
-	public void testGetLoginURL() throws Exception {
-		String path = StringBundler.concat(
-			"/web/", RandomTestUtil.randomString(),
-			"/manage/-/digital_signature/sign/", RandomTestUtil.randomLong());
-		String portalURL = StringBundler.concat(
-			"http://", RandomTestUtil.randomString(), ".com");
+	public void testGetDSRequests() throws Exception {
+		long fileEntryId1 = RandomTestUtil.randomInt();
+		long fileEntryId2 = RandomTestUtil.randomInt();
 
-		String url = ReflectionTestUtil.invoke(
-			_dsRequestManager, "_getLoginURL", new Class<?>[] {String.class},
-			portalURL + path);
+		_addDSRequest(_createDSEnvelope(), fileEntryId1, fileEntryId2);
 
-		Assert.assertTrue(
-			url,
-			url.startsWith(
-				StringBundler.concat(
-					portalURL, PortalUtil.getPathMain(), "/portal/login?")));
+		Map<Long, DSRequest> dsRequests = _dsRequestManager.getDSRequests(
+			TestPropsValues.getCompanyId(),
+			ListUtil.fromArray(fileEntryId1, fileEntryId2));
+
+		Assert.assertEquals(dsRequests.toString(), 2, dsRequests.size());
+
+		DSRequest dsRequest1 = dsRequests.get(fileEntryId1);
+		DSRequest dsRequest2 = dsRequests.get(fileEntryId2);
+
 		Assert.assertEquals(
-			path,
-			URLCodec.decodeURL(
-				HttpComponentsUtil.getParameter(url, "redirect", false)));
+			dsRequest1.getProviderRequestId(),
+			dsRequest2.getProviderRequestId());
+
+		dsRequests = _dsRequestManager.getDSRequests(
+			TestPropsValues.getCompanyId(),
+			Collections.singletonList(RandomTestUtil.randomLong()));
+
+		Assert.assertTrue(dsRequests.isEmpty());
 	}
 
 	@Test
-	public void testGetRecipientDSRequests() throws Exception {
+	public void testHasPermission() throws Exception {
 		_user = UserTestUtil.addUser();
 
-		DSRequest dsRequest1 = _addDSRequest(
-			_user.getEmailAddress(), DSRequestConstants.STATUS_VOIDED);
-		DSRequest dsRequest2 = _addDSRequest(
+		DSRequest dsRequest = _addDSRequest(
 			_user.getEmailAddress(), DSRequestConstants.STATUS_SENT);
 
-		Assert.assertEquals(
-			SetUtil.fromArray(
-				new Long[] {
-					dsRequest1.getDSRequestId(), dsRequest2.getDSRequestId()
-				}),
-			new HashSet<>(
-				TransformUtil.transform(
-					_dsRequestManager.getRecipientDSRequests(
-						TestPropsValues.getCompanyId(), _user.getUserId(), null,
-						QueryUtil.ALL_POS, QueryUtil.ALL_POS),
-					DSRequest::getDSRequestId)));
+		PermissionChecker permissionChecker =
+			PermissionCheckerFactoryUtil.create(TestPropsValues.getUser());
 
-		List<DSRequest> dsRequests = _dsRequestManager.getRecipientDSRequests(
-			TestPropsValues.getCompanyId(), _user.getUserId(), null, 0, 1);
+		Assert.assertTrue(
+			_dsRequestManager.hasPermission(
+				permissionChecker, dsRequest, ActionKeys.UPDATE));
+		Assert.assertTrue(
+			_dsRequestManager.hasPermission(
+				permissionChecker, dsRequest, ActionKeys.VIEW));
 
-		Assert.assertEquals(dsRequests.toString(), 1, dsRequests.size());
+		permissionChecker = PermissionCheckerFactoryUtil.create(_user);
 
-		Assert.assertEquals(
-			2,
-			_dsRequestManager.getRecipientDSRequestsCount(
-				TestPropsValues.getCompanyId(), _user.getUserId(), null));
-		Assert.assertEquals(
-			1,
-			_dsRequestManager.getRecipientDSRequestsCount(
-				TestPropsValues.getCompanyId(), _user.getUserId(),
-				dsRequest1.getEmailSubject()));
-		Assert.assertEquals(
-			0,
-			_dsRequestManager.getRecipientDSRequestsCount(
-				TestPropsValues.getCompanyId(), _user.getUserId(),
-				RandomTestUtil.randomString()));
+		Assert.assertFalse(
+			_dsRequestManager.hasPermission(
+				permissionChecker, dsRequest, ActionKeys.UPDATE));
+		Assert.assertTrue(
+			_dsRequestManager.hasPermission(
+				permissionChecker, dsRequest, ActionKeys.VIEW));
+
+		_otherUser = UserTestUtil.addUser();
+
+		permissionChecker = PermissionCheckerFactoryUtil.create(_otherUser);
+
+		Assert.assertFalse(
+			_dsRequestManager.hasPermission(
+				permissionChecker, dsRequest, ActionKeys.UPDATE));
+		Assert.assertFalse(
+			_dsRequestManager.hasPermission(
+				permissionChecker, dsRequest, ActionKeys.VIEW));
 	}
 
 	@Test
@@ -523,7 +508,7 @@ public class DSRequestManagerTest {
 			localDateTime.plusDays(1), "signed", "voided", localDateTime);
 	}
 
-	private DSRequest _addDSRequest(DSEnvelope dsEnvelope, long fileEntryId)
+	private DSRequest _addDSRequest(DSEnvelope dsEnvelope, long... fileEntryIds)
 		throws Exception {
 
 		return ReflectionTestUtil.invoke(
@@ -533,7 +518,7 @@ public class DSRequestManagerTest {
 				long[].class
 			},
 			TestPropsValues.getCompanyId(), TestPropsValues.getGroupId(),
-			TestPropsValues.getUserId(), dsEnvelope, new long[] {fileEntryId});
+			TestPropsValues.getUserId(), dsEnvelope, fileEntryIds);
 	}
 
 	private DSRequest _addDSRequest(String emailAddress, String status)
