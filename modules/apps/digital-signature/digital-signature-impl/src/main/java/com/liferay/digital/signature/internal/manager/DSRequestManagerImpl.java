@@ -180,49 +180,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	}
 
 	@Override
-	public boolean containsPermission(
-			PermissionChecker permissionChecker, DSRequest dsRequest,
-			String actionId)
-		throws PortalException {
-
-		User user = permissionChecker.getUser();
-
-		if (dsRequest.getRequesterUserId() == user.getUserId()) {
-			return true;
-		}
-
-		if (Objects.equals(actionId, ActionKeys.VIEW)) {
-			for (DSRequestRecipient dsRequestRecipient :
-					dsRequest.getDSRequestRecipients()) {
-
-				if ((dsRequestRecipient.getUserId() == user.getUserId()) ||
-					StringUtil.equalsIgnoreCase(
-						dsRequestRecipient.getEmailAddress(),
-						user.getEmailAddress())) {
-
-					return true;
-				}
-			}
-		}
-
-		ObjectDefinition dsRequestObjectDefinition =
-			_objectDefinitionLocalService.
-				fetchObjectDefinitionByExternalReferenceCode(
-					"L_DS_REQUEST", dsRequest.getCompanyId());
-
-		if (dsRequestObjectDefinition == null) {
-			return false;
-		}
-
-		ModelResourcePermission<?> modelResourcePermission =
-			ModelResourcePermissionRegistryUtil.getModelResourcePermission(
-				dsRequestObjectDefinition.getClassName());
-
-		return modelResourcePermission.contains(
-			permissionChecker, dsRequest.getDSRequestId(), actionId);
-	}
-
-	@Override
 	public DSRequest fetchDSRequest(long dsRequestId) {
 		ObjectEntry dsRequestObjectEntry =
 			_objectEntryLocalService.fetchObjectEntry(dsRequestId);
@@ -411,6 +368,49 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	}
 
 	@Override
+	public boolean hasPermission(
+			PermissionChecker permissionChecker, DSRequest dsRequest,
+			String actionId)
+		throws PortalException {
+
+		User user = permissionChecker.getUser();
+
+		if (dsRequest.getRequesterUserId() == user.getUserId()) {
+			return true;
+		}
+
+		if (Objects.equals(actionId, ActionKeys.VIEW)) {
+			for (DSRequestRecipient dsRequestRecipient :
+					dsRequest.getDSRequestRecipients()) {
+
+				if ((dsRequestRecipient.getUserId() == user.getUserId()) ||
+					StringUtil.equalsIgnoreCase(
+						dsRequestRecipient.getEmailAddress(),
+						user.getEmailAddress())) {
+
+					return true;
+				}
+			}
+		}
+
+		ObjectDefinition dsRequestObjectDefinition =
+			_objectDefinitionLocalService.
+				fetchObjectDefinitionByExternalReferenceCode(
+					"L_DS_REQUEST", dsRequest.getCompanyId());
+
+		if (dsRequestObjectDefinition == null) {
+			return false;
+		}
+
+		ModelResourcePermission<?> modelResourcePermission =
+			ModelResourcePermissionRegistryUtil.getModelResourcePermission(
+				dsRequestObjectDefinition.getClassName());
+
+		return modelResourcePermission.contains(
+			permissionChecker, dsRequest.getDSRequestId(), actionId);
+	}
+
+	@Override
 	public void sendDSRequestNotifications(
 		long companyId, long groupId, DSRequest dsRequest) {
 
@@ -531,7 +531,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			(dsRequestObjectDefinition == null) ||
 			(dsRequestRecipientObjectDefinition == null)) {
 
-			return null;
+			throw new PortalException(
+				"Unable to find the signature request object definitions");
 		}
 
 		ServiceContext serviceContext = _getServiceContext(
@@ -621,7 +622,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			dsRequestObjectEntry.getCompanyId(),
 			dsRequestObjectEntry.getCreateDate(),
 			dsRequestObjectEntry.getObjectEntryId(), dsRequestRecipients,
-			ListUtil.fromArray(ArrayUtil.toArray(fileEntryIds)),
+			ListUtil.fromArray(fileEntryIds),
 			_getRequesterEmailAddress(dsRequestObjectEntry),
 			_getRequesterName(dsRequestObjectEntry),
 			dsRequestObjectEntry.getUserId(), dsRequestObjectEntry.getValues());
