@@ -20,6 +20,7 @@ import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.object.constants.ObjectDefinitionConstants;
 import com.liferay.object.exception.ObjectEntryValuesException;
 import com.liferay.object.model.ObjectDefinition;
+import com.liferay.object.model.ObjectEntry;
 import com.liferay.object.rest.filter.factory.FilterFactory;
 import com.liferay.object.service.ObjectDefinitionLocalService;
 import com.liferay.object.service.ObjectEntryLocalService;
@@ -35,6 +36,7 @@ import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
+import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.AssertUtils;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.constants.TestDataConstants;
@@ -47,8 +49,10 @@ import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
+import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.SetUtil;
@@ -404,6 +408,34 @@ public class DSRequestManagerTest {
 	}
 
 	@Test
+	public void testGetFileEntryDSRequests() throws Exception {
+		String emailAddress = RandomTestUtil.randomString() + "@liferay.com";
+		long fileEntryId = RandomTestUtil.randomInt();
+
+		_addDSRequestObjectEntries(
+			emailAddress, fileEntryId, DSRequestRecipientConstants.STATUS_SENT,
+			DSRequestConstants.STATUS_VOIDED, TestPropsValues.getUserId());
+		_addDSRequestObjectEntries(
+			emailAddress, fileEntryId, DSRequestRecipientConstants.STATUS_SENT,
+			DSRequestConstants.STATUS_SENT, TestPropsValues.getUserId());
+
+		List<DSRequest> dsRequests = _dsRequestManager.getFileEntryDSRequests(
+			TestPropsValues.getCompanyId(), fileEntryId);
+
+		Assert.assertEquals(dsRequests.toString(), 2, dsRequests.size());
+
+		DSRequest dsRequest1 = dsRequests.get(0);
+
+		Assert.assertEquals(
+			DSRequestConstants.STATUS_SENT, dsRequest1.getStatus());
+
+		DSRequest dsRequest2 = dsRequests.get(1);
+
+		Assert.assertEquals(
+			DSRequestConstants.STATUS_VOIDED, dsRequest2.getStatus());
+	}
+
+	@Test
 	public void testGetRecipientDSRequests() throws Exception {
 		_user = UserTestUtil.addUser();
 
@@ -507,6 +539,44 @@ public class DSRequestManagerTest {
 	}
 
 	@Test
+	public void testSendSignatureReminders() throws Exception {
+		try (CompanyConfigurationTemporarySwapper
+				companyConfigurationTemporarySwapper =
+					new CompanyConfigurationTemporarySwapper(
+						TestPropsValues.getCompanyId(),
+						DigitalSignatureConfiguration.class.getName(),
+						HashMapDictionaryBuilder.<String, Object>put(
+							"embeddedViewEnabled", true
+						).put(
+							"enabled", true
+						).put(
+							"signatureReminderEnabled", true
+						).put(
+							"siteSettingsStrategy", "always-inherit"
+						).build())) {
+
+			int count = _dsRequestManager.sendSignatureReminders(
+				TestPropsValues.getCompanyId());
+
+			_addDSRequestObjectEntries(
+				RandomTestUtil.randomString() + "@liferay.com",
+				RandomTestUtil.randomInt(),
+				DSRequestRecipientConstants.STATUS_SENT,
+				DSRequestConstants.STATUS_SENT, TestPropsValues.getUserId());
+			_addDSRequestObjectEntries(
+				RandomTestUtil.randomString() + "@liferay.com",
+				RandomTestUtil.randomInt(),
+				DSRequestRecipientConstants.STATUS_SENT,
+				DSRequestConstants.STATUS_VOIDED, TestPropsValues.getUserId());
+
+			Assert.assertEquals(
+				count + 1,
+				_dsRequestManager.sendSignatureReminders(
+					TestPropsValues.getCompanyId()));
+		}
+	}
+
+	@Test
 	public void testUpdateDSRequest() throws Exception {
 		LocalDateTime localDateTime = LocalDateTime.ofEpochSecond(
 			System.currentTimeMillis() / 1000, 0, ZoneOffset.UTC);
@@ -549,6 +619,65 @@ public class DSRequestManagerTest {
 		dsEnvelope.setStatus(status);
 
 		return _addDSRequest(dsEnvelope, RandomTestUtil.randomInt());
+	}
+
+	private void _addDSRequestObjectEntries(
+			String emailAddress, long fileEntryId, String recipientStatus,
+			String requestStatus, long userId)
+		throws Exception {
+
+		String languageId = LocaleUtil.toLanguageId(
+			LocaleUtil.getSiteDefault());
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(
+				TestPropsValues.getGroupId(), userId);
+
+		ObjectEntry dsRequestObjectEntry =
+			_objectEntryLocalService.addObjectEntry(
+				0, userId, _dsRequestObjectDefinition.getObjectDefinitionId(), 0,
+				languageId,
+				HashMapBuilder.<String, Serializable>put(
+					"emailSubject", RandomTestUtil.randomString()
+				).put(
+					"providerKey", "docusign"
+				).put(
+					"providerRequestId", RandomTestUtil.randomString()
+				).put(
+					"requestStatus", requestStatus
+				).build(),
+				serviceContext);
+
+		_objectEntryLocalService.addObjectEntry(
+			0, userId,
+			_dsRequestDocumentObjectDefinition.getObjectDefinitionId(), 0,
+			languageId,
+			HashMapBuilder.<String, Serializable>put(
+				"fileEntryId", fileEntryId
+			).put(
+				"r_dsRequestToDSRequestDocuments_l_dsRequestId",
+				dsRequestObjectEntry.getObjectEntryId()
+			).build(),
+			serviceContext);
+
+		_objectEntryLocalService.addObjectEntry(
+			0, userId,
+			_dsRequestRecipientObjectDefinition.getObjectDefinitionId(), 0,
+			languageId,
+			HashMapBuilder.<String, Serializable>put(
+				"emailAddress", emailAddress
+			).put(
+				"name", RandomTestUtil.randomString()
+			).put(
+				"providerRecipientId", RandomTestUtil.randomString()
+			).put(
+				"r_dsRequestToDSRequestRecipients_l_dsRequestId",
+				dsRequestObjectEntry.getObjectEntryId()
+			).put(
+				"r_userToDSRequestRecipients_userId", userId
+			).put(
+				"requestRecipientStatus", recipientStatus
+			).build(),
+			serviceContext);
 	}
 
 	private DSEnvelope _createDSEnvelope() {
