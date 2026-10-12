@@ -10,6 +10,7 @@ import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.exception.NoSuchLayoutException;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.NoSuchModelException;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.GroupConstants;
@@ -119,6 +120,22 @@ public class OpenDSRequestStrutsAction implements StrutsAction {
 		return null;
 	}
 
+	private Layout _fetchVisibleLayout(long groupId, boolean privateLayout)
+		throws PortalException {
+
+		for (Layout layout :
+				_layoutService.getLayouts(
+					groupId, privateLayout,
+					LayoutConstants.DEFAULT_PARENT_LAYOUT_ID)) {
+
+			if (!layout.isHidden()) {
+				return layout;
+			}
+		}
+
+		return null;
+	}
+
 	private Layout _getLayout(long companyId, long groupId) throws Exception {
 		Group group = _groupLocalService.fetchGroup(groupId);
 
@@ -135,12 +152,10 @@ public class OpenDSRequestStrutsAction implements StrutsAction {
 			return _layoutLocalService.getLayout(plid);
 		}
 
-		Layout layout = _layoutService.fetchFirstLayout(
-			group.getGroupId(), false, true);
+		Layout layout = _fetchVisibleLayout(group.getGroupId(), false);
 
 		if (layout == null) {
-			layout = _layoutService.fetchFirstLayout(
-				group.getGroupId(), true, true);
+			layout = _fetchVisibleLayout(group.getGroupId(), true);
 		}
 
 		if (layout != null) {
@@ -150,9 +165,7 @@ public class OpenDSRequestStrutsAction implements StrutsAction {
 		Group guestGroup = _groupLocalService.getGroup(
 			companyId, GroupConstants.GUEST);
 
-		return _layoutLocalService.fetchFirstLayout(
-			guestGroup.getGroupId(), false,
-			LayoutConstants.DEFAULT_PARENT_LAYOUT_ID, false);
+		return _fetchVisibleLayout(guestGroup.getGroupId(), false);
 	}
 
 	@Reference

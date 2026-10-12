@@ -126,6 +126,7 @@ public class OpenDSRequestStrutsActionTest {
 	@Test
 	public void testExecute() throws Exception {
 		_testExecuteWithGuestUser();
+		_testExecuteWithHiddenLayout();
 		_testExecuteWithParameters();
 		_testExecuteWithoutDSRequest();
 		_testExecuteWithoutDSRequestViewPermission();
@@ -280,6 +281,28 @@ public class OpenDSRequestStrutsActionTest {
 			redirectedURL,
 			redirectedURL.contains(
 				URLCodec.encodeURL("dsRequestId=" + dsRequestId)));
+	}
+
+	private void _testExecuteWithHiddenLayout() throws Exception {
+		Group group = GroupTestUtil.addGroup();
+
+		Layout layout = LayoutTestUtil.addTypePortletLayout(group);
+
+		layout.setHidden(true);
+
+		_layoutLocalService.updateLayout(layout);
+
+		long dsRequestId = _addDSRequest(group.getGroupId());
+
+		Group guestGroup = _groupLocalService.getGroup(
+			TestPropsValues.getCompanyId(), GroupConstants.GUEST);
+
+		_assertRedirectedToLayout(
+			dsRequestId,
+			_layoutLocalService.fetchFirstLayout(
+				guestGroup.getGroupId(), false,
+				LayoutConstants.DEFAULT_PARENT_LAYOUT_ID, false),
+			_execute(dsRequestId, Collections.emptyMap(), _user));
 	}
 
 	private void _testExecuteWithParameters() throws Exception {
