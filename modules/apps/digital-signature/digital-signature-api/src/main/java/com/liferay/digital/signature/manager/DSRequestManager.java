@@ -29,8 +29,13 @@ public interface DSRequestManager {
 
 	public DSRequest fetchDSRequest(long dsRequestId);
 
+	public DSRequest fetchDSRequest(long companyId, long fileEntryId);
+
 	public Map<Long, DSRequest> getDSRequests(
 		long companyId, Collection<Long> fileEntryIds);
+
+	public List<DSRequest> getFileEntryDSRequests(
+		long companyId, long fileEntryId);
 
 	public List<DSRequest> getSiteDSRequests(
 		long companyId, long siteGroupId, String search, int start, int end);
@@ -46,10 +51,12 @@ public interface DSRequestManager {
 	public void sendDSRequestNotifications(
 		long companyId, long groupId, DSRequest dsRequest);
 
+	public int sendSignatureReminders(long companyId);
+
 	public void updateDSRequest(
 		long companyId, long groupId, String providerRequestId);
 
 	public void voidDSRequest(
-		long companyId, long groupId, String providerRequestId, String reason);
+		long companyId, long groupId, DSRequest dsRequest, String reason);
 
 }
