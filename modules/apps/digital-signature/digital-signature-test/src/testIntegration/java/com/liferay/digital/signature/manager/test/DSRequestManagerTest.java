@@ -453,9 +453,18 @@ public class DSRequestManagerTest {
 			_user.getEmailAddress(), DSRequestConstants.STATUS_SENT);
 
 		PermissionChecker permissionChecker =
-			PermissionCheckerFactoryUtil.create(_user);
+			PermissionCheckerFactoryUtil.create(TestPropsValues.getUser());
 
 		Assert.assertTrue(
+			_dsRequestManager.hasPermission(
+				permissionChecker, dsRequest, ActionKeys.UPDATE));
+		Assert.assertTrue(
+			_dsRequestManager.hasPermission(
+				permissionChecker, dsRequest, ActionKeys.VIEW));
+
+		permissionChecker = PermissionCheckerFactoryUtil.create(_user);
+
+		Assert.assertFalse(
 			_dsRequestManager.hasPermission(
 				permissionChecker, dsRequest, ActionKeys.UPDATE));
 		Assert.assertTrue(
