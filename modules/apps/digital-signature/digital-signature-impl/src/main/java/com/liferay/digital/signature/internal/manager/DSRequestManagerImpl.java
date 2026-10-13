@@ -516,7 +516,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 	@Override
 	public int sendSignatureReminders(long companyId) {
-		if (!_isEnabled(companyId, 0)) {
+		if (!FeatureFlagManagerUtil.isEnabled(companyId, "LPD-69290")) {
 			return 0;
 		}
 
