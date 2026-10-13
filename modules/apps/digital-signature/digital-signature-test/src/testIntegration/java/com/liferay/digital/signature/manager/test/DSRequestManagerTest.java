@@ -23,6 +23,7 @@ import com.liferay.object.service.ObjectEntryLocalService;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.sql.dsl.expression.Predicate;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
+import com.liferay.portal.configuration.test.util.GroupConfigurationTemporarySwapper;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.User;
@@ -102,6 +103,8 @@ public class DSRequestManagerTest {
 					"apiAccountId", RandomTestUtil.randomString()
 				).put(
 					"apiUsername", RandomTestUtil.randomString()
+				).put(
+					"embeddedViewEnabled", true
 				).put(
 					"enabled", true
 				).put(
@@ -268,6 +271,86 @@ public class DSRequestManagerTest {
 			_getValuesList(
 				"(emailAddress eq '" + emailAddress2 + "')",
 				_dsRequestRecipientObjectDefinition));
+	public void testFetchDSRequest() throws Exception {
+		DSRequest dsRequest1 = _addDSRequest(
+			_createDSEnvelope(), RandomTestUtil.randomInt());
+
+		DSRequest dsRequest2 = _dsRequestManager.fetchDSRequest(
+			TestPropsValues.getCompanyId(), dsRequest1.getDSRequestId());
+
+		Assert.assertEquals(
+			dsRequest1.getDSRequestId(), dsRequest2.getDSRequestId());
+		Assert.assertEquals(
+			DSRequestConstants.STATUS_SENT, dsRequest2.getStatus());
+
+		Assert.assertNull(
+			_dsRequestManager.fetchDSRequest(
+				RandomTestUtil.randomLong(), dsRequest1.getDSRequestId()));
+
+		_testFetchDSRequestWhenExpirationDateIsPast();
+		_testFetchDSRequestWhenSiteOverridesInstanceSettings();
+	}
+	public void testGetDSRequests() throws Exception {
+		long fileEntryId1 = RandomTestUtil.randomInt();
+		long fileEntryId2 = RandomTestUtil.randomInt();
+
+		_addDSRequest(_createDSEnvelope(), fileEntryId1, fileEntryId2);
+
+		Map<Long, DSRequest> dsRequests = _dsRequestManager.getDSRequests(
+			TestPropsValues.getCompanyId(),
+			ListUtil.fromArray(fileEntryId1, fileEntryId2));
+
+		Assert.assertEquals(dsRequests.toString(), 2, dsRequests.size());
+
+		DSRequest dsRequest1 = dsRequests.get(fileEntryId1);
+		DSRequest dsRequest2 = dsRequests.get(fileEntryId2);
+
+		Assert.assertEquals(
+			dsRequest1.getProviderRequestId(),
+			dsRequest2.getProviderRequestId());
+
+		dsRequests = _dsRequestManager.getDSRequests(
+			TestPropsValues.getCompanyId(),
+			Collections.singletonList(RandomTestUtil.randomLong()));
+
+		Assert.assertTrue(dsRequests.isEmpty());
+	}
+	public void testHasPermission() throws Exception {
+		User user1 = UserTestUtil.addUser();
+
+		DSRequest dsRequest = _addDSRequest(
+			user1.getEmailAddress(), DSRequestConstants.STATUS_SENT);
+
+		PermissionChecker permissionChecker =
+			PermissionCheckerFactoryUtil.create(TestPropsValues.getUser());
+
+		Assert.assertTrue(
+			_dsRequestManager.hasPermission(
+				permissionChecker, dsRequest, ActionKeys.UPDATE));
+		Assert.assertTrue(
+			_dsRequestManager.hasPermission(
+				permissionChecker, dsRequest, ActionKeys.VIEW));
+
+		permissionChecker = PermissionCheckerFactoryUtil.create(user1);
+
+		Assert.assertFalse(
+			_dsRequestManager.hasPermission(
+				permissionChecker, dsRequest, ActionKeys.UPDATE));
+		Assert.assertTrue(
+			_dsRequestManager.hasPermission(
+				permissionChecker, dsRequest, ActionKeys.VIEW));
+
+		User user2 = UserTestUtil.addUser();
+
+		permissionChecker = PermissionCheckerFactoryUtil.create(user2);
+
+		Assert.assertFalse(
+			_dsRequestManager.hasPermission(
+				permissionChecker, dsRequest, ActionKeys.UPDATE));
+		Assert.assertFalse(
+			_dsRequestManager.hasPermission(
+				permissionChecker, dsRequest, ActionKeys.VIEW));
+	}
 	}
 
 	@Test
@@ -358,6 +441,70 @@ public class DSRequestManagerTest {
 			objectDefinition.getObjectDefinitionId(),
 			_filterFactory.create(filterString, objectDefinition), null,
 			QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
+	}
+
+	private void _testFetchDSRequestWhenExpirationDateIsPast()
+		throws Exception {
+
+		DSEnvelope dsEnvelope = _createDSEnvelope();
+
+		LocalDateTime localDateTime = LocalDateTime.now();
+
+		dsEnvelope.setExpireLocalDateTime(localDateTime.minusDays(1));
+
+		DSRequest dsRequest = _addDSRequest(
+			dsEnvelope, RandomTestUtil.randomInt());
+
+		dsRequest = _dsRequestManager.fetchDSRequest(
+			TestPropsValues.getCompanyId(), dsRequest.getDSRequestId());
+
+		Assert.assertEquals(
+			DSRequestConstants.STATUS_EXPIRED, dsRequest.getStatus());
+		Assert.assertTrue(dsRequest.isRequestable());
+		Assert.assertTrue(dsRequest.isTerminal());
+	}
+
+	private void _testFetchDSRequestWhenSiteOverridesInstanceSettings()
+		throws Exception {
+
+		DSRequest dsRequest = _addDSRequest(
+			_createDSEnvelope(), RandomTestUtil.randomInt());
+
+		try (CompanyConfigurationTemporarySwapper
+				companyConfigurationTemporarySwapper =
+					new CompanyConfigurationTemporarySwapper(
+						TestPropsValues.getCompanyId(),
+						DigitalSignatureConfiguration.class.getName(),
+						HashMapDictionaryBuilder.<String, Object>put(
+							"embeddedViewEnabled", false
+						).put(
+							"enabled", true
+						).put(
+							"siteSettingsStrategy", "always-override"
+						).build())) {
+
+			Assert.assertNull(
+				_dsRequestManager.fetchDSRequest(
+					TestPropsValues.getCompanyId(),
+					dsRequest.getDSRequestId()));
+
+			try (GroupConfigurationTemporarySwapper
+					groupConfigurationTemporarySwapper =
+						new GroupConfigurationTemporarySwapper(
+							TestPropsValues.getGroupId(),
+							DigitalSignatureConfiguration.class.getName(),
+							HashMapDictionaryBuilder.<String, Object>put(
+								"embeddedViewEnabled", true
+							).put(
+								"enabled", true
+							).build())) {
+
+				Assert.assertNotNull(
+					_dsRequestManager.fetchDSRequest(
+						TestPropsValues.getCompanyId(),
+						dsRequest.getDSRequestId()));
+			}
+		}
 	}
 
 	private void _testUpdateDSRequest(
