@@ -576,6 +576,15 @@ public class CommerceOrderEngineImpl implements CommerceOrderEngine {
 
 				Message message = new Message();
 
+				long principalUserId = userId;
+
+				if (principalUserId == 0) {
+					principalUserId = commerceOrder.getUserId();
+				}
+
+				message.put("companyId", commerceOrder.getCompanyId());
+				message.put("principalName", String.valueOf(principalUserId));
+
 				DTOConverter<?, ?> commerceOrderDTOConverter =
 					_dtoConverterRegistry.getDTOConverter(
 						"Liferay.Headless.Commerce.Admin.Order",
