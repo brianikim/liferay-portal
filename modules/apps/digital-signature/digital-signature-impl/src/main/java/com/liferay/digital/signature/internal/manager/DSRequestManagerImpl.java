@@ -17,7 +17,10 @@ import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.digital.signature.model.DSRequestRecipient;
 import com.liferay.digital.signature.url.SignDSURLProvider;
+import com.liferay.document.library.kernel.model.DLFileEntry;
+import com.liferay.document.library.kernel.model.DLVersionNumberIncrease;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
+import com.liferay.document.library.kernel.service.DLFileEntryLocalService;
 import com.liferay.mail.kernel.model.MailMessage;
 import com.liferay.mail.kernel.service.MailService;
 import com.liferay.object.constants.ObjectDefinitionConstants;
@@ -41,6 +44,7 @@ import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.UserConstants;
 import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.repository.model.FileVersion;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
@@ -54,6 +58,7 @@ import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.Base64;
+import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.HtmlUtil;
@@ -64,6 +69,7 @@ import com.liferay.portal.kernel.util.PrefsPropsUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
 import jakarta.mail.internet.InternetAddress;
 
@@ -381,6 +387,12 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			return;
 		}
 
+		ObjectDefinition dsRequestDocumentObjectDefinition =
+			_objectDefinitionLocalService.
+				fetchObjectDefinitionByExternalReferenceCode(
+					DSObjectDefinitionConstants.
+						EXTERNAL_REFERENCE_CODE_REQUEST_DOCUMENT,
+					companyId);
 		ObjectDefinition dsRequestObjectDefinition =
 			_objectDefinitionLocalService.
 				fetchObjectDefinitionByExternalReferenceCode(
@@ -393,7 +405,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 						EXTERNAL_REFERENCE_CODE_REQUEST_RECIPIENT,
 					companyId);
 
-		if ((dsRequestObjectDefinition == null) ||
+		if ((dsRequestDocumentObjectDefinition == null) ||
+			(dsRequestObjectDefinition == null) ||
 			(dsRequestRecipientObjectDefinition == null)) {
 
 			return;
@@ -409,6 +422,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				dsRecipients.put(dsRecipient.getDSRecipientId(), dsRecipient);
 			}
 
+			String requestStatus = _getRequestStatus(dsEnvelope);
+
 			for (Map<String, Serializable> values :
 					_getValuesList(
 						companyId,
@@ -418,10 +433,21 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				long dsRequestId = MapUtil.getLong(
 					values, dsRequestObjectDefinition.getPKObjectFieldName());
 
+				if (Objects.equals(
+						requestStatus, DSRequestConstants.STATUS_COMPLETED) &&
+					!Objects.equals(
+						MapUtil.getString(values, "requestStatus"),
+						DSRequestConstants.STATUS_COMPLETED)) {
+
+					_updateFileEntries(
+						companyId, groupId, dsEnvelope,
+						dsRequestDocumentObjectDefinition, dsRequestId);
+				}
+
 				_updateRecipientStatuses(
 					companyId, groupId, dsRecipients, dsRequestId,
-					dsRequestRecipientObjectDefinition,
-					_getRequestStatus(dsEnvelope));
+					dsRequestRecipientObjectDefinition, requestStatus);
+
 				_updateRequestStatus(
 					companyId, groupId, dsEnvelope, dsRequestId);
 			}
@@ -856,6 +882,35 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		return serviceContext;
 	}
 
+	private String _getSignedFileName(FileEntry fileEntry) {
+		if (StringUtil.equalsIgnoreCase(fileEntry.getExtension(), "pdf")) {
+			return fileEntry.getFileName();
+		}
+
+		String fileName = FileUtil.stripExtension(fileEntry.getFileName());
+
+		String signedFileName = fileName + ".pdf";
+
+		for (int i = 1;; i++) {
+			DLFileEntry dlFileEntry =
+				_dlFileEntryLocalService.fetchFileEntryByFileName(
+					fileEntry.getGroupId(), fileEntry.getFolderId(),
+					signedFileName);
+
+			if (dlFileEntry == null) {
+				return signedFileName;
+			}
+
+			if (i == 1) {
+				signedFileName = fileName + " (signed).pdf";
+			}
+			else {
+				signedFileName = StringBundler.concat(
+					fileName, " (signed ", i, ").pdf");
+			}
+		}
+	}
+
 	private long _getSiteGroupId(long groupId) {
 		Group group = _groupLocalService.fetchGroup(groupId);
 
@@ -973,6 +1028,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 		catch (Exception exception) {
 			_log.error(
+				"Unable to send sign email for signature request " +
 					dsRequest.getDSRequestId(),
 				exception);
 		}
@@ -998,6 +1054,80 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 
 		return Date.from(localDateTime.toInstant(ZoneOffset.UTC));
+	}
+
+	private void _updateFileEntries(
+			long companyId, long groupId, DSEnvelope dsEnvelope,
+			ObjectDefinition objectDefinition, long dsRequestId)
+		throws Exception {
+
+		List<Long> fileEntryIds = TransformUtil.transform(
+			_getValuesList(
+				companyId,
+				StringBundler.concat(
+					"(r_dsRequestToDSRequestDocuments_l_dsRequestId eq '",
+					dsRequestId, "')"),
+				objectDefinition, null),
+			values -> MapUtil.getLong(values, "fileEntryId"));
+
+		if (fileEntryIds.isEmpty()) {
+			return;
+		}
+
+		ObjectEntry objectEntry = _objectEntryLocalService.fetchObjectEntry(
+			dsRequestId);
+
+		if (objectEntry == null) {
+			return;
+		}
+
+		long userId = objectEntry.getUserId();
+
+		for (long fileEntryId : fileEntryIds) {
+			byte[] bytes = _dsEnvelopeManager.getSignedDocument(
+				companyId, groupId, dsEnvelope.getDSEnvelopeId(),
+				String.valueOf(fileEntryId));
+
+			if ((bytes == null) || (bytes.length < 5) ||
+				!StringUtil.startsWith(new String(bytes, 0, 5), "%PDF-")) {
+
+				throw new PortalException(
+					StringBundler.concat(
+						"DocuSign did not return a signed PDF for file entry ",
+						fileEntryId, " of envelope ",
+						dsEnvelope.getDSEnvelopeId()));
+			}
+
+			FileEntry fileEntry = _dlAppLocalService.getFileEntry(fileEntryId);
+
+			String signedFileName = _getSignedFileName(fileEntry);
+
+			String title = fileEntry.getTitle();
+
+			if (Objects.equals(title, fileEntry.getFileName())) {
+				title = signedFileName;
+			}
+
+			ServiceContext serviceContext = _getServiceContext(
+				companyId, fileEntry.getGroupId(), userId);
+
+			fileEntry = _dlAppLocalService.updateFileEntry(
+				userId, fileEntryId, signedFileName,
+				ContentTypes.APPLICATION_PDF, title, null,
+				fileEntry.getDescription(), null, DLVersionNumberIncrease.MAJOR,
+				bytes, fileEntry.getDisplayDate(),
+				fileEntry.getExpirationDate(), fileEntry.getReviewDate(),
+				serviceContext);
+
+			FileVersion fileVersion = fileEntry.getLatestFileVersion();
+
+			if (fileVersion.getStatus() != WorkflowConstants.STATUS_APPROVED) {
+				_dlFileEntryLocalService.updateStatus(
+					userId, fileVersion.getFileVersionId(),
+					WorkflowConstants.STATUS_APPROVED, serviceContext,
+					new HashMap<>());
+			}
+		}
 	}
 
 	private void _updateRecipientStatuses(
@@ -1090,12 +1220,14 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	private DLAppLocalService _dlAppLocalService;
 
 	@Reference
+	private DLFileEntryLocalService _dlFileEntryLocalService;
+
+	@Reference
 	private DSEnvelopeManager _dsEnvelopeManager;
 
 	@Reference(
 		target = "(filter.factory.key=" + ObjectDefinitionConstants.STORAGE_TYPE_DEFAULT + ")"
 	)
-
 	private FilterFactory<Predicate> _filterFactory;
 
 	@Reference
