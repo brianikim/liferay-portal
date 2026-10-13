@@ -173,6 +173,19 @@ public class DSEnvelopeManagerImpl implements DSEnvelopeManager {
 			pagination, jsonObject.getInt("totalSetSize"));
 	}
 
+	@Override
+	public void voidDSEnvelope(
+		long companyId, long groupId, String dsEnvelopeId, String reason) {
+
+		_dsHttp.put(
+			companyId, groupId, "envelopes/" + dsEnvelopeId,
+			JSONUtil.put(
+				"status", "voided"
+			).put(
+				"voidedReason", reason
+			));
+	}
+
 	private List<DSDocument> _getDSDocuments(JSONArray jsonArray) {
 		return JSONUtil.toList(
 			jsonArray,
@@ -196,9 +209,12 @@ public class DSEnvelopeManagerImpl implements DSEnvelopeManager {
 			jsonObject.getJSONArray("signers"),
 			signerJSONObject -> new DSRecipient() {
 				{
+					dsClientUserId = signerJSONObject.getString("clientUserId");
 					dsRecipientId = signerJSONObject.getString("recipientId");
 					emailAddress = signerJSONObject.getString("email");
 					name = signerJSONObject.getString("name");
+					routingOrder = GetterUtil.getInteger(
+						signerJSONObject.getString("routingOrder"));
 					sentLocalDateTime = _toLocalDateTime(
 						signerJSONObject.getString("sentDateTime"));
 					status = signerJSONObject.getString("status");
