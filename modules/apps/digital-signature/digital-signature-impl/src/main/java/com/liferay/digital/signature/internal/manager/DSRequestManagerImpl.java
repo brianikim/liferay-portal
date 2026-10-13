@@ -296,6 +296,94 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	}
 
 	@Override
+	public List<DSRequest> getSiteDSRequests(
+		long companyId, long siteGroupId, String search, int start, int end) {
+
+		if (!_isEnabled(companyId, siteGroupId)) {
+			return new ArrayList<>();
+		}
+
+		ObjectDefinition dsRequestObjectDefinition =
+			_objectDefinitionLocalService.
+				fetchObjectDefinitionByExternalReferenceCode(
+					"L_DS_REQUEST", companyId);
+		ObjectDefinition dsRequestRecipientObjectDefinition =
+			_objectDefinitionLocalService.
+				fetchObjectDefinitionByExternalReferenceCode(
+					"L_DS_REQUEST_RECIPIENT", companyId);
+
+		if ((dsRequestObjectDefinition == null) ||
+			(dsRequestRecipientObjectDefinition == null)) {
+
+			return new ArrayList<>();
+		}
+
+		try {
+			List<Long> dsRequestIds = _objectEntryLocalService.getPrimaryKeys(
+				new Long[] {0L}, companyId,
+				dsRequestObjectDefinition.getUserId(),
+				dsRequestObjectDefinition.getObjectDefinitionId(),
+				_filterFactory.create(
+					"siteGroupId eq " + siteGroupId, dsRequestObjectDefinition),
+				false, search, start, end,
+				new Sort[] {new Sort(Field.CREATE_DATE, Sort.LONG_TYPE, true)});
+
+			if (dsRequestIds.isEmpty()) {
+				return new ArrayList<>();
+			}
+
+			Map<Long, DSRequest> dsRequestsMap = _getDSRequestsMap(
+				companyId, new HashSet<>(dsRequestIds),
+				dsRequestRecipientObjectDefinition);
+
+			return TransformUtil.transform(dsRequestIds, dsRequestsMap::get);
+		}
+		catch (Exception exception) {
+			_log.error(
+				"Unable to load the signature requests for site " + siteGroupId,
+				exception);
+
+			return new ArrayList<>();
+		}
+	}
+
+	@Override
+	public int getSiteDSRequestsCount(
+		long companyId, long siteGroupId, String search) {
+
+		if (!_isEnabled(companyId, siteGroupId)) {
+			return 0;
+		}
+
+		ObjectDefinition dsRequestObjectDefinition =
+			_objectDefinitionLocalService.
+				fetchObjectDefinitionByExternalReferenceCode(
+					"L_DS_REQUEST", companyId);
+
+		if (dsRequestObjectDefinition == null) {
+			return 0;
+		}
+
+		try {
+			return _objectEntryLocalService.getValuesListCount(
+				new Long[] {0L}, companyId,
+				dsRequestObjectDefinition.getUserId(),
+				dsRequestObjectDefinition.getObjectDefinitionId(),
+				_filterFactory.create(
+					"siteGroupId eq " + siteGroupId, dsRequestObjectDefinition),
+				false, search);
+		}
+		catch (Exception exception) {
+			_log.error(
+				"Unable to count the signature requests for site " +
+					siteGroupId,
+				exception);
+
+			return 0;
+		}
+	}
+
+	@Override
 	public boolean hasPermission(
 			PermissionChecker permissionChecker, DSRequest dsRequest,
 			String actionId)
@@ -441,6 +529,28 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					providerRequestId,
 				exception);
 		}
+	}
+
+	@Override
+	public void voidDSRequest(
+		long companyId, long groupId, DSRequest dsRequest, String reason) {
+
+		if (dsRequest == null) {
+			return;
+		}
+
+		String providerRequestId = dsRequest.getProviderRequestId();
+
+		if (Validator.isNull(providerRequestId) ||
+			!_isEnabled(companyId, groupId)) {
+
+			return;
+		}
+
+		_dsEnvelopeManager.voidDSEnvelope(
+			companyId, groupId, providerRequestId, reason);
+
+		updateDSRequest(companyId, groupId, providerRequestId);
 	}
 
 	private DSRequest _addDSRequest(
