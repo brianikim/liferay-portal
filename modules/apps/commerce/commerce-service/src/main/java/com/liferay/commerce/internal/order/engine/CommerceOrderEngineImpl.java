@@ -62,6 +62,7 @@ import com.liferay.portal.kernel.messaging.DestinationNames;
 import com.liferay.portal.kernel.messaging.Message;
 import com.liferay.portal.kernel.messaging.MessageBusUtil;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.service.ServiceContext;
@@ -577,6 +578,14 @@ public class CommerceOrderEngineImpl implements CommerceOrderEngine {
 					commerceOrder);
 
 				Message message = new Message();
+
+				message.put("companyId", commerceOrder.getCompanyId());
+
+				if ((userId != 0) &&
+					Validator.isNull(PrincipalThreadLocal.getName())) {
+
+					message.put("principalName", String.valueOf(userId));
+				}
 
 				DTOConverter<?, ?> commerceOrderDTOConverter =
 					_dtoConverterRegistry.getDTOConverter(

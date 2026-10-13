@@ -10,9 +10,11 @@ import com.liferay.commerce.constants.CommerceCheckoutWebKeys;
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.util.BaseCommerceCheckoutStep;
 import com.liferay.commerce.util.CommerceCheckoutStep;
+import com.liferay.commerce.util.CommerceCheckoutStepRegistry;
 import com.liferay.frontend.taglib.servlet.taglib.util.JSPRenderer;
 import com.liferay.headless.commerce.delivery.cart.resource.v1_0.CartResource;
 import com.liferay.portal.kernel.util.BigDecimalUtil;
+import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.Validator;
 
@@ -82,10 +84,23 @@ public class PaymentProcessCommerceCheckoutStep
 			HttpServletResponse httpServletResponse)
 		throws Exception {
 
+		CommerceCheckoutStep nextCommerceCheckoutStep = null;
+
+		if (ListUtil.exists(
+				_commerceCheckoutStepRegistry.getCommerceCheckoutSteps(
+					httpServletRequest, httpServletResponse, false),
+				CommerceCheckoutStep::isContinueAfterPayment)) {
+
+			nextCommerceCheckoutStep =
+				_commerceCheckoutStepRegistry.getNextCommerceCheckoutStep(
+					NAME, httpServletRequest, httpServletResponse);
+		}
+
 		PaymentProcessCheckoutStepDisplayContext
 			paymentProcessCheckoutStepDisplayContext =
 				new PaymentProcessCheckoutStepDisplayContext(
-					_cartResourceFactory, httpServletRequest);
+					_cartResourceFactory, httpServletRequest,
+					nextCommerceCheckoutStep);
 
 		// Redirection only works with the original servlet response
 
@@ -135,6 +150,9 @@ public class PaymentProcessCommerceCheckoutStep
 
 	@Reference
 	private CartResource.Factory _cartResourceFactory;
+
+	@Reference
+	private CommerceCheckoutStepRegistry _commerceCheckoutStepRegistry;
 
 	@Reference
 	private JSPRenderer _jspRenderer;
