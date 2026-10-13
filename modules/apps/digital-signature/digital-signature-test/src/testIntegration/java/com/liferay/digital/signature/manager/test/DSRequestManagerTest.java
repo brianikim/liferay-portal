@@ -13,6 +13,11 @@ import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
+import com.liferay.digital.signature.model.DSRequest;
+import com.liferay.document.library.kernel.model.DLFolderConstants;
+import com.liferay.document.library.kernel.service.DLAppLocalService;
+import com.liferay.mail.kernel.model.MailMessage;
+import com.liferay.mail.kernel.service.MailService;
 import com.liferay.object.constants.ObjectDefinitionConstants;
 import com.liferay.object.exception.ObjectEntryValuesException;
 import com.liferay.object.model.ObjectDefinition;
@@ -21,17 +26,28 @@ import com.liferay.object.service.ObjectDefinitionLocalService;
 import com.liferay.object.service.ObjectEntryLocalService;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.sql.dsl.expression.Predicate;
+import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
+import com.liferay.portal.kernel.exception.NoSuchUserException;
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
 import com.liferay.portal.kernel.test.AssertUtils;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
+import com.liferay.portal.kernel.test.constants.TestDataConstants;
 import com.liferay.portal.kernel.test.context.ContextUserReplace;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
+import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
+import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
+import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.MapUtil;
@@ -140,10 +156,15 @@ public class DSRequestManagerTest {
 
 		long fileEntryId1 = RandomTestUtil.randomLong();
 
-		_dsRequestManager.addDSRequest(
-			TestPropsValues.getCompanyId(), TestPropsValues.getGroupId(),
-			TestPropsValues.getUserId(), dsEnvelope1,
-			new long[] {fileEntryId1});
+		DSRequest dsRequest = _addDSRequest(dsEnvelope1, fileEntryId1);
+
+		Assert.assertEquals(
+			Collections.singletonList(fileEntryId1),
+			dsRequest.getFileEntryIds());
+		Assert.assertEquals(
+			dsEnvelope1.getDSEnvelopeId(), dsRequest.getProviderRequestId());
+		Assert.assertEquals(
+			TestPropsValues.getGroupId(), dsRequest.getSiteGroupId());
 
 		Map<String, Serializable> requestValues = _getRequestValues(
 			dsEnvelope1);
@@ -184,22 +205,44 @@ public class DSRequestManagerTest {
 
 		DSRecipient dsRecipient2 = _createDSRecipient();
 
-		dsRecipient2.setName(RandomTestUtil.randomString(281));
+		dsRecipient2.setDSRecipientId(RandomTestUtil.randomString(281));
+		dsRecipient2.setEmailAddress(user.getEmailAddress());
 
 		DSEnvelope dsEnvelope2 = _createDSEnvelope();
 
 		dsEnvelope2.setDSRecipients(ListUtil.fromArray(dsRecipient2));
 
-		long fileEntryId2 = RandomTestUtil.randomLong();
+		Group group = GroupTestUtil.addGroup();
 
-		AssertUtils.assertFailure(
-			ObjectEntryValuesException.ExceedsTextMaxLength.class,
-			"Object entry value exceeds the maximum length of 280 characters " +
-				"for object field \"name\"",
-			() -> _dsRequestManager.addDSRequest(
-				TestPropsValues.getCompanyId(), TestPropsValues.getGroupId(),
-				TestPropsValues.getUserId(), dsEnvelope2,
-				new long[] {fileEntryId2}));
+		FileEntry fileEntry = _dlAppLocalService.addFileEntry(
+			null, TestPropsValues.getUserId(), group.getGroupId(),
+			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
+			RandomTestUtil.randomString() + ".txt", ContentTypes.TEXT_PLAIN,
+			TestDataConstants.TEST_BYTE_ARRAY, null, null, null,
+			ServiceContextTestUtil.getServiceContext(group.getGroupId()));
+
+		DSEnvelopeManager dsEnvelopeManager =
+			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager",
+				ProxyUtil.newProxyInstance(
+					DSEnvelopeManager.class.getClassLoader(),
+					new Class<?>[] {DSEnvelopeManager.class},
+					(proxy, method, arguments) -> dsEnvelope2));
+
+		try {
+			AssertUtils.assertFailure(
+				ObjectEntryValuesException.ExceedsTextMaxLength.class,
+				"Object entry value exceeds the maximum length of 280 " +
+					"characters for object field \"providerRecipientId\"",
+				() -> _dsRequestManager.addDSRequest(
+					TestPropsValues.getCompanyId(), group.getGroupId(),
+					TestPropsValues.getUserId(), dsEnvelope2,
+					new long[] {fileEntry.getFileEntryId()}));
+		}
+		finally {
+			ReflectionTestUtil.setFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager);
+		}
 
 		Assert.assertEquals(
 			Collections.emptyList(),
@@ -210,7 +253,7 @@ public class DSRequestManagerTest {
 		Assert.assertEquals(
 			Collections.emptyList(),
 			_getValuesList(
-				"(fileEntryId eq " + fileEntryId2 + ")",
+				"(fileEntryId eq " + fileEntry.getFileEntryId() + ")",
 				_dsRequestDocumentObjectDefinition));
 		Assert.assertEquals(
 			Collections.emptyList(),
@@ -218,6 +261,15 @@ public class DSRequestManagerTest {
 				"(providerRecipientId eq '" + dsRecipient2.getDSRecipientId() +
 					"')",
 				_dsRequestRecipientObjectDefinition));
+
+		_testAddDSRequestWhenEmbeddedViewIsDisabled();
+		_testAddDSRequestWhenExpirationWarningIsNotBeforeExpiration();
+		_testAddDSRequestWhenFileEntryHasActiveRequest();
+		_testAddDSRequestWhenFileEntryIdsIsEmpty();
+		_testAddDSRequestWhenRecipientIsNotUser();
+	}
+
+	@Test
 	public void testFetchDSRequest() throws Exception {
 		DSRequest dsRequest1 = _addDSRequest(
 			_createDSEnvelope(), RandomTestUtil.randomLong());
@@ -236,6 +288,8 @@ public class DSRequestManagerTest {
 
 		_testFetchDSRequestWhenExpirationDateIsPast();
 	}
+
+	@Test
 	public void testGetDSRequests() throws Exception {
 		long fileEntryId1 = RandomTestUtil.randomLong();
 		long fileEntryId2 = RandomTestUtil.randomLong();
@@ -261,6 +315,8 @@ public class DSRequestManagerTest {
 
 		Assert.assertTrue(dsRequests.isEmpty());
 	}
+
+	@Test
 	public void testHasPermission() throws Exception {
 		User user1 = UserTestUtil.addUser();
 
@@ -297,6 +353,48 @@ public class DSRequestManagerTest {
 			_dsRequestManager.hasPermission(
 				permissionChecker, dsRequest, ActionKeys.VIEW));
 	}
+
+	@Test
+	public void testSendDSRequestNotifications() throws Exception {
+		List<MailMessage> mailMessages = new ArrayList<>();
+
+		MailService mailService =
+			(MailService)ReflectionTestUtil.getAndSetFieldValue(
+				_dsRequestManager, "_mailService",
+				ProxyUtil.newProxyInstance(
+					MailService.class.getClassLoader(),
+					new Class<?>[] {MailService.class},
+					(proxy, method, arguments) -> {
+						if (Objects.equals(method.getName(), "sendEmail")) {
+							mailMessages.add((MailMessage)arguments[0]);
+						}
+
+						return null;
+					}));
+
+		User user = UserTestUtil.addUser();
+
+		try {
+			_dsRequestManager.sendDSRequestNotifications(
+				TestPropsValues.getCompanyId(), TestPropsValues.getGroupId(),
+				_addDSRequest(
+					user.getEmailAddress(), DSRequestConstants.STATUS_VOIDED));
+
+			Assert.assertEquals(
+				mailMessages.toString(), 0, mailMessages.size());
+
+			_dsRequestManager.sendDSRequestNotifications(
+				TestPropsValues.getCompanyId(), TestPropsValues.getGroupId(),
+				_addDSRequest(
+					user.getEmailAddress(), DSRequestConstants.STATUS_SENT));
+
+			Assert.assertEquals(
+				mailMessages.toString(), 1, mailMessages.size());
+		}
+		finally {
+			ReflectionTestUtil.setFieldValue(
+				_dsRequestManager, "_mailService", mailService);
+		}
 	}
 
 	@Test
@@ -328,6 +426,35 @@ public class DSRequestManagerTest {
 		_testUpdateDSRequest(
 			DSRequestConstants.STATUS_SIGNED, DSRequestConstants.STATUS_VOIDED,
 			localDateTime.plusDays(1), "signed", "voided", localDateTime);
+
+	}
+	private DSRequest _addDSRequest(DSEnvelope dsEnvelope, long... fileEntryIds)
+		throws Exception {
+
+		return ReflectionTestUtil.invoke(
+			_dsRequestManager, "_addDSRequest",
+			new Class<?>[] {
+				long.class, long.class, long.class, DSEnvelope.class,
+				long[].class
+			},
+			TestPropsValues.getCompanyId(), TestPropsValues.getGroupId(),
+			TestPropsValues.getUserId(), dsEnvelope, fileEntryIds);
+	}
+
+	private DSRequest _addDSRequest(String emailAddress, String status)
+		throws Exception {
+
+		DSEnvelope dsEnvelope = _createDSEnvelope();
+
+		List<DSRecipient> dsRecipients = dsEnvelope.getDSRecipients();
+
+		DSRecipient dsRecipient = dsRecipients.get(0);
+
+		dsRecipient.setEmailAddress(emailAddress);
+
+		dsEnvelope.setStatus(status);
+
+		return _addDSRequest(dsEnvelope, RandomTestUtil.randomLong());
 	}
 
 	private DSEnvelope _createDSEnvelope() {
@@ -389,6 +516,98 @@ public class DSRequestManagerTest {
 			QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
 	}
 
+	private void _testAddDSRequestWhenEmbeddedViewIsDisabled()
+		throws Exception {
+
+		try (CompanyConfigurationTemporarySwapper
+				companyConfigurationTemporarySwapper =
+					new CompanyConfigurationTemporarySwapper(
+						TestPropsValues.getCompanyId(),
+						DigitalSignatureConfiguration.class.getName(),
+						HashMapDictionaryBuilder.<String, Object>put(
+							"embeddedViewEnabled", false
+						).put(
+							"enabled", true
+						).put(
+							"siteSettingsStrategy", "always-inherit"
+						).build())) {
+
+			AssertUtils.assertFailure(
+				PortalException.class,
+				"Digital signatures are not enabled for group " +
+					TestPropsValues.getGroupId(),
+				() -> _dsRequestManager.addDSRequest(
+					TestPropsValues.getCompanyId(),
+					TestPropsValues.getGroupId(), TestPropsValues.getUserId(),
+					_createDSEnvelope(),
+					new long[] {RandomTestUtil.randomLong()}));
+		}
+	}
+
+	private void _testAddDSRequestWhenExpirationWarningIsNotBeforeExpiration()
+		throws Exception {
+
+		DSEnvelope dsEnvelope = _createDSEnvelope();
+
+		dsEnvelope.setExpireAfter(5);
+		dsEnvelope.setExpireWarn(5);
+
+		AssertUtils.assertFailure(
+			PortalException.class,
+			"Days to warn signers must be fewer than days until expiration",
+			() -> _dsRequestManager.addDSRequest(
+				TestPropsValues.getCompanyId(), TestPropsValues.getGroupId(),
+				TestPropsValues.getUserId(), dsEnvelope,
+				new long[] {RandomTestUtil.randomLong()}));
+	}
+
+	private void _testAddDSRequestWhenFileEntryHasActiveRequest()
+		throws Exception {
+
+		long fileEntryId = RandomTestUtil.randomLong();
+
+		_addDSRequest(_createDSEnvelope(), fileEntryId);
+
+		AssertUtils.assertFailure(
+			PortalException.class,
+			StringBundler.concat(
+				"File entry ", fileEntryId,
+				" already has a signature request with status \"",
+				DSRequestConstants.STATUS_SENT, "\""),
+			() -> _dsRequestManager.addDSRequest(
+				TestPropsValues.getCompanyId(), TestPropsValues.getGroupId(),
+				TestPropsValues.getUserId(), _createDSEnvelope(),
+				new long[] {fileEntryId}));
+	}
+
+	private void _testAddDSRequestWhenFileEntryIdsIsEmpty() throws Exception {
+		AssertUtils.assertFailure(
+			PortalException.class,
+			"A signature request must have at least one file entry",
+			() -> _dsRequestManager.addDSRequest(
+				TestPropsValues.getCompanyId(), TestPropsValues.getGroupId(),
+				TestPropsValues.getUserId(), new DSEnvelope(), new long[0]));
+	}
+
+	private void _testAddDSRequestWhenRecipientIsNotUser() throws Exception {
+		DSRecipient dsRecipient = _createDSRecipient();
+
+		DSEnvelope dsEnvelope = _createDSEnvelope();
+
+		dsEnvelope.setDSRecipients(ListUtil.fromArray(dsRecipient));
+
+		AssertUtils.assertFailure(
+			NoSuchUserException.class,
+			StringBundler.concat(
+				"No User exists with the key {companyId=",
+				TestPropsValues.getCompanyId(), ", emailAddress=",
+				StringUtil.toLowerCase(dsRecipient.getEmailAddress()), "}"),
+			() -> _dsRequestManager.addDSRequest(
+				TestPropsValues.getCompanyId(), TestPropsValues.getGroupId(),
+				TestPropsValues.getUserId(), dsEnvelope,
+				new long[] {RandomTestUtil.randomLong()}));
+	}
+
 	private void _testFetchDSRequestWhenExpirationDateIsPast()
 		throws Exception {
 
@@ -424,10 +643,7 @@ public class DSRequestManagerTest {
 			dsRecipient.setStatus(DSRequestConstants.STATUS_CREATED);
 		}
 
-		_dsRequestManager.addDSRequest(
-			TestPropsValues.getCompanyId(), TestPropsValues.getGroupId(),
-			TestPropsValues.getUserId(), dsEnvelope,
-			new long[] {RandomTestUtil.randomLong()});
+		_addDSRequest(dsEnvelope, RandomTestUtil.randomLong());
 
 		dsEnvelope.setExpireLocalDateTime(expireLocalDateTime);
 		dsEnvelope.setStatus(requestStatus);
@@ -489,6 +705,10 @@ public class DSRequestManagerTest {
 
 	private CompanyConfigurationTemporarySwapper
 		_companyConfigurationTemporarySwapper;
+
+	@Inject
+	private DLAppLocalService _dlAppLocalService;
+
 	private ObjectDefinition _dsRequestDocumentObjectDefinition;
 
 	@Inject
