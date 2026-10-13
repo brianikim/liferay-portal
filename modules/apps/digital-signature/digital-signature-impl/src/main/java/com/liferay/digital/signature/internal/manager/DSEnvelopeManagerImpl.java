@@ -5,6 +5,7 @@
 
 package com.liferay.digital.signature.internal.manager;
 
+import com.liferay.digital.signature.exception.DSEnvelopeException;
 import com.liferay.digital.signature.internal.http.DSHttp;
 import com.liferay.digital.signature.manager.DSCustomFieldManager;
 import com.liferay.digital.signature.manager.DSEnvelopeManager;
@@ -62,26 +63,53 @@ public class DSEnvelopeManagerImpl implements DSEnvelopeManager {
 				"DocuSign did not return a digital signature envelope ID");
 		}
 
-		_dsCustomFieldManager.addDSCustomFields(
-			companyId, groupId, dsEnvelope.getDSEnvelopeId(),
-			new DSCustomField() {
-				{
-					name = "envelopeName";
-					show = true;
-					value = dsEnvelopeName;
-				}
-			},
-			new DSCustomField() {
-				{
-					name = "envelopeSenderEmailAddress";
-					show = true;
-					value = dsEnvelopeSenderEmailAddress;
-				}
-			});
+		String dsEnvelopeId = dsEnvelope.getDSEnvelopeId();
 
-		return getDSEnvelope(
-			companyId, groupId, dsEnvelope.getDSEnvelopeId(),
-			"custom_fields,recipients");
+		try {
+			_dsCustomFieldManager.addDSCustomFields(
+				companyId, groupId, dsEnvelopeId,
+				new DSCustomField() {
+					{
+						name = "envelopeName";
+						show = true;
+						value = dsEnvelopeName;
+					}
+				},
+				new DSCustomField() {
+					{
+						name = "envelopeSenderEmailAddress";
+						show = true;
+						value = dsEnvelopeSenderEmailAddress;
+					}
+				});
+
+			DSEnvelope addedDSEnvelope = getDSEnvelope(
+				companyId, groupId, dsEnvelopeId, "custom_fields,recipients");
+
+			if (Validator.isNull(addedDSEnvelope.getDSEnvelopeId())) {
+				throw new SystemException(
+					"Unable to read digital signature envelope " +
+						dsEnvelopeId);
+			}
+
+			return addedDSEnvelope;
+		}
+		catch (Exception exception1) {
+			try {
+				voidDSEnvelope(
+					companyId, groupId, dsEnvelopeId,
+					"Unable to finish creating the digital signature envelope");
+			}
+			catch (Exception exception2) {
+				_log.error(
+					"Unable to void digital signature envelope " + dsEnvelopeId,
+					exception2);
+
+				exception1.addSuppressed(exception2);
+			}
+
+			throw exception1;
+		}
 	}
 
 	@Override

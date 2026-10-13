@@ -13,7 +13,6 @@ import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.petra.function.transform.TransformUtil;
-import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONUtil;
@@ -156,5 +155,8 @@ public class AddDSEnvelopeMVCResourceCommand
 
 	@Reference
 	private JSONFactory _jsonFactory;
+
+	@Reference
+	private UserLocalService _userLocalService;
 
 }
