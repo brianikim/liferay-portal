@@ -14,6 +14,7 @@ import com.liferay.digital.signature.model.DSDocument;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.petra.string.StringBundler;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONObject;
@@ -200,6 +201,37 @@ public class DSEnvelopeManagerImpl implements DSEnvelopeManager {
 			pagination, jsonObject.getInt("totalSetSize"));
 	}
 
+	@Override
+	public void voidDSEnvelope(
+			long companyId, long groupId, String dsEnvelopeId, String reason)
+		throws PortalException {
+
+		JSONObject jsonObject = _dsHttp.put(
+			companyId, groupId, "envelopes/" + dsEnvelopeId,
+			JSONUtil.put(
+				"status", "voided"
+			).put(
+				"voidedReason", reason
+			));
+
+		if (Validator.isNotNull(jsonObject.getString("errorCode"))) {
+			throw new PortalException(
+				StringBundler.concat(
+					"Unable to void envelope ", dsEnvelopeId, ": ",
+					jsonObject.getString("message")));
+		}
+
+		String message = StringBundler.concat(
+			"Unable to void digital signature envelope ", dsEnvelopeId, ": ",
+			jsonObject.getString("message"));
+
+		if (Objects.equals(errorCode, "ENVELOPE_CANNOT_VOID_INVALID_STATE")) {
+			throw new DSEnvelopeException.MustBeVoidable(message);
+		}
+
+		throw new PortalException(message);
+	}
+
 	private List<DSDocument> _getDSDocuments(JSONArray jsonArray) {
 		return JSONUtil.toList(
 			jsonArray,
@@ -223,9 +255,12 @@ public class DSEnvelopeManagerImpl implements DSEnvelopeManager {
 			jsonObject.getJSONArray("signers"),
 			signerJSONObject -> new DSRecipient() {
 				{
+					dsClientUserId = signerJSONObject.getString("clientUserId");
 					dsRecipientId = signerJSONObject.getString("recipientId");
 					emailAddress = signerJSONObject.getString("email");
 					name = signerJSONObject.getString("name");
+					routingOrder = GetterUtil.getInteger(
+						signerJSONObject.getString("routingOrder"));
 					sentLocalDateTime = _toLocalDateTime(
 						signerJSONObject.getString("sentDateTime"));
 					status = signerJSONObject.getString("status");
