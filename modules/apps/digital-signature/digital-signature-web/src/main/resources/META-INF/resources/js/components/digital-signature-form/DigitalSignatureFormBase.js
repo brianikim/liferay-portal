@@ -13,6 +13,7 @@ import {errorToast} from '../../utils/toast';
 import {Input} from '../form/FormBase';
 import FileEntryList from './FileEntryList';
 import FileSelector from './FileSelector';
+import RecipientUserAutocomplete from './RecipientUserAutocomplete';
 
 const MAX_LENGTH = {
 	ATTACHMENTS: 10,
@@ -60,6 +61,21 @@ const DigitalSignatureFormBase = ({
 		);
 	};
 
+	const onSelectRecipient = (recipientIndex, user) => {
+		setFieldValue(
+			'recipients',
+			values.recipients.map((recipient, index) =>
+				index === recipientIndex
+					? {
+							...recipient,
+							email: user.emailAddress,
+							fullName: user.name,
+						}
+					: recipient
+			)
+		);
+	};
+
 	return (
 		<>
 			<Input
@@ -91,8 +107,11 @@ const DigitalSignatureFormBase = ({
 							<Input
 								className="mb-0"
 								disabled={embeddedViewEnabled}
+								error={
 									embeddedViewEnabled
-								error={errors?.recipients?.[index]?.fullName}
+										? undefined
+										: errors?.recipients?.[index]?.fullName
+								}
 								label={Liferay.Language.get(
 									'recipient-full-name'
 								)}
@@ -108,18 +127,33 @@ const DigitalSignatureFormBase = ({
 
 						<ClayInput.GroupItem>
 							{embeddedViewEnabled ? (
-							<Input
-								className="mb-0"
-								error={errors?.recipients?.[index]?.email}
-								label={Liferay.Language.get('recipient-email')}
-								name={`recipients[${index}].email`}
-								onChange={handleChange}
-								placeholder={Liferay.Language.get(
-									'recipient-email'
-								)}
-								required
-								value={recipient.email}
-							/>
+								<RecipientUserAutocomplete
+									error={errors?.recipients?.[index]?.email}
+									id={`recipients[${index}].email`}
+									label={Liferay.Language.get(
+										'recipient-email'
+									)}
+									onSelectUser={(user) =>
+										onSelectRecipient(index, user)
+									}
+									value={recipient.email}
+								/>
+							) : (
+								<Input
+									className="mb-0"
+									error={errors?.recipients?.[index]?.email}
+									label={Liferay.Language.get(
+										'recipient-email'
+									)}
+									name={`recipients[${index}].email`}
+									onChange={handleChange}
+									placeholder={Liferay.Language.get(
+										'recipient-email'
+									)}
+									required
+									value={recipient.email}
+								/>
+							)}
 						</ClayInput.GroupItem>
 
 						<ClayInput.GroupItem shrink>
