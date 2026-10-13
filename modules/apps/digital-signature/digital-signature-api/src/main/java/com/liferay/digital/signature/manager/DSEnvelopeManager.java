@@ -25,6 +25,9 @@ public interface DSEnvelopeManager {
 			long companyId, long groupId, String... dsEnvelopeIds)
 		throws Exception;
 
+	public byte[] getDSDocumentAsBytes(
+		long companyId, long groupId, String dsDocumentId, String dsEnvelopeId);
+
 	public DSEnvelope getDSEnvelope(
 		long companyId, long groupId, String dsEnvelopeId);
 
