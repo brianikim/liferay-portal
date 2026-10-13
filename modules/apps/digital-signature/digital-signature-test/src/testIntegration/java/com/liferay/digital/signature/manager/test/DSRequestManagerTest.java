@@ -14,6 +14,7 @@ import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
+import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.object.constants.ObjectDefinitionConstants;
 import com.liferay.object.exception.ObjectEntryValuesException;
 import com.liferay.object.model.ObjectDefinition;
@@ -23,10 +24,13 @@ import com.liferay.object.service.ObjectEntryLocalService;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.sql.dsl.expression.Predicate;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
+import com.liferay.portal.configuration.test.util.GroupConfigurationTemporarySwapper;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
@@ -105,6 +109,8 @@ public class DSRequestManagerTest {
 					"apiAccountId", RandomTestUtil.randomString()
 				).put(
 					"apiUsername", RandomTestUtil.randomString()
+				).put(
+					"embeddedViewEnabled", true
 				).put(
 					"enabled", true
 				).put(
@@ -276,6 +282,65 @@ public class DSRequestManagerTest {
 	}
 
 	@Test
+	public void testFetchDSRequest() throws Exception {
+		DSRequest dsRequest1 = _addDSRequest(
+			_createDSEnvelope(), RandomTestUtil.randomInt());
+
+		DSRequest dsRequest2 = _dsRequestManager.fetchDSRequest(
+			TestPropsValues.getCompanyId(), dsRequest1.getDSRequestId());
+
+		Assert.assertEquals(
+			dsRequest1.getDSRequestId(), dsRequest2.getDSRequestId());
+		Assert.assertEquals(
+			DSRequestConstants.STATUS_SENT, dsRequest2.getStatus());
+
+		Assert.assertNull(
+			_dsRequestManager.fetchDSRequest(
+				RandomTestUtil.randomLong(), dsRequest1.getDSRequestId()));
+
+		_testFetchDSRequestWhenExpirationDateIsPast();
+		_testFetchDSRequestWhenSiteOverridesInstanceSettings();
+	}
+
+	@Test
+	public void testHasPermission() throws Exception {
+		User user1 = UserTestUtil.addUser();
+
+		DSRequest dsRequest = _addDSRequest(
+			user1.getEmailAddress(), DSRequestConstants.STATUS_SENT);
+
+		PermissionChecker permissionChecker =
+			PermissionCheckerFactoryUtil.create(TestPropsValues.getUser());
+
+		Assert.assertTrue(
+			_dsRequestManager.hasPermission(
+				permissionChecker, dsRequest, ActionKeys.UPDATE));
+		Assert.assertTrue(
+			_dsRequestManager.hasPermission(
+				permissionChecker, dsRequest, ActionKeys.VIEW));
+
+		permissionChecker = PermissionCheckerFactoryUtil.create(user1);
+
+		Assert.assertFalse(
+			_dsRequestManager.hasPermission(
+				permissionChecker, dsRequest, ActionKeys.UPDATE));
+		Assert.assertTrue(
+			_dsRequestManager.hasPermission(
+				permissionChecker, dsRequest, ActionKeys.VIEW));
+
+		User user2 = UserTestUtil.addUser();
+
+		permissionChecker = PermissionCheckerFactoryUtil.create(user2);
+
+		Assert.assertFalse(
+			_dsRequestManager.hasPermission(
+				permissionChecker, dsRequest, ActionKeys.UPDATE));
+		Assert.assertFalse(
+			_dsRequestManager.hasPermission(
+				permissionChecker, dsRequest, ActionKeys.VIEW));
+	}
+
+	@Test
 	public void testUpdateDSRequest() throws Exception {
 		LocalDateTime localDateTime = LocalDateTime.ofEpochSecond(
 			System.currentTimeMillis() / 1000, 0, ZoneOffset.UTC);
@@ -304,6 +369,35 @@ public class DSRequestManagerTest {
 		_testUpdateDSRequest(
 			DSRequestConstants.STATUS_SIGNED, DSRequestConstants.STATUS_VOIDED,
 			localDateTime.plusDays(1), "signed", "voided", localDateTime);
+	}
+
+	private DSRequest _addDSRequest(DSEnvelope dsEnvelope, long... fileEntryIds)
+		throws Exception {
+
+		return ReflectionTestUtil.invoke(
+			_dsRequestManager, "_addDSRequest",
+			new Class<?>[] {
+				long.class, long.class, long.class, DSEnvelope.class,
+				long[].class
+			},
+			TestPropsValues.getCompanyId(), TestPropsValues.getGroupId(),
+			TestPropsValues.getUserId(), dsEnvelope, fileEntryIds);
+	}
+
+	private DSRequest _addDSRequest(String emailAddress, String status)
+		throws Exception {
+
+		DSEnvelope dsEnvelope = _createDSEnvelope();
+
+		List<DSRecipient> dsRecipients = dsEnvelope.getDSRecipients();
+
+		DSRecipient dsRecipient = dsRecipients.get(0);
+
+		dsRecipient.setEmailAddress(emailAddress);
+
+		dsEnvelope.setStatus(status);
+
+		return _addDSRequest(dsEnvelope, RandomTestUtil.randomInt());
 	}
 
 	private DSEnvelope _createDSEnvelope() {
@@ -378,10 +472,7 @@ public class DSRequestManagerTest {
 
 		dsEnvelope.setDSRecipients(ListUtil.fromArray(dsRecipient));
 
-		_dsRequestManager.addDSRequest(
-			TestPropsValues.getCompanyId(), TestPropsValues.getGroupId(),
-			TestPropsValues.getUserId(), dsEnvelope,
-			new long[] {RandomTestUtil.randomInt()});
+		_addDSRequest(dsEnvelope, RandomTestUtil.randomInt());
 
 		String filterString =
 			"(providerRecipientId eq '" + dsRecipient.getDSRecipientId() + "')";
@@ -414,6 +505,70 @@ public class DSRequestManagerTest {
 			0,
 			MapUtil.getLong(
 				recipientValues, "r_userToDSRequestRecipients_userId"));
+	}
+
+	private void _testFetchDSRequestWhenExpirationDateIsPast()
+		throws Exception {
+
+		DSEnvelope dsEnvelope = _createDSEnvelope();
+
+		LocalDateTime localDateTime = LocalDateTime.now();
+
+		dsEnvelope.setExpireLocalDateTime(localDateTime.minusDays(1));
+
+		DSRequest dsRequest = _addDSRequest(
+			dsEnvelope, RandomTestUtil.randomInt());
+
+		dsRequest = _dsRequestManager.fetchDSRequest(
+			TestPropsValues.getCompanyId(), dsRequest.getDSRequestId());
+
+		Assert.assertEquals(
+			DSRequestConstants.STATUS_EXPIRED, dsRequest.getStatus());
+		Assert.assertTrue(dsRequest.isRequestable());
+		Assert.assertTrue(dsRequest.isTerminal());
+	}
+
+	private void _testFetchDSRequestWhenSiteOverridesInstanceSettings()
+		throws Exception {
+
+		DSRequest dsRequest = _addDSRequest(
+			_createDSEnvelope(), RandomTestUtil.randomInt());
+
+		try (CompanyConfigurationTemporarySwapper
+				companyConfigurationTemporarySwapper =
+					new CompanyConfigurationTemporarySwapper(
+						TestPropsValues.getCompanyId(),
+						DigitalSignatureConfiguration.class.getName(),
+						HashMapDictionaryBuilder.<String, Object>put(
+							"embeddedViewEnabled", false
+						).put(
+							"enabled", true
+						).put(
+							"siteSettingsStrategy", "always-override"
+						).build())) {
+
+			Assert.assertNull(
+				_dsRequestManager.fetchDSRequest(
+					TestPropsValues.getCompanyId(),
+					dsRequest.getDSRequestId()));
+
+			try (GroupConfigurationTemporarySwapper
+					groupConfigurationTemporarySwapper =
+						new GroupConfigurationTemporarySwapper(
+							TestPropsValues.getGroupId(),
+							DigitalSignatureConfiguration.class.getName(),
+							HashMapDictionaryBuilder.<String, Object>put(
+								"embeddedViewEnabled", true
+							).put(
+								"enabled", true
+							).build())) {
+
+				Assert.assertNotNull(
+					_dsRequestManager.fetchDSRequest(
+						TestPropsValues.getCompanyId(),
+						dsRequest.getDSRequestId()));
+			}
+		}
 	}
 
 	private void _testUpdateDSRequest(
@@ -506,6 +661,7 @@ public class DSRequestManagerTest {
 	private DSRequestManager _dsRequestManager;
 
 	private ObjectDefinition _dsRequestObjectDefinition;
+
 	private ObjectDefinition _dsRequestRecipientObjectDefinition;
 
 	@Inject(
