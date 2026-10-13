@@ -15,6 +15,7 @@ import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.GroupConstants;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutConstants;
+import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.service.GroupLocalService;
@@ -26,6 +27,7 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HttpComponentsUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 
 import jakarta.portlet.WindowState;
@@ -92,8 +94,30 @@ public class OpenDSRequestStrutsAction implements StrutsAction {
 			return null;
 		}
 
+		String url = StringBundler.concat(
 			_portal.getLayoutFullURL(layout, themeDisplay),
+			"/-/digital_signature/sign/", dsRequest.getDSRequestId());
+
+		String windowState = WindowState.MAXIMIZED.toString();
+
+		if (LiferayWindowState.isPopUp(httpServletRequest)) {
+			String portletNamespace = _portal.getPortletNamespace(
+				DigitalSignaturePortletKeys.SIGN_DIGITAL_SIGNATURE);
+
+			String backURL = _portal.escapeRedirect(
+				ParamUtil.getString(
+					httpServletRequest, portletNamespace + "backURL"));
+
+			if (Validator.isNotNull(backURL)) {
+				url = HttpComponentsUtil.setParameter(
+					url, portletNamespace + "backURL", backURL);
+			}
+
+			windowState = LiferayWindowState.POP_UP.toString();
+		}
+
 		httpServletResponse.sendRedirect(
+			HttpComponentsUtil.setParameter(url, "p_p_state", windowState));
 
 		return null;
 	}
