@@ -458,11 +458,11 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 		User user = permissionChecker.getUser();
 
-		if (dsRequest.getRequesterUserId() == user.getUserId()) {
-			return true;
-		}
-
 		if (Objects.equals(actionId, ActionKeys.VIEW)) {
+			if (dsRequest.getRequesterUserId() == user.getUserId()) {
+				return true;
+			}
+
 			for (DSRequestRecipient dsRequestRecipient :
 					dsRequest.getDSRequestRecipients()) {
 
