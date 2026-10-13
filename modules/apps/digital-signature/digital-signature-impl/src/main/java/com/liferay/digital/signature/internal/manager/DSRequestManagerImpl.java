@@ -18,6 +18,7 @@ import com.liferay.digital.signature.model.DSRequestRecipient;
 import com.liferay.digital.signature.url.SignDSURLProvider;
 import com.liferay.document.library.kernel.model.DLVersionNumberIncrease;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
+import com.liferay.document.library.kernel.service.DLFileEntryLocalService;
 import com.liferay.mail.kernel.model.MailMessage;
 import com.liferay.mail.kernel.service.MailService;
 import com.liferay.object.constants.ObjectDefinitionConstants;
@@ -41,6 +42,7 @@ import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.UserConstants;
 import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.repository.model.FileVersion;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
@@ -68,6 +70,7 @@ import com.liferay.portal.kernel.util.PrefsPropsUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
 import jakarta.mail.internet.InternetAddress;
 
@@ -1258,11 +1261,23 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 			FileEntry fileEntry = _dlAppLocalService.getFileEntry(fileEntryId);
 
-			_dlAppLocalService.updateFileEntry(
+			ServiceContext serviceContext = _getServiceContext(
+				companyId, fileEntry.getGroupId(), userId);
+
+			fileEntry = _dlAppLocalService.updateFileEntry(
 				userId, fileEntryId, fileEntry.getFileName(),
 				ContentTypes.APPLICATION_PDF, fileEntry.getTitle(), null, null,
 				null, DLVersionNumberIncrease.MAJOR, bytes, null, null, null,
-				_getServiceContext(companyId, fileEntry.getGroupId(), userId));
+				serviceContext);
+
+			FileVersion fileVersion = fileEntry.getLatestFileVersion();
+
+			if (fileVersion.getStatus() != WorkflowConstants.STATUS_APPROVED) {
+				_dlFileEntryLocalService.updateStatus(
+					userId, fileVersion.getFileVersionId(),
+					WorkflowConstants.STATUS_APPROVED, serviceContext,
+					new HashMap<>());
+			}
 		}
 	}
 
@@ -1371,6 +1386,9 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 	@Reference
 	private DLAppLocalService _dlAppLocalService;
+
+	@Reference
+	private DLFileEntryLocalService _dlFileEntryLocalService;
 
 	@Reference
 	private DSEnvelopeManager _dsEnvelopeManager;

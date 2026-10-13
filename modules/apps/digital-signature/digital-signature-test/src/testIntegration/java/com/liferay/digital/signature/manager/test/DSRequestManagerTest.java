@@ -36,6 +36,9 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
+import com.liferay.portal.kernel.portletfilerepository.PortletFileRepository;
+import com.liferay.portal.kernel.repository.model.FileVersion;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
@@ -885,12 +888,14 @@ public class DSRequestManagerTest {
 		Group group = GroupTestUtil.addGroup();
 
 		DSEnvelope dsEnvelope = _createDSEnvelope();
-		FileEntry fileEntry = _dlAppLocalService.addFileEntry(
-			null, TestPropsValues.getUserId(), group.getGroupId(),
+		FileEntry fileEntry = _portletFileRepository.addPortletFileEntry(
+			group.getGroupId(), TestPropsValues.getUserId(),
+			Group.class.getName(), group.getGroupId(),
+			RandomTestUtil.randomString(),
 			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
+			TestDataConstants.TEST_BYTE_ARRAY,
 			RandomTestUtil.randomString() + ".txt", ContentTypes.TEXT_PLAIN,
-			TestDataConstants.TEST_BYTE_ARRAY, null, null, null,
-			ServiceContextTestUtil.getServiceContext(group.getGroupId()));
+			false);
 
 		_addDSRequest(dsEnvelope, fileEntry.getFileEntryId());
 
@@ -929,6 +934,11 @@ public class DSRequestManagerTest {
 		Assert.assertArrayEquals(
 			bytes, FileUtil.getBytes(fileEntry.getContentStream()));
 		Assert.assertEquals("2.0", fileEntry.getVersion());
+
+		FileVersion fileVersion = fileEntry.getLatestFileVersion();
+
+		Assert.assertEquals(
+			WorkflowConstants.STATUS_APPROVED, fileVersion.getStatus());
 	}
 
 	private CompanyConfigurationTemporarySwapper
@@ -955,5 +965,8 @@ public class DSRequestManagerTest {
 
 	@Inject
 	private ObjectEntryLocalService _objectEntryLocalService;
+
+	@Inject
+	private PortletFileRepository _portletFileRepository;
 
 }
