@@ -8,7 +8,10 @@ package com.liferay.digital.signature.web.internal.portlet.action.test;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.digital.signature.manager.DSEnvelopeManager;
+import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
+import com.liferay.digital.signature.model.DSRequest;
+import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
@@ -16,12 +19,18 @@ import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.ResourceConstants;
+import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.model.role.RoleConstants;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
 import com.liferay.portal.kernel.service.CompanyLocalService;
+import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
+import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.constants.TestDataConstants;
@@ -48,6 +57,11 @@ import jakarta.portlet.ResourceRequest;
 import jakarta.portlet.ResourceResponse;
 
 import java.io.ByteArrayOutputStream;
+
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.Objects;
+import java.util.Queue;
 
 import org.junit.Assert;
 import org.junit.ClassRule;
@@ -93,58 +107,90 @@ public class AddDSEnvelopeMVCResourceCommandTest {
 
 		mockLiferayResourceRequest.setParameter("recipients", "[]");
 
-		AssertUtils.assertFailure(
-			PortalException.class, "Expire warn must be less than expire after",
-			() -> ReflectionTestUtil.invoke(
-				_mvcResourceCommand, "doTransactionalCommand",
-				new Class<?>[] {ResourceRequest.class, ResourceResponse.class},
-				mockLiferayResourceRequest, new MockLiferayResourceResponse()));
+		try (CompanyConfigurationTemporarySwapper
+				companyConfigurationTemporarySwapper =
+					new CompanyConfigurationTemporarySwapper(
+						TestPropsValues.getCompanyId(),
+						DigitalSignatureConfiguration.class.getName(),
+						HashMapDictionaryBuilder.<String, Object>put(
+							"embeddedViewEnabled", true
+						).build())) {
 
-		mockLiferayResourceRequest.setParameter(
-			"expireWarn", String.valueOf(days - 1));
+			Queue<Object[]> argumentsList = new LinkedList<>();
+			String dsEnvelopeId = RandomTestUtil.randomString();
+			long dsRequestId = RandomTestUtil.randomLong();
 
-		String dsEnvelopeId = RandomTestUtil.randomString();
+			DSRequestManager dsRequestManager =
+				(DSRequestManager)ReflectionTestUtil.getAndSetFieldValue(
+					_mvcResourceCommand, "_dsRequestManager",
+					ProxyUtil.newProxyInstance(
+						DSRequestManager.class.getClassLoader(),
+						new Class<?>[] {DSRequestManager.class},
+						(proxy, method, arguments) -> {
+							if (Objects.equals(
+									method.getName(),
+									"sendDSRequestNotifications")) {
 
-		DSEnvelopeManager dsEnvelopeManager =
-			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
-				_mvcResourceCommand, "_dsEnvelopeManager",
-				ProxyUtil.newProxyInstance(
-					DSEnvelopeManager.class.getClassLoader(),
-					new Class<?>[] {DSEnvelopeManager.class},
-					(proxy, method, arguments) -> {
-						DSEnvelope dsEnvelope = (DSEnvelope)arguments[2];
+								argumentsList.add(arguments);
 
-						Assert.assertEquals(days, dsEnvelope.getExpireAfter());
-						Assert.assertEquals(
-							days - 1, dsEnvelope.getExpireWarn());
+								return null;
+							}
 
-						dsEnvelope.setDSEnvelopeId(dsEnvelopeId);
+							if (!Objects.equals(
+									method.getName(), "addDSRequest")) {
 
-						return dsEnvelope;
-					}));
+								return null;
+							}
 
-		MockLiferayResourceResponse mockLiferayResourceResponse =
-			new MockLiferayResourceResponse();
+							DSEnvelope dsEnvelope = (DSEnvelope)arguments[3];
 
-		try {
-			ReflectionTestUtil.invoke(
-				_mvcResourceCommand, "doTransactionalCommand",
-				new Class<?>[] {ResourceRequest.class, ResourceResponse.class},
-				mockLiferayResourceRequest, mockLiferayResourceResponse);
+							Assert.assertEquals(
+								days, dsEnvelope.getExpireAfter());
+							Assert.assertEquals(
+								days - 1, dsEnvelope.getExpireWarn());
+
+							return new DSRequest(
+								TestPropsValues.getCompanyId(), null,
+								dsRequestId, Collections.emptyList(),
+								dsEnvelopeId, Collections.emptyList(), 0, null,
+								Collections.emptyMap());
+						}));
+
+			MockLiferayResourceResponse mockLiferayResourceResponse =
+				new MockLiferayResourceResponse();
+
+			try {
+				ReflectionTestUtil.invoke(
+					_mvcResourceCommand, "doTransactionalCommand",
+					new Class<?>[] {
+						ResourceRequest.class, ResourceResponse.class
+					},
+					mockLiferayResourceRequest, mockLiferayResourceResponse);
+			}
+			finally {
+				ReflectionTestUtil.setFieldValue(
+					_mvcResourceCommand, "_dsRequestManager", dsRequestManager);
+			}
+
+			ByteArrayOutputStream byteArrayOutputStream =
+				(ByteArrayOutputStream)
+					mockLiferayResourceResponse.getPortletOutputStream();
+
+			JSONObject jsonObject = _jsonFactory.createJSONObject(
+				byteArrayOutputStream.toString());
+
+			Assert.assertEquals(
+				dsEnvelopeId, jsonObject.getString("dsEnvelopeId"));
+
+			Assert.assertEquals(
+				argumentsList.toString(), 1, argumentsList.size());
+
+			Object[] arguments = argumentsList.poll();
+
+			Assert.assertEquals(dsRequestId, arguments[0]);
 		}
-		finally {
-			ReflectionTestUtil.setFieldValue(
-				_mvcResourceCommand, "_dsEnvelopeManager", dsEnvelopeManager);
-		}
 
-		ByteArrayOutputStream byteArrayOutputStream =
-			(ByteArrayOutputStream)
-				mockLiferayResourceResponse.getPortletOutputStream();
-
-		JSONObject jsonObject = _jsonFactory.createJSONObject(
-			byteArrayOutputStream.toString());
-
-		Assert.assertEquals(dsEnvelopeId, jsonObject.getString("dsEnvelopeId"));
+		_testDoTransactionalCommandWithoutFileEntryPermission();
 	}
 
 	@FeatureFlag(enable = false, value = "LPD-69290")
@@ -220,8 +266,7 @@ public class AddDSEnvelopeMVCResourceCommandTest {
 		Assert.assertEquals(dsEnvelopeId, jsonObject.getString("dsEnvelopeId"));
 	}
 
-	@Test
-	public void testDoTransactionalCommandWithoutFileEntryUpdatePermission()
+	private void _testDoTransactionalCommandWithoutFileEntryPermission()
 		throws Exception {
 
 		_group = GroupTestUtil.addGroup();
@@ -246,7 +291,7 @@ public class AddDSEnvelopeMVCResourceCommandTest {
 			ServiceContextTestUtil.getServiceContext(_group.getGroupId());
 
 		serviceContext.setAddGroupPermissions(false);
-		serviceContext.setAddGuestPermissions(true);
+		serviceContext.setAddGuestPermissions(false);
 
 		FileEntry fileEntry = _dlAppLocalService.addFileEntry(
 			null, TestPropsValues.getUserId(), _group.getGroupId(),
@@ -298,55 +343,110 @@ public class AddDSEnvelopeMVCResourceCommandTest {
 					},
 					mockLiferayResourceRequest,
 					new MockLiferayResourceResponse()));
+
+			Role role = _roleLocalService.getRole(
+				TestPropsValues.getCompanyId(), RoleConstants.USER);
+
+			_resourcePermissionLocalService.setResourcePermissions(
+				TestPropsValues.getCompanyId(), DLFileEntry.class.getName(),
+				ResourceConstants.SCOPE_INDIVIDUAL,
+				String.valueOf(fileEntry.getFileEntryId()), role.getRoleId(),
+				new String[] {ActionKeys.VIEW});
+
+			themeDisplay.setPermissionChecker(
+				PermissionCheckerFactoryUtil.create(_user));
+
+			Assert.assertThrows(
+				PrincipalException.MustHavePermission.class,
+				() -> ReflectionTestUtil.invoke(
+					_mvcResourceCommand, "doTransactionalCommand",
+					new Class<?>[] {
+						ResourceRequest.class, ResourceResponse.class
+					},
+					mockLiferayResourceRequest,
+					new MockLiferayResourceResponse()));
+
+			_resourcePermissionLocalService.setResourcePermissions(
+				TestPropsValues.getCompanyId(), DLFileEntry.class.getName(),
+				ResourceConstants.SCOPE_INDIVIDUAL,
+				String.valueOf(fileEntry.getFileEntryId()), role.getRoleId(),
+				new String[] {ActionKeys.UPDATE, ActionKeys.VIEW});
+
+			themeDisplay.setPermissionChecker(
+				PermissionCheckerFactoryUtil.create(_user));
+
+			User recipientUser = UserTestUtil.addUser();
+
+			mockLiferayResourceRequest.setParameter(
+				"recipients",
+				JSONUtil.putAll(
+					JSONUtil.put(
+						"email", recipientUser.getEmailAddress()
+					).put(
+						"fullName", recipientUser.getFullName()
+					)
+				).toString());
+
+			Assert.assertThrows(
+				PrincipalException.MustHavePermission.class,
+				() -> ReflectionTestUtil.invoke(
+					_mvcResourceCommand, "doTransactionalCommand",
+					new Class<?>[] {
+						ResourceRequest.class, ResourceResponse.class
+					},
+					mockLiferayResourceRequest,
+					new MockLiferayResourceResponse()));
+
+			mockLiferayResourceRequest.setParameter("recipients", "[]");
+
+			String dsEnvelopeId = RandomTestUtil.randomString();
+
+			DSRequestManager dsRequestManager =
+				(DSRequestManager)ReflectionTestUtil.getAndSetFieldValue(
+					_mvcResourceCommand, "_dsRequestManager",
+					ProxyUtil.newProxyInstance(
+						DSRequestManager.class.getClassLoader(),
+						new Class<?>[] {DSRequestManager.class},
+						(proxy, method, arguments) -> {
+							if (!Objects.equals(
+									method.getName(), "addDSRequest")) {
+
+								return null;
+							}
+
+							return new DSRequest(
+								TestPropsValues.getCompanyId(), null, 0,
+								Collections.emptyList(), dsEnvelopeId,
+								Collections.emptyList(), 0, null,
+								Collections.emptyMap());
+						}));
+
+			MockLiferayResourceResponse mockLiferayResourceResponse =
+				new MockLiferayResourceResponse();
+
+			try {
+				ReflectionTestUtil.invoke(
+					_mvcResourceCommand, "doTransactionalCommand",
+					new Class<?>[] {
+						ResourceRequest.class, ResourceResponse.class
+					},
+					mockLiferayResourceRequest, mockLiferayResourceResponse);
+			}
+			finally {
+				ReflectionTestUtil.setFieldValue(
+					_mvcResourceCommand, "_dsRequestManager", dsRequestManager);
+			}
+
+			ByteArrayOutputStream byteArrayOutputStream =
+				(ByteArrayOutputStream)
+					mockLiferayResourceResponse.getPortletOutputStream();
+
+			JSONObject jsonObject = _jsonFactory.createJSONObject(
+				byteArrayOutputStream.toString());
+
+			Assert.assertEquals(
+				dsEnvelopeId, jsonObject.getString("dsEnvelopeId"));
 		}
-	}
-
-	@Test
-	public void testDoTransactionalCommandWithoutFileEntryViewPermission()
-		throws Exception {
-
-		_group = GroupTestUtil.addGroup();
-
-		_user = UserTestUtil.addUser();
-
-		MockLiferayResourceRequest mockLiferayResourceRequest =
-			new MockLiferayResourceRequest();
-
-		ThemeDisplay themeDisplay = new ThemeDisplay();
-
-		themeDisplay.setCompany(
-			_companyLocalService.getCompany(TestPropsValues.getCompanyId()));
-		themeDisplay.setPermissionChecker(
-			PermissionCheckerFactoryUtil.create(_user));
-		themeDisplay.setUser(_user);
-
-		mockLiferayResourceRequest.setAttribute(
-			WebKeys.THEME_DISPLAY, themeDisplay);
-
-		ServiceContext serviceContext =
-			ServiceContextTestUtil.getServiceContext(_group.getGroupId());
-
-		serviceContext.setAddGroupPermissions(false);
-		serviceContext.setAddGuestPermissions(false);
-
-		FileEntry fileEntry = _dlAppLocalService.addFileEntry(
-			null, TestPropsValues.getUserId(), _group.getGroupId(),
-			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
-			RandomTestUtil.randomString() + ".pdf",
-			ContentTypes.APPLICATION_PDF, TestDataConstants.TEST_BYTE_ARRAY,
-			null, null, null, serviceContext);
-
-		mockLiferayResourceRequest.setParameter(
-			"fileEntryIds", String.valueOf(fileEntry.getFileEntryId()));
-
-		mockLiferayResourceRequest.setParameter("recipients", "[]");
-
-		Assert.assertThrows(
-			PrincipalException.MustHavePermission.class,
-			() -> ReflectionTestUtil.invoke(
-				_mvcResourceCommand, "doTransactionalCommand",
-				new Class<?>[] {ResourceRequest.class, ResourceResponse.class},
-				mockLiferayResourceRequest, new MockLiferayResourceResponse()));
 	}
 
 	@Inject
@@ -363,6 +463,12 @@ public class AddDSEnvelopeMVCResourceCommandTest {
 
 	@Inject(filter = "mvc.command.name=/digital_signature/add_ds_envelope")
 	private MVCResourceCommand _mvcResourceCommand;
+
+	@Inject
+	private ResourcePermissionLocalService _resourcePermissionLocalService;
+
+	@Inject
+	private RoleLocalService _roleLocalService;
 
 	@DeleteAfterTestRun
 	private User _user;

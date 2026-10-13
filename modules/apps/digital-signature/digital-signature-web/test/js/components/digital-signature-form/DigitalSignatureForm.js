@@ -3,12 +3,19 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import {act, cleanup, fireEvent, render} from '@testing-library/react';
+import {act, cleanup, fireEvent, render, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import {AppContext} from '../../../../src/main/resources/META-INF/resources/js/AppContext';
 import DigitalSignatureForm from '../../../../src/main/resources/META-INF/resources/js/components/digital-signature-form/DigitalSignatureForm';
+
+jest.mock('frontend-js-components-web', () => ({
+	openToast: jest.fn(),
+}));
+
+const BASE_RESOURCE_URL =
+	'http://localhost:8080/group/guest/~/control_panel/manage?p_p_id=com_liferay_digital_signature_web_portlet_DigitalSignaturePortlet';
 
 const DigitalSignatureFormWithProvider = (props) => (
 	<AppContext.Provider value={{}}>
@@ -17,7 +24,19 @@ const DigitalSignatureFormWithProvider = (props) => (
 );
 
 describe('DigitalSignatureForm', () => {
+	afterAll(() => {
+		delete window.ResizeObserver;
+	});
+
 	afterEach(cleanup);
+
+	beforeAll(() => {
+		window.ResizeObserver = jest.fn().mockImplementation(() => ({
+			disconnect: jest.fn(),
+			observe: jest.fn(),
+			unobserve: jest.fn(),
+		}));
+	});
 
 	it('Renders with the Send button disabled', () => {
 		const {getByText} = render(<DigitalSignatureFormWithProvider />);
@@ -67,27 +86,118 @@ describe('DigitalSignatureForm', () => {
 		expect(asFragment()).toMatchSnapshot();
 	});
 
-	describe('With the LPD-69290 feature flag enabled', () => {
-		beforeAll(() => {
-			Liferay.FeatureFlags['LPD-69290'] = true;
-		});
+	it('Validates the days to warn recipients only when the envelope expires', async () => {
+		const {getByLabelText, getByText, queryByText} = render(
+			<AppContext.Provider value={{embeddedViewEnabled: true}}>
+				<DigitalSignatureForm />
+			</AppContext.Provider>
+		);
 
-		afterAll(() => {
-			Liferay.FeatureFlags['LPD-69290'] = false;
-		});
+		const inputExpireAfter = getByLabelText('days-until-expiration');
+		const inputExpireWarn = getByLabelText(
+			'days-to-warn-recipients-before-expiration'
+		);
 
-		it('Validates the days to warn recipients', async () => {
-			const {getByLabelText, getByText} = render(
-				<DigitalSignatureFormWithProvider />
+		await userEvent.clear(inputExpireWarn);
+		await userEvent.type(inputExpireWarn, '120');
+
+		expect(
+			getByText(
+				'days-to-warn-recipients-must-be-fewer-than-days-until-expiration'
+			)
+		).toBeInTheDocument();
+
+		await userEvent.clear(inputExpireAfter);
+		await userEvent.type(inputExpireAfter, '0');
+
+		expect(
+			queryByText(
+				'days-to-warn-recipients-must-be-fewer-than-days-until-expiration'
+			)
+		).toBeNull();
+	});
+
+	it('Sends the expiration days with the envelope', async () => {
+		const navigate = jest.fn();
+
+		fetch.mockImplementation((resource) =>
+			Promise.resolve(
+				new Response(
+					JSON.stringify(
+						String(resource).includes('user-accounts')
+							? {
+									items: [
+										{
+											emailAddress: 'test1@liferay.com',
+											id: 1,
+											name: 'Test Test',
+										},
+									],
+								}
+							: {dsEnvelopeId: 1}
+					)
+				)
+			)
+		);
+
+		const {findByText, getByLabelText, getByPlaceholderText, getByText} =
+			render(
+				<AppContext.Provider
+					value={{
+						allowedFileExtensions: ['pdf'],
+						baseResourceURL: BASE_RESOURCE_URL,
+						embeddedViewEnabled: true,
+						portletNamespace: '_namespace_',
+					}}
+				>
+					<DigitalSignatureForm
+						fileEntries={[
+							{
+								extension: 'pdf',
+								fileEntryId: 1,
+								title: 'Document.pdf',
+							},
+						]}
+						navigate={navigate}
+					/>
+				</AppContext.Provider>
 			);
 
-			const inputExpireWarn = getByLabelText(
-				'days-to-warn-recipients-before-expiration'
-			);
+		await userEvent.type(
+			getByPlaceholderText('my-envelope-name'),
+			'Envelope Name'
+		);
+		await userEvent.type(getByLabelText('recipient-email'), 'test');
+		await userEvent.click(
+			await findByText('Test Test (test1@liferay.com)')
+		);
+		await userEvent.type(
+			getByPlaceholderText('please-sign-this-document'),
+			'Email Subject'
+		);
 
-			await userEvent.clear(inputExpireWarn);
-			await userEvent.type(inputExpireWarn, '120');
-	it('Restricts recipients to existing users when embedded signing is enabled', () => {
+		const inputExpireAfter = getByLabelText('days-until-expiration');
+		const inputExpireWarn = getByLabelText(
+			'days-to-warn-recipients-before-expiration'
+		);
+
+		await userEvent.clear(inputExpireAfter);
+		await userEvent.type(inputExpireAfter, '30');
+		await userEvent.clear(inputExpireWarn);
+		await userEvent.type(inputExpireWarn, '5');
+		await userEvent.click(getByText('send'));
+
+		await waitFor(() => expect(navigate).toHaveBeenCalled());
+
+		const [, {body}] = fetch.mock.calls.find(([resource]) =>
+			String(resource).includes('add_ds_envelope')
+		);
+
+		expect(body.get('_namespace_expireAfter')).toBe('30');
+		expect(body.get('_namespace_expireWarn')).toBe('5');
+	});
+
+	it('Restricts recipients to existing users when the embedded view is enabled', () => {
 		const {getByPlaceholderText, queryByPlaceholderText} = render(
 			<AppContext.Provider value={{embeddedViewEnabled: true}}>
 				<DigitalSignatureForm />
@@ -96,12 +206,8 @@ describe('DigitalSignatureForm', () => {
 
 		expect(getByPlaceholderText('search-for')).toBeTruthy();
 		expect(queryByPlaceholderText('recipient-email')).toBeNull();
-			expect(
-				getByText(
-					'days-to-warn-recipients-must-be-fewer-than-days-until-expiration'
-				)
+		expect(
 			getByPlaceholderText('recipient-full-name').hasAttribute('disabled')
-			).toBeInTheDocument();
-		});
+		).toBeTruthy();
 	});
 });
