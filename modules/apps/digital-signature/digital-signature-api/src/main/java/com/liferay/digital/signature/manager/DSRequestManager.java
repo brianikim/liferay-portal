@@ -8,6 +8,7 @@ package com.liferay.digital.signature.manager;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
 
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -23,6 +24,11 @@ public interface DSRequestManager {
 		throws PortalException;
 
 	public DSRequest fetchDSRequest(long companyId, long dsRequestId);
+
+	public boolean hasPermission(
+			PermissionChecker permissionChecker, DSRequest dsRequest,
+			String actionId)
+		throws PortalException;
 
 	public void updateDSRequest(long dsRequestId) throws PortalException;
 

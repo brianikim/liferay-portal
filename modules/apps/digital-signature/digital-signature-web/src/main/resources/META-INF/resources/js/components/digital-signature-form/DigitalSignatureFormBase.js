@@ -22,6 +22,7 @@ const MAX_LENGTH = {
 
 const DigitalSignatureFormBase = ({
 	defaultRecipient,
+	embeddedViewEnabled,
 	errors,
 	handleChange,
 	setFieldValue,
@@ -89,6 +90,8 @@ const DigitalSignatureFormBase = ({
 						<ClayInput.GroupItem>
 							<Input
 								className="mb-0"
+								disabled={embeddedViewEnabled}
+									embeddedViewEnabled
 								error={errors?.recipients?.[index]?.fullName}
 								label={Liferay.Language.get(
 									'recipient-full-name'
@@ -104,6 +107,7 @@ const DigitalSignatureFormBase = ({
 						</ClayInput.GroupItem>
 
 						<ClayInput.GroupItem>
+							{embeddedViewEnabled ? (
 							<Input
 								className="mb-0"
 								error={errors?.recipients?.[index]?.email}
