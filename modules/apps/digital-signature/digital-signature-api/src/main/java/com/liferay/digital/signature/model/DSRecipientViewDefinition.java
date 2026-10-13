@@ -25,6 +25,14 @@ public class DSRecipientViewDefinition {
 		return emailAddress;
 	}
 
+	public String[] getFrameAncestors() {
+		return frameAncestors;
+	}
+
+	public String[] getMessageOrigins() {
+		return messageOrigins;
+	}
+
 	public String getReturnURL() {
 		return returnURL;
 	}
@@ -45,6 +53,14 @@ public class DSRecipientViewDefinition {
 		this.emailAddress = emailAddress;
 	}
 
+	public void setFrameAncestors(String[] frameAncestors) {
+		this.frameAncestors = frameAncestors;
+	}
+
+	public void setMessageOrigins(String[] messageOrigins) {
+		this.messageOrigins = messageOrigins;
+	}
+
 	public void setReturnURL(String returnURL) {
 		this.returnURL = returnURL;
 	}
@@ -61,6 +77,24 @@ public class DSRecipientViewDefinition {
 		).put(
 			"email", getEmailAddress()
 		).put(
+			"frameAncestors",
+			() -> {
+				if (frameAncestors == null) {
+					return null;
+				}
+
+				return JSONUtil.putAll(frameAncestors);
+			}
+		).put(
+			"messageOrigins",
+			() -> {
+				if (messageOrigins == null) {
+					return null;
+				}
+
+				return JSONUtil.putAll(messageOrigins);
+			}
+		).put(
 			"returnUrl", getReturnURL()
 		).put(
 			"userName", getUserName()
@@ -75,6 +109,8 @@ public class DSRecipientViewDefinition {
 	protected String authenticationMethod;
 	protected String dsClientUserId;
 	protected String emailAddress;
+	protected String[] frameAncestors;
+	protected String[] messageOrigins;
 	protected String returnURL;
 	protected String userName;
 
