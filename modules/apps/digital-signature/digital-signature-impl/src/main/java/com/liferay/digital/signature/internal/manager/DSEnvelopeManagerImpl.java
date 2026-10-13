@@ -136,6 +136,17 @@ public class DSEnvelopeManagerImpl implements DSEnvelopeManager {
 	}
 
 	@Override
+	public byte[] getDSDocumentAsBytes(
+		long companyId, long groupId, String dsDocumentId,
+		String dsEnvelopeId) {
+
+		return _dsHttp.getAsBytes(
+			companyId, groupId,
+			StringBundler.concat(
+				"envelopes/", dsEnvelopeId, "/documents/", dsDocumentId));
+	}
+
+	@Override
 	public DSEnvelope getDSEnvelope(
 		long companyId, long groupId, String dsEnvelopeId) {
 
@@ -214,11 +225,10 @@ public class DSEnvelopeManagerImpl implements DSEnvelopeManager {
 				"voidedReason", reason
 			));
 
-		if (Validator.isNotNull(jsonObject.getString("errorCode"))) {
-			throw new PortalException(
-				StringBundler.concat(
-					"Unable to void envelope ", dsEnvelopeId, ": ",
-					jsonObject.getString("message")));
+		String errorCode = jsonObject.getString("errorCode");
+
+		if (Validator.isNull(errorCode)) {
+			return;
 		}
 
 		String message = StringBundler.concat(
