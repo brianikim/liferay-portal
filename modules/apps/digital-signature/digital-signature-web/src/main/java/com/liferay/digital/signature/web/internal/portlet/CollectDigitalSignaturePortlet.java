@@ -93,6 +93,8 @@ public class CollectDigitalSignaturePortlet extends MVCPortlet {
 					);
 				});
 
+				DigitalSignatureWebKeys.DIGITAL_SIGNATURE_EMBEDDED_VIEW_ENABLED,
+				digitalSignatureConfiguration.embeddedViewEnabled());
 			renderRequest.setAttribute(
 				DigitalSignatureWebKeys.DIGITAL_SIGNATURE_FILE_ENTRIES,
 				jsonArray);
