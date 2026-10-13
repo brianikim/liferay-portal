@@ -8,7 +8,9 @@ package com.liferay.digital.signature.web.internal.portlet.action.test;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.digital.signature.manager.DSEnvelopeManager;
+import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
+import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
@@ -38,6 +40,7 @@ import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ContentTypes;
+import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.WebKeys;
@@ -50,6 +53,10 @@ import jakarta.portlet.ResourceRequest;
 import jakarta.portlet.ResourceResponse;
 
 import java.io.ByteArrayOutputStream;
+import java.io.Serializable;
+
+import java.util.Collections;
+import java.util.Objects;
 
 import org.junit.Assert;
 import org.junit.ClassRule;
@@ -95,59 +102,86 @@ public class AddDSEnvelopeMVCResourceCommandTest {
 
 		mockLiferayResourceRequest.setParameter("recipients", "[]");
 
-		AssertUtils.assertFailure(
-			PortalException.class,
-			"Days to warn signers must be fewer than days until expiration",
-			() -> ReflectionTestUtil.invoke(
-				_mvcResourceCommand, "doTransactionalCommand",
-				new Class<?>[] {ResourceRequest.class, ResourceResponse.class},
-				mockLiferayResourceRequest, new MockLiferayResourceResponse()));
+		try (CompanyConfigurationTemporarySwapper
+				companyConfigurationTemporarySwapper =
+					new CompanyConfigurationTemporarySwapper(
+						TestPropsValues.getCompanyId(),
+						DigitalSignatureConfiguration.class.getName(),
+						HashMapDictionaryBuilder.<String, Object>put(
+							"embeddedViewEnabled", true
+						).build())) {
 
-		mockLiferayResourceRequest.setParameter(
-			"expireWarn", String.valueOf(days - 1));
+			AssertUtils.assertFailure(
+				PortalException.class,
+				"Days to warn signers must be fewer than days until expiration",
+				() -> ReflectionTestUtil.invoke(
+					_mvcResourceCommand, "doTransactionalCommand",
+					new Class<?>[] {
+						ResourceRequest.class, ResourceResponse.class
+					},
+					mockLiferayResourceRequest,
+					new MockLiferayResourceResponse()));
 
-		String dsEnvelopeId = RandomTestUtil.randomString();
+			mockLiferayResourceRequest.setParameter(
+				"expireWarn", String.valueOf(days - 1));
 
-		DSEnvelopeManager dsEnvelopeManager =
-			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
-				_mvcResourceCommand, "_dsEnvelopeManager",
-				ProxyUtil.newProxyInstance(
-					DSEnvelopeManager.class.getClassLoader(),
-					new Class<?>[] {DSEnvelopeManager.class},
-					(proxy, method, arguments) -> {
-						DSEnvelope dsEnvelope = (DSEnvelope)arguments[2];
+			String providerRequestId = RandomTestUtil.randomString();
 
-						Assert.assertEquals(days, dsEnvelope.getExpireAfter());
-						Assert.assertEquals(
-							days - 1, dsEnvelope.getExpireWarn());
+			DSRequestManager dsRequestManager =
+				(DSRequestManager)ReflectionTestUtil.getAndSetFieldValue(
+					_mvcResourceCommand, "_dsRequestManager",
+					ProxyUtil.newProxyInstance(
+						DSRequestManager.class.getClassLoader(),
+						new Class<?>[] {DSRequestManager.class},
+						(proxy, method, arguments) -> {
+							if (!Objects.equals(
+									method.getName(), "addDSRequest")) {
 
-						dsEnvelope.setDSEnvelopeId(dsEnvelopeId);
+								return null;
+							}
 
-						return dsEnvelope;
-					}));
+							DSEnvelope dsEnvelope = (DSEnvelope)arguments[3];
 
-		MockLiferayResourceResponse mockLiferayResourceResponse =
-			new MockLiferayResourceResponse();
+							Assert.assertEquals(
+								days, dsEnvelope.getExpireAfter());
+							Assert.assertEquals(
+								days - 1, dsEnvelope.getExpireWarn());
 
-		try {
-			ReflectionTestUtil.invoke(
-				_mvcResourceCommand, "doTransactionalCommand",
-				new Class<?>[] {ResourceRequest.class, ResourceResponse.class},
-				mockLiferayResourceRequest, mockLiferayResourceResponse);
+							return new DSRequest(
+								TestPropsValues.getCompanyId(), null, 0,
+								Collections.emptyList(),
+								Collections.emptyList(), null, null, 0,
+								HashMapBuilder.<String, Serializable>put(
+									"providerRequestId", providerRequestId
+								).build());
+						}));
+
+			MockLiferayResourceResponse mockLiferayResourceResponse =
+				new MockLiferayResourceResponse();
+
+			try {
+				ReflectionTestUtil.invoke(
+					_mvcResourceCommand, "doTransactionalCommand",
+					new Class<?>[] {
+						ResourceRequest.class, ResourceResponse.class
+					},
+					mockLiferayResourceRequest, mockLiferayResourceResponse);
+			}
+			finally {
+				ReflectionTestUtil.setFieldValue(
+					_mvcResourceCommand, "_dsRequestManager", dsRequestManager);
+			}
+
+			ByteArrayOutputStream byteArrayOutputStream =
+				(ByteArrayOutputStream)
+					mockLiferayResourceResponse.getPortletOutputStream();
+
+			JSONObject jsonObject = _jsonFactory.createJSONObject(
+				byteArrayOutputStream.toString());
+
+			Assert.assertEquals(
+				providerRequestId, jsonObject.getString("dsEnvelopeId"));
 		}
-		finally {
-			ReflectionTestUtil.setFieldValue(
-				_mvcResourceCommand, "_dsEnvelopeManager", dsEnvelopeManager);
-		}
-
-		ByteArrayOutputStream byteArrayOutputStream =
-			(ByteArrayOutputStream)
-				mockLiferayResourceResponse.getPortletOutputStream();
-
-		JSONObject jsonObject = _jsonFactory.createJSONObject(
-			byteArrayOutputStream.toString());
-
-		Assert.assertEquals(dsEnvelopeId, jsonObject.getString("dsEnvelopeId"));
 	}
 
 	@FeatureFlag(enable = false, value = "LPD-69290")
