@@ -88,7 +88,8 @@ public class AddDSEnvelopeMVCResourceCommand
 					resourceRequest, "emailSubject");
 
 				if (FeatureFlagManagerUtil.isEnabled(
-						themeDisplay.getCompanyId(), "LPD-69290")) {
+						themeDisplay.getCompanyId(), "LPD-69290") &&
+					digitalSignatureConfiguration.embeddedViewEnabled()) {
 
 					expireAfter = ParamUtil.getInteger(
 						resourceRequest, "expireAfter");
