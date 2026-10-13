@@ -8,7 +8,6 @@ package com.liferay.digital.signature.internal.manager;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfigurationUtil;
 import com.liferay.digital.signature.constants.DSRequestConstants;
-import com.liferay.digital.signature.constants.DSRequestRecipientConstants;
 import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
@@ -195,7 +194,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					"requestExpirationDate",
 					() -> _toDate(dsEnvelope.getExpireLocalDateTime())
 				).put(
-					"requestStatus", _getRequestStatus(dsEnvelope)
+					"requestStatus", () -> _getRequestStatus(dsEnvelope)
 				).build(),
 				serviceContext);
 
@@ -237,7 +236,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 						companyId, dsRecipient.getEmailAddress())
 				).put(
 					"requestRecipientStatus",
-					_getRequestRecipientStatus(dsRecipient)
+					() -> _getRequestRecipientStatus(dsRecipient)
 				).put(
 					"sentDate",
 					() -> _toDate(dsRecipient.getSentLocalDateTime())
@@ -264,11 +263,21 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	private String _getRequestRecipientStatus(DSRecipient dsRecipient) {
 		String status = StringUtil.toLowerCase(dsRecipient.getStatus());
 
-		if (ArrayUtil.contains(DSRequestRecipientConstants.STATUSES, status)) {
+		if (Objects.equals(status, "delivered")) {
+			return DSRequestConstants.STATUS_SENT;
+		}
+
+		if (ArrayUtil.contains(
+				DSRequestConstants.STATUSES_REQUEST_RECIPIENT, status)) {
+
 			return status;
 		}
 
-		return DSRequestRecipientConstants.STATUS_SENT;
+		if (_log.isWarnEnabled()) {
+			_log.warn("Unsupported request recipient status " + status);
+		}
+
+		return null;
 	}
 
 	private String _getRequestStatus(DSEnvelope dsEnvelope) {
@@ -285,11 +294,21 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			return DSRequestConstants.STATUS_EXPIRED;
 		}
 
-		if (ArrayUtil.contains(DSRequestConstants.STATUSES, status)) {
+		if (Objects.equals(status, "delivered") ||
+			Objects.equals(status, DSRequestConstants.STATUS_SIGNED)) {
+
+			return DSRequestConstants.STATUS_SENT;
+		}
+
+		if (ArrayUtil.contains(DSRequestConstants.STATUSES_REQUEST, status)) {
 			return status;
 		}
 
-		return DSRequestConstants.STATUS_SENT;
+		if (_log.isWarnEnabled()) {
+			_log.warn("Unsupported request status " + status);
+		}
+
+		return null;
 	}
 
 	private ServiceContext _getServiceContext(
@@ -383,7 +402,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
 				HashMapBuilder.<String, Serializable>put(
 					"requestRecipientStatus",
-					_getRequestRecipientStatus(dsRecipient)
+					() -> _getRequestRecipientStatus(dsRecipient)
 				).put(
 					"requestRecipientStatusDate",
 					() -> _toDate(dsRecipient.getStatusLocalDateTime())
@@ -415,7 +434,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				"requestExpirationDate",
 				() -> _toDate(dsEnvelope.getExpireLocalDateTime())
 			).put(
-				"requestStatus", _getRequestStatus(dsEnvelope)
+				"requestStatus", () -> _getRequestStatus(dsEnvelope)
 			).put(
 				"requestStatusDate",
 				() -> _toDate(dsEnvelope.getStatusChangedLocalDateTime())
