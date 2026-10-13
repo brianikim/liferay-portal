@@ -24,6 +24,11 @@ public interface DSRequestManager {
 
 	public DSRequest fetchDSRequest(long companyId, long dsRequestId);
 
+	public boolean hasPermission(
+			PermissionChecker permissionChecker, DSRequest dsRequest,
+			String actionId)
+		throws PortalException;
+
 	public void updateDSRequest(
 		long companyId, long groupId, String providerRequestId);
 

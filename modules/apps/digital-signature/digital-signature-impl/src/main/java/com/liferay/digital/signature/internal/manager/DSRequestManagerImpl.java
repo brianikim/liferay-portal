@@ -132,13 +132,68 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 
 		try {
+			Map<Long, DSRequest> dsRequestsMap = _getDSRequestsMap(
+				companyId, Collections.singleton(dsRequestId),
+				dsRequestRecipientObjectDefinition);
 
+			return dsRequestsMap.get(dsRequestId);
 		}
 		catch (Exception exception) {
 			_log.error(
 
 			return null;
 		}
+	}
+
+			Map<Long, Long> dsRequestIdsMap = _getDSRequestIdsMap(
+				companyId, dsRequestDocumentObjectDefinition, fileEntryIds);
+			if (dsRequestIdsMap.isEmpty()) {
+			Map<Long, DSRequest> dsRequestsMap = _getDSRequestsMap(
+				companyId, new HashSet<>(dsRequestIdsMap.values()),
+				dsRequestRecipientObjectDefinition);
+			for (Map.Entry<Long, Long> entry : dsRequestIdsMap.entrySet()) {
+				DSRequest dsRequest = dsRequestsMap.get(entry.getValue());
+	@Override
+	public boolean hasPermission(
+			PermissionChecker permissionChecker, DSRequest dsRequest,
+			String actionId)
+		throws PortalException {
+
+		User user = permissionChecker.getUser();
+
+		if (dsRequest.getRequesterUserId() == user.getUserId()) {
+			return true;
+		}
+
+		if (Objects.equals(actionId, ActionKeys.VIEW)) {
+			for (DSRequestRecipient dsRequestRecipient :
+					dsRequest.getDSRequestRecipients()) {
+
+				if ((dsRequestRecipient.getUserId() == user.getUserId()) ||
+					StringUtil.equalsIgnoreCase(
+						dsRequestRecipient.getEmailAddress(),
+						user.getEmailAddress())) {
+
+					return true;
+				}
+			}
+		}
+
+		ObjectDefinition dsRequestObjectDefinition =
+			_objectDefinitionLocalService.
+				fetchObjectDefinitionByExternalReferenceCode(
+					"L_DS_REQUEST", dsRequest.getCompanyId());
+
+		if (dsRequestObjectDefinition == null) {
+			return false;
+		}
+
+		ModelResourcePermission<?> modelResourcePermission =
+			ModelResourcePermissionRegistryUtil.getModelResourcePermission(
+				dsRequestObjectDefinition.getClassName());
+
+		return modelResourcePermission.contains(
+			permissionChecker, dsRequest.getDSRequestId(), actionId);
 	}
 
 	@Override
@@ -292,47 +347,95 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					() -> _toDate(dsRecipient.getSentLocalDateTime())
 				).build(),
 				serviceContext);
+	private Map<Long, Long> _getDSRequestIdsMap(
+			long companyId, ObjectDefinition dsRequestDocumentObjectDefinition,
+			Collection<Long> fileEntryIds)
 		throws Exception {
 
+		Map<Long, Long> dsRequestIdsMap = new HashMap<>();
 
+		for (Map<String, Serializable> values :
+				_getValuesList(
+					companyId,
+					StringBundler.concat(
+						"(fileEntryId in (",
+						StringUtil.merge(fileEntryIds, ", "), "))"),
+					dsRequestDocumentObjectDefinition,
+					new Sort[] {
+						new Sort(Field.CREATE_DATE, Sort.LONG_TYPE, true)
+					})) {
+
+			dsRequestIdsMap.putIfAbsent(
+				MapUtil.getLong(values, "fileEntryId"),
+				MapUtil.getLong(
+					values, "r_dsRequestToDSRequestDocuments_l_dsRequestId"));
+		}
+
+		return dsRequestIdsMap;
+	}
+
+	private Map<Long, DSRequest> _getDSRequestsMap(
+			long companyId, Set<Long> dsRequestIds,
+			ObjectDefinition dsRequestRecipientObjectDefinition)
+		throws Exception {
+
+		Map<Long, DSRequest> dsRequestsMap = new HashMap<>();
+
+		Map<Long, List<DSRequestRecipient>> dsRequestRecipientsMap =
 			new HashMap<>();
 
+		for (Map<String, Serializable> values :
 				_getValuesList(
 					companyId,
 					StringBundler.concat(
 						"(r_dsRequestToDSRequestRecipients_l_dsRequestId in ('",
+						StringUtil.merge(dsRequestIds, "', '"), "'))"),
 
 			List<DSRequestRecipient> dsRequestRecipients =
+				dsRequestRecipientsMap.computeIfAbsent(
 					MapUtil.getLong(
+						values,
 						"r_dsRequestToDSRequestRecipients_l_dsRequestId"),
 
+			dsRequestRecipients.add(new DSRequestRecipient(values));
 		}
 
 		for (List<DSRequestRecipient> dsRequestRecipients :
+				dsRequestRecipientsMap.values()) {
 
 			dsRequestRecipients.sort(
 				Comparator.comparingInt(DSRequestRecipient::getSigningOrder));
 		}
 
+		Map<Long, List<Long>> fileEntryIdsMap = _getFileEntryIdsMap(
+			companyId, dsRequestIds);
 
+		for (long dsRequestId : dsRequestIds) {
 			ObjectEntry dsRequestObjectEntry =
 
 			if (dsRequestObjectEntry == null) {
 				continue;
 			}
 
+			dsRequestsMap.put(
 				new DSRequest(
 					dsRequestObjectEntry.getCompanyId(),
+					dsRequestRecipientsMap.getOrDefault(
+					fileEntryIdsMap.getOrDefault(
 					_getRequesterEmailAddress(dsRequestObjectEntry),
 					_getRequesterName(dsRequestObjectEntry),
 					dsRequestObjectEntry.getUserId(),
 					dsRequestObjectEntry.getValues()));
 		}
 
+		return dsRequestsMap;
 	}
 
+	private Map<Long, List<Long>> _getFileEntryIdsMap(
+			long companyId, Set<Long> dsRequestIds)
 		throws Exception {
 
+		Map<Long, List<Long>> fileEntryIdsMap = new HashMap<>();
 
 		ObjectDefinition dsRequestDocumentObjectDefinition =
 			_objectDefinitionLocalService.
@@ -340,17 +443,24 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					"L_DS_REQUEST_DOCUMENT", companyId);
 
 		if (dsRequestDocumentObjectDefinition == null) {
+			return fileEntryIdsMap;
 		}
 
+		for (Map<String, Serializable> values :
 				_getValuesList(
 					companyId,
 					StringBundler.concat(
 						"(r_dsRequestToDSRequestDocuments_l_dsRequestId in ('",
+						StringUtil.merge(dsRequestIds, "', '"), "'))"),
 
+			List<Long> fileEntryIds = fileEntryIdsMap.computeIfAbsent(
 				MapUtil.getLong(
+					values, "r_dsRequestToDSRequestDocuments_l_dsRequestId"),
 
+			fileEntryIds.add(MapUtil.getLong(values, "fileEntryId"));
 		}
 
+		return fileEntryIdsMap;
 	}
 
 		}
@@ -501,7 +611,15 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			DigitalSignatureConfigurationUtil.getDigitalSignatureConfiguration(
 				companyId, groupId);
 
-		return digitalSignatureConfiguration.enabled();
+		if (digitalSignatureConfiguration.embeddedViewEnabled() &&
+			digitalSignatureConfiguration.enabled()) {
+
+			return true;
+		}
+
+		return false;
+	}
+
 	private boolean _isServiceAccount(User user) {
 		if ((user.getType() == UserConstants.TYPE_DEFAULT_SERVICE_ACCOUNT) ||
 			(user.getType() == UserConstants.TYPE_SERVICE_ACCOUNT)) {
