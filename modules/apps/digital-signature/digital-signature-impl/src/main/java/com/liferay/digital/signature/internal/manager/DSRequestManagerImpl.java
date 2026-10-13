@@ -192,7 +192,10 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 		if ((dsRequestObjectEntry == null) ||
 			(dsRequestObjectEntry.getCompanyId() != companyId) ||
-			!_isEnabled(companyId, 0)) {
+			!_isEnabled(
+				companyId,
+				MapUtil.getLong(
+					dsRequestObjectEntry.getValues(), "siteGroupId"))) {
 
 			return null;
 		}
@@ -245,7 +248,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		Map<Long, DSRequest> dsRequests = new HashMap<>();
 
 		if ((fileEntryIds == null) || fileEntryIds.isEmpty() ||
-			!_isEnabled(companyId, 0)) {
+			!FeatureFlagManagerUtil.isEnabled(companyId, "LPD-69290")) {
 
 			return dsRequests;
 		}
@@ -280,7 +283,9 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			for (Map.Entry<Long, Long> entry : dsRequestIdsMap.entrySet()) {
 				DSRequest dsRequest = dsRequestsMap.get(entry.getValue());
 
-				if (dsRequest != null) {
+				if ((dsRequest != null) &&
+					_isEnabled(companyId, dsRequest.getSiteGroupId())) {
+
 					dsRequests.put(entry.getKey(), dsRequest);
 				}
 			}

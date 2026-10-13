@@ -29,6 +29,7 @@ import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.sql.dsl.expression.Predicate;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
+import com.liferay.portal.configuration.test.util.GroupConfigurationTemporarySwapper;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.NoSuchUserException;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -295,6 +296,7 @@ public class DSRequestManagerTest {
 				RandomTestUtil.randomLong(), dsRequest1.getDSRequestId()));
 
 		_testFetchDSRequestWhenExpirationDateIsPast();
+		_testFetchDSRequestWhenSiteOverridesInstanceSettings();
 	}
 
 	@Test
@@ -760,6 +762,49 @@ public class DSRequestManagerTest {
 			DSRequestConstants.STATUS_EXPIRED, dsRequest.getStatus());
 		Assert.assertTrue(dsRequest.isRequestable());
 		Assert.assertTrue(dsRequest.isTerminal());
+	}
+
+	private void _testFetchDSRequestWhenSiteOverridesInstanceSettings()
+		throws Exception {
+
+		DSRequest dsRequest = _addDSRequest(
+			_createDSEnvelope(), RandomTestUtil.randomLong());
+
+		try (CompanyConfigurationTemporarySwapper
+				companyConfigurationTemporarySwapper =
+					new CompanyConfigurationTemporarySwapper(
+						TestPropsValues.getCompanyId(),
+						DigitalSignatureConfiguration.class.getName(),
+						HashMapDictionaryBuilder.<String, Object>put(
+							"embeddedViewEnabled", false
+						).put(
+							"enabled", true
+						).put(
+							"siteSettingsStrategy", "always-override"
+						).build())) {
+
+			Assert.assertNull(
+				_dsRequestManager.fetchDSRequest(
+					TestPropsValues.getCompanyId(),
+					dsRequest.getDSRequestId()));
+
+			try (GroupConfigurationTemporarySwapper
+					groupConfigurationTemporarySwapper =
+						new GroupConfigurationTemporarySwapper(
+							TestPropsValues.getGroupId(),
+							DigitalSignatureConfiguration.class.getName(),
+							HashMapDictionaryBuilder.<String, Object>put(
+								"embeddedViewEnabled", true
+							).put(
+								"enabled", true
+							).build())) {
+
+				Assert.assertNotNull(
+					_dsRequestManager.fetchDSRequest(
+						TestPropsValues.getCompanyId(),
+						dsRequest.getDSRequestId()));
+			}
+		}
 	}
 
 	private void _testUpdateDSRequest(
