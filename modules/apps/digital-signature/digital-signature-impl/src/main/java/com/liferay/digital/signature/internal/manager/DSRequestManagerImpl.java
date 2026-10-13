@@ -16,6 +16,8 @@ import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.digital.signature.model.DSRequestRecipient;
 import com.liferay.digital.signature.url.SignDSURLProvider;
+import com.liferay.document.library.kernel.model.DLVersionNumberIncrease;
+import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.mail.kernel.model.MailMessage;
 import com.liferay.mail.kernel.service.MailService;
 import com.liferay.object.constants.ObjectDefinitionConstants;
@@ -25,6 +27,7 @@ import com.liferay.object.model.ObjectEntry;
 import com.liferay.object.rest.filter.factory.FilterFactory;
 import com.liferay.object.service.ObjectDefinitionLocalService;
 import com.liferay.object.service.ObjectEntryLocalService;
+import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.sql.dsl.expression.Predicate;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
@@ -37,6 +40,7 @@ import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.UserConstants;
+import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
@@ -53,6 +57,7 @@ import com.liferay.portal.kernel.transaction.TransactionConfig;
 import com.liferay.portal.kernel.transaction.TransactionInvokerUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.Base64;
+import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.HtmlUtil;
@@ -182,6 +187,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	@Override
 	public DSRequest fetchDSRequest(long companyId, long dsRequestId) {
 		ObjectEntry dsRequestObjectEntry =
+			_objectEntryLocalService.fetchObjectEntry(dsRequestId);
 
 		if ((dsRequestObjectEntry == null) ||
 			(dsRequestObjectEntry.getCompanyId() != companyId) ||
@@ -216,6 +222,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 		catch (Exception exception) {
 			_log.error(
+				"Unable to load the signature request " + dsRequestId,
+				exception);
 
 			return null;
 		}
@@ -358,6 +366,10 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			return;
 		}
 
+		ObjectDefinition dsRequestDocumentObjectDefinition =
+			_objectDefinitionLocalService.
+				fetchObjectDefinitionByExternalReferenceCode(
+					"L_DS_REQUEST_DOCUMENT", companyId);
 		ObjectDefinition dsRequestObjectDefinition =
 			_objectDefinitionLocalService.
 				fetchObjectDefinitionByExternalReferenceCode(
@@ -367,7 +379,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				fetchObjectDefinitionByExternalReferenceCode(
 					"L_DS_REQUEST_RECIPIENT", companyId);
 
-		if ((dsRequestObjectDefinition == null) ||
+		if ((dsRequestDocumentObjectDefinition == null) ||
+			(dsRequestObjectDefinition == null) ||
 			(dsRequestRecipientObjectDefinition == null)) {
 
 			return;
@@ -397,6 +410,18 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					dsRequestRecipientObjectDefinition);
 				_updateRequestStatus(
 					companyId, groupId, dsEnvelope, dsRequestId);
+
+				if (Objects.equals(
+						_getRequestStatus(dsEnvelope),
+						DSRequestConstants.STATUS_COMPLETED) &&
+					!Objects.equals(
+						MapUtil.getString(values, "requestStatus"),
+						DSRequestConstants.STATUS_COMPLETED)) {
+
+					_updateFileEntries(
+						companyId, groupId, dsEnvelope,
+						dsRequestDocumentObjectDefinition, dsRequestId);
+				}
 			}
 		}
 		catch (Exception exception) {
@@ -576,6 +601,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					MapUtil.getLong(
 						values,
 						"r_dsRequestToDSRequestRecipients_l_dsRequestId"),
+					dsRequestId -> new ArrayList<>());
 
 			dsRequestRecipients.add(new DSRequestRecipient(values));
 		}
@@ -592,16 +618,21 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 		for (long dsRequestId : dsRequestIds) {
 			ObjectEntry dsRequestObjectEntry =
+				_objectEntryLocalService.fetchObjectEntry(dsRequestId);
 
 			if (dsRequestObjectEntry == null) {
 				continue;
 			}
 
 			dsRequestsMap.put(
+				dsRequestId,
 				new DSRequest(
 					dsRequestObjectEntry.getCompanyId(),
+					dsRequestObjectEntry.getCreateDate(), dsRequestId,
 					dsRequestRecipientsMap.getOrDefault(
+						dsRequestId, Collections.emptyList()),
 					fileEntryIdsMap.getOrDefault(
+						dsRequestId, Collections.emptyList()),
 					_getRequesterEmailAddress(dsRequestObjectEntry),
 					_getRequesterName(dsRequestObjectEntry),
 					dsRequestObjectEntry.getUserId(),
@@ -652,6 +683,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			List<Long> fileEntryIds = fileEntryIdsMap.computeIfAbsent(
 				MapUtil.getLong(
 					values, "r_dsRequestToDSRequestDocuments_l_dsRequestId"),
+				dsRequestId -> new ArrayList<>());
 
 			fileEntryIds.add(MapUtil.getLong(values, "fileEntryId"));
 		}
@@ -881,6 +913,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 		catch (Exception exception) {
 			_log.error(
+				"Unable to send sign email for signature request " +
 					dsRequest.getDSRequestId(),
 				exception);
 		}
@@ -1041,6 +1074,9 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 	@Reference
 	private CompanyLocalService _companyLocalService;
+
+	@Reference
+	private DLAppLocalService _dlAppLocalService;
 
 	@Reference
 	private DSEnvelopeManager _dsEnvelopeManager;

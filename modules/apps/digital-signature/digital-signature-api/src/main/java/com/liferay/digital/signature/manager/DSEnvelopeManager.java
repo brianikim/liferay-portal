@@ -35,6 +35,9 @@ public interface DSEnvelopeManager {
 		boolean includeDocuments, String keywords, String order,
 		Pagination pagination, String status);
 
+	public byte[] getSignedDocument(
+		long companyId, long groupId, String dsEnvelopeId, String dsDocumentId);
+
 	public void voidDSEnvelope(
 		long companyId, long groupId, String dsEnvelopeId, String reason);
 
