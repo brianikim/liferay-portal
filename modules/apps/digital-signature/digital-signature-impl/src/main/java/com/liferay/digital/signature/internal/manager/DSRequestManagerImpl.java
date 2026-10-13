@@ -32,8 +32,11 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.UserConstants;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermissionRegistryUtil;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
@@ -123,6 +126,50 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 			return null;
 		}
+	}
+
+	@Override
+	public boolean hasPermission(
+			PermissionChecker permissionChecker, DSRequest dsRequest,
+			String actionId)
+		throws PortalException {
+
+		if (Objects.equals(actionId, ActionKeys.VIEW)) {
+			User user = permissionChecker.getUser();
+
+			if (dsRequest.getRequesterUserId() == user.getUserId()) {
+				return true;
+			}
+
+			for (DSRequestRecipient dsRequestRecipient :
+					dsRequest.getDSRequestRecipients()) {
+
+				if ((dsRequestRecipient.getUserId() == user.getUserId()) ||
+					StringUtil.equalsIgnoreCase(
+						dsRequestRecipient.getEmailAddress(),
+						user.getEmailAddress())) {
+
+					return true;
+				}
+			}
+		}
+
+		ObjectDefinition objectDefinition =
+			_objectDefinitionLocalService.
+				fetchObjectDefinitionByExternalReferenceCode(
+					DSObjectDefinitionConstants.EXTERNAL_REFERENCE_CODE_REQUEST,
+					dsRequest.getCompanyId());
+
+		if (objectDefinition == null) {
+			return false;
+		}
+
+		ModelResourcePermission<?> modelResourcePermission =
+			ModelResourcePermissionRegistryUtil.getModelResourcePermission(
+				objectDefinition.getClassName());
+
+		return modelResourcePermission.contains(
+			permissionChecker, dsRequest.getDSRequestId(), actionId);
 	}
 
 	@Override
@@ -565,7 +612,13 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			DigitalSignatureConfigurationUtil.getDigitalSignatureConfiguration(
 				companyId, groupId);
 
-		return digitalSignatureConfiguration.enabled();
+		if (digitalSignatureConfiguration.embeddedViewEnabled() &&
+			digitalSignatureConfiguration.enabled()) {
+
+			return true;
+		}
+
+		return false;
 	}
 
 	private boolean _isServiceAccount(User user) {

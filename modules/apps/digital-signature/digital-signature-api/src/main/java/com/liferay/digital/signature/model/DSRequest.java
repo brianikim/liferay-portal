@@ -128,6 +128,7 @@ public class DSRequest {
 				DSRequestConstants.STATUSES_REQUEST_TERMINAL, _status) &&
 			_expirationDate.before(new Date())) {
 
+			return DSRequestConstants.STATUS_EXPIRED;
 		}
 
 		return _status;
