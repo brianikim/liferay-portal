@@ -64,6 +64,19 @@ public class AddDSEnvelopeMVCResourceCommand
 		ThemeDisplay themeDisplay = (ThemeDisplay)resourceRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
+		DigitalSignatureConfiguration digitalSignatureConfiguration =
+			DigitalSignatureConfigurationUtil.getDigitalSignatureConfiguration(
+				themeDisplay.getCompanyId(), themeDisplay.getSiteGroupId());
+
+		boolean embeddedViewEnabled = false;
+
+		if (FeatureFlagManagerUtil.isEnabled(
+				themeDisplay.getCompanyId(), "LPD-69290") &&
+			digitalSignatureConfiguration.embeddedViewEnabled()) {
+
+			embeddedViewEnabled = true;
+		}
+
 		DSEnvelope dsEnvelope = new DSEnvelope() {
 			{
 				dsRecipients = _getDSRecipients(resourceRequest);
@@ -73,7 +86,8 @@ public class AddDSEnvelopeMVCResourceCommand
 					resourceRequest, "emailSubject");
 
 				if (FeatureFlagManagerUtil.isEnabled(
-						themeDisplay.getCompanyId(), "LPD-69290")) {
+						themeDisplay.getCompanyId(), "LPD-69290") &&
+					digitalSignatureConfiguration.embeddedViewEnabled()) {
 
 					expireAfter = ParamUtil.getInteger(
 						resourceRequest, "expireAfter");
