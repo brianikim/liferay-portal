@@ -87,12 +87,20 @@ describe('DigitalSignatureForm', () => {
 
 			await userEvent.clear(inputExpireWarn);
 			await userEvent.type(inputExpireWarn, '120');
+	it('Restricts recipients to existing users when embedded signing is enabled', () => {
+		const {getByPlaceholderText, queryByPlaceholderText} = render(
 			<AppContext.Provider value={{embeddedViewEnabled: true}}>
+				<DigitalSignatureForm />
+			</AppContext.Provider>
+		);
 
+		expect(getByPlaceholderText('search-for')).toBeTruthy();
+		expect(queryByPlaceholderText('recipient-email')).toBeNull();
 			expect(
 				getByText(
 					'days-to-warn-recipients-must-be-fewer-than-days-until-expiration'
 				)
+			getByPlaceholderText('recipient-full-name').hasAttribute('disabled')
 			).toBeInTheDocument();
 		});
 	});
