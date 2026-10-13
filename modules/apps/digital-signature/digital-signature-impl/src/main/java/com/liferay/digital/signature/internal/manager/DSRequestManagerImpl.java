@@ -306,7 +306,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 		List<DSRequest> dsRequests = new ArrayList<>();
 
-		if (!_isEnabled(companyId, 0)) {
+		if (!FeatureFlagManagerUtil.isEnabled(companyId, "LPD-69290")) {
 			return dsRequests;
 		}
 
@@ -352,7 +352,9 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			for (long dsRequestId : dsRequestIds) {
 				DSRequest dsRequest = dsRequestsMap.get(dsRequestId);
 
-				if (dsRequest != null) {
+				if ((dsRequest != null) &&
+					_isEnabled(companyId, dsRequest.getSiteGroupId())) {
+
 					dsRequests.add(dsRequest);
 				}
 			}
