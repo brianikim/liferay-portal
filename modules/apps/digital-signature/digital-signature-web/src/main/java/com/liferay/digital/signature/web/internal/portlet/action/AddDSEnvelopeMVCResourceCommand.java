@@ -85,19 +85,16 @@ public class AddDSEnvelopeMVCResourceCommand
 					resourceRequest, "emailMessage");
 				emailSubject = ParamUtil.getString(
 					resourceRequest, "emailSubject");
-
-				if (FeatureFlagManagerUtil.isEnabled(
-						themeDisplay.getCompanyId(), "LPD-69290")) {
-
-					expireAfter = ParamUtil.getInteger(
-						resourceRequest, "expireAfter");
-					expireWarn = ParamUtil.getInteger(
-						resourceRequest, "expireWarn");
-				}
-
 				name = ParamUtil.getString(resourceRequest, "envelopeName");
 			}
 		};
+
+		if (embeddedViewEnabled) {
+			dsEnvelope.setExpireAfter(
+				ParamUtil.getInteger(resourceRequest, "expireAfter"));
+			dsEnvelope.setExpireWarn(
+				ParamUtil.getInteger(resourceRequest, "expireWarn"));
+		}
 
 		if ((dsEnvelope.getExpireAfter() > 0) &&
 			(dsEnvelope.getExpireWarn() >= dsEnvelope.getExpireAfter())) {
@@ -114,11 +111,13 @@ public class AddDSEnvelopeMVCResourceCommand
 				themeDisplay.getPermissionChecker(), fileEntryId,
 				ActionKeys.VIEW);
 
-			if (embeddedViewEnabled) {
-				_fileEntryModelResourcePermission.check(
-					themeDisplay.getPermissionChecker(), fileEntryId,
-					ActionKeys.UPDATE);
+			if (!embeddedViewEnabled) {
+				continue;
 			}
+
+			_fileEntryModelResourcePermission.check(
+				themeDisplay.getPermissionChecker(), fileEntryId,
+				ActionKeys.UPDATE);
 		}
 
 		User user = themeDisplay.getUser();
