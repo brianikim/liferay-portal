@@ -12,6 +12,8 @@ import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
+import com.liferay.digital.signature.model.DSRequest;
+import com.liferay.digital.signature.model.DSRequestRecipient;
 import com.liferay.object.constants.ObjectDefinitionConstants;
 import com.liferay.object.constants.ObjectEntryFolderConstants;
 import com.liferay.object.model.ObjectDefinition;
@@ -20,14 +22,18 @@ import com.liferay.object.rest.filter.factory.FilterFactory;
 import com.liferay.object.service.ObjectDefinitionLocalService;
 import com.liferay.object.service.ObjectEntryLocalService;
 import com.liferay.petra.sql.dsl.expression.Predicate;
+import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.model.UserConstants;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
+import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.transaction.Propagation;
@@ -36,6 +42,8 @@ import com.liferay.portal.kernel.transaction.TransactionInvokerUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.MapUtil;
+import com.liferay.portal.kernel.util.PrefsPropsUtil;
+import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 
@@ -44,11 +52,15 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -88,6 +100,44 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				"Unable to record the signature request for envelope " +
 					dsEnvelope.getDSEnvelopeId(),
 				throwable);
+		}
+	}
+
+	@Override
+	public DSRequest fetchDSRequest(long companyId, long dsRequestId) {
+		ObjectEntry dsRequestObjectEntry =
+
+		if ((dsRequestObjectEntry == null) ||
+			(dsRequestObjectEntry.getCompanyId() != companyId) ||
+			!_isEnabled(companyId, 0)) {
+
+			return null;
+		}
+
+		ObjectDefinition dsRequestObjectDefinition =
+			_objectDefinitionLocalService.
+				fetchObjectDefinitionByExternalReferenceCode(
+					"L_DS_REQUEST", companyId);
+		ObjectDefinition dsRequestRecipientObjectDefinition =
+			_objectDefinitionLocalService.
+				fetchObjectDefinitionByExternalReferenceCode(
+					"L_DS_REQUEST_RECIPIENT", companyId);
+
+		if ((dsRequestObjectDefinition == null) ||
+			(dsRequestRecipientObjectDefinition == null) ||
+			(dsRequestObjectEntry.getObjectDefinitionId() !=
+				dsRequestObjectDefinition.getObjectDefinitionId())) {
+
+			return null;
+		}
+
+		try {
+
+		}
+		catch (Exception exception) {
+			_log.error(
+
+			return null;
 		}
 	}
 
@@ -242,6 +292,67 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					() -> _toDate(dsRecipient.getSentLocalDateTime())
 				).build(),
 				serviceContext);
+		throws Exception {
+
+
+			new HashMap<>();
+
+				_getValuesList(
+					companyId,
+					StringBundler.concat(
+						"(r_dsRequestToDSRequestRecipients_l_dsRequestId in ('",
+
+			List<DSRequestRecipient> dsRequestRecipients =
+					MapUtil.getLong(
+						"r_dsRequestToDSRequestRecipients_l_dsRequestId"),
+
+		}
+
+		for (List<DSRequestRecipient> dsRequestRecipients :
+
+			dsRequestRecipients.sort(
+				Comparator.comparingInt(DSRequestRecipient::getSigningOrder));
+		}
+
+
+			ObjectEntry dsRequestObjectEntry =
+
+			if (dsRequestObjectEntry == null) {
+				continue;
+			}
+
+				new DSRequest(
+					dsRequestObjectEntry.getCompanyId(),
+					_getRequesterEmailAddress(dsRequestObjectEntry),
+					_getRequesterName(dsRequestObjectEntry),
+					dsRequestObjectEntry.getUserId(),
+					dsRequestObjectEntry.getValues()));
+		}
+
+	}
+
+		throws Exception {
+
+
+		ObjectDefinition dsRequestDocumentObjectDefinition =
+			_objectDefinitionLocalService.
+				fetchObjectDefinitionByExternalReferenceCode(
+					"L_DS_REQUEST_DOCUMENT", companyId);
+
+		if (dsRequestDocumentObjectDefinition == null) {
+		}
+
+				_getValuesList(
+					companyId,
+					StringBundler.concat(
+						"(r_dsRequestToDSRequestDocuments_l_dsRequestId in ('",
+
+				MapUtil.getLong(
+
+		}
+
+	}
+
 		}
 	}
 
@@ -311,6 +422,42 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		return null;
 	}
 
+	private String _getRequesterEmailAddress(ObjectEntry dsRequestObjectEntry) {
+		User user = _userLocalService.fetchUser(
+			dsRequestObjectEntry.getUserId());
+
+		if (user == null) {
+			return null;
+		}
+
+		if (_isServiceAccount(user)) {
+			return PrefsPropsUtil.getString(
+				user.getCompanyId(), PropsKeys.ADMIN_EMAIL_FROM_ADDRESS);
+		}
+
+		return user.getEmailAddress();
+	}
+
+	private String _getRequesterName(ObjectEntry dsRequestObjectEntry) {
+		User user = _userLocalService.fetchUser(
+			dsRequestObjectEntry.getUserId());
+
+		if (user == null) {
+			return dsRequestObjectEntry.getUserName();
+		}
+
+		if (_isServiceAccount(user)) {
+			Company company = _companyLocalService.fetchCompany(
+				user.getCompanyId());
+
+			if (company != null) {
+				return company.getName();
+			}
+		}
+
+		return user.getFullName();
+	}
+
 	private ServiceContext _getServiceContext(
 		long companyId, long groupId, long userId) {
 
@@ -355,6 +502,16 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				companyId, groupId);
 
 		return digitalSignatureConfiguration.enabled();
+	private boolean _isServiceAccount(User user) {
+		if ((user.getType() == UserConstants.TYPE_DEFAULT_SERVICE_ACCOUNT) ||
+			(user.getType() == UserConstants.TYPE_SERVICE_ACCOUNT)) {
+
+			return true;
+		}
+
+		return false;
+	}
+
 	}
 
 	private Date _toDate(LocalDateTime localDateTime) {
@@ -448,6 +605,9 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	private static final TransactionConfig _transactionConfig =
 		TransactionConfig.Factory.create(
 			Propagation.REQUIRED, new Class<?>[] {Exception.class});
+
+	@Reference
+	private CompanyLocalService _companyLocalService;
 
 	@Reference
 	private DSEnvelopeManager _dsEnvelopeManager;
