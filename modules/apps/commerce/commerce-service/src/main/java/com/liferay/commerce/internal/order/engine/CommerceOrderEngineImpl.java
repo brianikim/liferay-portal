@@ -574,7 +574,16 @@ public class CommerceOrderEngineImpl implements CommerceOrderEngine {
 					CommerceOrderConstants.getNotificationKey(orderStatus),
 					commerceOrder);
 
+				long principalUserId = userId;
+
+				if (principalUserId == 0) {
+					principalUserId = commerceOrder.getUserId();
+				}
+
 				Message message = new Message();
+
+				message.put("companyId", commerceOrder.getCompanyId());
+				message.put("principalName", String.valueOf(principalUserId));
 
 				DTOConverter<?, ?> commerceOrderDTOConverter =
 					_dtoConverterRegistry.getDTOConverter(
