@@ -48,10 +48,12 @@ import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
+import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
@@ -62,11 +64,13 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -427,7 +431,9 @@ public class DSRequestManagerTest {
 			DSRequestConstants.STATUS_SIGNED, DSRequestConstants.STATUS_VOIDED,
 			localDateTime.plusDays(1), "signed", "voided", localDateTime);
 
+		_testUpdateDSRequestWhenRequestIsCompleted();
 	}
+
 	private DSRequest _addDSRequest(DSEnvelope dsEnvelope, long... fileEntryIds)
 		throws Exception {
 
@@ -701,6 +707,56 @@ public class DSRequestManagerTest {
 				Date.from(statusChangedLocalDateTime.toInstant(ZoneOffset.UTC)),
 				recipientValues.get("requestRecipientStatusDate"));
 		}
+	}
+
+	private void _testUpdateDSRequestWhenRequestIsCompleted() throws Exception {
+		Group group = GroupTestUtil.addGroup();
+
+		DSEnvelope dsEnvelope = _createDSEnvelope();
+		FileEntry fileEntry = _dlAppLocalService.addFileEntry(
+			null, TestPropsValues.getUserId(), group.getGroupId(),
+			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
+			RandomTestUtil.randomString() + ".txt", ContentTypes.TEXT_PLAIN,
+			TestDataConstants.TEST_BYTE_ARRAY, null, null, null,
+			ServiceContextTestUtil.getServiceContext(group.getGroupId()));
+
+		_addDSRequest(dsEnvelope, fileEntry.getFileEntryId());
+
+		dsEnvelope.setStatus(DSRequestConstants.STATUS_COMPLETED);
+
+		byte[] bytes = RandomTestUtil.randomBytes();
+
+		DSEnvelopeManager dsEnvelopeManager =
+			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager",
+				ProxyUtil.newProxyInstance(
+					DSEnvelopeManager.class.getClassLoader(),
+					new Class<?>[] {DSEnvelopeManager.class},
+					(proxy, method, arguments) -> {
+						if (Objects.equals(
+								method.getName(), "getSignedDocument")) {
+
+							return bytes;
+						}
+
+						return dsEnvelope;
+					}));
+
+		try {
+			_dsRequestManager.updateDSRequest(
+				TestPropsValues.getCompanyId(), TestPropsValues.getGroupId(),
+				dsEnvelope.getDSEnvelopeId());
+		}
+		finally {
+			ReflectionTestUtil.setFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager);
+		}
+
+		fileEntry = _dlAppLocalService.getFileEntry(fileEntry.getFileEntryId());
+
+		Assert.assertArrayEquals(
+			bytes, FileUtil.getBytes(fileEntry.getContentStream()));
+		Assert.assertEquals("2.0", fileEntry.getVersion());
 	}
 
 	private CompanyConfigurationTemporarySwapper
