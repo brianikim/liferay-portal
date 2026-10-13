@@ -88,6 +88,7 @@ describe('DigitalSignatureForm', () => {
 		).toBeInTheDocument();
 	});
 
+			<AppContext.Provider value={{embeddedViewEnabled: true}}>
 
 			expect(
 			).toBeInTheDocument();
