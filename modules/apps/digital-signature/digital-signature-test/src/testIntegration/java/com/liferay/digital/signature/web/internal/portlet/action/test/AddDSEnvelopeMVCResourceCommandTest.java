@@ -6,21 +6,37 @@
 package com.liferay.digital.signature.web.internal.portlet.action.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.model.DSEnvelope;
-import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.document.library.kernel.model.DLFolderConstants;
+import com.liferay.document.library.kernel.service.DLAppLocalService;
+import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
+import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
+import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.security.auth.PrincipalException;
+import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
 import com.liferay.portal.kernel.service.CompanyLocalService;
-import com.liferay.portal.kernel.test.AssertUtils;
+import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
+import com.liferay.portal.kernel.test.constants.TestDataConstants;
 import com.liferay.portal.kernel.test.portlet.MockLiferayResourceRequest;
 import com.liferay.portal.kernel.test.portlet.MockLiferayResourceResponse;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
+import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
+import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
+import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
+import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.ContentTypes;
+import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.test.rule.FeatureFlag;
@@ -131,13 +147,224 @@ public class AddDSEnvelopeMVCResourceCommandTest {
 		Assert.assertEquals(dsEnvelopeId, jsonObject.getString("dsEnvelopeId"));
 	}
 
+	@FeatureFlag(enable = false, value = "LPD-69290")
+	@Test
+	public void testDoTransactionalCommandWhenFeatureFlagIsDisabled()
+		throws Exception {
+
+		MockLiferayResourceRequest mockLiferayResourceRequest =
+			new MockLiferayResourceRequest();
+
+		ThemeDisplay themeDisplay = new ThemeDisplay();
+
+		themeDisplay.setCompany(
+			_companyLocalService.getCompany(TestPropsValues.getCompanyId()));
+		themeDisplay.setSiteGroupId(TestPropsValues.getGroupId());
+		themeDisplay.setUser(TestPropsValues.getUser());
+
+		mockLiferayResourceRequest.setAttribute(
+			WebKeys.THEME_DISPLAY, themeDisplay);
+
+		mockLiferayResourceRequest.setParameter("expireAfter", "5");
+		mockLiferayResourceRequest.setParameter("expireWarn", "5");
+		mockLiferayResourceRequest.setParameter("recipients", "[]");
+
+		String dsEnvelopeId = RandomTestUtil.randomString();
+
+		DSEnvelopeManager dsEnvelopeManager =
+			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
+				_mvcResourceCommand, "_dsEnvelopeManager",
+				ProxyUtil.newProxyInstance(
+					DSEnvelopeManager.class.getClassLoader(),
+					new Class<?>[] {DSEnvelopeManager.class},
+					(proxy, method, arguments) -> {
+						DSEnvelope dsEnvelope = (DSEnvelope)arguments[2];
+
+						Assert.assertEquals(0, dsEnvelope.getExpireAfter());
+						Assert.assertEquals(0, dsEnvelope.getExpireWarn());
+
+						dsEnvelope.setDSEnvelopeId(dsEnvelopeId);
+
+						return dsEnvelope;
+					}));
+
+		MockLiferayResourceResponse mockLiferayResourceResponse =
+			new MockLiferayResourceResponse();
+
+		try (CompanyConfigurationTemporarySwapper
+				companyConfigurationTemporarySwapper =
+					new CompanyConfigurationTemporarySwapper(
+						TestPropsValues.getCompanyId(),
+						DigitalSignatureConfiguration.class.getName(),
+						HashMapDictionaryBuilder.<String, Object>put(
+							"embeddedViewEnabled", true
+						).build())) {
+
+			ReflectionTestUtil.invoke(
+				_mvcResourceCommand, "doTransactionalCommand",
+				new Class<?>[] {ResourceRequest.class, ResourceResponse.class},
+				mockLiferayResourceRequest, mockLiferayResourceResponse);
+		}
+		finally {
+			ReflectionTestUtil.setFieldValue(
+				_mvcResourceCommand, "_dsEnvelopeManager", dsEnvelopeManager);
+		}
+
+		ByteArrayOutputStream byteArrayOutputStream =
+			(ByteArrayOutputStream)
+				mockLiferayResourceResponse.getPortletOutputStream();
+
+		JSONObject jsonObject = _jsonFactory.createJSONObject(
+			byteArrayOutputStream.toString());
+
+		Assert.assertEquals(dsEnvelopeId, jsonObject.getString("dsEnvelopeId"));
+	}
+
+	@Test
+	public void testDoTransactionalCommandWithoutFileEntryUpdatePermission()
+		throws Exception {
+
+		_group = GroupTestUtil.addGroup();
+		_user = UserTestUtil.addUser();
+
+		MockLiferayResourceRequest mockLiferayResourceRequest =
+			new MockLiferayResourceRequest();
+
+		ThemeDisplay themeDisplay = new ThemeDisplay();
+
+		themeDisplay.setCompany(
+			_companyLocalService.getCompany(TestPropsValues.getCompanyId()));
+		themeDisplay.setPermissionChecker(
+			PermissionCheckerFactoryUtil.create(_user));
+		themeDisplay.setSiteGroupId(_group.getGroupId());
+		themeDisplay.setUser(_user);
+
+		mockLiferayResourceRequest.setAttribute(
+			WebKeys.THEME_DISPLAY, themeDisplay);
+
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(_group.getGroupId());
+
+		serviceContext.setAddGroupPermissions(false);
+		serviceContext.setAddGuestPermissions(true);
+
+		FileEntry fileEntry = _dlAppLocalService.addFileEntry(
+			null, TestPropsValues.getUserId(), _group.getGroupId(),
+			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
+			RandomTestUtil.randomString() + ".pdf",
+			ContentTypes.APPLICATION_PDF, TestDataConstants.TEST_BYTE_ARRAY,
+			null, null, null, serviceContext);
+
+		mockLiferayResourceRequest.setParameter(
+			"fileEntryIds", String.valueOf(fileEntry.getFileEntryId()));
+
+		mockLiferayResourceRequest.setParameter("recipients", "[]");
+
+		try (CompanyConfigurationTemporarySwapper
+				companyConfigurationTemporarySwapper =
+					new CompanyConfigurationTemporarySwapper(
+						TestPropsValues.getCompanyId(),
+						DigitalSignatureConfiguration.class.getName(),
+						HashMapDictionaryBuilder.<String, Object>put(
+							"embeddedViewEnabled", false
+						).build())) {
+
+			Assert.assertThrows(
+				PrincipalException.MustHavePermission.class,
+				() -> ReflectionTestUtil.invoke(
+					_mvcResourceCommand, "doTransactionalCommand",
+					new Class<?>[] {
+						ResourceRequest.class, ResourceResponse.class
+					},
+					mockLiferayResourceRequest,
+					new MockLiferayResourceResponse()));
+		}
+
+		try (CompanyConfigurationTemporarySwapper
+				companyConfigurationTemporarySwapper =
+					new CompanyConfigurationTemporarySwapper(
+						TestPropsValues.getCompanyId(),
+						DigitalSignatureConfiguration.class.getName(),
+						HashMapDictionaryBuilder.<String, Object>put(
+							"embeddedViewEnabled", true
+						).build())) {
+
+			Assert.assertThrows(
+				PrincipalException.MustHavePermission.class,
+				() -> ReflectionTestUtil.invoke(
+					_mvcResourceCommand, "doTransactionalCommand",
+					new Class<?>[] {
+						ResourceRequest.class, ResourceResponse.class
+					},
+					mockLiferayResourceRequest,
+					new MockLiferayResourceResponse()));
+		}
+	}
+
+	@Test
+	public void testDoTransactionalCommandWithoutFileEntryViewPermission()
+		throws Exception {
+
+		_group = GroupTestUtil.addGroup();
+
+		_user = UserTestUtil.addUser();
+
+		MockLiferayResourceRequest mockLiferayResourceRequest =
+			new MockLiferayResourceRequest();
+
+		ThemeDisplay themeDisplay = new ThemeDisplay();
+
+		themeDisplay.setCompany(
+			_companyLocalService.getCompany(TestPropsValues.getCompanyId()));
+		themeDisplay.setPermissionChecker(
+			PermissionCheckerFactoryUtil.create(_user));
+		themeDisplay.setUser(_user);
+
+		mockLiferayResourceRequest.setAttribute(
+			WebKeys.THEME_DISPLAY, themeDisplay);
+
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(_group.getGroupId());
+
+		serviceContext.setAddGroupPermissions(false);
+		serviceContext.setAddGuestPermissions(false);
+
+		FileEntry fileEntry = _dlAppLocalService.addFileEntry(
+			null, TestPropsValues.getUserId(), _group.getGroupId(),
+			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
+			RandomTestUtil.randomString() + ".pdf",
+			ContentTypes.APPLICATION_PDF, TestDataConstants.TEST_BYTE_ARRAY,
+			null, null, null, serviceContext);
+
+		mockLiferayResourceRequest.setParameter(
+			"fileEntryIds", String.valueOf(fileEntry.getFileEntryId()));
+
+		mockLiferayResourceRequest.setParameter("recipients", "[]");
+
+		Assert.assertThrows(
+			PrincipalException.MustHavePermission.class,
+			() -> ReflectionTestUtil.invoke(
+				_mvcResourceCommand, "doTransactionalCommand",
+				new Class<?>[] {ResourceRequest.class, ResourceResponse.class},
+				mockLiferayResourceRequest, new MockLiferayResourceResponse()));
+	}
+
 	@Inject
 	private CompanyLocalService _companyLocalService;
+
+	@Inject
+	private DLAppLocalService _dlAppLocalService;
+
+	@DeleteAfterTestRun
+	private Group _group;
 
 	@Inject
 	private JSONFactory _jsonFactory;
 
 	@Inject(filter = "mvc.command.name=/digital_signature/add_ds_envelope")
 	private MVCResourceCommand _mvcResourceCommand;
+
+	@DeleteAfterTestRun
+	private User _user;
 
 }
