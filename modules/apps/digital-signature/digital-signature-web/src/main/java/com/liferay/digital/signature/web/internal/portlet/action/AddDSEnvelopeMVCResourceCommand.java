@@ -63,12 +63,23 @@ public class AddDSEnvelopeMVCResourceCommand extends BaseMVCResourceCommand {
 		ThemeDisplay themeDisplay = (ThemeDisplay)resourceRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
+		DigitalSignatureConfiguration digitalSignatureConfiguration =
+			DigitalSignatureConfigurationUtil.getDigitalSignatureConfiguration(
+				themeDisplay.getCompanyId(), themeDisplay.getSiteGroupId());
+
+		boolean embeddedViewEnabled = false;
+
+		if (FeatureFlagManagerUtil.isEnabled(
+				themeDisplay.getCompanyId(), "LPD-69290") &&
+			digitalSignatureConfiguration.embeddedViewEnabled()) {
+
+			embeddedViewEnabled = true;
+		}
+
 		int expireAfter = 0;
 		int expireWarn = 0;
 
-		if (FeatureFlagManagerUtil.isEnabled(
-				themeDisplay.getCompanyId(), "LPD-69290")) {
-
+		if (embeddedViewEnabled) {
 			expireAfter = ParamUtil.getInteger(resourceRequest, "expireAfter");
 			expireWarn = ParamUtil.getInteger(resourceRequest, "expireWarn");
 
