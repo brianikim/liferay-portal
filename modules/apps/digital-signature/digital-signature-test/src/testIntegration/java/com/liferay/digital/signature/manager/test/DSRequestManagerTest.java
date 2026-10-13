@@ -16,10 +16,12 @@ import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.digital.signature.model.DSRequest;
+import com.liferay.digital.signature.model.DSRequestRecipient;
 import com.liferay.digital.signature.url.DSRequestURLProvider;
 import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.model.DLFolder;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
+import com.liferay.document.library.kernel.model.DLVersionNumberIncrease;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.document.library.kernel.service.DLFolderLocalService;
 import com.liferay.notification.constants.NotificationRecipientSettingConstants;
@@ -49,7 +51,10 @@ import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
+import com.liferay.portal.kernel.portletfilerepository.PortletFileRepository;
 import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.repository.model.FileVersion;
+import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
@@ -72,7 +77,9 @@ import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
+import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.MapUtil;
@@ -193,17 +200,27 @@ public class DSRequestManagerTest {
 
 	@Test
 	public void testAddDSRequest() throws Exception {
-		DSEnvelope dsEnvelope1 = _createDSEnvelope();
-
-		User user = TestPropsValues.getUser();
+		User user1 = TestPropsValues.getUser();
 
 		DSRecipient dsRecipient1 = _createDSRecipient(user1.getEmailAddress());
 
 		dsRecipient1.setRoutingOrder(2);
 
-		dsEnvelope1.setDSRecipients(
-			ListUtil.fromArray(
-				dsRecipient1, _createDSRecipient(UserTestUtil.addUser())));
+		LocalDateTime dsEnvelopeStatusLocalDateTime =
+			LocalDateTime.ofEpochSecond(
+				System.currentTimeMillis() / 1000, 0, ZoneOffset.UTC);
+
+		LocalDateTime dsRecipientStatusLocalDateTime =
+			dsEnvelopeStatusLocalDateTime.minusHours(1);
+
+		dsRecipient1.setStatusLocalDateTime(dsRecipientStatusLocalDateTime);
+
+		User user2 = UserTestUtil.addUser();
+
+		DSEnvelope dsEnvelope1 = _createDSEnvelope(
+			dsRecipient1, _createDSRecipient(user2.getEmailAddress()));
+
+		dsEnvelope1.setStatusLocalDateTime(dsEnvelopeStatusLocalDateTime);
 
 		FileEntry fileEntry1 = _addFileEntry();
 
@@ -256,6 +273,9 @@ public class DSRequestManagerTest {
 			DSRequestConstants.STATUS_SENT,
 			MapUtil.getString(dsRequestValues, "requestStatus"));
 		Assert.assertEquals(
+			Date.from(dsEnvelopeStatusLocalDateTime.toInstant(ZoneOffset.UTC)),
+			dsRequestValues.get("requestStatusDate"));
+		Assert.assertEquals(
 			TestPropsValues.getGroupId(),
 			MapUtil.getLong(dsRequestValues, "siteGroupId"));
 
@@ -268,8 +288,22 @@ public class DSRequestManagerTest {
 			dsRequestDocumentValuesList.toString(), 1,
 			dsRequestDocumentValuesList.size());
 
-		List<Map<String, Serializable>> dsRequestRecipientValuesList = ListUtil.filter(
-			_getDSRequestRecipientValuesList(dsRequestValues),
+		List<Map<String, Serializable>> dsRequestRecipientValuesList =
+			_getDSRequestRecipientValuesList(
+				dsRequestObjectEntry.getObjectEntryId());
+
+		Assert.assertEquals(
+			new HashSet<>(
+				TransformUtil.transform(
+					dsEnvelope1.getDSRecipients(),
+					DSRecipient::getEmailAddress)),
+			new HashSet<>(
+				TransformUtil.transform(
+					dsRequestRecipientValuesList,
+					values -> MapUtil.getString(values, "emailAddress"))));
+
+		dsRequestRecipientValuesList = ListUtil.filter(
+			dsRequestRecipientValuesList,
 			values -> Objects.equals(
 				dsRecipient1.getEmailAddress(),
 				MapUtil.getString(values, "emailAddress")));
@@ -277,24 +311,23 @@ public class DSRequestManagerTest {
 		Assert.assertEquals(
 			dsRequestRecipientValuesList.toString(), 1,
 			dsRequestRecipientValuesList.size());
+
+		Map<String, Serializable> dsRequestRecipientValues =
+			dsRequestRecipientValuesList.get(0);
+
 		Assert.assertEquals(
 			user1.getFullName(),
 			MapUtil.getString(dsRequestRecipientValues, "name"));
 		Assert.assertEquals(
 			user1.getUserId(),
 			MapUtil.getLong(
-				dsRequestRecipientValuesList.get(0),
+				dsRequestRecipientValues,
 				"r_userToDSRequestRecipients_userId"));
-
-		DSEnvelope dsEnvelope2 = _createDSEnvelope();
-
-		DSRecipient dsRecipient2 = _createDSRecipient();
-
-		dsRecipient2.setName(RandomTestUtil.randomString(281));
-
-		dsEnvelope2.setDSRecipients(ListUtil.fromArray(dsRecipient2));
-
-		Group group = GroupTestUtil.addGroup();
+		Assert.assertEquals(
+			Date.from(dsRecipientStatusLocalDateTime.toInstant(ZoneOffset.UTC)),
+			dsRequestRecipientValues.get("requestRecipientStatusDate"));
+		Assert.assertEquals(
+			2, MapUtil.getInteger(dsRequestRecipientValues, "signingOrder"));
 
 		MockLiferayResourceRequest mockLiferayResourceRequest =
 			new MockLiferayResourceRequest();
@@ -325,6 +358,14 @@ public class DSRequestManagerTest {
 					"fullName", user1.getFullName()
 				)
 			).toString());
+
+		DSRecipient dsRecipient2 = _createDSRecipient();
+
+		dsRecipient2.setName(RandomTestUtil.randomString(281));
+
+		DSEnvelope dsEnvelope2 = _createDSEnvelope(dsRecipient2);
+
+		Queue<Object[]> argumentsList = new LinkedList<>();
 
 		DSEnvelopeManager dsEnvelopeManager =
 			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
@@ -390,12 +431,16 @@ public class DSRequestManagerTest {
 				_dsRequestRecipientObjectDefinition));
 
 		_testAddDSRequestWhenDSEnvelopeIdIsNull();
+		_testAddDSRequestWhenDSEnvelopeVoidFails();
+		_testAddDSRequestWhenDSRecipientIsInvalid();
+		_testAddDSRequestWhenDSRequestRecipientUserIsDeleted();
+		_testAddDSRequestWhenDigitalSignatureIsDisabled();
 		_testAddDSRequestWhenEmbeddedViewIsDisabled();
 		_testAddDSRequestWhenExpirationIsInvalid();
+		_testAddDSRequestWhenExpiredDSEnvelopeIsCompleted();
 		_testAddDSRequestWhenFeatureFlagIsDisabled();
 		_testAddDSRequestWhenFileEntryIsInvalid();
-		_testAddDSRequestWhenRecipientIsInvalid();
-		_testAddDSRequestWhenDSRequestRecipientUserIsDeleted();
+		_testAddDSRequestWhenGroupIsStagingGroup();
 	}
 
 	@Test
@@ -591,24 +636,44 @@ public class DSRequestManagerTest {
 			System.currentTimeMillis() / 1000, 0, ZoneOffset.UTC);
 
 		_testUpdateDSRequest(
-			RandomTestUtil.randomString(), DSRequestConstants.STATUS_CREATED, DSRequestConstants.STATUS_CREATED, localDateTime.plusDays(1), "autoresponded", localDateTime);
+			RandomTestUtil.randomString(), "autoresponded",
+			DSRequestConstants.STATUS_CREATED,
+			DSRequestConstants.STATUS_CREATED, localDateTime.plusDays(1),
+			localDateTime);
 		_testUpdateDSRequest(
-			"declined", DSRequestConstants.STATUS_DECLINED, DSRequestConstants.STATUS_DECLINED, localDateTime.plusDays(1), "declined", localDateTime);
+			"declined", "declined", DSRequestConstants.STATUS_DECLINED,
+			DSRequestConstants.STATUS_DECLINED, localDateTime.plusDays(1),
+			localDateTime);
 		_testUpdateDSRequest(
-			"voided", DSRequestConstants.STATUS_EXPIRED, DSRequestConstants.STATUS_EXPIRED, localDateTime, "sent", localDateTime);
+			"voided", "sent", DSRequestConstants.STATUS_EXPIRED,
+			DSRequestConstants.STATUS_EXPIRED, localDateTime, localDateTime);
 		_testUpdateDSRequest(
-			"delivered", DSRequestConstants.STATUS_SENT, DSRequestConstants.STATUS_SENT, localDateTime.plusDays(1), "delivered", localDateTime);
+			"delivered", "delivered", DSRequestConstants.STATUS_SENT,
+			DSRequestConstants.STATUS_SENT, localDateTime.plusDays(1),
+			localDateTime);
 		_testUpdateDSRequest(
-			"voided", DSRequestConstants.STATUS_SIGNED, DSRequestConstants.STATUS_EXPIRED, localDateTime, "signed", localDateTime);
+			"voided", "signed", DSRequestConstants.STATUS_SIGNED,
+			DSRequestConstants.STATUS_EXPIRED, localDateTime, localDateTime);
 		_testUpdateDSRequest(
-			"signed", DSRequestConstants.STATUS_SIGNED, DSRequestConstants.STATUS_SENT, localDateTime.plusDays(1), "signed", localDateTime);
+			"signed", "signed", DSRequestConstants.STATUS_SIGNED,
+			DSRequestConstants.STATUS_SENT, localDateTime.plusDays(1),
+			localDateTime);
 		_testUpdateDSRequest(
-			"voided", DSRequestConstants.STATUS_SIGNED, DSRequestConstants.STATUS_VOIDED, localDateTime.plusDays(1), "signed", localDateTime);
+			"voided", "signed", DSRequestConstants.STATUS_SIGNED,
+			DSRequestConstants.STATUS_VOIDED, localDateTime.plusDays(1),
+			localDateTime);
 		_testUpdateDSRequest(
-			"voided", DSRequestConstants.STATUS_VOIDED, DSRequestConstants.STATUS_VOIDED, localDateTime.plusDays(1), "sent", localDateTime);
+			"voided", "sent", DSRequestConstants.STATUS_VOIDED,
+			DSRequestConstants.STATUS_VOIDED, localDateTime.plusDays(1),
+			localDateTime);
+		_testUpdateDSRequest(
+			"voided", "sent", DSRequestConstants.STATUS_VOIDED,
+			DSRequestConstants.STATUS_VOIDED, null, localDateTime);
 
+		_testUpdateDSRequestWhenDSEnvelopeIsCompleted();
+		_testUpdateDSRequestWhenDSRecipientStatusesDiffer();
 		_testUpdateDSRequestWhenObjectEntryIsNotDSRequest();
-		_testUpdateDSRequestWhenRecipientStatusesDiffer();
+		_testUpdateDSRequestWhenSignedDocumentIsNotPDF();
 	}
 
 	@Test
@@ -722,13 +787,16 @@ public class DSRequestManagerTest {
 		return dsEnvelope;
 	}
 
-	private DSEnvelope _createDSEnvelope(User user) {
+	private DSEnvelope _createDSEnvelope(DSRecipient... dsRecipients) {
 		DSEnvelope dsEnvelope = _createDSEnvelope();
 
-		dsEnvelope.setDSRecipients(
-			ListUtil.fromArray(_createDSRecipient(user)));
+		dsEnvelope.setDSRecipients(ListUtil.fromArray(dsRecipients));
 
 		return dsEnvelope;
+	}
+
+	private DSEnvelope _createDSEnvelope(User user) {
+		return _createDSEnvelope(_createDSRecipient(user));
 	}
 
 	private DSRecipient _createDSRecipient() {
@@ -808,13 +876,11 @@ public class DSRequestManagerTest {
 	}
 
 	private void _testAddDSRequestWhenDSEnvelopeIdIsNull() throws Exception {
-		DSEnvelope dsEnvelope = _createDSEnvelope();
-
-		dsEnvelope.setDSEnvelopeId(null);
-
 		DSRecipient dsRecipient = _createDSRecipient();
 
-		dsEnvelope.setDSRecipients(ListUtil.fromArray(dsRecipient));
+		DSEnvelope dsEnvelope = _createDSEnvelope(dsRecipient);
+
+		dsEnvelope.setDSEnvelopeId(null);
 
 		AssertUtils.assertFailure(
 			PortalException.class,
@@ -829,18 +895,133 @@ public class DSRequestManagerTest {
 				_dsRequestRecipientObjectDefinition));
 	}
 
+	private void _testAddDSRequestWhenDSEnvelopeVoidFails() throws Exception {
+		DSEnvelope dsEnvelope = _createDSEnvelope(
+			_createDSRecipient(UserTestUtil.addUser()));
+		FileEntry fileEntry = _addFileEntry();
+
+		DSEnvelopeManager dsEnvelopeManager =
+			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager",
+				ProxyUtil.newProxyInstance(
+					DSEnvelopeManager.class.getClassLoader(),
+					new Class<?>[] {DSEnvelopeManager.class},
+					(proxy, method, arguments) -> {
+						if (Objects.equals(
+								method.getName(), "voidDSEnvelope")) {
+
+							throw new PortalException();
+						}
+
+						DSEnvelope addedDSEnvelope = (DSEnvelope)arguments[2];
+
+						addedDSEnvelope.setDSEnvelopeId(null);
+
+						return addedDSEnvelope;
+					}));
+
+		try (LogCapture logCapture = LoggerTestUtil.configureLog4JLogger(
+				"com.liferay.digital.signature.internal.manager." +
+					"DSRequestManagerImpl",
+				LoggerTestUtil.ERROR)) {
+
+			PortalException portalException = Assert.assertThrows(
+				PortalException.class,
+				() -> _dsRequestManager.addDSRequest(
+					TestPropsValues.getCompanyId(),
+					TestPropsValues.getGroupId(), TestPropsValues.getUserId(),
+					dsEnvelope, new long[] {fileEntry.getFileEntryId()}));
+
+			Assert.assertEquals(
+				"A digital signature request requires a digital signature " +
+					"envelope ID",
+				portalException.getMessage());
+
+			Throwable[] suppressedThrowables = portalException.getSuppressed();
+
+			Assert.assertEquals(
+				Arrays.toString(suppressedThrowables), 1,
+				suppressedThrowables.length);
+
+			List<LogEntry> logEntries = logCapture.getLogEntries();
+
+			Assert.assertEquals(logEntries.toString(), 1, logEntries.size());
+		}
+		finally {
+			ReflectionTestUtil.setFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager);
+		}
+	}
+
+	private void _testAddDSRequestWhenDSRecipientIsInvalid() throws Exception {
+		User user = UserTestUtil.addUser();
+
+		DSEnvelope dsEnvelope = _createDSEnvelope(
+			_createDSRecipient(user), _createDSRecipient(user));
+
+		FileEntry fileEntry = _addFileEntry();
+
+		AssertUtils.assertFailure(
+			DSRequestException.DuplicateRecipient.class,
+			"User " + user.getUserId() +
+				" is already a digital signature request recipient",
+			() -> _addDSRequest(dsEnvelope, fileEntry));
+
+		User guestUser = _userLocalService.getGuestUser(
+			TestPropsValues.getCompanyId());
+
+		dsEnvelope.setDSRecipients(
+			ListUtil.fromArray(_createDSRecipient(guestUser)));
+
+		AssertUtils.assertFailure(
+			DSRequestException.InvalidRecipient.class,
+			"User " + guestUser.getUserId() +
+				" cannot be a digital signature request recipient",
+			() -> _addDSRequest(dsEnvelope, fileEntry));
+
+		User inactiveUser = UserTestUtil.addUser();
+
+		inactiveUser = _userLocalService.updateStatus(
+			inactiveUser.getUserId(), WorkflowConstants.STATUS_INACTIVE,
+			ServiceContextTestUtil.getServiceContext());
+
+		dsEnvelope.setDSRecipients(
+			ListUtil.fromArray(_createDSRecipient(inactiveUser)));
+
+		AssertUtils.assertFailure(
+			DSRequestException.InvalidRecipient.class,
+			"User " + inactiveUser.getUserId() +
+				" cannot be a digital signature request recipient",
+			() -> _addDSRequest(dsEnvelope, fileEntry));
+
+		DSRecipient dsRecipient = _createDSRecipient();
+
+		dsEnvelope.setDSRecipients(ListUtil.fromArray(dsRecipient));
+
+		AssertUtils.assertFailure(
+			DSRequestException.RecipientMustExist.class,
+			"No user exists with email address " +
+				dsRecipient.getEmailAddress(),
+			() -> _addDSRequest(dsEnvelope, fileEntry));
+
+		dsEnvelope.setDSRecipients(
+			ListUtil.fromArray(_createDSRecipient(user)));
+
+		DSRequest dsRequest = _addDSRequest(dsEnvelope, fileEntry);
+
+		Assert.assertEquals(
+			dsEnvelope.getDSEnvelopeId(), dsRequest.getExternalReferenceCode());
+	}
+
 	private void _testAddDSRequestWhenDSRequestRecipientUserIsDeleted()
 		throws Exception {
-
-		DSEnvelope dsEnvelope = _createDSEnvelope();
 
 		User user = UserTestUtil.addUser();
 
 		DSRecipient dsRecipient = _createDSRecipient(user);
 
-		dsEnvelope.setDSRecipients(ListUtil.fromArray(dsRecipient));
-
-		_addDSRequest(dsEnvelope, RandomTestUtil.randomInt());
+		_addDSRequest(
+			_createDSEnvelope(dsRecipient), RandomTestUtil.randomInt());
 
 		String filterString =
 			"(emailAddress eq '" + dsRecipient.getEmailAddress() + "')";
@@ -931,8 +1112,8 @@ public class DSRequestManagerTest {
 						).build())) {
 
 			AssertUtils.assertFailure(
-				PortalException.class,
-				"Digital signatures are not enabled for group " +
+				DSRequestException.MustBeEnabled.class,
+				"Digital signature is not enabled for site " +
 					TestPropsValues.getGroupId(),
 				() -> _addDSRequest(dsEnvelope, fileEntry));
 		}
@@ -952,15 +1133,22 @@ public class DSRequestManagerTest {
 		FileEntry fileEntry = _addFileEntry();
 
 		AssertUtils.assertFailure(
-			PortalException.class,
-			"Days until expiration and days to warn signers must not be " +
-				"negative",
+			DSRequestException.ExpirationMustNotBeNegative.class,
+			"Expire after and expire warn must not be negative",
+			() -> _addDSRequest(dsEnvelope, fileEntry));
+
+		dsEnvelope.setExpireAfter(5);
+		dsEnvelope.setExpireWarn(-1);
+
+		AssertUtils.assertFailure(
+			DSRequestException.ExpirationMustNotBeNegative.class,
+			"Expire after and expire warn must not be negative",
 			() -> _addDSRequest(dsEnvelope, fileEntry));
 
 		dsEnvelope.setExpireWarn(5);
 
 		AssertUtils.assertFailure(
-			PortalException.class,
+			DSRequestException.ExpireWarnMustBeLessThanExpireAfter.class,
 			"Expire warn must be less than expire after",
 			() -> _addDSRequest(dsEnvelope, fileEntry));
 
@@ -1045,8 +1233,8 @@ public class DSRequestManagerTest {
 					false, "LPD-69290")) {
 
 			AssertUtils.assertFailure(
-				PortalException.class,
-				"Digital signatures are not enabled for group " +
+				DSRequestException.MustBeEnabled.class,
+				"Digital signature is not enabled for site " +
 					TestPropsValues.getGroupId(),
 				() -> _dsRequestManager.addDSRequest(
 					TestPropsValues.getCompanyId(),
@@ -1064,8 +1252,8 @@ public class DSRequestManagerTest {
 
 	private void _testAddDSRequestWhenFileEntryIsInvalid() throws Exception {
 		AssertUtils.assertFailure(
-			PortalException.class,
-			"A signature request must have at least one file entry",
+			DSRequestException.MustHaveFileEntry.class,
+			"A digital signature request must have at least one file entry",
 			() -> _dsRequestManager.addDSRequest(
 				TestPropsValues.getCompanyId(), TestPropsValues.getGroupId(),
 				TestPropsValues.getUserId(), new DSEnvelope(), new long[0]));
@@ -1081,7 +1269,7 @@ public class DSRequestManagerTest {
 			DSRequestException.FileEntryHasDSRequest.class,
 			StringBundler.concat(
 				"File entry ", fileEntry.getFileEntryId(),
-				" already has a signature request with status \"",
+				" already has a digital signature request with status \"",
 				DSRequestConstants.STATUS_SENT, "\""),
 			() -> _addDSRequest(dsEnvelope2, fileEntry));
 
@@ -1117,69 +1305,22 @@ public class DSRequestManagerTest {
 		}
 	}
 
-	private void _testAddDSRequestWhenRecipientIsInvalid() throws Exception {
-		DSEnvelope dsEnvelope = _createDSEnvelope();
+	private void _testAddDSRequestWhenGroupIsStagingGroup() throws Exception {
+		Group group = GroupTestUtil.addGroup();
 
-		User user = UserTestUtil.addUser();
+		group.setLiveGroupId(TestPropsValues.getGroupId());
 
-		dsEnvelope.setDSRecipients(
-			ListUtil.fromArray(
-				_createDSRecipient(user), _createDSRecipient(user)));
-
-		FileEntry fileEntry = _addFileEntry();
+		Group stagingGroup = _groupLocalService.updateGroup(group);
 
 		AssertUtils.assertFailure(
-			PortalException.class,
-			"User " + user.getUserId() +
-				" is already a signature request recipient",
-			() -> _addDSRequest(dsEnvelope, fileEntry));
-
-		User guestUser = _userLocalService.getGuestUser(
-			TestPropsValues.getCompanyId());
-
-		dsEnvelope.setDSRecipients(
-			ListUtil.fromArray(_createDSRecipient(guestUser)));
-
-		AssertUtils.assertFailure(
-			PortalException.class,
-			"User " + guestUser.getUserId() +
-				" cannot be a signature request recipient",
-			() -> _addDSRequest(dsEnvelope, fileEntry));
-
-		User inactiveUser = UserTestUtil.addUser();
-
-		inactiveUser = _userLocalService.updateStatus(
-			inactiveUser.getUserId(), WorkflowConstants.STATUS_INACTIVE,
-			ServiceContextTestUtil.getServiceContext());
-
-		dsEnvelope.setDSRecipients(
-			ListUtil.fromArray(_createDSRecipient(inactiveUser)));
-
-		AssertUtils.assertFailure(
-			PortalException.class,
-			"User " + inactiveUser.getUserId() +
-				" cannot be a signature request recipient",
-			() -> _addDSRequest(dsEnvelope, fileEntry));
-
-		DSRecipient dsRecipient = _createDSRecipient();
-
-		dsEnvelope.setDSRecipients(ListUtil.fromArray(dsRecipient));
-
-		AssertUtils.assertFailure(
-			NoSuchUserException.class,
-			StringBundler.concat(
-				"No User exists with the key {companyId=",
-				TestPropsValues.getCompanyId(), ", emailAddress=",
-				StringUtil.toLowerCase(dsRecipient.getEmailAddress()), "}"),
-			() -> _addDSRequest(dsEnvelope, fileEntry));
-
-		dsEnvelope.setDSRecipients(
-			ListUtil.fromArray(_createDSRecipient(user)));
-
-		DSRequest dsRequest = _addDSRequest(dsEnvelope, fileEntry);
-
-		Assert.assertEquals(
-			dsEnvelope.getDSEnvelopeId(), dsRequest.getExternalReferenceCode());
+			DSRequestException.MustNotBeStagingGroup.class,
+			"Digital signature requests are not supported in staging group " +
+				stagingGroup.getGroupId(),
+			() -> _dsRequestManager.addDSRequest(
+				TestPropsValues.getCompanyId(), stagingGroup.getGroupId(),
+				TestPropsValues.getUserId(),
+				_createDSEnvelope(_createDSRecipient(UserTestUtil.addUser())),
+				new long[] {RandomTestUtil.randomLong()}));
 	}
 
 	private void _testFetchDSRequest() throws Exception {
@@ -1229,7 +1370,7 @@ public class DSRequestManagerTest {
 	private void _testFetchDSRequestWhenSiteOverridesInstanceSettings()
 		throws Exception {
 
-		DSRequest dsRequest = _addDSRequest(
+		DSRequest dsRequest1 = _addDSRequest(
 			_createDSEnvelope(), RandomTestUtil.randomInt());
 
 		try (CompanyConfigurationTemporarySwapper
@@ -1248,7 +1389,7 @@ public class DSRequestManagerTest {
 			Assert.assertNull(
 				_dsRequestManager.fetchDSRequest(
 					TestPropsValues.getCompanyId(),
-					dsRequest.getDSRequestId()));
+					dsRequest1.getDSRequestId()));
 
 			try (GroupConfigurationTemporarySwapper
 					groupConfigurationTemporarySwapper =
@@ -1261,28 +1402,27 @@ public class DSRequestManagerTest {
 								"enabled", true
 							).build())) {
 
-				DSRequest fetchedDSRequest = _dsRequestManager.fetchDSRequest(
-					TestPropsValues.getCompanyId(), dsRequest.getDSRequestId());
+				DSRequest dsRequest2 = _dsRequestManager.fetchDSRequest(
+					TestPropsValues.getCompanyId(),
+					dsRequest1.getDSRequestId());
 
 				Assert.assertEquals(
-					dsRequest.getDSRequestId(),
-					fetchedDSRequest.getDSRequestId());
+					dsRequest1.getDSRequestId(), dsRequest2.getDSRequestId());
 			}
 		}
 	}
 
 	private void _testUpdateDSRequest(
-			String dsEnvelopeStatus, String expectedRequestRecipientStatus,
-			String expectedRequestStatus, LocalDateTime expirationLocalDateTime,
-			String requestRecipientStatus, LocalDateTime statusLocalDateTime)
+			String dsEnvelopeStatus, String dsRecipientStatus,
+			String expectedRequestRecipientStatus, String expectedRequestStatus,
+			LocalDateTime expirationLocalDateTime,
+			LocalDateTime statusLocalDateTime)
 		throws Exception {
 
-		DSEnvelope dsEnvelope = _createDSEnvelope();
+		DSEnvelope dsEnvelope = _createDSEnvelope(
+			_createDSRecipient(UserTestUtil.addUser()),
+			_createDSRecipient(UserTestUtil.addUser()));
 
-		dsEnvelope.setDSRecipients(
-			ListUtil.fromArray(
-				_createDSRecipient(UserTestUtil.addUser()),
-				_createDSRecipient(UserTestUtil.addUser())));
 		dsEnvelope.setStatus(DSRequestConstants.STATUS_CREATED);
 
 		for (DSRecipient dsRecipient : dsEnvelope.getDSRecipients()) {
@@ -1297,7 +1437,7 @@ public class DSRequestManagerTest {
 		dsEnvelope.setStatusLocalDateTime(statusLocalDateTime);
 
 		for (DSRecipient dsRecipient : dsEnvelope.getDSRecipients()) {
-			dsRecipient.setStatus(requestRecipientStatus);
+			dsRecipient.setStatus(dsRecipientStatus);
 			dsRecipient.setStatusLocalDateTime(statusLocalDateTime);
 		}
 
@@ -1369,35 +1509,133 @@ public class DSRequestManagerTest {
 		}
 	}
 
-	private void _testUpdateDSRequestWhenObjectEntryIsNotDSRequest()
+	private void _testUpdateDSRequestWhenDSEnvelopeIsCompleted()
 		throws Exception {
 
-		long fileEntryId = RandomTestUtil.randomInt();
+		Group group = GroupTestUtil.addGroup();
+		String portletId = RandomTestUtil.randomString();
 
-		_addDSRequest(_createDSEnvelope(), fileEntryId);
+		FileEntry fileEntry = _portletFileRepository.addPortletFileEntry(
+			group.getGroupId(), TestPropsValues.getUserId(),
+			Group.class.getName(), group.getGroupId(), portletId,
+			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
+			TestDataConstants.TEST_BYTE_ARRAY, "contract.txt",
+			ContentTypes.TEXT_PLAIN, false);
 
-		List<Map<String, Serializable>> dsRequestDocumentValuesList =
-			_getValuesList(
-				"(fileEntryId eq " + fileEntryId + ")",
-				_dsRequestDocumentObjectDefinition);
+		String description = RandomTestUtil.randomString();
 
-		long dsRequestDocumentId = MapUtil.getLong(
-			dsRequestDocumentValuesList.get(0),
-			_dsRequestDocumentObjectDefinition.getPKObjectFieldName());
+		long time = System.currentTimeMillis() / Time.SECOND * Time.SECOND;
 
-		AssertUtils.assertFailure(
-			NoSuchObjectEntryException.class,
-			StringBundler.concat(
-				"No ObjectEntry exists with the key {objectDefinitionId=",
-				_dsRequestObjectDefinition.getObjectDefinitionId(),
-				", objectEntryId=", dsRequestDocumentId, "}"),
-			() -> _dsRequestManager.updateDSRequest(dsRequestDocumentId));
-	}
+		Date displayDate = new Date(time - Time.DAY);
+		Date expirationDate = new Date(time + Time.DAY);
+		Date reviewDate = new Date(time + Time.HOUR);
 
-	private void _testUpdateDSRequestWhenRecipientStatusesDiffer()
-		throws Exception {
+		fileEntry = _dlAppLocalService.updateFileEntry(
+			TestPropsValues.getUserId(), fileEntry.getFileEntryId(), null, null,
+			fileEntry.getTitle(), null, description, null,
+			DLVersionNumberIncrease.NONE, (byte[])null, displayDate,
+			expirationDate, reviewDate,
+			ServiceContextTestUtil.getServiceContext(group.getGroupId()));
+
+		_portletFileRepository.addPortletFileEntry(
+			group.getGroupId(), TestPropsValues.getUserId(),
+			Group.class.getName(), group.getGroupId(), portletId,
+			fileEntry.getFolderId(), TestDataConstants.TEST_BYTE_ARRAY,
+			"contract.pdf", ContentTypes.APPLICATION_PDF, false);
 
 		DSEnvelope dsEnvelope = _createDSEnvelope();
+
+		dsEnvelope.setDSEnvelopeId(PortalUUIDUtil.generate());
+
+		DSRequest dsRequest = _addDSRequest(
+			dsEnvelope, fileEntry.getFileEntryId());
+
+		dsEnvelope.setStatus(DSRequestConstants.STATUS_COMPLETED);
+
+		byte[] bytes = ArrayUtil.append(
+			"%PDF-".getBytes(), RandomTestUtil.randomBytes());
+		List<String> methodNames = new ArrayList<>();
+
+		DSEnvelopeManager dsEnvelopeManager =
+			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager",
+				ProxyUtil.newProxyInstance(
+					DSEnvelopeManager.class.getClassLoader(),
+					new Class<?>[] {DSEnvelopeManager.class},
+					(proxy, method, arguments) -> {
+						methodNames.add(method.getName());
+
+						if (Objects.equals(
+								method.getName(), "getDSDocumentAsBytes")) {
+
+							return bytes;
+						}
+
+						return dsEnvelope;
+					}));
+
+		PermissionChecker permissionChecker =
+			PermissionThreadLocal.getPermissionChecker();
+
+		PermissionThreadLocal.setPermissionChecker(
+			PermissionCheckerFactoryUtil.create(UserTestUtil.addUser()));
+
+		try {
+			_dsRequestManager.updateDSRequest(dsRequest.getDSRequestId());
+
+			PermissionThreadLocal.setPermissionChecker(permissionChecker);
+
+			_objectEntryLocalService.partialUpdateObjectEntry(
+				TestPropsValues.getUserId(), dsRequest.getDSRequestId(),
+				ObjectEntryFolderConstants.
+					PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
+				HashMapBuilder.<String, Serializable>put(
+					"requestStatus", DSRequestConstants.STATUS_SENT
+				).build(),
+				ServiceContextTestUtil.getServiceContext());
+
+			_dsRequestManager.updateDSRequest(dsRequest.getDSRequestId());
+
+			methodNames.clear();
+
+			_dsRequestManager.updateDSRequest(dsRequest.getDSRequestId());
+
+			Assert.assertTrue(methodNames.toString(), methodNames.isEmpty());
+		}
+		finally {
+			PermissionThreadLocal.setPermissionChecker(permissionChecker);
+
+			ReflectionTestUtil.setFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager);
+		}
+
+		ObjectEntry dsRequestObjectEntry = _getDSRequestObjectEntry(dsEnvelope);
+
+		Assert.assertEquals(
+			DSRequestConstants.STATUS_COMPLETED,
+			MapUtil.getString(
+				dsRequestObjectEntry.getValues(), "requestStatus"));
+
+		fileEntry = _dlAppLocalService.getFileEntry(fileEntry.getFileEntryId());
+
+		Assert.assertArrayEquals(
+			bytes, FileUtil.getBytes(fileEntry.getContentStream()));
+		Assert.assertEquals(description, fileEntry.getDescription());
+		Assert.assertEquals(displayDate, fileEntry.getDisplayDate());
+		Assert.assertEquals(expirationDate, fileEntry.getExpirationDate());
+		Assert.assertEquals("contract (signed).pdf", fileEntry.getFileName());
+		Assert.assertEquals(reviewDate, fileEntry.getReviewDate());
+		Assert.assertEquals("contract (signed).pdf", fileEntry.getTitle());
+		Assert.assertEquals("2.0", fileEntry.getVersion());
+
+		FileVersion fileVersion = fileEntry.getLatestFileVersion();
+
+		Assert.assertEquals(
+			WorkflowConstants.STATUS_APPROVED, fileVersion.getStatus());
+	}
+
+	private void _testUpdateDSRequestWhenDSRecipientStatusesDiffer()
+		throws Exception {
 
 		User completedUser = UserTestUtil.addUser();
 
@@ -1407,8 +1645,8 @@ public class DSRequestManagerTest {
 
 		DSRecipient deliveredDSRecipient = _createDSRecipient(deliveredUser);
 
-		dsEnvelope.setDSRecipients(
-			ListUtil.fromArray(completedDSRecipient, deliveredDSRecipient));
+		DSEnvelope dsEnvelope = _createDSEnvelope(
+			completedDSRecipient, deliveredDSRecipient);
 
 		DSRequest dsRequest = _addDSRequest(
 			dsEnvelope, RandomTestUtil.randomInt());
@@ -1444,19 +1682,19 @@ public class DSRequestManagerTest {
 				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager);
 		}
 
-		Map<Long, Map<String, Serializable>> recipientValuesMap =
+		Map<Long, Map<String, Serializable>> dsRequestRecipientValuesMap =
 			new HashMap<>();
 
 		for (Map<String, Serializable> values :
 				_getDSRequestRecipientValuesList(dsRequest.getDSRequestId())) {
 
-			recipientValuesMap.put(
+			dsRequestRecipientValuesMap.put(
 				MapUtil.getLong(values, "r_userToDSRequestRecipients_userId"),
 				values);
 		}
 
 		Map<String, Serializable> dsRequestRecipientValues =
-			recipientValuesMap.get(completedUser.getUserId());
+			dsRequestRecipientValuesMap.get(completedUser.getUserId());
 
 		Assert.assertEquals(
 			DSRequestConstants.STATUS_COMPLETED,
@@ -1466,7 +1704,7 @@ public class DSRequestManagerTest {
 			Date.from(completedLocalDateTime.toInstant(ZoneOffset.UTC)),
 			dsRequestRecipientValues.get("requestRecipientStatusDate"));
 
-		dsRequestRecipientValues = recipientValuesMap.get(
+		dsRequestRecipientValues = dsRequestRecipientValuesMap.get(
 			deliveredUser.getUserId());
 
 		Assert.assertEquals(
@@ -1476,6 +1714,176 @@ public class DSRequestManagerTest {
 		Assert.assertEquals(
 			Date.from(deliveredLocalDateTime.toInstant(ZoneOffset.UTC)),
 			dsRequestRecipientValues.get("requestRecipientStatusDate"));
+	}
+
+	private void _testUpdateDSRequestWhenObjectEntryIsNotDSRequest()
+		throws Exception {
+
+		long fileEntryId = RandomTestUtil.randomInt();
+
+		_addDSRequest(_createDSEnvelope(), fileEntryId);
+
+		long dsRequestDocumentId = _getDSRequestDocumentId(fileEntryId);
+
+		AssertUtils.assertFailure(
+			NoSuchObjectEntryException.class,
+			StringBundler.concat(
+				"No ObjectEntry exists with the key {objectDefinitionId=",
+				_dsRequestObjectDefinition.getObjectDefinitionId(),
+				", objectEntryId=", dsRequestDocumentId, "}"),
+			() -> _dsRequestManager.updateDSRequest(dsRequestDocumentId));
+	}
+
+	private void _testUpdateDSRequestWhenSignedDocumentIsNotPDF()
+		throws Exception {
+
+		DSEnvelope dsEnvelope = _createDSEnvelope(
+			_createDSRecipient(UserTestUtil.addUser()),
+			_createDSRecipient(UserTestUtil.addUser()));
+
+		FileEntry fileEntry1 = _addFileEntry(
+			RandomTestUtil.randomString() + ".pdf");
+		FileEntry fileEntry2 = _addFileEntry(
+			RandomTestUtil.randomString() + ".pdf");
+
+		DSRequest dsRequest = _addDSRequest(
+			dsEnvelope, fileEntry1.getFileEntryId(),
+			fileEntry2.getFileEntryId());
+
+		for (DSRecipient dsRecipient : dsEnvelope.getDSRecipients()) {
+			dsRecipient.setStatus(DSRequestConstants.STATUS_COMPLETED);
+		}
+
+		dsEnvelope.setStatus(DSRequestConstants.STATUS_COMPLETED);
+
+		String dsDocumentId = String.valueOf(fileEntry2.getFileEntryId());
+
+		DSEnvelopeManager dsEnvelopeManager =
+			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager",
+				ProxyUtil.newProxyInstance(
+					DSEnvelopeManager.class.getClassLoader(),
+					new Class<?>[] {DSEnvelopeManager.class},
+					(proxy, method, arguments) -> {
+						if (!Objects.equals(
+								method.getName(), "getDSDocumentAsBytes")) {
+
+							return dsEnvelope;
+						}
+
+						if (Objects.equals(dsDocumentId, arguments[2])) {
+							return "{\"errorCode\": \"NOT_FOUND\"}".getBytes();
+						}
+
+						return ArrayUtil.append(
+							"%PDF-".getBytes(), RandomTestUtil.randomBytes());
+					}));
+
+		try (LogCapture logCapture = LoggerTestUtil.configureLog4JLogger(
+				"com.liferay.digital.signature.internal.manager." +
+					"DSRequestManagerImpl",
+				LoggerTestUtil.ERROR)) {
+
+			_dsRequestManager.updateDSRequest(dsRequest.getDSRequestId());
+			_dsRequestManager.updateDSRequest(dsRequest.getDSRequestId());
+
+			List<LogEntry> logEntries = logCapture.getLogEntries();
+
+			Assert.assertEquals(logEntries.toString(), 2, logEntries.size());
+
+			for (LogEntry logEntry : logEntries) {
+				Throwable throwable = logEntry.getThrowable();
+
+				Assert.assertEquals(
+					StringBundler.concat(
+						"DocuSign did not return a signed PDF for file entry ",
+						fileEntry2.getFileEntryId(),
+						" of digital signature envelope ",
+						dsEnvelope.getDSEnvelopeId()),
+					throwable.getMessage());
+			}
+		}
+		finally {
+			ReflectionTestUtil.setFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager);
+		}
+
+		dsRequest = _dsRequestManager.fetchDSRequest(
+			TestPropsValues.getCompanyId(), dsRequest.getDSRequestId());
+
+		Assert.assertEquals(
+			DSRequestConstants.STATUS_SENT, dsRequest.getStatus());
+
+		for (DSRequestRecipient dsRequestRecipient :
+				dsRequest.getDSRequestRecipients()) {
+
+			Assert.assertEquals(
+				DSRequestConstants.STATUS_SENT, dsRequestRecipient.getStatus());
+		}
+
+		fileEntry1 = _dlAppLocalService.getFileEntry(
+			fileEntry1.getFileEntryId());
+
+		Assert.assertEquals("2.0", fileEntry1.getVersion());
+
+		fileEntry2 = _dlAppLocalService.getFileEntry(
+			fileEntry2.getFileEntryId());
+
+		Assert.assertEquals("1.0", fileEntry2.getVersion());
+
+		ReflectionTestUtil.setFieldValue(
+			_dsRequestManager, "_dsEnvelopeManager",
+			ProxyUtil.newProxyInstance(
+				DSEnvelopeManager.class.getClassLoader(),
+				new Class<?>[] {DSEnvelopeManager.class},
+				(proxy, method, arguments) -> {
+					if (Objects.equals(
+							method.getName(), "getDSDocumentAsBytes")) {
+
+						return ArrayUtil.append(
+							"%PDF-".getBytes(), RandomTestUtil.randomBytes());
+					}
+
+					return dsEnvelope;
+				}));
+
+		try {
+			_dsRequestManager.updateDSRequest(dsRequest.getDSRequestId());
+		}
+		finally {
+			ReflectionTestUtil.setFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager);
+		}
+
+		dsRequest = _dsRequestManager.fetchDSRequest(
+			TestPropsValues.getCompanyId(), dsRequest.getDSRequestId());
+
+		Assert.assertEquals(
+			DSRequestConstants.STATUS_COMPLETED, dsRequest.getStatus());
+
+		for (DSRequestRecipient dsRequestRecipient :
+				dsRequest.getDSRequestRecipients()) {
+
+			Assert.assertEquals(
+				DSRequestConstants.STATUS_COMPLETED,
+				dsRequestRecipient.getStatus());
+		}
+
+		String fileName = fileEntry1.getFileName();
+
+		fileEntry1 = _dlAppLocalService.getFileEntry(
+			fileEntry1.getFileEntryId());
+
+		Assert.assertEquals(fileName, fileEntry1.getFileName());
+		Assert.assertEquals("2.0", fileEntry1.getVersion());
+
+		fileName = fileEntry2.getFileName();
+
+		fileEntry2 = _dlAppLocalService.getFileEntry(
+			fileEntry2.getFileEntryId());
+
+		Assert.assertEquals(fileName, fileEntry2.getFileName());
+		Assert.assertEquals("2.0", fileEntry2.getVersion());
 	}
 
 	private CompanyConfigurationTemporarySwapper
@@ -1496,8 +1904,10 @@ public class DSRequestManagerTest {
 	private DSRequestManager _dsRequestManager;
 
 	private ObjectDefinition _dsRequestObjectDefinition;
-
 	private ObjectDefinition _dsRequestRecipientObjectDefinition;
+
+	@Inject
+	private DSRequestURLProvider _dsRequestURLProvider;
 
 	@Inject(
 		filter = "filter.factory.key=" + ObjectDefinitionConstants.STORAGE_TYPE_DEFAULT
@@ -1521,7 +1931,7 @@ public class DSRequestManagerTest {
 	private ObjectEntryLocalService _objectEntryLocalService;
 
 	@Inject
-	private DSRequestURLProvider _dsRequestURLProvider;
+	private PortletFileRepository _portletFileRepository;
 
 	@Inject
 	private UserLocalService _userLocalService;
