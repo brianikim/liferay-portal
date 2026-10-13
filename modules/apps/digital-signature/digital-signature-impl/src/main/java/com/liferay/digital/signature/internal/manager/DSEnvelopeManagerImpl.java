@@ -175,6 +175,17 @@ public class DSEnvelopeManagerImpl implements DSEnvelopeManager {
 	}
 
 	@Override
+	public byte[] getSignedDocument(
+		long companyId, long groupId, String dsDocumentId,
+		String dsEnvelopeId) {
+
+		return _dsHttp.getAsBytes(
+			companyId, groupId,
+			StringBundler.concat(
+				"envelopes/", dsEnvelopeId, "/documents/", dsDocumentId));
+	}
+
+	@Override
 	public void voidDSEnvelope(
 			long companyId, long groupId, String dsEnvelopeId, String reason)
 		throws PortalException {
