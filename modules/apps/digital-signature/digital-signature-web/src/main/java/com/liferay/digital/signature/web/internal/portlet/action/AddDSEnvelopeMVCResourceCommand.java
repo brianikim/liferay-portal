@@ -5,13 +5,18 @@
 
 package com.liferay.digital.signature.web.internal.portlet.action;
 
+import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
+import com.liferay.digital.signature.configuration.DigitalSignatureConfigurationUtil;
+import com.liferay.digital.signature.constants.DSRequestConstants;
 import com.liferay.digital.signature.constants.DigitalSignaturePortletKeys;
 import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSDocument;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
+import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
+import com.liferay.document.library.kernel.service.DLAppService;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
@@ -59,13 +64,8 @@ public class AddDSEnvelopeMVCResourceCommand
 		ThemeDisplay themeDisplay = (ThemeDisplay)resourceRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		long[] fileEntryIds = ParamUtil.getLongValues(
-			resourceRequest, "fileEntryIds");
-		User user = themeDisplay.getUser();
-
 		DSEnvelope dsEnvelope = new DSEnvelope() {
 			{
-				dsDocuments = _getDSDocuments(fileEntryIds);
 				dsRecipients = _getDSRecipients(resourceRequest);
 				emailBlurb = ParamUtil.getString(
 					resourceRequest, "emailMessage");
@@ -82,8 +82,6 @@ public class AddDSEnvelopeMVCResourceCommand
 				}
 
 				name = ParamUtil.getString(resourceRequest, "envelopeName");
-				senderEmailAddress = user.getEmailAddress();
-				status = "sent";
 			}
 		};
 
@@ -95,24 +93,44 @@ public class AddDSEnvelopeMVCResourceCommand
 					"expiration");
 		}
 
-		dsEnvelope = _dsEnvelopeManager.addDSEnvelope(
-			themeDisplay.getCompanyId(), themeDisplay.getSiteGroupId(),
-			dsEnvelope);
+		long[] fileEntryIds = ParamUtil.getLongValues(
+			resourceRequest, "fileEntryIds");
 
-		_dsRequestManager.addDSRequest(
+		for (long fileEntryId : fileEntryIds) {
+			_dlAppService.getFileEntry(fileEntryId);
+		}
+
+		User user = themeDisplay.getUser();
+
+		if (!embeddedViewEnabled) {
+			dsEnvelope.setDSDocuments(
+				TransformUtil.transformToList(
+					fileEntryIds, fileEntryId -> _toDSDocument(fileEntryId)));
+			dsEnvelope.setSenderEmailAddress(user.getEmailAddress());
+			dsEnvelope.setStatus(DSRequestConstants.STATUS_SENT);
+
+			dsEnvelope = _dsEnvelopeManager.addDSEnvelope(
+				themeDisplay.getCompanyId(), themeDisplay.getSiteGroupId(),
+				dsEnvelope);
+
+			JSONPortletResponseUtil.writeJSON(
+				resourceRequest, resourceResponse,
+				JSONUtil.put("dsEnvelopeId", dsEnvelope.getDSEnvelopeId()));
+
+			return;
+		}
+
+		DSRequest dsRequest = _dsRequestManager.addDSRequest(
 			themeDisplay.getCompanyId(), themeDisplay.getSiteGroupId(),
 			user.getUserId(), dsEnvelope, fileEntryIds);
 
+		_dsRequestManager.sendDSRequestNotifications(
+			themeDisplay.getCompanyId(), themeDisplay.getSiteGroupId(),
+			dsRequest);
+
 		JSONPortletResponseUtil.writeJSON(
 			resourceRequest, resourceResponse,
-			JSONUtil.put("dsEnvelopeId", dsEnvelope.getDSEnvelopeId()));
-	}
-
-	private List<DSDocument> _getDSDocuments(long[] fileEntryIds)
-		throws Exception {
-
-		return TransformUtil.transformToList(
-			fileEntryIds, fileEntryId -> _toDSDocument(fileEntryId));
+			JSONUtil.put("dsEnvelopeId", dsRequest.getProviderRequestId()));
 	}
 
 	private List<DSRecipient> _getDSRecipients(ResourceRequest resourceRequest)
@@ -148,6 +166,9 @@ public class AddDSEnvelopeMVCResourceCommand
 
 	@Reference
 	private DLAppLocalService _dlAppLocalService;
+
+	@Reference
+	private DLAppService _dlAppService;
 
 	@Reference
 	private DSEnvelopeManager _dsEnvelopeManager;
