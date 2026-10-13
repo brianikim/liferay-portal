@@ -73,7 +73,7 @@ public class AddDSEnvelopeMVCResourceCommandTest {
 		mockLiferayResourceRequest.setParameter(
 			"expireAfter", String.valueOf(days));
 		mockLiferayResourceRequest.setParameter(
-			"expireWarn", String.valueOf(days));
+			"expireWarn", String.valueOf(days - 1));
 
 		mockLiferayResourceRequest.setParameter("recipients", "[]");
 

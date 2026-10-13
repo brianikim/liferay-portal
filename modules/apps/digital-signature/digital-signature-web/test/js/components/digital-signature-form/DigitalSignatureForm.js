@@ -87,6 +87,7 @@ describe('DigitalSignatureForm', () => {
 
 			await userEvent.clear(inputExpireWarn);
 			await userEvent.type(inputExpireWarn, '120');
+			<AppContext.Provider value={{embeddedViewEnabled: true}}>
 
 			expect(
 				getByText(

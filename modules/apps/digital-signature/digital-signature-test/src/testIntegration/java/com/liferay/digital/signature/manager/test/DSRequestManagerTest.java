@@ -10,11 +10,14 @@ import com.liferay.batch.engine.test.util.BatchEngineTestUtil;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.digital.signature.constants.DSObjectDefinitionConstants;
 import com.liferay.digital.signature.constants.DSRequestConstants;
+import com.liferay.digital.signature.exception.DSRequestException;
 import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
+import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.object.constants.ObjectDefinitionConstants;
+import com.liferay.object.constants.ObjectEntryFolderConstants;
 import com.liferay.object.exception.NoSuchObjectEntryException;
 import com.liferay.object.exception.ObjectEntryValuesException;
 import com.liferay.object.model.ObjectDefinition;
@@ -26,14 +29,21 @@ import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.sql.dsl.expression.Predicate;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
+import com.liferay.portal.configuration.test.util.GroupConfigurationTemporarySwapper;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.json.JSONArray;
+import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.service.WorkflowDefinitionLinkLocalService;
+import com.liferay.portal.kernel.service.WorkflowInstanceLinkLocalService;
 import com.liferay.portal.kernel.test.AssertUtils;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.context.ContextUserReplace;
@@ -47,6 +57,7 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.MapUtil;
+import com.liferay.portal.kernel.util.MimeTypesUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.test.rule.FeatureFlag;
@@ -61,12 +72,16 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Queue;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -111,6 +126,8 @@ public class DSRequestManagerTest {
 					"apiAccountId", RandomTestUtil.randomString()
 				).put(
 					"apiUsername", RandomTestUtil.randomString()
+				).put(
+					"embeddedViewEnabled", true
 				).put(
 					"enabled", true
 				).put(
@@ -167,6 +184,9 @@ public class DSRequestManagerTest {
 		Map<String, Serializable> dsRequestValues = _getDSRequestValues(
 			dsEnvelope);
 
+		Map<String, Serializable> dsRequestValues =
+			dsRequestObjectEntry.getValues();
+
 		Assert.assertEquals(
 			DSRequestConstants.STATUS_SENT,
 			MapUtil.getString(dsRequestValues, "requestStatus"));
@@ -203,7 +223,10 @@ public class DSRequestManagerTest {
 			dsRequestRecipientValuesList.toString(), 1,
 			dsRequestRecipientValuesList.size());
 		Assert.assertEquals(
-			user.getUserId(),
+			user1.getFullName(),
+			MapUtil.getString(dsRequestRecipientValues, "name"));
+		Assert.assertEquals(
+			user1.getUserId(),
 			MapUtil.getLong(
 				dsRequestRecipientValuesList.get(0),
 				"r_userToDSRequestRecipients_userId"));
@@ -234,6 +257,8 @@ public class DSRequestManagerTest {
 			).toString());
 
 		String dsEnvelopeId = RandomTestUtil.randomString();
+
+		Queue<Object[]> argumentsList = new LinkedList<>();
 
 		DSEnvelopeManager dsEnvelopeManager =
 			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
@@ -271,6 +296,12 @@ public class DSRequestManagerTest {
 				_mvcResourceCommand, "_dsEnvelopeManager", dsEnvelopeManager);
 		}
 
+		Assert.assertEquals(argumentsList.toString(), 1, argumentsList.size());
+
+		Object[] arguments = argumentsList.poll();
+
+		Assert.assertEquals(dsEnvelope2.getDSEnvelopeId(), arguments[2]);
+
 		Assert.assertEquals(
 			Collections.emptyList(),
 			_getValuesList(
@@ -284,6 +315,108 @@ public class DSRequestManagerTest {
 
 		_testAddDSRequestWhenDSEnvelopeIdIsNull();
 		_testAddDSRequestWhenDSRequestRecipientUserIsDeleted();
+	}
+
+	@Test
+	public void testFetchDSRequest() throws Exception {
+		DSRequest dsRequest1 = _addDSRequest(
+			_createDSEnvelope(), RandomTestUtil.randomInt());
+
+		DSRequest dsRequest2 = _dsRequestManager.fetchDSRequest(
+			TestPropsValues.getCompanyId(), dsRequest1.getDSRequestId());
+
+		Assert.assertEquals(
+			dsRequest1.getDSRequestId(), dsRequest2.getDSRequestId());
+		Assert.assertEquals(
+			DSRequestConstants.STATUS_SENT, dsRequest2.getStatus());
+
+		Assert.assertNull(
+			_dsRequestManager.fetchDSRequest(
+				RandomTestUtil.randomLong(), dsRequest1.getDSRequestId()));
+
+		_testFetchDSRequestWhenExpirationDateIsPast();
+		_testFetchDSRequestWhenSiteOverridesInstanceSettings();
+	}
+
+	@Test
+	public void testGetLatestFileEntryDSRequests() throws Exception {
+		long fileEntryId1 = RandomTestUtil.randomInt();
+		long fileEntryId2 = RandomTestUtil.randomInt();
+
+		DSRequest dsRequest1 = _addDSRequest(
+			_createDSEnvelope(), fileEntryId1, fileEntryId2);
+		DSRequest dsRequest2 = _addDSRequest(_createDSEnvelope(), fileEntryId2);
+
+		Map<Long, DSRequest> dsRequests =
+			_dsRequestManager.getLatestFileEntryDSRequests(
+				TestPropsValues.getCompanyId(),
+				new long[] {fileEntryId1, fileEntryId2});
+
+		Assert.assertEquals(dsRequests.toString(), 2, dsRequests.size());
+
+		DSRequest dsRequest3 = dsRequests.get(fileEntryId1);
+
+		Assert.assertEquals(
+			dsRequest1.getDSRequestId(), dsRequest3.getDSRequestId());
+
+		DSRequest dsRequest4 = dsRequests.get(fileEntryId2);
+
+		Assert.assertEquals(
+			dsRequest2.getDSRequestId(), dsRequest4.getDSRequestId());
+
+		dsRequests = _dsRequestManager.getLatestFileEntryDSRequests(
+			TestPropsValues.getCompanyId(),
+			new long[] {RandomTestUtil.randomLong()});
+
+		Assert.assertTrue(dsRequests.isEmpty());
+	}
+
+	@Test
+	public void testHasPermission() throws Exception {
+		User user1 = UserTestUtil.addUser();
+
+		DSEnvelope dsEnvelope = _createDSEnvelope(user1);
+
+		User user2 = UserTestUtil.addUser();
+
+		DSRequest dsRequest = ReflectionTestUtil.invoke(
+			_dsRequestManager, "_addDSRequest",
+			new Class<?>[] {
+				long.class, DSEnvelope.class, long[].class, long.class,
+				long.class
+			},
+			TestPropsValues.getCompanyId(), dsEnvelope,
+			new long[] {RandomTestUtil.randomInt()},
+			TestPropsValues.getGroupId(), user2.getUserId());
+
+		PermissionChecker permissionChecker =
+			PermissionCheckerFactoryUtil.create(user2);
+
+		Assert.assertTrue(
+			_dsRequestManager.hasPermission(
+				permissionChecker, dsRequest, ActionKeys.UPDATE));
+		Assert.assertTrue(
+			_dsRequestManager.hasPermission(
+				permissionChecker, dsRequest, ActionKeys.VIEW));
+
+		permissionChecker = PermissionCheckerFactoryUtil.create(user1);
+
+		Assert.assertFalse(
+			_dsRequestManager.hasPermission(
+				permissionChecker, dsRequest, ActionKeys.UPDATE));
+		Assert.assertTrue(
+			_dsRequestManager.hasPermission(
+				permissionChecker, dsRequest, ActionKeys.VIEW));
+
+		permissionChecker = PermissionCheckerFactoryUtil.create(
+			UserTestUtil.addUser());
+
+		Assert.assertFalse(
+			_dsRequestManager.hasPermission(
+				permissionChecker, dsRequest, ActionKeys.UPDATE));
+		Assert.assertFalse(
+			_dsRequestManager.hasPermission(
+				permissionChecker, dsRequest, ActionKeys.VIEW));
 	}
 
 	@Test
@@ -316,6 +449,35 @@ public class DSRequestManagerTest {
 		_testUpdateDSRequestWhenObjectEntryIsNotDSRequest();
 	}
 
+	private DSRequest _addDSRequest(DSEnvelope dsEnvelope, long... fileEntryIds)
+		throws Exception {
+
+		return ReflectionTestUtil.invoke(
+			_dsRequestManager, "_addDSRequest",
+			new Class<?>[] {
+				long.class, DSEnvelope.class, long[].class, long.class,
+				long.class
+			},
+			TestPropsValues.getCompanyId(), dsEnvelope, fileEntryIds,
+			TestPropsValues.getGroupId(), TestPropsValues.getUserId());
+	}
+
+	private DSRequest _addDSRequest(String emailAddress, String status)
+		throws Exception {
+
+		DSEnvelope dsEnvelope = _createDSEnvelope();
+
+		List<DSRecipient> dsRecipients = dsEnvelope.getDSRecipients();
+
+		DSRecipient dsRecipient = dsRecipients.get(0);
+
+		dsRecipient.setEmailAddress(emailAddress);
+
+		dsEnvelope.setStatus(status);
+
+		return _addDSRequest(dsEnvelope, RandomTestUtil.randomInt());
+	}
+
 	private DSEnvelope _createDSEnvelope() {
 		DSEnvelope dsEnvelope = new DSEnvelope();
 
@@ -329,10 +491,14 @@ public class DSRequestManagerTest {
 	}
 
 	private DSRecipient _createDSRecipient() {
+		return _createDSRecipient(
+			RandomTestUtil.randomString() + "@liferay.com");
+	}
+
+	private DSRecipient _createDSRecipient(String emailAddress) {
 		DSRecipient dsRecipient = new DSRecipient();
 
-		dsRecipient.setEmailAddress(
-			RandomTestUtil.randomString() + "@liferay.com");
+		dsRecipient.setEmailAddress(emailAddress);
 		dsRecipient.setName(RandomTestUtil.randomString());
 
 		return dsRecipient;
@@ -345,22 +511,27 @@ public class DSRequestManagerTest {
 		long dsRequestId = MapUtil.getLong(
 			values, _dsRequestObjectDefinition.getPKObjectFieldName());
 
+		return MapUtil.getLong(
+			dsRequestDocumentValuesList.get(0),
+			_dsRequestDocumentObjectDefinition.getPKObjectFieldName());
+	}
+
+	private ObjectEntry _getDSRequestObjectEntry(DSEnvelope dsEnvelope)
+		throws Exception {
+
+		return _objectEntryLocalService.getObjectEntry(
+			dsEnvelope.getDSEnvelopeId(), 0,
+			_dsRequestObjectDefinition.getObjectDefinitionId());
+	}
+
+	private List<Map<String, Serializable>> _getDSRequestRecipientValuesList(
+			long dsRequestId)
+		throws Exception {
+
 		return _getValuesList(
 			"(r_dsRequestToDSRequestRecipients_l_dsRequestId eq '" +
 				dsRequestId + "')",
 			_dsRequestRecipientObjectDefinition);
-	}
-
-	private Map<String, Serializable> _getDSRequestValues(DSEnvelope dsEnvelope)
-		throws Exception {
-
-		List<Map<String, Serializable>> valuesList = _getValuesList(
-			"(externalReferenceCode eq '" + dsEnvelope.getDSEnvelopeId() + "')",
-			_dsRequestObjectDefinition);
-
-		Assert.assertEquals(valuesList.toString(), 1, valuesList.size());
-
-		return valuesList.get(0);
 	}
 
 	private List<Map<String, Serializable>> _getValuesList(
@@ -412,10 +583,7 @@ public class DSRequestManagerTest {
 
 		dsEnvelope.setDSRecipients(ListUtil.fromArray(dsRecipient));
 
-		_dsRequestManager.addDSRequest(
-			TestPropsValues.getCompanyId(), TestPropsValues.getGroupId(),
-			TestPropsValues.getUserId(), dsEnvelope,
-			new long[] {RandomTestUtil.randomInt()});
+		_addDSRequest(dsEnvelope, RandomTestUtil.randomInt());
 
 		String filterString =
 			"(emailAddress eq '" + dsRecipient.getEmailAddress() + "')";
@@ -452,6 +620,72 @@ public class DSRequestManagerTest {
 			MapUtil.getLong(
 				dsRequestRecipientValues,
 				"r_userToDSRequestRecipients_userId"));
+	}
+
+	private void _testFetchDSRequestWhenExpirationDateIsPast()
+		throws Exception {
+
+		DSEnvelope dsEnvelope = _createDSEnvelope();
+
+		LocalDateTime localDateTime = LocalDateTime.now();
+
+		dsEnvelope.setExpirationLocalDateTime(localDateTime.minusDays(1));
+
+		DSRequest dsRequest = _addDSRequest(
+			dsEnvelope, RandomTestUtil.randomInt());
+
+		dsRequest = _dsRequestManager.fetchDSRequest(
+			TestPropsValues.getCompanyId(), dsRequest.getDSRequestId());
+
+		Assert.assertTrue(dsRequest.isReplaceable());
+		Assert.assertTrue(dsRequest.isTerminal());
+		Assert.assertEquals(
+			DSRequestConstants.STATUS_EXPIRED, dsRequest.getStatus());
+	}
+
+	private void _testFetchDSRequestWhenSiteOverridesInstanceSettings()
+		throws Exception {
+
+		DSRequest dsRequest = _addDSRequest(
+			_createDSEnvelope(), RandomTestUtil.randomInt());
+
+		try (CompanyConfigurationTemporarySwapper
+				companyConfigurationTemporarySwapper =
+					new CompanyConfigurationTemporarySwapper(
+						TestPropsValues.getCompanyId(),
+						DigitalSignatureConfiguration.class.getName(),
+						HashMapDictionaryBuilder.<String, Object>put(
+							"embeddedViewEnabled", false
+						).put(
+							"enabled", true
+						).put(
+							"siteSettingsStrategy", "always-override"
+						).build())) {
+
+			Assert.assertNull(
+				_dsRequestManager.fetchDSRequest(
+					TestPropsValues.getCompanyId(),
+					dsRequest.getDSRequestId()));
+
+			try (GroupConfigurationTemporarySwapper
+					groupConfigurationTemporarySwapper =
+						new GroupConfigurationTemporarySwapper(
+							TestPropsValues.getGroupId(),
+							DigitalSignatureConfiguration.class.getName(),
+							HashMapDictionaryBuilder.<String, Object>put(
+								"embeddedViewEnabled", true
+							).put(
+								"enabled", true
+							).build())) {
+
+				DSRequest fetchedDSRequest = _dsRequestManager.fetchDSRequest(
+					TestPropsValues.getCompanyId(), dsRequest.getDSRequestId());
+
+				Assert.assertEquals(
+					dsRequest.getDSRequestId(),
+					fetchedDSRequest.getDSRequestId());
+			}
+		}
 	}
 
 	private void _testUpdateDSRequest(
@@ -506,12 +740,20 @@ public class DSRequestManagerTest {
 				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager);
 		}
 
-		Map<String, Serializable> dsRequestValues = _getDSRequestValues(
-			dsEnvelope);
+		ObjectEntry dsRequestObjectEntry = _getDSRequestObjectEntry(dsEnvelope);
 
-		Assert.assertEquals(
-			Date.from(expirationLocalDateTime.toInstant(ZoneOffset.UTC)),
-			dsRequestValues.get("requestExpirationDate"));
+		Map<String, Serializable> dsRequestValues =
+			dsRequestObjectEntry.getValues();
+
+		if (expirationLocalDateTime == null) {
+			Assert.assertNull(dsRequestValues.get("requestExpirationDate"));
+		}
+		else {
+			Assert.assertEquals(
+				Date.from(expirationLocalDateTime.toInstant(ZoneOffset.UTC)),
+				dsRequestValues.get("requestExpirationDate"));
+		}
+
 		Assert.assertEquals(
 			expectedRequestStatus,
 			MapUtil.getString(dsRequestValues, "requestStatus"));
@@ -530,14 +772,7 @@ public class DSRequestManagerTest {
 			TestPropsValues.getUserId(), _createDSEnvelope(),
 			new long[] {fileEntryId});
 
-		List<Map<String, Serializable>> dsRequestDocumentValuesList =
-			_getValuesList(
-				"(fileEntryId eq " + fileEntryId + ")",
-				_dsRequestDocumentObjectDefinition);
-
-		long dsRequestDocumentId = MapUtil.getLong(
-			dsRequestDocumentValuesList.get(0),
-			_dsRequestDocumentObjectDefinition.getPKObjectFieldName());
+		long dsRequestDocumentId = _getDSRequestDocumentId(fileEntryId);
 
 		AssertUtils.assertFailure(
 			NoSuchObjectEntryException.class,
@@ -560,12 +795,16 @@ public class DSRequestManagerTest {
 	private DSRequestManager _dsRequestManager;
 
 	private ObjectDefinition _dsRequestObjectDefinition;
+
 	private ObjectDefinition _dsRequestRecipientObjectDefinition;
 
 	@Inject(
 		filter = "filter.factory.key=" + ObjectDefinitionConstants.STORAGE_TYPE_DEFAULT
 	)
 	private FilterFactory<Predicate> _filterFactory;
+
+	@Inject
+	private GroupLocalService _groupLocalService;
 
 	@Inject(filter = "mvc.command.name=/digital_signature/add_ds_envelope")
 	private MVCResourceCommand _mvcResourceCommand;
@@ -578,5 +817,12 @@ public class DSRequestManagerTest {
 
 	@Inject
 	private UserLocalService _userLocalService;
+
+	@Inject
+	private WorkflowDefinitionLinkLocalService
+		_workflowDefinitionLinkLocalService;
+
+	@Inject
+	private WorkflowInstanceLinkLocalService _workflowInstanceLinkLocalService;
 
 }
