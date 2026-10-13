@@ -31,7 +31,7 @@ import org.osgi.service.component.annotations.Reference;
 	property = {
 		"com.liferay.portlet.add-default-resource=true",
 		"com.liferay.portlet.css-class-wrapper=digital-signature-sign",
-		"com.liferay.portlet.display-category=category.tools",
+		"com.liferay.portlet.display-category=category.hidden",
 		"com.liferay.portlet.friendly-url-mapping=digital_signature",
 		"com.liferay.portlet.header-portlet-css=/css/main.css",
 		"com.liferay.portlet.private-request-attributes=false",
