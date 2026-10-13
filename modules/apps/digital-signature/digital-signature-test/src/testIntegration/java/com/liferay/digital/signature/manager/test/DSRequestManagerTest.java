@@ -35,9 +35,8 @@ import com.liferay.portal.kernel.exception.NoSuchUserException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
-import com.liferay.portal.kernel.repository.model.FileEntry;
-import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.portletfilerepository.PortletFileRepository;
+import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.FileVersion;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
@@ -62,6 +61,7 @@ import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
@@ -887,15 +887,22 @@ public class DSRequestManagerTest {
 	private void _testUpdateDSRequestWhenRequestIsCompleted() throws Exception {
 		Group group = GroupTestUtil.addGroup();
 
-		DSEnvelope dsEnvelope = _createDSEnvelope();
+		String portletId = RandomTestUtil.randomString();
+
 		FileEntry fileEntry = _portletFileRepository.addPortletFileEntry(
 			group.getGroupId(), TestPropsValues.getUserId(),
-			Group.class.getName(), group.getGroupId(),
-			RandomTestUtil.randomString(),
+			Group.class.getName(), group.getGroupId(), portletId,
 			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
-			TestDataConstants.TEST_BYTE_ARRAY,
-			RandomTestUtil.randomString() + ".txt", ContentTypes.TEXT_PLAIN,
-			false);
+			TestDataConstants.TEST_BYTE_ARRAY, "contract.txt",
+			ContentTypes.TEXT_PLAIN, false);
+
+		_portletFileRepository.addPortletFileEntry(
+			group.getGroupId(), TestPropsValues.getUserId(),
+			Group.class.getName(), group.getGroupId(), portletId,
+			fileEntry.getFolderId(), TestDataConstants.TEST_BYTE_ARRAY,
+			"contract.pdf", ContentTypes.APPLICATION_PDF, false);
+
+		DSEnvelope dsEnvelope = _createDSEnvelope();
 
 		_addDSRequest(dsEnvelope, fileEntry.getFileEntryId());
 
@@ -933,6 +940,7 @@ public class DSRequestManagerTest {
 
 		Assert.assertArrayEquals(
 			bytes, FileUtil.getBytes(fileEntry.getContentStream()));
+		Assert.assertEquals("contract (signed).pdf", fileEntry.getFileName());
 		Assert.assertEquals("2.0", fileEntry.getVersion());
 
 		FileVersion fileVersion = fileEntry.getLatestFileVersion();

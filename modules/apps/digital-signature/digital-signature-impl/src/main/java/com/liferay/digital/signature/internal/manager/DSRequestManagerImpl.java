@@ -16,6 +16,7 @@ import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.digital.signature.model.DSRequestRecipient;
 import com.liferay.digital.signature.url.SignDSURLProvider;
+import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.model.DLVersionNumberIncrease;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.document.library.kernel.service.DLFileEntryLocalService;
@@ -1071,6 +1072,25 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		return serviceContext;
 	}
 
+	private String _getSignedFileName(FileEntry fileEntry) {
+		if (StringUtil.equalsIgnoreCase(fileEntry.getExtension(), "pdf")) {
+			return fileEntry.getFileName();
+		}
+
+		String fileName = FileUtil.stripExtension(fileEntry.getFileName());
+
+		DLFileEntry dlFileEntry =
+			_dlFileEntryLocalService.fetchFileEntryByFileName(
+				fileEntry.getGroupId(), fileEntry.getFolderId(),
+				fileName + ".pdf");
+
+		if (dlFileEntry == null) {
+			return fileName + ".pdf";
+		}
+
+		return fileName + " (signed).pdf";
+	}
+
 	private long _getSiteGroupId(long groupId) {
 		Group group = _groupLocalService.fetchGroup(groupId);
 
@@ -1264,10 +1284,18 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			ServiceContext serviceContext = _getServiceContext(
 				companyId, fileEntry.getGroupId(), userId);
 
+			String signedFileName = _getSignedFileName(fileEntry);
+
+			String title = fileEntry.getTitle();
+
+			if (Objects.equals(title, fileEntry.getFileName())) {
+				title = signedFileName;
+			}
+
 			fileEntry = _dlAppLocalService.updateFileEntry(
-				userId, fileEntryId, fileEntry.getFileName(),
-				ContentTypes.APPLICATION_PDF, fileEntry.getTitle(), null, null,
-				null, DLVersionNumberIncrease.MAJOR, bytes, null, null, null,
+				userId, fileEntryId, signedFileName,
+				ContentTypes.APPLICATION_PDF, title, null, null, null,
+				DLVersionNumberIncrease.MAJOR, bytes, null, null, null,
 				serviceContext);
 
 			FileVersion fileVersion = fileEntry.getLatestFileVersion();
