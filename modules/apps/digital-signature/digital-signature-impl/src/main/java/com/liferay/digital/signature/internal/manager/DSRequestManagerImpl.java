@@ -598,7 +598,9 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				companyId, dsRequestIds, dsRequestRecipientObjectDefinition);
 
 			for (DSRequest dsRequest : dsRequestsMap.values()) {
-				if (!_isEnabled(companyId, dsRequest.getSiteGroupId())) {
+				if (dsRequest.isTerminal() ||
+					!_isEnabled(companyId, dsRequest.getSiteGroupId())) {
+
 					continue;
 				}
 

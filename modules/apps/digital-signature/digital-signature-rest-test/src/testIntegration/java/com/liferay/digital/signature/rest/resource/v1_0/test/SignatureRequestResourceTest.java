@@ -28,6 +28,7 @@ import com.liferay.object.model.ObjectEntry;
 import com.liferay.object.service.ObjectDefinitionLocalService;
 import com.liferay.object.service.ObjectEntryLocalService;
 import com.liferay.petra.function.UnsafeRunnable;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
 import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.Role;
@@ -500,7 +501,7 @@ public class SignatureRequestResourceTest
 		_assertProblemStatus(
 			"BAD_REQUEST",
 			() -> signatureRequestResource.postSignatureRequestVoid(
-				dsRequestObjectEntry.getObjectEntryId(), null));
+				dsRequestObjectEntry.getObjectEntryId(), StringPool.BLANK));
 	}
 
 	private void _testPostSignatureRequestVoidWithoutUpdatePermission()

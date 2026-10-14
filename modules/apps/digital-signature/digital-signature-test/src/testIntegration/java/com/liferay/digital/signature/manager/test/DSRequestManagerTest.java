@@ -563,10 +563,6 @@ public class DSRequestManagerTest {
 			System.currentTimeMillis() / 1000, 0, ZoneOffset.UTC);
 
 		_testUpdateDSRequest(
-			DSRequestConstants.STATUS_COMPLETED,
-			DSRequestConstants.STATUS_COMPLETED, localDateTime.plusDays(1),
-			"completed", "completed", localDateTime);
-		_testUpdateDSRequest(
 			DSRequestConstants.STATUS_CREATED,
 			DSRequestConstants.STATUS_CREATED, localDateTime.plusDays(1),
 			"autoresponded", RandomTestUtil.randomString(), localDateTime);
@@ -1127,6 +1123,10 @@ public class DSRequestManagerTest {
 			ReflectionTestUtil.setFieldValue(
 				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager);
 		}
+
+		Assert.assertEquals(
+			DSRequestConstants.STATUS_COMPLETED,
+			MapUtil.getString(_getRequestValues(dsEnvelope), "requestStatus"));
 
 		fileEntry = _dlAppLocalService.getFileEntry(fileEntry.getFileEntryId());
 
