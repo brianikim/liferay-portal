@@ -28,6 +28,8 @@ public interface DSRequestManager {
 
 	public DSRequest fetchDSRequest(long companyId, long dsRequestId);
 
+	public DSRequest fetchLatestFileEntryDSRequest(long companyId, long fileEntryId);
+
 	public Map<Long, DSRequest> getDSRequests(
 		long companyId, long[] fileEntryIds);
 
