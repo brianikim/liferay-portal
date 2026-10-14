@@ -144,6 +144,10 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributor
 			return Collections.emptyList();
 		}
 
+		ThemeDisplay themeDisplay =
+			(ThemeDisplay)httpServletRequest.getAttribute(
+				WebKeys.THEME_DISPLAY);
+
 		return FDSActionDropdownItemList.of(
 			FDSActionDropdownItemBuilder.putData(
 				"addDSRequestURL",
@@ -174,6 +178,20 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributor
 				"update"
 			).build(
 				"resend"
+			),
+			FDSActionDropdownItemBuilder.putData(
+				"dsRequestDetailsURL",
+				DSCommerceOrderAttachmentUtil.getServletURL(
+					"/commerce-digital-signature/signature-details",
+					themeDisplay)
+			).setHref(
+				StringPool.POUND
+			).setIcon(
+				"list-ul"
+			).setLabel(
+				_language.get(httpServletRequest, "view-signature-details")
+			).build(
+				"view-signature-details"
 			),
 			FDSActionDropdownItemBuilder.putData(
 				"voidDSRequestURL",
