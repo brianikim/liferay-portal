@@ -5,14 +5,16 @@
 
 import {
 	SignatureStatusDataRenderer,
+	formatActionUrl,
 	removeSignatureStatusColumn,
 } from 'commerce-frontend-js';
 import {openModal, openToast} from 'frontend-js-components-web';
-import {sub} from 'frontend-js-web';
+import {escapeHTML, sub} from 'frontend-js-web';
 import React from 'react';
 
 import CommerceOrderAttachmentRestrictedDataRenderer from './CommerceOrderAttachmentRestrictedDataRenderer';
 import CommerceOrderAttachmentTitleDataRenderer from './CommerceOrderAttachmentTitleDataRenderer';
+import RequestSignatureModal from './RequestSignatureModal';
 
 const openDeleteConfirmationModal = ({itemName, loadData, url}) => {
 	openModal({
@@ -80,8 +82,96 @@ const openDeleteConfirmationModal = ({itemName, loadData, url}) => {
 	});
 };
 
+const openErrorToast = (error) => {
+	openToast({
+		message: escapeHTML(
+			error?.errorMessage ||
+				Liferay.Language.get('an-unexpected-error-occurred')
+		),
+		type: 'danger',
+	});
+};
+
+const openRequestSignatureModal = ({
+	addDSRequestURL,
+	attachment,
+	requestSignatureModalProps,
+}) => {
+	openModal({
+		contentComponent: ({closeModal}) =>
+			React.createElement(RequestSignatureModal, {
+				addDSRequestURL,
+				attachment,
+				closeModal,
+				requestSignatureModalProps,
+			}),
+		size: 'lg',
+	});
+};
+
+const openVoidConfirmationModal = ({url}) => {
+	openModal({
+		bodyHTML: Liferay.Language.get(
+			'are-you-sure-you-want-to-void-this-signature-request'
+		),
+		buttons: [
+			{
+				autoFocus: true,
+				displayType: 'secondary',
+				label: Liferay.Language.get('cancel'),
+				type: 'cancel',
+			},
+			{
+				displayType: 'danger',
+				label: Liferay.Language.get('void'),
+				onClick: ({processClose}) => {
+					postSignatureRequestAction(url)
+						.then(() => {
+							processClose();
+
+							window.location.reload();
+						})
+						.catch(openErrorToast);
+				},
+			},
+		],
+		status: 'danger',
+		title: Liferay.Language.get('void'),
+	});
+};
+
+const postSignatureRequestAction = (url) =>
+	Liferay.Util.fetch(url, {method: 'POST'})
+		.then((response) => {
+			if (!response.ok) {
+				throw new Error(response.statusText);
+			}
+
+			return response.json();
+		})
+		.then(({errorMessage}) => {
+			if (errorMessage) {
+				throw {errorMessage};
+			}
+
+			openToast({
+				message: Liferay.Language.get(
+					'your-request-completed-successfully'
+				),
+				type: 'success',
+			});
+		});
+
 const AttachmentsFDSPropsTransformer = (props) => {
+	const requestSignatureModalProps =
+		props.additionalProps?.requestSignatureModalProps;
 	const signatureStatuses = props.additionalProps?.signatureStatuses ?? {};
+
+	const isRequestable = (item) =>
+		!!requestSignatureModalProps &&
+		requestSignatureModalProps.requestableCommerceOrderAttachmentIds.includes(
+			String(item?.id)
+		);
 
 	return {
 		...props,
@@ -97,23 +187,37 @@ const AttachmentsFDSPropsTransformer = (props) => {
 				}),
 		},
 		itemsActions: props.itemsActions?.map((action) => {
-			if (action?.data?.id === 'delete') {
+			const actionId = action?.data?.id;
+
+			if (actionId === 'delete') {
 				return {
 					...action,
 					className: 'text-danger',
 				};
 			}
 
+			if (actionId === 'request-signature') {
+				return {
+					...action,
+					isVisible: isRequestable,
+				};
+			}
+
+			if (
+				actionId === 'resend-signature-request' ||
+				actionId === 'void-signature-request'
+			) {
+				return {
+					...action,
+					isVisible: (item) => signatureStatuses[item?.id] === 'sent',
+				};
+			}
+
 			return action;
 		}),
-		onActionDropdownItemClick: ({
-			action: {
-				data: {id: actionId},
-			},
-			event,
-			itemData,
-			loadData,
-		}) => {
+		onActionDropdownItemClick: ({action, event, itemData, loadData}) => {
+			const actionId = action?.data?.id;
+
 			if (actionId === 'delete') {
 				event?.preventDefault();
 
@@ -133,6 +237,35 @@ const AttachmentsFDSPropsTransformer = (props) => {
 				}
 
 				window.location.href = fileURL;
+			}
+			else if (actionId === 'request-signature') {
+				event?.preventDefault();
+
+				openRequestSignatureModal({
+					addDSRequestURL: formatActionUrl(
+						action.data.addDSRequestURL,
+						itemData
+					),
+					attachment: itemData,
+					requestSignatureModalProps,
+				});
+			}
+			else if (actionId === 'resend-signature-request') {
+				event?.preventDefault();
+
+				postSignatureRequestAction(
+					formatActionUrl(action.data.resendDSRequestURL, itemData)
+				).catch(openErrorToast);
+			}
+			else if (actionId === 'void-signature-request') {
+				event?.preventDefault();
+
+				openVoidConfirmationModal({
+					url: formatActionUrl(
+						action.data.voidDSRequestURL,
+						itemData
+					),
+				});
 			}
 		},
 		views: Object.keys(signatureStatuses).length
