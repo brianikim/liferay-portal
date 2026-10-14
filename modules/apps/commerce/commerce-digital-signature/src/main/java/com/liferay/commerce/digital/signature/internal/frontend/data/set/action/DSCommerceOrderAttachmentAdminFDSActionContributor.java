@@ -150,6 +150,20 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributor
 				"request-signature"
 			),
 			FDSActionDropdownItemBuilder.putData(
+				"signatureStatusURL",
+				DSCommerceOrderAttachmentUtil.getActionURL(
+					"/commerce-digital-signature/signature-status",
+					themeDisplay)
+			).setHref(
+				StringPool.POUND
+			).setIcon(
+				"list-ul"
+			).setLabel(
+				_language.get(httpServletRequest, "view-signature-status")
+			).build(
+				"view-signature-status"
+			),
+			FDSActionDropdownItemBuilder.putData(
 				"resendURL",
 				_getResourceURL(
 					httpServletRequest, "/commerce_order/resend_ds_request")
