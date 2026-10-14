@@ -131,6 +131,16 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		Map<Long, DSRequest> dsRequests = getDSRequests(
 			companyId, ListUtil.fromArray(fileEntryIds));
 
+		for (DSRequest dsRequest : dsRequests.values()) {
+			if (dsRequest.isRequestable()) {
+				updateDSRequest(
+					companyId, dsRequest.getSiteGroupId(),
+					dsRequest.getProviderRequestId());
+			}
+		}
+
+		dsRequests = getDSRequests(companyId, ListUtil.fromArray(fileEntryIds));
+
 		for (Map.Entry<Long, DSRequest> entry : dsRequests.entrySet()) {
 			DSRequest dsRequest = entry.getValue();
 
@@ -587,9 +597,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				companyId, dsRequestIds, dsRequestRecipientObjectDefinition);
 
 			for (DSRequest dsRequest : dsRequestsMap.values()) {
-				if (dsRequest.isTerminal() ||
-					!_isEnabled(companyId, dsRequest.getSiteGroupId())) {
-
+				if (!_isEnabled(companyId, dsRequest.getSiteGroupId())) {
 					continue;
 				}
 
@@ -697,32 +705,41 @@ public class DSRequestManagerImpl implements DSRequestManager {
 						companyId, groupId, dsRecipients, dsRequestId,
 						dsRequestRecipientObjectDefinition, requestStatus);
 
-				_updateRequestStatus(
-					companyId, groupId, dsEnvelope, dsRequestId);
-
-				if (!sentDSRequestRecipients.isEmpty()) {
-					_sendDSRequestNotifications(
-						fetchDSRequest(companyId, dsRequestId),
-						sentDSRequestRecipients);
-				}
-
 				if (Objects.equals(
 						requestStatus, DSRequestConstants.STATUS_COMPLETED) &&
 					!Objects.equals(
 						MapUtil.getString(values, "requestStatus"),
 						DSRequestConstants.STATUS_COMPLETED)) {
 
-					_updateFileEntries(
-						companyId, groupId, dsEnvelope,
-						dsRequestDocumentObjectDefinition, dsRequestId);
+					TransactionInvokerUtil.invoke(
+						_transactionConfig,
+						() -> {
+							_updateFileEntries(
+								companyId, groupId, dsEnvelope,
+								dsRequestDocumentObjectDefinition, dsRequestId);
+							_updateRequestStatus(
+								companyId, groupId, dsEnvelope, dsRequestId);
+
+							return null;
+						});
+				}
+				else {
+					_updateRequestStatus(
+						companyId, groupId, dsEnvelope, dsRequestId);
+				}
+
+				if (!sentDSRequestRecipients.isEmpty()) {
+					_sendDSRequestNotifications(
+						fetchDSRequest(companyId, dsRequestId),
+						sentDSRequestRecipients);
 				}
 			}
 		}
-		catch (Exception exception) {
+		catch (Throwable throwable) {
 			_log.error(
 				"Unable to update the signature request for envelope " +
 					providerRequestId,
-				exception);
+				throwable);
 		}
 	}
 
@@ -1161,16 +1178,26 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 		String fileName = FileUtil.stripExtension(fileEntry.getFileName());
 
-		DLFileEntry dlFileEntry =
-			_dlFileEntryLocalService.fetchFileEntryByFileName(
-				fileEntry.getGroupId(), fileEntry.getFolderId(),
-				fileName + ".pdf");
+		String signedFileName = fileName + ".pdf";
 
-		if (dlFileEntry == null) {
-			return fileName + ".pdf";
+		for (int i = 1;; i++) {
+			DLFileEntry dlFileEntry =
+				_dlFileEntryLocalService.fetchFileEntryByFileName(
+					fileEntry.getGroupId(), fileEntry.getFolderId(),
+					signedFileName);
+
+			if (dlFileEntry == null) {
+				return signedFileName;
+			}
+
+			if (i == 1) {
+				signedFileName = fileName + " (signed).pdf";
+			}
+			else {
+				signedFileName = StringBundler.concat(
+					fileName, " (signed ", i, ").pdf");
+			}
 		}
-
-		return fileName + " (signed).pdf";
 	}
 
 	private long _getSiteGroupId(long groupId) {
@@ -1355,8 +1382,14 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				companyId, groupId, dsEnvelope.getDSEnvelopeId(),
 				String.valueOf(fileEntryId));
 
-			if (ArrayUtil.isEmpty(bytes)) {
-				continue;
+			if ((bytes == null) || (bytes.length < 5) ||
+				!StringUtil.startsWith(new String(bytes, 0, 5), "%PDF-")) {
+
+				throw new PortalException(
+					StringBundler.concat(
+						"DocuSign did not return a signed PDF for file entry ",
+						fileEntryId, " of envelope ",
+						dsEnvelope.getDSEnvelopeId()));
 			}
 
 			FileEntry fileEntry = _dlAppLocalService.getFileEntry(fileEntryId);
@@ -1374,8 +1407,10 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 			fileEntry = _dlAppLocalService.updateFileEntry(
 				userId, fileEntryId, signedFileName,
-				ContentTypes.APPLICATION_PDF, title, null, null, null,
-				DLVersionNumberIncrease.MAJOR, bytes, null, null, null,
+				ContentTypes.APPLICATION_PDF, title, null,
+				fileEntry.getDescription(), null, DLVersionNumberIncrease.MAJOR,
+				bytes, fileEntry.getDisplayDate(),
+				fileEntry.getExpirationDate(), fileEntry.getReviewDate(),
 				serviceContext);
 
 			FileVersion fileVersion = fileEntry.getLatestFileVersion();
