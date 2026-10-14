@@ -29,6 +29,7 @@ import com.liferay.object.constants.ObjectDefinitionConstants;
 import com.liferay.object.exception.NoSuchObjectEntryException;
 import com.liferay.object.exception.ObjectEntryValuesException;
 import com.liferay.object.model.ObjectDefinition;
+import com.liferay.object.model.ObjectEntry;
 import com.liferay.object.rest.filter.factory.FilterFactory;
 import com.liferay.object.service.ObjectDefinitionLocalService;
 import com.liferay.object.service.ObjectEntryLocalService;
@@ -53,6 +54,7 @@ import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.service.CompanyLocalService;
+import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.test.AssertUtils;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
@@ -71,8 +73,10 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
+import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -156,6 +160,8 @@ public class DSRequestManagerTest {
 					"integrationKey", RandomTestUtil.randomString()
 				).put(
 					"rsaPrivateKey", RandomTestUtil.randomString()
+				).put(
+					"signatureReminderEnabled", true
 				).put(
 					"siteSettingsStrategy", "always-inherit"
 				).build());
@@ -534,6 +540,110 @@ public class DSRequestManagerTest {
 	}
 
 	@Test
+	public void testSendSignatureReminders() throws Exception {
+		DSEnvelope dsEnvelope = _createDSEnvelope();
+
+		DSRecipient dsRecipient1 = _createDSRecipient(UserTestUtil.addUser());
+
+		dsRecipient1.setStatus(DSRequestConstants.STATUS_SENT);
+
+		User user = UserTestUtil.addUser();
+
+		DSRecipient dsRecipient2 = _createDSRecipient(user);
+
+		dsRecipient2.setStatus(DSRequestConstants.STATUS_CREATED);
+
+		dsEnvelope.setDSRecipients(
+			ListUtil.fromArray(dsRecipient1, dsRecipient2));
+
+		DSEnvelopeManager dsEnvelopeManager =
+			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager",
+				ProxyUtil.newProxyInstance(
+					DSEnvelopeManager.class.getClassLoader(),
+					new Class<?>[] {DSEnvelopeManager.class},
+					(proxy, method, arguments) -> dsEnvelope));
+
+		try {
+			DSRequest dsRequest1 = _addDSRequestObjectEntries(
+				DSRequestConstants.STATUS_SENT);
+			DSRequest dsRequest2 = _addDSRequestObjectEntries(
+				DSRequestConstants.STATUS_VOIDED);
+			DSRequest dsRequest3 = _addDSRequest(
+				dsEnvelope, RandomTestUtil.randomInt());
+
+			dsRecipient1.setStatus(DSRequestConstants.STATUS_COMPLETED);
+			dsRecipient2.setStatus(DSRequestConstants.STATUS_SENT);
+
+			_dsRequestManager.sendSignatureReminders(
+				TestPropsValues.getCompanyId());
+
+			List<NotificationQueueEntry> notificationQueueEntries =
+				_getNotificationQueueEntries(dsRequest1);
+
+			Assert.assertEquals(
+				notificationQueueEntries.toString(), 1,
+				notificationQueueEntries.size());
+
+			notificationQueueEntries = _getNotificationQueueEntries(dsRequest2);
+
+			Assert.assertEquals(
+				notificationQueueEntries.toString(), 0,
+				notificationQueueEntries.size());
+
+			notificationQueueEntries = _getNotificationQueueEntries(dsRequest3);
+
+			Assert.assertEquals(
+				notificationQueueEntries.toString(), 1,
+				notificationQueueEntries.size());
+
+			Map<String, Object> notificationRecipientSettingsMap =
+				NotificationRecipientSettingUtil.
+					getNotificationRecipientSettingsMap(
+						notificationQueueEntries.get(0));
+
+			Assert.assertEquals(
+				user.getEmailAddress(),
+				notificationRecipientSettingsMap.get(
+					NotificationRecipientSettingConstants.NAME_TO));
+
+			try (CompanyConfigurationTemporarySwapper
+					companyConfigurationTemporarySwapper =
+						new CompanyConfigurationTemporarySwapper(
+							TestPropsValues.getCompanyId(),
+							DigitalSignatureConfiguration.class.getName(),
+							HashMapDictionaryBuilder.<String, Object>put(
+								"signatureReminderEnabled", false
+							).build())) {
+
+				_dsRequestManager.sendSignatureReminders(
+					TestPropsValues.getCompanyId());
+			}
+
+			notificationQueueEntries = _getNotificationQueueEntries(dsRequest1);
+
+			Assert.assertEquals(
+				notificationQueueEntries.toString(), 1,
+				notificationQueueEntries.size());
+
+			dsEnvelope.setStatus(DSRequestConstants.STATUS_VOIDED);
+
+			_dsRequestManager.sendSignatureReminders(
+				TestPropsValues.getCompanyId());
+
+			notificationQueueEntries = _getNotificationQueueEntries(dsRequest1);
+
+			Assert.assertEquals(
+				notificationQueueEntries.toString(), 1,
+				notificationQueueEntries.size());
+		}
+		finally {
+			ReflectionTestUtil.setFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager);
+		}
+	}
+
+	@Test
 	public void testUpdateDSRequest() throws Exception {
 		LocalDateTime localDateTime = LocalDateTime.ofEpochSecond(
 			System.currentTimeMillis() / 1000, 0, ZoneOffset.UTC);
@@ -570,7 +680,7 @@ public class DSRequestManagerTest {
 			DSRequestConstants.STATUS_VOIDED, localDateTime.plusDays(1),
 			localDateTime);
 
-		_testUpdateDSRequestWhenDSRecipientStatusesDiffer();
+		_testUpdateDSRequestWhenNextRecipientIsSent();
 		_testUpdateDSRequestWhenObjectEntryIsNotDSRequest();
 		_testUpdateDSRequestWhenRequestIsCompleted();
 		_testUpdateDSRequestWhenSignedDocumentIsNotPDF();
@@ -632,6 +742,65 @@ public class DSRequestManagerTest {
 		dsEnvelope.setStatus(status);
 
 		return _addDSRequest(dsEnvelope, RandomTestUtil.randomInt());
+	}
+
+	private DSRequest _addDSRequestObjectEntries(String requestStatus)
+		throws Exception {
+
+		String languageId = LocaleUtil.toLanguageId(
+			LocaleUtil.getSiteDefault());
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(
+				TestPropsValues.getGroupId());
+
+		ObjectEntry dsRequestObjectEntry =
+			_objectEntryLocalService.addObjectEntry(
+				0, TestPropsValues.getUserId(),
+				_dsRequestObjectDefinition.getObjectDefinitionId(), 0,
+				languageId,
+				HashMapBuilder.<String, Serializable>put(
+					"emailSubject", RandomTestUtil.randomString()
+				).put(
+					"requestStatus", requestStatus
+				).put(
+					"siteGroupId", TestPropsValues.getGroupId()
+				).build(),
+				serviceContext);
+
+		_objectEntryLocalService.addObjectEntry(
+			0, TestPropsValues.getUserId(),
+			_dsRequestDocumentObjectDefinition.getObjectDefinitionId(), 0,
+			languageId,
+			HashMapBuilder.<String, Serializable>put(
+				"fileEntryId", RandomTestUtil.randomInt()
+			).put(
+				"r_dsRequestToDSRequestDocuments_l_dsRequestId",
+				dsRequestObjectEntry.getObjectEntryId()
+			).build(),
+			serviceContext);
+
+		_objectEntryLocalService.addObjectEntry(
+			0, TestPropsValues.getUserId(),
+			_dsRequestRecipientObjectDefinition.getObjectDefinitionId(), 0,
+			languageId,
+			HashMapBuilder.<String, Serializable>put(
+				"emailAddress", RandomTestUtil.randomString() + "@liferay.com"
+			).put(
+				"name", RandomTestUtil.randomString()
+			).put(
+				"r_dsRequestToDSRequestRecipients_l_dsRequestId",
+				dsRequestObjectEntry.getObjectEntryId()
+			).put(
+				"r_userToDSRequestRecipients_userId",
+				TestPropsValues.getUserId()
+			).put(
+				"requestRecipientStatus", DSRequestConstants.STATUS_SENT
+			).build(),
+			serviceContext);
+
+		return _dsRequestManager.fetchDSRequest(
+			TestPropsValues.getCompanyId(),
+			dsRequestObjectEntry.getObjectEntryId());
 	}
 
 	private FileEntry _addFileEntry() throws Exception {
@@ -1176,7 +1345,66 @@ public class DSRequestManagerTest {
 		}
 	}
 
-	private void _testUpdateDSRequestWhenDSRecipientStatusesDiffer()
+	private void _testUpdateDSRequestWhenNextRecipientIsSent()
+		throws Exception {
+
+		DSEnvelope dsEnvelope = _createDSEnvelope();
+
+		DSRecipient dsRecipient1 = _createDSRecipient(UserTestUtil.addUser());
+
+		dsRecipient1.setStatus(DSRequestConstants.STATUS_SENT);
+
+		User user = UserTestUtil.addUser();
+
+		DSRecipient dsRecipient2 = _createDSRecipient(user);
+
+		dsRecipient2.setStatus(DSRequestConstants.STATUS_CREATED);
+
+		dsEnvelope.setDSRecipients(
+			ListUtil.fromArray(dsRecipient1, dsRecipient2));
+
+		DSRequest dsRequest = _addDSRequest(
+			dsEnvelope, RandomTestUtil.randomInt());
+
+		dsRecipient1.setStatus(DSRequestConstants.STATUS_COMPLETED);
+		dsRecipient2.setStatus(DSRequestConstants.STATUS_SENT);
+
+		DSEnvelopeManager dsEnvelopeManager =
+			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager",
+				ProxyUtil.newProxyInstance(
+					DSEnvelopeManager.class.getClassLoader(),
+					new Class<?>[] {DSEnvelopeManager.class},
+					(proxy, method, arguments) -> dsEnvelope));
+
+		try {
+			_dsRequestManager.updateDSRequest(dsRequest.getDSRequestId());
+			_dsRequestManager.updateDSRequest(dsRequest.getDSRequestId());
+		}
+		finally {
+			ReflectionTestUtil.setFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager);
+		}
+
+		List<NotificationQueueEntry> notificationQueueEntries =
+			_getNotificationQueueEntries(dsRequest);
+
+		Assert.assertEquals(
+			notificationQueueEntries.toString(), 1,
+			notificationQueueEntries.size());
+
+		Map<String, Object> notificationRecipientSettingsMap =
+			NotificationRecipientSettingUtil.
+				getNotificationRecipientSettingsMap(
+					notificationQueueEntries.get(0));
+
+		Assert.assertEquals(
+			user.getEmailAddress(),
+			notificationRecipientSettingsMap.get(
+				NotificationRecipientSettingConstants.NAME_TO));
+	}
+
+	private void _testUpdateDSRequestWhenObjectEntryIsNotDSRequest()
 		throws Exception {
 
 		User completedUser = UserTestUtil.addUser();
