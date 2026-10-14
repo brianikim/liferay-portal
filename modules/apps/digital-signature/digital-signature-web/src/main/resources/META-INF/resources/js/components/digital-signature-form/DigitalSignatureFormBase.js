@@ -212,6 +212,7 @@ const DigitalSignatureFormBase = ({
 				<>
 					<Input
 						label={Liferay.Language.get('days-until-expiration')}
+						min="0"
 						name="expireAfter"
 						onChange={handleChange}
 						type="number"
@@ -223,6 +224,7 @@ const DigitalSignatureFormBase = ({
 						label={Liferay.Language.get(
 							'days-to-warn-signers-before-expiration'
 						)}
+						min="0"
 						name="expireWarn"
 						onChange={handleChange}
 						type="number"

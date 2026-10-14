@@ -114,6 +114,12 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 		int expireAfter = dsEnvelope.getExpireAfter();
 
+		if ((expireAfter < 0) || (dsEnvelope.getExpireWarn() < 0)) {
+			throw new PortalException(
+				"Days until expiration and days to warn signers must not be " +
+					"negative");
+		}
+
 		if ((expireAfter > 0) && (dsEnvelope.getExpireWarn() >= expireAfter)) {
 			throw new PortalException(
 				"Days to warn signers must be fewer than days until " +

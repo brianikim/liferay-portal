@@ -333,6 +333,7 @@ public class DSRequestManagerTest {
 				_dsRequestRecipientObjectDefinition));
 
 		_testAddDSRequestWhenEmbeddedViewIsDisabled();
+		_testAddDSRequestWhenExpirationIsNegative();
 		_testAddDSRequestWhenExpirationWarningIsNotBeforeExpiration();
 		_testAddDSRequestWhenFileEntryHasActiveRequest();
 		_testAddDSRequestWhenFileEntryIdsIsEmpty();
@@ -771,6 +772,22 @@ public class DSRequestManagerTest {
 					_createDSEnvelope(),
 					new long[] {RandomTestUtil.randomInt()}));
 		}
+	}
+
+	private void _testAddDSRequestWhenExpirationIsNegative() throws Exception {
+		DSEnvelope dsEnvelope = _createDSEnvelope();
+
+		dsEnvelope.setExpireAfter(5);
+		dsEnvelope.setExpireWarn(-1);
+
+		AssertUtils.assertFailure(
+			PortalException.class,
+			"Days until expiration and days to warn signers must not be " +
+				"negative",
+			() -> _dsRequestManager.addDSRequest(
+				TestPropsValues.getCompanyId(), TestPropsValues.getGroupId(),
+				TestPropsValues.getUserId(), dsEnvelope,
+				new long[] {RandomTestUtil.randomInt()}));
 	}
 
 	private void _testAddDSRequestWhenExpirationWarningIsNotBeforeExpiration()

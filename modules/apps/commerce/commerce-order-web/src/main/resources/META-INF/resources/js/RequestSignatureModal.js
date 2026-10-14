@@ -589,6 +589,7 @@ export default function RequestSignatureModal({
 
 					<ClayInput
 						id={`${portletNamespace}expireAfter`}
+						min="0"
 						onChange={(event) => setExpireAfter(event.target.value)}
 						type="number"
 						value={expireAfter}
@@ -606,6 +607,7 @@ export default function RequestSignatureModal({
 
 					<ClayInput
 						id={`${portletNamespace}expireWarn`}
+						min="0"
 						onChange={(event) => setExpireWarn(event.target.value)}
 						type="number"
 						value={expireWarn}
