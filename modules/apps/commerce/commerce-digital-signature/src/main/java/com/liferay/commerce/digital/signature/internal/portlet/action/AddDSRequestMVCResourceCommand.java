@@ -26,7 +26,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.UserConstants;
 import com.liferay.portal.kernel.portlet.JSONPortletResponseUtil;
-import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCResourceCommand;
+import com.liferay.portal.kernel.portlet.bridges.mvc.BaseTransactionalMVCResourceCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
@@ -36,8 +36,11 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 
+import jakarta.portlet.PortletException;
 import jakarta.portlet.ResourceRequest;
 import jakarta.portlet.ResourceResponse;
+
+import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -58,10 +61,43 @@ import org.osgi.service.component.annotations.Reference;
 	},
 	service = MVCResourceCommand.class
 )
-public class AddDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
+public class AddDSRequestMVCResourceCommand
+	extends BaseTransactionalMVCResourceCommand {
 
 	@Override
 	protected void doServeResource(
+			ResourceRequest resourceRequest, ResourceResponse resourceResponse)
+		throws PortletException {
+
+		try {
+			super.doServeResource(resourceRequest, resourceResponse);
+		}
+		catch (PortletException portletException) {
+			Throwable throwable = portletException.getCause();
+
+			if (!(throwable instanceof PortalException) ||
+				(throwable instanceof PrincipalException)) {
+
+				throw portletException;
+			}
+
+			if (_log.isDebugEnabled()) {
+				_log.debug(throwable);
+			}
+
+			try {
+				JSONPortletResponseUtil.writeJSON(
+					resourceRequest, resourceResponse,
+					JSONUtil.put("errorMessage", throwable.getMessage()));
+			}
+			catch (IOException ioException) {
+				throw new PortletException(ioException);
+			}
+		}
+	}
+
+	@Override
+	protected void doTransactionalCommand(
 			ResourceRequest resourceRequest, ResourceResponse resourceResponse)
 		throws Exception {
 
@@ -156,22 +192,8 @@ public class AddDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
 				resourceRequest, resourceResponse,
 				_jsonFactory.createJSONObject());
 		}
-		catch (PortalException portalException) {
-			if (portalException instanceof NoSuchModelException) {
-				throw new PrincipalException(portalException);
-			}
-
-			if (portalException instanceof PrincipalException) {
-				throw portalException;
-			}
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(portalException);
-			}
-
-			JSONPortletResponseUtil.writeJSON(
-				resourceRequest, resourceResponse,
-				JSONUtil.put("errorMessage", portalException.getMessage()));
+		catch (NoSuchModelException noSuchModelException) {
+			throw new PrincipalException(noSuchModelException);
 		}
 	}
 

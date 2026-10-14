@@ -114,7 +114,7 @@ public class AddDSEnvelopeMVCResourceCommandTest {
 				PortalException.class,
 				"Days to warn signers must be fewer than days until expiration",
 				() -> ReflectionTestUtil.invoke(
-					_mvcResourceCommand, "doServeResource",
+					_mvcResourceCommand, "doTransactionalCommand",
 					new Class<?>[] {
 						ResourceRequest.class, ResourceResponse.class
 					},
@@ -160,7 +160,7 @@ public class AddDSEnvelopeMVCResourceCommandTest {
 
 			try {
 				ReflectionTestUtil.invoke(
-					_mvcResourceCommand, "doServeResource",
+					_mvcResourceCommand, "doTransactionalCommand",
 					new Class<?>[] {
 						ResourceRequest.class, ResourceResponse.class
 					},
@@ -238,7 +238,7 @@ public class AddDSEnvelopeMVCResourceCommandTest {
 			Assert.assertThrows(
 				PrincipalException.MustHavePermission.class,
 				() -> ReflectionTestUtil.invoke(
-					_mvcResourceCommand, "doServeResource",
+					_mvcResourceCommand, "doTransactionalCommand",
 					new Class<?>[] {
 						ResourceRequest.class, ResourceResponse.class
 					},
@@ -290,7 +290,7 @@ public class AddDSEnvelopeMVCResourceCommandTest {
 		Assert.assertThrows(
 			PrincipalException.MustHavePermission.class,
 			() -> ReflectionTestUtil.invoke(
-				_mvcResourceCommand, "doServeResource",
+				_mvcResourceCommand, "doTransactionalCommand",
 				new Class<?>[] {ResourceRequest.class, ResourceResponse.class},
 				mockLiferayResourceRequest, new MockLiferayResourceResponse()));
 	}

@@ -35,25 +35,32 @@ import com.liferay.portal.configuration.test.util.GroupConfigurationTemporarySwa
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.NoSuchUserException;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
 import com.liferay.portal.kernel.portletfilerepository.PortletFileRepository;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.FileVersion;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
+import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
+import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.AssertUtils;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.constants.TestDataConstants;
 import com.liferay.portal.kernel.test.context.ContextUserReplace;
+import com.liferay.portal.kernel.test.portlet.MockLiferayResourceRequest;
+import com.liferay.portal.kernel.test.portlet.MockLiferayResourceResponse;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
@@ -64,6 +71,7 @@ import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.test.log.LogCapture;
 import com.liferay.portal.test.log.LogEntry;
@@ -74,6 +82,8 @@ import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
 
 import jakarta.mail.internet.InternetAddress;
+
+import jakarta.portlet.PortletException;
 
 import java.io.Serializable;
 
@@ -247,6 +257,33 @@ public class DSRequestManagerTest {
 			TestDataConstants.TEST_BYTE_ARRAY, null, null, null,
 			ServiceContextTestUtil.getServiceContext(group.getGroupId()));
 
+		MockLiferayResourceRequest mockLiferayResourceRequest =
+			new MockLiferayResourceRequest();
+
+		ThemeDisplay themeDisplay = new ThemeDisplay();
+
+		themeDisplay.setCompany(
+			_companyLocalService.getCompany(TestPropsValues.getCompanyId()));
+		themeDisplay.setPermissionChecker(
+			PermissionThreadLocal.getPermissionChecker());
+		themeDisplay.setSiteGroupId(group.getGroupId());
+		themeDisplay.setUser(TestPropsValues.getUser());
+
+		mockLiferayResourceRequest.setAttribute(
+			WebKeys.THEME_DISPLAY, themeDisplay);
+
+		mockLiferayResourceRequest.setParameter(
+			"fileEntryIds", String.valueOf(fileEntry.getFileEntryId()));
+		mockLiferayResourceRequest.setParameter(
+			"recipients",
+			JSONUtil.putAll(
+				JSONUtil.put(
+					"email", user.getEmailAddress()
+				).put(
+					"fullName", user.getFullName()
+				)
+			).toString());
+
 		DSEnvelopeManager dsEnvelopeManager =
 			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
 				_dsRequestManager, "_dsEnvelopeManager",
@@ -256,14 +293,21 @@ public class DSRequestManagerTest {
 					(proxy, method, arguments) -> dsEnvelope2));
 
 		try {
-			AssertUtils.assertFailure(
+			_mvcResourceCommand.serveResource(
+				mockLiferayResourceRequest, new MockLiferayResourceResponse());
+
+			Assert.fail();
+		}
+		catch (PortletException portletException) {
+			Throwable throwable = portletException.getCause();
+
+			Assert.assertSame(
 				ObjectEntryValuesException.ExceedsTextMaxLength.class,
+				throwable.getClass());
+			Assert.assertEquals(
 				"Object entry value exceeds the maximum length of 280 " +
 					"characters for object field \"providerRecipientId\"",
-				() -> _dsRequestManager.addDSRequest(
-					TestPropsValues.getCompanyId(), group.getGroupId(),
-					TestPropsValues.getUserId(), dsEnvelope2,
-					new long[] {fileEntry.getFileEntryId()}));
+				throwable.getMessage());
 		}
 		finally {
 			ReflectionTestUtil.setFieldValue(
@@ -1149,6 +1193,9 @@ public class DSRequestManagerTest {
 		_companyConfigurationTemporarySwapper;
 
 	@Inject
+	private CompanyLocalService _companyLocalService;
+
+	@Inject
 	private DLAppLocalService _dlAppLocalService;
 
 	private ObjectDefinition _dsRequestDocumentObjectDefinition;
@@ -1163,6 +1210,9 @@ public class DSRequestManagerTest {
 		filter = "filter.factory.key=" + ObjectDefinitionConstants.STORAGE_TYPE_DEFAULT
 	)
 	private FilterFactory<Predicate> _filterFactory;
+
+	@Inject(filter = "mvc.command.name=/digital_signature/add_ds_envelope")
+	private MVCResourceCommand _mvcResourceCommand;
 
 	@Inject
 	private ObjectDefinitionLocalService _objectDefinitionLocalService;

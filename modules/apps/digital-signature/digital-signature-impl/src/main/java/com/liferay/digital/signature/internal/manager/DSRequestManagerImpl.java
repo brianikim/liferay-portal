@@ -56,9 +56,6 @@ import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
-import com.liferay.portal.kernel.transaction.Propagation;
-import com.liferay.portal.kernel.transaction.TransactionConfig;
-import com.liferay.portal.kernel.transaction.TransactionInvokerUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.Base64;
 import com.liferay.portal.kernel.util.ContentTypes;
@@ -174,29 +171,27 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			companyId, groupId, dsEnvelope);
 
 		try {
-			return TransactionInvokerUtil.invoke(
-				_transactionConfig,
-				() -> _addDSRequest(
-					companyId, groupId, userId, sentDSEnvelope, fileEntryIds));
+			return _addDSRequest(
+				companyId, groupId, userId, sentDSEnvelope, fileEntryIds);
 		}
-		catch (Throwable throwable) {
+		catch (Exception exception1) {
 			try {
 				_dsEnvelopeManager.voidDSEnvelope(
 					companyId, groupId, sentDSEnvelope.getDSEnvelopeId(),
 					"Unable to record the signature request");
 			}
-			catch (Exception exception) {
-				throwable.addSuppressed(exception);
+			catch (Exception exception2) {
+				exception1.addSuppressed(exception2);
 			}
 
-			if (throwable instanceof PortalException) {
-				throw (PortalException)throwable;
+			if (exception1 instanceof PortalException) {
+				throw (PortalException)exception1;
 			}
 
 			throw new PortalException(
 				"Unable to record the signature request for envelope " +
 					sentDSEnvelope.getDSEnvelopeId(),
-				throwable);
+				exception1);
 		}
 	}
 
@@ -711,22 +706,13 @@ public class DSRequestManagerImpl implements DSRequestManager {
 						MapUtil.getString(values, "requestStatus"),
 						DSRequestConstants.STATUS_COMPLETED)) {
 
-					TransactionInvokerUtil.invoke(
-						_transactionConfig,
-						() -> {
-							_updateFileEntries(
-								companyId, groupId, dsEnvelope,
-								dsRequestDocumentObjectDefinition, dsRequestId);
-							_updateRequestStatus(
-								companyId, groupId, dsEnvelope, dsRequestId);
+					_updateFileEntries(
+						companyId, groupId, dsEnvelope,
+						dsRequestDocumentObjectDefinition, dsRequestId);
+				}
 
-							return null;
-						});
-				}
-				else {
-					_updateRequestStatus(
-						companyId, groupId, dsEnvelope, dsRequestId);
-				}
+				_updateRequestStatus(
+					companyId, groupId, dsEnvelope, dsRequestId);
 
 				if (!sentDSRequestRecipients.isEmpty()) {
 					_sendDSRequestNotifications(
@@ -735,11 +721,11 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				}
 			}
 		}
-		catch (Throwable throwable) {
+		catch (Exception exception) {
 			_log.error(
 				"Unable to update the signature request for envelope " +
 					providerRequestId,
-				throwable);
+				exception);
 		}
 	}
 
@@ -1544,10 +1530,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		DSRequestManagerImpl.class);
-
-	private static final TransactionConfig _transactionConfig =
-		TransactionConfig.Factory.create(
-			Propagation.REQUIRED, new Class<?>[] {Exception.class});
 
 	@Reference
 	private CompanyLocalService _companyLocalService;
