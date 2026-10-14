@@ -83,10 +83,12 @@ public class SaveCompanyConfigurationMVCActionCommandTest {
 		_processAction(true);
 
 		Assert.assertTrue(_isProperty("embeddedViewEnabled"));
+		Assert.assertTrue(_isProperty("signatureReminderEnabled"));
 
 		_processAction(false);
 
 		Assert.assertFalse(_isProperty("embeddedViewEnabled"));
+		Assert.assertFalse(_isProperty("signatureReminderEnabled"));
 	}
 
 	@FeatureFlag(enable = false, value = "LPD-69290")
@@ -111,6 +113,8 @@ public class SaveCompanyConfigurationMVCActionCommandTest {
 			).put(
 				"rsaPrivateKey", RandomTestUtil.randomString()
 			).put(
+				"signatureReminderEnabled", true
+			).put(
 				"siteSettingsStrategy", "always-inherit"
 			).build());
 
@@ -121,11 +125,14 @@ public class SaveCompanyConfigurationMVCActionCommandTest {
 						DigitalSignatureConfiguration.class.getName(),
 						HashMapDictionaryBuilder.<String, Object>put(
 							"embeddedViewEnabled", true
+						).put(
+							"signatureReminderEnabled", true
 						).build())) {
 
 			_processAction(false);
 
 			Assert.assertTrue(_isProperty("embeddedViewEnabled"));
+			Assert.assertTrue(_isProperty("signatureReminderEnabled"));
 		}
 	}
 
@@ -165,6 +172,8 @@ public class SaveCompanyConfigurationMVCActionCommandTest {
 
 		mockLiferayPortletActionRequest.addParameter(
 			"embeddedViewEnabled", String.valueOf(enabled));
+		mockLiferayPortletActionRequest.addParameter(
+			"signatureReminderEnabled", String.valueOf(enabled));
 
 		_mvcActionCommand.processAction(
 			mockLiferayPortletActionRequest,
