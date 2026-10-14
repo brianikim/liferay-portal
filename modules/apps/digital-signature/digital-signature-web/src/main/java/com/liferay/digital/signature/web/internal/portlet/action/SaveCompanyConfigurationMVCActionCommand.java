@@ -90,7 +90,7 @@ public class SaveCompanyConfigurationMVCActionCommand
 				digitalSignatureConfiguration.signatureReminderCheckInterval()
 			).put(
 				"signatureReminderEnabled",
-				digitalSignatureConfiguration.signatureReminderEnabled()
+				ParamUtil.getBoolean(actionRequest, "signatureReminderEnabled")
 			).put(
 				"siteSettingsStrategy",
 				ParamUtil.getString(actionRequest, "siteSettingsStrategy")
