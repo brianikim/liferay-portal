@@ -45,6 +45,8 @@ public interface DSRequestManager {
 	public void sendDSRequestNotifications(long dsRequestId)
 		throws PortalException;
 
+	public void sendSignatureReminders(long companyId);
+
 	public void updateDSRequest(long dsRequestId) throws PortalException;
 
 	public void voidDSRequest(long dsRequestId, String reason)
