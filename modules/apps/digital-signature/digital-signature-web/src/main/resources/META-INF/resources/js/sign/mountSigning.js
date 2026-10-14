@@ -13,6 +13,12 @@ export default function mountSigning({
 	jsURL,
 	signingURL,
 }) {
+	const onPageHide = () => {
+		if (navigator.sendBeacon) {
+			navigator.sendBeacon(completeURL);
+		}
+	};
+
 	const script = document.createElement('script');
 
 	script.onload = () => {
@@ -22,25 +28,25 @@ export default function mountSigning({
 				url: signingURL,
 			});
 
-			signing.on('sessionEnd', (event) => {
-				const sessionEndURL = `${completeURL}&event=${encodeURIComponent(
-					event.sessionEndType
-				)}`;
+			signing.on('sessionEnd', () => {
+				window.removeEventListener('pagehide', onPageHide);
 
 				const opener = getOpener();
 
 				if (opener && opener !== window) {
-					fetch(sessionEndURL, {method: 'POST'}).then(() => {
+					fetch(completeURL, {method: 'POST'}).then(() => {
 						opener.Liferay.fire('closeModal', {redirect: backURL});
 					});
 
 					return;
 				}
 
-				window.location.href = sessionEndURL;
+				window.location.href = completeURL;
 			});
 
 			signing.mount(`#${containerId}`);
+
+			window.addEventListener('pagehide', onPageHide);
 		});
 	};
 

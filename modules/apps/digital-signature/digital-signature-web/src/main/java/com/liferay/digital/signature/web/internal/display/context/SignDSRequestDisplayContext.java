@@ -17,6 +17,7 @@ import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
+import com.liferay.portal.security.key.secret.SecretResolverUtil;
 
 import jakarta.portlet.RenderRequest;
 import jakarta.portlet.RenderResponse;
@@ -100,7 +101,10 @@ public class SignDSRequestDisplayContext {
 		).put(
 			"containerId", _renderResponse.getNamespace() + "signingContainer"
 		).put(
-			"integrationKey", _digitalSignatureConfiguration.integrationKey()
+			"integrationKey",
+			SecretResolverUtil.resolve(
+				_dsRequest.getCompanyId(),
+				_digitalSignatureConfiguration.integrationKey())
 		).put(
 			"jsURL",
 			DigitalSignatureSystemConfigurationUtil.getJSURL(
