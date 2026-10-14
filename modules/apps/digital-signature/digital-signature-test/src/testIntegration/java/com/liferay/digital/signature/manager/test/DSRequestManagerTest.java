@@ -24,6 +24,7 @@ import com.liferay.mail.kernel.service.MailService;
 import com.liferay.object.constants.ObjectDefinitionConstants;
 import com.liferay.object.exception.ObjectEntryValuesException;
 import com.liferay.object.model.ObjectDefinition;
+import com.liferay.object.model.ObjectEntry;
 import com.liferay.object.rest.filter.factory.FilterFactory;
 import com.liferay.object.service.ObjectDefinitionLocalService;
 import com.liferay.object.service.ObjectEntryLocalService;
@@ -48,6 +49,7 @@ import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.service.CompanyLocalService;
+import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.test.AssertUtils;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
@@ -66,8 +68,10 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
+import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -80,6 +84,8 @@ import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
+
+import jakarta.mail.internet.InternetAddress;
 
 import jakarta.portlet.PortletException;
 
@@ -462,6 +468,66 @@ public class DSRequestManagerTest {
 	}
 
 	@Test
+	public void testSendSignatureReminders() throws Exception {
+		DSEnvelope dsEnvelope = _createDSEnvelope();
+
+		dsEnvelope.setDSRecipients(Collections.emptyList());
+		dsEnvelope.setStatus(DSRequestConstants.STATUS_SENT);
+
+		DSEnvelopeManager dsEnvelopeManager =
+			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager",
+				ProxyUtil.newProxyInstance(
+					DSEnvelopeManager.class.getClassLoader(),
+					new Class<?>[] {DSEnvelopeManager.class},
+					(proxy, method, arguments) -> dsEnvelope));
+
+		try (CompanyConfigurationTemporarySwapper
+				companyConfigurationTemporarySwapper =
+					new CompanyConfigurationTemporarySwapper(
+						TestPropsValues.getCompanyId(),
+						DigitalSignatureConfiguration.class.getName(),
+						HashMapDictionaryBuilder.<String, Object>put(
+							"embeddedViewEnabled", true
+						).put(
+							"enabled", true
+						).put(
+							"signatureReminderEnabled", true
+						).put(
+							"siteSettingsStrategy", "always-inherit"
+						).build())) {
+
+			int count = _dsRequestManager.sendSignatureReminders(
+				TestPropsValues.getCompanyId());
+
+			_addDSRequestObjectEntries(
+				RandomTestUtil.randomString() + "@liferay.com",
+				RandomTestUtil.randomInt(), DSRequestConstants.STATUS_SENT,
+				DSRequestConstants.STATUS_SENT, TestPropsValues.getUserId());
+			_addDSRequestObjectEntries(
+				RandomTestUtil.randomString() + "@liferay.com",
+				RandomTestUtil.randomInt(), DSRequestConstants.STATUS_SENT,
+				DSRequestConstants.STATUS_VOIDED, TestPropsValues.getUserId());
+
+			Assert.assertEquals(
+				count + 1,
+				_dsRequestManager.sendSignatureReminders(
+					TestPropsValues.getCompanyId()));
+
+			dsEnvelope.setStatus(DSRequestConstants.STATUS_VOIDED);
+
+			Assert.assertEquals(
+				0,
+				_dsRequestManager.sendSignatureReminders(
+					TestPropsValues.getCompanyId()));
+		}
+		finally {
+			ReflectionTestUtil.setFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager);
+		}
+	}
+
+	@Test
 	public void testUpdateDSRequest() throws Exception {
 		LocalDateTime localDateTime = LocalDateTime.ofEpochSecond(
 			System.currentTimeMillis() / 1000, 0, ZoneOffset.UTC);
@@ -494,6 +560,7 @@ public class DSRequestManagerTest {
 			DSRequestConstants.STATUS_VOIDED, DSRequestConstants.STATUS_VOIDED,
 			localDateTime.plusDays(1), "sent", "voided", localDateTime);
 
+		_testUpdateDSRequestWhenNextRecipientIsSent();
 		_testUpdateDSRequestWhenRequestIsCompleted();
 		_testUpdateDSRequestWhenSignedDocumentIsNotPDF();
 	}
@@ -525,6 +592,65 @@ public class DSRequestManagerTest {
 		dsEnvelope.setStatus(status);
 
 		return _addDSRequest(dsEnvelope, RandomTestUtil.randomInt());
+	}
+
+	private void _addDSRequestObjectEntries(
+			String emailAddress, long fileEntryId, String recipientStatus,
+			String requestStatus, long userId)
+		throws Exception {
+
+		String languageId = LocaleUtil.toLanguageId(
+			LocaleUtil.getSiteDefault());
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(
+				TestPropsValues.getGroupId(), userId);
+
+		ObjectEntry dsRequestObjectEntry =
+			_objectEntryLocalService.addObjectEntry(
+				0, userId, _dsRequestObjectDefinition.getObjectDefinitionId(),
+				0, languageId,
+				HashMapBuilder.<String, Serializable>put(
+					"emailSubject", RandomTestUtil.randomString()
+				).put(
+					"providerKey", "docusign"
+				).put(
+					"providerRequestId", RandomTestUtil.randomString()
+				).put(
+					"requestStatus", requestStatus
+				).build(),
+				serviceContext);
+
+		_objectEntryLocalService.addObjectEntry(
+			0, userId,
+			_dsRequestDocumentObjectDefinition.getObjectDefinitionId(), 0,
+			languageId,
+			HashMapBuilder.<String, Serializable>put(
+				"fileEntryId", fileEntryId
+			).put(
+				"r_dsRequestToDSRequestDocuments_l_dsRequestId",
+				dsRequestObjectEntry.getObjectEntryId()
+			).build(),
+			serviceContext);
+
+		_objectEntryLocalService.addObjectEntry(
+			0, userId,
+			_dsRequestRecipientObjectDefinition.getObjectDefinitionId(), 0,
+			languageId,
+			HashMapBuilder.<String, Serializable>put(
+				"emailAddress", emailAddress
+			).put(
+				"name", RandomTestUtil.randomString()
+			).put(
+				"providerRecipientId", RandomTestUtil.randomString()
+			).put(
+				"r_dsRequestToDSRequestRecipients_l_dsRequestId",
+				dsRequestObjectEntry.getObjectEntryId()
+			).put(
+				"r_userToDSRequestRecipients_userId", userId
+			).put(
+				"requestRecipientStatus", recipientStatus
+			).build(),
+			serviceContext);
 	}
 
 	private DSEnvelope _createDSEnvelope() {
@@ -986,6 +1112,80 @@ public class DSRequestManagerTest {
 				Date.from(statusChangedLocalDateTime.toInstant(ZoneOffset.UTC)),
 				values.get("requestRecipientStatusDate"));
 		}
+	}
+
+	private void _testUpdateDSRequestWhenNextRecipientIsSent()
+		throws Exception {
+
+		DSEnvelope dsEnvelope = _createDSEnvelope();
+
+		DSRecipient dsRecipient1 = _createDSRecipient();
+
+		User user1 = UserTestUtil.addUser();
+
+		dsRecipient1.setEmailAddress(user1.getEmailAddress());
+
+		dsRecipient1.setStatus(DSRequestConstants.STATUS_SENT);
+
+		DSRecipient dsRecipient2 = _createDSRecipient();
+
+		User user2 = UserTestUtil.addUser();
+
+		dsRecipient2.setEmailAddress(user2.getEmailAddress());
+
+		dsRecipient2.setStatus(DSRequestConstants.STATUS_CREATED);
+
+		dsEnvelope.setDSRecipients(
+			ListUtil.fromArray(dsRecipient1, dsRecipient2));
+
+		_addDSRequest(dsEnvelope, RandomTestUtil.randomInt());
+
+		dsRecipient1.setStatus(DSRequestConstants.STATUS_COMPLETED);
+		dsRecipient2.setStatus(DSRequestConstants.STATUS_SENT);
+
+		List<MailMessage> mailMessages = new ArrayList<>();
+
+		DSEnvelopeManager dsEnvelopeManager =
+			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager",
+				ProxyUtil.newProxyInstance(
+					DSEnvelopeManager.class.getClassLoader(),
+					new Class<?>[] {DSEnvelopeManager.class},
+					(proxy, method, arguments) -> dsEnvelope));
+		MailService mailService =
+			(MailService)ReflectionTestUtil.getAndSetFieldValue(
+				_dsRequestManager, "_mailService",
+				ProxyUtil.newProxyInstance(
+					MailService.class.getClassLoader(),
+					new Class<?>[] {MailService.class},
+					(proxy, method, arguments) -> {
+						if (Objects.equals(method.getName(), "sendEmail")) {
+							mailMessages.add((MailMessage)arguments[0]);
+						}
+
+						return null;
+					}));
+
+		try {
+			_dsRequestManager.updateDSRequest(
+				TestPropsValues.getCompanyId(), TestPropsValues.getGroupId(),
+				dsEnvelope.getDSEnvelopeId());
+		}
+		finally {
+			ReflectionTestUtil.setFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager);
+			ReflectionTestUtil.setFieldValue(
+				_dsRequestManager, "_mailService", mailService);
+		}
+
+		Assert.assertEquals(mailMessages.toString(), 1, mailMessages.size());
+
+		MailMessage mailMessage = mailMessages.get(0);
+
+		InternetAddress[] internetAddresses = mailMessage.getTo();
+
+		Assert.assertEquals(
+			user2.getEmailAddress(), internetAddresses[0].getAddress());
 	}
 
 	private void _testUpdateDSRequestWhenRequestIsCompleted() throws Exception {
