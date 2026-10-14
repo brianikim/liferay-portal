@@ -24,7 +24,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Brian I. Kim
  */
 @Component(
-	configurationPid = "com.liferay.digital.signature.configuration.DigitalSignatureConfiguration",
+	configurationPid = "com.liferay.digital.signature.configuration.DigitalSignatureSystemConfiguration",
 	service = SchedulerJobConfiguration.class
 )
 public class DSSignatureReminderSchedulerJobConfiguration

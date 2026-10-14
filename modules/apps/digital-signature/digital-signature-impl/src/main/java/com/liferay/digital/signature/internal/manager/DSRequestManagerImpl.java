@@ -929,11 +929,9 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 		for (Map<String, Serializable> values :
 				_getValuesList(
-					companyId,
-					StringBundler.concat(
-						"(r_dsRequestToDSRequestRecipients_l_dsRequestId in ('",
-						StringUtil.merge(dsRequestIds, "', '"), "'))"),
-					dsRequestRecipientObjectDefinition, null)) {
+					companyId, dsRequestIds,
+					"r_dsRequestToDSRequestRecipients_l_dsRequestId",
+					dsRequestRecipientObjectDefinition)) {
 
 			List<DSRequestRecipient> dsRequestRecipients =
 				dsRequestRecipientsMap.computeIfAbsent(
@@ -1015,11 +1013,9 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 		for (Map<String, Serializable> values :
 				_getValuesList(
-					companyId,
-					StringBundler.concat(
-						"(r_dsRequestToDSRequestDocuments_l_dsRequestId in ('",
-						StringUtil.merge(dsRequestIds, "', '"), "'))"),
-					dsRequestDocumentObjectDefinition, null)) {
+					companyId, dsRequestIds,
+					"r_dsRequestToDSRequestDocuments_l_dsRequestId",
+					dsRequestDocumentObjectDefinition)) {
 
 			List<Long> fileEntryIds = fileEntryIdsMap.computeIfAbsent(
 				MapUtil.getLong(
@@ -1208,6 +1204,32 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 
 		return groupId;
+	}
+
+	private List<Map<String, Serializable>> _getValuesList(
+			long companyId, Set<Long> dsRequestIds, String fieldName,
+			ObjectDefinition objectDefinition)
+		throws Exception {
+
+		List<Map<String, Serializable>> valuesList = new ArrayList<>();
+
+		List<Long> dsRequestIdsList = new ArrayList<>(dsRequestIds);
+
+		for (int i = 0; i < dsRequestIdsList.size(); i += _IN_FILTER_MAX_SIZE) {
+			valuesList.addAll(
+				_getValuesList(
+					companyId,
+					StringBundler.concat(
+						"(", fieldName, " in ('",
+						StringUtil.merge(
+							ListUtil.subList(
+								dsRequestIdsList, i, i + _IN_FILTER_MAX_SIZE),
+							"', '"),
+						"'))"),
+					objectDefinition, null));
+		}
+
+		return valuesList;
 	}
 
 	private List<Map<String, Serializable>> _getValuesList(
@@ -1517,6 +1539,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			).build(),
 			_getServiceContext(companyId, groupId, objectEntry.getUserId()));
 	}
+
+	private static final int _IN_FILTER_MAX_SIZE = 1000;
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		DSRequestManagerImpl.class);

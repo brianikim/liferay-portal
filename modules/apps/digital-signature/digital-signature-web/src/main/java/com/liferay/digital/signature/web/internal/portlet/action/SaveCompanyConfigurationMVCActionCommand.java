@@ -57,11 +57,6 @@ public class SaveCompanyConfigurationMVCActionCommand
 			return;
 		}
 
-		DigitalSignatureConfiguration digitalSignatureConfiguration =
-			_configurationProvider.getCompanyConfiguration(
-				DigitalSignatureConfiguration.class,
-				themeDisplay.getCompanyId());
-
 		_configurationProvider.saveCompanyConfiguration(
 			DigitalSignatureConfiguration.class, themeDisplay.getCompanyId(),
 			HashMapDictionaryBuilder.<String, Object>put(
@@ -85,9 +80,6 @@ public class SaveCompanyConfigurationMVCActionCommand
 			).put(
 				"rsaPrivateKey",
 				ParamUtil.getString(actionRequest, "rsaPrivateKey")
-			).put(
-				"signatureReminderCheckInterval",
-				digitalSignatureConfiguration.signatureReminderCheckInterval()
 			).put(
 				"signatureReminderEnabled",
 				ParamUtil.getBoolean(actionRequest, "signatureReminderEnabled")
