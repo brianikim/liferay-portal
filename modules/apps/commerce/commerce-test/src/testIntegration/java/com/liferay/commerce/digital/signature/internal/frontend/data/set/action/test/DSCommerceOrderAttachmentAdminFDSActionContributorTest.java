@@ -195,6 +195,16 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 			Collections.emptyList(), _getFDSActionDropdownItemIds(user));
 	}
 
+	@FeatureFlag(enable = false, value = "LPD-69290")
+	@Test
+	public void testGetFDSActionDropdownItemsWhenFeatureFlagIsDisabled()
+		throws Exception {
+
+		Assert.assertEquals(
+			Collections.emptyList(),
+			_getFDSActionDropdownItemIds(TestPropsValues.getUser()));
+	}
+
 	private void _addDSRequest(User user) throws Exception {
 		DSEnvelope dsEnvelope = new DSEnvelope();
 
