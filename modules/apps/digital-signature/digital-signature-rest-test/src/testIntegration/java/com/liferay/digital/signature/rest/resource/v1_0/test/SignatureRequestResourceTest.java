@@ -16,6 +16,7 @@ import com.liferay.digital.signature.rest.client.pagination.Page;
 import com.liferay.digital.signature.rest.client.pagination.Pagination;
 import com.liferay.digital.signature.rest.client.problem.Problem;
 import com.liferay.digital.signature.rest.client.resource.v1_0.SignatureRequestResource;
+import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.object.constants.ObjectActionKeys;
@@ -30,6 +31,7 @@ import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.role.RoleConstants;
 import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.test.constants.TestDataConstants;
@@ -269,6 +271,7 @@ public class SignatureRequestResourceTest
 	@Test
 	public void testPostSiteSignatureRequest() throws Exception {
 		_testPostSiteSignatureRequestWithoutAddPermission();
+		_testPostSiteSignatureRequestWithoutFileEntryUpdatePermission();
 		_testPostSiteSignatureRequestWithoutRecipientViewPermission();
 	}
 
@@ -495,6 +498,43 @@ public class SignatureRequestResourceTest
 				testGroup.getGroupId(), randomSignatureRequest()));
 	}
 
+	private void _testPostSiteSignatureRequestWithoutFileEntryUpdatePermission()
+		throws Exception {
+
+		Role role = RoleTestUtil.addRole(RoleConstants.TYPE_REGULAR);
+
+		RoleTestUtil.addResourcePermission(
+			role, _dsRequestObjectDefinition.getResourceName(),
+			ResourceConstants.SCOPE_COMPANY,
+			String.valueOf(testCompany.getCompanyId()),
+			ObjectActionKeys.ADD_OBJECT_ENTRY);
+
+		User user = UserTestUtil.addUser(testGroup.getGroupId());
+
+		_userLocalService.addRoleUser(role.getRoleId(), user);
+
+		FileEntry fileEntry = _dlAppLocalService.addFileEntry(
+			null, TestPropsValues.getUserId(), testGroup.getGroupId(),
+			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
+			RandomTestUtil.randomString() + ".pdf",
+			ContentTypes.APPLICATION_PDF, TestDataConstants.TEST_BYTE_ARRAY,
+			null, null, null,
+			ServiceContextTestUtil.getServiceContext(testGroup.getGroupId()));
+
+		SignatureRequest signatureRequest = randomSignatureRequest();
+
+		signatureRequest.setFileEntryIds(
+			new Long[] {fileEntry.getFileEntryId()});
+
+		SignatureRequestResource userSignatureRequestResource =
+			_getSignatureRequestResource(user);
+
+		_assertProblemStatus(
+			"FORBIDDEN",
+			() -> userSignatureRequestResource.postSiteSignatureRequest(
+				testGroup.getGroupId(), signatureRequest));
+	}
+
 	private void _testPostSiteSignatureRequestWithoutRecipientViewPermission()
 		throws Exception {
 
@@ -505,6 +545,9 @@ public class SignatureRequestResourceTest
 			ResourceConstants.SCOPE_COMPANY,
 			String.valueOf(testCompany.getCompanyId()),
 			ObjectActionKeys.ADD_OBJECT_ENTRY);
+		RoleTestUtil.addResourcePermission(
+			role, DLFileEntry.class.getName(), ResourceConstants.SCOPE_GROUP,
+			String.valueOf(testGroup.getGroupId()), ActionKeys.UPDATE);
 
 		User user = UserTestUtil.addUser(testGroup.getGroupId());
 

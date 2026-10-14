@@ -27,6 +27,8 @@ import com.liferay.portal.kernel.portlet.JSONPortletResponseUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseTransactionalMVCResourceCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
 import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Base64;
 import com.liferay.portal.kernel.util.FileUtil;
@@ -134,6 +136,12 @@ public class AddDSEnvelopeMVCResourceCommand
 			return;
 		}
 
+		for (long fileEntryId : fileEntryIds) {
+			_fileEntryModelResourcePermission.check(
+				themeDisplay.getPermissionChecker(), fileEntryId,
+				ActionKeys.UPDATE);
+		}
+
 		DSRequest dsRequest = _dsRequestManager.addDSRequest(
 			themeDisplay.getCompanyId(), themeDisplay.getSiteGroupId(),
 			user.getUserId(), dsEnvelope, fileEntryIds);
@@ -189,6 +197,12 @@ public class AddDSEnvelopeMVCResourceCommand
 
 	@Reference
 	private DSRequestManager _dsRequestManager;
+
+	@Reference(
+		target = "(model.class.name=com.liferay.portal.kernel.repository.model.FileEntry)"
+	)
+	private ModelResourcePermission<FileEntry>
+		_fileEntryModelResourcePermission;
 
 	@Reference
 	private JSONFactory _jsonFactory;

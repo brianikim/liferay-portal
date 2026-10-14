@@ -16,6 +16,7 @@ import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.petra.function.transform.TransformUtil;
+import com.liferay.portal.kernel.exception.NoSuchModelException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONUtil;
@@ -23,6 +24,7 @@ import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.model.UserConstants;
 import com.liferay.portal.kernel.portlet.JSONPortletResponseUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCResourceCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
@@ -155,6 +157,10 @@ public class AddDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
 				_jsonFactory.createJSONObject());
 		}
 		catch (PortalException portalException) {
+			if (portalException instanceof NoSuchModelException) {
+				throw new PrincipalException(portalException);
+			}
+
 			if (portalException instanceof PrincipalException) {
 				throw portalException;
 			}
@@ -191,6 +197,7 @@ public class AddDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
 			User user = _userLocalService.getUser(recipientUserId);
 
 			if ((user.getCompanyId() != commerceOrder.getCompanyId()) ||
+				(user.getType() != UserConstants.TYPE_REGULAR) ||
 				!user.isActive()) {
 
 				throw new PortalException(

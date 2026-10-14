@@ -15,10 +15,10 @@ import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.service.UserLocalService;
-import com.liferay.portal.kernel.util.StringUtil;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -35,6 +35,18 @@ public class DSRecipientViewDefinitionManagerImpl
 			long companyId, long groupId, long userId, String dsEnvelopeId,
 			String portalURL)
 		throws Exception {
+
+		PermissionChecker permissionChecker =
+			PermissionThreadLocal.getPermissionChecker();
+
+		if ((permissionChecker == null) ||
+			((permissionChecker.getUserId() != userId) &&
+			 !permissionChecker.isCompanyAdmin(companyId))) {
+
+			throw new PrincipalException.MustHavePermission(
+				permissionChecker, DSRecipientViewDefinition.class.getName(),
+				userId, ActionKeys.VIEW);
+		}
 
 		DSRecipientViewDefinition dsRecipientViewDefinition =
 			new DSRecipientViewDefinition();
@@ -59,7 +71,7 @@ public class DSRecipientViewDefinitionManagerImpl
 		dsRecipientViewDefinition.setReturnURL(appOriginURL);
 		dsRecipientViewDefinition.setUserName(user.getFullName());
 
-		return addDSRecipientViewDefinition(
+		return _addDSRecipientViewDefinition(
 			companyId, groupId, dsEnvelopeId, dsRecipientViewDefinition);
 	}
 
@@ -69,7 +81,23 @@ public class DSRecipientViewDefinitionManagerImpl
 			DSRecipientViewDefinition dsRecipientViewDefinition)
 		throws Exception {
 
-		_checkPermission(companyId, dsRecipientViewDefinition);
+		PermissionChecker permissionChecker =
+			PermissionThreadLocal.getPermissionChecker();
+
+		if ((permissionChecker == null) ||
+			!permissionChecker.isCompanyAdmin(companyId)) {
+
+			throw new PrincipalException.MustBeCompanyAdmin(permissionChecker);
+		}
+
+		return _addDSRecipientViewDefinition(
+			companyId, groupId, dsEnvelopeId, dsRecipientViewDefinition);
+	}
+
+	private String _addDSRecipientViewDefinition(
+			long companyId, long groupId, String dsEnvelopeId,
+			DSRecipientViewDefinition dsRecipientViewDefinition)
+		throws Exception {
 
 		JSONObject jsonObject = _dsHttp.post(
 			companyId, groupId,
@@ -78,34 +106,6 @@ public class DSRecipientViewDefinitionManagerImpl
 			dsRecipientViewDefinition.toJSONObject());
 
 		return jsonObject.getString("url");
-	}
-
-	private void _checkPermission(
-			long companyId, DSRecipientViewDefinition dsRecipientViewDefinition)
-		throws Exception {
-
-		PermissionChecker permissionChecker =
-			PermissionThreadLocal.getPermissionChecker();
-
-		if (permissionChecker == null) {
-			throw new PrincipalException.MustBeCompanyAdmin(permissionChecker);
-		}
-
-		if (permissionChecker.isCompanyAdmin(companyId)) {
-			return;
-		}
-
-		User user = permissionChecker.getUser();
-
-		if ((user != null) &&
-			StringUtil.equalsIgnoreCase(
-				user.getEmailAddress(),
-				dsRecipientViewDefinition.getEmailAddress())) {
-
-			return;
-		}
-
-		throw new PrincipalException.MustBeCompanyAdmin(permissionChecker);
 	}
 
 	@Reference

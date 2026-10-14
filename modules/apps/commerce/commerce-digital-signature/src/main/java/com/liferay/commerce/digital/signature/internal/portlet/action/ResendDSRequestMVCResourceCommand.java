@@ -13,6 +13,7 @@ import com.liferay.commerce.service.CommerceOrderAttachmentLocalService;
 import com.liferay.commerce.service.CommerceOrderLocalService;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSRequest;
+import com.liferay.portal.kernel.exception.NoSuchModelException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONUtil;
@@ -101,6 +102,10 @@ public class ResendDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
 				_jsonFactory.createJSONObject());
 		}
 		catch (PortalException portalException) {
+			if (portalException instanceof NoSuchModelException) {
+				throw new PrincipalException(portalException);
+			}
+
 			if (portalException instanceof PrincipalException) {
 				throw portalException;
 			}

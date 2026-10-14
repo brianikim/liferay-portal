@@ -21,9 +21,11 @@ import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.service.ObjectDefinitionLocalService;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermission;
 import com.liferay.portal.kernel.service.GroupService;
 import com.liferay.portal.kernel.service.UserService;
@@ -157,7 +159,9 @@ public class SignatureRequestResourceImpl
 		_groupService.getGroup(siteId);
 
 		for (Long fileEntryId : fileEntryIds) {
-			_dlAppService.getFileEntry(fileEntryId);
+			_fileEntryModelResourcePermission.check(
+				PermissionThreadLocal.getPermissionChecker(),
+				_dlAppService.getFileEntry(fileEntryId), ActionKeys.UPDATE);
 		}
 
 		DSRequest dsRequest = _dsRequestManager.addDSRequest(
@@ -302,6 +306,12 @@ public class SignatureRequestResourceImpl
 
 	@Reference
 	private DTOConverterRegistry _dtoConverterRegistry;
+
+	@Reference(
+		target = "(model.class.name=com.liferay.portal.kernel.repository.model.FileEntry)"
+	)
+	private ModelResourcePermission<FileEntry>
+		_fileEntryModelResourcePermission;
 
 	@Reference
 	private GroupService _groupService;

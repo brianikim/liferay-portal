@@ -184,6 +184,70 @@ public class AddDSEnvelopeMVCResourceCommandTest {
 	}
 
 	@Test
+	public void testDoServeResourceWithoutFileEntryUpdatePermission()
+		throws Exception {
+
+		_group = GroupTestUtil.addGroup();
+
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(_group.getGroupId());
+
+		serviceContext.setAddGroupPermissions(false);
+		serviceContext.setAddGuestPermissions(true);
+
+		FileEntry fileEntry = _dlAppLocalService.addFileEntry(
+			null, TestPropsValues.getUserId(), _group.getGroupId(),
+			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
+			RandomTestUtil.randomString() + ".pdf",
+			ContentTypes.APPLICATION_PDF, TestDataConstants.TEST_BYTE_ARRAY,
+			null, null, null, serviceContext);
+
+		_user = UserTestUtil.addUser();
+
+		MockLiferayResourceRequest mockLiferayResourceRequest =
+			new MockLiferayResourceRequest();
+
+		ThemeDisplay themeDisplay = new ThemeDisplay();
+
+		themeDisplay.setCompany(
+			_companyLocalService.getCompany(TestPropsValues.getCompanyId()));
+		themeDisplay.setPermissionChecker(
+			PermissionCheckerFactoryUtil.create(_user));
+		themeDisplay.setSiteGroupId(_group.getGroupId());
+		themeDisplay.setUser(_user);
+
+		mockLiferayResourceRequest.setAttribute(
+			WebKeys.THEME_DISPLAY, themeDisplay);
+
+		mockLiferayResourceRequest.setParameter(
+			"fileEntryIds", String.valueOf(fileEntry.getFileEntryId()));
+		mockLiferayResourceRequest.setParameter("recipients", "[]");
+
+		PermissionThreadLocal.setPermissionChecker(
+			themeDisplay.getPermissionChecker());
+
+		try (CompanyConfigurationTemporarySwapper
+				companyConfigurationTemporarySwapper =
+					new CompanyConfigurationTemporarySwapper(
+						TestPropsValues.getCompanyId(),
+						DigitalSignatureConfiguration.class.getName(),
+						HashMapDictionaryBuilder.<String, Object>put(
+							"embeddedViewEnabled", true
+						).build())) {
+
+			Assert.assertThrows(
+				PrincipalException.MustHavePermission.class,
+				() -> ReflectionTestUtil.invoke(
+					_mvcResourceCommand, "doServeResource",
+					new Class<?>[] {
+						ResourceRequest.class, ResourceResponse.class
+					},
+					mockLiferayResourceRequest,
+					new MockLiferayResourceResponse()));
+		}
+	}
+
+	@Test
 	public void testDoServeResourceWithoutFileEntryViewPermission()
 		throws Exception {
 
