@@ -62,4 +62,10 @@ public interface DigitalSignatureSystemConfiguration {
 	)
 	public String sandboxJSURL();
 
+	@Meta.AD(
+		deflt = "3", min = "1", name = "signature-reminder-check-interval",
+		required = false
+	)
+	public int signatureReminderCheckInterval();
+
 }
