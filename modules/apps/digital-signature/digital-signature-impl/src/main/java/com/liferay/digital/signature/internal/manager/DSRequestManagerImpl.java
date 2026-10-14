@@ -257,6 +257,14 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	}
 
 	@Override
+	public DSRequest fetchFileEntryDSRequest(long companyId, long fileEntryId) {
+		Map<Long, DSRequest> dsRequests = getDSRequests(
+			companyId, new long[] {fileEntryId});
+
+		return dsRequests.get(fileEntryId);
+	}
+
+	@Override
 	public Map<Long, DSRequest> getDSRequests(
 		long companyId, long[] fileEntryIds) {
 
