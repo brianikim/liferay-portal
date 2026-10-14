@@ -44,6 +44,7 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
+import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
@@ -169,6 +170,28 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 				commerceOrderAttachmentId, DSRequestConstants.STATUS_SENT
 			).build(),
 			additionalProps.get("signatureStatuses"));
+
+		CommerceOrderAttachment commerceOrderAttachment =
+			_commerceOrderAttachmentLocalService.addCommerceOrderAttachment(
+				RandomTestUtil.randomString(), TestPropsValues.getUserId(),
+				_commerceOrder.getCommerceOrderId(),
+				RandomTestUtil.nextDouble(), false,
+				RandomTestUtil.randomString(), "invoice",
+				RandomTestUtil.randomString() + ".zip",
+				new ByteArrayInputStream(RandomTestUtil.randomBytes()));
+
+		additionalProps = _getAdditionalProps(user);
+
+		signatureRequest = (Map<String, Object>)additionalProps.get(
+			"signatureRequest");
+
+		Assert.assertEquals(
+			SetUtil.fromArray(
+				commerceOrderAttachmentId,
+				String.valueOf(
+					commerceOrderAttachment.getCommerceOrderAttachmentId())),
+			SetUtil.fromCollection(
+				(List<String>)signatureRequest.get("nonrequestableIds")));
 
 		additionalProps = _getAdditionalProps(UserTestUtil.addUser());
 

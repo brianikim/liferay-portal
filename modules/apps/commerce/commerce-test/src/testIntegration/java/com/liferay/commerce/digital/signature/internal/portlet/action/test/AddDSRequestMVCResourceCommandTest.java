@@ -177,6 +177,22 @@ public class AddDSRequestMVCResourceCommandTest {
 				_commerceOrderAttachment.getCommerceOrderAttachmentId(),
 				" already has an active or completed signature request"),
 			0, 0, TestPropsValues.getUserId());
+
+		_commerceOrderAttachment =
+			_commerceOrderAttachmentLocalService.addCommerceOrderAttachment(
+				RandomTestUtil.randomString(), TestPropsValues.getUserId(),
+				_commerceOrder.getCommerceOrderId(),
+				RandomTestUtil.nextDouble(), false,
+				RandomTestUtil.randomString(), "invoice",
+				RandomTestUtil.randomString() + ".zip",
+				new ByteArrayInputStream(RandomTestUtil.randomBytes()));
+
+		_testServeResource(
+			StringBundler.concat(
+				"Commerce order attachment ",
+				_commerceOrderAttachment.getCommerceOrderAttachmentId(),
+				" has an unsupported file extension"),
+			0, 0, TestPropsValues.getUserId());
 	}
 
 	private void _addDSRequest(User user) throws Exception {
