@@ -637,7 +637,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				List<DSRequestRecipient> sentDSRequestRecipients =
 					_updateRecipientStatuses(
 						companyId, groupId, dsRecipients, dsRequestId,
-						dsRequestRecipientObjectDefinition);
+						dsRequestRecipientObjectDefinition,
+						_getRequestStatus(dsEnvelope));
 
 				_updateRequestStatus(
 					companyId, groupId, dsEnvelope, dsRequestId);
@@ -783,7 +784,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 							companyId, dsRecipient.getEmailAddress())
 					).put(
 						"requestRecipientStatus",
-						() -> _getRequestRecipientStatus(dsRecipient)
+						() -> _getRequestRecipientStatus(
+							dsRecipient, _getRequestStatus(dsEnvelope))
 					).put(
 						"sentDate",
 						() -> _toDate(dsRecipient.getSentLocalDateTime())
@@ -973,8 +975,19 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		return user.getUserId();
 	}
 
-	private String _getRequestRecipientStatus(DSRecipient dsRecipient) {
+	private String _getRequestRecipientStatus(
+		DSRecipient dsRecipient, String requestStatus) {
+
 		String status = StringUtil.toLowerCase(dsRecipient.getStatus());
+
+		if ((Objects.equals(requestStatus, DSRequestConstants.STATUS_EXPIRED) ||
+			 Objects.equals(requestStatus, DSRequestConstants.STATUS_VOIDED)) &&
+			!Objects.equals(status, DSRequestConstants.STATUS_COMPLETED) &&
+			!Objects.equals(status, DSRequestConstants.STATUS_DECLINED) &&
+			!Objects.equals(status, DSRequestConstants.STATUS_SIGNED)) {
+
+			return requestStatus;
+		}
 
 		if (Objects.equals(status, "delivered")) {
 			return DSRequestConstants.STATUS_SENT;
@@ -1312,7 +1325,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	private List<DSRequestRecipient> _updateRecipientStatuses(
 			long companyId, long groupId, Map<String, DSRecipient> dsRecipients,
 			long dsRequestId,
-			ObjectDefinition dsRequestRecipientObjectDefinition)
+			ObjectDefinition dsRequestRecipientObjectDefinition,
+			String requestStatus)
 		throws Exception {
 
 		List<DSRequestRecipient> sentDSRequestRecipients = new ArrayList<>();
@@ -1343,7 +1357,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			}
 
 			String requestRecipientStatus = _getRequestRecipientStatus(
-				dsRecipient);
+				dsRecipient, requestStatus);
 
 			objectEntry = _objectEntryLocalService.partialUpdateObjectEntry(
 				objectEntry.getUserId(), dsRequestRecipientId,

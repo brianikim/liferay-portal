@@ -492,6 +492,10 @@ public class DSRequestManagerTest {
 			DSRequestConstants.STATUS_DECLINED, localDateTime.plusDays(1),
 			"declined", "declined", localDateTime);
 		_testUpdateDSRequest(
+			DSRequestConstants.STATUS_EXPIRED,
+			DSRequestConstants.STATUS_EXPIRED, localDateTime, "sent", "voided",
+			localDateTime);
+		_testUpdateDSRequest(
 			DSRequestConstants.STATUS_SENT, DSRequestConstants.STATUS_SENT,
 			localDateTime.plusDays(1), "delivered", "delivered", localDateTime);
 		_testUpdateDSRequest(
@@ -503,6 +507,9 @@ public class DSRequestManagerTest {
 		_testUpdateDSRequest(
 			DSRequestConstants.STATUS_SIGNED, DSRequestConstants.STATUS_VOIDED,
 			localDateTime.plusDays(1), "signed", "voided", localDateTime);
+		_testUpdateDSRequest(
+			DSRequestConstants.STATUS_VOIDED, DSRequestConstants.STATUS_VOIDED,
+			localDateTime.plusDays(1), "sent", "voided", localDateTime);
 
 		_testUpdateDSRequestWhenRequestIsCompleted();
 	}
