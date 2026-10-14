@@ -10,6 +10,7 @@ import com.liferay.batch.engine.test.util.BatchEngineTestUtil;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.digital.signature.constants.DSObjectDefinitionConstants;
 import com.liferay.digital.signature.constants.DSRequestConstants;
+import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.rest.client.dto.v1_0.SignatureRequest;
 import com.liferay.digital.signature.rest.client.dto.v1_0.SignatureRequestRecipient;
 import com.liferay.digital.signature.rest.client.pagination.Page;
@@ -19,6 +20,8 @@ import com.liferay.digital.signature.rest.client.resource.v1_0.SignatureRequestR
 import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
+import com.liferay.mail.kernel.model.MailMessage;
+import com.liferay.mail.kernel.service.MailService;
 import com.liferay.object.constants.ObjectActionKeys;
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.model.ObjectEntry;
@@ -34,6 +37,7 @@ import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.constants.TestDataConstants;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.RoleTestUtil;
@@ -47,6 +51,7 @@ import com.liferay.portal.kernel.util.HttpComponentsUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.test.log.LogCapture;
 import com.liferay.portal.test.log.LoggerTestUtil;
@@ -55,7 +60,10 @@ import com.liferay.portal.test.rule.Inject;
 
 import java.io.Serializable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -254,6 +262,7 @@ public class SignatureRequestResourceTest
 	@Override
 	@Test
 	public void testPostSignatureRequestNotification() throws Exception {
+		_testPostSignatureRequestNotification();
 		_testPostSignatureRequestNotificationWithoutUpdatePermission();
 		_testPostSignatureRequestNotificationWithoutViewPermission();
 	}
@@ -337,6 +346,18 @@ public class SignatureRequestResourceTest
 				"r_dsRequestToDSRequestRecipients_l_dsRequestId",
 				dsRequestObjectEntry.getObjectEntryId()
 			).put(
+				"r_userToDSRequestRecipients_userId",
+				() -> {
+					User user = _userLocalService.fetchUserByEmailAddress(
+						testCompany.getCompanyId(), emailAddress);
+
+					if (user == null) {
+						return null;
+					}
+
+					return user.getUserId();
+				}
+			).put(
 				"requestRecipientStatus", DSRequestConstants.STATUS_SENT
 			).put(
 				"signingOrder", 1
@@ -383,6 +404,41 @@ public class SignatureRequestResourceTest
 		).locale(
 			LocaleUtil.getDefault()
 		).build();
+	}
+
+	private void _testPostSignatureRequestNotification() throws Exception {
+		List<MailMessage> mailMessages = new ArrayList<>();
+
+		MailService mailService =
+			(MailService)ReflectionTestUtil.getAndSetFieldValue(
+				_dsRequestManager, "_mailService",
+				ProxyUtil.newProxyInstance(
+					MailService.class.getClassLoader(),
+					new Class<?>[] {MailService.class},
+					(proxy, method, arguments) -> {
+						if (Objects.equals(method.getName(), "sendEmail")) {
+							mailMessages.add((MailMessage)arguments[0]);
+						}
+
+						return null;
+					}));
+
+		try {
+			User user = UserTestUtil.addUser();
+
+			ObjectEntry dsRequestObjectEntry = _addDSRequestObjectEntry(
+				user.getEmailAddress(), DSRequestConstants.STATUS_SENT);
+
+			signatureRequestResource.postSignatureRequestNotification(
+				dsRequestObjectEntry.getObjectEntryId());
+
+			Assert.assertEquals(
+				mailMessages.toString(), 1, mailMessages.size());
+		}
+		finally {
+			ReflectionTestUtil.setFieldValue(
+				_dsRequestManager, "_mailService", mailService);
+		}
 	}
 
 	private void _testPostSignatureRequestNotificationWithoutUpdatePermission()
@@ -593,6 +649,10 @@ public class SignatureRequestResourceTest
 	private DLAppLocalService _dlAppLocalService;
 
 	private ObjectDefinition _dsRequestDocumentObjectDefinition;
+
+	@Inject
+	private DSRequestManager _dsRequestManager;
+
 	private ObjectDefinition _dsRequestObjectDefinition;
 	private ObjectDefinition _dsRequestRecipientObjectDefinition;
 

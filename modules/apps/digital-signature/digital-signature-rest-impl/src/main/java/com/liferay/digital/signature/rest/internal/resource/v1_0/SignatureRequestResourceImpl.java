@@ -20,6 +20,7 @@ import com.liferay.object.definition.security.permission.resource.ObjectDefiniti
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.service.ObjectDefinitionLocalService;
 import com.liferay.petra.string.StringBundler;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
@@ -164,9 +165,24 @@ public class SignatureRequestResourceImpl
 				_dlAppService.getFileEntry(fileEntryId), ActionKeys.UPDATE);
 		}
 
-		DSRequest dsRequest = _dsRequestManager.addDSRequest(
-			contextCompany.getCompanyId(), siteId, contextUser.getUserId(),
-			_toDSEnvelope(signatureRequest), ArrayUtil.toArray(fileEntryIds));
+		DSRequest dsRequest = null;
+
+		try {
+			dsRequest = _dsRequestManager.addDSRequest(
+				contextCompany.getCompanyId(), siteId, contextUser.getUserId(),
+				_toDSEnvelope(signatureRequest),
+				ArrayUtil.toArray(fileEntryIds));
+		}
+		catch (PortalException portalException) {
+			if ((portalException.getClass() != PortalException.class) ||
+				(portalException.getCause() != null)) {
+
+				throw portalException;
+			}
+
+			throw new BadRequestException(
+				portalException.getMessage(), portalException);
+		}
 
 		if (GetterUtil.getBoolean(
 				signatureRequest.getSendNotifications(), true)) {

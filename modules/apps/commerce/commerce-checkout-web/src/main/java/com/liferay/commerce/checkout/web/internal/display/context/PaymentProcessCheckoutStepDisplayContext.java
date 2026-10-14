@@ -12,6 +12,7 @@ import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.util.CommerceCheckoutStep;
 import com.liferay.headless.commerce.delivery.cart.resource.v1_0.CartResource;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.portlet.url.builder.PortletURLBuilder;
 import com.liferay.portal.kernel.util.URLCodec;
 
@@ -57,7 +58,9 @@ public class PaymentProcessCheckoutStepDisplayContext {
 	}
 
 	private String _getCallbackURL() {
-		if ((_nextCommerceCheckoutStep == null) ||
+		if (!FeatureFlagManagerUtil.isEnabled(
+				_commerceOrder.getCompanyId(), "LPD-69290") ||
+			(_nextCommerceCheckoutStep == null) ||
 			Objects.equals(
 				_nextCommerceCheckoutStep.getName(),
 				OrderConfirmationCommerceCheckoutStep.NAME)) {

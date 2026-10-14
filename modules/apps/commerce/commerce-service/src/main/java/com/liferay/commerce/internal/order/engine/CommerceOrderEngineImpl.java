@@ -54,6 +54,7 @@ import com.liferay.commerce.service.CommerceShippingMethodLocalService;
 import com.liferay.commerce.subscription.CommerceSubscriptionEntryHelperUtil;
 import com.liferay.portal.configuration.module.configuration.ConfigurationProvider;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
@@ -62,6 +63,7 @@ import com.liferay.portal.kernel.messaging.DestinationNames;
 import com.liferay.portal.kernel.messaging.Message;
 import com.liferay.portal.kernel.messaging.MessageBusUtil;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.service.ServiceContext;
@@ -576,14 +578,22 @@ public class CommerceOrderEngineImpl implements CommerceOrderEngine {
 
 				Message message = new Message();
 
-				long principalUserId = userId;
+				if (FeatureFlagManagerUtil.isEnabled(
+						commerceOrder.getCompanyId(), "LPD-69290")) {
 
-				if (principalUserId == 0) {
-					principalUserId = commerceOrder.getUserId();
+					message.put("companyId", commerceOrder.getCompanyId());
+
+					if (Validator.isNull(PrincipalThreadLocal.getName())) {
+						long principalUserId = userId;
+
+						if (principalUserId == 0) {
+							principalUserId = commerceOrder.getUserId();
+						}
+
+						message.put(
+							"principalName", String.valueOf(principalUserId));
+					}
 				}
-
-				message.put("companyId", commerceOrder.getCompanyId());
-				message.put("principalName", String.valueOf(principalUserId));
 
 				DTOConverter<?, ?> commerceOrderDTOConverter =
 					_dtoConverterRegistry.getDTOConverter(
