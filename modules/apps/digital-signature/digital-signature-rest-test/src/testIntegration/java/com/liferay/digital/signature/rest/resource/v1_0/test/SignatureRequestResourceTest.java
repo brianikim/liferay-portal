@@ -10,23 +10,34 @@ import com.liferay.batch.engine.test.util.BatchEngineTestUtil;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.digital.signature.constants.DSRequestConstants;
 import com.liferay.digital.signature.rest.client.dto.v1_0.SignatureRequest;
+import com.liferay.digital.signature.rest.client.dto.v1_0.SignatureRequestRecipient;
 import com.liferay.digital.signature.rest.client.pagination.Page;
 import com.liferay.digital.signature.rest.client.pagination.Pagination;
 import com.liferay.digital.signature.rest.client.problem.Problem;
 import com.liferay.digital.signature.rest.client.resource.v1_0.SignatureRequestResource;
+import com.liferay.document.library.kernel.model.DLFolderConstants;
+import com.liferay.document.library.kernel.service.DLAppLocalService;
+import com.liferay.object.constants.ObjectActionKeys;
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.model.ObjectEntry;
 import com.liferay.object.service.ObjectDefinitionLocalService;
 import com.liferay.object.service.ObjectEntryLocalService;
 import com.liferay.petra.function.UnsafeRunnable;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
+import com.liferay.portal.kernel.model.ResourceConstants;
+import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.model.role.RoleConstants;
+import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.test.constants.TestDataConstants;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
+import com.liferay.portal.kernel.test.util.RoleTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
+import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.HttpComponentsUtil;
@@ -251,15 +262,8 @@ public class SignatureRequestResourceTest
 	@Override
 	@Test
 	public void testPostSiteSignatureRequest() throws Exception {
-		User user = UserTestUtil.addUser(testGroup.getGroupId());
-
-		SignatureRequestResource userSignatureRequestResource =
-			_getSignatureRequestResource(user);
-
-		_assertProblemStatus(
-			"FORBIDDEN",
-			() -> userSignatureRequestResource.postSiteSignatureRequest(
-				testGroup.getGroupId(), randomSignatureRequest()));
+		_testPostSiteSignatureRequestWithoutAddPermission();
+		_testPostSiteSignatureRequestWithoutRecipientViewPermission();
 	}
 
 	@Ignore
@@ -471,8 +475,74 @@ public class SignatureRequestResourceTest
 				RandomTestUtil.randomString()));
 	}
 
+	private void _testPostSiteSignatureRequestWithoutAddPermission()
+		throws Exception {
+
+		User user = UserTestUtil.addUser(testGroup.getGroupId());
+
+		SignatureRequestResource userSignatureRequestResource =
+			_getSignatureRequestResource(user);
+
+		_assertProblemStatus(
+			"FORBIDDEN",
+			() -> userSignatureRequestResource.postSiteSignatureRequest(
+				testGroup.getGroupId(), randomSignatureRequest()));
+	}
+
+	private void _testPostSiteSignatureRequestWithoutRecipientViewPermission()
+		throws Exception {
+
+		User user = UserTestUtil.addUser(testGroup.getGroupId());
+
+		Role role = RoleTestUtil.addRole(RoleConstants.TYPE_REGULAR);
+
+		RoleTestUtil.addResourcePermission(
+			role, _dsRequestObjectDefinition.getResourceName(),
+			ResourceConstants.SCOPE_COMPANY,
+			String.valueOf(testCompany.getCompanyId()),
+			ObjectActionKeys.ADD_OBJECT_ENTRY);
+
+		_userLocalService.addRoleUser(role.getRoleId(), user);
+
+		FileEntry fileEntry = _dlAppLocalService.addFileEntry(
+			null, TestPropsValues.getUserId(), testGroup.getGroupId(),
+			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
+			RandomTestUtil.randomString() + ".pdf",
+			ContentTypes.APPLICATION_PDF, TestDataConstants.TEST_BYTE_ARRAY,
+			null, null, null,
+			ServiceContextTestUtil.getServiceContext(testGroup.getGroupId()));
+
+		SignatureRequest signatureRequest = randomSignatureRequest();
+
+		signatureRequest.setFileEntryIds(
+			new Long[] {fileEntry.getFileEntryId()});
+
+		User recipientUser = UserTestUtil.addUser();
+
+		signatureRequest.setSignatureRequestRecipients(
+			new SignatureRequestRecipient[] {
+				new SignatureRequestRecipient() {
+					{
+						setUserId(recipientUser.getUserId());
+					}
+				}
+			});
+
+		SignatureRequestResource userSignatureRequestResource =
+			_getSignatureRequestResource(user);
+
+		_assertProblemStatus(
+			"FORBIDDEN",
+			() -> userSignatureRequestResource.postSiteSignatureRequest(
+				testGroup.getGroupId(), signatureRequest));
+	}
+
 	private CompanyConfigurationTemporarySwapper
 		_companyConfigurationTemporarySwapper;
+
+	@Inject
+	private DLAppLocalService _dlAppLocalService;
+
 	private ObjectDefinition _dsRequestDocumentObjectDefinition;
 	private ObjectDefinition _dsRequestObjectDefinition;
 	private ObjectDefinition _dsRequestRecipientObjectDefinition;
