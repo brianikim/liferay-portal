@@ -440,6 +440,19 @@ public class DSRequestManagerTest {
 
 	@Test
 	public void testSendSignatureReminders() throws Exception {
+		DSEnvelope dsEnvelope = new DSEnvelope();
+
+		dsEnvelope.setDSRecipients(Collections.emptyList());
+		dsEnvelope.setStatus(DSRequestConstants.STATUS_SENT);
+
+		DSEnvelopeManager dsEnvelopeManager =
+			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager",
+				ProxyUtil.newProxyInstance(
+					DSEnvelopeManager.class.getClassLoader(),
+					new Class<?>[] {DSEnvelopeManager.class},
+					(proxy, method, arguments) -> dsEnvelope));
+
 		try (CompanyConfigurationTemporarySwapper
 				companyConfigurationTemporarySwapper =
 					new CompanyConfigurationTemporarySwapper(
@@ -471,6 +484,17 @@ public class DSRequestManagerTest {
 				count + 1,
 				_dsRequestManager.sendSignatureReminders(
 					TestPropsValues.getCompanyId()));
+
+			dsEnvelope.setStatus(DSRequestConstants.STATUS_VOIDED);
+
+			Assert.assertEquals(
+				0,
+				_dsRequestManager.sendSignatureReminders(
+					TestPropsValues.getCompanyId()));
+		}
+		finally {
+			ReflectionTestUtil.setFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager);
 		}
 	}
 
