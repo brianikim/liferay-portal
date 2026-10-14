@@ -112,7 +112,7 @@ public class AddDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
 				throw new PortalException(
 					_language.get(
 						themeDisplay.getLocale(),
-						"this-file-type-cannot-be-signed"));
+						"this-file-extension-is-not-supported-by-docusign"));
 			}
 
 			DSRequest dsRequest = _dsRequestManager.fetchFileEntryDSRequest(
@@ -188,11 +188,18 @@ public class AddDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
 				User::getUserId));
 
 		int countersignerCount = 0;
+		Set<Long> recipientUserIds = new HashSet<>();
 		boolean sequential = ParamUtil.getBoolean(
 			resourceRequest, "sequential", true);
 
 		for (long recipientUserId :
 				ParamUtil.getLongValues(resourceRequest, "recipientUserIds")) {
+
+			if (!recipientUserIds.add(recipientUserId)) {
+				throw new PortalException(
+					_language.get(
+						locale, "a-recipient-can-only-be-added-once"));
+			}
 
 			User user = _userLocalService.getUser(recipientUserId);
 

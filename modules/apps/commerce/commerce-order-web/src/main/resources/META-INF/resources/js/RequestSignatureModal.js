@@ -12,7 +12,7 @@ import ClayModal from '@clayui/modal';
 import {openToast} from 'frontend-js-components-web';
 import {fetch, sub} from 'frontend-js-web';
 import PropTypes from 'prop-types';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 
 const EMAIL_MESSAGE_MAX_LENGTH = 10000;
 
@@ -56,6 +56,18 @@ function RecipientEmailAutocomplete({
 }) {
 	const [query, setQuery] = useState(value);
 	const [searchUsers, setSearchUsers] = useState([]);
+
+	const selectedEmailAddressRef = useRef(value);
+
+	useEffect(() => {
+		if (value === selectedEmailAddressRef.current) {
+			return;
+		}
+
+		selectedEmailAddressRef.current = value;
+
+		setQuery(value);
+	}, [value]);
 
 	useEffect(() => {
 		if (!query || !allowCountersigner) {
@@ -120,13 +132,19 @@ function RecipientEmailAutocomplete({
 			</label>
 
 			<ClayAutocomplete
+				filterKey="emailAddress"
 				id={id}
 				items={[...matchingAccountUsers, ...countersigners]}
 				menuTrigger="focus"
 				onChange={(nextQuery) => {
 					setQuery(nextQuery);
 
-					if (!nextQuery) {
+					if (
+						selectedEmailAddressRef.current &&
+						nextQuery !== selectedEmailAddressRef.current
+					) {
+						selectedEmailAddressRef.current = '';
+
 						onSelectUser(EMPTY_RECIPIENT);
 					}
 				}}
@@ -137,6 +155,8 @@ function RecipientEmailAutocomplete({
 					<ClayAutocomplete.Item
 						key={user.userId}
 						onClick={() => {
+							selectedEmailAddressRef.current = user.emailAddress;
+
 							setQuery(user.emailAddress);
 							onSelectUser(user);
 						}}
@@ -214,7 +234,18 @@ export default function RequestSignatureModal({
 	const [errors, setErrors] = useState({});
 	const [expireAfter, setExpireAfter] = useState(120);
 	const [expireWarn, setExpireWarn] = useState(3);
-	const [recipients, setRecipients] = useState([buyer || EMPTY_RECIPIENT]);
+	const rowKeyRef = useRef(0);
+
+	const createRecipient = (user) => ({
+		emailAddress: user.emailAddress,
+		name: user.name,
+		rowKey: rowKeyRef.current++,
+		userId: user.userId,
+	});
+
+	const [recipients, setRecipients] = useState(() => [
+		createRecipient(buyer || EMPTY_RECIPIENT),
+	]);
 	const [sequential, setSequential] = useState(true);
 	const [submitting, setSubmitting] = useState(false);
 
@@ -234,6 +265,7 @@ export default function RequestSignatureModal({
 					? {
 							emailAddress: user.emailAddress,
 							name: user.name,
+							rowKey: recipient.rowKey,
 							userId: user.userId,
 						}
 					: recipient
@@ -328,7 +360,7 @@ export default function RequestSignatureModal({
 				</ClayList>
 
 				{recipients.map((recipient, index) => (
-					<ClayForm.Group key={`${index}-${recipient.userId}`}>
+					<ClayForm.Group key={recipient.rowKey}>
 						<ClayInput.Group>
 							<ClayInput.GroupItem>
 								<ClayForm.Group className="mb-0 w-100">
@@ -471,7 +503,10 @@ export default function RequestSignatureModal({
 					className="mb-3"
 					displayType="unstyled"
 					onClick={() =>
-						setRecipients([...recipients, EMPTY_RECIPIENT])
+						setRecipients([
+							...recipients,
+							createRecipient(EMPTY_RECIPIENT),
+						])
 					}
 				>
 					<span className="inline-item inline-item-before">

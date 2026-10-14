@@ -92,6 +92,13 @@ public class VoidDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
 						"no-signature-request-was-found-for-this-document"));
 			}
 
+			if (dsRequest.isTerminal()) {
+				throw new PortalException(
+					_language.get(
+						themeDisplay.getLocale(),
+						"this-signature-request-is-no-longer-active"));
+			}
+
 			_dsRequestManager.voidDSRequest(
 				commerceOrder.getCompanyId(),
 				DSCommerceOrderAttachmentUtil.getSiteGroupId(commerceOrder),

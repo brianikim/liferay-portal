@@ -167,6 +167,10 @@ public class AddDSRequestMVCResourceCommandTest {
 
 		_testServeResource("At least one recipient is required.", 0, 0);
 
+		_testServeResource(
+			"A recipient can only be added once.", 0, 0,
+			TestPropsValues.getUserId(), TestPropsValues.getUserId());
+
 		_addDSRequest(TestPropsValues.getUser());
 
 		_testServeResource(
@@ -184,7 +188,7 @@ public class AddDSRequestMVCResourceCommandTest {
 				new ByteArrayInputStream(RandomTestUtil.randomBytes()));
 
 		_testServeResource(
-			"This file type cannot be signed.", 0, 0,
+			"This file extension is not supported by DocuSign.", 0, 0,
 			TestPropsValues.getUserId());
 	}
 
