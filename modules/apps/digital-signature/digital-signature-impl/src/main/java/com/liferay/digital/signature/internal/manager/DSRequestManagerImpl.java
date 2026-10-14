@@ -90,6 +90,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -294,17 +295,67 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	}
 
 	@Override
-	public Map<Long, DSRequest> getDSRequests(
-		long companyId, long[] fileEntryIds) {
+	public List<DSRequest> getFileEntryDSRequests(
+		long companyId, long fileEntryId) {
+
+		List<DSRequest> dsRequests = new ArrayList<>();
+
+		if (!FeatureFlagManagerUtil.isEnabled(companyId, "LPD-69290")) {
+			return dsRequests;
+		}
+
+		ObjectDefinition objectDefinition =
+			_objectDefinitionLocalService.
+				fetchObjectDefinitionByExternalReferenceCode(
+					DSObjectDefinitionConstants.
+						EXTERNAL_REFERENCE_CODE_REQUEST_DOCUMENT,
+					companyId);
+
+		if (objectDefinition == null) {
+			return dsRequests;
+		}
 
 		try {
-			return _getFileEntryDSRequests(companyId, fileEntryIds);
-		}
-		catch (PortalException portalException) {
-			_log.error(portalException);
+			Set<Long> dsRequestIds = new LinkedHashSet<>(
+				TransformUtil.transform(
+					_getValuesList(
+						companyId, "(fileEntryId eq " + fileEntryId + ")",
+						objectDefinition,
+						new Sort[] {
+							new Sort(Field.CREATE_DATE, Sort.LONG_TYPE, true),
+							new Sort("id", Sort.LONG_TYPE, true)
+						}),
+					values -> MapUtil.getLong(
+						values,
+						"r_dsRequestToDSRequestDocuments_l_dsRequestId")));
 
-			return new HashMap<>();
+			if (dsRequestIds.isEmpty()) {
+				return dsRequests;
+			}
+
+			Map<Long, DSRequest> dsRequestsMap = _getDSRequests(
+				companyId, dsRequestIds);
+
+			for (long dsRequestId : dsRequestIds) {
+				DSRequest dsRequest = dsRequestsMap.get(dsRequestId);
+
+				if ((dsRequest == null) ||
+					!_isEnabled(companyId, dsRequest.getSiteGroupId())) {
+
+					continue;
+				}
+
+				dsRequests.add(dsRequest);
+			}
 		}
+		catch (Exception exception) {
+			_log.error(
+				"Unable to load digital signature requests for file entry " +
+					fileEntryId,
+				exception);
+		}
+
+		return dsRequests;
 	}
 
 	@Override

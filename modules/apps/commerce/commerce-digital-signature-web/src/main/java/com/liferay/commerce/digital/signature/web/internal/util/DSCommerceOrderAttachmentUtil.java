@@ -18,6 +18,7 @@ import com.liferay.digital.signature.exception.DSRequestException;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.petra.function.transform.TransformUtil;
+import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
@@ -35,6 +36,10 @@ import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermi
 import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
+import com.liferay.portal.kernel.util.HashMapBuilder;
+import com.liferay.portal.kernel.util.HttpComponentsUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -71,9 +76,17 @@ public class DSCommerceOrderAttachmentUtil {
 			});
 	}
 
-	public static List<CommerceOrderAttachment> getCommerceOrderAttachments(
-			CommerceOrder commerceOrder, PermissionChecker permissionChecker)
-		throws PortalException {
+	public static String getActionURL(String path, ThemeDisplay themeDisplay) {
+		String url = HttpComponentsUtil.addParameter(
+			StringBundler.concat(
+				themeDisplay.getPortalURL(), PortalUtil.getPathModule(), path),
+			"backURL", themeDisplay.getURLCurrent());
+
+		return url + "&commerceOrderAttachmentId={id}";
+	}
+
+	public static Map<String, String> getDSRequestStatuses(
+		Map<Long, DSRequest> dsRequests) {
 
 		Map<String, String> dsRequestStatuses = new HashMap<>();
 
