@@ -25,7 +25,7 @@ import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermission;
 import com.liferay.portal.kernel.service.GroupService;
-import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.service.UserService;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
@@ -260,8 +260,7 @@ public class SignatureRequestResourceImpl
 					"A signature request recipient must have a user");
 			}
 
-			User user = _userLocalService.getUserById(
-				contextCompany.getCompanyId(), userId);
+			User user = _userService.getUserById(userId);
 
 			DSRecipient dsRecipient = new DSRecipient();
 
@@ -318,6 +317,6 @@ public class SignatureRequestResourceImpl
 		_signatureRequestDTOConverter;
 
 	@Reference
-	private UserLocalService _userLocalService;
+	private UserService _userService;
 
 }
