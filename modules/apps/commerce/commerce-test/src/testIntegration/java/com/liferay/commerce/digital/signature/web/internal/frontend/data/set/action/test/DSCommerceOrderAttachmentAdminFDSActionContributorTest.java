@@ -241,8 +241,8 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 
 		Assert.assertEquals(
 			List.of(
-				"request-signature", "resend-signature-request",
-				"void-signature-request"),
+				"request-signature", "view-signature-details", "resend",
+				"void"),
 			_getFDSActionDropdownItemIds(user));
 
 		try (SafeCloseable safeCloseable =

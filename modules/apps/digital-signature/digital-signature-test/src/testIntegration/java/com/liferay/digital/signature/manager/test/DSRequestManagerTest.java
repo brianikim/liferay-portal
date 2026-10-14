@@ -458,26 +458,60 @@ public class DSRequestManagerTest {
 	}
 
 	@Test
-	public void testGetDSRequests() throws Exception {
-		long fileEntryId1 = RandomTestUtil.randomInt();
-		long fileEntryId2 = RandomTestUtil.randomInt();
+	public void testGetFileEntryDSRequests() throws Exception {
+		DSEnvelope dsEnvelope = _createDSEnvelope();
 
-		_addDSRequest(_createDSEnvelope(), fileEntryId1, fileEntryId2);
+		dsEnvelope.setStatus(DSRequestConstants.STATUS_VOIDED);
 
-		Map<Long, DSRequest> dsRequests = _dsRequestManager.getDSRequests(
-			TestPropsValues.getCompanyId(),
-			new long[] {fileEntryId1, fileEntryId2});
+		long fileEntryId = RandomTestUtil.randomInt();
+
+		_addDSRequest(dsEnvelope, fileEntryId);
+		_addDSRequest(_createDSEnvelope(), fileEntryId);
+		_addDSRequest(_createDSEnvelope(), fileEntryId + 1);
+
+		List<DSRequest> dsRequests = _dsRequestManager.getFileEntryDSRequests(
+			TestPropsValues.getCompanyId(), fileEntryId);
 
 		Assert.assertEquals(dsRequests.toString(), 2, dsRequests.size());
 
-		DSRequest dsRequest1 = dsRequests.get(fileEntryId1);
-		DSRequest dsRequest2 = dsRequests.get(fileEntryId2);
+		DSRequest dsRequest1 = dsRequests.get(0);
 
 		Assert.assertEquals(
-			dsRequest1.getExternalReferenceCode(),
-			dsRequest2.getExternalReferenceCode());
+			DSRequestConstants.STATUS_SENT, dsRequest1.getStatus());
 
-		dsRequests = _dsRequestManager.getDSRequests(
+		DSRequest dsRequest2 = dsRequests.get(1);
+
+		Assert.assertEquals(
+			DSRequestConstants.STATUS_VOIDED, dsRequest2.getStatus());
+	}
+
+	@Test
+	public void testGetLatestFileEntryDSRequests() throws Exception {
+		long fileEntryId1 = RandomTestUtil.randomInt();
+		long fileEntryId2 = RandomTestUtil.randomInt();
+
+		DSRequest dsRequest1 = _addDSRequest(
+			_createDSEnvelope(), fileEntryId1, fileEntryId2);
+		DSRequest dsRequest2 = _addDSRequest(_createDSEnvelope(), fileEntryId2);
+
+		Map<Long, DSRequest> dsRequests =
+			_dsRequestManager.getLatestFileEntryDSRequests(
+				TestPropsValues.getCompanyId(),
+				new long[] {fileEntryId1, fileEntryId2});
+
+		Assert.assertEquals(dsRequests.toString(), 2, dsRequests.size());
+
+		DSRequest dsRequest3 = dsRequests.get(fileEntryId1);
+
+		Assert.assertEquals(
+			dsRequest1.getDSRequestId(), dsRequest3.getDSRequestId());
+
+		DSRequest dsRequest4 = dsRequests.get(fileEntryId2);
+
+		Assert.assertEquals(
+			dsRequest2.getDSRequestId(), dsRequest4.getDSRequestId());
+
+		dsRequests = _dsRequestManager.getLatestFileEntryDSRequests(
 			TestPropsValues.getCompanyId(),
 			new long[] {RandomTestUtil.randomLong()});
 
