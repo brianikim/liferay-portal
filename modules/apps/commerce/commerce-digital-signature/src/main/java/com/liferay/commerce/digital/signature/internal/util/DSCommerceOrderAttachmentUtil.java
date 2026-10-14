@@ -14,17 +14,22 @@ import com.liferay.commerce.product.service.CommerceChannelLocalService;
 import com.liferay.commerce.service.CommerceOrderAttachmentLocalService;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfigurationUtil;
+import com.liferay.digital.signature.constants.DigitalSignatureConstants;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSRequest;
+import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.module.service.Snapshot;
+import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.HttpComponentsUtil;
 import com.liferay.portal.kernel.util.Portal;
 
@@ -170,6 +175,20 @@ public class DSCommerceOrderAttachmentUtil {
 		);
 	}
 
+	public static boolean hasAllowedFileExtension(
+			CommerceOrderAttachment commerceOrderAttachment)
+		throws PortalException {
+
+		DLAppLocalService dlAppLocalService = _dlAppLocalServiceSnapshot.get();
+
+		FileEntry fileEntry = dlAppLocalService.getFileEntry(
+			commerceOrderAttachment.getFileEntryId());
+
+		return ArrayUtil.contains(
+			DigitalSignatureConstants.ALLOWED_FILE_EXTENSIONS,
+			fileEntry.getExtension());
+	}
+
 	public static boolean isEnabled(CommerceOrder commerceOrder) {
 		if (!FeatureFlagManagerUtil.isEnabled(
 				commerceOrder.getCompanyId(), "LPD-69290")) {
@@ -202,6 +221,9 @@ public class DSCommerceOrderAttachmentUtil {
 		_commerceOrderAttachmentLocalServiceSnapshot = new Snapshot<>(
 			DSCommerceOrderAttachmentUtil.class,
 			CommerceOrderAttachmentLocalService.class);
+	private static final Snapshot<DLAppLocalService>
+		_dlAppLocalServiceSnapshot = new Snapshot<>(
+			DSCommerceOrderAttachmentUtil.class, DLAppLocalService.class);
 	private static final Snapshot<DSRequestManager> _dsRequestManagerSnapshot =
 		new Snapshot<>(
 			DSCommerceOrderAttachmentUtil.class, DSRequestManager.class);

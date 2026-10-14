@@ -8,12 +8,15 @@ package com.liferay.commerce.digital.signature.internal.frontend.data.set.action
 import com.liferay.commerce.constants.CommercePortletKeys;
 import com.liferay.commerce.digital.signature.internal.util.DSCommerceOrderAttachmentUtil;
 import com.liferay.commerce.model.CommerceOrder;
+import com.liferay.commerce.model.CommerceOrderAttachment;
 import com.liferay.commerce.order.CommerceOrderAttachmentAdminFDSActionContributor;
+import com.liferay.commerce.service.CommerceOrderAttachmentLocalService;
 import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.frontend.data.set.model.FDSActionDropdownItem;
 import com.liferay.frontend.data.set.model.FDSActionDropdownItemBuilder;
 import com.liferay.frontend.data.set.model.FDSActionDropdownItemList;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.language.Language;
@@ -88,7 +91,8 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributor
 				).put(
 					"commerceOrderId", commerceOrder.getCommerceOrderId()
 				).put(
-					"nonrequestableIds", _getNonrequestableIds(dsRequests)
+					"nonrequestableIds",
+					_getNonrequestableIds(commerceOrder, dsRequests)
 				).put(
 					"portletNamespace",
 					_portal.getPortletNamespace(
@@ -186,15 +190,28 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributor
 	}
 
 	private List<String> _getNonrequestableIds(
-		Map<Long, DSRequest> dsRequests) {
+			CommerceOrder commerceOrder, Map<Long, DSRequest> dsRequests)
+		throws PortalException {
 
 		List<String> nonrequestableIds = new ArrayList<>();
 
-		for (Map.Entry<Long, DSRequest> entry : dsRequests.entrySet()) {
-			DSRequest dsRequest = entry.getValue();
+		for (CommerceOrderAttachment commerceOrderAttachment :
+				_commerceOrderAttachmentLocalService.
+					getCommerceOrderAttachments(
+						commerceOrder.getCommerceOrderId(), QueryUtil.ALL_POS,
+						QueryUtil.ALL_POS, null)) {
 
-			if (!dsRequest.isRequestable()) {
-				nonrequestableIds.add(String.valueOf(entry.getKey()));
+			DSRequest dsRequest = dsRequests.get(
+				commerceOrderAttachment.getCommerceOrderAttachmentId());
+
+			if (((dsRequest != null) && !dsRequest.isRequestable()) ||
+				!DSCommerceOrderAttachmentUtil.hasAllowedFileExtension(
+					commerceOrderAttachment)) {
+
+				nonrequestableIds.add(
+					String.valueOf(
+						commerceOrderAttachment.
+							getCommerceOrderAttachmentId()));
 			}
 		}
 
@@ -227,6 +244,10 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributor
 			themeDisplay.getPermissionChecker(), commerceOrder,
 			ActionKeys.UPDATE);
 	}
+
+	@Reference
+	private CommerceOrderAttachmentLocalService
+		_commerceOrderAttachmentLocalService;
 
 	@Reference(
 		target = "(model.class.name=com.liferay.commerce.model.CommerceOrder)"

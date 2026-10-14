@@ -85,6 +85,16 @@ public class AddDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
 					commerceOrder.getCommerceOrderId());
 		}
 
+		if (!DSCommerceOrderAttachmentUtil.hasAllowedFileExtension(
+				commerceOrderAttachment)) {
+
+			throw new PortalException(
+				StringBundler.concat(
+					"Commerce order attachment ",
+					commerceOrderAttachment.getCommerceOrderAttachmentId(),
+					" has an unsupported file extension"));
+		}
+
 		int expireAfterDays = ParamUtil.getInteger(
 			resourceRequest, "expireAfter");
 		int expireWarnDays = ParamUtil.getInteger(
