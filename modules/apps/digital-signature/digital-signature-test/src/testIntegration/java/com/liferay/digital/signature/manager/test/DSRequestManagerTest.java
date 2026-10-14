@@ -24,24 +24,32 @@ import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.sql.dsl.expression.Predicate;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
+import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
-import com.liferay.portal.kernel.test.AssertUtils;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.context.ContextUserReplace;
+import com.liferay.portal.kernel.test.portlet.MockLiferayResourceRequest;
+import com.liferay.portal.kernel.test.portlet.MockLiferayResourceResponse;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
+import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
+
+import jakarta.portlet.PortletException;
 
 import java.io.Serializable;
 
@@ -190,41 +198,78 @@ public class DSRequestManagerTest {
 				recipientValuesList.get(0),
 				"r_userToDSRequestRecipients_userId"));
 
-		DSEnvelope dsEnvelope2 = _createDSEnvelope();
+		MockLiferayResourceRequest mockLiferayResourceRequest =
+			new MockLiferayResourceRequest();
 
-		DSRecipient dsRecipient2 = _createDSRecipient();
+		ThemeDisplay themeDisplay = new ThemeDisplay();
 
-		dsRecipient2.setName(RandomTestUtil.randomString(281));
+		themeDisplay.setCompany(
+			_companyLocalService.getCompany(TestPropsValues.getCompanyId()));
+		themeDisplay.setSiteGroupId(TestPropsValues.getGroupId());
+		themeDisplay.setUser(user);
 
-		dsEnvelope2.setDSRecipients(ListUtil.fromArray(dsRecipient2));
+		mockLiferayResourceRequest.setAttribute(
+			WebKeys.THEME_DISPLAY, themeDisplay);
 
-		long fileEntryId2 = RandomTestUtil.randomInt();
+		String emailAddress2 = RandomTestUtil.randomString() + "@liferay.com";
 
-		AssertUtils.assertFailure(
-			ObjectEntryValuesException.ExceedsTextMaxLength.class,
-			"Object entry value exceeds the maximum length of 280 characters " +
-				"for object field \"name\"",
-			() -> _dsRequestManager.addDSRequest(
-				TestPropsValues.getCompanyId(), TestPropsValues.getGroupId(),
-				TestPropsValues.getUserId(), dsEnvelope2,
-				new long[] {fileEntryId2}));
+		mockLiferayResourceRequest.setParameter(
+			"recipients",
+			JSONUtil.putAll(
+				JSONUtil.put(
+					"email", emailAddress2
+				).put(
+					"fullName", RandomTestUtil.randomString(281)
+				)
+			).toString());
+
+		String dsEnvelopeId2 = RandomTestUtil.randomString();
+
+		DSEnvelopeManager dsEnvelopeManager =
+			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
+				_mvcResourceCommand, "_dsEnvelopeManager",
+				ProxyUtil.newProxyInstance(
+					DSEnvelopeManager.class.getClassLoader(),
+					new Class<?>[] {DSEnvelopeManager.class},
+					(proxy, method, arguments) -> {
+						DSEnvelope dsEnvelope = (DSEnvelope)arguments[2];
+
+						dsEnvelope.setDSEnvelopeId(dsEnvelopeId2);
+
+						return dsEnvelope;
+					}));
+
+		try {
+			_mvcResourceCommand.serveResource(
+				mockLiferayResourceRequest, new MockLiferayResourceResponse());
+
+			Assert.fail();
+		}
+		catch (PortletException portletException) {
+			Throwable throwable = portletException.getCause();
+
+			Assert.assertSame(
+				ObjectEntryValuesException.ExceedsTextMaxLength.class,
+				throwable.getClass());
+			Assert.assertEquals(
+				"Object entry value exceeds the maximum length of 280 " +
+					"characters for object field \"name\"",
+				throwable.getMessage());
+		}
+		finally {
+			ReflectionTestUtil.setFieldValue(
+				_mvcResourceCommand, "_dsEnvelopeManager", dsEnvelopeManager);
+		}
 
 		Assert.assertEquals(
 			Collections.emptyList(),
 			_getValuesList(
-				"(providerRequestId eq '" + dsEnvelope2.getDSEnvelopeId() +
-					"')",
+				"(providerRequestId eq '" + dsEnvelopeId2 + "')",
 				_dsRequestObjectDefinition));
 		Assert.assertEquals(
 			Collections.emptyList(),
 			_getValuesList(
-				"(fileEntryId eq " + fileEntryId2 + ")",
-				_dsRequestDocumentObjectDefinition));
-		Assert.assertEquals(
-			Collections.emptyList(),
-			_getValuesList(
-				"(providerRecipientId eq '" + dsRecipient2.getDSRecipientId() +
-					"')",
+				"(emailAddress eq '" + emailAddress2 + "')",
 				_dsRequestRecipientObjectDefinition));
 
 		_testAddDSRequestWhenRecipientUserIsDeleted();
@@ -451,6 +496,10 @@ public class DSRequestManagerTest {
 
 	private CompanyConfigurationTemporarySwapper
 		_companyConfigurationTemporarySwapper;
+
+	@Inject
+	private CompanyLocalService _companyLocalService;
+
 	private ObjectDefinition _dsRequestDocumentObjectDefinition;
 
 	@Inject
@@ -463,6 +512,9 @@ public class DSRequestManagerTest {
 		filter = "filter.factory.key=" + ObjectDefinitionConstants.STORAGE_TYPE_DEFAULT
 	)
 	private FilterFactory<Predicate> _filterFactory;
+
+	@Inject(filter = "mvc.command.name=/digital_signature/add_ds_envelope")
+	private MVCResourceCommand _mvcResourceCommand;
 
 	@Inject
 	private ObjectDefinitionLocalService _objectDefinitionLocalService;
