@@ -1,0 +1,118 @@
+/**
+ * SPDX-FileCopyrightText: (c) 2026 Liferay, Inc. https://liferay.com
+ * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
+ */
+
+package com.liferay.commerce.digital.signature.internal.servlet;
+
+import com.liferay.commerce.model.CommerceOrderAttachment;
+import com.liferay.commerce.service.CommerceOrderAttachmentLocalService;
+import com.liferay.digital.signature.manager.DSRequestManager;
+import com.liferay.digital.signature.model.DSRequest;
+import com.liferay.digital.signature.url.SignDSURLProvider;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.Validator;
+
+import jakarta.servlet.Servlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
+/**
+ * @author Brian I. Kim
+ */
+@Component(
+	property = {
+		"osgi.http.whiteboard.context.path=/commerce-digital-signature",
+		"osgi.http.whiteboard.servlet.name=com.liferay.commerce.digital.signature.internal.servlet.DSCommerceOrderSignServlet",
+		"osgi.http.whiteboard.servlet.pattern=/commerce-digital-signature/sign/*"
+	},
+	service = Servlet.class
+)
+public class DSCommerceOrderSignServlet extends HttpServlet {
+
+	@Override
+	protected void doGet(
+			HttpServletRequest httpServletRequest,
+			HttpServletResponse httpServletResponse)
+		throws IOException {
+
+		String backURL = _portal.escapeRedirect(
+			ParamUtil.getString(httpServletRequest, "backURL"));
+
+		if (Validator.isNull(backURL)) {
+			backURL = _portal.getPortalURL(httpServletRequest);
+		}
+
+		try {
+			User user = _portal.getUser(httpServletRequest);
+
+			if ((user == null) || user.isGuestUser()) {
+				httpServletResponse.sendRedirect(backURL);
+
+				return;
+			}
+
+			CommerceOrderAttachment commerceOrderAttachment =
+				_commerceOrderAttachmentLocalService.
+					fetchCommerceOrderAttachment(
+						ParamUtil.getLong(
+							httpServletRequest, "commerceOrderAttachmentId"));
+
+			if (commerceOrderAttachment == null) {
+				httpServletResponse.sendRedirect(backURL);
+
+				return;
+			}
+
+			long companyId = _portal.getCompanyId(httpServletRequest);
+
+			DSRequest dsRequest = _dsRequestManager.fetchFileEntryDSRequest(
+				companyId, commerceOrderAttachment.getFileEntryId());
+
+			if ((dsRequest == null) ||
+				!dsRequest.isSignatureRequired(user.getEmailAddress())) {
+
+				httpServletResponse.sendRedirect(backURL);
+
+				return;
+			}
+
+			httpServletResponse.sendRedirect(
+				_signDSURLProvider.getModalURL(
+					companyId, dsRequest.getSiteGroupId(), backURL,
+					dsRequest.getDSRequestId()));
+		}
+		catch (Exception exception) {
+			_log.error(exception);
+
+			httpServletResponse.sendRedirect(backURL);
+		}
+	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		DSCommerceOrderSignServlet.class);
+
+	@Reference
+	private CommerceOrderAttachmentLocalService
+		_commerceOrderAttachmentLocalService;
+
+	@Reference
+	private DSRequestManager _dsRequestManager;
+
+	@Reference
+	private Portal _portal;
+
+	@Reference
+	private SignDSURLProvider _signDSURLProvider;
+
+}
