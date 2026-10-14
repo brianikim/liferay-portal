@@ -75,7 +75,9 @@ function RecipientEmailAutocomplete({
 
 			fetch(url.toString())
 				.then((response) => response.json())
-				.then((users) => setSearchUsers(users))
+				.then((users) =>
+					setSearchUsers(Array.isArray(users) ? users : [])
+				)
 				.catch(() => setSearchUsers([]));
 		}, 300);
 
@@ -276,7 +278,11 @@ export default function RequestSignatureModal({
 
 				return response.json();
 			})
-			.then(() => {
+			.then(({errorMessage}) => {
+				if (errorMessage) {
+					throw {errorMessage};
+				}
+
 				closeModal();
 
 				openToast({
@@ -288,13 +294,13 @@ export default function RequestSignatureModal({
 
 				window.location.reload();
 			})
-			.catch(() => {
+			.catch((error) => {
 				setSubmitting(false);
 
 				openToast({
-					message: Liferay.Language.get(
-						'an-unexpected-error-occurred'
-					),
+					message:
+						error?.errorMessage ||
+						Liferay.Language.get('an-unexpected-error-occurred'),
 					type: 'danger',
 				});
 			});

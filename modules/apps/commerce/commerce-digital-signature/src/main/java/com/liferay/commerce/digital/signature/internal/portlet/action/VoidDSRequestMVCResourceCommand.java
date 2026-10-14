@@ -15,10 +15,14 @@ import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactory;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.language.Language;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.JSONPortletResponseUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCResourceCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
+import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
@@ -51,51 +55,71 @@ public class VoidDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
 		ThemeDisplay themeDisplay = (ThemeDisplay)resourceRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		CommerceOrderAttachment commerceOrderAttachment =
-			_commerceOrderAttachmentLocalService.getCommerceOrderAttachment(
-				ParamUtil.getLong(
-					resourceRequest, "commerceOrderAttachmentId"));
+		try {
+			CommerceOrderAttachment commerceOrderAttachment =
+				_commerceOrderAttachmentLocalService.getCommerceOrderAttachment(
+					ParamUtil.getLong(
+						resourceRequest, "commerceOrderAttachmentId"));
 
-		CommerceOrder commerceOrder =
-			_commerceOrderLocalService.getCommerceOrder(
-				commerceOrderAttachment.getCommerceOrderId());
+			CommerceOrder commerceOrder =
+				_commerceOrderLocalService.getCommerceOrder(
+					commerceOrderAttachment.getCommerceOrderId());
 
-		_commerceOrderModelResourcePermission.check(
-			themeDisplay.getPermissionChecker(), commerceOrder,
-			ActionKeys.UPDATE);
+			_commerceOrderModelResourcePermission.check(
+				themeDisplay.getPermissionChecker(), commerceOrder,
+				ActionKeys.UPDATE);
 
-		_commerceOrderAttachmentModelResourcePermission.check(
-			themeDisplay.getPermissionChecker(), commerceOrderAttachment,
-			ActionKeys.UPDATE);
+			_commerceOrderAttachmentModelResourcePermission.check(
+				themeDisplay.getPermissionChecker(), commerceOrderAttachment,
+				ActionKeys.UPDATE);
 
-		if (!DSCommerceOrderAttachmentUtil.isEnabled(commerceOrder)) {
-			throw new PortalException(
-				"Digital signature is not enabled for order " +
-					commerceOrder.getCommerceOrderId());
+			if (!DSCommerceOrderAttachmentUtil.isEnabled(commerceOrder)) {
+				throw new PortalException(
+					_language.get(
+						themeDisplay.getLocale(),
+						"digital-signature-is-not-enabled-for-this-order"));
+			}
+
+			DSRequest dsRequest = _dsRequestManager.fetchFileEntryDSRequest(
+				commerceOrder.getCompanyId(),
+				commerceOrderAttachment.getFileEntryId());
+
+			if (dsRequest == null) {
+				throw new PortalException(
+					_language.get(
+						themeDisplay.getLocale(),
+						"no-signature-request-was-found-for-this-document"));
+			}
+
+			_dsRequestManager.voidDSRequest(
+				commerceOrder.getCompanyId(),
+				DSCommerceOrderAttachmentUtil.getSiteGroupId(commerceOrder),
+				dsRequest,
+				_language.get(
+					themeDisplay.getLocale(),
+					"the-sender-voided-the-signature-request"));
+
+			JSONPortletResponseUtil.writeJSON(
+				resourceRequest, resourceResponse,
+				_jsonFactory.createJSONObject());
 		}
+		catch (PortalException portalException) {
+			if (portalException instanceof PrincipalException) {
+				throw portalException;
+			}
 
-		DSRequest dsRequest = _dsRequestManager.fetchFileEntryDSRequest(
-			commerceOrder.getCompanyId(),
-			commerceOrderAttachment.getFileEntryId());
+			if (_log.isDebugEnabled()) {
+				_log.debug(portalException);
+			}
 
-		if (dsRequest == null) {
-			throw new PortalException(
-				"Commerce order attachment " +
-					commerceOrderAttachment.getCommerceOrderAttachmentId() +
-						" has no signature request");
+			JSONPortletResponseUtil.writeJSON(
+				resourceRequest, resourceResponse,
+				JSONUtil.put("errorMessage", portalException.getMessage()));
 		}
-
-		_dsRequestManager.voidDSRequest(
-			commerceOrder.getCompanyId(),
-			DSCommerceOrderAttachmentUtil.getSiteGroupId(commerceOrder),
-			dsRequest,
-			_language.get(
-				themeDisplay.getLocale(),
-				"the-sender-voided-the-signature-request"));
-
-		JSONPortletResponseUtil.writeJSON(
-			resourceRequest, resourceResponse, _jsonFactory.createJSONObject());
 	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		VoidDSRequestMVCResourceCommand.class);
 
 	@Reference
 	private CommerceOrderAttachmentLocalService

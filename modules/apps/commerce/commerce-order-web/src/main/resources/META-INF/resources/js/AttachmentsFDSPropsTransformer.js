@@ -83,26 +83,36 @@ const openDeleteConfirmationModal = ({itemName, loadData, url}) => {
 	});
 };
 
-const openErrorToast = () => {
+const openErrorToast = (error) => {
 	openToast({
-		message: Liferay.Language.get('an-unexpected-error-occurred'),
+		message:
+			error?.errorMessage ||
+			Liferay.Language.get('an-unexpected-error-occurred'),
 		type: 'danger',
 	});
 };
 
 const postSignatureRequestAction = (url) =>
-	Liferay.Util.fetch(url, {method: 'POST'}).then((response) => {
-		if (!response.ok) {
-			throw new Error(response.statusText);
-		}
+	Liferay.Util.fetch(url, {method: 'POST'})
+		.then((response) => {
+			if (!response.ok) {
+				throw new Error(response.statusText);
+			}
 
-		openToast({
-			message: Liferay.Language.get(
-				'your-request-completed-successfully'
-			),
-			type: 'success',
+			return response.json();
+		})
+		.then(({errorMessage}) => {
+			if (errorMessage) {
+				throw {errorMessage};
+			}
+
+			openToast({
+				message: Liferay.Language.get(
+					'your-request-completed-successfully'
+				),
+				type: 'success',
+			});
 		});
-	});
 
 const openRequestSignatureModal = ({
 	addDSRequestURL,

@@ -11,10 +11,14 @@ import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.service.CommerceOrderLocalService;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONUtil;
+import com.liferay.portal.kernel.language.Language;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portlet.JSONPortletResponseUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCResourceCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
+import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.service.UserLocalService;
@@ -51,30 +55,49 @@ public class SearchDSRequestUsersMVCResourceCommand
 		ThemeDisplay themeDisplay = (ThemeDisplay)resourceRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		CommerceOrder commerceOrder =
-			_commerceOrderLocalService.getCommerceOrder(
-				ParamUtil.getLong(resourceRequest, "commerceOrderId"));
+		try {
+			CommerceOrder commerceOrder =
+				_commerceOrderLocalService.getCommerceOrder(
+					ParamUtil.getLong(resourceRequest, "commerceOrderId"));
 
-		_commerceOrderModelResourcePermission.check(
-			themeDisplay.getPermissionChecker(), commerceOrder,
-			ActionKeys.UPDATE);
+			_commerceOrderModelResourcePermission.check(
+				themeDisplay.getPermissionChecker(), commerceOrder,
+				ActionKeys.UPDATE);
 
-		if (!DSCommerceOrderAttachmentUtil.isEnabled(commerceOrder)) {
-			throw new PortalException(
-				"Digital signature is not enabled for order " +
-					commerceOrder.getCommerceOrderId());
+			if (!DSCommerceOrderAttachmentUtil.isEnabled(commerceOrder)) {
+				throw new PortalException(
+					_language.get(
+						themeDisplay.getLocale(),
+						"digital-signature-is-not-enabled-for-this-order"));
+			}
+
+			JSONPortletResponseUtil.writeJSON(
+				resourceRequest, resourceResponse,
+				JSONUtil.toJSONArray(
+					_userLocalService.search(
+						commerceOrder.getCompanyId(),
+						ParamUtil.getString(resourceRequest, "keywords"),
+						WorkflowConstants.STATUS_APPROVED, null, 0, 10,
+						(OrderByComparator<User>)null),
+					DSCommerceOrderAttachmentUtil::getUserJSONObject));
 		}
+		catch (PortalException portalException) {
+			if (portalException instanceof PrincipalException) {
+				throw portalException;
+			}
 
-		JSONPortletResponseUtil.writeJSON(
-			resourceRequest, resourceResponse,
-			JSONUtil.toJSONArray(
-				_userLocalService.search(
-					commerceOrder.getCompanyId(),
-					ParamUtil.getString(resourceRequest, "keywords"),
-					WorkflowConstants.STATUS_APPROVED, null, 0, 10,
-					(OrderByComparator<User>)null),
-				DSCommerceOrderAttachmentUtil::getUserJSONObject));
+			if (_log.isDebugEnabled()) {
+				_log.debug(portalException);
+			}
+
+			JSONPortletResponseUtil.writeJSON(
+				resourceRequest, resourceResponse,
+				JSONUtil.put("errorMessage", portalException.getMessage()));
+		}
 	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		SearchDSRequestUsersMVCResourceCommand.class);
 
 	@Reference
 	private CommerceOrderLocalService _commerceOrderLocalService;
@@ -84,6 +107,9 @@ public class SearchDSRequestUsersMVCResourceCommand
 	)
 	private ModelResourcePermission<CommerceOrder>
 		_commerceOrderModelResourcePermission;
+
+	@Reference
+	private Language _language;
 
 	@Reference
 	private UserLocalService _userLocalService;

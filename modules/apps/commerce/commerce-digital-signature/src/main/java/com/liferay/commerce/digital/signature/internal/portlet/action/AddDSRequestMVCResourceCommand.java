@@ -16,14 +16,17 @@ import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.petra.function.transform.TransformUtil;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactory;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.language.Language;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portlet.JSONPortletResponseUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCResourceCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
+import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.service.UserLocalService;
@@ -37,6 +40,7 @@ import jakarta.portlet.ResourceResponse;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.osgi.service.component.annotations.Component;
@@ -62,93 +66,112 @@ public class AddDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
 		ThemeDisplay themeDisplay = (ThemeDisplay)resourceRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		CommerceOrderAttachment commerceOrderAttachment =
-			_commerceOrderAttachmentLocalService.getCommerceOrderAttachment(
-				ParamUtil.getLong(
-					resourceRequest, "commerceOrderAttachmentId"));
+		try {
+			CommerceOrderAttachment commerceOrderAttachment =
+				_commerceOrderAttachmentLocalService.getCommerceOrderAttachment(
+					ParamUtil.getLong(
+						resourceRequest, "commerceOrderAttachmentId"));
 
-		CommerceOrder commerceOrder =
-			_commerceOrderLocalService.getCommerceOrder(
-				commerceOrderAttachment.getCommerceOrderId());
+			CommerceOrder commerceOrder =
+				_commerceOrderLocalService.getCommerceOrder(
+					commerceOrderAttachment.getCommerceOrderId());
 
-		_commerceOrderModelResourcePermission.check(
-			themeDisplay.getPermissionChecker(), commerceOrder,
-			ActionKeys.UPDATE);
+			_commerceOrderModelResourcePermission.check(
+				themeDisplay.getPermissionChecker(), commerceOrder,
+				ActionKeys.UPDATE);
 
-		_commerceOrderAttachmentModelResourcePermission.check(
-			themeDisplay.getPermissionChecker(), commerceOrderAttachment,
-			ActionKeys.UPDATE);
+			_commerceOrderAttachmentModelResourcePermission.check(
+				themeDisplay.getPermissionChecker(), commerceOrderAttachment,
+				ActionKeys.UPDATE);
 
-		if (!DSCommerceOrderAttachmentUtil.isEnabled(commerceOrder)) {
-			throw new PortalException(
-				"Digital signature is not enabled for order " +
-					commerceOrder.getCommerceOrderId());
+			if (!DSCommerceOrderAttachmentUtil.isEnabled(commerceOrder)) {
+				throw new PortalException(
+					_language.get(
+						themeDisplay.getLocale(),
+						"digital-signature-is-not-enabled-for-this-order"));
+			}
+
+			if (!DSCommerceOrderAttachmentUtil.hasAllowedFileExtension(
+					commerceOrderAttachment)) {
+
+				throw new PortalException(
+					_language.get(
+						themeDisplay.getLocale(),
+						"this-file-type-cannot-be-signed"));
+			}
+
+			int expireAfterDays = ParamUtil.getInteger(
+				resourceRequest, "expireAfter");
+			int expireWarnDays = ParamUtil.getInteger(
+				resourceRequest, "expireWarn");
+
+			if ((expireAfterDays > 0) && (expireWarnDays >= expireAfterDays)) {
+				throw new PortalException(
+					_language.get(
+						themeDisplay.getLocale(),
+						"days-to-warn-signers-must-be-fewer-than-days-until-" +
+							"expiration"));
+			}
+
+			DSRequest dsRequest = _dsRequestManager.fetchFileEntryDSRequest(
+				commerceOrder.getCompanyId(),
+				commerceOrderAttachment.getFileEntryId());
+
+			if ((dsRequest != null) && !dsRequest.isRequestable()) {
+				throw new PortalException(
+					_language.get(
+						themeDisplay.getLocale(),
+						"this-document-already-has-an-active-or-completed-" +
+							"signature-request"));
+			}
+
+			long siteGroupId = DSCommerceOrderAttachmentUtil.getSiteGroupId(
+				commerceOrder);
+
+			dsRequest = _dsRequestManager.addDSRequest(
+				commerceOrder.getCompanyId(), siteGroupId,
+				themeDisplay.getUserId(),
+				new DSEnvelope() {
+					{
+						dsRecipients = _getDSRecipients(
+							commerceOrder, themeDisplay.getLocale(),
+							resourceRequest);
+						emailBlurb = ParamUtil.getString(
+							resourceRequest, "emailMessage");
+						emailSubject = ParamUtil.getString(
+							resourceRequest, "emailSubject");
+						expireAfter = expireAfterDays;
+						expireWarn = expireWarnDays;
+						name = commerceOrderAttachment.getTitle();
+					}
+				},
+				new long[] {commerceOrderAttachment.getFileEntryId()});
+
+			_dsRequestManager.sendDSRequestNotifications(
+				commerceOrder.getCompanyId(), siteGroupId, dsRequest);
+
+			JSONPortletResponseUtil.writeJSON(
+				resourceRequest, resourceResponse,
+				_jsonFactory.createJSONObject());
 		}
+		catch (PortalException portalException) {
+			if (portalException instanceof PrincipalException) {
+				throw portalException;
+			}
 
-		if (!DSCommerceOrderAttachmentUtil.hasAllowedFileExtension(
-				commerceOrderAttachment)) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(portalException);
+			}
 
-			throw new PortalException(
-				StringBundler.concat(
-					"Commerce order attachment ",
-					commerceOrderAttachment.getCommerceOrderAttachmentId(),
-					" has an unsupported file extension"));
+			JSONPortletResponseUtil.writeJSON(
+				resourceRequest, resourceResponse,
+				JSONUtil.put("errorMessage", portalException.getMessage()));
 		}
-
-		int expireAfterDays = ParamUtil.getInteger(
-			resourceRequest, "expireAfter");
-		int expireWarnDays = ParamUtil.getInteger(
-			resourceRequest, "expireWarn");
-
-		if ((expireAfterDays > 0) && (expireWarnDays >= expireAfterDays)) {
-			throw new PortalException(
-				_language.get(
-					themeDisplay.getLocale(),
-					"days-to-warn-signers-must-be-fewer-than-days-until-" +
-						"expiration"));
-		}
-
-		DSRequest dsRequest = _dsRequestManager.fetchFileEntryDSRequest(
-			commerceOrder.getCompanyId(),
-			commerceOrderAttachment.getFileEntryId());
-
-		if ((dsRequest != null) && !dsRequest.isRequestable()) {
-			throw new PortalException(
-				StringBundler.concat(
-					"Commerce order attachment ",
-					commerceOrderAttachment.getCommerceOrderAttachmentId(),
-					" already has an active or completed signature request"));
-		}
-
-		long siteGroupId = DSCommerceOrderAttachmentUtil.getSiteGroupId(
-			commerceOrder);
-
-		dsRequest = _dsRequestManager.addDSRequest(
-			commerceOrder.getCompanyId(), siteGroupId, themeDisplay.getUserId(),
-			new DSEnvelope() {
-				{
-					dsRecipients = _getDSRecipients(
-						commerceOrder, resourceRequest);
-					emailBlurb = ParamUtil.getString(
-						resourceRequest, "emailMessage");
-					emailSubject = ParamUtil.getString(
-						resourceRequest, "emailSubject");
-					expireAfter = expireAfterDays;
-					expireWarn = expireWarnDays;
-					name = commerceOrderAttachment.getTitle();
-				}
-			},
-			new long[] {commerceOrderAttachment.getFileEntryId()});
-
-		_dsRequestManager.sendDSRequestNotifications(
-			commerceOrder.getCompanyId(), siteGroupId, dsRequest);
-
-		JSONPortletResponseUtil.writeJSON(
-			resourceRequest, resourceResponse, _jsonFactory.createJSONObject());
 	}
 
 	private List<DSRecipient> _getDSRecipients(
-			CommerceOrder commerceOrder, ResourceRequest resourceRequest)
+			CommerceOrder commerceOrder, Locale locale,
+			ResourceRequest resourceRequest)
 		throws Exception {
 
 		List<DSRecipient> dsRecipients = new ArrayList<>();
@@ -171,9 +194,9 @@ public class AddDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
 				!user.isActive()) {
 
 				throw new PortalException(
-					StringBundler.concat(
-						"User ", recipientUserId, " is not allowed to sign ",
-						"order ", commerceOrder.getCommerceOrderId()));
+					_language.get(
+						locale,
+						"one-or-more-recipients-cannot-sign-this-order"));
 			}
 
 			if (!accountUserIds.contains(recipientUserId) &&
@@ -184,7 +207,8 @@ public class AddDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
 
 			if (countersignerCount > 1) {
 				throw new PortalException(
-					"Only one internal countersigner is allowed");
+					_language.get(
+						locale, "only-one-internal-countersigner-is-allowed"));
 			}
 
 			int routingOrder = 1;
@@ -205,11 +229,15 @@ public class AddDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
 		}
 
 		if (dsRecipients.isEmpty()) {
-			throw new PortalException("At least one recipient is required");
+			throw new PortalException(
+				_language.get(locale, "at-least-one-recipient-is-required"));
 		}
 
 		return dsRecipients;
 	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		AddDSRequestMVCResourceCommand.class);
 
 	@Reference
 	private CommerceOrderAttachmentLocalService
