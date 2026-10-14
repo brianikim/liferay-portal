@@ -23,8 +23,9 @@ import com.liferay.digital.signature.constants.DSRequestConstants;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
+import com.liferay.portal.kernel.json.JSONFactory;
+import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
@@ -55,6 +56,7 @@ import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
 import jakarta.portlet.PortletException;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -137,9 +139,7 @@ public class AddDSRequestMVCResourceCommandTest {
 		_saveDigitalSignatureConfiguration(false);
 
 		_testServeResource(
-			"Digital signature is not enabled for order " +
-				_commerceOrder.getCommerceOrderId(),
-			0, 0);
+			"Digital signature is not enabled for this order.", 0, 0);
 
 		_saveDigitalSignatureConfiguration(true);
 
@@ -155,27 +155,23 @@ public class AddDSRequestMVCResourceCommandTest {
 			ServiceContextTestUtil.getServiceContext());
 
 		_testServeResource(
-			StringBundler.concat(
-				"User ", user1.getUserId(), " is not allowed to sign order ",
-				_commerceOrder.getCommerceOrderId()),
-			0, 0, user1.getUserId());
+			"One or more recipients cannot sign this order.", 0, 0,
+			user1.getUserId());
 
 		User user2 = UserTestUtil.addUser();
 		User user3 = UserTestUtil.addUser();
 
 		_testServeResource(
-			"Only one internal countersigner is allowed", 0, 0,
+			"Only one internal countersigner is allowed.", 0, 0,
 			user2.getUserId(), user3.getUserId());
 
-		_testServeResource("At least one recipient is required", 0, 0);
+		_testServeResource("At least one recipient is required.", 0, 0);
 
 		_addDSRequest(TestPropsValues.getUser());
 
 		_testServeResource(
-			StringBundler.concat(
-				"Commerce order attachment ",
-				_commerceOrderAttachment.getCommerceOrderAttachmentId(),
-				" already has an active or completed signature request"),
+			"This document already has an active or completed signature " +
+				"request.",
 			0, 0, TestPropsValues.getUserId());
 
 		_commerceOrderAttachment =
@@ -188,11 +184,8 @@ public class AddDSRequestMVCResourceCommandTest {
 				new ByteArrayInputStream(RandomTestUtil.randomBytes()));
 
 		_testServeResource(
-			StringBundler.concat(
-				"Commerce order attachment ",
-				_commerceOrderAttachment.getCommerceOrderAttachmentId(),
-				" has an unsupported file extension"),
-			0, 0, TestPropsValues.getUserId());
+			"This file type cannot be signed.", 0, 0,
+			TestPropsValues.getUserId());
 	}
 
 	private void _addDSRequest(User user) throws Exception {
@@ -255,7 +248,7 @@ public class AddDSRequestMVCResourceCommandTest {
 				).build());
 	}
 
-	private void _serveResource(
+	private JSONObject _serveResource(
 			User user, int expireAfter, int expireWarn,
 			long... recipientUserIds)
 		throws Exception {
@@ -289,8 +282,17 @@ public class AddDSRequestMVCResourceCommandTest {
 				"recipientUserIds", String.valueOf(recipientUserId));
 		}
 
+		MockLiferayResourceResponse mockLiferayResourceResponse =
+			new MockLiferayResourceResponse();
+
 		_mvcResourceCommand.serveResource(
-			mockLiferayResourceRequest, new MockLiferayResourceResponse());
+			mockLiferayResourceRequest, mockLiferayResourceResponse);
+
+		ByteArrayOutputStream byteArrayOutputStream =
+			(ByteArrayOutputStream)
+				mockLiferayResourceResponse.getPortletOutputStream();
+
+		return _jsonFactory.createJSONObject(byteArrayOutputStream.toString());
 	}
 
 	private void _testServeResource(
@@ -298,15 +300,12 @@ public class AddDSRequestMVCResourceCommandTest {
 			long... recipientUserIds)
 		throws Exception {
 
-		PortletException portletException = Assert.assertThrows(
-			PortletException.class,
-			() -> _serveResource(
-				TestPropsValues.getUser(), expireAfter, expireWarn,
-				recipientUserIds));
+		JSONObject jsonObject = _serveResource(
+			TestPropsValues.getUser(), expireAfter, expireWarn,
+			recipientUserIds);
 
-		Throwable throwable = portletException.getCause();
-
-		Assert.assertEquals(expectedMessage, throwable.getMessage());
+		Assert.assertEquals(
+			expectedMessage, jsonObject.getString("errorMessage"));
 	}
 
 	private CommerceOrder _commerceOrder;
@@ -329,6 +328,9 @@ public class AddDSRequestMVCResourceCommandTest {
 	private DSRequestManager _dsRequestManager;
 
 	private Group _group;
+
+	@Inject
+	private JSONFactory _jsonFactory;
 
 	@Inject(filter = "mvc.command.name=/commerce_order/add_ds_request")
 	private MVCResourceCommand _mvcResourceCommand;

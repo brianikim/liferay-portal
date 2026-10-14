@@ -20,6 +20,8 @@ import com.liferay.commerce.test.util.CommerceOrderAttachmentTestUtil;
 import com.liferay.commerce.test.util.CommerceTestUtil;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
+import com.liferay.portal.kernel.json.JSONFactory;
+import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
@@ -46,6 +48,7 @@ import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
 import jakarta.portlet.PortletException;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -127,16 +130,11 @@ public class VoidDSRequestMVCResourceCommandTest {
 
 		_saveDigitalSignatureConfiguration(false);
 
-		_testServeResource(
-			"Digital signature is not enabled for order " +
-				_commerceOrder.getCommerceOrderId());
+		_testServeResource("Digital signature is not enabled for this order.");
 
 		_saveDigitalSignatureConfiguration(true);
 
-		_testServeResource(
-			"Commerce order attachment " +
-				_commerceOrderAttachment.getCommerceOrderAttachmentId() +
-					" has no signature request");
+		_testServeResource("No signature request was found for this document.");
 	}
 
 	private void _saveDigitalSignatureConfiguration(boolean enabled)
@@ -171,7 +169,7 @@ public class VoidDSRequestMVCResourceCommandTest {
 				).build());
 	}
 
-	private void _serveResource(User user) throws Exception {
+	private JSONObject _serveResource(User user) throws Exception {
 		MockLiferayResourceRequest mockLiferayResourceRequest =
 			new MockLiferayResourceRequest();
 
@@ -192,18 +190,24 @@ public class VoidDSRequestMVCResourceCommandTest {
 			String.valueOf(
 				_commerceOrderAttachment.getCommerceOrderAttachmentId()));
 
+		MockLiferayResourceResponse mockLiferayResourceResponse =
+			new MockLiferayResourceResponse();
+
 		_mvcResourceCommand.serveResource(
-			mockLiferayResourceRequest, new MockLiferayResourceResponse());
+			mockLiferayResourceRequest, mockLiferayResourceResponse);
+
+		ByteArrayOutputStream byteArrayOutputStream =
+			(ByteArrayOutputStream)
+				mockLiferayResourceResponse.getPortletOutputStream();
+
+		return _jsonFactory.createJSONObject(byteArrayOutputStream.toString());
 	}
 
 	private void _testServeResource(String expectedMessage) throws Exception {
-		PortletException portletException = Assert.assertThrows(
-			PortletException.class,
-			() -> _serveResource(TestPropsValues.getUser()));
+		JSONObject jsonObject = _serveResource(TestPropsValues.getUser());
 
-		Throwable throwable = portletException.getCause();
-
-		Assert.assertEquals(expectedMessage, throwable.getMessage());
+		Assert.assertEquals(
+			expectedMessage, jsonObject.getString("errorMessage"));
 	}
 
 	private CommerceOrder _commerceOrder;
@@ -223,6 +227,9 @@ public class VoidDSRequestMVCResourceCommandTest {
 	private CompanyLocalService _companyLocalService;
 
 	private Group _group;
+
+	@Inject
+	private JSONFactory _jsonFactory;
 
 	@Inject(filter = "mvc.command.name=/commerce_order/void_ds_request")
 	private MVCResourceCommand _mvcResourceCommand;

@@ -118,26 +118,21 @@ public class SearchDSRequestUsersMVCResourceCommandTest {
 
 		_saveDigitalSignatureConfiguration(false);
 
-		portletException = Assert.assertThrows(
-			PortletException.class,
-			() -> _serveResource(
-				TestPropsValues.getUser(), user.getScreenName()));
-
-		Throwable throwable = portletException.getCause();
+		JSONObject jsonObject = _jsonFactory.createJSONObject(
+			_serveResource(TestPropsValues.getUser(), user.getScreenName()));
 
 		Assert.assertEquals(
-			"Digital signature is not enabled for order " +
-				_commerceOrder.getCommerceOrderId(),
-			throwable.getMessage());
+			"Digital signature is not enabled for this order.",
+			jsonObject.getString("errorMessage"));
 
 		_saveDigitalSignatureConfiguration(true);
 
-		JSONArray jsonArray = _serveResource(
-			TestPropsValues.getUser(), user.getScreenName());
+		JSONArray jsonArray = _jsonFactory.createJSONArray(
+			_serveResource(TestPropsValues.getUser(), user.getScreenName()));
 
 		Assert.assertEquals(jsonArray.toString(), 1, jsonArray.length());
 
-		JSONObject jsonObject = jsonArray.getJSONObject(0);
+		jsonObject = jsonArray.getJSONObject(0);
 
 		Assert.assertEquals(
 			user.getEmailAddress(), jsonObject.getString("emailAddress"));
@@ -177,9 +172,7 @@ public class SearchDSRequestUsersMVCResourceCommandTest {
 				).build());
 	}
 
-	private JSONArray _serveResource(User user, String keywords)
-		throws Exception {
-
+	private String _serveResource(User user, String keywords) throws Exception {
 		MockLiferayResourceRequest mockLiferayResourceRequest =
 			new MockLiferayResourceRequest();
 
@@ -210,7 +203,7 @@ public class SearchDSRequestUsersMVCResourceCommandTest {
 			(ByteArrayOutputStream)
 				mockLiferayResourceResponse.getPortletOutputStream();
 
-		return _jsonFactory.createJSONArray(byteArrayOutputStream.toString());
+		return byteArrayOutputStream.toString();
 	}
 
 	private CommerceOrder _commerceOrder;
