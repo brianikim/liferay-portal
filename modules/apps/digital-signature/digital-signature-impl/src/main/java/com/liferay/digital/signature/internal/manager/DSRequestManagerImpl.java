@@ -444,20 +444,87 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			return;
 		}
 
-		for (DSRequestRecipient dsRequestRecipient :
-				dsRequest.getDSRequestRecipients()) {
+		_sendDSRequestNotifications(
+			dsRequest, dsRequest.getDSRequestRecipients());
+	}
 
-			if (!Objects.equals(
-					DSRequestConstants.STATUS_SENT,
-					dsRequestRecipient.getStatus()) ||
-				(dsRequestRecipient.getUserId() <= 0) ||
-				!Validator.isEmailAddress(
-					dsRequestRecipient.getEmailAddress())) {
+	@Override
+	public void sendSignatureReminders(long companyId) {
+		if (!FeatureFlagManagerUtil.isEnabled(companyId, "LPD-69290")) {
+			return;
+		}
 
-				continue;
+		DigitalSignatureConfiguration digitalSignatureConfiguration =
+			DigitalSignatureConfigurationUtil.getDigitalSignatureConfiguration(
+				companyId, 0);
+
+		if (!digitalSignatureConfiguration.signatureReminderEnabled()) {
+			return;
+		}
+
+		ObjectDefinition objectDefinition =
+			_objectDefinitionLocalService.
+				fetchObjectDefinitionByExternalReferenceCode(
+					DSObjectDefinitionConstants.
+						EXTERNAL_REFERENCE_CODE_REQUEST_RECIPIENT,
+					companyId);
+
+		if (objectDefinition == null) {
+			return;
+		}
+
+		try {
+			Set<Long> dsRequestIds = new HashSet<>();
+
+			for (Map<String, Serializable> values :
+					_getValuesList(
+						companyId,
+						StringBundler.concat(
+							"(requestRecipientStatus eq '",
+							DSRequestConstants.STATUS_SENT, "')"),
+						objectDefinition, null)) {
+
+				dsRequestIds.add(
+					MapUtil.getLong(
+						values,
+						"r_dsRequestToDSRequestRecipients_l_dsRequestId"));
 			}
 
-			_sendDSRequestNotification(dsRequest, dsRequestRecipient);
+			if (dsRequestIds.isEmpty()) {
+				return;
+			}
+
+			Map<Long, DSRequest> dsRequests = _getDSRequests(
+				companyId, dsRequestIds);
+
+			for (DSRequest dsRequest : dsRequests.values()) {
+				if (dsRequest.isTerminal() ||
+					!_isEnabled(companyId, dsRequest.getSiteGroupId())) {
+
+					continue;
+				}
+
+				_updateDSRequest(
+					_getDSRequestObjectEntry(dsRequest.getDSRequestId()));
+
+				DSRequest updatedDSRequest = fetchDSRequest(
+					companyId, dsRequest.getDSRequestId());
+
+				if ((updatedDSRequest == null) ||
+					updatedDSRequest.isTerminal()) {
+
+					continue;
+				}
+
+				_sendDSRequestNotifications(
+					updatedDSRequest,
+					updatedDSRequest.getDSRequestRecipients());
+			}
+		}
+		catch (Exception exception) {
+			_log.error(
+				"Unable to send signature reminders for company " + companyId,
+				exception);
 		}
 	}
 
@@ -472,7 +539,21 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			return;
 		}
 
-		_updateDSRequest(objectEntry);
+		List<DSRequestRecipient> dsRequestRecipients = _updateDSRequest(
+			objectEntry);
+
+		if (dsRequestRecipients.isEmpty()) {
+			return;
+		}
+
+		DSRequest dsRequest = fetchDSRequest(
+			objectEntry.getCompanyId(), dsRequestId);
+
+		if ((dsRequest == null) || dsRequest.isTerminal()) {
+			return;
+		}
+
+		_sendDSRequestNotifications(dsRequest, dsRequestRecipients);
 	}
 
 	@Override
@@ -1135,6 +1216,24 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 	}
 
+	private void _sendDSRequestNotifications(
+		DSRequest dsRequest, List<DSRequestRecipient> dsRequestRecipients) {
+
+		for (DSRequestRecipient dsRequestRecipient : dsRequestRecipients) {
+			if (!Objects.equals(
+					DSRequestConstants.STATUS_SENT,
+					dsRequestRecipient.getStatus()) ||
+				(dsRequestRecipient.getUserId() <= 0) ||
+				!Validator.isEmailAddress(
+					dsRequestRecipient.getEmailAddress())) {
+
+				continue;
+			}
+
+			_sendDSRequestNotification(dsRequest, dsRequestRecipient);
+		}
+	}
+
 	private DSDocument _toDSDocument(long fileEntryId) throws Exception {
 		FileEntry fileEntry = _dlAppLocalService.getFileEntry(fileEntryId);
 
@@ -1157,7 +1256,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		return Date.from(localDateTime.toInstant(ZoneOffset.UTC));
 	}
 
-	private void _updateDSRequest(ObjectEntry objectEntry) {
+	private List<DSRequestRecipient> _updateDSRequest(ObjectEntry objectEntry) {
 		long companyId = objectEntry.getCompanyId();
 		long groupId = MapUtil.getLong(objectEntry.getValues(), "siteGroupId");
 
@@ -1180,8 +1279,9 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					objectEntry.getUserId());
 			}
 
-			_updateRecipientStatuses(
-				companyId, dsEnvelope, dsRequestId, groupId, requestStatus);
+			List<DSRequestRecipient> dsRequestRecipients =
+				_updateRecipientStatuses(
+					companyId, dsEnvelope, dsRequestId, groupId, requestStatus);
 
 			_objectEntryLocalService.partialUpdateObjectEntry(
 				objectEntry.getUserId(), dsRequestId,
@@ -1198,10 +1298,14 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				).build(),
 				_getServiceContext(
 					companyId, groupId, objectEntry.getUserId()));
+
+			return dsRequestRecipients;
 		}
 		catch (Exception exception) {
 			_log.error(
 				"Unable to update signature request " + dsRequestId, exception);
+
+			return new ArrayList<>();
 		}
 	}
 
@@ -1271,10 +1375,12 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 	}
 
-	private void _updateRecipientStatuses(
+	private List<DSRequestRecipient> _updateRecipientStatuses(
 			long companyId, DSEnvelope dsEnvelope, long dsRequestId,
 			long groupId, String requestStatus)
 		throws Exception {
+
+		List<DSRequestRecipient> dsRequestRecipients = new ArrayList<>();
 
 		Map<String, DSRecipient> dsRecipients = new HashMap<>();
 
@@ -1315,13 +1421,15 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				continue;
 			}
 
-			_objectEntryLocalService.partialUpdateObjectEntry(
+			String requestRecipientStatus = _getDSRequestRecipientStatus(
+				dsRecipient, requestStatus);
+
+			objectEntry = _objectEntryLocalService.partialUpdateObjectEntry(
 				objectEntry.getUserId(), dsRequestRecipientId,
 				ObjectEntryFolderConstants.
 					PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
 				HashMapBuilder.<String, Serializable>put(
-					"requestRecipientStatus",
-					() -> _getDSRequestRecipientStatus(dsRecipient, requestStatus)
+					"requestRecipientStatus", () -> requestRecipientStatus
 				).put(
 					"requestRecipientStatusDate",
 					() -> _toDate(dsRecipient.getStatusLocalDateTime())
@@ -1331,7 +1439,19 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				).build(),
 				_getServiceContext(
 					companyId, groupId, objectEntry.getUserId()));
+
+			if (Objects.equals(
+					MapUtil.getString(values, "requestRecipientStatus"),
+					DSRequestConstants.STATUS_CREATED) &&
+				Objects.equals(
+					requestRecipientStatus, DSRequestConstants.STATUS_SENT)) {
+
+				dsRequestRecipients.add(
+					new DSRequestRecipient(objectEntry.getValues()));
+			}
 		}
+
+		return dsRequestRecipients;
 	}
 
 	private static final int _IN_FILTER_MAX_SIZE = 1000;
