@@ -413,6 +413,8 @@ public class DSRequestManagerTest {
 		}
 	}
 
+	}
+
 	@Test
 	public void testUpdateDSRequest() throws Exception {
 		LocalDateTime localDateTime = LocalDateTime.ofEpochSecond(
@@ -480,6 +482,8 @@ public class DSRequestManagerTest {
 		dsEnvelope.setStatus(status);
 
 		return _addDSRequest(dsEnvelope, RandomTestUtil.randomInt());
+	}
+
 	}
 
 	private DSEnvelope _createDSEnvelope() {
