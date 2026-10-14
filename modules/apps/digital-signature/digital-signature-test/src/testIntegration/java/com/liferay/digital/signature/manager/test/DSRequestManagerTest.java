@@ -331,6 +331,34 @@ public class DSRequestManagerTest {
 	}
 
 	@Test
+	public void testGetFileEntryDSRequests() throws Exception {
+		String emailAddress = RandomTestUtil.randomString() + "@liferay.com";
+		long fileEntryId = RandomTestUtil.randomInt();
+
+		_addDSRequestObjectEntries(
+			emailAddress, fileEntryId, DSRequestConstants.STATUS_SENT,
+			DSRequestConstants.STATUS_VOIDED, TestPropsValues.getUserId());
+		_addDSRequestObjectEntries(
+			emailAddress, fileEntryId, DSRequestConstants.STATUS_SENT,
+			DSRequestConstants.STATUS_SENT, TestPropsValues.getUserId());
+
+		List<DSRequest> dsRequests = _dsRequestManager.getFileEntryDSRequests(
+			TestPropsValues.getCompanyId(), fileEntryId);
+
+		Assert.assertEquals(dsRequests.toString(), 2, dsRequests.size());
+
+		DSRequest dsRequest1 = dsRequests.get(0);
+
+		Assert.assertEquals(
+			DSRequestConstants.STATUS_SENT, dsRequest1.getStatus());
+
+		DSRequest dsRequest2 = dsRequests.get(1);
+
+		Assert.assertEquals(
+			DSRequestConstants.STATUS_VOIDED, dsRequest2.getStatus());
+	}
+
+	@Test
 	public void testHasPermission() throws Exception {
 		User user1 = UserTestUtil.addUser();
 
@@ -411,6 +439,7 @@ public class DSRequestManagerTest {
 		}
 	}
 
+	@Test
 	public void testSendSignatureReminders() throws Exception {
 		DSEnvelope dsEnvelope = _createDSEnvelope();
 
