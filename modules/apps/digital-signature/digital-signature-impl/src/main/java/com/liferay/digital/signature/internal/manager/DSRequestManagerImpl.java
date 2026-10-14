@@ -568,12 +568,45 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				companyId, dsRequestIds, dsRequestRecipientObjectDefinition);
 
 			for (DSRequest dsRequest : dsRequestsMap.values()) {
-				if (!dsRequest.isTerminal() &&
-					_isEnabled(companyId, dsRequest.getSiteGroupId())) {
+				if (dsRequest.isTerminal() ||
+					!_isEnabled(companyId, dsRequest.getSiteGroupId())) {
 
-					count += _sendDSRequestNotifications(
-						dsRequest, dsRequest.getDSRequestRecipients());
+					continue;
 				}
+
+				Set<String> providerRecipientIds = new HashSet<>();
+
+				for (DSRequestRecipient dsRequestRecipient :
+						dsRequest.getDSRequestRecipients()) {
+
+					if (Objects.equals(
+							DSRequestConstants.STATUS_SENT,
+							dsRequestRecipient.getStatus())) {
+
+						providerRecipientIds.add(
+							dsRequestRecipient.getProviderRecipientId());
+					}
+				}
+
+				updateDSRequest(
+					companyId, dsRequest.getSiteGroupId(),
+					dsRequest.getProviderRequestId());
+
+				DSRequest updatedDSRequest = fetchDSRequest(
+					companyId, dsRequest.getDSRequestId());
+
+				if ((updatedDSRequest == null) ||
+					updatedDSRequest.isTerminal()) {
+
+					continue;
+				}
+
+				count += _sendDSRequestNotifications(
+					updatedDSRequest,
+					ListUtil.filter(
+						updatedDSRequest.getDSRequestRecipients(),
+						dsRequestRecipient -> providerRecipientIds.contains(
+							dsRequestRecipient.getProviderRecipientId())));
 			}
 		}
 		catch (Exception exception) {
