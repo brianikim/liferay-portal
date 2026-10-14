@@ -9,6 +9,8 @@ import com.liferay.account.model.AccountEntry;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.batch.engine.test.util.BatchEngineTestUtil;
 import com.liferay.commerce.account.test.util.CommerceAccountTestUtil;
+import com.liferay.commerce.constants.CommerceOrderActionKeys;
+import com.liferay.commerce.constants.CommerceOrderConstants;
 import com.liferay.commerce.currency.model.CommerceCurrency;
 import com.liferay.commerce.currency.test.util.CommerceCurrencyTestUtil;
 import com.liferay.commerce.model.CommerceOrder;
@@ -29,7 +31,12 @@ import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.ResourceConstants;
+import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.model.role.RoleConstants;
+import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
+import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.servlet.HttpMethods;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
@@ -121,23 +128,21 @@ public class DSCommerceOrderSignatureStatusServletTest {
 		CommerceChannel commerceChannel = CommerceTestUtil.addCommerceChannel(
 			_group.getGroupId(), commerceCurrency.getCode());
 
-		AccountEntry accountEntry =
-			CommerceAccountTestUtil.addPersonAccountEntry(
-				TestPropsValues.getUserId(),
-				ServiceContextTestUtil.getServiceContext(
-					_group.getGroupId(), TestPropsValues.getUserId()));
+		_accountEntry = CommerceAccountTestUtil.addPersonAccountEntry(
+			TestPropsValues.getUserId(),
+			ServiceContextTestUtil.getServiceContext(
+				_group.getGroupId(), TestPropsValues.getUserId()));
 
-		CommerceOrder commerceOrder =
-			_commerceOrderLocalService.addCommerceOrder(
-				TestPropsValues.getUserId(), commerceChannel.getGroupId(),
-				accountEntry.getAccountEntryId(), commerceCurrency.getCode(),
-				0);
+		_commerceOrder = _commerceOrderLocalService.addCommerceOrder(
+			TestPropsValues.getUserId(), commerceChannel.getGroupId(),
+			_accountEntry.getAccountEntryId(), commerceCurrency.getCode(), 0);
 
 		_commerceOrderAttachment =
 			_commerceOrderAttachmentLocalService.addCommerceOrderAttachment(
 				RandomTestUtil.randomString(), TestPropsValues.getUserId(),
-				commerceOrder.getCommerceOrderId(), RandomTestUtil.nextDouble(),
-				false, RandomTestUtil.randomString(), "invoice",
+				_commerceOrder.getCommerceOrderId(),
+				RandomTestUtil.nextDouble(), false,
+				RandomTestUtil.randomString(), "invoice",
 				RandomTestUtil.randomString() + ".pdf",
 				new ByteArrayInputStream(RandomTestUtil.randomBytes()));
 	}
@@ -208,6 +213,20 @@ public class DSCommerceOrderSignatureStatusServletTest {
 		_assertNotFound(
 			_commerceOrderAttachment.getCommerceOrderAttachmentId(),
 			UserTestUtil.addUser());
+
+		_testDoGetWithAccountRole();
+	}
+
+	private CommerceOrderAttachment _addCommerceOrderAttachment(
+			boolean restricted)
+		throws Exception {
+
+		return _commerceOrderAttachmentLocalService.addCommerceOrderAttachment(
+			RandomTestUtil.randomString(), TestPropsValues.getUserId(),
+			_commerceOrder.getCommerceOrderId(), RandomTestUtil.nextDouble(),
+			restricted, RandomTestUtil.randomString(), "invoice",
+			RandomTestUtil.randomString() + ".pdf",
+			new ByteArrayInputStream(RandomTestUtil.randomBytes()));
 	}
 
 	private DSRequest _addDSRequest(String status, User user) throws Exception {
@@ -292,6 +311,60 @@ public class DSCommerceOrderSignatureStatusServletTest {
 		return mockHttpServletResponse;
 	}
 
+	private void _setResourcePermissions(Role role, String... actionIds)
+		throws Exception {
+
+		_resourcePermissionLocalService.setResourcePermissions(
+			_commerceOrder.getCompanyId(), CommerceOrderConstants.RESOURCE_NAME,
+			ResourceConstants.SCOPE_GROUP,
+			String.valueOf(_accountEntry.getAccountEntryGroupId()),
+			role.getRoleId(), actionIds);
+	}
+
+	private void _testDoGetWithAccountRole() throws Exception {
+		Role role = _roleLocalService.addRole(
+			RandomTestUtil.randomString(), TestPropsValues.getUserId(), null, 0,
+			RandomTestUtil.randomString(), null, null,
+			RoleConstants.TYPE_REGULAR, null,
+			ServiceContextTestUtil.getServiceContext(
+				_group.getGroupId(), TestPropsValues.getUserId()));
+
+		User user = UserTestUtil.addUser();
+
+		_roleLocalService.addUserRole(user.getUserId(), role);
+
+		_setResourcePermissions(
+			role, CommerceOrderActionKeys.MANAGE_COMMERCE_ORDERS);
+
+		CommerceOrderAttachment commerceOrderAttachment =
+			_addCommerceOrderAttachment(false);
+
+		Assert.assertEquals(
+			"{}",
+			_getContentAsString(
+				commerceOrderAttachment.getCommerceOrderAttachmentId(), user));
+
+		CommerceOrderAttachment restrictedCommerceOrderAttachment =
+			_addCommerceOrderAttachment(true);
+
+		_assertNotFound(
+			restrictedCommerceOrderAttachment.getCommerceOrderAttachmentId(),
+			user);
+
+		_setResourcePermissions(
+			role, CommerceOrderActionKeys.MANAGE_COMMERCE_ORDERS,
+			CommerceOrderActionKeys.VIEW_RESTRICTED_COMMERCE_ORDER_ATTACHMENTS);
+
+		Assert.assertEquals(
+			"{}",
+			_getContentAsString(
+				restrictedCommerceOrderAttachment.
+					getCommerceOrderAttachmentId(),
+				user));
+	}
+
+	private AccountEntry _accountEntry;
+	private CommerceOrder _commerceOrder;
 	private CommerceOrderAttachment _commerceOrderAttachment;
 
 	@Inject
@@ -311,6 +384,12 @@ public class DSCommerceOrderSignatureStatusServletTest {
 
 	@Inject
 	private JSONFactory _jsonFactory;
+
+	@Inject
+	private ResourcePermissionLocalService _resourcePermissionLocalService;
+
+	@Inject
+	private RoleLocalService _roleLocalService;
 
 	@Inject(
 		filter = "osgi.http.whiteboard.servlet.name=com.liferay.commerce.digital.signature.internal.servlet.DSCommerceOrderSignatureStatusServlet"

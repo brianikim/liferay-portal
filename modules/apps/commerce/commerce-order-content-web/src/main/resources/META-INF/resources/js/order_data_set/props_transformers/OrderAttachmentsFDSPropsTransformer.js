@@ -145,6 +145,7 @@ const OrderAttachmentsFDSPropsTransformer = (props) => {
 				event?.preventDefault();
 
 				openModal({
+					onClose: () => window.location.reload(),
 					size: 'full-screen',
 					title: itemData?.title,
 					url: formatActionUrl(action.data.signURL, itemData),
