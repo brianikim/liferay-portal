@@ -58,19 +58,19 @@ public class SaveSiteConfigurationMVCActionCommand
 			return;
 		}
 
-		DigitalSignatureConfiguration digitalSignatureConfiguration =
-			_configurationProvider.getGroupConfiguration(
-				DigitalSignatureConfiguration.class,
-				themeDisplay.getSiteGroupId());
+		boolean embeddedViewEnabled = ParamUtil.getBoolean(
+			actionRequest, "embeddedViewEnabled");
 
-		boolean embeddedViewEnabled =
-			digitalSignatureConfiguration.embeddedViewEnabled();
-
-		if (FeatureFlagManagerUtil.isEnabled(
+		if (!FeatureFlagManagerUtil.isEnabled(
 				themeDisplay.getCompanyId(), "LPD-69290")) {
 
-			embeddedViewEnabled = ParamUtil.getBoolean(
-				actionRequest, "embeddedViewEnabled");
+			DigitalSignatureConfiguration digitalSignatureConfiguration =
+				_configurationProvider.getGroupConfiguration(
+					DigitalSignatureConfiguration.class,
+					themeDisplay.getSiteGroupId());
+
+			embeddedViewEnabled =
+				digitalSignatureConfiguration.embeddedViewEnabled();
 		}
 
 		_configurationProvider.saveGroupConfiguration(

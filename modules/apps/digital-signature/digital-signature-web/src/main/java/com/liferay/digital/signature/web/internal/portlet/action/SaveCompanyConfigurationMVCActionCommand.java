@@ -58,23 +58,23 @@ public class SaveCompanyConfigurationMVCActionCommand
 			return;
 		}
 
-		DigitalSignatureConfiguration digitalSignatureConfiguration =
-			_configurationProvider.getCompanyConfiguration(
-				DigitalSignatureConfiguration.class,
-				themeDisplay.getCompanyId());
+		boolean embeddedViewEnabled = ParamUtil.getBoolean(
+			actionRequest, "embeddedViewEnabled");
+		boolean signatureReminderEnabled = ParamUtil.getBoolean(
+			actionRequest, "signatureReminderEnabled");
 
-		boolean embeddedViewEnabled =
-			digitalSignatureConfiguration.embeddedViewEnabled();
-		boolean signatureReminderEnabled =
-			digitalSignatureConfiguration.signatureReminderEnabled();
-
-		if (FeatureFlagManagerUtil.isEnabled(
+		if (!FeatureFlagManagerUtil.isEnabled(
 				themeDisplay.getCompanyId(), "LPD-69290")) {
 
-			embeddedViewEnabled = ParamUtil.getBoolean(
-				actionRequest, "embeddedViewEnabled");
-			signatureReminderEnabled = ParamUtil.getBoolean(
-				actionRequest, "signatureReminderEnabled");
+			DigitalSignatureConfiguration digitalSignatureConfiguration =
+				_configurationProvider.getCompanyConfiguration(
+					DigitalSignatureConfiguration.class,
+					themeDisplay.getCompanyId());
+
+			embeddedViewEnabled =
+				digitalSignatureConfiguration.embeddedViewEnabled();
+			signatureReminderEnabled =
+				digitalSignatureConfiguration.signatureReminderEnabled();
 		}
 
 		_configurationProvider.saveCompanyConfiguration(
