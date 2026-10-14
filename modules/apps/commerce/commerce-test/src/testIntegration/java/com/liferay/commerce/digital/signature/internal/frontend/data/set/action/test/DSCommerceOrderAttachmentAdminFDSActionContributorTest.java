@@ -24,18 +24,32 @@ import com.liferay.digital.signature.constants.DSRequestConstants;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
+import com.liferay.layout.test.util.LayoutTestUtil;
+import com.liferay.petra.function.transform.TransformUtil;
+import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
+import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
+import com.liferay.portal.kernel.service.CompanyLocalService;
+import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
+import com.liferay.portal.kernel.test.util.FeatureFlagTestUtil;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
+import com.liferay.portal.kernel.test.util.UserTestUtil;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
+import com.liferay.portal.kernel.util.MapUtil;
+import com.liferay.portal.kernel.util.SetUtil;
+import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
@@ -44,6 +58,7 @@ import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
 import java.io.ByteArrayInputStream;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.After;
@@ -86,6 +101,8 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 
 		_group = GroupTestUtil.addGroup();
 
+		_layout = LayoutTestUtil.addTypeContentLayout(_group);
+
 		AccountEntry accountEntry =
 			CommerceAccountTestUtil.addPersonAccountEntry(
 				TestPropsValues.getUserId(),
@@ -119,26 +136,125 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 
 	@Test
 	public void testGetAdditionalProps() throws Exception {
-		Map<String, Object> additionalProps = _getAdditionalProps();
+		User user = TestPropsValues.getUser();
 
+		Map<String, Object> additionalProps = _getAdditionalProps(user);
+
+		Map<String, Object> signatureRequest =
+			(Map<String, Object>)additionalProps.get("signatureRequest");
+
+		JSONObject buyerJSONObject = (JSONObject)signatureRequest.get("buyer");
+
+		Assert.assertEquals(
+			user.getUserId(), buyerJSONObject.getLong("userId"));
+
+		Assert.assertEquals(
+			_commerceOrder.getCommerceOrderId(),
+			signatureRequest.get("commerceOrderId"));
+		Assert.assertEquals(
+			Collections.emptyList(), signatureRequest.get("nonrequestableIds"));
 		Assert.assertEquals(
 			Collections.emptyMap(), additionalProps.get("signatureStatuses"));
 
-		_addDSRequest(TestPropsValues.getUser());
+		_addDSRequest(user);
 
-		additionalProps = _getAdditionalProps();
+		additionalProps = _getAdditionalProps(user);
+
+		signatureRequest = (Map<String, Object>)additionalProps.get(
+			"signatureRequest");
+
+		String commerceOrderAttachmentId = String.valueOf(
+			_commerceOrderAttachment.getCommerceOrderAttachmentId());
+
+		Assert.assertEquals(
+			List.of(commerceOrderAttachmentId),
+			signatureRequest.get("nonrequestableIds"));
 
 		Assert.assertEquals(
 			HashMapBuilder.put(
-				String.valueOf(
-					_commerceOrderAttachment.getCommerceOrderAttachmentId()),
-				DSRequestConstants.STATUS_SENT
+				commerceOrderAttachmentId, DSRequestConstants.STATUS_SENT
 			).build(),
 			additionalProps.get("signatureStatuses"));
 
+		CommerceOrderAttachment commerceOrderAttachment =
+			_commerceOrderAttachmentLocalService.addCommerceOrderAttachment(
+				RandomTestUtil.randomString(), TestPropsValues.getUserId(),
+				_commerceOrder.getCommerceOrderId(),
+				RandomTestUtil.nextDouble(), false,
+				RandomTestUtil.randomString(), "invoice",
+				RandomTestUtil.randomString() + ".zip",
+				new ByteArrayInputStream(RandomTestUtil.randomBytes()));
+
+		additionalProps = _getAdditionalProps(user);
+
+		signatureRequest = (Map<String, Object>)additionalProps.get(
+			"signatureRequest");
+
+		Assert.assertEquals(
+			SetUtil.fromArray(
+				commerceOrderAttachmentId,
+				String.valueOf(
+					commerceOrderAttachment.getCommerceOrderAttachmentId())),
+			SetUtil.fromCollection(
+				(List<String>)signatureRequest.get("nonrequestableIds")));
+
+		commerceOrderAttachment.setFileEntryId(RandomTestUtil.nextLong());
+
+		commerceOrderAttachment =
+			_commerceOrderAttachmentLocalService.updateCommerceOrderAttachment(
+				commerceOrderAttachment);
+
+		_commerceOrder.setUserId(
+			_userLocalService.getGuestUserId(_group.getCompanyId()));
+
+		_commerceOrder = _commerceOrderLocalService.updateCommerceOrder(
+			_commerceOrder);
+
+		additionalProps = _getAdditionalProps(user);
+
+		signatureRequest = (Map<String, Object>)additionalProps.get(
+			"signatureRequest");
+
+		Assert.assertNull(signatureRequest.get("buyer"));
+		Assert.assertEquals(
+			SetUtil.fromArray(
+				commerceOrderAttachmentId,
+				String.valueOf(
+					commerceOrderAttachment.getCommerceOrderAttachmentId())),
+			SetUtil.fromCollection(
+				(List<String>)signatureRequest.get("nonrequestableIds")));
+
+		additionalProps = _getAdditionalProps(UserTestUtil.addUser());
+
+		Assert.assertNull(additionalProps.get("signatureRequest"));
+
 		_saveDigitalSignatureConfiguration(false);
 
-		Assert.assertEquals(Collections.emptyMap(), _getAdditionalProps());
+		Assert.assertEquals(Collections.emptyMap(), _getAdditionalProps(user));
+	}
+
+	@Test
+	public void testGetFDSActionDropdownItems() throws Exception {
+		User user = TestPropsValues.getUser();
+
+		Assert.assertEquals(
+			List.of(
+				"request-signature", "resend-signature-request",
+				"void-signature-request"),
+			_getFDSActionDropdownItemIds(user));
+
+		try (SafeCloseable safeCloseable =
+				FeatureFlagTestUtil.setFeatureFlagsWithSafeCloseable(
+					false, "LPD-69290")) {
+
+			Assert.assertEquals(
+				Collections.emptyList(), _getFDSActionDropdownItemIds(user));
+		}
+
+		_saveDigitalSignatureConfiguration(false);
+
+		Assert.assertEquals(
+			Collections.emptyList(), _getFDSActionDropdownItemIds(user));
 	}
 
 	private void _addDSRequest(User user) throws Exception {
@@ -169,9 +285,55 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 			dsEnvelope, new long[] {_commerceOrderAttachment.getFileEntryId()});
 	}
 
-	private Map<String, Object> _getAdditionalProps() throws Exception {
+	private Map<String, Object> _getAdditionalProps(User user)
+		throws Exception {
+
 		return _commerceOrderAttachmentAdminFDSActionContributor.
-			getAdditionalProps(_commerceOrder, new MockHttpServletRequest());
+			getAdditionalProps(
+				_commerceOrder, _getMockHttpServletRequest(user));
+	}
+
+	private List<String> _getFDSActionDropdownItemIds(User user)
+		throws Exception {
+
+		return TransformUtil.transform(
+			_commerceOrderAttachmentAdminFDSActionContributor.
+				getFDSActionDropdownItems(
+					_commerceOrder, _getMockHttpServletRequest(user)),
+			fdsActionDropdownItem -> {
+				Map<String, Object> data =
+					(Map<String, Object>)fdsActionDropdownItem.get("data");
+
+				return MapUtil.getString(data, "id");
+			});
+	}
+
+	private MockHttpServletRequest _getMockHttpServletRequest(User user)
+		throws Exception {
+
+		MockHttpServletRequest mockHttpServletRequest =
+			new MockHttpServletRequest();
+
+		ThemeDisplay themeDisplay = new ThemeDisplay();
+
+		themeDisplay.setCompany(
+			_companyLocalService.getCompany(_group.getCompanyId()));
+		themeDisplay.setLayout(_layout);
+		themeDisplay.setPermissionChecker(
+			PermissionCheckerFactoryUtil.create(user));
+		themeDisplay.setPlid(_layout.getPlid());
+		themeDisplay.setPortalURL("http://" + RandomTestUtil.randomString());
+		themeDisplay.setScopeGroupId(_group.getGroupId());
+		themeDisplay.setSiteGroupId(_group.getGroupId());
+		themeDisplay.setURLCurrent("/" + RandomTestUtil.randomString());
+		themeDisplay.setUser(user);
+
+		mockHttpServletRequest.setAttribute(
+			WebKeys.COMPANY_ID, _group.getCompanyId());
+		mockHttpServletRequest.setAttribute(
+			WebKeys.THEME_DISPLAY, themeDisplay);
+
+		return mockHttpServletRequest;
 	}
 
 	private void _saveDigitalSignatureConfiguration(boolean enabled)
@@ -224,8 +386,15 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 		_companyConfigurationTemporarySwapper;
 
 	@Inject
+	private CompanyLocalService _companyLocalService;
+
+	@Inject
 	private DSRequestManager _dsRequestManager;
 
 	private Group _group;
+	private Layout _layout;
+
+	@Inject
+	private UserLocalService _userLocalService;
 
 }
