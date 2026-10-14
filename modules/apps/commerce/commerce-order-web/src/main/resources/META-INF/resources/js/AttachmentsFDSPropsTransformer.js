@@ -6,6 +6,7 @@
 import {
 	SignatureStatusDataRenderer,
 	formatActionUrl,
+	openSignatureDetailsModal,
 	removeSignatureStatusColumn,
 } from 'commerce-frontend-js';
 import {openModal, openToast} from 'frontend-js-components-web';
@@ -213,6 +214,13 @@ const AttachmentsFDSPropsTransformer = (props) => {
 				};
 			}
 
+			if (actionId === 'view-signature-details') {
+				return {
+					...action,
+					isVisible: (item) => !!signatureStatuses[item?.id],
+				};
+			}
+
 			return action;
 		}),
 		onActionDropdownItemClick: ({action, event, itemData, loadData}) => {
@@ -256,6 +264,16 @@ const AttachmentsFDSPropsTransformer = (props) => {
 				postSignatureRequestAction(
 					formatActionUrl(action.data.resendDSRequestURL, itemData)
 				).catch(openErrorToast);
+			}
+			else if (actionId === 'view-signature-details') {
+				event?.preventDefault();
+
+				openSignatureDetailsModal({
+					url: formatActionUrl(
+						action.data.signatureDetailsURL,
+						itemData
+					),
+				});
 			}
 			else if (actionId === 'void-signature-request') {
 				event?.preventDefault();
