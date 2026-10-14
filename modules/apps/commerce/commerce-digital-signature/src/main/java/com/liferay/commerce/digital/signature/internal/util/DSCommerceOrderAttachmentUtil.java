@@ -18,6 +18,7 @@ import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.petra.function.transform.TransformUtil;
+import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
@@ -28,7 +29,10 @@ import com.liferay.portal.kernel.model.UserConstants;
 import com.liferay.portal.kernel.module.service.Snapshot;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
+import com.liferay.portal.kernel.util.HttpComponentsUtil;
+import com.liferay.portal.kernel.util.Portal;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -65,6 +69,15 @@ public class DSCommerceOrderAttachmentUtil {
 
 				return user;
 			});
+	}
+
+	public static String getActionURL(String path, ThemeDisplay themeDisplay) {
+		String url = HttpComponentsUtil.addParameter(
+			StringBundler.concat(
+				themeDisplay.getPortalURL(), Portal.PATH_MODULE, path),
+			"backURL", themeDisplay.getURLCurrent());
+
+		return url + "&commerceOrderAttachmentId={id}";
 	}
 
 	public static Map<Long, DSRequest> getDSRequests(

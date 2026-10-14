@@ -33,6 +33,9 @@ public interface DSRequestManager {
 	public Map<Long, DSRequest> getDSRequests(
 		long companyId, long[] fileEntryIds);
 
+	public List<DSRequest> getFileEntryDSRequests(
+		long companyId, long fileEntryId);
+
 	public List<DSRequest> getSiteDSRequests(
 		long companyId, long siteGroupId, String search, int start, int end);
 
