@@ -18,6 +18,7 @@ import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
+import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.User;
@@ -170,6 +171,12 @@ public class DSCommerceOrderAttachmentUtil {
 	}
 
 	public static boolean isEnabled(CommerceOrder commerceOrder) {
+		if (!FeatureFlagManagerUtil.isEnabled(
+				commerceOrder.getCompanyId(), "LPD-69290")) {
+
+			return false;
+		}
+
 		DigitalSignatureConfiguration digitalSignatureConfiguration =
 			DigitalSignatureConfigurationUtil.getDigitalSignatureConfiguration(
 				commerceOrder.getCompanyId(), getSiteGroupId(commerceOrder));
