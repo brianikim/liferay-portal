@@ -113,7 +113,7 @@ public class DSCommerceOrderSignatureStatusServlet extends HttpServlet {
 		return JSONUtil.put(
 			"createDate", _toTime(dsRequest.getCreateDate())
 		).put(
-			"providerRequestId", dsRequest.getProviderRequestId()
+			"externalReferenceCode", dsRequest.getExternalReferenceCode()
 		).put(
 			"requestStatus", dsRequest.getStatus()
 		).put(
@@ -131,25 +131,23 @@ public class DSCommerceOrderSignatureStatusServlet extends HttpServlet {
 		return JSONUtil.put(
 			"expirationDate", _toTime(dsRequest.getExpirationDate())
 		).put(
+			"externalReferenceCode", dsRequest.getExternalReferenceCode()
+		).put(
 			"history",
 			JSONUtil.toJSONArray(
 				dsRequests.subList(1, dsRequests.size()),
 				this::_getHistoryJSONObject)
-		).put(
-			"providerRequestId", dsRequest.getProviderRequestId()
 		).put(
 			"recipients",
 			JSONUtil.toJSONArray(
 				dsRequest.getDSRequestRecipients(),
 				this::_getRecipientJSONObject)
 		).put(
-			"requesterEmailAddress", dsRequest.getRequesterEmailAddress()
-		).put(
-			"requesterName", dsRequest.getRequesterName()
-		).put(
 			"requestStatus", dsRequest.getStatus()
 		).put(
 			"statusDate", _toTime(dsRequest.getStatusDate())
+		).put(
+			"userName", dsRequest.getUserName()
 		).toString();
 	}
 

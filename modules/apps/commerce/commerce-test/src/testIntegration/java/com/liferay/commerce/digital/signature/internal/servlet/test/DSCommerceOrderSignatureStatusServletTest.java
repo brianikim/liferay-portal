@@ -88,12 +88,13 @@ public class DSCommerceOrderSignatureStatusServletTest {
 
 	@Before
 	public void setUp() throws Exception {
-		String prefix = ".com.liferay.digital.signature.internal.batch.";
-
 		BatchEngineTestUtil.processBatchEngineUnits(
 			"com.liferay.digital.signature.impl",
 			DSCommerceOrderSignatureStatusServletTest.class,
-			new String[] {prefix + "01.object.definition"});
+			new String[] {
+				".com.liferay.digital.signature.internal.batch.01.object." +
+					"definition"
+			});
 
 		CommerceOrderAttachmentTestUtil.initialize(getClass());
 
@@ -123,16 +124,16 @@ public class DSCommerceOrderSignatureStatusServletTest {
 
 		_group = GroupTestUtil.addGroup();
 
+		_accountEntry = CommerceAccountTestUtil.addPersonAccountEntry(
+			TestPropsValues.getUserId(),
+			ServiceContextTestUtil.getServiceContext(
+				_group.getGroupId(), TestPropsValues.getUserId()));
+
 		CommerceCurrency commerceCurrency =
 			CommerceCurrencyTestUtil.addCommerceCurrency(_group.getCompanyId());
 
 		CommerceChannel commerceChannel = CommerceTestUtil.addCommerceChannel(
 			_group.getGroupId(), commerceCurrency.getCode());
-
-		_accountEntry = CommerceAccountTestUtil.addPersonAccountEntry(
-			TestPropsValues.getUserId(),
-			ServiceContextTestUtil.getServiceContext(
-				_group.getGroupId(), TestPropsValues.getUserId()));
 
 		_commerceOrder = _commerceOrderLocalService.addCommerceOrder(
 			TestPropsValues.getUserId(), commerceChannel.getGroupId(),
@@ -167,9 +168,9 @@ public class DSCommerceOrderSignatureStatusServletTest {
 			_getContentAsString(
 				_commerceOrderAttachment.getCommerceOrderAttachmentId(), user));
 
-		DSRequest dsRequest1 = _addDSRequest(
+		DSRequest voidedDSRequest = _addDSRequest(
 			DSRequestConstants.STATUS_VOIDED, user);
-		DSRequest dsRequest2 = _addDSRequest(
+		DSRequest sentDSRequest = _addDSRequest(
 			DSRequestConstants.STATUS_SENT, user);
 
 		JSONObject jsonObject = _jsonFactory.createJSONObject(
@@ -177,8 +178,8 @@ public class DSCommerceOrderSignatureStatusServletTest {
 				_commerceOrderAttachment.getCommerceOrderAttachmentId(), user));
 
 		Assert.assertEquals(
-			dsRequest2.getProviderRequestId(),
-			jsonObject.getString("providerRequestId"));
+			sentDSRequest.getExternalReferenceCode(),
+			jsonObject.getString("externalReferenceCode"));
 		Assert.assertEquals(
 			DSRequestConstants.STATUS_SENT,
 			jsonObject.getString("requestStatus"));
@@ -191,8 +192,8 @@ public class DSCommerceOrderSignatureStatusServletTest {
 		JSONObject historyJSONObject = historyJSONArray.getJSONObject(0);
 
 		Assert.assertEquals(
-			dsRequest1.getProviderRequestId(),
-			historyJSONObject.getString("providerRequestId"));
+			voidedDSRequest.getExternalReferenceCode(),
+			historyJSONObject.getString("externalReferenceCode"));
 		Assert.assertEquals(
 			DSRequestConstants.STATUS_VOIDED,
 			historyJSONObject.getString("requestStatus"));
@@ -329,7 +330,6 @@ public class DSCommerceOrderSignatureStatusServletTest {
 			RoleConstants.TYPE_REGULAR, null,
 			ServiceContextTestUtil.getServiceContext(
 				_group.getGroupId(), TestPropsValues.getUserId()));
-
 		User user = UserTestUtil.addUser();
 
 		_roleLocalService.addUserRole(user.getUserId(), role);

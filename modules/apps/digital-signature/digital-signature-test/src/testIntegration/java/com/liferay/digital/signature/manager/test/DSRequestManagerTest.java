@@ -393,18 +393,15 @@ public class DSRequestManagerTest {
 
 	@Test
 	public void testGetFileEntryDSRequests() throws Exception {
-		String emailAddress = RandomTestUtil.randomString() + "@liferay.com";
+		DSEnvelope dsEnvelope = _createDSEnvelope();
+
+		dsEnvelope.setStatus(DSRequestConstants.STATUS_VOIDED);
+
 		long fileEntryId = RandomTestUtil.randomInt();
 
-		_addDSRequestObjectEntries(
-			emailAddress, fileEntryId, DSRequestConstants.STATUS_SENT,
-			DSRequestConstants.STATUS_VOIDED, TestPropsValues.getUserId());
-		_addDSRequestObjectEntries(
-			emailAddress, fileEntryId, DSRequestConstants.STATUS_SENT,
-			DSRequestConstants.STATUS_SENT, TestPropsValues.getUserId());
-		_addDSRequestObjectEntries(
-			emailAddress, fileEntryId + 1, DSRequestConstants.STATUS_SENT,
-			DSRequestConstants.STATUS_SENT, TestPropsValues.getUserId());
+		_addDSRequest(dsEnvelope, fileEntryId);
+		_addDSRequest(_createDSEnvelope(), fileEntryId);
+		_addDSRequest(_createDSEnvelope(), fileEntryId + 1);
 
 		List<DSRequest> dsRequests = _dsRequestManager.getFileEntryDSRequests(
 			TestPropsValues.getCompanyId(), fileEntryId);

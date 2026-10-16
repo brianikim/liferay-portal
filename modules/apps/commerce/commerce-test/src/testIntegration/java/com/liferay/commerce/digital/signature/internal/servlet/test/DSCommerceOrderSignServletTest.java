@@ -79,12 +79,13 @@ public class DSCommerceOrderSignServletTest {
 
 	@Before
 	public void setUp() throws Exception {
-		String prefix = ".com.liferay.digital.signature.internal.batch.";
-
 		BatchEngineTestUtil.processBatchEngineUnits(
 			"com.liferay.digital.signature.impl",
 			DSCommerceOrderSignServletTest.class,
-			new String[] {prefix + "01.object.definition"});
+			new String[] {
+				".com.liferay.digital.signature.internal.batch.01.object." +
+					"definition"
+			});
 
 		CommerceOrderAttachmentTestUtil.initialize(getClass());
 
@@ -114,17 +115,17 @@ public class DSCommerceOrderSignServletTest {
 
 		_group = GroupTestUtil.addGroup();
 
-		CommerceCurrency commerceCurrency =
-			CommerceCurrencyTestUtil.addCommerceCurrency(_group.getCompanyId());
-
-		CommerceChannel commerceChannel = CommerceTestUtil.addCommerceChannel(
-			_group.getGroupId(), commerceCurrency.getCode());
-
 		AccountEntry accountEntry =
 			CommerceAccountTestUtil.addPersonAccountEntry(
 				TestPropsValues.getUserId(),
 				ServiceContextTestUtil.getServiceContext(
 					_group.getGroupId(), TestPropsValues.getUserId()));
+
+		CommerceCurrency commerceCurrency =
+			CommerceCurrencyTestUtil.addCommerceCurrency(_group.getCompanyId());
+
+		CommerceChannel commerceChannel = CommerceTestUtil.addCommerceChannel(
+			_group.getGroupId(), commerceCurrency.getCode());
 
 		CommerceOrder commerceOrder =
 			_commerceOrderLocalService.addCommerceOrder(
@@ -149,15 +150,15 @@ public class DSCommerceOrderSignServletTest {
 	@Test
 	public void testDoGet() throws Exception {
 		String backURL = "/" + RandomTestUtil.randomString();
-
 		long commerceOrderAttachmentId =
 			_commerceOrderAttachment.getCommerceOrderAttachmentId();
-
-		User user = TestPropsValues.getUser();
 
 		Assert.assertEquals(
 			backURL,
 			_getRedirectedURL(backURL, commerceOrderAttachmentId, null));
+
+		User user = TestPropsValues.getUser();
+
 		Assert.assertEquals(
 			backURL,
 			_getRedirectedURL(backURL, commerceOrderAttachmentId, user));
@@ -168,6 +169,7 @@ public class DSCommerceOrderSignServletTest {
 		Assert.assertEquals(
 			backURL,
 			_getRedirectedURL(backURL, RandomTestUtil.randomLong(), user));
+
 		Assert.assertEquals(
 			backURL,
 			_getRedirectedURL(

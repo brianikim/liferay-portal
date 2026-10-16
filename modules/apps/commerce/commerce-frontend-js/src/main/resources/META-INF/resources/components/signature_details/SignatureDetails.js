@@ -51,8 +51,8 @@ function getActivities(detail) {
 	});
 
 	if (
-		(detail.requestStatus === 'voided' ||
-			detail.requestStatus === 'expired') &&
+		(detail.requestStatus === 'expired' ||
+			detail.requestStatus === 'voided') &&
 		detail.statusDate
 	) {
 		activities.push({
@@ -96,12 +96,8 @@ function SignatureDetailsContent({detail}) {
 					{Liferay.Language.get('requester')}
 				</div>
 
-				<div className="font-weight-semi-bold">
-					{detail.requesterName}
-				</div>
-
-				<div className="mb-3 text-secondary">
-					{detail.requesterEmailAddress}
+				<div className="font-weight-semi-bold mb-3">
+					{detail.userName}
 				</div>
 
 				<div className="small text-secondary text-uppercase">
@@ -109,7 +105,7 @@ function SignatureDetailsContent({detail}) {
 				</div>
 
 				<div className={detail.expirationDate ? 'mb-3' : ''}>
-					{detail.providerRequestId}
+					{detail.externalReferenceCode}
 				</div>
 
 				{detail.expirationDate ? (
@@ -215,8 +211,10 @@ function SignatureDetailsContent({detail}) {
 
 						<tbody>
 							{detail.history.map((historyEntry) => (
-								<tr key={historyEntry.providerRequestId}>
-									<td>{historyEntry.providerRequestId}</td>
+								<tr key={historyEntry.externalReferenceCode}>
+									<td>
+										{historyEntry.externalReferenceCode}
+									</td>
 
 									<td>
 										<SignatureStatusLabel
@@ -291,7 +289,7 @@ export default function SignatureDetails({url}) {
 		);
 	}
 
-	if (detail && detail.providerRequestId) {
+	if (detail && detail.externalReferenceCode) {
 		return <SignatureDetailsContent detail={detail} />;
 	}
 

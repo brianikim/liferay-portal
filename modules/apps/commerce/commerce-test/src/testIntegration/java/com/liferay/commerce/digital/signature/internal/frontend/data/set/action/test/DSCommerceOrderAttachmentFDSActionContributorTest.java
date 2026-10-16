@@ -80,12 +80,13 @@ public class DSCommerceOrderAttachmentFDSActionContributorTest {
 
 	@Before
 	public void setUp() throws Exception {
-		String prefix = ".com.liferay.digital.signature.internal.batch.";
-
 		BatchEngineTestUtil.processBatchEngineUnits(
 			"com.liferay.digital.signature.impl",
 			DSCommerceOrderAttachmentFDSActionContributorTest.class,
-			new String[] {prefix + "01.object.definition"});
+			new String[] {
+				".com.liferay.digital.signature.internal.batch.01.object." +
+					"definition"
+			});
 
 		CommerceOrderAttachmentTestUtil.initialize(getClass());
 
@@ -93,17 +94,17 @@ public class DSCommerceOrderAttachmentFDSActionContributorTest {
 
 		_group = GroupTestUtil.addGroup();
 
-		CommerceCurrency commerceCurrency =
-			CommerceCurrencyTestUtil.addCommerceCurrency(_group.getCompanyId());
-
-		CommerceChannel commerceChannel = CommerceTestUtil.addCommerceChannel(
-			_group.getGroupId(), commerceCurrency.getCode());
-
 		AccountEntry accountEntry =
 			CommerceAccountTestUtil.addPersonAccountEntry(
 				TestPropsValues.getUserId(),
 				ServiceContextTestUtil.getServiceContext(
 					_group.getGroupId(), TestPropsValues.getUserId()));
+
+		CommerceCurrency commerceCurrency =
+			CommerceCurrencyTestUtil.addCommerceCurrency(_group.getCompanyId());
+
+		CommerceChannel commerceChannel = CommerceTestUtil.addCommerceChannel(
+			_group.getGroupId(), commerceCurrency.getCode());
 
 		_commerceOrder = _commerceOrderLocalService.addCommerceOrder(
 			TestPropsValues.getUserId(), commerceChannel.getGroupId(),
@@ -126,65 +127,9 @@ public class DSCommerceOrderAttachmentFDSActionContributorTest {
 
 	@Test
 	public void testGetAdditionalProps() throws Exception {
-		User user = TestPropsValues.getUser();
-
-		Assert.assertEquals(Collections.emptyMap(), _getAdditionalProps(user));
-
-		_addDSRequest(user);
-
-		Map<String, Object> additionalProps = _getAdditionalProps(user);
-
-		String commerceOrderAttachmentId = String.valueOf(
-			_commerceOrderAttachment.getCommerceOrderAttachmentId());
-
-		Assert.assertEquals(
-			List.of(commerceOrderAttachmentId),
-			additionalProps.get("signableIds"));
-		Assert.assertEquals(
-			HashMapBuilder.put(
-				commerceOrderAttachmentId, DSRequestConstants.STATUS_SENT
-			).build(),
-			additionalProps.get("signatureStatuses"));
-
-		additionalProps = _getAdditionalProps(UserTestUtil.addUser());
-
-		Assert.assertEquals(
-			Collections.emptyList(), additionalProps.get("signableIds"));
-
-		_saveDigitalSignatureConfiguration(false);
-
-		Assert.assertEquals(Collections.emptyMap(), _getAdditionalProps(user));
-	}
-
-	@Test
-	public void testGetAdditionalPropsWhenAttachmentIsRestricted()
-		throws Exception {
-
-		_commerceOrderAttachment =
-			_commerceOrderAttachmentLocalService.addCommerceOrderAttachment(
-				RandomTestUtil.randomString(), TestPropsValues.getUserId(),
-				_commerceOrder.getCommerceOrderId(),
-				RandomTestUtil.nextDouble(), true,
-				RandomTestUtil.randomString(), "invoice",
-				RandomTestUtil.randomString() + ".pdf",
-				new ByteArrayInputStream(RandomTestUtil.randomBytes()));
-
-		User user = UserTestUtil.addUser();
-
-		_addDSRequest(user);
-
-		Assert.assertEquals(Collections.emptyMap(), _getAdditionalProps(user));
-
-		Map<String, Object> additionalProps = _getAdditionalProps(
-			TestPropsValues.getUser());
-
-		Assert.assertEquals(
-			HashMapBuilder.put(
-				String.valueOf(
-					_commerceOrderAttachment.getCommerceOrderAttachmentId()),
-				DSRequestConstants.STATUS_SENT
-			).build(),
-			additionalProps.get("signatureStatuses"));
+		_testGetAdditionalProps();
+		_testGetAdditionalPropsWhenAttachmentIsRestricted();
+		_testGetAdditionalPropsWhenDisabled();
 	}
 
 	@Test
@@ -194,7 +139,7 @@ public class DSCommerceOrderAttachmentFDSActionContributorTest {
 		Assert.assertEquals(
 			Collections.emptyList(), _getFDSActionDropdownItemIds(user));
 
-		_addDSRequest(user);
+		_addDSRequest(_commerceOrderAttachment, user);
 
 		Assert.assertEquals(
 			List.of("sign", "view-signature-status"),
@@ -210,7 +155,10 @@ public class DSCommerceOrderAttachmentFDSActionContributorTest {
 			Collections.emptyList(), _getFDSActionDropdownItemIds(user));
 	}
 
-	private void _addDSRequest(User user) throws Exception {
+	private void _addDSRequest(
+			CommerceOrderAttachment commerceOrderAttachment, User user)
+		throws Exception {
+
 		DSEnvelope dsEnvelope = new DSEnvelope();
 
 		dsEnvelope.setDSEnvelopeId(RandomTestUtil.randomString());
@@ -235,7 +183,7 @@ public class DSCommerceOrderAttachmentFDSActionContributorTest {
 				long[].class
 			},
 			_group.getCompanyId(), _group.getGroupId(), user.getUserId(),
-			dsEnvelope, new long[] {_commerceOrderAttachment.getFileEntryId()});
+			dsEnvelope, new long[] {commerceOrderAttachment.getFileEntryId()});
 	}
 
 	private Map<String, Object> _getAdditionalProps(User user)
@@ -312,6 +260,82 @@ public class DSCommerceOrderAttachmentFDSActionContributorTest {
 				).put(
 					"siteSettingsStrategy", "always-inherit"
 				).build());
+	}
+
+	private void _testGetAdditionalProps() throws Exception {
+		User user = TestPropsValues.getUser();
+
+		Assert.assertEquals(Collections.emptyMap(), _getAdditionalProps(user));
+
+		_addDSRequest(_commerceOrderAttachment, user);
+
+		Map<String, Object> additionalProps = _getAdditionalProps(user);
+
+		String commerceOrderAttachmentId = String.valueOf(
+			_commerceOrderAttachment.getCommerceOrderAttachmentId());
+
+		Assert.assertEquals(
+			List.of(commerceOrderAttachmentId),
+			additionalProps.get("signableIds"));
+		Assert.assertEquals(
+			HashMapBuilder.put(
+				commerceOrderAttachmentId, DSRequestConstants.STATUS_SENT
+			).build(),
+			additionalProps.get("signatureStatuses"));
+
+		additionalProps = _getAdditionalProps(UserTestUtil.addUser());
+
+		Assert.assertEquals(
+			Collections.emptyList(), additionalProps.get("signableIds"));
+	}
+
+	private void _testGetAdditionalPropsWhenAttachmentIsRestricted()
+		throws Exception {
+
+		CommerceOrderAttachment commerceOrderAttachment =
+			_commerceOrderAttachmentLocalService.addCommerceOrderAttachment(
+				RandomTestUtil.randomString(), TestPropsValues.getUserId(),
+				_commerceOrder.getCommerceOrderId(),
+				RandomTestUtil.nextDouble(), true,
+				RandomTestUtil.randomString(), "invoice",
+				RandomTestUtil.randomString() + ".pdf",
+				new ByteArrayInputStream(RandomTestUtil.randomBytes()));
+
+		User user = UserTestUtil.addUser();
+
+		_addDSRequest(commerceOrderAttachment, user);
+
+		Map<String, Object> additionalProps = _getAdditionalProps(user);
+
+		Assert.assertEquals(
+			HashMapBuilder.put(
+				String.valueOf(
+					_commerceOrderAttachment.getCommerceOrderAttachmentId()),
+				DSRequestConstants.STATUS_SENT
+			).build(),
+			additionalProps.get("signatureStatuses"));
+
+		additionalProps = _getAdditionalProps(TestPropsValues.getUser());
+
+		Assert.assertEquals(
+			HashMapBuilder.put(
+				String.valueOf(
+					_commerceOrderAttachment.getCommerceOrderAttachmentId()),
+				DSRequestConstants.STATUS_SENT
+			).put(
+				String.valueOf(
+					commerceOrderAttachment.getCommerceOrderAttachmentId()),
+				DSRequestConstants.STATUS_SENT
+			).build(),
+			additionalProps.get("signatureStatuses"));
+	}
+
+	private void _testGetAdditionalPropsWhenDisabled() throws Exception {
+		_saveDigitalSignatureConfiguration(false);
+
+		Assert.assertEquals(
+			Collections.emptyMap(),
+			_getAdditionalProps(TestPropsValues.getUser()));
 	}
 
 	private CommerceOrder _commerceOrder;
