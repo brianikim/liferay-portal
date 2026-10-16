@@ -104,7 +104,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					"requestExpirationDate",
 					() -> _toDate(dsEnvelope.getExpireLocalDateTime())
 				).put(
-					"requestStatus", () -> _getRequestStatus(dsEnvelope)
+					"requestStatus", () -> _getDSRequestStatus(dsEnvelope)
 				).put(
 					"requestStatusDate",
 					() -> _toDate(dsEnvelope.getStatusChangedLocalDateTime())
@@ -128,22 +128,10 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				"A signature request requires a DocuSign envelope ID");
 		}
 
-		ObjectDefinition dsRequestDocumentObjectDefinition =
-			_objectDefinitionLocalService.
-				getObjectDefinitionByExternalReferenceCode(
-					DSObjectDefinitionConstants.
-						EXTERNAL_REFERENCE_CODE_REQUEST_DOCUMENT,
-					companyId);
 		ObjectDefinition dsRequestObjectDefinition =
 			_objectDefinitionLocalService.
 				getObjectDefinitionByExternalReferenceCode(
 					DSObjectDefinitionConstants.EXTERNAL_REFERENCE_CODE_REQUEST,
-					companyId);
-		ObjectDefinition dsRequestRecipientObjectDefinition =
-			_objectDefinitionLocalService.
-				getObjectDefinitionByExternalReferenceCode(
-					DSObjectDefinitionConstants.
-						EXTERNAL_REFERENCE_CODE_REQUEST_RECIPIENT,
 					companyId);
 
 		ServiceContext serviceContext = _getServiceContext(
@@ -161,11 +149,18 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				"requestExpirationDate",
 				() -> _toDate(dsEnvelope.getExpireLocalDateTime())
 			).put(
-				"requestStatus", () -> _getRequestStatus(dsEnvelope)
+				"requestStatus", () -> _getDSRequestStatus(dsEnvelope)
 			).put(
 				"siteGroupId", _getSiteGroupId(groupId)
 			).build(),
 			serviceContext);
+
+		ObjectDefinition dsRequestDocumentObjectDefinition =
+			_objectDefinitionLocalService.
+				getObjectDefinitionByExternalReferenceCode(
+					DSObjectDefinitionConstants.
+						EXTERNAL_REFERENCE_CODE_REQUEST_DOCUMENT,
+					companyId);
 
 		for (long fileEntryId : fileEntryIds) {
 			_objectEntryLocalService.addObjectEntry(
@@ -183,6 +178,13 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				serviceContext);
 		}
 
+		ObjectDefinition dsRequestRecipientObjectDefinition =
+			_objectDefinitionLocalService.
+				getObjectDefinitionByExternalReferenceCode(
+					DSObjectDefinitionConstants.
+						EXTERNAL_REFERENCE_CODE_REQUEST_RECIPIENT,
+					companyId);
+
 		for (DSRecipient dsRecipient : dsEnvelope.getDSRecipients()) {
 			_objectEntryLocalService.addObjectEntry(
 				0, userId,
@@ -199,11 +201,10 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					objectEntry.getObjectEntryId()
 				).put(
 					"r_userToDSRequestRecipients_userId",
-					_getRecipientUserId(
-						companyId, dsRecipient.getEmailAddress())
+					_getUserId(companyId, dsRecipient.getEmailAddress())
 				).put(
 					"requestRecipientStatus",
-					() -> _getRequestRecipientStatus(dsRecipient)
+					() -> _getDSRequestRecipientStatus(dsRecipient)
 				).put(
 					"sentDate",
 					() -> _toDate(dsRecipient.getSentLocalDateTime())
@@ -212,22 +213,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 	}
 
-	private long _getRecipientUserId(long companyId, String emailAddress) {
-		if (Validator.isNull(emailAddress)) {
-			return 0;
-		}
-
-		User user = _userLocalService.fetchUserByEmailAddress(
-			companyId, emailAddress);
-
-		if (user == null) {
-			return 0;
-		}
-
-		return user.getUserId();
-	}
-
-	private String _getRequestRecipientStatus(DSRecipient dsRecipient) {
+	private String _getDSRequestRecipientStatus(DSRecipient dsRecipient) {
 		String status = StringUtil.toLowerCase(dsRecipient.getStatus());
 
 		if (Objects.equals(status, "delivered")) {
@@ -249,7 +235,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		return null;
 	}
 
-	private String _getRequestStatus(DSEnvelope dsEnvelope) {
+	private String _getDSRequestStatus(DSEnvelope dsEnvelope) {
 		LocalDateTime expireLocalDateTime = dsEnvelope.getExpireLocalDateTime();
 		String status = StringUtil.toLowerCase(dsEnvelope.getStatus());
 		LocalDateTime statusChangedLocalDateTime =
@@ -302,6 +288,21 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 
 		return groupId;
+	}
+
+	private long _getUserId(long companyId, String emailAddress) {
+		if (Validator.isNull(emailAddress)) {
+			return 0;
+		}
+
+		User user = _userLocalService.fetchUserByEmailAddress(
+			companyId, emailAddress);
+
+		if (user == null) {
+			return 0;
+		}
+
+		return user.getUserId();
 	}
 
 	private boolean _isEnabled(long companyId, long groupId) {
