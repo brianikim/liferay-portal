@@ -41,11 +41,11 @@ public class DSEnvelopeManagerImplTest {
 
 	@Test
 	public void testVoidDSEnvelope() throws Exception {
-		_setResponseJSONObject(JSONUtil.put("envelopeId", "envelopeId"));
+		_mockDSHttp(JSONUtil.put("envelopeId", "envelopeId"));
 
 		_dsEnvelopeManagerImpl.voidDSEnvelope(1, 2, "envelopeId", "reason");
 
-		_setResponseJSONObject(
+		_mockDSHttp(
 			JSONUtil.put(
 				"errorCode", "ENVELOPE_CANNOT_VOID_INVALID_STATE"
 			).put(
@@ -65,7 +65,7 @@ public class DSEnvelopeManagerImplTest {
 		}
 	}
 
-	private void _setResponseJSONObject(JSONObject jsonObject) {
+	private void _mockDSHttp(JSONObject jsonObject) {
 		DSHttp dsHttp = Mockito.mock(DSHttp.class);
 
 		Mockito.when(

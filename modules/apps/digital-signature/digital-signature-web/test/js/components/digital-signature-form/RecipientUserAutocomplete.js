@@ -10,16 +10,16 @@ import React from 'react';
 import RecipientUserAutocomplete from '../../../../src/main/resources/META-INF/resources/js/components/digital-signature-form/RecipientUserAutocomplete';
 
 describe('RecipientUserAutocomplete', () => {
+	afterAll(() => {
+		delete window.ResizeObserver;
+	});
+
 	beforeAll(() => {
 		window.ResizeObserver = jest.fn().mockImplementation(() => ({
 			disconnect: jest.fn(),
 			observe: jest.fn(),
 			unobserve: jest.fn(),
 		}));
-	});
-
-	afterAll(() => {
-		delete window.ResizeObserver;
 	});
 
 	beforeEach(() => {
