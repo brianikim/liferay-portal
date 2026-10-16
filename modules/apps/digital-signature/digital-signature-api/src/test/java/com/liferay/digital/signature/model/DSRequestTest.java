@@ -35,12 +35,10 @@ public class DSRequestTest {
 		long userId = RandomTestUtil.randomLong();
 
 		DSRequest dsRequest = _createDSRequest(
-			DSRequestConstants.STATUS_SENT, DSRequestConstants.STATUS_SENT,
-			userId);
+			DSRequestConstants.STATUS_COMPLETED,
+			DSRequestConstants.STATUS_COMPLETED, userId);
 
-		Assert.assertTrue(dsRequest.isSignatureRequired(userId));
-		Assert.assertFalse(
-			dsRequest.isSignatureRequired(RandomTestUtil.randomLong()));
+		Assert.assertFalse(dsRequest.isSignatureRequired(userId));
 
 		dsRequest = _createDSRequest(
 			DSRequestConstants.STATUS_CREATED, DSRequestConstants.STATUS_SENT,
@@ -49,10 +47,12 @@ public class DSRequestTest {
 		Assert.assertFalse(dsRequest.isSignatureRequired(userId));
 
 		dsRequest = _createDSRequest(
-			DSRequestConstants.STATUS_COMPLETED,
-			DSRequestConstants.STATUS_COMPLETED, userId);
+			DSRequestConstants.STATUS_SENT, DSRequestConstants.STATUS_SENT,
+			userId);
 
-		Assert.assertFalse(dsRequest.isSignatureRequired(userId));
+		Assert.assertTrue(dsRequest.isSignatureRequired(userId));
+		Assert.assertFalse(
+			dsRequest.isSignatureRequired(RandomTestUtil.randomLong()));
 	}
 
 	private DSRequest _createDSRequest(
@@ -68,8 +68,9 @@ public class DSRequestTest {
 					).put(
 						"requestRecipientStatus", recipientStatus
 					).build())),
-			Collections.emptyList(), RandomTestUtil.randomString(),
+			RandomTestUtil.randomString(), Collections.emptyList(),
 			RandomTestUtil.randomString(), RandomTestUtil.randomLong(),
+			RandomTestUtil.randomString(),
 			HashMapBuilder.<String, Serializable>put(
 				"requestStatus", requestStatus
 			).build());

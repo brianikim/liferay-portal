@@ -33,6 +33,7 @@ import com.liferay.portal.kernel.service.UserService;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
+import com.liferay.portal.kernel.util.IntegerWrapper;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.vulcan.dto.converter.DTOConverter;
 import com.liferay.portal.vulcan.dto.converter.DTOConverterRegistry;
@@ -43,7 +44,6 @@ import com.liferay.portal.vulcan.pagination.Pagination;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -103,8 +103,7 @@ public class SignatureRequestResourceImpl
 		}
 
 		_dsRequestManager.sendDSRequestNotifications(
-			contextCompany.getCompanyId(), dsRequest.getSiteGroupId(),
-			dsRequest);
+			dsRequest.getDSRequestId());
 
 		return _toSignatureRequest(dsRequest);
 	}
@@ -130,9 +129,7 @@ public class SignatureRequestResourceImpl
 				"A reason is required to void a signature request");
 		}
 
-		_dsRequestManager.voidDSRequest(
-			contextCompany.getCompanyId(), dsRequest.getSiteGroupId(),
-			dsRequest, voidReason);
+		_dsRequestManager.voidDSRequest(dsRequest.getDSRequestId(), voidReason);
 
 		return _toSignatureRequest(
 			_dsRequestManager.fetchDSRequest(
@@ -144,7 +141,7 @@ public class SignatureRequestResourceImpl
 			Long siteId, SignatureRequest signatureRequest)
 		throws Exception {
 
-		ObjectDefinition dsRequestObjectDefinition =
+		ObjectDefinition objectDefinition =
 			_objectDefinitionLocalService.
 				getObjectDefinitionByExternalReferenceCode(
 					DSObjectDefinitionConstants.EXTERNAL_REFERENCE_CODE_REQUEST,
@@ -152,7 +149,7 @@ public class SignatureRequestResourceImpl
 
 		PortletResourcePermission portletResourcePermission =
 			ObjectDefinitionPortletResourcePermissionRegistryUtil.getService(
-				dsRequestObjectDefinition.getResourceName());
+				objectDefinition.getResourceName());
 
 		portletResourcePermission.check(
 			PermissionThreadLocal.getPermissionChecker(), 0,
@@ -196,7 +193,7 @@ public class SignatureRequestResourceImpl
 				signatureRequest.getSendNotifications(), true)) {
 
 			_dsRequestManager.sendDSRequestNotifications(
-				contextCompany.getCompanyId(), siteId, dsRequest);
+				dsRequest.getDSRequestId());
 		}
 
 		return _toSignatureRequest(dsRequest);
@@ -254,19 +251,19 @@ public class SignatureRequestResourceImpl
 	private DSEnvelope _toDSEnvelope(SignatureRequest signatureRequest)
 		throws Exception {
 
-		DSEnvelope dsEnvelope = new DSEnvelope();
-
-		dsEnvelope.setDSRecipients(
-			_toDSRecipients(signatureRequest.getSignatureRequestRecipients()));
-		dsEnvelope.setEmailBlurb(signatureRequest.getEmailBody());
-		dsEnvelope.setEmailSubject(signatureRequest.getEmailSubject());
-		dsEnvelope.setExpireAfter(
-			GetterUtil.getInteger(signatureRequest.getExpireAfter()));
-		dsEnvelope.setExpireWarn(
-			GetterUtil.getInteger(signatureRequest.getExpireWarn()));
-		dsEnvelope.setName(signatureRequest.getName());
-
-		return dsEnvelope;
+		return new DSEnvelope() {
+			{
+				dsRecipients = _toDSRecipients(
+					signatureRequest.getSignatureRequestRecipients());
+				emailBlurb = signatureRequest.getEmailBody();
+				emailSubject = signatureRequest.getEmailSubject();
+				expireAfter = GetterUtil.getInteger(
+					signatureRequest.getExpireAfter());
+				expireWarn = GetterUtil.getInteger(
+					signatureRequest.getExpireWarn());
+				name = signatureRequest.getName();
+			}
+		};
 	}
 
 	private List<DSRecipient> _toDSRecipients(
@@ -278,31 +275,29 @@ public class SignatureRequestResourceImpl
 				"A signature request must have at least one recipient");
 		}
 
-		List<DSRecipient> dsRecipients = new ArrayList<>();
+		IntegerWrapper integerWrapper = new IntegerWrapper();
 
-		for (SignatureRequestRecipient signatureRequestRecipient :
-				signatureRequestRecipients) {
+		return unsafeTransformToList(
+			signatureRequestRecipients,
+			signatureRequestRecipient -> {
+				Long userId = signatureRequestRecipient.getUserId();
 
-			Long userId = signatureRequestRecipient.getUserId();
+				if (userId == null) {
+					throw new BadRequestException(
+						"A signature request recipient must have a user");
+				}
 
-			if (userId == null) {
-				throw new BadRequestException(
-					"A signature request recipient must have a user");
-			}
+				User user = _userService.getUserById(userId);
 
-			User user = _userService.getUserById(userId);
-
-			DSRecipient dsRecipient = new DSRecipient();
-
-			dsRecipient.setDSRecipientId(
-				String.valueOf(dsRecipients.size() + 1));
-			dsRecipient.setEmailAddress(user.getEmailAddress());
-			dsRecipient.setName(user.getFullName());
-
-			dsRecipients.add(dsRecipient);
-		}
-
-		return dsRecipients;
+				return new DSRecipient() {
+					{
+						dsRecipientId = String.valueOf(
+							integerWrapper.increment());
+						emailAddress = user.getEmailAddress();
+						name = user.getFullName();
+					}
+				};
+			});
 	}
 
 	private SignatureRequest _toSignatureRequest(DSRequest dsRequest)

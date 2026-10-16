@@ -14,6 +14,7 @@ import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRequest;
+import com.liferay.digital.signature.rest.client.dto.v1_0.Creator;
 import com.liferay.digital.signature.rest.client.dto.v1_0.SignatureRequest;
 import com.liferay.digital.signature.rest.client.dto.v1_0.SignatureRequestRecipient;
 import com.liferay.digital.signature.rest.client.pagination.Page;
@@ -23,8 +24,8 @@ import com.liferay.digital.signature.rest.client.resource.v1_0.SignatureRequestR
 import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
-import com.liferay.mail.kernel.model.MailMessage;
-import com.liferay.mail.kernel.service.MailService;
+import com.liferay.notification.model.NotificationQueueEntry;
+import com.liferay.notification.service.NotificationQueueEntryLocalService;
 import com.liferay.object.constants.ObjectActionKeys;
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.model.ObjectEntry;
@@ -33,6 +34,7 @@ import com.liferay.object.service.ObjectEntryLocalService;
 import com.liferay.petra.function.UnsafeRunnable;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.User;
@@ -52,6 +54,7 @@ import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.HttpComponentsUtil;
+import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
@@ -90,30 +93,17 @@ public class SignatureRequestResourceTest
 	public void setUp() throws Exception {
 		super.setUp();
 
-		String prefix = ".com.liferay.digital.signature.internal.batch.";
-
 		BatchEngineTestUtil.processBatchEngineUnits(
 			"com.liferay.digital.signature.impl",
 			SignatureRequestResourceTest.class,
-			new String[] {prefix + "01.object.definition"});
-
-		_dsRequestDocumentObjectDefinition =
-			_objectDefinitionLocalService.
-				getObjectDefinitionByExternalReferenceCode(
-					DSObjectDefinitionConstants.
-						EXTERNAL_REFERENCE_CODE_REQUEST_DOCUMENT,
-					testCompany.getCompanyId());
-		_dsRequestObjectDefinition =
-			_objectDefinitionLocalService.
-				getObjectDefinitionByExternalReferenceCode(
-					DSObjectDefinitionConstants.EXTERNAL_REFERENCE_CODE_REQUEST,
-					testCompany.getCompanyId());
-		_dsRequestRecipientObjectDefinition =
-			_objectDefinitionLocalService.
-				getObjectDefinitionByExternalReferenceCode(
-					DSObjectDefinitionConstants.
-						EXTERNAL_REFERENCE_CODE_REQUEST_RECIPIENT,
-					testCompany.getCompanyId());
+			new String[] {
+				".com.liferay.digital.signature.internal.batch.01.object." +
+					"definition",
+				".com.liferay.digital.signature.internal.batch.02.object." +
+					"relationship",
+				".com.liferay.digital.signature.internal.batch.03." +
+					"notification.template"
+			});
 
 		_companyConfigurationTemporarySwapper =
 			new CompanyConfigurationTemporarySwapper(
@@ -138,6 +128,23 @@ public class SignatureRequestResourceTest
 				).put(
 					"siteSettingsStrategy", "always-inherit"
 				).build());
+		_dsRequestDocumentObjectDefinition =
+			_objectDefinitionLocalService.
+				getObjectDefinitionByExternalReferenceCode(
+					DSObjectDefinitionConstants.
+						EXTERNAL_REFERENCE_CODE_REQUEST_DOCUMENT,
+					testCompany.getCompanyId());
+		_dsRequestObjectDefinition =
+			_objectDefinitionLocalService.
+				getObjectDefinitionByExternalReferenceCode(
+					DSObjectDefinitionConstants.EXTERNAL_REFERENCE_CODE_REQUEST,
+					testCompany.getCompanyId());
+		_dsRequestRecipientObjectDefinition =
+			_objectDefinitionLocalService.
+				getObjectDefinitionByExternalReferenceCode(
+					DSObjectDefinitionConstants.
+						EXTERNAL_REFERENCE_CODE_REQUEST_RECIPIENT,
+					testCompany.getCompanyId());
 	}
 
 	@After
@@ -155,7 +162,6 @@ public class SignatureRequestResourceTest
 
 		ObjectEntry dsRequestObjectEntry = _addDSRequestObjectEntry(
 			user1.getEmailAddress(), DSRequestConstants.STATUS_SENT);
-
 		SignatureRequestResource user1SignatureRequestResource =
 			_getSignatureRequestResource(user1);
 
@@ -163,10 +169,14 @@ public class SignatureRequestResourceTest
 			user1SignatureRequestResource.getSignatureRequest(
 				dsRequestObjectEntry.getObjectEntryId());
 
+		Creator creator = signatureRequest.getCreator();
+
+		Assert.assertEquals(
+			Long.valueOf(TestPropsValues.getUserId()), creator.getId());
+
 		Assert.assertEquals(
 			MapUtil.getString(dsRequestObjectEntry.getValues(), "emailBody"),
 			signatureRequest.getEmailBody());
-
 		Assert.assertEquals(
 			Long.valueOf(dsRequestObjectEntry.getObjectEntryId()),
 			signatureRequest.getId());
@@ -324,9 +334,7 @@ public class SignatureRequestResourceTest
 				).put(
 					"emailSubject", RandomTestUtil.randomString()
 				).put(
-					"providerKey", "docusign"
-				).put(
-					"providerRequestId", RandomTestUtil.randomString()
+					"externalReferenceCode", RandomTestUtil.randomString()
 				).put(
 					"requestStatus", requestStatus
 				).put(
@@ -354,8 +362,6 @@ public class SignatureRequestResourceTest
 				"emailAddress", emailAddress
 			).put(
 				"name", RandomTestUtil.randomString()
-			).put(
-				"providerRecipientId", RandomTestUtil.randomString()
 			).put(
 				"r_dsRequestToDSRequestRecipients_l_dsRequestId",
 				dsRequestObjectEntry.getObjectEntryId()
@@ -402,6 +408,11 @@ public class SignatureRequestResourceTest
 	}
 
 	private SignatureRequest _createSignatureRequest() throws Exception {
+		SignatureRequest signatureRequest = randomSignatureRequest();
+
+		signatureRequest.setExpireAfter(0);
+		signatureRequest.setExpireWarn(0);
+
 		FileEntry fileEntry = _dlAppLocalService.addFileEntry(
 			null, TestPropsValues.getUserId(), testGroup.getGroupId(),
 			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
@@ -409,15 +420,14 @@ public class SignatureRequestResourceTest
 			ContentTypes.APPLICATION_PDF, TestDataConstants.TEST_BYTE_ARRAY,
 			null, null, null,
 			ServiceContextTestUtil.getServiceContext(testGroup.getGroupId()));
-		User user = UserTestUtil.addUser();
 
-		SignatureRequest signatureRequest = randomSignatureRequest();
-
-		signatureRequest.setExpireAfter(0);
-		signatureRequest.setExpireWarn(0);
 		signatureRequest.setFileEntryIds(
 			new Long[] {fileEntry.getFileEntryId()});
+
 		signatureRequest.setSendNotifications(false);
+
+		User user = UserTestUtil.addUser();
+
 		signatureRequest.setSignatureRequestRecipients(
 			new SignatureRequestRecipient[] {
 				new SignatureRequestRecipient() {
@@ -450,38 +460,27 @@ public class SignatureRequestResourceTest
 	}
 
 	private void _testPostSignatureRequestNotification() throws Exception {
-		List<MailMessage> mailMessages = new ArrayList<>();
+		User user = UserTestUtil.addUser();
 
-		MailService mailService =
-			(MailService)ReflectionTestUtil.getAndSetFieldValue(
-				_dsRequestManager, "_mailService",
-				ProxyUtil.newProxyInstance(
-					MailService.class.getClassLoader(),
-					new Class<?>[] {MailService.class},
-					(proxy, method, arguments) -> {
-						if (Objects.equals(method.getName(), "sendEmail")) {
-							mailMessages.add((MailMessage)arguments[0]);
-						}
+		ObjectEntry dsRequestObjectEntry = _addDSRequestObjectEntry(
+			user.getEmailAddress(), DSRequestConstants.STATUS_SENT);
 
-						return null;
-					}));
+		signatureRequestResource.postSignatureRequestNotification(
+			dsRequestObjectEntry.getObjectEntryId());
 
-		try {
-			User user = UserTestUtil.addUser();
+		List<NotificationQueueEntry> notificationQueueEntries = ListUtil.filter(
+			_notificationQueueEntryLocalService.getNotificationQueueEntries(
+				QueryUtil.ALL_POS, QueryUtil.ALL_POS),
+			notificationQueueEntry ->
+				Objects.equals(
+					notificationQueueEntry.getClassName(),
+					DSRequest.class.getName()) &&
+				(notificationQueueEntry.getClassPK() ==
+					dsRequestObjectEntry.getObjectEntryId()));
 
-			ObjectEntry dsRequestObjectEntry = _addDSRequestObjectEntry(
-				user.getEmailAddress(), DSRequestConstants.STATUS_SENT);
-
-			signatureRequestResource.postSignatureRequestNotification(
-				dsRequestObjectEntry.getObjectEntryId());
-
-			Assert.assertEquals(
-				mailMessages.toString(), 1, mailMessages.size());
-		}
-		finally {
-			ReflectionTestUtil.setFieldValue(
-				_dsRequestManager, "_mailService", mailService);
-		}
+		Assert.assertEquals(
+			notificationQueueEntries.toString(), 1,
+			notificationQueueEntries.size());
 	}
 
 	private void _testPostSignatureRequestNotificationWhenRequestIsTerminal()
@@ -504,7 +503,6 @@ public class SignatureRequestResourceTest
 
 		ObjectEntry dsRequestObjectEntry = _addDSRequestObjectEntry(
 			user.getEmailAddress(), DSRequestConstants.STATUS_SENT);
-
 		SignatureRequestResource userSignatureRequestResource =
 			_getSignatureRequestResource(user);
 
@@ -517,14 +515,14 @@ public class SignatureRequestResourceTest
 	private void _testPostSignatureRequestNotificationWithoutViewPermission()
 		throws Exception {
 
+		ObjectEntry dsRequestObjectEntry = _addDSRequestObjectEntry(
+			RandomTestUtil.randomString() + "@liferay.com",
+			DSRequestConstants.STATUS_SENT);
+
 		User user = UserTestUtil.addUser();
 
 		SignatureRequestResource userSignatureRequestResource =
 			_getSignatureRequestResource(user);
-
-		ObjectEntry dsRequestObjectEntry = _addDSRequestObjectEntry(
-			RandomTestUtil.randomString() + "@liferay.com",
-			DSRequestConstants.STATUS_SENT);
 
 		_assertProblemStatus(
 			"NOT_FOUND",
@@ -533,10 +531,6 @@ public class SignatureRequestResourceTest
 	}
 
 	private void _testPostSignatureRequestVoid() throws Exception {
-		ObjectEntry dsRequestObjectEntry = _addDSRequestObjectEntry(
-			RandomTestUtil.randomString() + "@liferay.com",
-			DSRequestConstants.STATUS_SENT);
-
 		DSEnvelope dsEnvelope = new DSEnvelope();
 
 		dsEnvelope.setDSRecipients(new ArrayList<>());
@@ -561,6 +555,9 @@ public class SignatureRequestResourceTest
 					}));
 
 		try {
+			ObjectEntry dsRequestObjectEntry = _addDSRequestObjectEntry(
+				RandomTestUtil.randomString() + "@liferay.com",
+				DSRequestConstants.STATUS_SENT);
 			String voidReason = RandomTestUtil.randomString();
 
 			SignatureRequest signatureRequest =
@@ -576,10 +573,7 @@ public class SignatureRequestResourceTest
 			Object[] arguments = argumentsList.get(0);
 
 			Assert.assertEquals(
-				MapUtil.getString(
-					dsRequestObjectEntry.getValues(), "providerRequestId"),
-				arguments[2]);
-
+				dsRequestObjectEntry.getExternalReferenceCode(), arguments[2]);
 			Assert.assertEquals(voidReason, arguments[3]);
 		}
 		finally {
@@ -622,7 +616,6 @@ public class SignatureRequestResourceTest
 
 		ObjectEntry dsRequestObjectEntry = _addDSRequestObjectEntry(
 			user.getEmailAddress(), DSRequestConstants.STATUS_SENT);
-
 		SignatureRequestResource userSignatureRequestResource =
 			_getSignatureRequestResource(user);
 
@@ -636,14 +629,14 @@ public class SignatureRequestResourceTest
 	private void _testPostSignatureRequestVoidWithoutViewPermission()
 		throws Exception {
 
+		ObjectEntry dsRequestObjectEntry = _addDSRequestObjectEntry(
+			RandomTestUtil.randomString() + "@liferay.com",
+			DSRequestConstants.STATUS_SENT);
+
 		User user = UserTestUtil.addUser();
 
 		SignatureRequestResource userSignatureRequestResource =
 			_getSignatureRequestResource(user);
-
-		ObjectEntry dsRequestObjectEntry = _addDSRequestObjectEntry(
-			RandomTestUtil.randomString() + "@liferay.com",
-			DSRequestConstants.STATUS_SENT);
 
 		_assertProblemStatus(
 			"NOT_FOUND",
@@ -653,8 +646,6 @@ public class SignatureRequestResourceTest
 	}
 
 	private void _testPostSiteSignatureRequest() throws Exception {
-		SignatureRequest signatureRequest = _createSignatureRequest();
-
 		DSEnvelopeManager dsEnvelopeManager =
 			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
 				_dsRequestManager, "_dsEnvelopeManager",
@@ -677,6 +668,8 @@ public class SignatureRequestResourceTest
 					}));
 
 		try {
+			SignatureRequest signatureRequest = _createSignatureRequest();
+
 			SignatureRequest postSignatureRequest =
 				signatureRequestResource.postSiteSignatureRequest(
 					testGroup.getGroupId(), signatureRequest);
@@ -830,6 +823,8 @@ public class SignatureRequestResourceTest
 
 		_userLocalService.addRoleUser(role.getRoleId(), user);
 
+		SignatureRequest signatureRequest = randomSignatureRequest();
+
 		FileEntry fileEntry = _dlAppLocalService.addFileEntry(
 			null, TestPropsValues.getUserId(), testGroup.getGroupId(),
 			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
@@ -837,8 +832,6 @@ public class SignatureRequestResourceTest
 			ContentTypes.APPLICATION_PDF, TestDataConstants.TEST_BYTE_ARRAY,
 			null, null, null,
 			ServiceContextTestUtil.getServiceContext(testGroup.getGroupId()));
-
-		SignatureRequest signatureRequest = randomSignatureRequest();
 
 		signatureRequest.setFileEntryIds(
 			new Long[] {fileEntry.getFileEntryId()});
@@ -870,6 +863,8 @@ public class SignatureRequestResourceTest
 
 		_userLocalService.addRoleUser(role.getRoleId(), user);
 
+		SignatureRequest signatureRequest = randomSignatureRequest();
+
 		FileEntry fileEntry = _dlAppLocalService.addFileEntry(
 			null, TestPropsValues.getUserId(), testGroup.getGroupId(),
 			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
@@ -877,8 +872,6 @@ public class SignatureRequestResourceTest
 			ContentTypes.APPLICATION_PDF, TestDataConstants.TEST_BYTE_ARRAY,
 			null, null, null,
 			ServiceContextTestUtil.getServiceContext(testGroup.getGroupId()));
-
-		SignatureRequest signatureRequest = randomSignatureRequest();
 
 		signatureRequest.setFileEntryIds(
 			new Long[] {fileEntry.getFileEntryId()});
@@ -916,6 +909,10 @@ public class SignatureRequestResourceTest
 
 	private ObjectDefinition _dsRequestObjectDefinition;
 	private ObjectDefinition _dsRequestRecipientObjectDefinition;
+
+	@Inject
+	private NotificationQueueEntryLocalService
+		_notificationQueueEntryLocalService;
 
 	@Inject
 	private ObjectDefinitionLocalService _objectDefinitionLocalService;
