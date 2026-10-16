@@ -49,6 +49,27 @@ public class SignatureRequest implements Cloneable, Serializable {
 
 	protected Map<String, Map<String, String>> actions;
 
+	public Creator getCreator() {
+		return creator;
+	}
+
+	public void setCreator(Creator creator) {
+		this.creator = creator;
+	}
+
+	public void setCreator(
+		UnsafeSupplier<Creator, Exception> creatorUnsafeSupplier) {
+
+		try {
+			creator = creatorUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected Creator creator;
+
 	public Date getDateCreated() {
 		return dateCreated;
 	}
@@ -255,111 +276,6 @@ public class SignatureRequest implements Cloneable, Serializable {
 
 	protected String name;
 
-	public String getProviderKey() {
-		return providerKey;
-	}
-
-	public void setProviderKey(String providerKey) {
-		this.providerKey = providerKey;
-	}
-
-	public void setProviderKey(
-		UnsafeSupplier<String, Exception> providerKeyUnsafeSupplier) {
-
-		try {
-			providerKey = providerKeyUnsafeSupplier.get();
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	protected String providerKey;
-
-	public String getProviderRequestId() {
-		return providerRequestId;
-	}
-
-	public void setProviderRequestId(String providerRequestId) {
-		this.providerRequestId = providerRequestId;
-	}
-
-	public void setProviderRequestId(
-		UnsafeSupplier<String, Exception> providerRequestIdUnsafeSupplier) {
-
-		try {
-			providerRequestId = providerRequestIdUnsafeSupplier.get();
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	protected String providerRequestId;
-
-	public String getRequesterEmailAddress() {
-		return requesterEmailAddress;
-	}
-
-	public void setRequesterEmailAddress(String requesterEmailAddress) {
-		this.requesterEmailAddress = requesterEmailAddress;
-	}
-
-	public void setRequesterEmailAddress(
-		UnsafeSupplier<String, Exception> requesterEmailAddressUnsafeSupplier) {
-
-		try {
-			requesterEmailAddress = requesterEmailAddressUnsafeSupplier.get();
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	protected String requesterEmailAddress;
-
-	public String getRequesterName() {
-		return requesterName;
-	}
-
-	public void setRequesterName(String requesterName) {
-		this.requesterName = requesterName;
-	}
-
-	public void setRequesterName(
-		UnsafeSupplier<String, Exception> requesterNameUnsafeSupplier) {
-
-		try {
-			requesterName = requesterNameUnsafeSupplier.get();
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	protected String requesterName;
-
-	public Long getRequesterUserId() {
-		return requesterUserId;
-	}
-
-	public void setRequesterUserId(Long requesterUserId) {
-		this.requesterUserId = requesterUserId;
-	}
-
-	public void setRequesterUserId(
-		UnsafeSupplier<Long, Exception> requesterUserIdUnsafeSupplier) {
-
-		try {
-			requesterUserId = requesterUserIdUnsafeSupplier.get();
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	protected Long requesterUserId;
-
 	public Boolean getSendNotifications() {
 		return sendNotifications;
 	}
@@ -480,4 +396,4 @@ public class SignatureRequest implements Cloneable, Serializable {
 	}
 
 }
-// LIFERAY-REST-BUILDER-HASH:1085517230
+// LIFERAY-REST-BUILDER-HASH:1308232426

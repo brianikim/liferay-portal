@@ -16,7 +16,6 @@ import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
-import com.liferay.document.library.kernel.service.DLAppService;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
@@ -86,20 +85,16 @@ public class AddDSEnvelopeMVCResourceCommand
 					resourceRequest, "emailMessage");
 				emailSubject = ParamUtil.getString(
 					resourceRequest, "emailSubject");
-
-				if (FeatureFlagManagerUtil.isEnabled(
-						themeDisplay.getCompanyId(), "LPD-69290") &&
-					digitalSignatureConfiguration.embeddedViewEnabled()) {
-
-					expireAfter = ParamUtil.getInteger(
-						resourceRequest, "expireAfter");
-					expireWarn = ParamUtil.getInteger(
-						resourceRequest, "expireWarn");
-				}
-
 				name = ParamUtil.getString(resourceRequest, "envelopeName");
 			}
 		};
+
+		if (embeddedViewEnabled) {
+			dsEnvelope.setExpireAfter(
+				ParamUtil.getInteger(resourceRequest, "expireAfter"));
+			dsEnvelope.setExpireWarn(
+				ParamUtil.getInteger(resourceRequest, "expireWarn"));
+		}
 
 		if ((dsEnvelope.getExpireAfter() > 0) &&
 			(dsEnvelope.getExpireWarn() >= dsEnvelope.getExpireAfter())) {
@@ -113,7 +108,15 @@ public class AddDSEnvelopeMVCResourceCommand
 			resourceRequest, "fileEntryIds");
 
 		for (long fileEntryId : fileEntryIds) {
-			_dlAppService.getFileEntry(fileEntryId);
+			_fileEntryModelResourcePermission.check(
+				themeDisplay.getPermissionChecker(), fileEntryId,
+				ActionKeys.VIEW);
+
+			if (embeddedViewEnabled) {
+				_fileEntryModelResourcePermission.check(
+					themeDisplay.getPermissionChecker(), fileEntryId,
+					ActionKeys.UPDATE);
+			}
 		}
 
 		User user = themeDisplay.getUser();
@@ -136,23 +139,16 @@ public class AddDSEnvelopeMVCResourceCommand
 			return;
 		}
 
-		for (long fileEntryId : fileEntryIds) {
-			_fileEntryModelResourcePermission.check(
-				themeDisplay.getPermissionChecker(), fileEntryId,
-				ActionKeys.UPDATE);
-		}
-
 		DSRequest dsRequest = _dsRequestManager.addDSRequest(
 			themeDisplay.getCompanyId(), themeDisplay.getSiteGroupId(),
 			user.getUserId(), dsEnvelope, fileEntryIds);
 
 		_dsRequestManager.sendDSRequestNotifications(
-			themeDisplay.getCompanyId(), themeDisplay.getSiteGroupId(),
-			dsRequest);
+			dsRequest.getDSRequestId());
 
 		JSONPortletResponseUtil.writeJSON(
 			resourceRequest, resourceResponse,
-			JSONUtil.put("dsEnvelopeId", dsRequest.getProviderRequestId()));
+			JSONUtil.put("dsEnvelopeId", dsRequest.getExternalReferenceCode()));
 	}
 
 	private List<DSRecipient> _getDSRecipients(ResourceRequest resourceRequest)
@@ -188,9 +184,6 @@ public class AddDSEnvelopeMVCResourceCommand
 
 	@Reference
 	private DLAppLocalService _dlAppLocalService;
-
-	@Reference
-	private DLAppService _dlAppService;
 
 	@Reference
 	private DSEnvelopeManager _dsEnvelopeManager;

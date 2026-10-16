@@ -66,27 +66,6 @@ public class SignatureRequestRecipient implements Cloneable, Serializable {
 
 	protected String name;
 
-	public String getProviderRecipientId() {
-		return providerRecipientId;
-	}
-
-	public void setProviderRecipientId(String providerRecipientId) {
-		this.providerRecipientId = providerRecipientId;
-	}
-
-	public void setProviderRecipientId(
-		UnsafeSupplier<String, Exception> providerRecipientIdUnsafeSupplier) {
-
-		try {
-			providerRecipientId = providerRecipientIdUnsafeSupplier.get();
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	protected String providerRecipientId;
-
 	public Date getSentDate() {
 		return sentDate;
 	}
@@ -204,4 +183,4 @@ public class SignatureRequestRecipient implements Cloneable, Serializable {
 	}
 
 }
-// LIFERAY-REST-BUILDER-HASH:-274615529
+// LIFERAY-REST-BUILDER-HASH:-446863155
