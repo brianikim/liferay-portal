@@ -79,7 +79,7 @@ public class AddDSEnvelopeMVCResourceCommandTest {
 			PermissionCheckerMethodTestRule.INSTANCE);
 
 	@Test
-	public void testDoServeResource() throws Exception {
+	public void testDoTransactionalCommand() throws Exception {
 		MockLiferayResourceRequest mockLiferayResourceRequest =
 			new MockLiferayResourceRequest();
 

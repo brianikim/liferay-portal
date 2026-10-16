@@ -401,9 +401,11 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			Group group = groupPersistence.fetchByC_GK(
 				user.getCompanyId(), defaultGroupName);
 
-			if (group != null) {
-				defaultGroups.add(group);
+			if (group == null) {
+				continue;
 			}
+
+			defaultGroups.add(group);
 		}
 
 		String[] defaultOrganizationGroupNames = PrefsPropsUtil.getStringArray(
@@ -421,9 +423,11 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			Group group = groupPersistence.fetchByC_GK(
 				user.getCompanyId(), defaultOrganizationGroupName);
 
-			if (group != null) {
-				defaultGroups.add(group);
+			if (group == null) {
+				continue;
 			}
+
+			defaultGroups.add(group);
 		}
 
 		long[] userGroupIds = user.getGroupIds();
@@ -545,12 +549,14 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			UserGroup userGroup = userGroupPersistence.fetchByC_N(
 				user.getCompanyId(), defaultUserGroupName);
 
-			if ((userGroup != null) &&
-				!ArrayUtil.contains(
+			if ((userGroup == null) ||
+				ArrayUtil.contains(
 					userUserGroupIds, userGroup.getUserGroupId())) {
 
-				userGroupIdSet.add(userGroup.getUserGroupId());
+				continue;
 			}
+
+			userGroupIdSet.add(userGroup.getUserGroupId());
 		}
 
 		if (userGroupIdSet.isEmpty()) {
@@ -1959,6 +1965,49 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	}
 
 	/**
+	 * Removes the users from the organization.
+	 *
+	 * @param organizationId the primary key of the organization
+	 */
+	@Override
+	public void clearOrganizationUsers(long organizationId) {
+		long[] userIds = organizationPersistence.getUserPrimaryKeys(
+			organizationId);
+
+		super.clearOrganizationUsers(organizationId);
+
+		_reindex(userIds);
+	}
+
+	/**
+	 * Removes the users from the role.
+	 *
+	 * @param roleId the primary key of the role
+	 */
+	@Override
+	public void clearRoleUsers(long roleId) {
+		long[] userIds = rolePersistence.getUserPrimaryKeys(roleId);
+
+		super.clearRoleUsers(roleId);
+
+		_reindex(userIds);
+	}
+
+	/**
+	 * Removes the users from the team.
+	 *
+	 * @param teamId the primary key of the team
+	 */
+	@Override
+	public void clearTeamUsers(long teamId) {
+		long[] userIds = teamPersistence.getUserPrimaryKeys(teamId);
+
+		super.clearTeamUsers(teamId);
+
+		_reindex(userIds);
+	}
+
+	/**
 	 * Removes the users from the user group.
 	 *
 	 * @param userGroupId the primary key of the user group
@@ -2101,6 +2150,55 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	}
 
 	/**
+	 * Removes the user from the organization.
+	 *
+	 * @param organizationId the primary key of the organization
+	 * @param userId the primary key of the user
+	 */
+	@Override
+	public void deleteOrganizationUser(long organizationId, long userId) {
+		super.deleteOrganizationUser(organizationId, userId);
+
+		_reindex(userId);
+	}
+
+	/**
+	 * Removes the user from the organization.
+	 *
+	 * @param organizationId the primary key of the organization
+	 * @param user the user
+	 */
+	@Override
+	public void deleteOrganizationUser(long organizationId, User user) {
+		deleteOrganizationUser(organizationId, user.getUserId());
+	}
+
+	/**
+	 * Removes the users from the organization.
+	 *
+	 * @param organizationId the primary key of the organization
+	 * @param users the users
+	 */
+	@Override
+	public void deleteOrganizationUsers(long organizationId, List<User> users) {
+		deleteOrganizationUsers(
+			organizationId, ListUtil.toLongArray(users, User.USER_ID_ACCESSOR));
+	}
+
+	/**
+	 * Removes the users from the organization.
+	 *
+	 * @param organizationId the primary key of the organization
+	 * @param userIds the primary keys of the users
+	 */
+	@Override
+	public void deleteOrganizationUsers(long organizationId, long[] userIds) {
+		super.deleteOrganizationUsers(organizationId, userIds);
+
+		_reindex(userIds);
+	}
+
+	/**
 	 * Deletes the user's portrait image.
 	 *
 	 * @param userId the primary key of the user
@@ -2125,6 +2223,91 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		rolePersistence.removeUser(roleId, userId);
 
 		reindex(userId);
+	}
+
+	/**
+	 * Removes the user from the role.
+	 *
+	 * @param roleId the primary key of the role
+	 * @param user the user
+	 */
+	@Override
+	public void deleteRoleUser(long roleId, User user) throws PortalException {
+		deleteRoleUser(roleId, user.getUserId());
+	}
+
+	/**
+	 * Removes the users from the role.
+	 *
+	 * @param roleId the primary key of the role
+	 * @param users the users
+	 */
+	@Override
+	public void deleteRoleUsers(long roleId, List<User> users) {
+		deleteRoleUsers(
+			roleId, ListUtil.toLongArray(users, User.USER_ID_ACCESSOR));
+	}
+
+	/**
+	 * Removes the users from the role.
+	 *
+	 * @param roleId the primary key of the role
+	 * @param userIds the primary keys of the users
+	 */
+	@Override
+	public void deleteRoleUsers(long roleId, long[] userIds) {
+		super.deleteRoleUsers(roleId, userIds);
+
+		_reindex(userIds);
+	}
+
+	/**
+	 * Removes the user from the team.
+	 *
+	 * @param teamId the primary key of the team
+	 * @param userId the primary key of the user
+	 */
+	@Override
+	public void deleteTeamUser(long teamId, long userId) {
+		super.deleteTeamUser(teamId, userId);
+
+		_reindex(userId);
+	}
+
+	/**
+	 * Removes the user from the team.
+	 *
+	 * @param teamId the primary key of the team
+	 * @param user the user
+	 */
+	@Override
+	public void deleteTeamUser(long teamId, User user) {
+		deleteTeamUser(teamId, user.getUserId());
+	}
+
+	/**
+	 * Removes the users from the team.
+	 *
+	 * @param teamId the primary key of the team
+	 * @param users the users
+	 */
+	@Override
+	public void deleteTeamUsers(long teamId, List<User> users) {
+		deleteTeamUsers(
+			teamId, ListUtil.toLongArray(users, User.USER_ID_ACCESSOR));
+	}
+
+	/**
+	 * Removes the users from the team.
+	 *
+	 * @param teamId the primary key of the team
+	 * @param userIds the primary keys of the users
+	 */
+	@Override
+	public void deleteTeamUsers(long teamId, long[] userIds) {
+		super.deleteTeamUsers(teamId, userIds);
+
+		_reindex(userIds);
 	}
 
 	/**
@@ -2896,14 +3079,13 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 					socialRelation.getUserId2());
 
 				if (user.isGuestUser() ||
-					(user.getStatus() != WorkflowConstants.STATUS_APPROVED)) {
+					(user.getStatus() != WorkflowConstants.STATUS_APPROVED) ||
+					users.contains(user)) {
 
 					continue;
 				}
 
-				if (!users.contains(user)) {
-					users.add(user);
-				}
+				users.add(user);
 			}
 
 			if (orderByComparator != null) {
@@ -3918,9 +4100,11 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 				int count = userFinder.countByKeywords(
 					companyId, null, status, params);
 
-				if (count > 0) {
-					counts.put(groupId, count);
+				if (count <= 0) {
+					continue;
 				}
+
+				counts.put(groupId, count);
 			}
 		}
 		catch (Exception exception) {
@@ -4497,6 +4681,25 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	}
 
 	/**
+	 * Sets the users in the organization, removing and adding users to the
+	 * organization as necessary.
+	 *
+	 * @param organizationId the primary key of the organization
+	 * @param userIds the primary keys of the users
+	 */
+	@Override
+	public void setOrganizationUsers(long organizationId, long[] userIds) {
+		long[] oldUserIds = organizationPersistence.getUserPrimaryKeys(
+			organizationId);
+
+		super.setOrganizationUsers(organizationId, userIds);
+
+		_reindex(
+			ArrayUtil.toLongArray(
+				SetUtil.symmetricDifference(userIds, oldUserIds)));
+	}
+
+	/**
 	 * Sets the users in the role, removing and adding users to the role as
 	 * necessary.
 	 *
@@ -4517,6 +4720,24 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		rolePersistence.setUsers(roleId, userIds);
 
 		reindex(updateUserIds);
+	}
+
+	/**
+	 * Sets the users in the team, removing and adding users to the team as
+	 * necessary.
+	 *
+	 * @param teamId the primary key of the team
+	 * @param userIds the primary keys of the users
+	 */
+	@Override
+	public void setTeamUsers(long teamId, long[] userIds) {
+		long[] oldUserIds = teamPersistence.getUserPrimaryKeys(teamId);
+
+		super.setTeamUsers(teamId, userIds);
+
+		_reindex(
+			ArrayUtil.toLongArray(
+				SetUtil.symmetricDifference(userIds, oldUserIds)));
 	}
 
 	/**
@@ -4668,9 +4889,11 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		for (Long userId : userIds) {
 			User user = userPersistence.fetchByPrimaryKey(userId);
 
-			if (user != null) {
-				users.add(user);
+			if (user == null) {
+				continue;
 			}
+
+			users.add(user);
 		}
 
 		unsetRoleUsers(roleId, users);
@@ -7063,16 +7286,20 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			_userGroupRolePersistence.findByUserId(userId);
 
 		for (UserGroupRole userGroupRole : userGroupRoles) {
-			if (ArrayUtil.contains(groupIds, userGroupRole.getGroupId())) {
-				Role role = rolePersistence.findByPrimaryKey(
-					userGroupRole.getRoleId());
-
-				if ((role.getType() == RoleConstants.TYPE_DEPOT) ||
-					(role.getType() == RoleConstants.TYPE_SITE)) {
-
-					_userGroupRolePersistence.remove(userGroupRole);
-				}
+			if (!ArrayUtil.contains(groupIds, userGroupRole.getGroupId())) {
+				continue;
 			}
+
+			Role role = rolePersistence.findByPrimaryKey(
+				userGroupRole.getRoleId());
+
+			if ((role.getType() != RoleConstants.TYPE_DEPOT) &&
+				(role.getType() != RoleConstants.TYPE_SITE)) {
+
+				continue;
+			}
+
+			_userGroupRolePersistence.remove(userGroupRole);
 		}
 
 		List<Team> oldTeams = userPersistence.getTeams(userId);
@@ -7080,9 +7307,11 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		List<Team> removedFromTeams = new ArrayList<>();
 
 		for (Team team : oldTeams) {
-			if (ArrayUtil.contains(groupIds, team.getGroupId())) {
-				removedFromTeams.add(team);
+			if (!ArrayUtil.contains(groupIds, team.getGroupId())) {
+				continue;
 			}
+
+			removedFromTeams.add(team);
 		}
 
 		if (!removedFromTeams.isEmpty()) {
@@ -7182,9 +7411,11 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		userGroupRoles = new ArrayList<>(userGroupRoles);
 
 		for (UserGroupRole userGroupRole : previousUserGroupRoles) {
-			if (!userGroupRoles.remove(userGroupRole)) {
-				_userGroupRoleLocalService.deleteUserGroupRole(userGroupRole);
+			if (userGroupRoles.remove(userGroupRole)) {
+				continue;
 			}
+
+			_userGroupRoleLocalService.deleteUserGroupRole(userGroupRole);
 		}
 
 		if (ListUtil.isEmpty(userGroupRoles)) {
@@ -7219,10 +7450,12 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			Organization organization =
 				organizationPersistence.findByPrimaryKey(organizationId);
 
-			if (!ArrayUtil.contains(validGroupIds, organization.getGroupId())) {
-				validGroupIds = ArrayUtil.append(
-					validGroupIds, organization.getGroupId());
+			if (ArrayUtil.contains(validGroupIds, organization.getGroupId())) {
+				continue;
 			}
+
+			validGroupIds = ArrayUtil.append(
+				validGroupIds, organization.getGroupId());
 		}
 
 		Arrays.sort(validGroupIds);
@@ -7231,9 +7464,11 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			int count = Arrays.binarySearch(
 				validGroupIds, userGroupRole.getGroupId());
 
-			if (count >= 0) {
-				_userGroupRoleLocalService.addUserGroupRole(userGroupRole);
+			if (count < 0) {
+				continue;
 			}
+
+			_userGroupRoleLocalService.addUserGroupRole(userGroupRole);
 		}
 	}
 
@@ -7577,11 +7812,13 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			Role role = rolePersistence.fetchByC_N(
 				user.getCompanyId(), defaultRoleName);
 
-			if ((role != null) &&
-				(role.getType() == RoleConstants.TYPE_REGULAR)) {
+			if ((role == null) ||
+				(role.getType() != RoleConstants.TYPE_REGULAR)) {
 
-				roleIdsSet.add(role.getRoleId());
+				continue;
 			}
+
+			roleIdsSet.add(role.getRoleId());
 		}
 
 		roleIds = ArrayUtil.toArray(roleIdsSet.toArray(new Long[0]));
@@ -7613,12 +7850,14 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			user.getUserId(), TicketConstants.TYPE_PASSWORD);
 
 		for (Ticket ticket : tickets) {
-			if (!ticket.isExpired()) {
-				_ticketLocalService.updateTicket(
-					ticket.getTicketId(), User.class.getName(),
-					user.getUserId(), TicketConstants.TYPE_PASSWORD,
-					ticket.getExtraInfo(), new Date());
+			if (ticket.isExpired()) {
+				continue;
 			}
+
+			_ticketLocalService.updateTicket(
+				ticket.getTicketId(), User.class.getName(), user.getUserId(),
+				TicketConstants.TYPE_PASSWORD, ticket.getExtraInfo(),
+				new Date());
 		}
 	}
 
