@@ -92,28 +92,6 @@ const openErrorToast = (error) => {
 	});
 };
 
-const postSignatureRequestAction = (url) =>
-	Liferay.Util.fetch(url, {method: 'POST'})
-		.then((response) => {
-			if (!response.ok) {
-				throw new Error(response.statusText);
-			}
-
-			return response.json();
-		})
-		.then(({errorMessage}) => {
-			if (errorMessage) {
-				throw {errorMessage};
-			}
-
-			openToast({
-				message: Liferay.Language.get(
-					'your-request-completed-successfully'
-				),
-				type: 'success',
-			});
-		});
-
 const openRequestSignatureModal = ({
 	addDSRequestURL,
 	attachment,
@@ -161,6 +139,28 @@ const openVoidConfirmationModal = ({url}) => {
 		title: Liferay.Language.get('void'),
 	});
 };
+
+const postSignatureRequestAction = (url) =>
+	Liferay.Util.fetch(url, {method: 'POST'})
+		.then((response) => {
+			if (!response.ok) {
+				throw new Error(response.statusText);
+			}
+
+			return response.json();
+		})
+		.then(({errorMessage}) => {
+			if (errorMessage) {
+				throw {errorMessage};
+			}
+
+			openToast({
+				message: Liferay.Language.get(
+					'your-request-completed-successfully'
+				),
+				type: 'success',
+			});
+		});
 
 const AttachmentsFDSPropsTransformer = (props) => {
 	const signatureRequest = props.additionalProps?.signatureRequest;

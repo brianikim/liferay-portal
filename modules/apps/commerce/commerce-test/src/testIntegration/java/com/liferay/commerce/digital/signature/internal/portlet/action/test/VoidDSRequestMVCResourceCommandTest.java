@@ -87,12 +87,13 @@ public class VoidDSRequestMVCResourceCommandTest {
 
 	@Before
 	public void setUp() throws Exception {
-		String prefix = ".com.liferay.digital.signature.internal.batch.";
-
 		BatchEngineTestUtil.processBatchEngineUnits(
 			"com.liferay.digital.signature.impl",
 			VoidDSRequestMVCResourceCommandTest.class,
-			new String[] {prefix + "01.object.definition"});
+			new String[] {
+				".com.liferay.digital.signature.internal.batch.01.object." +
+					"definition"
+			});
 
 		CommerceOrderAttachmentTestUtil.initialize(getClass());
 
@@ -100,17 +101,17 @@ public class VoidDSRequestMVCResourceCommandTest {
 
 		_group = GroupTestUtil.addGroup();
 
-		CommerceCurrency commerceCurrency =
-			CommerceCurrencyTestUtil.addCommerceCurrency(_group.getCompanyId());
-
-		CommerceChannel commerceChannel = CommerceTestUtil.addCommerceChannel(
-			_group.getGroupId(), commerceCurrency.getCode());
-
 		AccountEntry accountEntry =
 			CommerceAccountTestUtil.addPersonAccountEntry(
 				TestPropsValues.getUserId(),
 				ServiceContextTestUtil.getServiceContext(
 					_group.getGroupId(), TestPropsValues.getUserId()));
+
+		CommerceCurrency commerceCurrency =
+			CommerceCurrencyTestUtil.addCommerceCurrency(_group.getCompanyId());
+
+		CommerceChannel commerceChannel = CommerceTestUtil.addCommerceChannel(
+			_group.getGroupId(), commerceCurrency.getCode());
 
 		_commerceOrder = _commerceOrderLocalService.addCommerceOrder(
 			TestPropsValues.getUserId(), commerceChannel.getGroupId(),
@@ -251,6 +252,10 @@ public class VoidDSRequestMVCResourceCommandTest {
 	private DSEnvelope _addDSRequest(String status, User user)
 		throws Exception {
 
+		DSEnvelope dsEnvelope = new DSEnvelope();
+
+		dsEnvelope.setDSEnvelopeId(RandomTestUtil.randomString());
+
 		DSRecipient dsRecipient = new DSRecipient();
 
 		dsRecipient.setDSRecipientId("1");
@@ -259,10 +264,8 @@ public class VoidDSRequestMVCResourceCommandTest {
 		dsRecipient.setRoutingOrder(1);
 		dsRecipient.setStatus(status);
 
-		DSEnvelope dsEnvelope = new DSEnvelope();
-
-		dsEnvelope.setDSEnvelopeId(RandomTestUtil.randomString());
 		dsEnvelope.setDSRecipients(ListUtil.fromArray(dsRecipient));
+
 		dsEnvelope.setEmailSubject(RandomTestUtil.randomString());
 		dsEnvelope.setStatus(status);
 
