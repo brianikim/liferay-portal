@@ -88,12 +88,13 @@ public class AddDSRequestMVCResourceCommandTest {
 
 	@Before
 	public void setUp() throws Exception {
-		String prefix = ".com.liferay.digital.signature.internal.batch.";
-
 		BatchEngineTestUtil.processBatchEngineUnits(
 			"com.liferay.digital.signature.impl",
 			AddDSRequestMVCResourceCommandTest.class,
-			new String[] {prefix + "01.object.definition"});
+			new String[] {
+				".com.liferay.digital.signature.internal.batch.01.object." +
+					"definition"
+			});
 
 		CommerceOrderAttachmentTestUtil.initialize(getClass());
 
@@ -101,17 +102,17 @@ public class AddDSRequestMVCResourceCommandTest {
 
 		_group = GroupTestUtil.addGroup();
 
-		CommerceCurrency commerceCurrency =
-			CommerceCurrencyTestUtil.addCommerceCurrency(_group.getCompanyId());
-
-		CommerceChannel commerceChannel = CommerceTestUtil.addCommerceChannel(
-			_group.getGroupId(), commerceCurrency.getCode());
-
 		AccountEntry accountEntry =
 			CommerceAccountTestUtil.addPersonAccountEntry(
 				TestPropsValues.getUserId(),
 				ServiceContextTestUtil.getServiceContext(
 					_group.getGroupId(), TestPropsValues.getUserId()));
+
+		CommerceCurrency commerceCurrency =
+			CommerceCurrencyTestUtil.addCommerceCurrency(_group.getCompanyId());
+
+		CommerceChannel commerceChannel = CommerceTestUtil.addCommerceChannel(
+			_group.getGroupId(), commerceCurrency.getCode());
 
 		_commerceOrder = _commerceOrderLocalService.addCommerceOrder(
 			TestPropsValues.getUserId(), commerceChannel.getGroupId(),
@@ -161,9 +162,8 @@ public class AddDSRequestMVCResourceCommandTest {
 			portletException.getCause() instanceof PrincipalException);
 
 		_testServeResource(
-			"The number of days to warn signers must be fewer than the " +
-				"number of days until expiration.",
-			1, 1);
+			"Days to warn signers must be fewer than days until expiration.", 1,
+			1);
 
 		User user1 = UserTestUtil.addUser();
 
@@ -183,10 +183,6 @@ public class AddDSRequestMVCResourceCommandTest {
 			user2.getUserId(), user3.getUserId());
 
 		_testServeResource("At least one recipient is required.", 0, 0);
-
-		_testServeResource(
-			"A recipient can only be added once.", 0, 0,
-			TestPropsValues.getUserId(), TestPropsValues.getUserId());
 
 		AtomicReference<DSEnvelope> dsEnvelopeAtomicReference =
 			new AtomicReference<>();
@@ -224,7 +220,8 @@ public class AddDSRequestMVCResourceCommandTest {
 		try {
 			JSONObject jsonObject = _serveResource(
 				_commerceOrderAttachment.getCommerceOrderAttachmentId(), 0, 0,
-				TestPropsValues.getUser(), TestPropsValues.getUserId());
+				TestPropsValues.getUser(), TestPropsValues.getUserId(),
+				TestPropsValues.getUserId());
 
 			Assert.assertEquals("{}", jsonObject.toString());
 		}
@@ -253,7 +250,7 @@ public class AddDSRequestMVCResourceCommandTest {
 			_group.getCompanyId(), _commerceOrderAttachment.getFileEntryId());
 
 		Assert.assertEquals(
-			dsEnvelope.getDSEnvelopeId(), dsRequest.getProviderRequestId());
+			dsEnvelope.getDSEnvelopeId(), dsRequest.getExternalReferenceCode());
 		Assert.assertEquals(
 			DSRequestConstants.STATUS_SENT, dsRequest.getStatus());
 

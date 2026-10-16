@@ -83,8 +83,8 @@ public class OpenDSRequestStrutsAction implements StrutsAction {
 		}
 
 		Layout layout = _fetchLayout(
-			themeDisplay.getPermissionChecker(), themeDisplay.getCompanyId(),
-			dsRequest.getSiteGroupId());
+			themeDisplay.getCompanyId(), dsRequest.getSiteGroupId(),
+			themeDisplay.getPermissionChecker());
 
 		if (layout == null) {
 			_portal.sendError(
@@ -141,7 +141,7 @@ public class OpenDSRequestStrutsAction implements StrutsAction {
 	}
 
 	private Layout _fetchLayout(
-			PermissionChecker permissionChecker, long companyId, long groupId)
+			long companyId, long groupId, PermissionChecker permissionChecker)
 		throws Exception {
 
 		Group group = _groupLocalService.fetchGroup(groupId);

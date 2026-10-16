@@ -95,6 +95,12 @@ public class AutocompleteAssigneeMVCResourceCommandTest {
 			serviceReferences.get(0));
 
 		_role = RoleTestUtil.addRole("Custom Role", RoleConstants.TYPE_REGULAR);
+
+		for (int i = 0; i < _MAX_EXPANSIONS; i++) {
+			_roles.add(
+				RoleTestUtil.addRole("R" + i, RoleConstants.TYPE_REGULAR));
+		}
+
 		_user = UserTestUtil.addUser(
 			TestPropsValues.getCompanyId(), TestPropsValues.getUserId(),
 			RandomTestUtil.randomString(), LocaleUtil.getDefault(), "John",
@@ -183,6 +189,10 @@ public class AutocompleteAssigneeMVCResourceCommandTest {
 			byteArrayOutputStream.toString());
 	}
 
+	// See org.apache.lucene.search.FuzzyQuery.defaultMaxExpansions
+
+	private static final int _MAX_EXPANSIONS = 50;
+
 	@Inject
 	private CompanyLocalService _companyLocalService;
 
@@ -193,6 +203,9 @@ public class AutocompleteAssigneeMVCResourceCommandTest {
 
 	@DeleteAfterTestRun
 	private Role _role;
+
+	@DeleteAfterTestRun
+	private final List<Role> _roles = new ArrayList<>();
 
 	@DeleteAfterTestRun
 	private User _user;

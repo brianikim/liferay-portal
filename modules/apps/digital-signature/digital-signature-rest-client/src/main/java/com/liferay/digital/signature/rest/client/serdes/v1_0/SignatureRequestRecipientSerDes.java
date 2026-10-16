@@ -85,21 +85,6 @@ public class SignatureRequestRecipientSerDes {
 			sb.append("\"");
 		}
 
-		if (signatureRequestRecipient.getProviderRecipientId() != null) {
-			if (sb.length() > 1) {
-				sb.append(", ");
-			}
-
-			sb.append("\"providerRecipientId\": ");
-
-			sb.append("\"");
-
-			sb.append(
-				_escape(signatureRequestRecipient.getProviderRecipientId()));
-
-			sb.append("\"");
-		}
-
 		if (signatureRequestRecipient.getSentDate() != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -198,16 +183,6 @@ public class SignatureRequestRecipientSerDes {
 				"name", String.valueOf(signatureRequestRecipient.getName()));
 		}
 
-		if (signatureRequestRecipient.getProviderRecipientId() == null) {
-			map.put("providerRecipientId", null);
-		}
-		else {
-			map.put(
-				"providerRecipientId",
-				String.valueOf(
-					signatureRequestRecipient.getProviderRecipientId()));
-		}
-
 		if (signatureRequestRecipient.getSentDate() == null) {
 			map.put("sentDate", null);
 		}
@@ -270,11 +245,6 @@ public class SignatureRequestRecipientSerDes {
 			else if (Objects.equals(jsonParserFieldName, "name")) {
 				return false;
 			}
-			else if (Objects.equals(
-						jsonParserFieldName, "providerRecipientId")) {
-
-				return false;
-			}
 			else if (Objects.equals(jsonParserFieldName, "sentDate")) {
 				return false;
 			}
@@ -305,14 +275,6 @@ public class SignatureRequestRecipientSerDes {
 			else if (Objects.equals(jsonParserFieldName, "name")) {
 				if (jsonParserFieldValue != null) {
 					signatureRequestRecipient.setName(
-						(String)jsonParserFieldValue);
-				}
-			}
-			else if (Objects.equals(
-						jsonParserFieldName, "providerRecipientId")) {
-
-				if (jsonParserFieldValue != null) {
-					signatureRequestRecipient.setProviderRecipientId(
 						(String)jsonParserFieldValue);
 				}
 			}
@@ -427,4 +389,4 @@ public class SignatureRequestRecipientSerDes {
 	}
 
 }
-// LIFERAY-REST-BUILDER-HASH:-1921355964
+// LIFERAY-REST-BUILDER-HASH:-173248146

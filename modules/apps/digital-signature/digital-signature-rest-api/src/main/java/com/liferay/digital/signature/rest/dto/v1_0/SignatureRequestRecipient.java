@@ -150,51 +150,6 @@ public class SignatureRequestRecipient implements Serializable {
 	private Supplier<String> _nameSupplier;
 
 	@io.swagger.v3.oas.annotations.media.Schema(
-		description = "Identifier the provider assigned to the signer. Read-only."
-	)
-	public String getProviderRecipientId() {
-		if (_providerRecipientIdSupplier != null) {
-			providerRecipientId = _providerRecipientIdSupplier.get();
-
-			_providerRecipientIdSupplier = null;
-		}
-
-		return providerRecipientId;
-	}
-
-	public void setProviderRecipientId(String providerRecipientId) {
-		this.providerRecipientId = providerRecipientId;
-
-		_providerRecipientIdSupplier = null;
-	}
-
-	@JsonIgnore
-	public void setProviderRecipientId(
-		UnsafeSupplier<String, Exception> providerRecipientIdUnsafeSupplier) {
-
-		_providerRecipientIdSupplier = () -> {
-			try {
-				return providerRecipientIdUnsafeSupplier.get();
-			}
-			catch (RuntimeException runtimeException) {
-				throw runtimeException;
-			}
-			catch (Exception exception) {
-				throw new RuntimeException(exception);
-			}
-		};
-	}
-
-	@GraphQLField(
-		description = "Identifier the provider assigned to the signer. Read-only."
-	)
-	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
-	protected String providerRecipientId;
-
-	@JsonIgnore
-	private Supplier<String> _providerRecipientIdSupplier;
-
-	@io.swagger.v3.oas.annotations.media.Schema(
 		description = "When the signer was notified. Read-only."
 	)
 	public Date getSentDate() {
@@ -433,22 +388,6 @@ public class SignatureRequestRecipient implements Serializable {
 			sb.append("\"");
 		}
 
-		String providerRecipientId = getProviderRecipientId();
-
-		if (providerRecipientId != null) {
-			if (sb.length() > 1) {
-				sb.append(", ");
-			}
-
-			sb.append("\"providerRecipientId\": ");
-
-			sb.append("\"");
-
-			sb.append(_escape(providerRecipientId));
-
-			sb.append("\"");
-		}
-
 		Date sentDate = getSentDate();
 
 		if (sentDate != null) {
@@ -631,4 +570,4 @@ public class SignatureRequestRecipient implements Serializable {
 	private Map<String, Serializable> _extendedProperties;
 
 }
-// LIFERAY-REST-BUILDER-HASH:690273461
+// LIFERAY-REST-BUILDER-HASH:259583830

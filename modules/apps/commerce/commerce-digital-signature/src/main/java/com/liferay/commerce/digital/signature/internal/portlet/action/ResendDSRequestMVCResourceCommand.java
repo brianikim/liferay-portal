@@ -100,9 +100,7 @@ public class ResendDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
 			}
 
 			_dsRequestManager.sendDSRequestNotifications(
-				commerceOrder.getCompanyId(),
-				DSCommerceOrderAttachmentUtil.getSiteGroupId(commerceOrder),
-				dsRequest);
+				dsRequest.getDSRequestId());
 
 			JSONPortletResponseUtil.writeJSON(
 				resourceRequest, resourceResponse,
