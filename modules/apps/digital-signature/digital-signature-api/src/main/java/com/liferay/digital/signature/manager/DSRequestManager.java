@@ -21,7 +21,6 @@ public interface DSRequestManager {
 			long[] fileEntryIds)
 		throws PortalException;
 
-	public void updateDSRequest(
-		long companyId, long groupId, String providerRequestId);
+	public void updateDSRequest(long dsRequestId) throws PortalException;
 
 }
