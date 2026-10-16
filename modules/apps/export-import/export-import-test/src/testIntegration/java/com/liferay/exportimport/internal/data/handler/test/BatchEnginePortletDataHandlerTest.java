@@ -3768,6 +3768,51 @@ public class BatchEnginePortletDataHandlerTest {
 	}
 
 	@Test
+	@TestInfo("LPD-104572")
+	public void testExportObjectDefinitionsWithUnserializableObjectField()
+		throws Exception {
+
+		Group group = _stagingGroupHelper.fetchCompanyGroup(
+			TestPropsValues.getCompanyId());
+
+		ObjectDefinition objectDefinition =
+			ObjectDefinitionTestUtil.addCustomObjectDefinition();
+
+		try {
+			ObjectField objectField = _addObjectFields(1, objectDefinition)[0];
+
+			objectField.setReadOnly("1");
+
+			_objectFieldLocalService.updateObjectField(objectField);
+
+			try (LogCapture logCapture = LoggerTestUtil.configureLog4JLogger(
+					"com.liferay.batch.engine.internal." +
+						"BatchEngineExportTaskExecutorImpl",
+					LoggerTestUtil.ERROR)) {
+
+				new ExportImportExecutor(
+				).withGroupId(
+					group.getGroupId()
+				).withIncludeObjectDefinitions(
+				).executeExport();
+
+				Assert.fail();
+			}
+			catch (PortletDataException portletDataException) {
+				String message = portletDataException.getMessage();
+
+				Assert.assertTrue(
+					message,
+					message.startsWith("Unable to export batch data for "));
+			}
+		}
+		finally {
+			_objectDefinitionLocalService.deleteObjectDefinition(
+				objectDefinition);
+		}
+	}
+
+	@Test
 	@TestInfo("LPD-99059")
 	public void testExportSiteObjectEntriesExceedingExportBatchSize()
 		throws Exception {
@@ -5184,9 +5229,11 @@ public class BatchEnginePortletDataHandlerTest {
 				objectEntry.getValues(),
 				_OBJECT_FIELD_NAME_ATTACHMENT_SHOW_FILES_IN_DOCS_AND_MEDIA);
 
-			if (fileEntryId != 0) {
-				_dlFileEntryLocalService.deleteFileEntry(fileEntryId);
+			if (fileEntryId == 0) {
+				continue;
 			}
+
+			_dlFileEntryLocalService.deleteFileEntry(fileEntryId);
 		}
 	}
 

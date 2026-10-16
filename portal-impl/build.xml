@@ -86,7 +86,9 @@
 	<target name="build-iw">
 		<java
 			classname="com.liferay.portal.tools.InstanceWrapperBuilder"
+			classpath="src"
 			classpathref="project.classpath"
+			failonerror="true"
 			fork="true"
 			newenvironment="true"
 		>

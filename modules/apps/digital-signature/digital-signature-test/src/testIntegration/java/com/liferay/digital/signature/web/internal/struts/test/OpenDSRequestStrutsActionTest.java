@@ -92,12 +92,13 @@ public class OpenDSRequestStrutsActionTest {
 
 	@Before
 	public void setUp() throws Exception {
-		String prefix = ".com.liferay.digital.signature.internal.batch.";
-
 		BatchEngineTestUtil.processBatchEngineUnits(
 			"com.liferay.digital.signature.impl",
 			OpenDSRequestStrutsActionTest.class,
-			new String[] {prefix + "01.object.definition"});
+			new String[] {
+				".com.liferay.digital.signature.internal.batch.01.object." +
+					"definition"
+			});
 
 		_companyConfigurationTemporarySwapper =
 			new CompanyConfigurationTemporarySwapper(
@@ -110,10 +111,6 @@ public class OpenDSRequestStrutsActionTest {
 				).put(
 					"siteSettingsStrategy", "always-inherit"
 				).build());
-
-		_group = GroupTestUtil.addGroup();
-		_user = UserTestUtil.addUser();
-
 		_dsRequestObjectDefinition =
 			_objectDefinitionLocalService.
 				getObjectDefinitionByExternalReferenceCode(
@@ -125,6 +122,8 @@ public class OpenDSRequestStrutsActionTest {
 					DSObjectDefinitionConstants.
 						EXTERNAL_REFERENCE_CODE_REQUEST_RECIPIENT,
 					TestPropsValues.getCompanyId());
+		_group = GroupTestUtil.addGroup();
+		_user = UserTestUtil.addUser();
 	}
 
 	@After
@@ -149,28 +148,23 @@ public class OpenDSRequestStrutsActionTest {
 				_group.getGroupId(), TestPropsValues.getUserId());
 
 		ObjectEntry objectEntry = _addObjectEntry(
-			_dsRequestObjectDefinition,
+			_dsRequestObjectDefinition, serviceContext,
 			HashMapBuilder.<String, Serializable>put(
 				"emailSubject", RandomTestUtil.randomString()
 			).put(
-				"providerKey", "docusign"
-			).put(
-				"providerRequestId", RandomTestUtil.randomString()
+				"externalReferenceCode", RandomTestUtil.randomString()
 			).put(
 				"requestStatus", DSRequestConstants.STATUS_SENT
 			).put(
 				"siteGroupId", siteGroupId
-			).build(),
-			serviceContext);
+			).build());
 
 		_addObjectEntry(
-			_dsRequestRecipientObjectDefinition,
+			_dsRequestRecipientObjectDefinition, serviceContext,
 			HashMapBuilder.<String, Serializable>put(
 				"emailAddress", _user.getEmailAddress()
 			).put(
 				"name", _user.getFullName()
-			).put(
-				"providerRecipientId", RandomTestUtil.randomString()
 			).put(
 				"r_dsRequestToDSRequestRecipients_l_dsRequestId",
 				objectEntry.getObjectEntryId()
@@ -178,15 +172,14 @@ public class OpenDSRequestStrutsActionTest {
 				"r_userToDSRequestRecipients_userId", _user.getUserId()
 			).put(
 				"requestRecipientStatus", DSRequestConstants.STATUS_SENT
-			).build(),
-			serviceContext);
+			).build());
 
 		return objectEntry.getObjectEntryId();
 	}
 
 	private ObjectEntry _addObjectEntry(
-			ObjectDefinition objectDefinition, Map<String, Serializable> values,
-			ServiceContext serviceContext)
+			ObjectDefinition objectDefinition, ServiceContext serviceContext,
+			Map<String, Serializable> values)
 		throws Exception {
 
 		return _objectEntryLocalService.addObjectEntry(
@@ -310,9 +303,9 @@ public class OpenDSRequestStrutsActionTest {
 	private void _testExecuteWithParameters() throws Exception {
 		Group group = GroupTestUtil.addGroup();
 
-		Layout layout = LayoutTestUtil.addTypePortletLayout(group);
-
 		long dsRequestId = _addDSRequest(group.getGroupId());
+
+		Layout layout = LayoutTestUtil.addTypePortletLayout(group);
 
 		String backURL = "/" + RandomTestUtil.randomString();
 		String portletNamespace = _portal.getPortletNamespace(
