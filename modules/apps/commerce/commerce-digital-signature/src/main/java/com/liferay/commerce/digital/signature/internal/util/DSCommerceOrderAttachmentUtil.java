@@ -5,18 +5,18 @@
 
 package com.liferay.commerce.digital.signature.internal.util;
 
-import com.liferay.account.service.AccountEntryUserRelLocalService;
+import com.liferay.account.service.AccountEntryUserRelLocalServiceUtil;
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.model.CommerceOrderAttachment;
 import com.liferay.commerce.product.model.CommerceChannel;
-import com.liferay.commerce.product.service.CommerceChannelLocalService;
-import com.liferay.commerce.service.CommerceOrderAttachmentLocalService;
+import com.liferay.commerce.product.service.CommerceChannelLocalServiceUtil;
+import com.liferay.commerce.service.CommerceOrderAttachmentLocalServiceUtil;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfigurationUtil;
 import com.liferay.digital.signature.constants.DigitalSignatureConstants;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSRequest;
-import com.liferay.document.library.kernel.service.DLAppLocalService;
+import com.liferay.document.library.kernel.service.DLAppLocalServiceUtil;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -27,7 +27,7 @@ import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.UserConstants;
 import com.liferay.portal.kernel.module.service.Snapshot;
 import com.liferay.portal.kernel.repository.model.FileEntry;
-import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -44,17 +44,12 @@ import java.util.Map;
 public class DSCommerceOrderAttachmentUtil {
 
 	public static List<User> getAccountUsers(CommerceOrder commerceOrder) {
-		AccountEntryUserRelLocalService accountEntryUserRelLocalService =
-			_accountEntryUserRelLocalServiceSnapshot.get();
-
-		UserLocalService userLocalService = _userLocalServiceSnapshot.get();
-
 		return TransformUtil.transform(
-			accountEntryUserRelLocalService.
+			AccountEntryUserRelLocalServiceUtil.
 				getAccountEntryUserRelsByAccountEntryId(
 					commerceOrder.getCommerceAccountId()),
 			accountEntryUserRel -> {
-				User user = userLocalService.fetchUser(
+				User user = UserLocalServiceUtil.fetchUser(
 					accountEntryUserRel.getAccountUserId());
 
 				if ((user == null) || !user.isActive() ||
@@ -87,14 +82,11 @@ public class DSCommerceOrderAttachmentUtil {
 
 		Map<Long, Long> fileEntryIds = new LinkedHashMap<>();
 
-		CommerceOrderAttachmentLocalService
-			commerceOrderAttachmentLocalService =
-				_commerceOrderAttachmentLocalServiceSnapshot.get();
-
 		for (CommerceOrderAttachment commerceOrderAttachment :
-				commerceOrderAttachmentLocalService.getCommerceOrderAttachments(
-					commerceOrder.getCommerceOrderId(), QueryUtil.ALL_POS,
-					QueryUtil.ALL_POS, null)) {
+				CommerceOrderAttachmentLocalServiceUtil.
+					getCommerceOrderAttachments(
+						commerceOrder.getCommerceOrderId(), QueryUtil.ALL_POS,
+						QueryUtil.ALL_POS, null)) {
 
 			fileEntryIds.put(
 				commerceOrderAttachment.getCommerceOrderAttachmentId(),
@@ -139,11 +131,8 @@ public class DSCommerceOrderAttachmentUtil {
 	}
 
 	public static long getSiteGroupId(CommerceOrder commerceOrder) {
-		CommerceChannelLocalService commerceChannelLocalService =
-			_commerceChannelLocalServiceSnapshot.get();
-
 		CommerceChannel commerceChannel =
-			commerceChannelLocalService.fetchCommerceChannelByGroupClassPK(
+			CommerceChannelLocalServiceUtil.fetchCommerceChannelByGroupClassPK(
 				commerceOrder.getGroupId());
 
 		if (commerceChannel == null) {
@@ -167,9 +156,7 @@ public class DSCommerceOrderAttachmentUtil {
 			CommerceOrderAttachment commerceOrderAttachment)
 		throws PortalException {
 
-		DLAppLocalService dlAppLocalService = _dlAppLocalServiceSnapshot.get();
-
-		FileEntry fileEntry = dlAppLocalService.fetchFileEntry(
+		FileEntry fileEntry = DLAppLocalServiceUtil.fetchFileEntry(
 			commerceOrderAttachment.getFileEntryId());
 
 		if (fileEntry == null) {
@@ -201,26 +188,8 @@ public class DSCommerceOrderAttachmentUtil {
 		return false;
 	}
 
-	private static final Snapshot<AccountEntryUserRelLocalService>
-		_accountEntryUserRelLocalServiceSnapshot = new Snapshot<>(
-			DSCommerceOrderAttachmentUtil.class,
-			AccountEntryUserRelLocalService.class);
-	private static final Snapshot<CommerceChannelLocalService>
-		_commerceChannelLocalServiceSnapshot = new Snapshot<>(
-			DSCommerceOrderAttachmentUtil.class,
-			CommerceChannelLocalService.class);
-	private static final Snapshot<CommerceOrderAttachmentLocalService>
-		_commerceOrderAttachmentLocalServiceSnapshot = new Snapshot<>(
-			DSCommerceOrderAttachmentUtil.class,
-			CommerceOrderAttachmentLocalService.class);
-	private static final Snapshot<DLAppLocalService>
-		_dlAppLocalServiceSnapshot = new Snapshot<>(
-			DSCommerceOrderAttachmentUtil.class, DLAppLocalService.class);
 	private static final Snapshot<DSRequestManager> _dsRequestManagerSnapshot =
 		new Snapshot<>(
 			DSCommerceOrderAttachmentUtil.class, DSRequestManager.class);
-	private static final Snapshot<UserLocalService> _userLocalServiceSnapshot =
-		new Snapshot<>(
-			DSCommerceOrderAttachmentUtil.class, UserLocalService.class);
 
 }

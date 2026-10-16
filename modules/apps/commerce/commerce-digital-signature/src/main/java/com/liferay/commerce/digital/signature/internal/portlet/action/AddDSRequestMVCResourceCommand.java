@@ -163,11 +163,9 @@ public class AddDSRequestMVCResourceCommand
 							"signature-request"));
 			}
 
-			long siteGroupId = DSCommerceOrderAttachmentUtil.getSiteGroupId(
-				commerceOrder);
-
 			dsRequest = _dsRequestManager.addDSRequest(
-				commerceOrder.getCompanyId(), siteGroupId,
+				commerceOrder.getCompanyId(),
+				DSCommerceOrderAttachmentUtil.getSiteGroupId(commerceOrder),
 				themeDisplay.getUserId(),
 				new DSEnvelope() {
 					{
@@ -186,7 +184,7 @@ public class AddDSRequestMVCResourceCommand
 				new long[] {commerceOrderAttachment.getFileEntryId()});
 
 			_dsRequestManager.sendDSRequestNotifications(
-				commerceOrder.getCompanyId(), siteGroupId, dsRequest);
+				dsRequest.getDSRequestId());
 
 			JSONPortletResponseUtil.writeJSON(
 				resourceRequest, resourceResponse,
@@ -209,7 +207,7 @@ public class AddDSRequestMVCResourceCommand
 				DSCommerceOrderAttachmentUtil.getAccountUsers(commerceOrder),
 				User::getUserId));
 
-		int countersignerCount = 0;
+		int count = 0;
 		Set<Long> recipientUserIds = new HashSet<>();
 		boolean sequential = ParamUtil.getBoolean(
 			resourceRequest, "sequential", true);
@@ -218,9 +216,7 @@ public class AddDSRequestMVCResourceCommand
 				ParamUtil.getLongValues(resourceRequest, "recipientUserIds")) {
 
 			if (!recipientUserIds.add(recipientUserId)) {
-				throw new PortalException(
-					_language.get(
-						locale, "a-recipient-can-only-be-added-once"));
+				continue;
 			}
 
 			User user = _userLocalService.getUser(recipientUserId);
@@ -238,19 +234,13 @@ public class AddDSRequestMVCResourceCommand
 			if (!accountUserIds.contains(recipientUserId) &&
 				(recipientUserId != commerceOrder.getUserId())) {
 
-				countersignerCount++;
+				count++;
 			}
 
-			if (countersignerCount > 1) {
+			if (count > 1) {
 				throw new PortalException(
 					_language.get(
 						locale, "only-one-internal-countersigner-is-allowed"));
-			}
-
-			int routingOrder = 1;
-
-			if (sequential) {
-				routingOrder = dsRecipients.size() + 1;
 			}
 
 			DSRecipient dsRecipient = new DSRecipient();
@@ -259,6 +249,13 @@ public class AddDSRequestMVCResourceCommand
 				String.valueOf(dsRecipients.size() + 1));
 			dsRecipient.setEmailAddress(user.getEmailAddress());
 			dsRecipient.setName(user.getFullName());
+
+			int routingOrder = 1;
+
+			if (sequential) {
+				routingOrder = dsRecipients.size() + 1;
+			}
+
 			dsRecipient.setRoutingOrder(routingOrder);
 
 			dsRecipients.add(dsRecipient);
