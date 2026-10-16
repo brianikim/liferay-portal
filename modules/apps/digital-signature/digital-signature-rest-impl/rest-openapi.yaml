@@ -95,6 +95,11 @@ components:
                         Actions the current user can take on the request, such as signing it when it is their turn. Read-only.
                     readOnly: true
                     type: object
+                creator:
+                    $ref: ../../headless/headless-delivery/headless-delivery-impl/rest-openapi.yaml#Creator
+                    description:
+                        The user who created the request. Read-only.
+                    readOnly: true
                 dateCreated:
                     description:
                         When the request was created. Read-only.
@@ -122,11 +127,11 @@ components:
                     type: string
                 expireAfter:
                     description:
-                        Days until the request expires. Zero leaves it open.
+                        Days until the request expires. Zero leaves it open. Supplied on creation; not returned on read.
                     type: integer
                 expireWarn:
                     description:
-                        Days before expiration to warn the signers. Must be fewer than the days until expiration.
+                        Days before expiration to warn the signers. Must be fewer than the days until expiration. Supplied on creation; not returned on read.
                     type: integer
                 fileEntryIds:
                     description:
@@ -143,37 +148,11 @@ components:
                     type: integer
                 name:
                     description:
-                        Name of the request.
+                        Name of the request. Supplied on creation; not returned on read.
                     type: string
-                providerKey:
-                    description:
-                        Signature provider holding the request. Read-only.
-                    readOnly: true
-                    type: string
-                providerRequestId:
-                    description:
-                        Identifier the provider assigned to the request. Read-only.
-                    readOnly: true
-                    type: string
-                requesterEmailAddress:
-                    description:
-                        Email address of the user who sent the request. Read-only.
-                    readOnly: true
-                    type: string
-                requesterName:
-                    description:
-                        Name of the user who sent the request. Read-only.
-                    readOnly: true
-                    type: string
-                requesterUserId:
-                    description:
-                        Identifier of the user who sent the request. Read-only.
-                    format: int64
-                    readOnly: true
-                    type: integer
                 sendNotifications:
                     description:
-                        Whether Liferay emails each signer a link to sign. Defaults to true.
+                        Whether Liferay emails each signer a link to sign. Defaults to true. Supplied on creation; not returned on read.
                     type: boolean
                 signatureRequestRecipients:
                     description:
@@ -205,11 +184,6 @@ components:
                 name:
                     description:
                         Name of the signer. Read-only; taken from the user.
-                    readOnly: true
-                    type: string
-                providerRecipientId:
-                    description:
-                        Identifier the provider assigned to the signer. Read-only.
                     readOnly: true
                     type: string
                 sentDate:
@@ -247,6 +221,8 @@ openapi: 3.0.1
 paths:
     "/signature-requests/{signatureRequestId}":
         get:
+            description:
+                Retrieves a signature request. Requires VIEW permission on the request.
             operationId: getSignatureRequest
             parameters:
                 -   in: path
@@ -267,6 +243,8 @@ paths:
             tags: ["SignatureRequest"]
     "/signature-requests/{signatureRequestId}/notifications":
         post:
+            description:
+                Sends each signer whose turn it is a link to sign the request. Requires UPDATE permission on the request.
             operationId: postSignatureRequestNotification
             parameters:
                 -   in: path
@@ -287,6 +265,8 @@ paths:
             tags: ["SignatureRequest"]
     "/signature-requests/{signatureRequestId}/void":
         post:
+            description:
+                Voids the signature request with the provider and records the reason. Requires UPDATE permission on the request.
             operationId: postSignatureRequestVoid
             parameters:
                 -   in: path
@@ -445,6 +425,8 @@ paths:
             tags: ["DSRecipientViewDefinition"]
     "/sites/{siteId}/signature-requests":
         get:
+            description:
+                Retrieves the signature requests of the site.
             operationId: getSiteSignatureRequestsPage
             parameters:
                 -   in: path
@@ -480,6 +462,8 @@ paths:
                                 type: array
             tags: ["SignatureRequest"]
         post:
+            description:
+                Sends the documents to the signers through the signature provider and records the signature request. Requires permission to add signature requests and UPDATE permission on each document.
             operationId: postSiteSignatureRequest
             parameters:
                 -   in: path

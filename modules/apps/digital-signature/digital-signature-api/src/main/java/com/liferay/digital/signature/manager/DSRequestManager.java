@@ -47,8 +47,7 @@ public interface DSRequestManager {
 
 	public void updateDSRequest(long dsRequestId) throws PortalException;
 
-	public void voidDSRequest(
-			long companyId, long groupId, DSRequest dsRequest, String reason)
+	public void voidDSRequest(long dsRequestId, String reason)
 		throws PortalException;
 
 }
