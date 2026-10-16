@@ -78,12 +78,13 @@ public class SignDSRequestMVCRenderCommandTest {
 
 	@Before
 	public void setUp() throws Exception {
-		String prefix = ".com.liferay.digital.signature.internal.batch.";
-
 		BatchEngineTestUtil.processBatchEngineUnits(
 			"com.liferay.digital.signature.impl",
 			SignDSRequestMVCRenderCommandTest.class,
-			new String[] {prefix + "01.object.definition"});
+			new String[] {
+				".com.liferay.digital.signature.internal.batch.01.object." +
+					"definition"
+			});
 
 		_companyConfigurationTemporarySwapper =
 			new CompanyConfigurationTemporarySwapper(
@@ -96,11 +97,6 @@ public class SignDSRequestMVCRenderCommandTest {
 				).put(
 					"siteSettingsStrategy", "always-inherit"
 				).build());
-
-		_group = GroupTestUtil.addGroup();
-
-		_layout = LayoutTestUtil.addTypePortletLayout(_group);
-
 		_dsRequestDocumentObjectDefinition =
 			_objectDefinitionLocalService.
 				getObjectDefinitionByExternalReferenceCode(
@@ -118,6 +114,10 @@ public class SignDSRequestMVCRenderCommandTest {
 					DSObjectDefinitionConstants.
 						EXTERNAL_REFERENCE_CODE_REQUEST_RECIPIENT,
 					TestPropsValues.getCompanyId());
+
+		_group = GroupTestUtil.addGroup();
+
+		_layout = LayoutTestUtil.addTypePortletLayout(_group);
 	}
 
 	@After
@@ -127,8 +127,17 @@ public class SignDSRequestMVCRenderCommandTest {
 
 	@Test
 	public void testRender() throws Exception {
-		_testRenderWithViewInContext();
-		_testRenderWithoutViewInContext();
+		Layout layout = LayoutTestUtil.addTypePortletLayout(_group);
+
+		FileEntry fileEntry = _addFileEntry(layout.getPlid());
+
+		_assertRedirectedToLayout(
+			_addDSRequest(fileEntry.getFileEntryId()), layout);
+
+		fileEntry = _addFileEntry(RandomTestUtil.randomLong());
+
+		_assertRedirectedToLayout(
+			_addDSRequest(fileEntry.getFileEntryId()), _layout);
 	}
 
 	private long _addDSRequest(long fileEntryId) throws Exception {
@@ -137,32 +146,28 @@ public class SignDSRequestMVCRenderCommandTest {
 				_group.getGroupId(), TestPropsValues.getUserId());
 
 		ObjectEntry objectEntry = _addObjectEntry(
-			_dsRequestObjectDefinition,
+			_dsRequestObjectDefinition, serviceContext,
 			HashMapBuilder.<String, Serializable>put(
 				"emailSubject", RandomTestUtil.randomString()
 			).put(
-				"providerKey", "docusign"
-			).put(
-				"providerRequestId", RandomTestUtil.randomString()
+				"externalReferenceCode", RandomTestUtil.randomString()
 			).put(
 				"requestStatus", DSRequestConstants.STATUS_SENT
 			).put(
 				"siteGroupId", _group.getGroupId()
-			).build(),
-			serviceContext);
+			).build());
 
 		_addObjectEntry(
-			_dsRequestDocumentObjectDefinition,
+			_dsRequestDocumentObjectDefinition, serviceContext,
 			HashMapBuilder.<String, Serializable>put(
 				"fileEntryId", fileEntryId
 			).put(
 				"r_dsRequestToDSRequestDocuments_l_dsRequestId",
 				objectEntry.getObjectEntryId()
-			).build(),
-			serviceContext);
+			).build());
 
 		_addObjectEntry(
-			_dsRequestRecipientObjectDefinition,
+			_dsRequestRecipientObjectDefinition, serviceContext,
 			HashMapBuilder.<String, Serializable>put(
 				"emailAddress",
 				() -> {
@@ -173,8 +178,6 @@ public class SignDSRequestMVCRenderCommandTest {
 			).put(
 				"name", RandomTestUtil.randomString()
 			).put(
-				"providerRecipientId", RandomTestUtil.randomString()
-			).put(
 				"r_dsRequestToDSRequestRecipients_l_dsRequestId",
 				objectEntry.getObjectEntryId()
 			).put(
@@ -182,8 +185,7 @@ public class SignDSRequestMVCRenderCommandTest {
 				TestPropsValues.getUserId()
 			).put(
 				"requestRecipientStatus", DSRequestConstants.STATUS_SENT
-			).build(),
-			serviceContext);
+			).build());
 
 		return objectEntry.getObjectEntryId();
 	}
@@ -200,8 +202,8 @@ public class SignDSRequestMVCRenderCommandTest {
 	}
 
 	private ObjectEntry _addObjectEntry(
-			ObjectDefinition objectDefinition, Map<String, Serializable> values,
-			ServiceContext serviceContext)
+			ObjectDefinition objectDefinition, ServiceContext serviceContext,
+			Map<String, Serializable> values)
 		throws Exception {
 
 		return _objectEntryLocalService.addObjectEntry(
@@ -249,22 +251,6 @@ public class SignDSRequestMVCRenderCommandTest {
 			String.valueOf(dsRequestId),
 			HttpComponentsUtil.getParameter(
 				redirectedURL, "dsRequestId", false));
-	}
-
-	private void _testRenderWithViewInContext() throws Exception {
-		Layout layout = LayoutTestUtil.addTypePortletLayout(_group);
-
-		FileEntry fileEntry = _addFileEntry(layout.getPlid());
-
-		_assertRedirectedToLayout(
-			_addDSRequest(fileEntry.getFileEntryId()), layout);
-	}
-
-	private void _testRenderWithoutViewInContext() throws Exception {
-		FileEntry fileEntry = _addFileEntry(RandomTestUtil.randomLong());
-
-		_assertRedirectedToLayout(
-			_addDSRequest(fileEntry.getFileEntryId()), _layout);
 	}
 
 	private CompanyConfigurationTemporarySwapper

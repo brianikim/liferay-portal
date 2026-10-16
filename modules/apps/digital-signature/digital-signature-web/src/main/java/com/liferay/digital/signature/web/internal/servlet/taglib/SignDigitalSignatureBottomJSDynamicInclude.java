@@ -74,10 +74,10 @@ public class SignDigitalSignatureBottomJSDynamicInclude
 			return;
 		}
 
-		String url = null;
+		String modalURL = null;
 
 		try {
-			url = _signDSURLProvider.getModalURL(
+			modalURL = _signDSURLProvider.getModalURL(
 				themeDisplay.getCompanyId(), dsRequest.getSiteGroupId(),
 				HttpComponentsUtil.removeParameter(
 					themeDisplay.getURLCurrent(), "dsRequestId"),
@@ -102,7 +102,7 @@ public class SignDigitalSignatureBottomJSDynamicInclude
 					JSONUtil.put(
 						"title", _getTitle(dsRequest, httpServletRequest)
 					).put(
-						"url", url
+						"url", modalURL
 					),
 					");"),
 				Arrays.asList(

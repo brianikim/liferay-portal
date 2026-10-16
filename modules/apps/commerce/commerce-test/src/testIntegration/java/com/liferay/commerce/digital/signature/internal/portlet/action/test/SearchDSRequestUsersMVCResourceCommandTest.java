@@ -71,28 +71,29 @@ public class SearchDSRequestUsersMVCResourceCommandTest {
 
 	@Before
 	public void setUp() throws Exception {
-		String prefix = ".com.liferay.digital.signature.internal.batch.";
-
 		BatchEngineTestUtil.processBatchEngineUnits(
 			"com.liferay.digital.signature.impl",
 			SearchDSRequestUsersMVCResourceCommandTest.class,
-			new String[] {prefix + "01.object.definition"});
+			new String[] {
+				".com.liferay.digital.signature.internal.batch.01.object." +
+					"definition"
+			});
 
 		_saveDigitalSignatureConfiguration(true);
 
 		_group = GroupTestUtil.addGroup();
-
-		CommerceCurrency commerceCurrency =
-			CommerceCurrencyTestUtil.addCommerceCurrency(_group.getCompanyId());
-
-		CommerceChannel commerceChannel = CommerceTestUtil.addCommerceChannel(
-			_group.getGroupId(), commerceCurrency.getCode());
 
 		AccountEntry accountEntry =
 			CommerceAccountTestUtil.addPersonAccountEntry(
 				TestPropsValues.getUserId(),
 				ServiceContextTestUtil.getServiceContext(
 					_group.getGroupId(), TestPropsValues.getUserId()));
+
+		CommerceCurrency commerceCurrency =
+			CommerceCurrencyTestUtil.addCommerceCurrency(_group.getCompanyId());
+
+		CommerceChannel commerceChannel = CommerceTestUtil.addCommerceChannel(
+			_group.getGroupId(), commerceCurrency.getCode());
 
 		_commerceOrder = _commerceOrderLocalService.addCommerceOrder(
 			TestPropsValues.getUserId(), commerceChannel.getGroupId(),

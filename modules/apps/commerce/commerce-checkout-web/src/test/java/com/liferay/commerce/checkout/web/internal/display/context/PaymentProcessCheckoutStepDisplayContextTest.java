@@ -59,6 +59,8 @@ public class PaymentProcessCheckoutStepDisplayContextTest {
 			"http://localhost/checkout"
 		);
 
+		PortalUtil portalUtil = new PortalUtil();
+
 		Portal portal = Mockito.mock(Portal.class);
 
 		Mockito.when(
@@ -66,8 +68,6 @@ public class PaymentProcessCheckoutStepDisplayContextTest {
 		).thenReturn(
 			_liferayPortletResponse
 		);
-
-		PortalUtil portalUtil = new PortalUtil();
 
 		portalUtil.setPortal(portal);
 	}

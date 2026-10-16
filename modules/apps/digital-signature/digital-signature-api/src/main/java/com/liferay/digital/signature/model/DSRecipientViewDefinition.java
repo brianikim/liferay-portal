@@ -7,6 +7,7 @@ package com.liferay.digital.signature.model;
 
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
+import com.liferay.portal.kernel.util.ArrayUtil;
 
 /**
  * @author José Abelenda
@@ -79,7 +80,7 @@ public class DSRecipientViewDefinition {
 		).put(
 			"frameAncestors",
 			() -> {
-				if (frameAncestors == null) {
+				if (ArrayUtil.isEmpty(frameAncestors)) {
 					return null;
 				}
 
@@ -88,7 +89,7 @@ public class DSRecipientViewDefinition {
 		).put(
 			"messageOrigins",
 			() -> {
-				if (messageOrigins == null) {
+				if (ArrayUtil.isEmpty(messageOrigins)) {
 					return null;
 				}
 

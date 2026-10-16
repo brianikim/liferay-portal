@@ -23,7 +23,11 @@ import com.liferay.digital.signature.constants.DSRequestConstants;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
+import com.liferay.digital.signature.model.DSRequest;
+import com.liferay.notification.model.NotificationQueueEntry;
+import com.liferay.notification.service.NotificationQueueEntryLocalService;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.model.Group;
@@ -46,17 +50,18 @@ import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.WebKeys;
-import com.liferay.portal.test.mail.MailServiceTestUtil;
 import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
-import com.liferay.portal.test.rule.SynchronousMailTestRule;
 
 import jakarta.portlet.PortletException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+
+import java.util.List;
+import java.util.Objects;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -78,17 +83,21 @@ public class ResendDSRequestMVCResourceCommandTest {
 	public static final AggregateTestRule aggregateTestRule =
 		new AggregateTestRule(
 			new LiferayIntegrationTestRule(),
-			PermissionCheckerMethodTestRule.INSTANCE,
-			SynchronousMailTestRule.INSTANCE);
+			PermissionCheckerMethodTestRule.INSTANCE);
 
 	@Before
 	public void setUp() throws Exception {
-		String prefix = ".com.liferay.digital.signature.internal.batch.";
-
 		BatchEngineTestUtil.processBatchEngineUnits(
 			"com.liferay.digital.signature.impl",
 			ResendDSRequestMVCResourceCommandTest.class,
-			new String[] {prefix + "01.object.definition"});
+			new String[] {
+				".com.liferay.digital.signature.internal.batch.01.object." +
+					"definition",
+				".com.liferay.digital.signature.internal.batch.02.object." +
+					"relationship",
+				".com.liferay.digital.signature.internal.batch.03." +
+					"notification.template"
+			});
 
 		CommerceOrderAttachmentTestUtil.initialize(getClass());
 
@@ -96,17 +105,17 @@ public class ResendDSRequestMVCResourceCommandTest {
 
 		_group = GroupTestUtil.addGroup();
 
-		CommerceCurrency commerceCurrency =
-			CommerceCurrencyTestUtil.addCommerceCurrency(_group.getCompanyId());
-
-		CommerceChannel commerceChannel = CommerceTestUtil.addCommerceChannel(
-			_group.getGroupId(), commerceCurrency.getCode());
-
 		AccountEntry accountEntry =
 			CommerceAccountTestUtil.addPersonAccountEntry(
 				TestPropsValues.getUserId(),
 				ServiceContextTestUtil.getServiceContext(
 					_group.getGroupId(), TestPropsValues.getUserId()));
+
+		CommerceCurrency commerceCurrency =
+			CommerceCurrencyTestUtil.addCommerceCurrency(_group.getCompanyId());
+
+		CommerceChannel commerceChannel = CommerceTestUtil.addCommerceChannel(
+			_group.getGroupId(), commerceCurrency.getCode());
 
 		_commerceOrder = _commerceOrderLocalService.addCommerceOrder(
 			TestPropsValues.getUserId(), commerceChannel.getGroupId(),
@@ -169,18 +178,33 @@ public class ResendDSRequestMVCResourceCommandTest {
 				RandomTestUtil.randomString() + ".pdf",
 				new ByteArrayInputStream(RandomTestUtil.randomBytes()));
 
-		_addDSRequest(DSRequestConstants.STATUS_SENT, UserTestUtil.addUser());
-
-		int inboxSize = MailServiceTestUtil.getInboxSize();
+		DSRequest dsRequest = _addDSRequest(
+			DSRequestConstants.STATUS_SENT, UserTestUtil.addUser());
 
 		_serveResource(
 			_commerceOrderAttachment.getCommerceOrderAttachmentId(),
 			TestPropsValues.getUser());
 
-		Assert.assertEquals(inboxSize + 1, MailServiceTestUtil.getInboxSize());
+		List<NotificationQueueEntry> notificationQueueEntries = ListUtil.filter(
+			_notificationQueueEntryLocalService.getNotificationQueueEntries(
+				QueryUtil.ALL_POS, QueryUtil.ALL_POS),
+			notificationQueueEntry ->
+				Objects.equals(
+					notificationQueueEntry.getClassName(),
+					DSRequest.class.getName()) &&
+				(notificationQueueEntry.getClassPK() ==
+					dsRequest.getDSRequestId()));
+
+		Assert.assertEquals(
+			notificationQueueEntries.toString(), 1,
+			notificationQueueEntries.size());
 	}
 
-	private void _addDSRequest(String status, User user) throws Exception {
+	private DSRequest _addDSRequest(String status, User user) throws Exception {
+		DSEnvelope dsEnvelope = new DSEnvelope();
+
+		dsEnvelope.setDSEnvelopeId(RandomTestUtil.randomString());
+
 		DSRecipient dsRecipient = new DSRecipient();
 
 		dsRecipient.setDSRecipientId("1");
@@ -189,14 +213,12 @@ public class ResendDSRequestMVCResourceCommandTest {
 		dsRecipient.setRoutingOrder(1);
 		dsRecipient.setStatus(status);
 
-		DSEnvelope dsEnvelope = new DSEnvelope();
-
-		dsEnvelope.setDSEnvelopeId(RandomTestUtil.randomString());
 		dsEnvelope.setDSRecipients(ListUtil.fromArray(dsRecipient));
+
 		dsEnvelope.setEmailSubject(RandomTestUtil.randomString());
 		dsEnvelope.setStatus(status);
 
-		ReflectionTestUtil.invoke(
+		return ReflectionTestUtil.invoke(
 			_dsRequestManager, "_addDSRequest",
 			new Class<?>[] {
 				long.class, long.class, long.class, DSEnvelope.class,
@@ -308,5 +330,9 @@ public class ResendDSRequestMVCResourceCommandTest {
 
 	@Inject(filter = "mvc.command.name=/commerce_order/resend_ds_request")
 	private MVCResourceCommand _mvcResourceCommand;
+
+	@Inject
+	private NotificationQueueEntryLocalService
+		_notificationQueueEntryLocalService;
 
 }

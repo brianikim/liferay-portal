@@ -279,12 +279,14 @@ public class BrokenLinkAssetSearcher {
 		for (Bucket bucket : termsAggregationResult.getBuckets()) {
 			String key = bucket.getKey();
 
-			if (key.length() > outboundLinkPrefix.length()) {
-				nextCharacters.add(
-					new String(
-						Character.toChars(
-							key.codePointAt(outboundLinkPrefix.length()))));
+			if (key.length() <= outboundLinkPrefix.length()) {
+				continue;
 			}
+
+			nextCharacters.add(
+				new String(
+					Character.toChars(
+						key.codePointAt(outboundLinkPrefix.length()))));
 		}
 
 		return nextCharacters;
@@ -505,12 +507,13 @@ public class BrokenLinkAssetSearcher {
 					String.class));
 
 		for (String outboundLink : outboundLinks) {
-			if (!existingExternalReferenceCodes.contains(
+			if (existingExternalReferenceCodes.contains(
 					_getExternalReferenceCode(outboundLink))) {
 
-				brokenLinkTargetsMap.put(
-					outboundLink, BrokenLinkTarget.deleted());
+				continue;
 			}
+
+			brokenLinkTargetsMap.put(outboundLink, BrokenLinkTarget.deleted());
 		}
 	}
 

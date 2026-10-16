@@ -25,24 +25,24 @@ public class DSRequest {
 
 	public DSRequest(
 		long companyId, Date createDate, long dsRequestId,
-		List<DSRequestRecipient> dsRequestRecipients, List<Long> fileEntryIds,
-		String requesterEmailAddress, String requesterName,
-		long requesterUserId, Map<String, Serializable> values) {
+		List<DSRequestRecipient> dsRequestRecipients,
+		String externalReferenceCode, List<Long> fileEntryIds,
+		String userEmailAddress, long userId, String userName,
+		Map<String, Serializable> values) {
 
 		_companyId = companyId;
 		_createDate = createDate;
 		_dsRequestId = dsRequestId;
 		_dsRequestRecipients = dsRequestRecipients;
+		_externalReferenceCode = externalReferenceCode;
 		_fileEntryIds = fileEntryIds;
-		_requesterEmailAddress = requesterEmailAddress;
-		_requesterName = requesterName;
-		_requesterUserId = requesterUserId;
+		_userEmailAddress = userEmailAddress;
+		_userId = userId;
+		_userName = userName;
 
 		_emailBody = MapUtil.getString(values, "emailBody");
 		_emailSubject = MapUtil.getString(values, "emailSubject");
 		_expirationDate = _toDate(values.get("requestExpirationDate"));
-		_providerKey = MapUtil.getString(values, "providerKey");
-		_providerRequestId = MapUtil.getString(values, "providerRequestId");
 		_siteGroupId = MapUtil.getLong(values, "siteGroupId");
 		_status = MapUtil.getString(values, "requestStatus");
 		_statusDate = _toDate(values.get("requestStatusDate"));
@@ -88,6 +88,10 @@ public class DSRequest {
 		return new Date(_expirationDate.getTime());
 	}
 
+	public String getExternalReferenceCode() {
+		return _externalReferenceCode;
+	}
+
 	public List<Long> getFileEntryIds() {
 		if (_fileEntryIds == null) {
 			return Collections.emptyList();
@@ -96,35 +100,14 @@ public class DSRequest {
 		return _fileEntryIds;
 	}
 
-	public String getProviderKey() {
-		return _providerKey;
-	}
-
-	public String getProviderRequestId() {
-		return _providerRequestId;
-	}
-
-	public String getRequesterEmailAddress() {
-		return _requesterEmailAddress;
-	}
-
-	public String getRequesterName() {
-		return _requesterName;
-	}
-
-	public long getRequesterUserId() {
-		return _requesterUserId;
-	}
-
 	public long getSiteGroupId() {
 		return _siteGroupId;
 	}
 
 	public String getStatus() {
-		if ((_expirationDate != null) &&
+		if ((_expirationDate != null) && _expirationDate.before(new Date()) &&
 			!ArrayUtil.contains(
-				DSRequestConstants.STATUSES_REQUEST_TERMINAL, _status) &&
-			_expirationDate.before(new Date())) {
+				DSRequestConstants.STATUSES_REQUEST_TERMINAL, _status)) {
 
 			return DSRequestConstants.STATUS_EXPIRED;
 		}
@@ -140,9 +123,24 @@ public class DSRequest {
 		return new Date(_statusDate.getTime());
 	}
 
+	public String getUserEmailAddress() {
+		return _userEmailAddress;
+	}
+
+	public long getUserId() {
+		return _userId;
+	}
+
+	public String getUserName() {
+		return _userName;
+	}
+
 	public boolean isRequestable() {
-		if (isTerminal() &&
-			!Objects.equals(getStatus(), DSRequestConstants.STATUS_COMPLETED)) {
+		String status = getStatus();
+
+		if (!Objects.equals(status, DSRequestConstants.STATUS_COMPLETED) &&
+			ArrayUtil.contains(
+				DSRequestConstants.STATUSES_REQUEST_TERMINAL, status)) {
 
 			return true;
 		}
@@ -188,14 +186,13 @@ public class DSRequest {
 	private final String _emailBody;
 	private final String _emailSubject;
 	private final Date _expirationDate;
+	private final String _externalReferenceCode;
 	private final List<Long> _fileEntryIds;
-	private final String _providerKey;
-	private final String _providerRequestId;
-	private final String _requesterEmailAddress;
-	private final String _requesterName;
-	private final long _requesterUserId;
 	private final long _siteGroupId;
 	private final String _status;
 	private final Date _statusDate;
+	private final String _userEmailAddress;
+	private final long _userId;
+	private final String _userName;
 
 }

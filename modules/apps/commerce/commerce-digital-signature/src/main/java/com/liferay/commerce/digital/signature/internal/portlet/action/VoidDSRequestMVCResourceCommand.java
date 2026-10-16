@@ -100,9 +100,7 @@ public class VoidDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
 			}
 
 			_dsRequestManager.voidDSRequest(
-				commerceOrder.getCompanyId(),
-				DSCommerceOrderAttachmentUtil.getSiteGroupId(commerceOrder),
-				dsRequest,
+				dsRequest.getDSRequestId(),
 				_language.get(
 					themeDisplay.getLocale(),
 					"the-sender-voided-the-signature-request"));

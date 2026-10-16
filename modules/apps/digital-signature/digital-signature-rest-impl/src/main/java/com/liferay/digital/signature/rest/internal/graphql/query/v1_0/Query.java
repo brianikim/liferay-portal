@@ -104,9 +104,11 @@ public class Query {
 	/**
 	 * Invoke this method with the command line:
 	 *
-	 * curl -H 'Content-Type: text/plain; charset=utf-8' -X 'POST' 'http://localhost:8080/o/graphql' -d $'{"query": "query {signatureRequest(signatureRequestId: ___){actions, dateCreated, documentTitles, emailBody, emailSubject, expirationDate, expireAfter, expireWarn, fileEntryIds, id, name, providerKey, providerRequestId, requesterEmailAddress, requesterName, requesterUserId, sendNotifications, signatureRequestRecipients, status, statusDate}}"}' -u 'test@liferay.com:test'
+	 * curl -H 'Content-Type: text/plain; charset=utf-8' -X 'POST' 'http://localhost:8080/o/graphql' -d $'{"query": "query {signatureRequest(signatureRequestId: ___){actions, creator, dateCreated, documentTitles, emailBody, emailSubject, expirationDate, expireAfter, expireWarn, fileEntryIds, id, name, sendNotifications, signatureRequestRecipients, status, statusDate}}"}' -u 'test@liferay.com:test'
 	 */
-	@GraphQLField
+	@GraphQLField(
+		description = "Retrieves a signature request. Requires VIEW permission on the request."
+	)
 	public SignatureRequest signatureRequest(
 			@GraphQLName("signatureRequestId") Long signatureRequestId)
 		throws Exception {
@@ -124,7 +126,7 @@ public class Query {
 	 *
 	 * curl -H 'Content-Type: text/plain; charset=utf-8' -X 'POST' 'http://localhost:8080/o/graphql' -d $'{"query": "query {signatureRequests(page: ___, pageSize: ___, search: ___, siteKey: ___){items {__}, page, pageSize, totalCount}}"}' -u 'test@liferay.com:test'
 	 */
-	@GraphQLField
+	@GraphQLField(description = "Retrieves the signature requests of the site.")
 	public SignatureRequestPage signatureRequests(
 			@GraphQLName("siteKey") @NotEmpty String siteKey,
 			@GraphQLName("search") String search,
@@ -285,4 +287,4 @@ public class Query {
 	private com.liferay.portal.kernel.model.User _user;
 
 }
-// LIFERAY-REST-BUILDER-HASH:-876462951
+// LIFERAY-REST-BUILDER-HASH:-120797396

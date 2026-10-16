@@ -26,6 +26,7 @@ import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.layout.test.util.LayoutTestUtil;
 import com.liferay.petra.function.transform.TransformUtil;
+import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.model.Group;
@@ -36,6 +37,7 @@ import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
+import com.liferay.portal.kernel.test.util.FeatureFlagTestUtil;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
@@ -85,12 +87,13 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 
 	@Before
 	public void setUp() throws Exception {
-		String prefix = ".com.liferay.digital.signature.internal.batch.";
-
 		BatchEngineTestUtil.processBatchEngineUnits(
 			"com.liferay.digital.signature.impl",
 			DSCommerceOrderAttachmentAdminFDSActionContributorTest.class,
-			new String[] {prefix + "01.object.definition"});
+			new String[] {
+				".com.liferay.digital.signature.internal.batch.01.object." +
+					"definition"
+			});
 
 		CommerceOrderAttachmentTestUtil.initialize(getClass());
 
@@ -100,17 +103,17 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 
 		_layout = LayoutTestUtil.addTypeContentLayout(_group);
 
-		CommerceCurrency commerceCurrency =
-			CommerceCurrencyTestUtil.addCommerceCurrency(_group.getCompanyId());
-
-		CommerceChannel commerceChannel = CommerceTestUtil.addCommerceChannel(
-			_group.getGroupId(), commerceCurrency.getCode());
-
 		AccountEntry accountEntry =
 			CommerceAccountTestUtil.addPersonAccountEntry(
 				TestPropsValues.getUserId(),
 				ServiceContextTestUtil.getServiceContext(
 					_group.getGroupId(), TestPropsValues.getUserId()));
+
+		CommerceCurrency commerceCurrency =
+			CommerceCurrencyTestUtil.addCommerceCurrency(_group.getCompanyId());
+
+		CommerceChannel commerceChannel = CommerceTestUtil.addCommerceChannel(
+			_group.getGroupId(), commerceCurrency.getCode());
 
 		_commerceOrder = _commerceOrderLocalService.addCommerceOrder(
 			TestPropsValues.getUserId(), commerceChannel.getGroupId(),
@@ -240,23 +243,25 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 				"resend-signature-request", "void-signature-request"),
 			_getFDSActionDropdownItemIds(user));
 
+		try (SafeCloseable safeCloseable =
+				FeatureFlagTestUtil.setFeatureFlagsWithSafeCloseable(
+					false, "LPD-69290")) {
+
+			Assert.assertEquals(
+				Collections.emptyList(), _getFDSActionDropdownItemIds(user));
+		}
+
 		_saveDigitalSignatureConfiguration(false);
 
 		Assert.assertEquals(
 			Collections.emptyList(), _getFDSActionDropdownItemIds(user));
 	}
 
-	@FeatureFlag(enable = false, value = "LPD-69290")
-	@Test
-	public void testGetFDSActionDropdownItemsWhenFeatureFlagIsDisabled()
-		throws Exception {
-
-		Assert.assertEquals(
-			Collections.emptyList(),
-			_getFDSActionDropdownItemIds(TestPropsValues.getUser()));
-	}
-
 	private void _addDSRequest(User user) throws Exception {
+		DSEnvelope dsEnvelope = new DSEnvelope();
+
+		dsEnvelope.setDSEnvelopeId(RandomTestUtil.randomString());
+
 		DSRecipient dsRecipient = new DSRecipient();
 
 		dsRecipient.setDSRecipientId("1");
@@ -265,10 +270,8 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 		dsRecipient.setRoutingOrder(1);
 		dsRecipient.setStatus(DSRequestConstants.STATUS_SENT);
 
-		DSEnvelope dsEnvelope = new DSEnvelope();
-
-		dsEnvelope.setDSEnvelopeId(RandomTestUtil.randomString());
 		dsEnvelope.setDSRecipients(ListUtil.fromArray(dsRecipient));
+
 		dsEnvelope.setEmailSubject(RandomTestUtil.randomString());
 		dsEnvelope.setStatus(DSRequestConstants.STATUS_SENT);
 
