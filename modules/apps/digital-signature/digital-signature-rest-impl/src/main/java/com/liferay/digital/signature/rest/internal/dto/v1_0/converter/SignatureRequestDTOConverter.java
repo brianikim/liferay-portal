@@ -10,8 +10,12 @@ import com.liferay.digital.signature.model.DSRequestRecipient;
 import com.liferay.digital.signature.rest.dto.v1_0.SignatureRequest;
 import com.liferay.digital.signature.rest.dto.v1_0.SignatureRequestRecipient;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
+import com.liferay.headless.delivery.dto.v1_0.util.CreatorUtil;
 import com.liferay.petra.function.transform.TransformUtil;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.vulcan.dto.converter.DTOConverter;
 import com.liferay.portal.vulcan.dto.converter.DTOConverterContext;
@@ -42,17 +46,16 @@ public class SignatureRequestDTOConverter
 		return new SignatureRequest() {
 			{
 				setActions(dtoConverterContext::getActions);
+				setCreator(
+					() -> CreatorUtil.toCreator(
+						dtoConverterContext, _portal,
+						_userLocalService.fetchUser(dsRequest.getUserId())));
 				setDateCreated(dsRequest::getCreateDate);
 				setDocumentTitles(() -> _getDocumentTitles(dsRequest));
 				setEmailBody(dsRequest::getEmailBody);
 				setEmailSubject(dsRequest::getEmailSubject);
 				setExpirationDate(dsRequest::getExpirationDate);
 				setId(dsRequest::getDSRequestId);
-				setProviderKey(dsRequest::getProviderKey);
-				setProviderRequestId(dsRequest::getProviderRequestId);
-				setRequesterEmailAddress(dsRequest::getRequesterEmailAddress);
-				setRequesterName(dsRequest::getRequesterName);
-				setRequesterUserId(dsRequest::getRequesterUserId);
 				setSignatureRequestRecipients(
 					() -> TransformUtil.transformToArray(
 						dsRequest.getDSRequestRecipients(),
@@ -79,7 +82,7 @@ public class SignatureRequestDTOConverter
 
 					return fileEntry.getTitle();
 				}),
-			", ");
+			StringPool.COMMA_AND_SPACE);
 	}
 
 	private SignatureRequestRecipient _toSignatureRequestRecipient(
@@ -89,8 +92,6 @@ public class SignatureRequestDTOConverter
 			{
 				setEmailAddress(dsRequestRecipient::getEmailAddress);
 				setName(dsRequestRecipient::getName);
-				setProviderRecipientId(
-					dsRequestRecipient::getProviderRecipientId);
 				setSentDate(dsRequestRecipient::getSentDate);
 				setStatus(dsRequestRecipient::getStatus);
 				setStatusDate(dsRequestRecipient::getStatusDate);
@@ -101,5 +102,11 @@ public class SignatureRequestDTOConverter
 
 	@Reference
 	private DLAppLocalService _dlAppLocalService;
+
+	@Reference
+	private Portal _portal;
+
+	@Reference
+	private UserLocalService _userLocalService;
 
 }
