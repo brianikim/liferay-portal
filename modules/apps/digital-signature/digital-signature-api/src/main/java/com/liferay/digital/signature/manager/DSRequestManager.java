@@ -35,10 +35,9 @@ public interface DSRequestManager {
 			String actionId)
 		throws PortalException;
 
-	public void sendDSRequestNotifications(
-		long companyId, long groupId, DSRequest dsRequest);
+	public void sendDSRequestNotifications(long dsRequestId)
+		throws PortalException;
 
-	public void updateDSRequest(
-		long companyId, long groupId, String providerRequestId);
+	public void updateDSRequest(long dsRequestId) throws PortalException;
 
 }

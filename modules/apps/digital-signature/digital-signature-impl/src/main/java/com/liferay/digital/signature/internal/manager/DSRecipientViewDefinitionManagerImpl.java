@@ -50,6 +50,16 @@ public class DSRecipientViewDefinitionManagerImpl
 				userId, ActionKeys.VIEW);
 		}
 
+		DSRecipientViewDefinition dsRecipientViewDefinition =
+			new DSRecipientViewDefinition();
+
+		dsRecipientViewDefinition.setAuthenticationMethod("none");
+		dsRecipientViewDefinition.setDSClientUserId(String.valueOf(userId));
+
+		User user = _userLocalService.getUser(userId);
+
+		dsRecipientViewDefinition.setEmailAddress(user.getEmailAddress());
+
 		DigitalSignatureConfiguration digitalSignatureConfiguration =
 			DigitalSignatureConfigurationUtil.getDigitalSignatureConfiguration(
 				companyId, groupId);
@@ -58,19 +68,12 @@ public class DSRecipientViewDefinitionManagerImpl
 			DigitalSignatureSystemConfigurationUtil.getAppOriginURL(
 				digitalSignatureConfiguration.environment());
 
-		User user = _userLocalService.getUser(userId);
-
-		DSRecipientViewDefinition dsRecipientViewDefinition =
-			new DSRecipientViewDefinition();
-
-		dsRecipientViewDefinition.setAuthenticationMethod("none");
-		dsRecipientViewDefinition.setDSClientUserId(String.valueOf(userId));
-		dsRecipientViewDefinition.setEmailAddress(user.getEmailAddress());
 		dsRecipientViewDefinition.setFrameAncestors(
 			new String[] {portalURL, appOriginURL});
 		dsRecipientViewDefinition.setMessageOrigins(
 			new String[] {appOriginURL});
 		dsRecipientViewDefinition.setReturnURL(appOriginURL);
+
 		dsRecipientViewDefinition.setUserName(user.getFullName());
 
 		return _addDSRecipientViewDefinition(

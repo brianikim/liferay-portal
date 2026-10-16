@@ -51,7 +51,7 @@ public class SignDSURLProviderTest {
 	public void testGetModalURL() throws Exception {
 		String backURL = "/" + RandomTestUtil.randomString();
 
-		String url = _signDSURLProvider.getModalURL(
+		String modalURL = _signDSURLProvider.getModalURL(
 			TestPropsValues.getCompanyId(), _group.getGroupId(), backURL,
 			RandomTestUtil.randomLong());
 
@@ -62,11 +62,11 @@ public class SignDSURLProviderTest {
 			backURL,
 			URLCodec.decodeURL(
 				HttpComponentsUtil.getParameter(
-					url, portletNamespace + "backURL", false)));
+					modalURL, portletNamespace + "backURL", false)));
 
 		Assert.assertEquals(
 			LiferayWindowState.POP_UP.toString(),
-			HttpComponentsUtil.getParameter(url, "p_p_state", false));
+			HttpComponentsUtil.getParameter(modalURL, "p_p_state", false));
 	}
 
 	@Test

@@ -21,7 +21,6 @@ public class DSRequestRecipient {
 	public DSRequestRecipient(Map<String, Serializable> values) {
 		_emailAddress = MapUtil.getString(values, "emailAddress");
 		_name = MapUtil.getString(values, "name");
-		_providerRecipientId = MapUtil.getString(values, "providerRecipientId");
 		_sentDate = _toDate(values.get("sentDate"));
 		_signingOrder = MapUtil.getInteger(values, "signingOrder");
 		_status = MapUtil.getString(values, "requestRecipientStatus");
@@ -35,10 +34,6 @@ public class DSRequestRecipient {
 
 	public String getName() {
 		return _name;
-	}
-
-	public String getProviderRecipientId() {
-		return _providerRecipientId;
 	}
 
 	public Date getSentDate() {
@@ -79,7 +74,6 @@ public class DSRequestRecipient {
 
 	private final String _emailAddress;
 	private final String _name;
-	private final String _providerRecipientId;
 	private final Date _sentDate;
 	private final int _signingOrder;
 	private final String _status;
