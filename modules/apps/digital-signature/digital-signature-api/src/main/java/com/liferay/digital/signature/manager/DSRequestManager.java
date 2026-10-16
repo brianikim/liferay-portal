@@ -44,16 +44,14 @@ public interface DSRequestManager {
 			String actionId)
 		throws PortalException;
 
-	public void sendDSRequestNotifications(
-		long companyId, long groupId, DSRequest dsRequest);
+	public void sendDSRequestNotifications(long dsRequestId)
+		throws PortalException;
 
-	public int sendSignatureReminders(long companyId);
+	public void sendSignatureReminders(long companyId);
 
-	public void updateDSRequest(
-		long companyId, long groupId, String providerRequestId);
+	public void updateDSRequest(long dsRequestId) throws PortalException;
 
-	public void voidDSRequest(
-			long companyId, long groupId, DSRequest dsRequest, String reason)
+	public void voidDSRequest(long dsRequestId, String reason)
 		throws PortalException;
 
 }
