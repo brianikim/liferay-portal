@@ -144,9 +144,11 @@ public class StaticSiteExporterTest {
 			for (StaticSiteExportResource staticSiteExportResource :
 					staticSiteExport.getStaticSiteExportResources()) {
 
-				if (_ICONS_URL.equals(staticSiteExportResource.getURL())) {
-					iconsStaticSiteExportResource = staticSiteExportResource;
+				if (!_ICONS_URL.equals(staticSiteExportResource.getURL())) {
+					continue;
 				}
+
+				iconsStaticSiteExportResource = staticSiteExportResource;
 			}
 
 			Assert.assertNotNull(
@@ -853,12 +855,14 @@ public class StaticSiteExporterTest {
 
 			String html = layoutStaticSiteExportEntry.getHTML();
 
-			if (url.contains(".css") && html.contains(url)) {
-				stylesheet = true;
-
-				Assert.assertThat(
-					html, CoreMatchers.containsString(StringPool.SLASH + path));
+			if (!url.contains(".css") || !html.contains(url)) {
+				continue;
 			}
+
+			stylesheet = true;
+
+			Assert.assertThat(
+				html, CoreMatchers.containsString(StringPool.SLASH + path));
 		}
 
 		Assert.assertTrue(staticSiteExportResources.toString(), auiResource);

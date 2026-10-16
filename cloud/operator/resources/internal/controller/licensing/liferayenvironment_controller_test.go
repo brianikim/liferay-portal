@@ -13,6 +13,7 @@ import (
 	"maps"
 	"os"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"strings"
 	"testing"
@@ -127,6 +128,28 @@ func TestCapReplicaBounds(t *testing.T) {
 				)
 			}
 		})
+	}
+}
+
+func TestDeploySyncScriptVariables(t *testing.T) {
+	variables := map[string]bool{}
+
+	variablePattern := regexp.MustCompile(`\$\{(LIFERAY_SYNC_[A-Z_]+):([?-])`)
+
+	for _, match := range variablePattern.FindAllStringSubmatch(string(deploySyncScript), -1) {
+		variables[match[1]] = match[2] == "?"
+	}
+
+	want := map[string]bool{
+		"LIFERAY_SYNC_DEST":     true,
+		"LIFERAY_SYNC_INTERVAL": false,
+		"LIFERAY_SYNC_MARKER":   true,
+		"LIFERAY_SYNC_PATTERN":  false,
+		"LIFERAY_SYNC_SOURCE":   true,
+	}
+
+	if !maps.Equal(variables, want) {
+		t.Errorf("deploy-sync.sh variables (name: required) = %v, want %v", variables, want)
 	}
 }
 
@@ -1407,6 +1430,40 @@ func TestExtractLiferayImageTag(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestReconcileAdoptsEntitlementsSecret(t *testing.T) {
+	licenseXML := virtualClusterLicenseXML(
+		"Friday, March 2, 2029 12:00:00 AM GMT", 1, "dev-namespace-uid",
+	)
+
+	objects := append(
+		developmentObjects(),
+		&corev1.Secret{
+			Data: map[string][]byte{
+				"license.xml": []byte("<license>stale</license>"),
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "dev-entitlements",
+				Namespace: "liferay-dev",
+			},
+		},
+	)
+
+	provisioningClient := &stubProvisioning{
+		entitlements: &provisioning.Entitlements{
+			LicenseXML:      []byte(licenseXML),
+			MaxClusterNodes: 1,
+		},
+	}
+
+	liferayEnvironmentReconciler, _ := reconcileEnvironment(provisioningClient, t, objects...)
+
+	if got := getLicenseXML(liferayEnvironmentReconciler, t); got != licenseXML {
+		t.Errorf("license.xml = %q, want the provisioned license", got)
+	}
+
+	assertOwnedSecret(liferayEnvironmentReconciler, "dev-entitlements", t)
 }
 
 func TestReconcileAppliesExpirationWhileProvisioningUnreachable(t *testing.T) {
@@ -2906,6 +2963,92 @@ func TestReconcilePersistsProvisioningGracePeriodWhenWorkloadUpdateRejected(t *t
 	}
 }
 
+func TestReconcilePublishesDeploySyncSecret(t *testing.T) {
+	objects := []client.Object{
+		&corev1.Namespace{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "liferay-dev",
+				UID:  "dev-namespace-uid",
+			},
+		},
+		&corev1.Secret{
+			Data: map[string][]byte{
+				"activationCode": []byte("one-time-code"),
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "dev-activation",
+				Namespace: "liferay-dev",
+			},
+		},
+		pendingEnvironment(),
+	}
+
+	provisioningClient := &stubProvisioning{
+		activateError: fmt.Errorf("provisioning: activation code rejected"),
+	}
+
+	liferayEnvironmentReconciler, _ := reconcileEnvironment(provisioningClient, t, objects...)
+
+	secret := getSecret("dev-deploy-sync", liferayEnvironmentReconciler, t)
+
+	if !bytes.Equal(secret.Data["deploy-sync.sh"], deploySyncScript) {
+		t.Errorf("Data[%q] = %q, want the embedded deploy sync script", "deploy-sync.sh", secret.Data["deploy-sync.sh"])
+	}
+
+	assertOwnedSecret(liferayEnvironmentReconciler, "dev-deploy-sync", t)
+}
+
+func TestReconcilePublishesDeploySyncSecretWhenIdentityUnreadable(t *testing.T) {
+	provisioningClient := &stubProvisioning{}
+
+	liferayEnvironmentReconciler := &LiferayEnvironmentReconciler{
+		Client: newFakeClient(
+			t,
+			&corev1.Namespace{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "liferay-dev",
+					UID:  "dev-namespace-uid",
+				},
+			},
+			&corev1.Secret{
+				Data: map[string][]byte{
+					"private.pem": []byte("not a private key"),
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "dev-identity",
+					Namespace: "liferay-dev",
+				},
+			},
+			pendingEnvironment(),
+		),
+		HeartbeatInterval:    10 * time.Minute,
+		MarketplaceMountPath: t.TempDir(),
+		Provisioning:         provisioningClient,
+		Recorder:             record.NewFakeRecorder(10),
+		Syncer: addon.NewSyncer(
+			provisioningClient, 15*time.Second, 30*time.Second, 30*time.Minute,
+			inlineRunner{},
+		),
+	}
+
+	if _, error := liferayEnvironmentReconciler.Reconcile(
+		context.Background(), controllerruntime.Request{
+			NamespacedName: types.NamespacedName{
+				Name:      "dev",
+				Namespace: "liferay-dev",
+			},
+		},
+	); error == nil {
+		t.Fatal("Reconcile() error = <nil>, want the unreadable identity rejected")
+	}
+
+	secret := getSecret("dev-deploy-sync", liferayEnvironmentReconciler, t)
+
+	if !bytes.Equal(secret.Data["deploy-sync.sh"], deploySyncScript) {
+		t.Errorf("Data[%q] = %q, want the embedded deploy sync script", "deploy-sync.sh", secret.Data["deploy-sync.sh"])
+	}
+}
+
 func TestReconcileRejectsLicenseIssuedForAnotherEnvironment(t *testing.T) {
 	entitlements := &provisioning.Entitlements{
 		LicenseXML: []byte(virtualClusterLicenseXML(
@@ -3194,6 +3337,50 @@ func TestReconcileRestoresAutoscaledWorkloadWhenLicenseRenewed(t *testing.T) {
 	}
 
 	assertScaledObjectReplicaCount(3, "maxReplicaCount", scaledObject, t)
+}
+
+func TestReconcileRestoresDeploySyncSecret(t *testing.T) {
+	objects := []client.Object{
+		&corev1.Namespace{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "liferay-dev",
+				UID:  "dev-namespace-uid",
+			},
+		},
+		&corev1.Secret{
+			Data: map[string][]byte{
+				"activationCode": []byte("one-time-code"),
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "dev-activation",
+				Namespace: "liferay-dev",
+			},
+		},
+		&corev1.Secret{
+			Data: map[string][]byte{
+				"deploy-sync.sh": []byte("echo edited"),
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "dev-deploy-sync",
+				Namespace: "liferay-dev",
+			},
+		},
+		pendingEnvironment(),
+	}
+
+	provisioningClient := &stubProvisioning{
+		activateError: fmt.Errorf("provisioning: activation code rejected"),
+	}
+
+	liferayEnvironmentReconciler, _ := reconcileEnvironment(provisioningClient, t, objects...)
+
+	secret := getSecret("dev-deploy-sync", liferayEnvironmentReconciler, t)
+
+	if !bytes.Equal(secret.Data["deploy-sync.sh"], deploySyncScript) {
+		t.Errorf("Data[%q] = %q, want the embedded deploy sync script", "deploy-sync.sh", secret.Data["deploy-sync.sh"])
+	}
+
+	assertOwnedSecret(liferayEnvironmentReconciler, "dev-deploy-sync", t)
 }
 
 func TestReconcileRestoresReplicasWhenProvisioningRecovers(t *testing.T) {
@@ -3768,6 +3955,26 @@ func addOnEntitlements(checksum string) *provisioning.Entitlements {
 			"Friday, March 2, 2029 12:00:00 AM GMT", 3, "dev-namespace-uid",
 		)),
 		MaxClusterNodes: 3,
+	}
+}
+
+func assertOwnedSecret(
+	liferayEnvironmentReconciler *LiferayEnvironmentReconciler,
+	name string,
+	t *testing.T,
+) {
+	t.Helper()
+
+	secret := getSecret(name, liferayEnvironmentReconciler, t)
+
+	owner := metav1.GetControllerOf(secret)
+
+	if owner == nil || owner.Kind != "LiferayEnvironment" || owner.Name != "dev" {
+		t.Errorf("GetControllerOf(%q) = %v, want LiferayEnvironment dev", name, owner)
+	}
+
+	if label := secret.Labels["controller-watched"]; label != "yes" {
+		t.Errorf("Labels[%q] = %q, want %q", "controller-watched", label, "yes")
 	}
 }
 
