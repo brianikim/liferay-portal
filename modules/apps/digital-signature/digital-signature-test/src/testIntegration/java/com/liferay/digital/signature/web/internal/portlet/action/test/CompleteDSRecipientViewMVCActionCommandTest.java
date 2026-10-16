@@ -81,12 +81,13 @@ public class CompleteDSRecipientViewMVCActionCommandTest {
 
 	@Before
 	public void setUp() throws Exception {
-		String prefix = ".com.liferay.digital.signature.internal.batch.";
-
 		BatchEngineTestUtil.processBatchEngineUnits(
 			"com.liferay.digital.signature.impl",
 			CompleteDSRecipientViewMVCActionCommandTest.class,
-			new String[] {prefix + "01.object.definition"});
+			new String[] {
+				".com.liferay.digital.signature.internal.batch.01.object." +
+					"definition"
+			});
 
 		_companyConfigurationTemporarySwapper =
 			new CompanyConfigurationTemporarySwapper(
@@ -99,9 +100,6 @@ public class CompleteDSRecipientViewMVCActionCommandTest {
 				).put(
 					"siteSettingsStrategy", "always-inherit"
 				).build());
-
-		_group = GroupTestUtil.addGroup();
-
 		_dsRequestObjectDefinition =
 			_objectDefinitionLocalService.
 				getObjectDefinitionByExternalReferenceCode(
@@ -113,6 +111,7 @@ public class CompleteDSRecipientViewMVCActionCommandTest {
 					DSObjectDefinitionConstants.
 						EXTERNAL_REFERENCE_CODE_REQUEST_RECIPIENT,
 					TestPropsValues.getCompanyId());
+		_group = GroupTestUtil.addGroup();
 	}
 
 	@After
@@ -122,21 +121,23 @@ public class CompleteDSRecipientViewMVCActionCommandTest {
 
 	@Test
 	public void testProcessAction() throws Exception {
-		String providerRequestId = RandomTestUtil.randomString();
+		String dsEnvelopeId = RandomTestUtil.randomString();
 
-		long dsRequestId = _addDSRequest(providerRequestId);
+		long dsRequestId = _addDSRequest(dsEnvelopeId);
 
 		DSEnvelope dsEnvelope = new DSEnvelope();
+
+		dsEnvelope.setDSEnvelopeId(dsEnvelopeId);
 
 		DSRecipient dsRecipient = new DSRecipient();
 
 		User user = TestPropsValues.getUser();
 
-		dsRecipient.setDSRecipientId("1");
+		dsRecipient.setDSClientUserId(String.valueOf(user.getUserId()));
 		dsRecipient.setEmailAddress(user.getEmailAddress());
+
 		dsRecipient.setStatus(DSRequestConstants.STATUS_COMPLETED);
 
-		dsEnvelope.setDSEnvelopeId(providerRequestId);
 		dsEnvelope.setDSRecipients(ListUtil.fromArray(dsRecipient));
 		dsEnvelope.setStatus(DSRequestConstants.STATUS_SENT);
 
@@ -184,28 +185,25 @@ public class CompleteDSRecipientViewMVCActionCommandTest {
 		}
 	}
 
-	private long _addDSRequest(String providerRequestId) throws Exception {
+	private long _addDSRequest(String dsEnvelopeId) throws Exception {
 		ServiceContext serviceContext =
 			ServiceContextTestUtil.getServiceContext(
 				_group.getGroupId(), TestPropsValues.getUserId());
 
 		ObjectEntry objectEntry = _addObjectEntry(
-			_dsRequestObjectDefinition,
+			_dsRequestObjectDefinition, serviceContext,
 			HashMapBuilder.<String, Serializable>put(
 				"emailSubject", RandomTestUtil.randomString()
 			).put(
-				"providerKey", "docusign"
-			).put(
-				"providerRequestId", providerRequestId
+				"externalReferenceCode", dsEnvelopeId
 			).put(
 				"requestStatus", DSRequestConstants.STATUS_SENT
 			).put(
 				"siteGroupId", _group.getGroupId()
-			).build(),
-			serviceContext);
+			).build());
 
 		_addObjectEntry(
-			_dsRequestRecipientObjectDefinition,
+			_dsRequestRecipientObjectDefinition, serviceContext,
 			HashMapBuilder.<String, Serializable>put(
 				"emailAddress",
 				() -> {
@@ -216,8 +214,6 @@ public class CompleteDSRecipientViewMVCActionCommandTest {
 			).put(
 				"name", RandomTestUtil.randomString()
 			).put(
-				"providerRecipientId", "1"
-			).put(
 				"r_dsRequestToDSRequestRecipients_l_dsRequestId",
 				objectEntry.getObjectEntryId()
 			).put(
@@ -225,15 +221,14 @@ public class CompleteDSRecipientViewMVCActionCommandTest {
 				TestPropsValues.getUserId()
 			).put(
 				"requestRecipientStatus", DSRequestConstants.STATUS_SENT
-			).build(),
-			serviceContext);
+			).build());
 
 		return objectEntry.getObjectEntryId();
 	}
 
 	private ObjectEntry _addObjectEntry(
-			ObjectDefinition objectDefinition, Map<String, Serializable> values,
-			ServiceContext serviceContext)
+			ObjectDefinition objectDefinition, ServiceContext serviceContext,
+			Map<String, Serializable> values)
 		throws Exception {
 
 		return _objectEntryLocalService.addObjectEntry(

@@ -56,36 +56,6 @@
 					"type": "String"
 				},
 				{
-					"DBType": "String",
-					"businessType": "Text",
-					"externalReferenceCode": "PROVIDER_KEY",
-					"indexed": true,
-					"indexedAsKeyword": true,
-					"label": {
-						"en_US": "Provider Key"
-					},
-					"name": "providerKey",
-					"required": true,
-					"state": false,
-					"system": true,
-					"type": "String"
-				},
-				{
-					"DBType": "String",
-					"businessType": "Text",
-					"externalReferenceCode": "PROVIDER_REQUEST_ID",
-					"indexed": true,
-					"indexedAsKeyword": true,
-					"label": {
-						"en_US": "Provider Request ID"
-					},
-					"name": "providerRequestId",
-					"required": true,
-					"state": false,
-					"system": true,
-					"type": "String"
-				},
-				{
 					"DBType": "DateTime",
 					"businessType": "DateTime",
 					"externalReferenceCode": "REQUEST_EXPIRATION_DATE",
@@ -218,7 +188,7 @@
 				"code": 0
 			},
 			"system": true,
-			"titleObjectFieldName": "providerRequestId"
+			"titleObjectFieldName": "externalReferenceCode"
 		},
 		{
 			"active": true,
@@ -299,21 +269,6 @@
 					},
 					"name": "name",
 					"required": false,
-					"state": false,
-					"system": true,
-					"type": "String"
-				},
-				{
-					"DBType": "String",
-					"businessType": "Text",
-					"externalReferenceCode": "PROVIDER_RECIPIENT_ID",
-					"indexed": true,
-					"indexedAsKeyword": true,
-					"label": {
-						"en_US": "Provider Recipient ID"
-					},
-					"name": "providerRecipientId",
-					"required": true,
 					"state": false,
 					"system": true,
 					"type": "String"

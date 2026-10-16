@@ -97,7 +97,7 @@ public class SignDSRequestMVCRenderCommand implements MVCRenderCommand {
 				String urlViewInContext = _fetchURLViewInContext(
 					dsRequest, renderRequest, renderResponse, themeDisplay);
 
-				if (urlViewInContext == null) {
+				if (Validator.isNull(urlViewInContext)) {
 					urlViewInContext = _portal.getLayoutFullURL(
 						themeDisplay.getLayout(), themeDisplay);
 				}
@@ -117,9 +117,12 @@ public class SignDSRequestMVCRenderCommand implements MVCRenderCommand {
 			return MVCRenderConstants.MVC_PATH_VALUE_SKIP_DISPATCH;
 		}
 
-		_dsRequestManager.updateDSRequest(
-			themeDisplay.getCompanyId(), dsRequest.getSiteGroupId(),
-			dsRequest.getProviderRequestId());
+		try {
+			_dsRequestManager.updateDSRequest(dsRequest.getDSRequestId());
+		}
+		catch (PortalException portalException) {
+			throw new PortletException(portalException);
+		}
 
 		dsRequest = _dsRequestManager.fetchDSRequest(
 			themeDisplay.getCompanyId(), dsRequest.getDSRequestId());
@@ -145,7 +148,7 @@ public class SignDSRequestMVCRenderCommand implements MVCRenderCommand {
 							themeDisplay.getCompanyId(),
 							dsRequest.getSiteGroupId(),
 							themeDisplay.getUserId(),
-							dsRequest.getProviderRequestId(),
+							dsRequest.getExternalReferenceCode(),
 							_portal.getPortalURL(
 								_portal.getHttpServletRequest(
 									renderRequest)))));
@@ -203,7 +206,7 @@ public class SignDSRequestMVCRenderCommand implements MVCRenderCommand {
 								dlFileEntry.getClassPK())),
 						themeDisplay);
 
-				if (assetDisplayPageFriendlyURL != null) {
+				if (Validator.isNotNull(assetDisplayPageFriendlyURL)) {
 					return assetDisplayPageFriendlyURL;
 				}
 
