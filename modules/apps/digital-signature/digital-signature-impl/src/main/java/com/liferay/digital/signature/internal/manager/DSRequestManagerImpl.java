@@ -13,23 +13,20 @@ import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
-import com.liferay.object.constants.ObjectDefinitionConstants;
 import com.liferay.object.constants.ObjectEntryFolderConstants;
+import com.liferay.object.exception.NoSuchObjectEntryException;
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.model.ObjectEntry;
-import com.liferay.object.rest.filter.factory.FilterFactory;
 import com.liferay.object.service.ObjectDefinitionLocalService;
 import com.liferay.object.service.ObjectEntryLocalService;
-import com.liferay.petra.sql.dsl.expression.Predicate;
 import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
-import com.liferay.portal.kernel.security.permission.PermissionChecker;
-import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
+import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.ArrayUtil;
@@ -44,9 +41,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import org.osgi.service.component.annotations.Component;
@@ -72,67 +66,55 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	}
 
 	@Override
-	public void updateDSRequest(
-		long companyId, long groupId, String providerRequestId) {
+	public void updateDSRequest(long dsRequestId) throws PortalException {
+		ObjectEntry objectEntry = _objectEntryLocalService.getObjectEntry(
+			dsRequestId);
 
-		if (Validator.isNull(providerRequestId) ||
-			!_isEnabled(companyId, groupId)) {
+		long companyId = objectEntry.getCompanyId();
 
-			return;
-		}
-
-		ObjectDefinition dsRequestObjectDefinition =
+		ObjectDefinition objectDefinition =
 			_objectDefinitionLocalService.
-				fetchObjectDefinitionByExternalReferenceCode(
+				getObjectDefinitionByExternalReferenceCode(
 					DSObjectDefinitionConstants.EXTERNAL_REFERENCE_CODE_REQUEST,
 					companyId);
-		ObjectDefinition dsRequestRecipientObjectDefinition =
-			_objectDefinitionLocalService.
-				fetchObjectDefinitionByExternalReferenceCode(
-					DSObjectDefinitionConstants.
-						EXTERNAL_REFERENCE_CODE_REQUEST_RECIPIENT,
-					companyId);
 
-		if ((dsRequestObjectDefinition == null) ||
-			(dsRequestRecipientObjectDefinition == null)) {
+		if (objectDefinition.getObjectDefinitionId() !=
+				objectEntry.getObjectDefinitionId()) {
 
+			throw new NoSuchObjectEntryException(
+				"No signature request exists with the primary key " +
+					dsRequestId);
+		}
+
+		long groupId = MapUtil.getLong(objectEntry.getValues(), "siteGroupId");
+
+		if (!_isEnabled(companyId, groupId)) {
 			return;
 		}
 
 		try {
-			Map<String, DSRecipient> dsRecipients = new HashMap<>();
-
 			DSEnvelope dsEnvelope = _dsEnvelopeManager.getDSEnvelope(
-				companyId, groupId, providerRequestId);
+				companyId, groupId, objectEntry.getExternalReferenceCode());
 
-			for (DSRecipient dsRecipient : dsEnvelope.getDSRecipients()) {
-				dsRecipients.put(dsRecipient.getDSRecipientId(), dsRecipient);
-			}
-
-			for (Map<String, Serializable> values :
-					_getValuesList(
-						companyId,
-						StringBundler.concat(
-							"(providerRequestId eq '",
-							StringUtil.replace(providerRequestId, '\'', "''"),
-							"')"),
-						dsRequestObjectDefinition)) {
-
-				long dsRequestId = MapUtil.getLong(
-					values, dsRequestObjectDefinition.getPKObjectFieldName());
-
-				_updateRecipientStatuses(
-					companyId, groupId, dsRecipients, dsRequestId,
-					dsRequestRecipientObjectDefinition);
-				_updateRequestStatus(
-					companyId, groupId, dsEnvelope, dsRequestId);
-			}
+			_objectEntryLocalService.partialUpdateObjectEntry(
+				objectEntry.getUserId(), dsRequestId,
+				ObjectEntryFolderConstants.
+					PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
+				HashMapBuilder.<String, Serializable>put(
+					"requestExpirationDate",
+					() -> _toDate(dsEnvelope.getExpireLocalDateTime())
+				).put(
+					"requestStatus", () -> _getDSRequestStatus(dsEnvelope)
+				).put(
+					"requestStatusDate",
+					() -> _toDate(dsEnvelope.getStatusChangedLocalDateTime())
+				).build(),
+				_getServiceContext(
+					companyId, groupId, objectEntry.getUserId()));
 		}
 		catch (Exception exception) {
 			_log.error(
-				"Unable to update the signature request for envelope " +
-					providerRequestId,
-				exception);
+				"Unable to update signature request " + dsRequestId, exception);
 		}
 	}
 
@@ -141,53 +123,44 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			long[] fileEntryIds)
 		throws PortalException {
 
-		ObjectDefinition dsRequestDocumentObjectDefinition =
-			_objectDefinitionLocalService.
-				fetchObjectDefinitionByExternalReferenceCode(
-					DSObjectDefinitionConstants.
-						EXTERNAL_REFERENCE_CODE_REQUEST_DOCUMENT,
-					companyId);
+		if (Validator.isNull(dsEnvelope.getDSEnvelopeId())) {
+			throw new PortalException(
+				"A signature request requires a DocuSign envelope ID");
+		}
+
 		ObjectDefinition dsRequestObjectDefinition =
 			_objectDefinitionLocalService.
-				fetchObjectDefinitionByExternalReferenceCode(
+				getObjectDefinitionByExternalReferenceCode(
 					DSObjectDefinitionConstants.EXTERNAL_REFERENCE_CODE_REQUEST,
 					companyId);
-		ObjectDefinition dsRequestRecipientObjectDefinition =
-			_objectDefinitionLocalService.
-				fetchObjectDefinitionByExternalReferenceCode(
-					DSObjectDefinitionConstants.
-						EXTERNAL_REFERENCE_CODE_REQUEST_RECIPIENT,
-					companyId);
-
-		if ((dsRequestDocumentObjectDefinition == null) ||
-			(dsRequestObjectDefinition == null) ||
-			(dsRequestRecipientObjectDefinition == null)) {
-
-			return;
-		}
 
 		ServiceContext serviceContext = _getServiceContext(
 			companyId, groupId, userId);
 
-		ObjectEntry dsRequestObjectEntry =
-			_objectEntryLocalService.addObjectEntry(
-				0, userId, dsRequestObjectDefinition.getObjectDefinitionId(),
-				ObjectEntryFolderConstants.
-					PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
-				null,
-				HashMapBuilder.<String, Serializable>put(
-					"emailSubject", dsEnvelope.getEmailSubject()
-				).put(
-					"providerKey", "docusign"
-				).put(
-					"providerRequestId", dsEnvelope.getDSEnvelopeId()
-				).put(
-					"requestExpirationDate",
-					() -> _toDate(dsEnvelope.getExpireLocalDateTime())
-				).put(
-					"requestStatus", () -> _getRequestStatus(dsEnvelope)
-				).build(),
-				serviceContext);
+		ObjectEntry objectEntry = _objectEntryLocalService.addObjectEntry(
+			0, userId, dsRequestObjectDefinition.getObjectDefinitionId(),
+			ObjectEntryFolderConstants.PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
+			null,
+			HashMapBuilder.<String, Serializable>put(
+				"emailSubject", dsEnvelope.getEmailSubject()
+			).put(
+				"externalReferenceCode", dsEnvelope.getDSEnvelopeId()
+			).put(
+				"requestExpirationDate",
+				() -> _toDate(dsEnvelope.getExpireLocalDateTime())
+			).put(
+				"requestStatus", () -> _getDSRequestStatus(dsEnvelope)
+			).put(
+				"siteGroupId", _getSiteGroupId(groupId)
+			).build(),
+			serviceContext);
+
+		ObjectDefinition dsRequestDocumentObjectDefinition =
+			_objectDefinitionLocalService.
+				getObjectDefinitionByExternalReferenceCode(
+					DSObjectDefinitionConstants.
+						EXTERNAL_REFERENCE_CODE_REQUEST_DOCUMENT,
+					companyId);
 
 		for (long fileEntryId : fileEntryIds) {
 			_objectEntryLocalService.addObjectEntry(
@@ -200,10 +173,17 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					"fileEntryId", fileEntryId
 				).put(
 					"r_dsRequestToDSRequestDocuments_l_dsRequestId",
-					dsRequestObjectEntry.getObjectEntryId()
+					objectEntry.getObjectEntryId()
 				).build(),
 				serviceContext);
 		}
+
+		ObjectDefinition dsRequestRecipientObjectDefinition =
+			_objectDefinitionLocalService.
+				getObjectDefinitionByExternalReferenceCode(
+					DSObjectDefinitionConstants.
+						EXTERNAL_REFERENCE_CODE_REQUEST_RECIPIENT,
+					companyId);
 
 		for (DSRecipient dsRecipient : dsEnvelope.getDSRecipients()) {
 			_objectEntryLocalService.addObjectEntry(
@@ -217,17 +197,14 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				).put(
 					"name", dsRecipient.getName()
 				).put(
-					"providerRecipientId", dsRecipient.getDSRecipientId()
-				).put(
 					"r_dsRequestToDSRequestRecipients_l_dsRequestId",
-					dsRequestObjectEntry.getObjectEntryId()
+					objectEntry.getObjectEntryId()
 				).put(
 					"r_userToDSRequestRecipients_userId",
-					_getRecipientUserId(
-						companyId, dsRecipient.getEmailAddress())
+					_getUserId(companyId, dsRecipient.getEmailAddress())
 				).put(
 					"requestRecipientStatus",
-					() -> _getRequestRecipientStatus(dsRecipient)
+					() -> _getDSRequestRecipientStatus(dsRecipient)
 				).put(
 					"sentDate",
 					() -> _toDate(dsRecipient.getSentLocalDateTime())
@@ -236,22 +213,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 	}
 
-	private long _getRecipientUserId(long companyId, String emailAddress) {
-		if (Validator.isNull(emailAddress)) {
-			return 0;
-		}
-
-		User user = _userLocalService.fetchUserByEmailAddress(
-			companyId, emailAddress);
-
-		if (user == null) {
-			return 0;
-		}
-
-		return user.getUserId();
-	}
-
-	private String _getRequestRecipientStatus(DSRecipient dsRecipient) {
+	private String _getDSRequestRecipientStatus(DSRecipient dsRecipient) {
 		String status = StringUtil.toLowerCase(dsRecipient.getStatus());
 
 		if (Objects.equals(status, "delivered")) {
@@ -273,7 +235,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		return null;
 	}
 
-	private String _getRequestStatus(DSEnvelope dsEnvelope) {
+	private String _getDSRequestStatus(DSEnvelope dsEnvelope) {
 		LocalDateTime expireLocalDateTime = dsEnvelope.getExpireLocalDateTime();
 		String status = StringUtil.toLowerCase(dsEnvelope.getStatus());
 		LocalDateTime statusChangedLocalDateTime =
@@ -318,26 +280,29 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		return serviceContext;
 	}
 
-	private List<Map<String, Serializable>> _getValuesList(
-			long companyId, String filterString,
-			ObjectDefinition objectDefinition)
-		throws Exception {
+	private long _getSiteGroupId(long groupId) {
+		Group group = _groupLocalService.fetchGroup(groupId);
 
-		PermissionChecker permissionChecker =
-			PermissionThreadLocal.getPermissionChecker();
-
-		try {
-			PermissionThreadLocal.setPermissionChecker(null);
-
-			return _objectEntryLocalService.getValuesList(
-				0, companyId, objectDefinition.getUserId(),
-				objectDefinition.getObjectDefinitionId(),
-				_filterFactory.create(filterString, objectDefinition), null,
-				QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
+		if ((group == null) || !group.isSite()) {
+			return 0;
 		}
-		finally {
-			PermissionThreadLocal.setPermissionChecker(permissionChecker);
+
+		return groupId;
+	}
+
+	private long _getUserId(long companyId, String emailAddress) {
+		if (Validator.isNull(emailAddress)) {
+			return 0;
 		}
+
+		User user = _userLocalService.fetchUserByEmailAddress(
+			companyId, emailAddress);
+
+		if (user == null) {
+			return 0;
+		}
+
+		return user.getUserId();
 	}
 
 	private boolean _isEnabled(long companyId, long groupId) {
@@ -360,93 +325,14 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		return Date.from(localDateTime.toInstant(ZoneOffset.UTC));
 	}
 
-	private void _updateRecipientStatuses(
-			long companyId, long groupId, Map<String, DSRecipient> dsRecipients,
-			long dsRequestId,
-			ObjectDefinition dsRequestRecipientObjectDefinition)
-		throws Exception {
-
-		for (Map<String, Serializable> values :
-				_getValuesList(
-					companyId,
-					"(r_dsRequestToDSRequestRecipients_l_dsRequestId eq '" +
-						dsRequestId + "')",
-					dsRequestRecipientObjectDefinition)) {
-
-			DSRecipient dsRecipient = dsRecipients.get(
-				MapUtil.getString(values, "providerRecipientId"));
-
-			if (dsRecipient == null) {
-				continue;
-			}
-
-			long dsRequestRecipientId = MapUtil.getLong(
-				values,
-				dsRequestRecipientObjectDefinition.getPKObjectFieldName());
-
-			ObjectEntry objectEntry = _objectEntryLocalService.fetchObjectEntry(
-				dsRequestRecipientId);
-
-			if (objectEntry == null) {
-				continue;
-			}
-
-			_objectEntryLocalService.partialUpdateObjectEntry(
-				objectEntry.getUserId(), dsRequestRecipientId,
-				ObjectEntryFolderConstants.
-					PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
-				HashMapBuilder.<String, Serializable>put(
-					"requestRecipientStatus",
-					() -> _getRequestRecipientStatus(dsRecipient)
-				).put(
-					"requestRecipientStatusDate",
-					() -> _toDate(dsRecipient.getStatusLocalDateTime())
-				).put(
-					"sentDate",
-					() -> _toDate(dsRecipient.getSentLocalDateTime())
-				).build(),
-				_getServiceContext(
-					companyId, groupId, objectEntry.getUserId()));
-		}
-	}
-
-	private void _updateRequestStatus(
-			long companyId, long groupId, DSEnvelope dsEnvelope,
-			long dsRequestId)
-		throws Exception {
-
-		ObjectEntry objectEntry = _objectEntryLocalService.fetchObjectEntry(
-			dsRequestId);
-
-		if (objectEntry == null) {
-			return;
-		}
-
-		_objectEntryLocalService.partialUpdateObjectEntry(
-			objectEntry.getUserId(), dsRequestId,
-			ObjectEntryFolderConstants.PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
-			HashMapBuilder.<String, Serializable>put(
-				"requestExpirationDate",
-				() -> _toDate(dsEnvelope.getExpireLocalDateTime())
-			).put(
-				"requestStatus", () -> _getRequestStatus(dsEnvelope)
-			).put(
-				"requestStatusDate",
-				() -> _toDate(dsEnvelope.getStatusChangedLocalDateTime())
-			).build(),
-			_getServiceContext(companyId, groupId, objectEntry.getUserId()));
-	}
-
 	private static final Log _log = LogFactoryUtil.getLog(
 		DSRequestManagerImpl.class);
 
 	@Reference
 	private DSEnvelopeManager _dsEnvelopeManager;
 
-	@Reference(
-		target = "(filter.factory.key=" + ObjectDefinitionConstants.STORAGE_TYPE_DEFAULT + ")"
-	)
-	private FilterFactory<Predicate> _filterFactory;
+	@Reference
+	private GroupLocalService _groupLocalService;
 
 	@Reference
 	private ObjectDefinitionLocalService _objectDefinitionLocalService;
