@@ -1194,7 +1194,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					objectEntry.getUserId());
 			}
 
-			_updateRecipientStatuses(
+			_updateDSRequestRecipientStatuses(
 				companyId, dsEnvelope, dsRequestId, groupId, requestStatus);
 
 			_objectEntryLocalService.partialUpdateObjectEntry(
@@ -1203,19 +1203,82 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
 				HashMapBuilder.<String, Serializable>put(
 					"requestExpirationDate",
-					() -> _toDate(dsEnvelope.getExpireLocalDateTime())
+					() -> _toDate(dsEnvelope.getExpirationLocalDateTime())
 				).put(
 					"requestStatus", () -> requestStatus
 				).put(
 					"requestStatusDate",
-					() -> _toDate(dsEnvelope.getStatusChangedLocalDateTime())
+					() -> _toDate(dsEnvelope.getStatusLocalDateTime())
 				).build(),
 				_getServiceContext(
 					companyId, groupId, objectEntry.getUserId()));
 		}
 		catch (Exception exception) {
-			_log.error(
-				"Unable to update signature request " + dsRequestId, exception);
+			_log.error("Unable to update DS request " + dsRequestId, exception);
+		}
+	}
+
+	private void _updateDSRequestRecipientStatuses(
+			long companyId, DSEnvelope dsEnvelope, long dsRequestId,
+			long groupId, String requestStatus)
+		throws Exception {
+
+		Map<String, DSRecipient> dsRecipients = new HashMap<>();
+
+		for (DSRecipient dsRecipient : dsEnvelope.getDSRecipients()) {
+			dsRecipients.put(dsRecipient.getDSClientUserId(), dsRecipient);
+		}
+
+		ObjectDefinition objectDefinition =
+			_objectDefinitionLocalService.
+				getObjectDefinitionByExternalReferenceCode(
+					DSObjectDefinitionConstants.
+						EXTERNAL_REFERENCE_CODE_REQUEST_RECIPIENT,
+					companyId);
+
+		for (Map<String, Serializable> values :
+				_getValuesList(
+					companyId,
+					"(r_dsRequestToDSRequestRecipients_l_dsRequestId eq '" +
+						dsRequestId + "')",
+					objectDefinition, null)) {
+
+			DSRecipient dsRecipient = dsRecipients.get(
+				String.valueOf(
+					MapUtil.getLong(
+						values, "r_userToDSRequestRecipients_userId")));
+
+			if (dsRecipient == null) {
+				continue;
+			}
+
+			long dsRequestRecipientId = MapUtil.getLong(
+				values, objectDefinition.getPKObjectFieldName());
+
+			ObjectEntry objectEntry = _objectEntryLocalService.fetchObjectEntry(
+				dsRequestRecipientId);
+
+			if (objectEntry == null) {
+				continue;
+			}
+
+			_objectEntryLocalService.partialUpdateObjectEntry(
+				objectEntry.getUserId(), dsRequestRecipientId,
+				ObjectEntryFolderConstants.
+					PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
+				HashMapBuilder.<String, Serializable>put(
+					"requestRecipientStatus",
+					() -> _getDSRequestRecipientStatus(
+						dsRecipient, requestStatus)
+				).put(
+					"requestRecipientStatusDate",
+					() -> _toDate(dsRecipient.getStatusLocalDateTime())
+				).put(
+					"sentDate",
+					() -> _toDate(dsRecipient.getSentLocalDateTime())
+				).build(),
+				_getServiceContext(
+					companyId, groupId, objectEntry.getUserId()));
 		}
 	}
 
