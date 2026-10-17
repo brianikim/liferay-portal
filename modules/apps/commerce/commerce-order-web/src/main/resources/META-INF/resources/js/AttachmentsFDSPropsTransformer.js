@@ -168,7 +168,9 @@ const AttachmentsFDSPropsTransformer = (props) => {
 
 	const isRequestable = (item) =>
 		!!signatureRequest &&
-		!signatureRequest.nonrequestableIds.includes(String(item?.id));
+		signatureRequest.requestableCommerceOrderAttachmentIds.includes(
+			String(item?.id)
+		);
 
 	return {
 		...props,

@@ -56,7 +56,6 @@ import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.MapUtil;
-import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
@@ -160,9 +159,14 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 			_commerceOrder.getCommerceOrderId(),
 			signatureRequest.get("commerceOrderId"));
 		Assert.assertEquals(
-			Collections.emptyList(), signatureRequest.get("nonrequestableIds"));
-		Assert.assertEquals(
 			Collections.emptyMap(), additionalProps.get("signatureStatuses"));
+
+		String commerceOrderAttachmentId = String.valueOf(
+			_commerceOrderAttachment.getCommerceOrderAttachmentId());
+
+		Assert.assertEquals(
+			List.of(commerceOrderAttachmentId),
+			signatureRequest.get("requestableCommerceOrderAttachmentIds"));
 
 		_addDSRequest(user);
 
@@ -171,12 +175,9 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 		signatureRequest = (Map<String, Object>)additionalProps.get(
 			"signatureRequest");
 
-		String commerceOrderAttachmentId = String.valueOf(
-			_commerceOrderAttachment.getCommerceOrderAttachmentId());
-
 		Assert.assertEquals(
-			List.of(commerceOrderAttachmentId),
-			signatureRequest.get("nonrequestableIds"));
+			Collections.emptyList(),
+			signatureRequest.get("requestableCommerceOrderAttachmentIds"));
 
 		Assert.assertEquals(
 			HashMapBuilder.put(
@@ -199,18 +200,13 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 			"signatureRequest");
 
 		Assert.assertEquals(
-			SetUtil.fromArray(
-				commerceOrderAttachmentId,
-				String.valueOf(
-					commerceOrderAttachment.getCommerceOrderAttachmentId())),
-			SetUtil.fromCollection(
-				(List<String>)signatureRequest.get("nonrequestableIds")));
+			Collections.emptyList(),
+			signatureRequest.get("requestableCommerceOrderAttachmentIds"));
 
 		commerceOrderAttachment.setFileEntryId(RandomTestUtil.nextLong());
 
-		commerceOrderAttachment =
-			_commerceOrderAttachmentLocalService.updateCommerceOrderAttachment(
-				commerceOrderAttachment);
+		_commerceOrderAttachmentLocalService.updateCommerceOrderAttachment(
+			commerceOrderAttachment);
 
 		_commerceOrder.setUserId(
 			_userLocalService.getGuestUserId(_group.getCompanyId()));
@@ -225,12 +221,8 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 
 		Assert.assertNull(signatureRequest.get("buyer"));
 		Assert.assertEquals(
-			SetUtil.fromArray(
-				commerceOrderAttachmentId,
-				String.valueOf(
-					commerceOrderAttachment.getCommerceOrderAttachmentId())),
-			SetUtil.fromCollection(
-				(List<String>)signatureRequest.get("nonrequestableIds")));
+			Collections.emptyList(),
+			signatureRequest.get("requestableCommerceOrderAttachmentIds"));
 
 		additionalProps = _getAdditionalProps(UserTestUtil.addUser());
 
@@ -250,8 +242,6 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 		_commerceOrderAttachment =
 			_commerceOrderAttachmentLocalService.updateCommerceOrderAttachment(
 				_commerceOrderAttachment);
-
-		_addDSRequest(TestPropsValues.getUser());
 
 		Role role = _roleLocalService.addRole(
 			RandomTestUtil.randomString(), TestPropsValues.getUserId(), null, 0,
@@ -285,7 +275,12 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 			(Map<String, Object>)additionalProps.get("signatureRequest");
 
 		Assert.assertEquals(
-			Collections.emptyList(), signatureRequest.get("nonrequestableIds"));
+			Collections.emptyList(),
+			signatureRequest.get("requestableCommerceOrderAttachmentIds"));
+
+		_addDSRequest(TestPropsValues.getUser());
+
+		additionalProps = _getAdditionalProps(user);
 
 		Assert.assertEquals(
 			Collections.emptyMap(), additionalProps.get("signatureStatuses"));
@@ -303,19 +298,11 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 
 		additionalProps = _getAdditionalProps(user);
 
-		signatureRequest = (Map<String, Object>)additionalProps.get(
-			"signatureRequest");
-
-		String commerceOrderAttachmentId = String.valueOf(
-			_commerceOrderAttachment.getCommerceOrderAttachmentId());
-
-		Assert.assertEquals(
-			List.of(commerceOrderAttachmentId),
-			signatureRequest.get("nonrequestableIds"));
-
 		Assert.assertEquals(
 			HashMapBuilder.put(
-				commerceOrderAttachmentId, DSRequestConstants.STATUS_SENT
+				String.valueOf(
+					_commerceOrderAttachment.getCommerceOrderAttachmentId()),
+				DSRequestConstants.STATUS_SENT
 			).build(),
 			additionalProps.get("signatureStatuses"));
 	}

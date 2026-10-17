@@ -95,14 +95,14 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributor
 				).put(
 					"commerceOrderId", commerceOrder.getCommerceOrderId()
 				).put(
-					"nonrequestableIds",
-					_getNonrequestableIds(
-						commerceOrder, httpServletRequest,
-						themeDisplay.getPermissionChecker())
-				).put(
 					"portletNamespace",
 					_portal.getPortletNamespace(
 						CommercePortletKeys.COMMERCE_ORDER)
+				).put(
+					"requestableCommerceOrderAttachmentIds",
+					_getRequestableCommerceOrderAttachmentIds(
+						commerceOrder, httpServletRequest,
+						themeDisplay.getPermissionChecker())
 				).put(
 					"searchUsersURL",
 					ResourceURLBuilder.createResourceURL(
@@ -179,7 +179,7 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributor
 			));
 	}
 
-	private List<String> _getNonrequestableIds(
+	private List<String> _getRequestableCommerceOrderAttachmentIds(
 			CommerceOrder commerceOrder, HttpServletRequest httpServletRequest,
 			PermissionChecker permissionChecker)
 		throws PortalException {
@@ -195,8 +195,8 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributor
 				DSRequest dsRequest = dsRequests.get(
 					commerceOrderAttachment.getCommerceOrderAttachmentId());
 
-				if (((dsRequest == null) || dsRequest.isRequestable()) &&
-					DSCommerceOrderAttachmentUtil.hasAllowedFileExtension(
+				if (((dsRequest != null) && !dsRequest.isRequestable()) ||
+					!DSCommerceOrderAttachmentUtil.hasAllowedFileExtension(
 						commerceOrderAttachment)) {
 
 					return null;
