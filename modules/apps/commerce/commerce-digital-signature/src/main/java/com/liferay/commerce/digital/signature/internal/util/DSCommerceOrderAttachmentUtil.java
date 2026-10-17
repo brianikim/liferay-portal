@@ -35,7 +35,7 @@ import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.HttpComponentsUtil;
-import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -73,7 +73,7 @@ public class DSCommerceOrderAttachmentUtil {
 	public static String getActionURL(String path, ThemeDisplay themeDisplay) {
 		String url = HttpComponentsUtil.addParameter(
 			StringBundler.concat(
-				themeDisplay.getPortalURL(), Portal.PATH_MODULE, path),
+				themeDisplay.getPortalURL(), PortalUtil.getPathModule(), path),
 			"backURL", themeDisplay.getURLCurrent());
 
 		return url + "&commerceOrderAttachmentId={id}";
