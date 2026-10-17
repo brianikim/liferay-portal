@@ -168,7 +168,7 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 			List.of(commerceOrderAttachmentId),
 			signatureRequest.get("requestableCommerceOrderAttachmentIds"));
 
-		_addDSRequest(user);
+		_addDSRequest(_commerceOrderAttachment, user);
 
 		additionalProps = _getAdditionalProps(user);
 
@@ -224,6 +224,8 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 			Collections.emptyList(),
 			signatureRequest.get("requestableCommerceOrderAttachmentIds"));
 
+		_testGetAdditionalPropsWhenCommerceOrderAttachmentIsRestricted();
+
 		additionalProps = _getAdditionalProps(UserTestUtil.addUser());
 
 		Assert.assertNull(additionalProps.get("signatureRequest"));
@@ -231,80 +233,6 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 		_saveDigitalSignatureConfiguration(false);
 
 		Assert.assertEquals(Collections.emptyMap(), _getAdditionalProps(user));
-	}
-
-	@Test
-	public void testGetAdditionalPropsWhenCommerceOrderAttachmentIsRestricted()
-		throws Exception {
-
-		_commerceOrderAttachment.setRestricted(true);
-
-		_commerceOrderAttachment =
-			_commerceOrderAttachmentLocalService.updateCommerceOrderAttachment(
-				_commerceOrderAttachment);
-
-		Role role = _roleLocalService.addRole(
-			RandomTestUtil.randomString(), TestPropsValues.getUserId(), null, 0,
-			RandomTestUtil.randomString(), null, null,
-			RoleConstants.TYPE_REGULAR, null,
-			ServiceContextTestUtil.getServiceContext(
-				_group.getGroupId(), TestPropsValues.getUserId()));
-
-		_resourcePermissionLocalService.setResourcePermissions(
-			_group.getCompanyId(), CommerceOrderAttachment.class.getName(),
-			ResourceConstants.SCOPE_GROUP,
-			String.valueOf(_commerceOrder.getGroupId()), role.getRoleId(),
-			new String[] {ActionKeys.VIEW});
-
-		AccountEntry accountEntry = _commerceOrder.getAccountEntry();
-
-		_resourcePermissionLocalService.setResourcePermissions(
-			_group.getCompanyId(), CommerceOrderConstants.RESOURCE_NAME,
-			ResourceConstants.SCOPE_GROUP,
-			String.valueOf(accountEntry.getAccountEntryGroupId()),
-			role.getRoleId(),
-			new String[] {CommerceOrderActionKeys.MANAGE_COMMERCE_ORDERS});
-
-		User user = UserTestUtil.addUser();
-
-		_roleLocalService.addUserRole(user.getUserId(), role);
-
-		Map<String, Object> additionalProps = _getAdditionalProps(user);
-
-		Map<String, Object> signatureRequest =
-			(Map<String, Object>)additionalProps.get("signatureRequest");
-
-		Assert.assertEquals(
-			Collections.emptyList(),
-			signatureRequest.get("requestableCommerceOrderAttachmentIds"));
-
-		_addDSRequest(TestPropsValues.getUser());
-
-		additionalProps = _getAdditionalProps(user);
-
-		Assert.assertEquals(
-			Collections.emptyMap(), additionalProps.get("signatureStatuses"));
-
-		_resourcePermissionLocalService.setResourcePermissions(
-			_group.getCompanyId(), CommerceOrderConstants.RESOURCE_NAME,
-			ResourceConstants.SCOPE_GROUP,
-			String.valueOf(accountEntry.getAccountEntryGroupId()),
-			role.getRoleId(),
-			new String[] {
-				CommerceOrderActionKeys.MANAGE_COMMERCE_ORDERS,
-				CommerceOrderActionKeys.
-					VIEW_RESTRICTED_COMMERCE_ORDER_ATTACHMENTS
-			});
-
-		additionalProps = _getAdditionalProps(user);
-
-		Assert.assertEquals(
-			HashMapBuilder.put(
-				String.valueOf(
-					_commerceOrderAttachment.getCommerceOrderAttachmentId()),
-				DSRequestConstants.STATUS_SENT
-			).build(),
-			additionalProps.get("signatureStatuses"));
 	}
 
 	@Test
@@ -331,7 +259,10 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 			Collections.emptyList(), _getFDSActionDropdownItemIds(user));
 	}
 
-	private void _addDSRequest(User user) throws Exception {
+	private void _addDSRequest(
+			CommerceOrderAttachment commerceOrderAttachment, User user)
+		throws Exception {
+
 		DSEnvelope dsEnvelope = new DSEnvelope();
 
 		dsEnvelope.setDSEnvelopeId(RandomTestUtil.randomString());
@@ -356,7 +287,7 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 				long[].class
 			},
 			_group.getCompanyId(), _group.getGroupId(), user.getUserId(),
-			dsEnvelope, new long[] {_commerceOrderAttachment.getFileEntryId()});
+			dsEnvelope, new long[] {commerceOrderAttachment.getFileEntryId()});
 	}
 
 	private Map<String, Object> _getAdditionalProps(User user)
@@ -440,6 +371,90 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 				).put(
 					"siteSettingsStrategy", "always-inherit"
 				).build());
+	}
+
+	private void _testGetAdditionalPropsWhenCommerceOrderAttachmentIsRestricted()
+		throws Exception {
+
+		CommerceOrderAttachment commerceOrderAttachment =
+			_commerceOrderAttachmentLocalService.addCommerceOrderAttachment(
+				RandomTestUtil.randomString(), TestPropsValues.getUserId(),
+				_commerceOrder.getCommerceOrderId(),
+				RandomTestUtil.nextDouble(), true,
+				RandomTestUtil.randomString(), "invoice",
+				RandomTestUtil.randomString() + ".pdf",
+				new ByteArrayInputStream(RandomTestUtil.randomBytes()));
+
+		Role role = _roleLocalService.addRole(
+			RandomTestUtil.randomString(), TestPropsValues.getUserId(), null, 0,
+			RandomTestUtil.randomString(), null, null,
+			RoleConstants.TYPE_REGULAR, null,
+			ServiceContextTestUtil.getServiceContext(
+				_group.getGroupId(), TestPropsValues.getUserId()));
+
+		_resourcePermissionLocalService.setResourcePermissions(
+			_group.getCompanyId(), CommerceOrderAttachment.class.getName(),
+			ResourceConstants.SCOPE_GROUP,
+			String.valueOf(_commerceOrder.getGroupId()), role.getRoleId(),
+			new String[] {ActionKeys.VIEW});
+
+		AccountEntry accountEntry = _commerceOrder.getAccountEntry();
+
+		_resourcePermissionLocalService.setResourcePermissions(
+			_group.getCompanyId(), CommerceOrderConstants.RESOURCE_NAME,
+			ResourceConstants.SCOPE_GROUP,
+			String.valueOf(accountEntry.getAccountEntryGroupId()),
+			role.getRoleId(),
+			new String[] {CommerceOrderActionKeys.MANAGE_COMMERCE_ORDERS});
+
+		User user = UserTestUtil.addUser();
+
+		_roleLocalService.addUserRole(user.getUserId(), role);
+
+		Map<String, Object> additionalProps = _getAdditionalProps(user);
+
+		Map<String, Object> signatureRequest =
+			(Map<String, Object>)additionalProps.get("signatureRequest");
+
+		Assert.assertEquals(
+			Collections.emptyList(),
+			signatureRequest.get("requestableCommerceOrderAttachmentIds"));
+
+		_addDSRequest(commerceOrderAttachment, TestPropsValues.getUser());
+
+		additionalProps = _getAdditionalProps(user);
+
+		String commerceOrderAttachmentId = String.valueOf(
+			_commerceOrderAttachment.getCommerceOrderAttachmentId());
+
+		Assert.assertEquals(
+			HashMapBuilder.put(
+				commerceOrderAttachmentId, DSRequestConstants.STATUS_SENT
+			).build(),
+			additionalProps.get("signatureStatuses"));
+
+		_resourcePermissionLocalService.setResourcePermissions(
+			_group.getCompanyId(), CommerceOrderConstants.RESOURCE_NAME,
+			ResourceConstants.SCOPE_GROUP,
+			String.valueOf(accountEntry.getAccountEntryGroupId()),
+			role.getRoleId(),
+			new String[] {
+				CommerceOrderActionKeys.MANAGE_COMMERCE_ORDERS,
+				CommerceOrderActionKeys.
+					VIEW_RESTRICTED_COMMERCE_ORDER_ATTACHMENTS
+			});
+
+		additionalProps = _getAdditionalProps(user);
+
+		Assert.assertEquals(
+			HashMapBuilder.put(
+				commerceOrderAttachmentId, DSRequestConstants.STATUS_SENT
+			).put(
+				String.valueOf(
+					commerceOrderAttachment.getCommerceOrderAttachmentId()),
+				DSRequestConstants.STATUS_SENT
+			).build(),
+			additionalProps.get("signatureStatuses"));
 	}
 
 	private CommerceOrder _commerceOrder;
