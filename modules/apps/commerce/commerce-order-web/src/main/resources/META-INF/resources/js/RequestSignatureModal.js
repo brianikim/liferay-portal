@@ -249,13 +249,13 @@ export default function RequestSignatureModal({
 	const [sequential, setSequential] = useState(true);
 	const [submitting, setSubmitting] = useState(false);
 
-	const signerUserIds = [
+	const accountUserIds = [
 		...accountUsers.map(({userId}) => userId),
 		buyer?.userId,
 	];
 
 	const countersignerIndex = recipients.findIndex(
-		({userId}) => userId && !signerUserIds.includes(userId)
+		({userId}) => userId && !accountUserIds.includes(userId)
 	);
 
 	const setRecipient = (recipientIndex, user) =>
