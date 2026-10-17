@@ -162,8 +162,8 @@ public class AddDSRequestMVCResourceCommandTest {
 			portletException.getCause() instanceof PrincipalException);
 
 		_testServeResource(
-			"Days to warn signers must be fewer than days until expiration.", 1,
-			1);
+			"Days to warn recipients must be fewer than days until expiration.",
+			1, 1);
 
 		User user1 = UserTestUtil.addUser();
 

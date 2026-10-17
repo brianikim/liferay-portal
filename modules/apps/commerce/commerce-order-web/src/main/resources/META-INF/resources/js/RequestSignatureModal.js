@@ -200,7 +200,7 @@ function validate({emailSubject, expireAfter, expireWarn, recipients}) {
 
 	if (Number(expireAfter) > 0 && Number(expireWarn) >= Number(expireAfter)) {
 		errors.expireWarn = Liferay.Language.get(
-			'days-to-warn-signers-must-be-fewer-than-days-until-expiration'
+			'days-to-warn-recipients-must-be-fewer-than-days-until-expiration'
 		);
 	}
 
@@ -602,7 +602,7 @@ export default function RequestSignatureModal({
 				>
 					<label htmlFor={`${portletNamespace}expireWarn`}>
 						{Liferay.Language.get(
-							'days-to-warn-signers-before-expiration'
+							'days-to-warn-recipients-before-expiration'
 						)}
 					</label>
 

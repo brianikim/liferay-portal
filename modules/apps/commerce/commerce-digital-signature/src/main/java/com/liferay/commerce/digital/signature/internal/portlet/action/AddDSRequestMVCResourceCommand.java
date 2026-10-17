@@ -138,8 +138,8 @@ public class AddDSRequestMVCResourceCommand
 				throw new PortalException(
 					_language.get(
 						themeDisplay.getLocale(),
-						"days-to-warn-signers-must-be-fewer-than-days-until-" +
-							"expiration"));
+						"days-to-warn-recipients-must-be-fewer-than-days-" +
+							"until-expiration"));
 			}
 
 			if (!DSCommerceOrderAttachmentUtil.hasAllowedFileExtension(
