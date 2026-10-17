@@ -92,6 +92,11 @@ public class ResendDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
 						"no-signature-request-was-found-for-this-document"));
 			}
 
+			_dsRequestManager.updateDSRequest(dsRequest.getDSRequestId());
+
+			dsRequest = _dsRequestManager.fetchDSRequest(
+				commerceOrder.getCompanyId(), dsRequest.getDSRequestId());
+
 			if (dsRequest.isTerminal()) {
 				throw new PortalException(
 					_language.get(

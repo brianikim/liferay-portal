@@ -20,6 +20,7 @@ import com.liferay.commerce.test.util.CommerceOrderAttachmentTestUtil;
 import com.liferay.commerce.test.util.CommerceTestUtil;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.digital.signature.constants.DSRequestConstants;
+import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
@@ -49,6 +50,7 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
@@ -129,10 +131,27 @@ public class ResendDSRequestMVCResourceCommandTest {
 				RandomTestUtil.randomString(), "invoice",
 				RandomTestUtil.randomString() + ".pdf",
 				new ByteArrayInputStream(RandomTestUtil.randomBytes()));
+
+		_dsEnvelopeManager =
+			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager",
+				ProxyUtil.newProxyInstance(
+					DSEnvelopeManager.class.getClassLoader(),
+					new Class<?>[] {DSEnvelopeManager.class},
+					(proxy, method, arguments) -> {
+						if (Objects.equals(method.getName(), "getDSEnvelope")) {
+							return _dsEnvelope;
+						}
+
+						return null;
+					}));
 	}
 
 	@After
 	public void tearDown() throws Exception {
+		ReflectionTestUtil.setFieldValue(
+			_dsRequestManager, "_dsEnvelopeManager", _dsEnvelopeManager);
+
 		_companyConfigurationTemporarySwapper.close();
 	}
 
@@ -185,15 +204,26 @@ public class ResendDSRequestMVCResourceCommandTest {
 			_commerceOrderAttachment.getCommerceOrderAttachmentId(),
 			TestPropsValues.getUser());
 
-		List<NotificationQueueEntry> notificationQueueEntries = ListUtil.filter(
-			_notificationQueueEntryLocalService.getNotificationQueueEntries(
-				QueryUtil.ALL_POS, QueryUtil.ALL_POS),
-			notificationQueueEntry ->
-				Objects.equals(
-					notificationQueueEntry.getClassName(),
-					DSRequest.class.getName()) &&
-				(notificationQueueEntry.getClassPK() ==
-					dsRequest.getDSRequestId()));
+		List<NotificationQueueEntry> notificationQueueEntries =
+			_getNotificationQueueEntries(dsRequest);
+
+		Assert.assertEquals(
+			notificationQueueEntries.toString(), 1,
+			notificationQueueEntries.size());
+
+		List<DSRecipient> dsRecipients = _dsEnvelope.getDSRecipients();
+
+		DSRecipient dsRecipient = dsRecipients.get(0);
+
+		dsRecipient.setStatus(DSRequestConstants.STATUS_COMPLETED);
+
+		JSONObject jsonObject = _serveResource(
+			_commerceOrderAttachment.getCommerceOrderAttachmentId(),
+			TestPropsValues.getUser());
+
+		Assert.assertEquals("{}", jsonObject.toString());
+
+		notificationQueueEntries = _getNotificationQueueEntries(dsRequest);
 
 		Assert.assertEquals(
 			notificationQueueEntries.toString(), 1,
@@ -207,6 +237,7 @@ public class ResendDSRequestMVCResourceCommandTest {
 
 		DSRecipient dsRecipient = new DSRecipient();
 
+		dsRecipient.setDSClientUserId(String.valueOf(user.getUserId()));
 		dsRecipient.setDSRecipientId("1");
 		dsRecipient.setEmailAddress(user.getEmailAddress());
 		dsRecipient.setName(user.getFullName());
@@ -218,6 +249,8 @@ public class ResendDSRequestMVCResourceCommandTest {
 		dsEnvelope.setEmailSubject(RandomTestUtil.randomString());
 		dsEnvelope.setStatus(status);
 
+		_dsEnvelope = dsEnvelope;
+
 		return ReflectionTestUtil.invoke(
 			_dsRequestManager, "_addDSRequest",
 			new Class<?>[] {
@@ -226,6 +259,20 @@ public class ResendDSRequestMVCResourceCommandTest {
 			},
 			_group.getCompanyId(), _group.getGroupId(), user.getUserId(),
 			dsEnvelope, new long[] {_commerceOrderAttachment.getFileEntryId()});
+	}
+
+	private List<NotificationQueueEntry> _getNotificationQueueEntries(
+		DSRequest dsRequest) {
+
+		return ListUtil.filter(
+			_notificationQueueEntryLocalService.getNotificationQueueEntries(
+				QueryUtil.ALL_POS, QueryUtil.ALL_POS),
+			notificationQueueEntry ->
+				Objects.equals(
+					notificationQueueEntry.getClassName(),
+					DSRequest.class.getName()) &&
+				(notificationQueueEntry.getClassPK() ==
+					dsRequest.getDSRequestId()));
 	}
 
 	private void _saveDigitalSignatureConfiguration(boolean enabled)
@@ -319,6 +366,9 @@ public class ResendDSRequestMVCResourceCommandTest {
 
 	@Inject
 	private CompanyLocalService _companyLocalService;
+
+	private DSEnvelope _dsEnvelope;
+	private DSEnvelopeManager _dsEnvelopeManager;
 
 	@Inject
 	private DSRequestManager _dsRequestManager;
