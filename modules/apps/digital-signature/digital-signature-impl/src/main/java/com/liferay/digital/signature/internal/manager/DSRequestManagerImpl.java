@@ -406,7 +406,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					objectEntry.getUserId());
 			}
 
-			_updateRecipientStatuses(
+			_updateDSRequestRecipientStatuses(
 				companyId, dsEnvelope, dsRequestId, groupId, requestStatus);
 
 			_objectEntryLocalService.partialUpdateObjectEntry(
@@ -1010,10 +1010,11 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			Locale locale = _getLocale(
 				dsRequest.getSiteGroupId(), dsRequestRecipient.getUserId());
 
-			String subject = dsRequest.getEmailSubject();
+			String emailSubject = dsRequest.getEmailSubject();
 
-			if (Validator.isNull(subject)) {
-				subject = _language.get(locale, "you-have-a-document-to-sign");
+			if (Validator.isNull(emailSubject)) {
+				emailSubject = _language.get(
+					locale, "you-have-a-document-to-sign");
 			}
 
 			NotificationType notificationType =
@@ -1037,7 +1038,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 						"[%DS_REQUEST_EMAIL_MESSAGE%]",
 						_getEmailMessage(dsRequest.getEmailMessage(), locale)
 					).put(
-						"[%DS_REQUEST_EMAIL_SUBJECT%]", subject
+						"[%DS_REQUEST_EMAIL_SUBJECT%]", emailSubject
 					).put(
 						"[%DS_REQUEST_FROM_ADDRESS%]",
 						PrefsPropsUtil.getString(
@@ -1092,6 +1093,69 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 
 		return Date.from(localDateTime.toInstant(ZoneOffset.UTC));
+	}
+
+	private void _updateDSRequestRecipientStatuses(
+			long companyId, DSEnvelope dsEnvelope, long dsRequestId,
+			long groupId, String requestStatus)
+		throws Exception {
+
+		Map<String, DSRecipient> dsRecipients = new HashMap<>();
+
+		for (DSRecipient dsRecipient : dsEnvelope.getDSRecipients()) {
+			dsRecipients.put(dsRecipient.getDSClientUserId(), dsRecipient);
+		}
+
+		ObjectDefinition objectDefinition =
+			_objectDefinitionLocalService.
+				getObjectDefinitionByExternalReferenceCode(
+					DSObjectDefinitionConstants.
+						EXTERNAL_REFERENCE_CODE_REQUEST_RECIPIENT,
+					companyId);
+
+		for (Map<String, Serializable> values :
+				_getValuesList(
+					companyId,
+					"(r_dsRequestToDSRequestRecipients_l_dsRequestId eq '" +
+						dsRequestId + "')",
+					objectDefinition, null)) {
+
+			DSRecipient dsRecipient = dsRecipients.get(
+				String.valueOf(
+					MapUtil.getLong(
+						values, "r_userToDSRequestRecipients_userId")));
+
+			if (dsRecipient == null) {
+				continue;
+			}
+
+			long dsRequestRecipientId = MapUtil.getLong(
+				values, objectDefinition.getPKObjectFieldName());
+
+			ObjectEntry objectEntry = _objectEntryLocalService.fetchObjectEntry(
+				dsRequestRecipientId);
+
+			if (objectEntry == null) {
+				continue;
+			}
+
+			_objectEntryLocalService.partialUpdateObjectEntry(
+				objectEntry.getUserId(), dsRequestRecipientId,
+				ObjectEntryFolderConstants.
+					PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
+				HashMapBuilder.<String, Serializable>put(
+					"requestRecipientStatus",
+					() -> _getDSRequestRecipientStatus(dsRecipient, requestStatus)
+				).put(
+					"requestRecipientStatusDate",
+					() -> _toDate(dsRecipient.getStatusLocalDateTime())
+				).put(
+					"sentDate",
+					() -> _toDate(dsRecipient.getSentLocalDateTime())
+				).build(),
+				_getServiceContext(
+					companyId, groupId, objectEntry.getUserId()));
+		}
 	}
 
 	private void _updateFileEntries(
@@ -1157,69 +1221,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					WorkflowConstants.STATUS_APPROVED, serviceContext,
 					new HashMap<>());
 			}
-		}
-	}
-
-	private void _updateRecipientStatuses(
-			long companyId, DSEnvelope dsEnvelope, long dsRequestId,
-			long groupId, String requestStatus)
-		throws Exception {
-
-		Map<String, DSRecipient> dsRecipients = new HashMap<>();
-
-		for (DSRecipient dsRecipient : dsEnvelope.getDSRecipients()) {
-			dsRecipients.put(dsRecipient.getDSClientUserId(), dsRecipient);
-		}
-
-		ObjectDefinition objectDefinition =
-			_objectDefinitionLocalService.
-				getObjectDefinitionByExternalReferenceCode(
-					DSObjectDefinitionConstants.
-						EXTERNAL_REFERENCE_CODE_REQUEST_RECIPIENT,
-					companyId);
-
-		for (Map<String, Serializable> values :
-				_getValuesList(
-					companyId,
-					"(r_dsRequestToDSRequestRecipients_l_dsRequestId eq '" +
-						dsRequestId + "')",
-					objectDefinition, null)) {
-
-			DSRecipient dsRecipient = dsRecipients.get(
-				String.valueOf(
-					MapUtil.getLong(
-						values, "r_userToDSRequestRecipients_userId")));
-
-			if (dsRecipient == null) {
-				continue;
-			}
-
-			long dsRequestRecipientId = MapUtil.getLong(
-				values, objectDefinition.getPKObjectFieldName());
-
-			ObjectEntry objectEntry = _objectEntryLocalService.fetchObjectEntry(
-				dsRequestRecipientId);
-
-			if (objectEntry == null) {
-				continue;
-			}
-
-			_objectEntryLocalService.partialUpdateObjectEntry(
-				objectEntry.getUserId(), dsRequestRecipientId,
-				ObjectEntryFolderConstants.
-					PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
-				HashMapBuilder.<String, Serializable>put(
-					"requestRecipientStatus",
-					() -> _getDSRequestRecipientStatus(dsRecipient, requestStatus)
-				).put(
-					"requestRecipientStatusDate",
-					() -> _toDate(dsRecipient.getStatusLocalDateTime())
-				).put(
-					"sentDate",
-					() -> _toDate(dsRecipient.getSentLocalDateTime())
-				).build(),
-				_getServiceContext(
-					companyId, groupId, objectEntry.getUserId()));
 		}
 	}
 

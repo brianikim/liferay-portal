@@ -56,7 +56,7 @@ public class DSRequestTest {
 	}
 
 	private DSRequest _createDSRequest(
-		String recipientStatus, String requestStatus, long userId) {
+		String requestRecipientStatus, String requestStatus, long userId) {
 
 		return new DSRequest(
 			RandomTestUtil.randomLong(), new Date(),
@@ -66,7 +66,7 @@ public class DSRequestTest {
 					HashMapBuilder.<String, Serializable>put(
 						"r_userToDSRequestRecipients_userId", userId
 					).put(
-						"requestRecipientStatus", recipientStatus
+						"requestRecipientStatus", requestRecipientStatus
 					).build())),
 			RandomTestUtil.randomString(), Collections.emptyList(),
 			RandomTestUtil.randomString(), RandomTestUtil.randomLong(),
