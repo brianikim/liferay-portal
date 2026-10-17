@@ -7,6 +7,7 @@ package com.liferay.commerce.digital.signature.internal.servlet;
 
 import com.liferay.commerce.model.CommerceOrderAttachment;
 import com.liferay.commerce.service.CommerceOrderAttachmentService;
+import com.liferay.digital.signature.constants.DSRequestConstants;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.digital.signature.model.DSRequestRecipient;
@@ -35,6 +36,7 @@ import java.io.PrintWriter;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -141,7 +143,8 @@ public class DSCommerceOrderSignatureStatusServlet extends HttpServlet {
 			"recipients",
 			JSONUtil.toJSONArray(
 				dsRequest.getDSRequestRecipients(),
-				this::_getRecipientJSONObject)
+				dsRequestRecipient -> _getRecipientJSONObject(
+					dsRequest, dsRequestRecipient))
 		).put(
 			"requestStatus", dsRequest.getStatus()
 		).put(
@@ -152,14 +155,15 @@ public class DSCommerceOrderSignatureStatusServlet extends HttpServlet {
 	}
 
 	private JSONObject _getRecipientJSONObject(
-		DSRequestRecipient dsRequestRecipient) {
+		DSRequest dsRequest, DSRequestRecipient dsRequestRecipient) {
 
 		return JSONUtil.put(
 			"emailAddress", dsRequestRecipient.getEmailAddress()
 		).put(
 			"name", dsRequestRecipient.getName()
 		).put(
-			"requestRecipientStatus", dsRequestRecipient.getStatus()
+			"requestRecipientStatus",
+			_getRequestRecipientStatus(dsRequest, dsRequestRecipient)
 		).put(
 			"sentDate", _toTime(dsRequestRecipient.getSentDate())
 		).put(
@@ -167,6 +171,22 @@ public class DSCommerceOrderSignatureStatusServlet extends HttpServlet {
 		).put(
 			"statusDate", _toTime(dsRequestRecipient.getStatusDate())
 		);
+	}
+
+	private String _getRequestRecipientStatus(
+		DSRequest dsRequest, DSRequestRecipient dsRequestRecipient) {
+
+		String status = dsRequestRecipient.getStatus();
+
+		if (Objects.equals(
+				dsRequest.getStatus(), DSRequestConstants.STATUS_EXPIRED) &&
+			(Objects.equals(status, DSRequestConstants.STATUS_CREATED) ||
+			 Objects.equals(status, DSRequestConstants.STATUS_SENT))) {
+
+			return DSRequestConstants.STATUS_EXPIRED;
+		}
+
+		return status;
 	}
 
 	private void _sendError(HttpServletResponse httpServletResponse)

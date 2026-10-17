@@ -26,6 +26,8 @@ import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.digital.signature.model.DSRequest;
+import com.liferay.object.constants.ObjectEntryFolderConstants;
+import com.liferay.object.service.ObjectEntryLocalService;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactory;
@@ -46,6 +48,7 @@ import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
+import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.WebKeys;
@@ -60,6 +63,10 @@ import jakarta.servlet.Servlet;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.ByteArrayInputStream;
+import java.io.Serializable;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -169,9 +176,11 @@ public class DSCommerceOrderSignatureStatusServletTest {
 				_commerceOrderAttachment.getCommerceOrderAttachmentId(), user));
 
 		DSRequest voidedDSRequest = _addDSRequest(
-			DSRequestConstants.STATUS_VOIDED, user);
+			DSRequestConstants.STATUS_VOIDED,
+			_createDSRecipient(DSRequestConstants.STATUS_SENT, user));
 		DSRequest sentDSRequest = _addDSRequest(
-			DSRequestConstants.STATUS_SENT, user);
+			DSRequestConstants.STATUS_SENT,
+			_createDSRecipient(DSRequestConstants.STATUS_SENT, user));
 
 		JSONObject jsonObject = _jsonFactory.createJSONObject(
 			_getContentAsString(
@@ -216,6 +225,7 @@ public class DSCommerceOrderSignatureStatusServletTest {
 			_commerceOrderAttachment.getCommerceOrderAttachmentId(),
 			UserTestUtil.addUser());
 
+		_testDoGetWhenDSRequestIsExpired();
 		_testDoGetWithAccountRole();
 	}
 
@@ -231,20 +241,13 @@ public class DSCommerceOrderSignatureStatusServletTest {
 			new ByteArrayInputStream(RandomTestUtil.randomBytes()));
 	}
 
-	private DSRequest _addDSRequest(String status, User user) throws Exception {
+	private DSRequest _addDSRequest(String status, DSRecipient... dsRecipients)
+		throws Exception {
+
 		DSEnvelope dsEnvelope = new DSEnvelope();
 
 		dsEnvelope.setDSEnvelopeId(RandomTestUtil.randomString());
-
-		DSRecipient dsRecipient = new DSRecipient();
-
-		dsRecipient.setDSRecipientId("1");
-		dsRecipient.setEmailAddress(user.getEmailAddress());
-		dsRecipient.setName(user.getFullName());
-		dsRecipient.setRoutingOrder(1);
-		dsRecipient.setStatus(DSRequestConstants.STATUS_SENT);
-
-		dsEnvelope.setDSRecipients(ListUtil.fromArray(dsRecipient));
+		dsEnvelope.setDSRecipients(ListUtil.fromArray(dsRecipients));
 
 		dsEnvelope.setEmailSubject(RandomTestUtil.randomString());
 		dsEnvelope.setStatus(status);
@@ -255,8 +258,9 @@ public class DSCommerceOrderSignatureStatusServletTest {
 				long.class, long.class, long.class, DSEnvelope.class,
 				long[].class
 			},
-			_group.getCompanyId(), _group.getGroupId(), user.getUserId(),
-			dsEnvelope, new long[] {_commerceOrderAttachment.getFileEntryId()});
+			_group.getCompanyId(), _group.getGroupId(),
+			TestPropsValues.getUserId(), dsEnvelope,
+			new long[] {_commerceOrderAttachment.getFileEntryId()});
 	}
 
 	private void _assertNotFound(long commerceOrderAttachmentId, User user)
@@ -274,6 +278,18 @@ public class DSCommerceOrderSignatureStatusServletTest {
 				HttpServletResponse.SC_NOT_FOUND,
 				mockHttpServletResponse.getStatus());
 		}
+	}
+
+	private DSRecipient _createDSRecipient(String status, User user) {
+		DSRecipient dsRecipient = new DSRecipient();
+
+		dsRecipient.setDSRecipientId(RandomTestUtil.randomString());
+		dsRecipient.setEmailAddress(user.getEmailAddress());
+		dsRecipient.setName(user.getFullName());
+		dsRecipient.setRoutingOrder(1);
+		dsRecipient.setStatus(status);
+
+		return dsRecipient;
 	}
 
 	private String _getContentAsString(
@@ -321,6 +337,55 @@ public class DSCommerceOrderSignatureStatusServletTest {
 			ResourceConstants.SCOPE_GROUP,
 			String.valueOf(_accountEntry.getAccountEntryGroupId()),
 			role.getRoleId(), actionIds);
+	}
+
+	private void _testDoGetWhenDSRequestIsExpired() throws Exception {
+		User user1 = TestPropsValues.getUser();
+		User user2 = UserTestUtil.addUser();
+
+		DSRequest dsRequest = _addDSRequest(
+			DSRequestConstants.STATUS_SENT,
+			_createDSRecipient(DSRequestConstants.STATUS_SENT, user1),
+			_createDSRecipient(DSRequestConstants.STATUS_COMPLETED, user2));
+
+		_objectEntryLocalService.partialUpdateObjectEntry(
+			TestPropsValues.getUserId(), dsRequest.getDSRequestId(),
+			ObjectEntryFolderConstants.PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
+			HashMapBuilder.<String, Serializable>put(
+				"requestStatus", DSRequestConstants.STATUS_EXPIRED
+			).build(),
+			ServiceContextTestUtil.getServiceContext(
+				_group.getGroupId(), TestPropsValues.getUserId()));
+
+		JSONObject jsonObject = _jsonFactory.createJSONObject(
+			_getContentAsString(
+				_commerceOrderAttachment.getCommerceOrderAttachmentId(),
+				user1));
+
+		Assert.assertEquals(
+			DSRequestConstants.STATUS_EXPIRED,
+			jsonObject.getString("requestStatus"));
+
+		Map<String, String> requestRecipientStatuses = new HashMap<>();
+
+		JSONArray recipientsJSONArray = jsonObject.getJSONArray("recipients");
+
+		for (int i = 0; i < recipientsJSONArray.length(); i++) {
+			JSONObject recipientJSONObject = recipientsJSONArray.getJSONObject(
+				i);
+
+			requestRecipientStatuses.put(
+				recipientJSONObject.getString("emailAddress"),
+				recipientJSONObject.getString("requestRecipientStatus"));
+		}
+
+		Assert.assertEquals(
+			HashMapBuilder.put(
+				user1.getEmailAddress(), DSRequestConstants.STATUS_EXPIRED
+			).put(
+				user2.getEmailAddress(), DSRequestConstants.STATUS_COMPLETED
+			).build(),
+			requestRecipientStatuses);
 	}
 
 	private void _testDoGetWithAccountRole() throws Exception {
@@ -392,6 +457,9 @@ public class DSCommerceOrderSignatureStatusServletTest {
 
 	@Inject
 	private JSONFactory _jsonFactory;
+
+	@Inject
+	private ObjectEntryLocalService _objectEntryLocalService;
 
 	@Inject
 	private ResourcePermissionLocalService _resourcePermissionLocalService;
