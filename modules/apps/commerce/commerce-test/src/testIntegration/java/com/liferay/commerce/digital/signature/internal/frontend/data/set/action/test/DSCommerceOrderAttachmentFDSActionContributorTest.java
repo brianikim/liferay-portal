@@ -150,11 +150,11 @@ public class DSCommerceOrderAttachmentFDSActionContributorTest {
 		_addDSRequest(_commerceOrderAttachment, user);
 
 		Assert.assertEquals(
-			List.of("sign", "view-signature-status"),
+			List.of("sign", "view-signature-details"),
 			_getFDSActionDropdownItemIds(user));
 
 		Assert.assertEquals(
-			List.of("view-signature-status"),
+			List.of("view-signature-details"),
 			_getFDSActionDropdownItemIds(_addUser()));
 		Assert.assertEquals(
 			Collections.emptyList(),

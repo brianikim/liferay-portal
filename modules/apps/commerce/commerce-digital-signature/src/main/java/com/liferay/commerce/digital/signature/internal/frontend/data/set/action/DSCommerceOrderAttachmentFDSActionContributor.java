@@ -120,18 +120,18 @@ public class DSCommerceOrderAttachmentFDSActionContributor
 
 		fdsActionDropdownItems.add(
 			FDSActionDropdownItemBuilder.putData(
-				"signatureStatusURL",
+				"signatureDetailsURL",
 				DSCommerceOrderAttachmentUtil.getActionURL(
-					"/commerce-digital-signature/signature-status",
+					"/commerce-digital-signature/signature-details",
 					themeDisplay)
 			).setHref(
 				StringPool.POUND
 			).setIcon(
 				"list-ul"
 			).setLabel(
-				_language.get(httpServletRequest, "view-signature-status")
+				_language.get(httpServletRequest, "view-signature-details")
 			).build(
-				"view-signature-status"
+				"view-signature-details"
 			));
 
 		return fdsActionDropdownItems;

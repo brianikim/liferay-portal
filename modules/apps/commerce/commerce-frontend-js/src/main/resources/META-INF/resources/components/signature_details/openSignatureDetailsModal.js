@@ -12,6 +12,6 @@ export default function openSignatureDetailsModal({url}) {
 	openModal({
 		bodyComponent: () => React.createElement(SignatureDetails, {url}),
 		size: 'lg',
-		title: Liferay.Language.get('signature-status'),
+		title: Liferay.Language.get('signature-details'),
 	});
 }

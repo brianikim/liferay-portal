@@ -213,7 +213,7 @@ const AttachmentsFDSPropsTransformer = (props) => {
 				};
 			}
 
-			if (actionId === 'view-signature-status') {
+			if (actionId === 'view-signature-details') {
 				return {
 					...action,
 					isVisible: (item) => !!signatureStatuses[item?.id],
@@ -264,12 +264,12 @@ const AttachmentsFDSPropsTransformer = (props) => {
 					formatActionUrl(action.data.resendURL, itemData)
 				).catch(openErrorToast);
 			}
-			else if (actionId === 'view-signature-status') {
+			else if (actionId === 'view-signature-details') {
 				event?.preventDefault();
 
 				openSignatureDetailsModal({
 					url: formatActionUrl(
-						action.data.signatureStatusURL,
+						action.data.signatureDetailsURL,
 						itemData
 					),
 				});

@@ -84,7 +84,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
  */
 @FeatureFlag("LPD-69290")
 @RunWith(Arquillian.class)
-public class DSCommerceOrderSignatureStatusServletTest {
+public class DSCommerceOrderSignatureDetailsServletTest {
 
 	@ClassRule
 	@Rule
@@ -97,7 +97,7 @@ public class DSCommerceOrderSignatureStatusServletTest {
 	public void setUp() throws Exception {
 		BatchEngineTestUtil.processBatchEngineUnits(
 			"com.liferay.digital.signature.impl",
-			DSCommerceOrderSignatureStatusServletTest.class,
+			DSCommerceOrderSignatureDetailsServletTest.class,
 			new String[] {
 				".com.liferay.digital.signature.internal.batch.01.object." +
 					"definition"
@@ -270,7 +270,7 @@ public class DSCommerceOrderSignatureStatusServletTest {
 
 		try (LogCapture logCapture = LoggerTestUtil.configureLog4JLogger(
 				"com.liferay.commerce.digital.signature.internal.servlet." +
-					"DSCommerceOrderSignatureStatusServlet",
+					"DSCommerceOrderSignatureDetailsServlet",
 				LoggerTestUtil.OFF)) {
 
 			MockHttpServletResponse mockHttpServletResponse =
@@ -470,7 +470,7 @@ public class DSCommerceOrderSignatureStatusServletTest {
 	private RoleLocalService _roleLocalService;
 
 	@Inject(
-		filter = "osgi.http.whiteboard.servlet.name=com.liferay.commerce.digital.signature.internal.servlet.DSCommerceOrderSignatureStatusServlet"
+		filter = "osgi.http.whiteboard.servlet.name=com.liferay.commerce.digital.signature.internal.servlet.DSCommerceOrderSignatureDetailsServlet"
 	)
 	private Servlet _servlet;
 

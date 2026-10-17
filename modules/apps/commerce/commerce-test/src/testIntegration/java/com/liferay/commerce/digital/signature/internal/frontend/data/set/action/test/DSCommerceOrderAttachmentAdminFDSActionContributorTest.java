@@ -241,7 +241,7 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 
 		Assert.assertEquals(
 			List.of(
-				"request-signature", "view-signature-status",
+				"request-signature", "view-signature-details",
 				"resend-signature-request", "void-signature-request"),
 			_getFDSActionDropdownItemIds(user));
 
