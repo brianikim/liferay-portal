@@ -328,7 +328,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 		catch (Exception exception) {
 			_log.error(
-				"Unable to load DS requests for site " + siteGroupId,
+				"Unable to load digital signature requests for site " +
+					siteGroupId,
 				exception);
 
 			return new ArrayList<>();
@@ -363,7 +364,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 		catch (Exception exception) {
 			_log.error(
-				"Unable to count DS requests for site " + siteGroupId,
+				"Unable to count digital signature requests for site " +
+					siteGroupId,
 				exception);
 
 			return 0;
@@ -1216,7 +1218,9 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					companyId, groupId, objectEntry.getUserId()));
 		}
 		catch (Exception exception) {
-			_log.error("Unable to update DS request " + dsRequestId, exception);
+			_log.error(
+				"Unable to update digital signature request " + dsRequestId,
+				exception);
 		}
 	}
 
