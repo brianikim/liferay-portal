@@ -312,7 +312,10 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				_filterFactory.create(
 					"siteGroupId eq " + siteGroupId, objectDefinition),
 				false, search, start, end,
-				new Sort[] {new Sort(Field.CREATE_DATE, Sort.LONG_TYPE, true)});
+				new Sort[] {
+					new Sort(Field.CREATE_DATE, Sort.LONG_TYPE, true),
+					new Sort("id", Sort.LONG_TYPE, true)
+				});
 
 			if (dsRequestIds.isEmpty()) {
 				return new ArrayList<>();
