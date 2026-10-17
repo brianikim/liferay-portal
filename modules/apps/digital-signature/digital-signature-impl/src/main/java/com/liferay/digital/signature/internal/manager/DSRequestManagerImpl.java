@@ -323,7 +323,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 						companyId, "(fileEntryId eq " + fileEntryId + ")",
 						objectDefinition,
 						new Sort[] {
-							new Sort(Field.CREATE_DATE, Sort.LONG_TYPE, true)
+							new Sort(Field.CREATE_DATE, Sort.LONG_TYPE, true),
+							new Sort("id", Sort.LONG_TYPE, true)
 						})) {
 
 				dsRequestIds.add(
