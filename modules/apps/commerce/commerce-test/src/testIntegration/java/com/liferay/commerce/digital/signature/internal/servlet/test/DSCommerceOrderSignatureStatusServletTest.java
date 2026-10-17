@@ -192,6 +192,8 @@ public class DSCommerceOrderSignatureStatusServletTest {
 		Assert.assertEquals(
 			DSRequestConstants.STATUS_SENT,
 			jsonObject.getString("requestStatus"));
+		Assert.assertEquals(
+			user.getFullName(), jsonObject.getString("userName"));
 
 		JSONArray historyJSONArray = jsonObject.getJSONArray("history");
 

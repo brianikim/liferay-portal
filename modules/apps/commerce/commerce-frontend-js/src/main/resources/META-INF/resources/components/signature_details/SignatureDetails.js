@@ -93,7 +93,7 @@ function SignatureDetailsContent({detail}) {
 				</div>
 
 				<div className="small text-secondary text-uppercase">
-					{Liferay.Language.get('requester')}
+					{Liferay.Language.get('sender')}
 				</div>
 
 				<div className="font-weight-semi-bold mb-3">
