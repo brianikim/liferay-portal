@@ -202,7 +202,7 @@ public abstract class BaseSignatureRequestResourceTestCase {
 		SignatureRequest signatureRequest = randomSignatureRequest();
 
 		signatureRequest.setDocumentTitles(regex);
-		signatureRequest.setEmailBody(regex);
+		signatureRequest.setEmailMessage(regex);
 		signatureRequest.setEmailSubject(regex);
 		signatureRequest.setName(regex);
 		signatureRequest.setStatus(regex);
@@ -214,7 +214,7 @@ public abstract class BaseSignatureRequestResourceTestCase {
 		signatureRequest = SignatureRequestSerDes.toDTO(json);
 
 		Assert.assertEquals(regex, signatureRequest.getDocumentTitles());
-		Assert.assertEquals(regex, signatureRequest.getEmailBody());
+		Assert.assertEquals(regex, signatureRequest.getEmailMessage());
 		Assert.assertEquals(regex, signatureRequest.getEmailSubject());
 		Assert.assertEquals(regex, signatureRequest.getName());
 		Assert.assertEquals(regex, signatureRequest.getStatus());
@@ -1206,8 +1206,8 @@ public abstract class BaseSignatureRequestResourceTestCase {
 				continue;
 			}
 
-			if (Objects.equals("emailBody", additionalAssertFieldName)) {
-				if (signatureRequest.getEmailBody() == null) {
+			if (Objects.equals("emailMessage", additionalAssertFieldName)) {
+				if (signatureRequest.getEmailMessage() == null) {
 					valid = false;
 				}
 
@@ -1465,10 +1465,10 @@ public abstract class BaseSignatureRequestResourceTestCase {
 				continue;
 			}
 
-			if (Objects.equals("emailBody", additionalAssertFieldName)) {
+			if (Objects.equals("emailMessage", additionalAssertFieldName)) {
 				if (!Objects.deepEquals(
-						signatureRequest1.getEmailBody(),
-						signatureRequest2.getEmailBody())) {
+						signatureRequest1.getEmailMessage(),
+						signatureRequest2.getEmailMessage())) {
 
 					return false;
 				}
@@ -1793,8 +1793,8 @@ public abstract class BaseSignatureRequestResourceTestCase {
 			return sb.toString();
 		}
 
-		if (entityFieldName.equals("emailBody")) {
-			Object object = signatureRequest.getEmailBody();
+		if (entityFieldName.equals("emailMessage")) {
+			Object object = signatureRequest.getEmailMessage();
 
 			String value = String.valueOf(object);
 
@@ -2117,7 +2117,7 @@ public abstract class BaseSignatureRequestResourceTestCase {
 				dateCreated = RandomTestUtil.nextDate();
 				documentTitles = StringUtil.toLowerCase(
 					RandomTestUtil.randomString());
-				emailBody =
+				emailMessage =
 					StringUtil.toLowerCase(RandomTestUtil.randomString()) +
 						"@liferay.com";
 				emailSubject =
@@ -2381,4 +2381,4 @@ public abstract class BaseSignatureRequestResourceTestCase {
 		_vulcanCRUDItemDelegateBuilderRegistry;
 
 }
-// LIFERAY-REST-BUILDER-HASH:-921899549
+// LIFERAY-REST-BUILDER-HASH:-1137665129
