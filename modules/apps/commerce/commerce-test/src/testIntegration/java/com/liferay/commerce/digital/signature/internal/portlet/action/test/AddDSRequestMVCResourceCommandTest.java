@@ -59,6 +59,8 @@ import jakarta.portlet.PortletException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 import java.util.List;
 import java.util.Objects;
@@ -184,6 +186,8 @@ public class AddDSRequestMVCResourceCommandTest {
 
 		_testServeResource("At least one recipient is required.", 0, 0);
 
+		_testServeResourceWhenResponseWriteFails();
+
 		AtomicReference<DSEnvelope> dsEnvelopeAtomicReference =
 			new AtomicReference<>();
 
@@ -273,6 +277,42 @@ public class AddDSRequestMVCResourceCommandTest {
 			TestPropsValues.getUserId());
 	}
 
+	private MockLiferayResourceRequest _getMockLiferayResourceRequest(
+			long commerceOrderAttachmentId, int expireAfter, int expireWarn,
+			User user, long... recipientUserIds)
+		throws Exception {
+
+		MockLiferayResourceRequest mockLiferayResourceRequest =
+			new MockLiferayResourceRequest();
+
+		ThemeDisplay themeDisplay = new ThemeDisplay();
+
+		themeDisplay.setCompany(
+			_companyLocalService.getCompany(_group.getCompanyId()));
+		themeDisplay.setLocale(LocaleUtil.US);
+		themeDisplay.setPermissionChecker(
+			PermissionCheckerFactoryUtil.create(user));
+		themeDisplay.setUser(user);
+
+		mockLiferayResourceRequest.setAttribute(
+			WebKeys.THEME_DISPLAY, themeDisplay);
+
+		mockLiferayResourceRequest.addParameter(
+			"commerceOrderAttachmentId",
+			String.valueOf(commerceOrderAttachmentId));
+		mockLiferayResourceRequest.addParameter(
+			"expireAfter", String.valueOf(expireAfter));
+		mockLiferayResourceRequest.addParameter(
+			"expireWarn", String.valueOf(expireWarn));
+
+		for (long recipientUserId : recipientUserIds) {
+			mockLiferayResourceRequest.addParameter(
+				"recipientUserIds", String.valueOf(recipientUserId));
+		}
+
+		return mockLiferayResourceRequest;
+	}
+
 	private void _saveDigitalSignatureConfiguration(boolean enabled)
 		throws Exception {
 
@@ -310,39 +350,14 @@ public class AddDSRequestMVCResourceCommandTest {
 			User user, long... recipientUserIds)
 		throws Exception {
 
-		MockLiferayResourceRequest mockLiferayResourceRequest =
-			new MockLiferayResourceRequest();
-
-		ThemeDisplay themeDisplay = new ThemeDisplay();
-
-		themeDisplay.setCompany(
-			_companyLocalService.getCompany(_group.getCompanyId()));
-		themeDisplay.setLocale(LocaleUtil.US);
-		themeDisplay.setPermissionChecker(
-			PermissionCheckerFactoryUtil.create(user));
-		themeDisplay.setUser(user);
-
-		mockLiferayResourceRequest.setAttribute(
-			WebKeys.THEME_DISPLAY, themeDisplay);
-
-		mockLiferayResourceRequest.addParameter(
-			"commerceOrderAttachmentId",
-			String.valueOf(commerceOrderAttachmentId));
-		mockLiferayResourceRequest.addParameter(
-			"expireAfter", String.valueOf(expireAfter));
-		mockLiferayResourceRequest.addParameter(
-			"expireWarn", String.valueOf(expireWarn));
-
-		for (long recipientUserId : recipientUserIds) {
-			mockLiferayResourceRequest.addParameter(
-				"recipientUserIds", String.valueOf(recipientUserId));
-		}
-
 		MockLiferayResourceResponse mockLiferayResourceResponse =
 			new MockLiferayResourceResponse();
 
 		_mvcResourceCommand.serveResource(
-			mockLiferayResourceRequest, mockLiferayResourceResponse);
+			_getMockLiferayResourceRequest(
+				commerceOrderAttachmentId, expireAfter, expireWarn, user,
+				recipientUserIds),
+			mockLiferayResourceResponse);
 
 		ByteArrayOutputStream byteArrayOutputStream =
 			(ByteArrayOutputStream)
@@ -363,6 +378,89 @@ public class AddDSRequestMVCResourceCommandTest {
 
 		Assert.assertEquals(
 			expectedMessage, jsonObject.getString("errorMessage"));
+	}
+
+	private void _testServeResourceWhenResponseWriteFails() throws Exception {
+		AtomicReference<String> dsEnvelopeIdAtomicReference =
+			new AtomicReference<>();
+		AtomicReference<String> voidedDSEnvelopeIdAtomicReference =
+			new AtomicReference<>();
+
+		DSEnvelopeManager proxyDSEnvelopeManager =
+			(DSEnvelopeManager)ProxyUtil.newProxyInstance(
+				DSEnvelopeManager.class.getClassLoader(),
+				new Class<?>[] {DSEnvelopeManager.class},
+				(proxy, method, arguments) -> {
+					if (Objects.equals(method.getName(), "addDSEnvelope")) {
+						DSEnvelope dsEnvelope = (DSEnvelope)arguments[2];
+
+						dsEnvelope.setDSEnvelopeId(
+							RandomTestUtil.randomString());
+
+						for (DSRecipient dsRecipient :
+								dsEnvelope.getDSRecipients()) {
+
+							dsRecipient.setStatus(
+								DSRequestConstants.STATUS_SENT);
+						}
+
+						dsEnvelopeIdAtomicReference.set(
+							dsEnvelope.getDSEnvelopeId());
+
+						return dsEnvelope;
+					}
+
+					if (Objects.equals(method.getName(), "voidDSEnvelope")) {
+						voidedDSEnvelopeIdAtomicReference.set(
+							(String)arguments[2]);
+					}
+
+					return null;
+				});
+
+		DSEnvelopeManager dsEnvelopeManager1 =
+			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager",
+				proxyDSEnvelopeManager);
+		DSEnvelopeManager dsEnvelopeManager2 =
+			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
+				_mvcResourceCommand, "_dsEnvelopeManager",
+				proxyDSEnvelopeManager);
+
+		try {
+			Assert.assertThrows(
+				PortletException.class,
+				() -> _mvcResourceCommand.serveResource(
+					_getMockLiferayResourceRequest(
+						_commerceOrderAttachment.getCommerceOrderAttachmentId(),
+						0, 0, TestPropsValues.getUser(),
+						TestPropsValues.getUserId()),
+					new MockLiferayResourceResponse() {
+
+						@Override
+						public OutputStream getPortletOutputStream()
+							throws IOException {
+
+							throw new IOException();
+						}
+
+					}));
+		}
+		finally {
+			ReflectionTestUtil.setFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager1);
+			ReflectionTestUtil.setFieldValue(
+				_mvcResourceCommand, "_dsEnvelopeManager", dsEnvelopeManager2);
+		}
+
+		Assert.assertNull(
+			_dsRequestManager.fetchFileEntryDSRequest(
+				_group.getCompanyId(),
+				_commerceOrderAttachment.getFileEntryId()));
+		Assert.assertNotNull(dsEnvelopeIdAtomicReference.get());
+		Assert.assertEquals(
+			dsEnvelopeIdAtomicReference.get(),
+			voidedDSEnvelopeIdAtomicReference.get());
 	}
 
 	private CommerceOrder _commerceOrder;

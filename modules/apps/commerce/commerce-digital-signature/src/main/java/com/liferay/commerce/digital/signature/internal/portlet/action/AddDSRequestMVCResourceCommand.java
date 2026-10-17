@@ -11,6 +11,7 @@ import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.model.CommerceOrderAttachment;
 import com.liferay.commerce.service.CommerceOrderAttachmentLocalService;
 import com.liferay.commerce.service.CommerceOrderLocalService;
+import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
@@ -73,6 +74,8 @@ public class AddDSRequestMVCResourceCommand
 			super.doServeResource(resourceRequest, resourceResponse);
 		}
 		catch (PortletException portletException) {
+			_voidDSEnvelope(resourceRequest);
+
 			Throwable throwable = portletException.getCause();
 
 			if (!(throwable instanceof PortalException) ||
@@ -183,6 +186,8 @@ public class AddDSRequestMVCResourceCommand
 				},
 				new long[] {commerceOrderAttachment.getFileEntryId()});
 
+			resourceRequest.setAttribute(DSRequest.class.getName(), dsRequest);
+
 			_dsRequestManager.sendDSRequestNotifications(
 				dsRequest.getDSRequestId());
 
@@ -269,6 +274,28 @@ public class AddDSRequestMVCResourceCommand
 		return dsRecipients;
 	}
 
+	private void _voidDSEnvelope(ResourceRequest resourceRequest) {
+		DSRequest dsRequest = (DSRequest)resourceRequest.getAttribute(
+			DSRequest.class.getName());
+
+		if (dsRequest == null) {
+			return;
+		}
+
+		try {
+			_dsEnvelopeManager.voidDSEnvelope(
+				dsRequest.getCompanyId(), dsRequest.getSiteGroupId(),
+				dsRequest.getExternalReferenceCode(),
+				"Unable to record the DS request");
+		}
+		catch (Exception exception) {
+			_log.error(
+				"Unable to void envelope " +
+					dsRequest.getExternalReferenceCode(),
+				exception);
+		}
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(
 		AddDSRequestMVCResourceCommand.class);
 
@@ -290,6 +317,9 @@ public class AddDSRequestMVCResourceCommand
 	)
 	private ModelResourcePermission<CommerceOrder>
 		_commerceOrderModelResourcePermission;
+
+	@Reference
+	private DSEnvelopeManager _dsEnvelopeManager;
 
 	@Reference
 	private DSRequestManager _dsRequestManager;
