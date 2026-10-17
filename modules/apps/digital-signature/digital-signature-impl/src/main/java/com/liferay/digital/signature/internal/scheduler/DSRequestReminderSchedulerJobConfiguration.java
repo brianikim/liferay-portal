@@ -27,7 +27,7 @@ import org.osgi.service.component.annotations.Reference;
 	configurationPid = "com.liferay.digital.signature.configuration.DigitalSignatureSystemConfiguration",
 	service = SchedulerJobConfiguration.class
 )
-public class DSSignatureReminderSchedulerJobConfiguration
+public class DSRequestReminderSchedulerJobConfiguration
 	implements SchedulerJobConfiguration {
 
 	@Override
