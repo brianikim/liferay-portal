@@ -63,6 +63,7 @@ export const CommerceContext = Liferay.CommerceContext;
 
 export {commerceEvents, commerceTypes};
 
+export {default as openSignatureDetailsModal} from './components/signature_details/openSignatureDetailsModal';
 export {default as removeSignatureStatusColumn} from './components/signature_details/removeSignatureStatusColumn';
 export {default as createCommerceCart} from './utilities/createCommerceCart';
 export {default as FormUtils} from './utilities/forms/index';
