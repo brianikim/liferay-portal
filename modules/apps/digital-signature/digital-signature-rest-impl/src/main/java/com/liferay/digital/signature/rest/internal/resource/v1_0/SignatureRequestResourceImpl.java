@@ -284,7 +284,7 @@ public class SignatureRequestResourceImpl
 
 				if (userId == null) {
 					throw new BadRequestException(
-						"A signature request recipient must have a user");
+						"A recipient must have a user ID");
 				}
 
 				User user = _userService.getUserById(userId);
