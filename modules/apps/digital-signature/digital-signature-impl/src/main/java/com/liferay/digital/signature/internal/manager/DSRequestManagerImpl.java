@@ -466,6 +466,9 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				).put(
 					"requestStatus", () -> requestStatus
 				).put(
+					"requestStatusDate",
+					() -> _toDate(dsEnvelope.getStatusLocalDateTime())
+				).put(
 					"siteGroupId", _getSiteGroupId(groupId)
 				).build(),
 				serviceContext);
@@ -524,6 +527,9 @@ public class DSRequestManagerImpl implements DSRequestManager {
 						"requestRecipientStatus",
 						() -> _getDSRequestRecipientStatus(
 							dsRecipient, requestStatus)
+					).put(
+						"requestRecipientStatusDate",
+						() -> _toDate(dsRecipient.getStatusLocalDateTime())
 					).put(
 						"sentDate",
 						() -> _toDate(dsRecipient.getSentLocalDateTime())

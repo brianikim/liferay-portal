@@ -189,8 +189,19 @@ public class DSRequestManagerTest {
 
 		DSRecipient dsRecipient1 = _createDSRecipient(user);
 
+		LocalDateTime dsEnvelopeStatusLocalDateTime =
+			LocalDateTime.ofEpochSecond(
+				System.currentTimeMillis() / 1000, 0, ZoneOffset.UTC);
+
+		LocalDateTime dsRecipientStatusLocalDateTime =
+			dsEnvelopeStatusLocalDateTime.minusHours(1);
+
+		dsRecipient1.setStatusLocalDateTime(dsRecipientStatusLocalDateTime);
+
 		DSEnvelope dsEnvelope1 = _createDSEnvelope(
 			dsRecipient1, _createDSRecipient(UserTestUtil.addUser()));
+
+		dsEnvelope1.setStatusLocalDateTime(dsEnvelopeStatusLocalDateTime);
 
 		FileEntry fileEntry1 = _addFileEntry();
 
@@ -213,6 +224,9 @@ public class DSRequestManagerTest {
 		Assert.assertEquals(
 			DSRequestConstants.STATUS_SENT,
 			MapUtil.getString(dsRequestValues, "requestStatus"));
+		Assert.assertEquals(
+			Date.from(dsEnvelopeStatusLocalDateTime.toInstant(ZoneOffset.UTC)),
+			dsRequestValues.get("requestStatusDate"));
 		Assert.assertEquals(
 			TestPropsValues.getGroupId(),
 			MapUtil.getLong(dsRequestValues, "siteGroupId"));
@@ -245,11 +259,18 @@ public class DSRequestManagerTest {
 		Assert.assertEquals(
 			dsRequestRecipientValuesList.toString(), 1,
 			dsRequestRecipientValuesList.size());
+
+		Map<String, Serializable> dsRequestRecipientValues =
+			dsRequestRecipientValuesList.get(0);
+
 		Assert.assertEquals(
 			user.getUserId(),
 			MapUtil.getLong(
-				dsRequestRecipientValuesList.get(0),
+				dsRequestRecipientValues,
 				"r_userToDSRequestRecipients_userId"));
+		Assert.assertEquals(
+			Date.from(dsRecipientStatusLocalDateTime.toInstant(ZoneOffset.UTC)),
+			dsRequestRecipientValues.get("requestRecipientStatusDate"));
 
 		Group group = GroupTestUtil.addGroup();
 
