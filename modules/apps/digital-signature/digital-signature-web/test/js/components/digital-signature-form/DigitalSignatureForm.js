@@ -67,32 +67,38 @@ describe('DigitalSignatureForm', () => {
 		expect(asFragment()).toMatchSnapshot();
 	});
 
-	describe('With the LPD-69290 feature flag enabled', () => {
-		beforeAll(() => {
-			Liferay.FeatureFlags['LPD-69290'] = true;
-		});
+	it('Validates the days to warn recipients when embedded signing is enabled', async () => {
+		const {getByLabelText, getByText} = render(
+			<AppContext.Provider value={{embeddedViewEnabled: true}}>
+				<DigitalSignatureForm />
+			</AppContext.Provider>
+		);
 
-		afterAll(() => {
-			Liferay.FeatureFlags['LPD-69290'] = false;
-		});
+		const inputExpireWarn = getByLabelText(
+			'days-to-warn-recipients-before-expiration'
+		);
 
-		it('Validates the days to warn recipients', async () => {
-			const {getByLabelText, getByText} = render(
-				<DigitalSignatureFormWithProvider />
-			);
+		await userEvent.clear(inputExpireWarn);
+		await userEvent.type(inputExpireWarn, '120');
 
-			const inputExpireWarn = getByLabelText(
-				'days-to-warn-recipients-before-expiration'
-			);
+		expect(
+			getByText(
+				'days-to-warn-recipients-must-be-fewer-than-days-until-expiration'
+			)
+		).toBeInTheDocument();
+	});
 
-			await userEvent.clear(inputExpireWarn);
-			await userEvent.type(inputExpireWarn, '120');
+	it('Restricts recipients to existing users when embedded signing is enabled', () => {
+		const {getByPlaceholderText, queryByPlaceholderText} = render(
+			<AppContext.Provider value={{embeddedViewEnabled: true}}>
+				<DigitalSignatureForm />
+			</AppContext.Provider>
+		);
 
-			expect(
-				getByText(
-					'days-to-warn-recipients-must-be-fewer-than-days-until-expiration'
-				)
-			).toBeInTheDocument();
-		});
+		expect(getByPlaceholderText('search-for')).toBeTruthy();
+		expect(queryByPlaceholderText('recipient-email')).toBeNull();
+		expect(
+			getByPlaceholderText('recipient-full-name').hasAttribute('disabled')
+		).toBeTruthy();
 	});
 });
