@@ -175,7 +175,7 @@ public class SignatureRequestResourceTest
 			Long.valueOf(TestPropsValues.getUserId()), creator.getId());
 
 		Assert.assertEquals(
-			MapUtil.getString(dsRequestObjectEntry.getValues(), "emailBody"),
+			MapUtil.getString(dsRequestObjectEntry.getValues(), "emailMessage"),
 			signatureRequest.getEmailBody());
 		Assert.assertEquals(
 			Long.valueOf(dsRequestObjectEntry.getObjectEntryId()),
@@ -330,7 +330,7 @@ public class SignatureRequestResourceTest
 				_dsRequestObjectDefinition.getObjectDefinitionId(), 0,
 				languageId,
 				HashMapBuilder.<String, Serializable>put(
-					"emailBody", RandomTestUtil.randomString()
+					"emailMessage", RandomTestUtil.randomString()
 				).put(
 					"emailSubject", RandomTestUtil.randomString()
 				).put(
