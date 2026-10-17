@@ -5,23 +5,18 @@
 
 package com.liferay.commerce.digital.signature.internal.frontend.data.set.action;
 
-import com.liferay.commerce.constants.CommerceOrderActionKeys;
 import com.liferay.commerce.digital.signature.internal.util.DSCommerceOrderAttachmentUtil;
 import com.liferay.commerce.model.CommerceOrder;
-import com.liferay.commerce.model.CommerceOrderAttachment;
 import com.liferay.commerce.order.CommerceOrderAttachmentFDSActionContributor;
-import com.liferay.commerce.service.CommerceOrderAttachmentLocalService;
 import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.frontend.data.set.model.FDSActionDropdownItem;
 import com.liferay.frontend.data.set.model.FDSActionDropdownItemBuilder;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.string.StringPool;
-import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.WebKeys;
@@ -30,7 +25,6 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -146,59 +140,19 @@ public class DSCommerceOrderAttachmentFDSActionContributor
 	private Map<Long, DSRequest> _getDSRequests(
 		CommerceOrder commerceOrder, HttpServletRequest httpServletRequest) {
 
-		Map<Long, DSRequest> dsRequests = null;
-
-		ThemeDisplay themeDisplay =
-			(ThemeDisplay)httpServletRequest.getAttribute(
-				WebKeys.THEME_DISPLAY);
-
 		try {
-			dsRequests = DSCommerceOrderAttachmentUtil.getDSRequests(
+			return DSCommerceOrderAttachmentUtil.getDSRequests(
 				commerceOrder, httpServletRequest);
-
-			if (dsRequests.isEmpty() ||
-				_commerceOrderModelResourcePermission.contains(
-					themeDisplay.getPermissionChecker(), commerceOrder,
-					CommerceOrderActionKeys.
-						VIEW_RESTRICTED_COMMERCE_ORDER_ATTACHMENTS)) {
-
-				return dsRequests;
-			}
 		}
 		catch (PortalException portalException) {
 			_log.error(portalException);
 
 			return Collections.emptyMap();
 		}
-
-		Map<Long, DSRequest> unrestrictedDSRequests = new LinkedHashMap<>(
-			dsRequests);
-
-		for (CommerceOrderAttachment commerceOrderAttachment :
-				_commerceOrderAttachmentLocalService.
-					getCommerceOrderAttachments(
-						commerceOrder.getCommerceOrderId(), true,
-						QueryUtil.ALL_POS, QueryUtil.ALL_POS, null)) {
-
-			unrestrictedDSRequests.remove(
-				commerceOrderAttachment.getCommerceOrderAttachmentId());
-		}
-
-		return unrestrictedDSRequests;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		DSCommerceOrderAttachmentFDSActionContributor.class);
-
-	@Reference
-	private CommerceOrderAttachmentLocalService
-		_commerceOrderAttachmentLocalService;
-
-	@Reference(
-		target = "(model.class.name=com.liferay.commerce.model.CommerceOrder)"
-	)
-	private ModelResourcePermission<CommerceOrder>
-		_commerceOrderModelResourcePermission;
 
 	@Reference
 	private Language _language;

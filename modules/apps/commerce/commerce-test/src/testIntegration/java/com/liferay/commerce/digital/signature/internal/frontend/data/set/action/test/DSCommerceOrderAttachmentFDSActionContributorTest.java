@@ -9,6 +9,8 @@ import com.liferay.account.model.AccountEntry;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.batch.engine.test.util.BatchEngineTestUtil;
 import com.liferay.commerce.account.test.util.CommerceAccountTestUtil;
+import com.liferay.commerce.constants.CommerceOrderActionKeys;
+import com.liferay.commerce.constants.CommerceOrderConstants;
 import com.liferay.commerce.currency.model.CommerceCurrency;
 import com.liferay.commerce.currency.test.util.CommerceCurrencyTestUtil;
 import com.liferay.commerce.model.CommerceOrder;
@@ -27,9 +29,15 @@ import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.ResourceConstants;
+import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.model.role.RoleConstants;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
 import com.liferay.portal.kernel.service.CompanyLocalService;
+import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
+import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
@@ -147,6 +155,9 @@ public class DSCommerceOrderAttachmentFDSActionContributorTest {
 
 		Assert.assertEquals(
 			List.of("view-signature-status"),
+			_getFDSActionDropdownItemIds(_addUser()));
+		Assert.assertEquals(
+			Collections.emptyList(),
 			_getFDSActionDropdownItemIds(UserTestUtil.addUser()));
 
 		_saveDigitalSignatureConfiguration(false);
@@ -184,6 +195,36 @@ public class DSCommerceOrderAttachmentFDSActionContributorTest {
 			},
 			_group.getCompanyId(), _group.getGroupId(), user.getUserId(),
 			dsEnvelope, new long[] {commerceOrderAttachment.getFileEntryId()});
+	}
+
+	private User _addUser() throws Exception {
+		Role role = _roleLocalService.addRole(
+			RandomTestUtil.randomString(), TestPropsValues.getUserId(), null, 0,
+			RandomTestUtil.randomString(), null, null,
+			RoleConstants.TYPE_REGULAR, null,
+			ServiceContextTestUtil.getServiceContext(
+				_group.getGroupId(), TestPropsValues.getUserId()));
+
+		_resourcePermissionLocalService.setResourcePermissions(
+			_group.getCompanyId(), CommerceOrderAttachment.class.getName(),
+			ResourceConstants.SCOPE_GROUP,
+			String.valueOf(_commerceOrder.getGroupId()), role.getRoleId(),
+			new String[] {ActionKeys.VIEW});
+
+		AccountEntry accountEntry = _commerceOrder.getAccountEntry();
+
+		_resourcePermissionLocalService.setResourcePermissions(
+			_group.getCompanyId(), CommerceOrderConstants.RESOURCE_NAME,
+			ResourceConstants.SCOPE_GROUP,
+			String.valueOf(accountEntry.getAccountEntryGroupId()),
+			role.getRoleId(),
+			new String[] {CommerceOrderActionKeys.MANAGE_COMMERCE_ORDERS});
+
+		User user = UserTestUtil.addUser();
+
+		_roleLocalService.addUserRole(user.getUserId(), role);
+
+		return user;
 	}
 
 	private Map<String, Object> _getAdditionalProps(User user)
@@ -283,10 +324,14 @@ public class DSCommerceOrderAttachmentFDSActionContributorTest {
 			).build(),
 			additionalProps.get("signatureStatuses"));
 
-		additionalProps = _getAdditionalProps(UserTestUtil.addUser());
+		additionalProps = _getAdditionalProps(_addUser());
 
 		Assert.assertEquals(
 			Collections.emptyList(), additionalProps.get("signableIds"));
+
+		Assert.assertEquals(
+			Collections.emptyMap(),
+			_getAdditionalProps(UserTestUtil.addUser()));
 	}
 
 	private void _testGetAdditionalPropsWhenAttachmentIsRestricted()
@@ -301,7 +346,7 @@ public class DSCommerceOrderAttachmentFDSActionContributorTest {
 				RandomTestUtil.randomString() + ".pdf",
 				new ByteArrayInputStream(RandomTestUtil.randomBytes()));
 
-		User user = UserTestUtil.addUser();
+		User user = _addUser();
 
 		_addDSRequest(commerceOrderAttachment, user);
 
@@ -362,5 +407,11 @@ public class DSCommerceOrderAttachmentFDSActionContributorTest {
 	private DSRequestManager _dsRequestManager;
 
 	private Group _group;
+
+	@Inject
+	private ResourcePermissionLocalService _resourcePermissionLocalService;
+
+	@Inject
+	private RoleLocalService _roleLocalService;
 
 }
