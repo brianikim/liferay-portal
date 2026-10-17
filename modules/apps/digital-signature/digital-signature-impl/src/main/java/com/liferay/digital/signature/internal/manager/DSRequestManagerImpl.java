@@ -127,8 +127,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 		if ((expireAfter > 0) && (dsEnvelope.getExpireWarn() >= expireAfter)) {
 			throw new PortalException(
-				"Days to warn signers must be fewer than days until " +
-					"expiration");
+				"Expire warn must be less than expire after");
 		}
 
 		Map<Long, DSRequest> dsRequests = _getFileEntryDSRequests(
@@ -459,14 +458,14 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
 				null,
 				HashMapBuilder.<String, Serializable>put(
-					"emailBody", dsEnvelope.getEmailBlurb()
+					"emailMessage", dsEnvelope.getEmailBlurb()
 				).put(
 					"emailSubject", dsEnvelope.getEmailSubject()
 				).put(
 					"externalReferenceCode", dsEnvelope.getDSEnvelopeId()
 				).put(
 					"requestExpirationDate",
-					() -> _toDate(dsEnvelope.getExpireLocalDateTime())
+					() -> _toDate(dsEnvelope.getExpirationLocalDateTime())
 				).put(
 					"requestStatus", () -> requestStatus
 				).put(
@@ -604,8 +603,10 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				objectEntry.getObjectDefinitionId()) {
 
 			throw new NoSuchObjectEntryException(
-				"No signature request exists with the primary key " +
-					dsRequestId);
+				StringBundler.concat(
+					"No ObjectEntry exists with the key {objectDefinitionId=",
+					objectDefinition.getObjectDefinitionId(),
+					", objectEntryId=", dsRequestId, "}"));
 		}
 
 		return objectEntry;
@@ -748,12 +749,12 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		return dsRequests;
 	}
 
-	private String _getEmailBody(String emailBody, Locale locale) {
-		if (Validator.isNull(emailBody)) {
+	private String _getEmailMessage(String emailMessage, Locale locale) {
+		if (Validator.isNull(emailMessage)) {
 			return _language.get(locale, "you-have-a-document-to-sign");
 		}
 
-		return HtmlUtil.escape(emailBody);
+		return HtmlUtil.escape(emailMessage);
 	}
 
 	private Map<Long, DSRequest> _getFileEntryDSRequests(
@@ -1034,8 +1035,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					notificationTemplate
 				).termValues(
 					HashMapBuilder.<String, Object>put(
-						"[%DS_REQUEST_EMAIL_BODY%]",
-						_getEmailBody(dsRequest.getEmailBody(), locale)
+						"[%DS_REQUEST_EMAIL_MESSAGE%]",
+						_getEmailMessage(dsRequest.getEmailMessage(), locale)
 					).put(
 						"[%DS_REQUEST_EMAIL_SUBJECT%]", subject
 					).put(

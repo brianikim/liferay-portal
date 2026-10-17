@@ -40,7 +40,7 @@ public class DSRequest {
 		_userId = userId;
 		_userName = userName;
 
-		_emailBody = MapUtil.getString(values, "emailBody");
+		_emailMessage = MapUtil.getString(values, "emailMessage");
 		_emailSubject = MapUtil.getString(values, "emailSubject");
 		_expirationDate = _toDate(values.get("requestExpirationDate"));
 		_siteGroupId = MapUtil.getLong(values, "siteGroupId");
@@ -72,8 +72,8 @@ public class DSRequest {
 		return _dsRequestRecipients;
 	}
 
-	public String getEmailBody() {
-		return _emailBody;
+	public String getEmailMessage() {
+		return _emailMessage;
 	}
 
 	public String getEmailSubject() {
@@ -183,7 +183,7 @@ public class DSRequest {
 	private final Date _createDate;
 	private final long _dsRequestId;
 	private final List<DSRequestRecipient> _dsRequestRecipients;
-	private final String _emailBody;
+	private final String _emailMessage;
 	private final String _emailSubject;
 	private final Date _expirationDate;
 	private final String _externalReferenceCode;
