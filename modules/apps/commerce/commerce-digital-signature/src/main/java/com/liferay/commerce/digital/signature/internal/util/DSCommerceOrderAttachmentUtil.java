@@ -27,8 +27,13 @@ import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.UserConstants;
 import com.liferay.portal.kernel.module.service.Snapshot;
 import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.service.UserLocalServiceUtil;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
+import com.liferay.portal.kernel.util.WebKeys;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -62,8 +67,33 @@ public class DSCommerceOrderAttachmentUtil {
 			});
 	}
 
+	public static List<CommerceOrderAttachment> getCommerceOrderAttachments(
+			CommerceOrder commerceOrder, PermissionChecker permissionChecker)
+		throws PortalException {
+
+		ModelResourcePermission<CommerceOrderAttachment>
+			commerceOrderAttachmentModelResourcePermission =
+				_commerceOrderAttachmentModelResourcePermissionSnapshot.get();
+
+		return TransformUtil.transform(
+			CommerceOrderAttachmentLocalServiceUtil.getCommerceOrderAttachments(
+				commerceOrder.getCommerceOrderId(), QueryUtil.ALL_POS,
+				QueryUtil.ALL_POS, null),
+			commerceOrderAttachment -> {
+				if (!commerceOrderAttachmentModelResourcePermission.contains(
+						permissionChecker, commerceOrderAttachment,
+						ActionKeys.VIEW)) {
+
+					return null;
+				}
+
+				return commerceOrderAttachment;
+			});
+	}
+
 	public static Map<Long, DSRequest> getDSRequests(
-		CommerceOrder commerceOrder, HttpServletRequest httpServletRequest) {
+			CommerceOrder commerceOrder, HttpServletRequest httpServletRequest)
+		throws PortalException {
 
 		if (!isEnabled(commerceOrder)) {
 			return Collections.emptyMap();
@@ -80,13 +110,15 @@ public class DSCommerceOrderAttachmentUtil {
 			return dsRequests;
 		}
 
+		ThemeDisplay themeDisplay =
+			(ThemeDisplay)httpServletRequest.getAttribute(
+				WebKeys.THEME_DISPLAY);
+
 		Map<Long, Long> fileEntryIds = new LinkedHashMap<>();
 
 		for (CommerceOrderAttachment commerceOrderAttachment :
-				CommerceOrderAttachmentLocalServiceUtil.
-					getCommerceOrderAttachments(
-						commerceOrder.getCommerceOrderId(), QueryUtil.ALL_POS,
-						QueryUtil.ALL_POS, null)) {
+				getCommerceOrderAttachments(
+					commerceOrder, themeDisplay.getPermissionChecker())) {
 
 			fileEntryIds.put(
 				commerceOrderAttachment.getCommerceOrderAttachmentId(),
@@ -190,6 +222,14 @@ public class DSCommerceOrderAttachmentUtil {
 		return false;
 	}
 
+	private static final Snapshot
+		<ModelResourcePermission<CommerceOrderAttachment>>
+			_commerceOrderAttachmentModelResourcePermissionSnapshot =
+				new Snapshot<>(
+					DSCommerceOrderAttachmentUtil.class,
+					Snapshot.cast(ModelResourcePermission.class),
+					"(model.class.name=com.liferay.commerce.model." +
+						"CommerceOrderAttachment)");
 	private static final Snapshot<DSRequestManager> _dsRequestManagerSnapshot =
 		new Snapshot<>(
 			DSCommerceOrderAttachmentUtil.class, DSRequestManager.class);

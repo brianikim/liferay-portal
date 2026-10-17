@@ -9,6 +9,8 @@ import com.liferay.account.model.AccountEntry;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.batch.engine.test.util.BatchEngineTestUtil;
 import com.liferay.commerce.account.test.util.CommerceAccountTestUtil;
+import com.liferay.commerce.constants.CommerceOrderActionKeys;
+import com.liferay.commerce.constants.CommerceOrderConstants;
 import com.liferay.commerce.currency.model.CommerceCurrency;
 import com.liferay.commerce.currency.test.util.CommerceCurrencyTestUtil;
 import com.liferay.commerce.model.CommerceOrder;
@@ -31,9 +33,15 @@ import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporaryS
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.ResourceConstants;
+import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.model.role.RoleConstants;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
 import com.liferay.portal.kernel.service.CompanyLocalService;
+import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
+import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
@@ -234,6 +242,85 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 	}
 
 	@Test
+	public void testGetAdditionalPropsWhenCommerceOrderAttachmentIsRestricted()
+		throws Exception {
+
+		_commerceOrderAttachment.setRestricted(true);
+
+		_commerceOrderAttachment =
+			_commerceOrderAttachmentLocalService.updateCommerceOrderAttachment(
+				_commerceOrderAttachment);
+
+		_addDSRequest(TestPropsValues.getUser());
+
+		Role role = _roleLocalService.addRole(
+			RandomTestUtil.randomString(), TestPropsValues.getUserId(), null, 0,
+			RandomTestUtil.randomString(), null, null,
+			RoleConstants.TYPE_REGULAR, null,
+			ServiceContextTestUtil.getServiceContext(
+				_group.getGroupId(), TestPropsValues.getUserId()));
+
+		_resourcePermissionLocalService.setResourcePermissions(
+			_group.getCompanyId(), CommerceOrderAttachment.class.getName(),
+			ResourceConstants.SCOPE_GROUP,
+			String.valueOf(_commerceOrder.getGroupId()), role.getRoleId(),
+			new String[] {ActionKeys.VIEW});
+
+		AccountEntry accountEntry = _commerceOrder.getAccountEntry();
+
+		_resourcePermissionLocalService.setResourcePermissions(
+			_group.getCompanyId(), CommerceOrderConstants.RESOURCE_NAME,
+			ResourceConstants.SCOPE_GROUP,
+			String.valueOf(accountEntry.getAccountEntryGroupId()),
+			role.getRoleId(),
+			new String[] {CommerceOrderActionKeys.MANAGE_COMMERCE_ORDERS});
+
+		User user = UserTestUtil.addUser();
+
+		_roleLocalService.addUserRole(user.getUserId(), role);
+
+		Map<String, Object> additionalProps = _getAdditionalProps(user);
+
+		Map<String, Object> signatureRequest =
+			(Map<String, Object>)additionalProps.get("signatureRequest");
+
+		Assert.assertEquals(
+			Collections.emptyList(), signatureRequest.get("nonrequestableIds"));
+
+		Assert.assertEquals(
+			Collections.emptyMap(), additionalProps.get("signatureStatuses"));
+
+		_resourcePermissionLocalService.setResourcePermissions(
+			_group.getCompanyId(), CommerceOrderConstants.RESOURCE_NAME,
+			ResourceConstants.SCOPE_GROUP,
+			String.valueOf(accountEntry.getAccountEntryGroupId()),
+			role.getRoleId(),
+			new String[] {
+				CommerceOrderActionKeys.MANAGE_COMMERCE_ORDERS,
+				CommerceOrderActionKeys.
+					VIEW_RESTRICTED_COMMERCE_ORDER_ATTACHMENTS
+			});
+
+		additionalProps = _getAdditionalProps(user);
+
+		signatureRequest = (Map<String, Object>)additionalProps.get(
+			"signatureRequest");
+
+		String commerceOrderAttachmentId = String.valueOf(
+			_commerceOrderAttachment.getCommerceOrderAttachmentId());
+
+		Assert.assertEquals(
+			List.of(commerceOrderAttachmentId),
+			signatureRequest.get("nonrequestableIds"));
+
+		Assert.assertEquals(
+			HashMapBuilder.put(
+				commerceOrderAttachmentId, DSRequestConstants.STATUS_SENT
+			).build(),
+			additionalProps.get("signatureStatuses"));
+	}
+
+	@Test
 	public void testGetFDSActionDropdownItems() throws Exception {
 		User user = TestPropsValues.getUser();
 
@@ -393,6 +480,12 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 
 	private Group _group;
 	private Layout _layout;
+
+	@Inject
+	private ResourcePermissionLocalService _resourcePermissionLocalService;
+
+	@Inject
+	private RoleLocalService _roleLocalService;
 
 	@Inject
 	private UserLocalService _userLocalService;
