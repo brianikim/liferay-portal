@@ -155,7 +155,7 @@ public class SignDSRequestMVCRenderCommand implements MVCRenderCommand {
 		}
 		catch (Exception exception) {
 			_log.error(
-				"Unable to create the signing view for signature request " +
+				"Unable to create the signing view for DS request " +
 					dsRequest.getDSRequestId(),
 				exception);
 

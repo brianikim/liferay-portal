@@ -815,8 +815,7 @@ public class DSRequestManagerTest {
 
 		AssertUtils.assertFailure(
 			PortalException.class,
-			"Days until expiration and days to warn signers must not be " +
-				"negative",
+			"Expire after and expire warn must not be negative",
 			() -> _addDSRequest(dsEnvelope, fileEntry));
 
 		dsEnvelope.setExpireWarn(5);
@@ -862,7 +861,7 @@ public class DSRequestManagerTest {
 	private void _testAddDSRequestWhenFileEntryIsInvalid() throws Exception {
 		AssertUtils.assertFailure(
 			PortalException.class,
-			"A signature request must have at least one file entry",
+			"A DS request must have at least one file entry",
 			() -> _dsRequestManager.addDSRequest(
 				TestPropsValues.getCompanyId(), TestPropsValues.getGroupId(),
 				TestPropsValues.getUserId(), new DSEnvelope(), new long[0]));
@@ -879,7 +878,7 @@ public class DSRequestManagerTest {
 			PortalException.class,
 			StringBundler.concat(
 				"File entry ", fileEntry.getFileEntryId(),
-				" already has a signature request with status \"",
+				" already has a DS request with status \"",
 				DSRequestConstants.STATUS_SENT, "\""),
 			() -> _addDSRequest(dsEnvelope2, fileEntry));
 
@@ -931,7 +930,7 @@ public class DSRequestManagerTest {
 		AssertUtils.assertFailure(
 			PortalException.class,
 			"User " + user.getUserId() +
-				" is already a signature request recipient",
+				" is already a DS request recipient",
 			() -> _addDSRequest(dsEnvelope, fileEntry));
 
 		User guestUser = _userLocalService.getGuestUser(
@@ -943,7 +942,7 @@ public class DSRequestManagerTest {
 		AssertUtils.assertFailure(
 			PortalException.class,
 			"User " + guestUser.getUserId() +
-				" cannot be a signature request recipient",
+				" cannot be a DS request recipient",
 			() -> _addDSRequest(dsEnvelope, fileEntry));
 
 		User inactiveUser = UserTestUtil.addUser();
@@ -958,7 +957,7 @@ public class DSRequestManagerTest {
 		AssertUtils.assertFailure(
 			PortalException.class,
 			"User " + inactiveUser.getUserId() +
-				" cannot be a signature request recipient",
+				" cannot be a DS request recipient",
 			() -> _addDSRequest(dsEnvelope, fileEntry));
 
 		DSRecipient dsRecipient = _createDSRecipient();

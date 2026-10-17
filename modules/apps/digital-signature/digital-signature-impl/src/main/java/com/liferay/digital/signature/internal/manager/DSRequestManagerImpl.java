@@ -114,15 +114,14 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 		if (ArrayUtil.isEmpty(fileEntryIds)) {
 			throw new PortalException(
-				"A signature request must have at least one file entry");
+				"A DS request must have at least one file entry");
 		}
 
 		int expireAfter = dsEnvelope.getExpireAfter();
 
 		if ((expireAfter < 0) || (dsEnvelope.getExpireWarn() < 0)) {
 			throw new PortalException(
-				"Days until expiration and days to warn signers must not be " +
-					"negative");
+				"Expire after and expire warn must not be negative");
 		}
 
 		if ((expireAfter > 0) && (dsEnvelope.getExpireWarn() >= expireAfter)) {
@@ -144,7 +143,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			catch (PortalException portalException) {
 				if (_log.isWarnEnabled()) {
 					_log.warn(
-						"Unable to update signature request " +
+						"Unable to update DS request " +
 							dsRequest.getDSRequestId(),
 						portalException);
 				}
@@ -160,7 +159,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				throw new PortalException(
 					StringBundler.concat(
 						"File entry ", entry.getKey(),
-						" already has a signature request with status \"",
+						" already has a DS request with status \"",
 						dsRequest.getStatus(), "\""));
 			}
 		}
@@ -176,13 +175,13 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 				throw new PortalException(
 					"User " + recipientUser.getUserId() +
-						" cannot be a signature request recipient");
+						" cannot be a DS request recipient");
 			}
 
 			if (!recipientUserIds.add(recipientUser.getUserId())) {
 				throw new PortalException(
 					"User " + recipientUser.getUserId() +
-						" is already a signature request recipient");
+						" is already a DS request recipient");
 			}
 
 			dsRecipient.setDSClientUserId(
@@ -209,7 +208,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			try {
 				_dsEnvelopeManager.voidDSEnvelope(
 					companyId, groupId, sentDSEnvelope.getDSEnvelopeId(),
-					"Unable to record the signature request");
+					"Unable to record the DS request");
 			}
 			catch (Exception exception2) {
 				_log.error(
@@ -225,7 +224,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			}
 
 			throw new PortalException(
-				"Unable to record the signature request for envelope " +
+				"Unable to record the DS request for envelope " +
 					sentDSEnvelope.getDSEnvelopeId(),
 				exception1);
 		}
@@ -266,7 +265,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 		catch (Exception exception) {
 			_log.error(
-				"Unable to load the signature request " + dsRequestId,
+				"Unable to load the DS request " + dsRequestId,
 				exception);
 
 			return null;
@@ -350,7 +349,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 		catch (Exception exception) {
 			_log.error(
-				"Unable to load the signature request " + dsRequestId,
+				"Unable to load the DS request " + dsRequestId,
 				exception);
 
 			return;
@@ -792,7 +791,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 		catch (Exception exception) {
 			throw new PortalException(
-				"Unable to load the signature requests for company " +
+				"Unable to load the DS requests for company " +
 					companyId,
 				exception);
 		}
@@ -1000,7 +999,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				if (_log.isWarnEnabled()) {
 					_log.warn(
 						StringBundler.concat(
-							"Unable to send sign email for signature request ",
+							"Unable to send sign email for DS request ",
 							dsRequest.getDSRequestId(),
 							" because its notification template is missing"));
 				}
@@ -1067,7 +1066,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 		catch (Exception exception) {
 			_log.error(
-				"Unable to send sign email for signature request " +
+				"Unable to send sign email for DS request " +
 					dsRequest.getDSRequestId(),
 				exception);
 		}
