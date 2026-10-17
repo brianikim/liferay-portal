@@ -354,8 +354,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 		catch (Exception exception) {
 			_log.error(
-				"Unable to load the signature requests for file entry " +
-					fileEntryId,
+				"Unable to load DS requests for file entry " + fileEntryId,
 				exception);
 		}
 
