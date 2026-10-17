@@ -680,6 +680,7 @@ public class DSRequestManagerTest {
 			DSRequestConstants.STATUS_VOIDED, localDateTime.plusDays(1),
 			localDateTime);
 
+		_testUpdateDSRequestWhenDSRecipientStatusesDiffer();
 		_testUpdateDSRequestWhenNextRecipientIsSent();
 		_testUpdateDSRequestWhenObjectEntryIsNotDSRequest();
 		_testUpdateDSRequestWhenRequestIsCompleted();
@@ -1345,66 +1346,7 @@ public class DSRequestManagerTest {
 		}
 	}
 
-	private void _testUpdateDSRequestWhenNextRecipientIsSent()
-		throws Exception {
-
-		DSEnvelope dsEnvelope = _createDSEnvelope();
-
-		DSRecipient dsRecipient1 = _createDSRecipient(UserTestUtil.addUser());
-
-		dsRecipient1.setStatus(DSRequestConstants.STATUS_SENT);
-
-		User user = UserTestUtil.addUser();
-
-		DSRecipient dsRecipient2 = _createDSRecipient(user);
-
-		dsRecipient2.setStatus(DSRequestConstants.STATUS_CREATED);
-
-		dsEnvelope.setDSRecipients(
-			ListUtil.fromArray(dsRecipient1, dsRecipient2));
-
-		DSRequest dsRequest = _addDSRequest(
-			dsEnvelope, RandomTestUtil.randomInt());
-
-		dsRecipient1.setStatus(DSRequestConstants.STATUS_COMPLETED);
-		dsRecipient2.setStatus(DSRequestConstants.STATUS_SENT);
-
-		DSEnvelopeManager dsEnvelopeManager =
-			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
-				_dsRequestManager, "_dsEnvelopeManager",
-				ProxyUtil.newProxyInstance(
-					DSEnvelopeManager.class.getClassLoader(),
-					new Class<?>[] {DSEnvelopeManager.class},
-					(proxy, method, arguments) -> dsEnvelope));
-
-		try {
-			_dsRequestManager.updateDSRequest(dsRequest.getDSRequestId());
-			_dsRequestManager.updateDSRequest(dsRequest.getDSRequestId());
-		}
-		finally {
-			ReflectionTestUtil.setFieldValue(
-				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager);
-		}
-
-		List<NotificationQueueEntry> notificationQueueEntries =
-			_getNotificationQueueEntries(dsRequest);
-
-		Assert.assertEquals(
-			notificationQueueEntries.toString(), 1,
-			notificationQueueEntries.size());
-
-		Map<String, Object> notificationRecipientSettingsMap =
-			NotificationRecipientSettingUtil.
-				getNotificationRecipientSettingsMap(
-					notificationQueueEntries.get(0));
-
-		Assert.assertEquals(
-			user.getEmailAddress(),
-			notificationRecipientSettingsMap.get(
-				NotificationRecipientSettingConstants.NAME_TO));
-	}
-
-	private void _testUpdateDSRequestWhenObjectEntryIsNotDSRequest()
+	private void _testUpdateDSRequestWhenDSRecipientStatusesDiffer()
 		throws Exception {
 
 		User completedUser = UserTestUtil.addUser();
@@ -1485,6 +1427,65 @@ public class DSRequestManagerTest {
 		Assert.assertEquals(
 			Date.from(deliveredLocalDateTime.toInstant(ZoneOffset.UTC)),
 			dsRequestRecipientValues.get("requestRecipientStatusDate"));
+	}
+
+	private void _testUpdateDSRequestWhenNextRecipientIsSent()
+		throws Exception {
+
+		DSEnvelope dsEnvelope = _createDSEnvelope();
+
+		DSRecipient dsRecipient1 = _createDSRecipient(UserTestUtil.addUser());
+
+		dsRecipient1.setStatus(DSRequestConstants.STATUS_SENT);
+
+		User user = UserTestUtil.addUser();
+
+		DSRecipient dsRecipient2 = _createDSRecipient(user);
+
+		dsRecipient2.setStatus(DSRequestConstants.STATUS_CREATED);
+
+		dsEnvelope.setDSRecipients(
+			ListUtil.fromArray(dsRecipient1, dsRecipient2));
+
+		DSRequest dsRequest = _addDSRequest(
+			dsEnvelope, RandomTestUtil.randomInt());
+
+		dsRecipient1.setStatus(DSRequestConstants.STATUS_COMPLETED);
+		dsRecipient2.setStatus(DSRequestConstants.STATUS_SENT);
+
+		DSEnvelopeManager dsEnvelopeManager =
+			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager",
+				ProxyUtil.newProxyInstance(
+					DSEnvelopeManager.class.getClassLoader(),
+					new Class<?>[] {DSEnvelopeManager.class},
+					(proxy, method, arguments) -> dsEnvelope));
+
+		try {
+			_dsRequestManager.updateDSRequest(dsRequest.getDSRequestId());
+			_dsRequestManager.updateDSRequest(dsRequest.getDSRequestId());
+		}
+		finally {
+			ReflectionTestUtil.setFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager);
+		}
+
+		List<NotificationQueueEntry> notificationQueueEntries =
+			_getNotificationQueueEntries(dsRequest);
+
+		Assert.assertEquals(
+			notificationQueueEntries.toString(), 1,
+			notificationQueueEntries.size());
+
+		Map<String, Object> notificationRecipientSettingsMap =
+			NotificationRecipientSettingUtil.
+				getNotificationRecipientSettingsMap(
+					notificationQueueEntries.get(0));
+
+		Assert.assertEquals(
+			user.getEmailAddress(),
+			notificationRecipientSettingsMap.get(
+				NotificationRecipientSettingConstants.NAME_TO));
 	}
 
 	private void _testUpdateDSRequestWhenObjectEntryIsNotDSRequest()

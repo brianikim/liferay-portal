@@ -1288,7 +1288,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			}
 
 			List<DSRequestRecipient> dsRequestRecipients =
-				_updateRecipientStatuses(
+				_updateDSRequestRecipientStatuses(
 					companyId, dsEnvelope, dsRequestId, groupId, requestStatus);
 
 			_objectEntryLocalService.partialUpdateObjectEntry(
@@ -1310,80 +1310,13 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			return dsRequestRecipients;
 		}
 		catch (Exception exception) {
-			_log.error(
-				"Unable to update signature request " + dsRequestId, exception);
+			_log.error("Unable to update DS request " + dsRequestId, exception);
 
 			return new ArrayList<>();
 		}
 	}
 
-	private void _updateFileEntries(
-			long companyId, DSEnvelope dsEnvelope, long dsRequestId,
-			long groupId, long userId)
-		throws Exception {
-
-		ObjectDefinition objectDefinition =
-			_objectDefinitionLocalService.
-				getObjectDefinitionByExternalReferenceCode(
-					DSObjectDefinitionConstants.
-						EXTERNAL_REFERENCE_CODE_REQUEST_DOCUMENT,
-					companyId);
-
-		List<Long> fileEntryIds = TransformUtil.transform(
-			_getValuesList(
-				companyId,
-				"(r_dsRequestToDSRequestDocuments_l_dsRequestId eq '" +
-					dsRequestId + "')",
-				objectDefinition, null),
-			values -> MapUtil.getLong(values, "fileEntryId"));
-
-		for (long fileEntryId : fileEntryIds) {
-			byte[] bytes = _dsEnvelopeManager.getSignedDocument(
-				companyId, groupId, String.valueOf(fileEntryId),
-				dsEnvelope.getDSEnvelopeId());
-
-			if ((bytes == null) || (bytes.length < 5) ||
-				!StringUtil.startsWith(new String(bytes, 0, 5), "%PDF-")) {
-
-				throw new PortalException(
-					StringBundler.concat(
-						"DocuSign did not return a signed PDF for file entry ",
-						fileEntryId, " of envelope ",
-						dsEnvelope.getDSEnvelopeId()));
-			}
-
-			FileEntry fileEntry = _dlAppLocalService.getFileEntry(fileEntryId);
-
-			String signedFileName = _getSignedFileName(fileEntry);
-			String title = fileEntry.getTitle();
-
-			if (Objects.equals(title, fileEntry.getFileName())) {
-				title = signedFileName;
-			}
-
-			ServiceContext serviceContext = _getServiceContext(
-				companyId, fileEntry.getGroupId(), userId);
-
-			fileEntry = _dlAppLocalService.updateFileEntry(
-				userId, fileEntryId, signedFileName,
-				ContentTypes.APPLICATION_PDF, title, null,
-				fileEntry.getDescription(), null, DLVersionNumberIncrease.MAJOR,
-				bytes, fileEntry.getDisplayDate(),
-				fileEntry.getExpirationDate(), fileEntry.getReviewDate(),
-				serviceContext);
-
-			FileVersion fileVersion = fileEntry.getLatestFileVersion();
-
-			if (fileVersion.getStatus() != WorkflowConstants.STATUS_APPROVED) {
-				_dlFileEntryLocalService.updateStatus(
-					userId, fileVersion.getFileVersionId(),
-					WorkflowConstants.STATUS_APPROVED, serviceContext,
-					new HashMap<>());
-			}
-		}
-	}
-
-	private List<DSRequestRecipient> _updateRecipientStatuses(
+	private List<DSRequestRecipient> _updateDSRequestRecipientStatuses(
 			long companyId, DSEnvelope dsEnvelope, long dsRequestId,
 			long groupId, String requestStatus)
 		throws Exception {
@@ -1462,6 +1395,74 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 
 		return dsRequestRecipients;
+	}
+
+	private void _updateFileEntries(
+			long companyId, DSEnvelope dsEnvelope, long dsRequestId,
+			long groupId, long userId)
+		throws Exception {
+
+		ObjectDefinition objectDefinition =
+			_objectDefinitionLocalService.
+				getObjectDefinitionByExternalReferenceCode(
+					DSObjectDefinitionConstants.
+						EXTERNAL_REFERENCE_CODE_REQUEST_DOCUMENT,
+					companyId);
+
+		List<Long> fileEntryIds = TransformUtil.transform(
+			_getValuesList(
+				companyId,
+				"(r_dsRequestToDSRequestDocuments_l_dsRequestId eq '" +
+					dsRequestId + "')",
+				objectDefinition, null),
+			values -> MapUtil.getLong(values, "fileEntryId"));
+
+		for (long fileEntryId : fileEntryIds) {
+			byte[] bytes = _dsEnvelopeManager.getSignedDocument(
+				companyId, groupId, String.valueOf(fileEntryId),
+				dsEnvelope.getDSEnvelopeId());
+
+			if ((bytes == null) || (bytes.length < 5) ||
+				!StringUtil.startsWith(new String(bytes, 0, 5), "%PDF-")) {
+
+				throw new PortalException(
+					StringBundler.concat(
+						"DocuSign did not return a signed PDF for file entry ",
+						fileEntryId, " of envelope ",
+						dsEnvelope.getDSEnvelopeId()));
+			}
+
+			FileEntry fileEntry = _dlAppLocalService.getFileEntry(fileEntryId);
+
+			String signedFileName = _getSignedFileName(fileEntry);
+			String title = fileEntry.getTitle();
+
+			if (Objects.equals(title, fileEntry.getFileName())) {
+				title = signedFileName;
+			}
+
+			ServiceContext serviceContext = _getServiceContext(
+				companyId, fileEntry.getGroupId(), userId);
+
+			fileEntry = _dlAppLocalService.updateFileEntry(
+				userId, fileEntryId, signedFileName,
+				ContentTypes.APPLICATION_PDF, title, null,
+				fileEntry.getDescription(), null, DLVersionNumberIncrease.MAJOR,
+				bytes, fileEntry.getDisplayDate(),
+				fileEntry.getExpirationDate(), fileEntry.getReviewDate(),
+				serviceContext);
+
+			FileVersion fileVersion = fileEntry.getLatestFileVersion();
+
+			if (fileVersion.getStatus() == WorkflowConstants.STATUS_APPROVED) {
+				continue;
+			}
+
+			_dlFileEntryLocalService.updateStatus(
+				userId, fileVersion.getFileVersionId(),
+				WorkflowConstants.STATUS_APPROVED, serviceContext,
+				new HashMap<>());
+		}
 	}
 
 	private static final int _IN_FILTER_MAX_SIZE = 1000;
