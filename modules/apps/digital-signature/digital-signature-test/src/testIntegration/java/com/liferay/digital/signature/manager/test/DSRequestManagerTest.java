@@ -343,11 +343,11 @@ public class DSRequestManagerTest {
 
 		_testAddDSRequestWhenDSEnvelopeIdIsNull();
 		_testAddDSRequestWhenDSRecipientIsInvalid();
+		_testAddDSRequestWhenDSRequestRecipientUserIsDeleted();
 		_testAddDSRequestWhenEmbeddedViewIsDisabled();
 		_testAddDSRequestWhenExpirationIsInvalid();
 		_testAddDSRequestWhenFeatureFlagIsDisabled();
 		_testAddDSRequestWhenFileEntryIsInvalid();
-		_testAddDSRequestWhenDSRequestRecipientUserIsDeleted();
 	}
 
 	@Test
