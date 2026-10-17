@@ -326,7 +326,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 		catch (Exception exception) {
 			_log.error(
-				"Unable to load the signature requests for site " + siteGroupId,
+				"Unable to load DS requests for site " + siteGroupId,
 				exception);
 
 			return new ArrayList<>();
@@ -361,8 +361,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 		catch (Exception exception) {
 			_log.error(
-				"Unable to count the signature requests for site " +
-					siteGroupId,
+				"Unable to count DS requests for site " + siteGroupId,
 				exception);
 
 			return 0;

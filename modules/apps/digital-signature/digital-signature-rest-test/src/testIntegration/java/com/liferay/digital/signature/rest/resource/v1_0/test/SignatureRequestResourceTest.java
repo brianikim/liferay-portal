@@ -278,7 +278,7 @@ public class SignatureRequestResourceTest
 	@Test
 	public void testPostSignatureRequestNotification() throws Exception {
 		_testPostSignatureRequestNotification();
-		_testPostSignatureRequestNotificationWhenRequestIsTerminal();
+		_testPostSignatureRequestNotificationWhenSignatureRequestIsTerminal();
 		_testPostSignatureRequestNotificationWithoutUpdatePermission();
 		_testPostSignatureRequestNotificationWithoutViewPermission();
 	}
@@ -287,7 +287,7 @@ public class SignatureRequestResourceTest
 	@Test
 	public void testPostSignatureRequestVoid() throws Exception {
 		_testPostSignatureRequestVoid();
-		_testPostSignatureRequestVoidWhenRequestIsTerminal();
+		_testPostSignatureRequestVoidWhenSignatureRequestIsTerminal();
 		_testPostSignatureRequestVoidWhenVoidReasonIsNull();
 		_testPostSignatureRequestVoidWithoutUpdatePermission();
 		_testPostSignatureRequestVoidWithoutViewPermission();
@@ -305,7 +305,7 @@ public class SignatureRequestResourceTest
 		_testPostSiteSignatureRequestWhenRecipientsIsEmpty();
 		_testPostSiteSignatureRequestWithoutAddPermission();
 		_testPostSiteSignatureRequestWithoutFileEntryUpdatePermission();
-		_testPostSiteSignatureRequestWithoutRecipientViewPermission();
+		_testPostSiteSignatureRequestWithoutRecipientUserViewPermission();
 	}
 
 	@Ignore
@@ -483,7 +483,7 @@ public class SignatureRequestResourceTest
 			notificationQueueEntries.size());
 	}
 
-	private void _testPostSignatureRequestNotificationWhenRequestIsTerminal()
+	private void _testPostSignatureRequestNotificationWhenSignatureRequestIsTerminal()
 		throws Exception {
 
 		ObjectEntry dsRequestObjectEntry = _addDSRequestObjectEntry(
@@ -582,7 +582,7 @@ public class SignatureRequestResourceTest
 		}
 	}
 
-	private void _testPostSignatureRequestVoidWhenRequestIsTerminal()
+	private void _testPostSignatureRequestVoidWhenSignatureRequestIsTerminal()
 		throws Exception {
 
 		ObjectEntry dsRequestObjectEntry = _addDSRequestObjectEntry(
@@ -845,7 +845,7 @@ public class SignatureRequestResourceTest
 				testGroup.getGroupId(), signatureRequest));
 	}
 
-	private void _testPostSiteSignatureRequestWithoutRecipientViewPermission()
+	private void _testPostSiteSignatureRequestWithoutRecipientUserViewPermission()
 		throws Exception {
 
 		Role role = RoleTestUtil.addRole(RoleConstants.TYPE_REGULAR);
