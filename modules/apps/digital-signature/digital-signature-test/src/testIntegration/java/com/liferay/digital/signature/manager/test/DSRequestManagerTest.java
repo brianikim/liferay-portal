@@ -540,7 +540,7 @@ public class DSRequestManagerTest {
 	}
 
 	@Test
-	public void testSendSignatureReminders() throws Exception {
+	public void testSendDSRequestReminders() throws Exception {
 		DSEnvelope dsEnvelope = _createDSEnvelope();
 
 		DSRecipient dsRecipient1 = _createDSRecipient(UserTestUtil.addUser());
@@ -575,7 +575,7 @@ public class DSRequestManagerTest {
 			dsRecipient1.setStatus(DSRequestConstants.STATUS_COMPLETED);
 			dsRecipient2.setStatus(DSRequestConstants.STATUS_SENT);
 
-			_dsRequestManager.sendSignatureReminders(
+			_dsRequestManager.sendDSRequestReminders(
 				TestPropsValues.getCompanyId());
 
 			List<NotificationQueueEntry> notificationQueueEntries =
@@ -616,7 +616,7 @@ public class DSRequestManagerTest {
 								"signatureReminderEnabled", false
 							).build())) {
 
-				_dsRequestManager.sendSignatureReminders(
+				_dsRequestManager.sendDSRequestReminders(
 					TestPropsValues.getCompanyId());
 			}
 
@@ -628,7 +628,7 @@ public class DSRequestManagerTest {
 
 			dsEnvelope.setStatus(DSRequestConstants.STATUS_VOIDED);
 
-			_dsRequestManager.sendSignatureReminders(
+			_dsRequestManager.sendDSRequestReminders(
 				TestPropsValues.getCompanyId());
 
 			notificationQueueEntries = _getNotificationQueueEntries(dsRequest1);
@@ -681,7 +681,7 @@ public class DSRequestManagerTest {
 			localDateTime);
 
 		_testUpdateDSRequestWhenDSRecipientStatusesDiffer();
-		_testUpdateDSRequestWhenNextRecipientIsSent();
+		_testUpdateDSRequestWhenNextDSRecipientIsSent();
 		_testUpdateDSRequestWhenObjectEntryIsNotDSRequest();
 		_testUpdateDSRequestWhenRequestIsCompleted();
 		_testUpdateDSRequestWhenSignedDocumentIsNotPDF();
@@ -1429,7 +1429,7 @@ public class DSRequestManagerTest {
 			dsRequestRecipientValues.get("requestRecipientStatusDate"));
 	}
 
-	private void _testUpdateDSRequestWhenNextRecipientIsSent()
+	private void _testUpdateDSRequestWhenNextDSRecipientIsSent()
 		throws Exception {
 
 		DSEnvelope dsEnvelope = _createDSEnvelope();

@@ -34,13 +34,13 @@ public class DSRequestReminderSchedulerJobConfiguration
 	public UnsafeConsumer<Long, Exception>
 		getCompanyJobExecutorUnsafeConsumer() {
 
-		return companyId -> _dsRequestManager.sendSignatureReminders(companyId);
+		return companyId -> _dsRequestManager.sendDSRequestReminders(companyId);
 	}
 
 	@Override
 	public UnsafeRunnable<Exception> getJobExecutorUnsafeRunnable() {
 		return () -> _companyLocalService.forEachCompanyId(
-			companyId -> _dsRequestManager.sendSignatureReminders(companyId));
+			companyId -> _dsRequestManager.sendDSRequestReminders(companyId));
 	}
 
 	@Override

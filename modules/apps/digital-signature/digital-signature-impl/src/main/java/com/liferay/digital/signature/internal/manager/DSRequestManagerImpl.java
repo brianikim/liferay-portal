@@ -447,7 +447,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	}
 
 	@Override
-	public void sendSignatureReminders(long companyId) {
+	public void sendDSRequestReminders(long companyId) {
 		if (!FeatureFlagManagerUtil.isEnabled(companyId, "LPD-69290")) {
 			return;
 		}
@@ -521,7 +521,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 		catch (Exception exception) {
 			_log.error(
-				"Unable to send signature reminders for company " + companyId,
+				"Unable to send DS request reminders for company " + companyId,
 				exception);
 		}
 	}
