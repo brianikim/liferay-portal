@@ -570,4 +570,4 @@ public class SignatureRequestRecipient implements Serializable {
 	private Map<String, Serializable> _extendedProperties;
 
 }
-// LIFERAY-REST-BUILDER-HASH:259583830
+// LIFERAY-REST-BUILDER-HASH:-2059275096
