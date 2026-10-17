@@ -111,11 +111,13 @@ public class AddDSEnvelopeMVCResourceCommand
 				themeDisplay.getPermissionChecker(), fileEntryId,
 				ActionKeys.VIEW);
 
-			if (embeddedViewEnabled) {
-				_fileEntryModelResourcePermission.check(
-					themeDisplay.getPermissionChecker(), fileEntryId,
-					ActionKeys.UPDATE);
+			if (!embeddedViewEnabled) {
+				continue;
 			}
+
+			_fileEntryModelResourcePermission.check(
+				themeDisplay.getPermissionChecker(), fileEntryId,
+				ActionKeys.UPDATE);
 		}
 
 		User user = themeDisplay.getUser();
