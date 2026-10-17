@@ -153,7 +153,7 @@ public class Mutation {
 	}
 
 	@GraphQLField(
-		description = "Sends each signer whose turn it is a link to sign the request. Requires UPDATE permission on the request."
+		description = "Sends each recipient whose turn it is a link to sign the signature request. Requires UPDATE permission on the signature request."
 	)
 	public SignatureRequest createSignatureRequestNotification(
 			@GraphQLName("signatureRequestId") Long signatureRequestId)
@@ -168,7 +168,7 @@ public class Mutation {
 	}
 
 	@GraphQLField(
-		description = "Voids the signature request with the provider and records the reason. Requires UPDATE permission on the request."
+		description = "Voids the signature request with the provider and records the reason. Requires UPDATE permission on the signature request."
 	)
 	public SignatureRequest createSignatureRequestVoid(
 			@GraphQLName("signatureRequestId") Long signatureRequestId,
@@ -184,7 +184,7 @@ public class Mutation {
 	}
 
 	@GraphQLField(
-		description = "Sends the documents to the signers through the signature provider and records the signature request. Requires permission to add signature requests and UPDATE permission on each document."
+		description = "Sends the documents to the recipients through the signature provider and records the signature request. Requires permission to add signature requests and UPDATE permission on each document."
 	)
 	public SignatureRequest createSiteSignatureRequest(
 			@GraphQLName("siteKey") @NotEmpty String siteKey,
@@ -362,4 +362,4 @@ public class Mutation {
 		_vulcanBatchEngineImportTaskResource;
 
 }
-// LIFERAY-REST-BUILDER-HASH:-851578313
+// LIFERAY-REST-BUILDER-HASH:1219885337

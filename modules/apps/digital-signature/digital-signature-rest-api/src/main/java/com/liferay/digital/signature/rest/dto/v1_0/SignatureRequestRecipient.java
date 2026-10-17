@@ -41,11 +41,11 @@ import java.util.function.Supplier;
  */
 @Generated("")
 @GraphQLName(
-	description = "One signer on a signature request.",
+	description = "One recipient on a signature request.",
 	value = "SignatureRequestRecipient"
 )
 @io.swagger.v3.oas.annotations.media.Schema(
-	description = "One signer on a signature request."
+	description = "One recipient on a signature request."
 )
 @JsonFilter("Liferay.Vulcan")
 @XmlRootElement(name = "SignatureRequestRecipient")
@@ -62,7 +62,7 @@ public class SignatureRequestRecipient implements Serializable {
 	}
 
 	@io.swagger.v3.oas.annotations.media.Schema(
-		description = "Email address of the signer. Read-only; taken from the user."
+		description = "Email address of the recipient. Read-only; taken from the user."
 	)
 	public String getEmailAddress() {
 		if (_emailAddressSupplier != null) {
@@ -98,7 +98,7 @@ public class SignatureRequestRecipient implements Serializable {
 	}
 
 	@GraphQLField(
-		description = "Email address of the signer. Read-only; taken from the user."
+		description = "Email address of the recipient. Read-only; taken from the user."
 	)
 	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	protected String emailAddress;
@@ -107,7 +107,7 @@ public class SignatureRequestRecipient implements Serializable {
 	private Supplier<String> _emailAddressSupplier;
 
 	@io.swagger.v3.oas.annotations.media.Schema(
-		description = "Name of the signer. Read-only; taken from the user."
+		description = "Name of the recipient. Read-only; taken from the user."
 	)
 	public String getName() {
 		if (_nameSupplier != null) {
@@ -141,7 +141,7 @@ public class SignatureRequestRecipient implements Serializable {
 	}
 
 	@GraphQLField(
-		description = "Name of the signer. Read-only; taken from the user."
+		description = "Name of the recipient. Read-only; taken from the user."
 	)
 	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	protected String name;
@@ -150,7 +150,7 @@ public class SignatureRequestRecipient implements Serializable {
 	private Supplier<String> _nameSupplier;
 
 	@io.swagger.v3.oas.annotations.media.Schema(
-		description = "When the signer was notified. Read-only."
+		description = "When the recipient was notified. Read-only."
 	)
 	public Date getSentDate() {
 		if (_sentDateSupplier != null) {
@@ -185,7 +185,7 @@ public class SignatureRequestRecipient implements Serializable {
 		};
 	}
 
-	@GraphQLField(description = "When the signer was notified. Read-only.")
+	@GraphQLField(description = "When the recipient was notified. Read-only.")
 	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	protected Date sentDate;
 
@@ -193,7 +193,7 @@ public class SignatureRequestRecipient implements Serializable {
 	private Supplier<Date> _sentDateSupplier;
 
 	@io.swagger.v3.oas.annotations.media.Schema(
-		description = "Status of this signer. Read-only."
+		description = "Status of this recipient. Read-only."
 	)
 	public String getStatus() {
 		if (_statusSupplier != null) {
@@ -228,7 +228,7 @@ public class SignatureRequestRecipient implements Serializable {
 		};
 	}
 
-	@GraphQLField(description = "Status of this signer. Read-only.")
+	@GraphQLField(description = "Status of this recipient. Read-only.")
 	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	protected String status;
 
@@ -236,7 +236,7 @@ public class SignatureRequestRecipient implements Serializable {
 	private Supplier<String> _statusSupplier;
 
 	@io.swagger.v3.oas.annotations.media.Schema(
-		description = "When this signer's status last changed. Read-only."
+		description = "When this recipient's status last changed. Read-only."
 	)
 	public Date getStatusDate() {
 		if (_statusDateSupplier != null) {
@@ -272,7 +272,7 @@ public class SignatureRequestRecipient implements Serializable {
 	}
 
 	@GraphQLField(
-		description = "When this signer's status last changed. Read-only."
+		description = "When this recipient's status last changed. Read-only."
 	)
 	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	protected Date statusDate;
@@ -281,7 +281,7 @@ public class SignatureRequestRecipient implements Serializable {
 	private Supplier<Date> _statusDateSupplier;
 
 	@io.swagger.v3.oas.annotations.media.Schema(
-		description = "Liferay user who must sign. Required when creating a request."
+		description = "Liferay user who must sign. Required when creating a signature request."
 	)
 	public Long getUserId() {
 		if (_userIdSupplier != null) {
@@ -317,7 +317,7 @@ public class SignatureRequestRecipient implements Serializable {
 	}
 
 	@GraphQLField(
-		description = "Liferay user who must sign. Required when creating a request."
+		description = "Liferay user who must sign. Required when creating a signature request."
 	)
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected Long userId;
@@ -570,4 +570,4 @@ public class SignatureRequestRecipient implements Serializable {
 	private Map<String, Serializable> _extendedProperties;
 
 }
-// LIFERAY-REST-BUILDER-HASH:-2059275096
+// LIFERAY-REST-BUILDER-HASH:429761350

@@ -77,7 +77,7 @@ public abstract class BaseSignatureRequestResourceImpl
 	 * curl -X 'GET' 'http://localhost:8080/o/digital-signature-rest/v1.0/signature-requests/{signatureRequestId}'  -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Operation(
-		description = "Retrieves a signature request. Requires VIEW permission on the request."
+		description = "Retrieves a signature request. Requires VIEW permission on the signature request."
 	)
 	@io.swagger.v3.oas.annotations.Parameters(
 		value = {
@@ -163,7 +163,7 @@ public abstract class BaseSignatureRequestResourceImpl
 	 * curl -X 'POST' 'http://localhost:8080/o/digital-signature-rest/v1.0/signature-requests/{signatureRequestId}/notifications'  -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Operation(
-		description = "Sends each signer whose turn it is a link to sign the request. Requires UPDATE permission on the request."
+		description = "Sends each recipient whose turn it is a link to sign the signature request. Requires UPDATE permission on the signature request."
 	)
 	@io.swagger.v3.oas.annotations.Parameters(
 		value = {
@@ -200,7 +200,7 @@ public abstract class BaseSignatureRequestResourceImpl
 	 * curl -X 'POST' 'http://localhost:8080/o/digital-signature-rest/v1.0/signature-requests/{signatureRequestId}/void'  -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Operation(
-		description = "Voids the signature request with the provider and records the reason. Requires UPDATE permission on the request."
+		description = "Voids the signature request with the provider and records the reason. Requires UPDATE permission on the signature request."
 	)
 	@io.swagger.v3.oas.annotations.Parameters(
 		value = {
@@ -243,7 +243,7 @@ public abstract class BaseSignatureRequestResourceImpl
 	 * curl -X 'POST' 'http://localhost:8080/o/digital-signature-rest/v1.0/sites/{siteId}/signature-requests' -d $'{"emailBody": ___, "emailSubject": ___, "expireAfter": ___, "expireWarn": ___, "fileEntryIds": ___, "name": ___, "sendNotifications": ___, "signatureRequestRecipients": ___}' --header 'Content-Type: application/json' -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Operation(
-		description = "Sends the documents to the signers through the signature provider and records the signature request. Requires permission to add signature requests and UPDATE permission on each document."
+		description = "Sends the documents to the recipients through the signature provider and records the signature request. Requires permission to add signature requests and UPDATE permission on each document."
 	)
 	@io.swagger.v3.oas.annotations.Parameters(
 		value = {
@@ -1113,4 +1113,4 @@ public abstract class BaseSignatureRequestResourceImpl
 		LogFactoryUtil.getLog(BaseSignatureRequestResourceImpl.class);
 
 }
-// LIFERAY-REST-BUILDER-HASH:-369193118
+// LIFERAY-REST-BUILDER-HASH:-399886404
