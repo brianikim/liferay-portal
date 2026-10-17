@@ -228,7 +228,7 @@ public class DSCommerceOrderSignatureStatusServletTest {
 			UserTestUtil.addUser());
 
 		_testDoGetWhenDSRequestIsExpired();
-		_testDoGetWithAccountRole();
+		_testDoGetWhenUserHasAccountRole();
 	}
 
 	private CommerceOrderAttachment _addCommerceOrderAttachment(
@@ -390,7 +390,7 @@ public class DSCommerceOrderSignatureStatusServletTest {
 			requestRecipientStatuses);
 	}
 
-	private void _testDoGetWithAccountRole() throws Exception {
+	private void _testDoGetWhenUserHasAccountRole() throws Exception {
 		Role role = _roleLocalService.addRole(
 			RandomTestUtil.randomString(), TestPropsValues.getUserId(), null, 0,
 			RandomTestUtil.randomString(), null, null,
