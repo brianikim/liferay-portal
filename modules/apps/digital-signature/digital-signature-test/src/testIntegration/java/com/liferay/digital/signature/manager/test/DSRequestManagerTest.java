@@ -238,7 +238,7 @@ public class DSRequestManagerTest {
 			dsRequestDocumentValuesList.toString(), 1,
 			dsRequestDocumentValuesList.size());
 
-		List<Map<String, Serializable>> dsRecipientValuesList = ListUtil.filter(
+		List<Map<String, Serializable>> dsRequestRecipientValuesList = ListUtil.filter(
 			_getDSRequestRecipientValuesList(dsRequestValues),
 			values -> Objects.equals(
 				dsRecipient1.getEmailAddress(),
@@ -351,7 +351,7 @@ public class DSRequestManagerTest {
 		_testAddDSRequestWhenFeatureFlagIsDisabled();
 		_testAddDSRequestWhenFileEntryIsInvalid();
 		_testAddDSRequestWhenRecipientIsInvalid();
-		_testAddDSRequestWhenDSRecipientUserIsDeleted();
+		_testAddDSRequestWhenDSRequestRecipientUserIsDeleted();
 	}
 
 	@Test
@@ -522,32 +522,21 @@ public class DSRequestManagerTest {
 			System.currentTimeMillis() / 1000, 0, ZoneOffset.UTC);
 
 		_testUpdateDSRequest(
-			DSRequestConstants.STATUS_CREATED,
-			DSRequestConstants.STATUS_CREATED, localDateTime.plusDays(1),
-			"autoresponded", RandomTestUtil.randomString(), localDateTime);
+			RandomTestUtil.randomString(), DSRequestConstants.STATUS_CREATED, DSRequestConstants.STATUS_CREATED, localDateTime.plusDays(1), "autoresponded", localDateTime);
 		_testUpdateDSRequest(
-			DSRequestConstants.STATUS_DECLINED,
-			DSRequestConstants.STATUS_DECLINED, localDateTime.plusDays(1),
-			"declined", "declined", localDateTime);
+			"declined", DSRequestConstants.STATUS_DECLINED, DSRequestConstants.STATUS_DECLINED, localDateTime.plusDays(1), "declined", localDateTime);
 		_testUpdateDSRequest(
-			DSRequestConstants.STATUS_EXPIRED,
-			DSRequestConstants.STATUS_EXPIRED, localDateTime, "sent", "voided",
-			localDateTime);
+			"voided", DSRequestConstants.STATUS_EXPIRED, DSRequestConstants.STATUS_EXPIRED, localDateTime, "sent", localDateTime);
 		_testUpdateDSRequest(
-			DSRequestConstants.STATUS_SENT, DSRequestConstants.STATUS_SENT,
-			localDateTime.plusDays(1), "delivered", "delivered", localDateTime);
+			"delivered", DSRequestConstants.STATUS_SENT, DSRequestConstants.STATUS_SENT, localDateTime.plusDays(1), "delivered", localDateTime);
 		_testUpdateDSRequest(
-			DSRequestConstants.STATUS_SIGNED, DSRequestConstants.STATUS_EXPIRED,
-			localDateTime, "signed", "voided", localDateTime);
+			"voided", DSRequestConstants.STATUS_SIGNED, DSRequestConstants.STATUS_EXPIRED, localDateTime, "signed", localDateTime);
 		_testUpdateDSRequest(
-			DSRequestConstants.STATUS_SIGNED, DSRequestConstants.STATUS_SENT,
-			localDateTime.plusDays(1), "signed", "signed", localDateTime);
+			"signed", DSRequestConstants.STATUS_SIGNED, DSRequestConstants.STATUS_SENT, localDateTime.plusDays(1), "signed", localDateTime);
 		_testUpdateDSRequest(
-			DSRequestConstants.STATUS_SIGNED, DSRequestConstants.STATUS_VOIDED,
-			localDateTime.plusDays(1), "signed", "voided", localDateTime);
+			"voided", DSRequestConstants.STATUS_SIGNED, DSRequestConstants.STATUS_VOIDED, localDateTime.plusDays(1), "signed", localDateTime);
 		_testUpdateDSRequest(
-			DSRequestConstants.STATUS_VOIDED, DSRequestConstants.STATUS_VOIDED,
-			localDateTime.plusDays(1), "sent", "voided", localDateTime);
+			"voided", DSRequestConstants.STATUS_VOIDED, DSRequestConstants.STATUS_VOIDED, localDateTime.plusDays(1), "sent", localDateTime);
 
 		_testUpdateDSRequestWhenObjectEntryIsNotDSRequest();
 		_testUpdateDSRequestWhenRecipientStatusesDiffer();
@@ -835,7 +824,7 @@ public class DSRequestManagerTest {
 
 		AssertUtils.assertFailure(
 			PortalException.class,
-			"Days to warn signers must be fewer than days until expiration",
+			"Expire warn must be less than expire after",
 			() -> _addDSRequest(dsEnvelope, fileEntry));
 
 		dsEnvelope.setExpireWarn(4);
@@ -1018,7 +1007,7 @@ public class DSRequestManagerTest {
 
 		LocalDateTime localDateTime = LocalDateTime.now();
 
-		dsEnvelope.setExpireLocalDateTime(localDateTime.minusDays(1));
+		dsEnvelope.setExpirationLocalDateTime(localDateTime.minusDays(1));
 
 		DSRequest dsRequest = _addDSRequest(
 			dsEnvelope, RandomTestUtil.randomInt());
@@ -1078,9 +1067,9 @@ public class DSRequestManagerTest {
 	}
 
 	private void _testUpdateDSRequest(
-			String expectedRequestRecipientStatus, String expectedRequestStatus,
-			LocalDateTime expireLocalDateTime, String requestRecipientStatus,
-			String requestStatus, LocalDateTime statusChangedLocalDateTime)
+			String dsEnvelopeStatus, String expectedRequestRecipientStatus,
+			String expectedRequestStatus, LocalDateTime expirationLocalDateTime,
+			String requestRecipientStatus, LocalDateTime statusLocalDateTime)
 		throws Exception {
 
 		DSEnvelope dsEnvelope = _createDSEnvelope();
@@ -1104,7 +1093,7 @@ public class DSRequestManagerTest {
 
 		for (DSRecipient dsRecipient : dsEnvelope.getDSRecipients()) {
 			dsRecipient.setStatus(requestRecipientStatus);
-			dsRecipient.setStatusLocalDateTime(statusChangedLocalDateTime);
+			dsRecipient.setStatusLocalDateTime(statusLocalDateTime);
 		}
 
 		DSEnvelopeManager dsEnvelopeManager =
@@ -1161,7 +1150,7 @@ public class DSRequestManagerTest {
 				expectedRequestRecipientStatus,
 				MapUtil.getString(values, "requestRecipientStatus"));
 			Assert.assertEquals(
-				Date.from(statusChangedLocalDateTime.toInstant(ZoneOffset.UTC)),
+				Date.from(statusLocalDateTime.toInstant(ZoneOffset.UTC)),
 				values.get("requestRecipientStatusDate"));
 		}
 	}

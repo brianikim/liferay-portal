@@ -67,7 +67,7 @@ describe('DigitalSignatureForm', () => {
 		expect(asFragment()).toMatchSnapshot();
 	});
 
-	it('Validates the expiration warning period when embedded signing is enabled', async () => {
+	it('Validates the days to warn recipients when embedded signing is enabled', async () => {
 		const {getByLabelText, getByText} = render(
 			<AppContext.Provider value={{embeddedViewEnabled: true}}>
 				<DigitalSignatureForm />
@@ -75,7 +75,7 @@ describe('DigitalSignatureForm', () => {
 		);
 
 		const inputExpireWarn = getByLabelText(
-			'days-to-warn-signers-before-expiration'
+			'days-to-warn-recipients-before-expiration'
 		);
 
 		await userEvent.clear(inputExpireWarn);
@@ -83,7 +83,7 @@ describe('DigitalSignatureForm', () => {
 
 		expect(
 			getByText(
-				'days-to-warn-signers-must-be-fewer-than-days-until-expiration'
+				'days-to-warn-recipients-must-be-fewer-than-days-until-expiration'
 			)
 		).toBeInTheDocument();
 	});

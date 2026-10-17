@@ -117,7 +117,7 @@ public class AddDSEnvelopeMVCResourceCommandTest {
 
 			AssertUtils.assertFailure(
 				PortalException.class,
-				"Days to warn signers must be fewer than days until expiration",
+				"Expire warn must be less than expire after",
 				() -> ReflectionTestUtil.invoke(
 					_mvcResourceCommand, "doTransactionalCommand",
 					new Class<?>[] {

@@ -14,7 +14,7 @@
 	"items": [
 		{
 			"body": {
-				"en_US": "<p>[%DS_REQUEST_EMAIL_BODY%]</p><p><a href=\"[%DS_REQUEST_SIGN_URL%]\">[%DS_REQUEST_SIGN_LABEL%]</a></p>"
+				"en_US": "<p>[%DS_REQUEST_EMAIL_MESSAGE%]</p><p><a href=\"[%DS_REQUEST_SIGN_URL%]\">[%DS_REQUEST_SIGN_LABEL%]</a></p>"
 			},
 			"editorType": "richText",
 			"externalReferenceCode": "L_DS_REQUEST_SIGN_NOTIFICATION_TEMPLATE",
