@@ -240,7 +240,7 @@ public abstract class BaseSignatureRequestResourceImpl
 	/**
 	 * Invoke this method with the command line:
 	 *
-	 * curl -X 'POST' 'http://localhost:8080/o/digital-signature-rest/v1.0/sites/{siteId}/signature-requests' -d $'{"emailBody": ___, "emailSubject": ___, "expireAfter": ___, "expireWarn": ___, "fileEntryIds": ___, "name": ___, "sendNotifications": ___, "signatureRequestRecipients": ___}' --header 'Content-Type: application/json' -u 'test@liferay.com:test'
+	 * curl -X 'POST' 'http://localhost:8080/o/digital-signature-rest/v1.0/sites/{siteId}/signature-requests' -d $'{"emailMessage": ___, "emailSubject": ___, "expireAfter": ___, "expireWarn": ___, "fileEntryIds": ___, "name": ___, "sendNotifications": ___, "signatureRequestRecipients": ___}' --header 'Content-Type: application/json' -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Operation(
 		description = "Sends the documents to the recipients through the signature provider and records the signature request. Requires permission to add signature requests and UPDATE permission on each document."
@@ -1113,4 +1113,4 @@ public abstract class BaseSignatureRequestResourceImpl
 		LogFactoryUtil.getLog(BaseSignatureRequestResourceImpl.class);
 
 }
-// LIFERAY-REST-BUILDER-HASH:-399886404
+// LIFERAY-REST-BUILDER-HASH:534814165

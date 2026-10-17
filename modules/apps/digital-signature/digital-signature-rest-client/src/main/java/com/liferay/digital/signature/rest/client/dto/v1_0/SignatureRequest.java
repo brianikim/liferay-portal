@@ -112,26 +112,26 @@ public class SignatureRequest implements Cloneable, Serializable {
 
 	protected String documentTitles;
 
-	public String getEmailBody() {
-		return emailBody;
+	public String getEmailMessage() {
+		return emailMessage;
 	}
 
-	public void setEmailBody(String emailBody) {
-		this.emailBody = emailBody;
+	public void setEmailMessage(String emailMessage) {
+		this.emailMessage = emailMessage;
 	}
 
-	public void setEmailBody(
-		UnsafeSupplier<String, Exception> emailBodyUnsafeSupplier) {
+	public void setEmailMessage(
+		UnsafeSupplier<String, Exception> emailMessageUnsafeSupplier) {
 
 		try {
-			emailBody = emailBodyUnsafeSupplier.get();
+			emailMessage = emailMessageUnsafeSupplier.get();
 		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	protected String emailBody;
+	protected String emailMessage;
 
 	public String getEmailSubject() {
 		return emailSubject;
@@ -396,4 +396,4 @@ public class SignatureRequest implements Cloneable, Serializable {
 	}
 
 }
-// LIFERAY-REST-BUILDER-HASH:1308232426
+// LIFERAY-REST-BUILDER-HASH:1081930685

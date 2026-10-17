@@ -246,31 +246,31 @@ public class SignatureRequest implements Serializable {
 	private Supplier<String> _documentTitlesSupplier;
 
 	@io.swagger.v3.oas.annotations.media.Schema(
-		description = "Body of the notification sent to each recipient."
+		description = "Message of the notification sent to each recipient."
 	)
-	public String getEmailBody() {
-		if (_emailBodySupplier != null) {
-			emailBody = _emailBodySupplier.get();
+	public String getEmailMessage() {
+		if (_emailMessageSupplier != null) {
+			emailMessage = _emailMessageSupplier.get();
 
-			_emailBodySupplier = null;
+			_emailMessageSupplier = null;
 		}
 
-		return emailBody;
+		return emailMessage;
 	}
 
-	public void setEmailBody(String emailBody) {
-		this.emailBody = emailBody;
+	public void setEmailMessage(String emailMessage) {
+		this.emailMessage = emailMessage;
 
-		_emailBodySupplier = null;
+		_emailMessageSupplier = null;
 	}
 
 	@JsonIgnore
-	public void setEmailBody(
-		UnsafeSupplier<String, Exception> emailBodyUnsafeSupplier) {
+	public void setEmailMessage(
+		UnsafeSupplier<String, Exception> emailMessageUnsafeSupplier) {
 
-		_emailBodySupplier = () -> {
+		_emailMessageSupplier = () -> {
 			try {
-				return emailBodyUnsafeSupplier.get();
+				return emailMessageUnsafeSupplier.get();
 			}
 			catch (RuntimeException runtimeException) {
 				throw runtimeException;
@@ -282,13 +282,13 @@ public class SignatureRequest implements Serializable {
 	}
 
 	@GraphQLField(
-		description = "Body of the notification sent to each recipient."
+		description = "Message of the notification sent to each recipient."
 	)
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
-	protected String emailBody;
+	protected String emailMessage;
 
 	@JsonIgnore
-	private Supplier<String> _emailBodySupplier;
+	private Supplier<String> _emailMessageSupplier;
 
 	@io.swagger.v3.oas.annotations.media.Schema(
 		description = "Subject of the notification sent to each recipient."
@@ -871,18 +871,18 @@ public class SignatureRequest implements Serializable {
 			sb.append("\"");
 		}
 
-		String emailBody = getEmailBody();
+		String emailMessage = getEmailMessage();
 
-		if (emailBody != null) {
+		if (emailMessage != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
 			}
 
-			sb.append("\"emailBody\": ");
+			sb.append("\"emailMessage\": ");
 
 			sb.append("\"");
 
-			sb.append(_escape(emailBody));
+			sb.append(_escape(emailMessage));
 
 			sb.append("\"");
 		}
@@ -1182,4 +1182,4 @@ public class SignatureRequest implements Serializable {
 	private Map<String, Serializable> _extendedProperties;
 
 }
-// LIFERAY-REST-BUILDER-HASH:407346200
+// LIFERAY-REST-BUILDER-HASH:-180598444

@@ -104,16 +104,16 @@ public class SignatureRequestSerDes {
 			sb.append("\"");
 		}
 
-		if (signatureRequest.getEmailBody() != null) {
+		if (signatureRequest.getEmailMessage() != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
 			}
 
-			sb.append("\"emailBody\": ");
+			sb.append("\"emailMessage\": ");
 
 			sb.append("\"");
 
-			sb.append(_escape(signatureRequest.getEmailBody()));
+			sb.append(_escape(signatureRequest.getEmailMessage()));
 
 			sb.append("\"");
 		}
@@ -337,12 +337,13 @@ public class SignatureRequestSerDes {
 				String.valueOf(signatureRequest.getDocumentTitles()));
 		}
 
-		if (signatureRequest.getEmailBody() == null) {
-			map.put("emailBody", null);
+		if (signatureRequest.getEmailMessage() == null) {
+			map.put("emailMessage", null);
 		}
 		else {
 			map.put(
-				"emailBody", String.valueOf(signatureRequest.getEmailBody()));
+				"emailMessage",
+				String.valueOf(signatureRequest.getEmailMessage()));
 		}
 
 		if (signatureRequest.getEmailSubject() == null) {
@@ -470,7 +471,7 @@ public class SignatureRequestSerDes {
 			else if (Objects.equals(jsonParserFieldName, "documentTitles")) {
 				return false;
 			}
-			else if (Objects.equals(jsonParserFieldName, "emailBody")) {
+			else if (Objects.equals(jsonParserFieldName, "emailMessage")) {
 				return false;
 			}
 			else if (Objects.equals(jsonParserFieldName, "emailSubject")) {
@@ -541,9 +542,10 @@ public class SignatureRequestSerDes {
 						(String)jsonParserFieldValue);
 				}
 			}
-			else if (Objects.equals(jsonParserFieldName, "emailBody")) {
+			else if (Objects.equals(jsonParserFieldName, "emailMessage")) {
 				if (jsonParserFieldValue != null) {
-					signatureRequest.setEmailBody((String)jsonParserFieldValue);
+					signatureRequest.setEmailMessage(
+						(String)jsonParserFieldValue);
 				}
 			}
 			else if (Objects.equals(jsonParserFieldName, "emailSubject")) {
@@ -715,4 +717,4 @@ public class SignatureRequestSerDes {
 	}
 
 }
-// LIFERAY-REST-BUILDER-HASH:1487041468
+// LIFERAY-REST-BUILDER-HASH:186073944
