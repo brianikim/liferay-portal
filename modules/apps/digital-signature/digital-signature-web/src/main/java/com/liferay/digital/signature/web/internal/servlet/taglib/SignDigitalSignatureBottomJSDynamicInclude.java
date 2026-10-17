@@ -85,7 +85,7 @@ public class SignDigitalSignatureBottomJSDynamicInclude
 		}
 		catch (Exception exception) {
 			_log.error(
-				"Unable to get the signing URL for signature request " +
+				"Unable to get the signing URL for DS request " +
 					dsRequestId,
 				exception);
 

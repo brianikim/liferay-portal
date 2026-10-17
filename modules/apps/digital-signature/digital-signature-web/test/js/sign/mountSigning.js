@@ -121,7 +121,7 @@ describe('mountSigning', () => {
 		expect(navigator.sendBeacon).not.toHaveBeenCalled();
 	});
 
-	it('sends a beacon to complete the signing view when the signer leaves the page early', async () => {
+	it('sends a beacon to complete the signing view when the recipient leaves the page early', async () => {
 		await mount();
 
 		window.dispatchEvent(new Event('pagehide'));
@@ -129,7 +129,7 @@ describe('mountSigning', () => {
 		expect(navigator.sendBeacon).toHaveBeenCalledWith(COMPLETE_URL);
 	});
 
-	it('sends a beacon to complete the signing view when the signer navigates away early', async () => {
+	it('sends a beacon to complete the signing view when the recipient navigates away early', async () => {
 		await mount();
 
 		const beforeNavigateListener = getBeforeNavigateListener();
