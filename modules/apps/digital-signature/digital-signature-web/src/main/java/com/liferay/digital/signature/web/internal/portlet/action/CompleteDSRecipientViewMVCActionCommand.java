@@ -126,7 +126,7 @@ public class CompleteDSRecipientViewMVCActionCommand
 		}
 		catch (Exception exception) {
 			_log.error(
-				"Unable to verify signing for DS request " +
+				"Unable to verify signing for digital signature request " +
 					dsRequest.getDSRequestId(),
 				exception);
 		}

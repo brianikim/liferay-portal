@@ -767,7 +767,8 @@ public class DSRequestManagerTest {
 
 		AssertUtils.assertFailure(
 			PortalException.class,
-			"User " + user.getUserId() + " is already a DS request recipient",
+			"User " + user.getUserId() +
+				" is already a digital signature request recipient",
 			() -> _addDSRequest(dsEnvelope, fileEntry));
 
 		User guestUser = _userLocalService.getGuestUser(
@@ -779,7 +780,7 @@ public class DSRequestManagerTest {
 		AssertUtils.assertFailure(
 			PortalException.class,
 			"User " + guestUser.getUserId() +
-				" cannot be a DS request recipient",
+				" cannot be a digital signature request recipient",
 			() -> _addDSRequest(dsEnvelope, fileEntry));
 
 		User inactiveUser = UserTestUtil.addUser();
@@ -794,7 +795,7 @@ public class DSRequestManagerTest {
 		AssertUtils.assertFailure(
 			PortalException.class,
 			"User " + inactiveUser.getUserId() +
-				" cannot be a DS request recipient",
+				" cannot be a digital signature request recipient",
 			() -> _addDSRequest(dsEnvelope, fileEntry));
 
 		DSRecipient dsRecipient = _createDSRecipient();
@@ -952,7 +953,7 @@ public class DSRequestManagerTest {
 	private void _testAddDSRequestWhenFileEntryIsInvalid() throws Exception {
 		AssertUtils.assertFailure(
 			PortalException.class,
-			"A DS request must have at least one file entry",
+			"A digital signature request must have at least one file entry",
 			() -> _dsRequestManager.addDSRequest(
 				TestPropsValues.getCompanyId(), TestPropsValues.getGroupId(),
 				TestPropsValues.getUserId(), new DSEnvelope(), new long[0]));
@@ -969,7 +970,7 @@ public class DSRequestManagerTest {
 			PortalException.class,
 			StringBundler.concat(
 				"File entry ", fileEntry.getFileEntryId(),
-				" already has a DS request with status \"",
+				" already has a digital signature request with status \"",
 				DSRequestConstants.STATUS_SENT, "\""),
 			() -> _addDSRequest(dsEnvelope2, fileEntry));
 
