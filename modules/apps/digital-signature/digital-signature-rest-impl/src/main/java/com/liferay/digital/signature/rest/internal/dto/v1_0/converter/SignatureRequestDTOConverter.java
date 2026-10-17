@@ -52,7 +52,7 @@ public class SignatureRequestDTOConverter
 						_userLocalService.fetchUser(dsRequest.getUserId())));
 				setDateCreated(dsRequest::getCreateDate);
 				setDocumentTitles(() -> _getDocumentTitles(dsRequest));
-				setEmailBody(dsRequest::getEmailMessage);
+				setEmailMessage(dsRequest::getEmailMessage);
 				setEmailSubject(dsRequest::getEmailSubject);
 				setExpirationDate(dsRequest::getExpirationDate);
 				setId(dsRequest::getDSRequestId);

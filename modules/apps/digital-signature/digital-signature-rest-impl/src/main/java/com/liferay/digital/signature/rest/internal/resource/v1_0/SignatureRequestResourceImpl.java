@@ -255,7 +255,7 @@ public class SignatureRequestResourceImpl
 			{
 				dsRecipients = _toDSRecipients(
 					signatureRequest.getSignatureRequestRecipients());
-				emailBlurb = signatureRequest.getEmailBody();
+				emailBlurb = signatureRequest.getEmailMessage();
 				emailSubject = signatureRequest.getEmailSubject();
 				expireAfter = GetterUtil.getInteger(
 					signatureRequest.getExpireAfter());

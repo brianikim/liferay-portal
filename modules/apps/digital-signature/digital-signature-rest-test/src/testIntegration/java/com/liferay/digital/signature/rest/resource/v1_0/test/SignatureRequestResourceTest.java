@@ -176,7 +176,7 @@ public class SignatureRequestResourceTest
 
 		Assert.assertEquals(
 			MapUtil.getString(dsRequestObjectEntry.getValues(), "emailMessage"),
-			signatureRequest.getEmailBody());
+			signatureRequest.getEmailMessage());
 		Assert.assertEquals(
 			Long.valueOf(dsRequestObjectEntry.getObjectEntryId()),
 			signatureRequest.getId());

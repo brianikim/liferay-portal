@@ -111,9 +111,9 @@ components:
                         Titles of the documents to be signed, separated by commas. Read-only.
                     readOnly: true
                     type: string
-                emailBody:
+                emailMessage:
                     description:
-                        Body of the notification sent to each recipient.
+                        Message of the notification sent to each recipient.
                     type: string
                 emailSubject:
                     description:
