@@ -136,7 +136,7 @@ public class DSCommerceOrderAttachmentFDSActionContributorTest {
 	@Test
 	public void testGetAdditionalProps() throws Exception {
 		_testGetAdditionalProps();
-		_testGetAdditionalPropsWhenAttachmentIsRestricted();
+		_testGetAdditionalPropsWhenCommerceOrderAttachmentIsRestricted();
 		_testGetAdditionalPropsWhenDisabled();
 	}
 
@@ -334,7 +334,7 @@ public class DSCommerceOrderAttachmentFDSActionContributorTest {
 			_getAdditionalProps(UserTestUtil.addUser()));
 	}
 
-	private void _testGetAdditionalPropsWhenAttachmentIsRestricted()
+	private void _testGetAdditionalPropsWhenCommerceOrderAttachmentIsRestricted()
 		throws Exception {
 
 		CommerceOrderAttachment commerceOrderAttachment =
