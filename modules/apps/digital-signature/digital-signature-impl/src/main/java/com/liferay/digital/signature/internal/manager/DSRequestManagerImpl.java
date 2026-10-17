@@ -578,7 +578,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					companyId, "fileEntryId", fileEntryIds, objectDefinition,
 					false,
 					new Sort[] {
-						new Sort(Field.CREATE_DATE, Sort.LONG_TYPE, true)
+						new Sort(Field.CREATE_DATE, Sort.LONG_TYPE, true),
+						new Sort("id", Sort.LONG_TYPE, true)
 					})) {
 
 			dsRequestIds.putIfAbsent(
