@@ -265,8 +265,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 		catch (Exception exception) {
 			_log.error(
-				"Unable to load the DS request " + dsRequestId,
-				exception);
+				"Unable to load the DS request " + dsRequestId, exception);
 
 			return null;
 		}
@@ -349,8 +348,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 		catch (Exception exception) {
 			_log.error(
-				"Unable to load the DS request " + dsRequestId,
-				exception);
+				"Unable to load the DS request " + dsRequestId, exception);
 
 			return;
 		}
@@ -782,17 +780,18 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			for (Map.Entry<Long, Long> entry : dsRequestIds.entrySet()) {
 				DSRequest dsRequest = dsRequestsMap.get(entry.getValue());
 
-				if ((dsRequest != null) &&
-					_isEnabled(companyId, dsRequest.getSiteGroupId())) {
+				if ((dsRequest == null) ||
+					!_isEnabled(companyId, dsRequest.getSiteGroupId())) {
 
-					dsRequests.put(entry.getKey(), dsRequest);
+					continue;
 				}
+
+				dsRequests.put(entry.getKey(), dsRequest);
 			}
 		}
 		catch (Exception exception) {
 			throw new PortalException(
-				"Unable to load the DS requests for company " +
-					companyId,
+				"Unable to load the DS requests for company " + companyId,
 				exception);
 		}
 
@@ -1145,7 +1144,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
 				HashMapBuilder.<String, Serializable>put(
 					"requestRecipientStatus",
-					() -> _getDSRequestRecipientStatus(dsRecipient, requestStatus)
+					() -> _getDSRequestRecipientStatus(
+						dsRecipient, requestStatus)
 				).put(
 					"requestRecipientStatusDate",
 					() -> _toDate(dsRecipient.getStatusLocalDateTime())
@@ -1215,12 +1215,14 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 			FileVersion fileVersion = fileEntry.getLatestFileVersion();
 
-			if (fileVersion.getStatus() != WorkflowConstants.STATUS_APPROVED) {
-				_dlFileEntryLocalService.updateStatus(
-					userId, fileVersion.getFileVersionId(),
-					WorkflowConstants.STATUS_APPROVED, serviceContext,
-					new HashMap<>());
+			if (fileVersion.getStatus() == WorkflowConstants.STATUS_APPROVED) {
+				continue;
 			}
+
+			_dlFileEntryLocalService.updateStatus(
+				userId, fileVersion.getFileVersionId(),
+				WorkflowConstants.STATUS_APPROVED, serviceContext,
+				new HashMap<>());
 		}
 	}
 
