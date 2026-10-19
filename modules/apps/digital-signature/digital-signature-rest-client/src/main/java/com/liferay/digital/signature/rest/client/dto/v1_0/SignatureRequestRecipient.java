@@ -129,6 +129,25 @@ public class SignatureRequestRecipient implements Cloneable, Serializable {
 
 	protected Date statusDate;
 
+	public Object getTabs() {
+		return tabs;
+	}
+
+	public void setTabs(Object tabs) {
+		this.tabs = tabs;
+	}
+
+	public void setTabs(UnsafeSupplier<Object, Exception> tabsUnsafeSupplier) {
+		try {
+			tabs = tabsUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected Object tabs;
+
 	public Long getUserId() {
 		return userId;
 	}
@@ -183,4 +202,4 @@ public class SignatureRequestRecipient implements Cloneable, Serializable {
 	}
 
 }
-// LIFERAY-REST-BUILDER-HASH:-446863155
+// LIFERAY-REST-BUILDER-HASH:-1105059996
