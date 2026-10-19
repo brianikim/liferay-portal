@@ -4,10 +4,10 @@
  */
 
 import {
-	SignatureStatusDataRenderer,
+	DSRequestStatusDataRenderer,
 	formatActionUrl,
-	openSignatureDetailsModal,
-	removeSignatureStatusColumn,
+	openDSRequestDetailsModal,
+	removeDSRequestStatusColumn,
 } from 'commerce-frontend-js';
 import {openModal, openToast} from 'frontend-js-components-web';
 import {sub} from 'frontend-js-web';
@@ -82,15 +82,15 @@ const openDeleteConfirmationModal = ({itemName, loadData, url}) => {
 const OrderAttachmentsFDSPropsTransformer = (props) => {
 	const signableCommerceOrderAttachmentIds =
 		props.additionalProps?.signableCommerceOrderAttachmentIds ?? [];
-	const signatureStatuses = props.additionalProps?.signatureStatuses ?? {};
+	const dsRequestStatuses = props.additionalProps?.dsRequestStatuses ?? {};
 
 	return {
 		...props,
 		customDataRenderers: {
-			signatureStatusDataRenderer: (rendererProps) =>
-				React.createElement(SignatureStatusDataRenderer, {
+			dsRequestStatusDataRenderer: (rendererProps) =>
+				React.createElement(DSRequestStatusDataRenderer, {
 					...rendererProps,
-					signatureStatuses,
+					dsRequestStatuses,
 				}),
 		},
 		itemsActions: props.itemsActions?.map((action) => {
@@ -113,10 +113,10 @@ const OrderAttachmentsFDSPropsTransformer = (props) => {
 				};
 			}
 
-			if (actionId === 'view-signature-details') {
+			if (actionId === 'view-ds-request-details') {
 				return {
 					...action,
-					isVisible: (item) => !!signatureStatuses[item?.id],
+					isVisible: (item) => !!dsRequestStatuses[item?.id],
 				};
 			}
 
@@ -157,20 +157,20 @@ const OrderAttachmentsFDSPropsTransformer = (props) => {
 					url: formatActionUrl(action.data.signURL, itemData),
 				});
 			}
-			else if (actionId === 'view-signature-details') {
+			else if (actionId === 'view-ds-request-details') {
 				event?.preventDefault();
 
-				openSignatureDetailsModal({
+				openDSRequestDetailsModal({
 					url: formatActionUrl(
-						action.data.signatureDetailsURL,
+						action.data.dsRequestDetailsURL,
 						itemData
 					),
 				});
 			}
 		},
-		views: Object.keys(signatureStatuses).length
+		views: Object.keys(dsRequestStatuses).length
 			? props.views
-			: removeSignatureStatusColumn(props.views),
+			: removeDSRequestStatusColumn(props.views),
 	};
 };
 

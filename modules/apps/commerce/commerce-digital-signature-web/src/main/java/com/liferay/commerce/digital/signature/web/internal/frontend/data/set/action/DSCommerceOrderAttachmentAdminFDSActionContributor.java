@@ -57,7 +57,7 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributor
 		}
 
 		return HashMapBuilder.<String, Object>put(
-			"requestSignatureModalProps",
+			"addDSRequestModalProps",
 			() -> {
 				ThemeDisplay themeDisplay =
 					(ThemeDisplay)httpServletRequest.getAttribute(
@@ -111,15 +111,15 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributor
 					_portal.getPortletNamespace(
 						CommercePortletKeys.COMMERCE_ORDER)
 				).put(
-					"requestableSignatureStatuses",
+					"requestableDSRequestStatuses",
 					ArrayUtil.remove(
 						DSRequestConstants.STATUSES_REQUEST_TERMINAL,
 						DSRequestConstants.STATUS_COMPLETED)
 				).build();
 			}
 		).put(
-			"signatureStatuses",
-			() -> DSCommerceOrderAttachmentUtil.getSignatureStatuses(
+			"dsRequestStatuses",
+			() -> DSCommerceOrderAttachmentUtil.getDSRequestStatuses(
 				DSCommerceOrderAttachmentUtil.getDSRequests(
 					commerceOrder, httpServletRequest))
 		).build();
@@ -151,10 +151,10 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributor
 			).setPermissionKey(
 				"update"
 			).build(
-				"request-signature"
+				"add-ds-request"
 			),
 			FDSActionDropdownItemBuilder.putData(
-				"signatureDetailsURL",
+				"dsRequestDetailsURL",
 				DSCommerceOrderAttachmentUtil.getActionURL(
 					"/commerce-digital-signature/signature-details",
 					themeDisplay)
@@ -165,7 +165,7 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributor
 			).setLabel(
 				_language.get(httpServletRequest, "view-signature-details")
 			).build(
-				"view-signature-details"
+				"view-ds-request-details"
 			),
 			FDSActionDropdownItemBuilder.putData(
 				"resendDSRequestURL",
@@ -180,7 +180,7 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributor
 			).setPermissionKey(
 				"update"
 			).build(
-				"resend-signature-request"
+				"resend-ds-request"
 			),
 			FDSActionDropdownItemBuilder.putData(
 				"voidDSRequestURL",
@@ -195,7 +195,7 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributor
 			).setPermissionKey(
 				"update"
 			).build(
-				"void-signature-request"
+				"void-ds-request"
 			));
 	}
 

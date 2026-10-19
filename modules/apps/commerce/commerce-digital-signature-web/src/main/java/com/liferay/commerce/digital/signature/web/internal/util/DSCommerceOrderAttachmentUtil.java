@@ -103,6 +103,21 @@ public class DSCommerceOrderAttachmentUtil {
 			});
 	}
 
+	public static Map<String, String> getDSRequestStatuses(
+		Map<Long, DSRequest> dsRequests) {
+
+		Map<String, String> dsRequestStatuses = new HashMap<>();
+
+		for (Map.Entry<Long, DSRequest> entry : dsRequests.entrySet()) {
+			DSRequest dsRequest = entry.getValue();
+
+			dsRequestStatuses.put(
+				String.valueOf(entry.getKey()), dsRequest.getStatus());
+		}
+
+		return dsRequestStatuses;
+	}
+
 	public static Map<Long, DSRequest> getDSRequests(
 			CommerceOrder commerceOrder, HttpServletRequest httpServletRequest)
 		throws PortalException {
@@ -159,21 +174,6 @@ public class DSCommerceOrderAttachmentUtil {
 		httpServletRequest.setAttribute(key, dsRequests);
 
 		return dsRequests;
-	}
-
-	public static Map<String, String> getSignatureStatuses(
-		Map<Long, DSRequest> dsRequests) {
-
-		Map<String, String> signatureStatuses = new HashMap<>();
-
-		for (Map.Entry<Long, DSRequest> entry : dsRequests.entrySet()) {
-			DSRequest dsRequest = entry.getValue();
-
-			signatureStatuses.put(
-				String.valueOf(entry.getKey()), dsRequest.getStatus());
-		}
-
-		return signatureStatuses;
 	}
 
 	public static long getSiteGroupId(CommerceOrder commerceOrder) {

@@ -54,6 +54,9 @@ public class DSCommerceOrderAttachmentFDSActionContributor
 				WebKeys.THEME_DISPLAY);
 
 		return HashMapBuilder.<String, Object>put(
+			"dsRequestStatuses",
+			DSCommerceOrderAttachmentUtil.getDSRequestStatuses(dsRequests)
+		).put(
 			"signableCommerceOrderAttachmentIds",
 			TransformUtil.transform(
 				dsRequests.entrySet(),
@@ -68,9 +71,6 @@ public class DSCommerceOrderAttachmentFDSActionContributor
 
 					return String.valueOf(entry.getKey());
 				})
-		).put(
-			"signatureStatuses",
-			DSCommerceOrderAttachmentUtil.getSignatureStatuses(dsRequests)
 		).build();
 	}
 
@@ -120,7 +120,7 @@ public class DSCommerceOrderAttachmentFDSActionContributor
 
 		fdsActionDropdownItems.add(
 			FDSActionDropdownItemBuilder.putData(
-				"signatureDetailsURL",
+				"dsRequestDetailsURL",
 				DSCommerceOrderAttachmentUtil.getActionURL(
 					"/commerce-digital-signature/signature-details",
 					themeDisplay)
@@ -131,7 +131,7 @@ public class DSCommerceOrderAttachmentFDSActionContributor
 			).setLabel(
 				_language.get(httpServletRequest, "view-signature-details")
 			).build(
-				"view-signature-details"
+				"view-ds-request-details"
 			));
 
 		return fdsActionDropdownItems;

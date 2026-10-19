@@ -9,7 +9,7 @@ import React from 'react';
 
 import '@testing-library/jest-dom';
 
-import RequestSignatureModal from '../../src/main/resources/META-INF/resources/js/RequestSignatureModal';
+import AddDSRequestModal from '../../src/main/resources/META-INF/resources/js/AddDSRequestModal';
 
 const buyer = {
 	emailAddress: 'buyer@liferay.com',
@@ -17,13 +17,10 @@ const buyer = {
 	userId: 1,
 };
 
-function renderRequestSignatureModal() {
+function renderAddDSRequestModal() {
 	render(
-		<RequestSignatureModal
-			addDSRequestURL="http://localhost/add"
-			attachment={{id: 1, title: 'contract.pdf'}}
-			closeModal={jest.fn()}
-			requestSignatureModalProps={{
+		<AddDSRequestModal
+			addDSRequestModalProps={{
 				accountUsers: [
 					buyer,
 					{
@@ -37,11 +34,14 @@ function renderRequestSignatureModal() {
 				getDSRequestRecipientUsersURL: 'http://localhost/search',
 				portletNamespace: '_namespace_',
 			}}
+			addDSRequestURL="http://localhost/add"
+			attachment={{id: 1, title: 'contract.pdf'}}
+			closeModal={jest.fn()}
 		/>
 	);
 }
 
-describe('RequestSignatureModal', () => {
+describe('AddDSRequestModal', () => {
 	afterAll(() => {
 		delete window.ResizeObserver;
 	});
@@ -55,7 +55,7 @@ describe('RequestSignatureModal', () => {
 	});
 
 	it('keeps the prefilled buyer when the email field gains and loses focus', async () => {
-		renderRequestSignatureModal();
+		renderAddDSRequestModal();
 
 		const emailInput = screen.getByLabelText(/recipient-email/);
 
@@ -69,7 +69,7 @@ describe('RequestSignatureModal', () => {
 	});
 
 	it('does not send the request to the selected user after the email is edited', async () => {
-		renderRequestSignatureModal();
+		renderAddDSRequestModal();
 
 		await userEvent.type(
 			screen.getByLabelText(/email-subject/),

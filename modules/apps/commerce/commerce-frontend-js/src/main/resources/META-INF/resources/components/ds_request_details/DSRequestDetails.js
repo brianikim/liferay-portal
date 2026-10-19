@@ -8,12 +8,12 @@ import {fetch} from 'frontend-js-web';
 import PropTypes from 'prop-types';
 import React, {useEffect, useState} from 'react';
 
-import SignatureStatusLabel, {
-	getSignatureStatusDisplayType,
-	getSignatureStatusLabel,
-} from './SignatureStatusLabel';
+import DSRequestStatusLabel, {
+	getDSRequestStatusDisplayType,
+	getDSRequestStatusLabel,
+} from './DSRequestStatusLabel';
 
-import './signature_details.scss';
+import './ds_request_details.scss';
 
 const SEPARATOR = ` ${String.fromCharCode(183)} `;
 
@@ -44,8 +44,8 @@ function getActivities(detail) {
 			activities.push({
 				detail: recipient.name,
 				time: recipient.statusDate,
-				title: getSignatureStatusLabel(status),
-				type: getSignatureStatusDisplayType(status),
+				title: getDSRequestStatusLabel(status),
+				type: getDSRequestStatusDisplayType(status),
 			});
 		}
 	});
@@ -57,8 +57,8 @@ function getActivities(detail) {
 		activities.push({
 			detail: '',
 			time: detail.statusDate,
-			title: getSignatureStatusLabel(detail.status),
-			type: getSignatureStatusDisplayType(detail.status),
+			title: getDSRequestStatusLabel(detail.status),
+			type: getDSRequestStatusDisplayType(detail.status),
 		});
 	}
 
@@ -75,20 +75,20 @@ function getRecipientStatus(recipient) {
 	return recipient.status;
 }
 
-function SignatureDetailsContent({detail}) {
+function DSRequestDetailsContent({detail}) {
 	const ordered =
 		new Set(detail.recipients.map(({signingOrder}) => signingOrder)).size >
 		1;
 
 	return (
-		<div className="signature-details">
+		<div className="ds-request-details">
 			<div className="bg-light border mb-4 p-3 rounded">
 				<div className="small text-secondary text-uppercase">
 					{Liferay.Language.get('status')}
 				</div>
 
 				<div className="mb-3">
-					<SignatureStatusLabel status={detail.status} />
+					<DSRequestStatusLabel status={detail.status} />
 				</div>
 
 				<div className="small text-secondary text-uppercase">
@@ -145,7 +145,7 @@ function SignatureDetailsContent({detail}) {
 							<td>{recipient.emailAddress}</td>
 
 							<td>
-								<SignatureStatusLabel
+								<DSRequestStatusLabel
 									status={getRecipientStatus(recipient)}
 								/>
 							</td>
@@ -216,7 +216,7 @@ function SignatureDetailsContent({detail}) {
 									</td>
 
 									<td>
-										<SignatureStatusLabel
+										<DSRequestStatusLabel
 											status={historyEntry.status}
 										/>
 									</td>
@@ -238,11 +238,11 @@ function SignatureDetailsContent({detail}) {
 	);
 }
 
-SignatureDetailsContent.propTypes = {
+DSRequestDetailsContent.propTypes = {
 	detail: PropTypes.object.isRequired,
 };
 
-export default function SignatureDetails({url}) {
+export default function DSRequestDetails({url}) {
 	const [detail, setDetail] = useState(null);
 	const [error, setError] = useState(false);
 	const [loading, setLoading] = useState(true);
@@ -289,7 +289,7 @@ export default function SignatureDetails({url}) {
 	}
 
 	if (detail && detail.externalReferenceCode) {
-		return <SignatureDetailsContent detail={detail} />;
+		return <DSRequestDetailsContent detail={detail} />;
 	}
 
 	return (
@@ -301,6 +301,6 @@ export default function SignatureDetails({url}) {
 	);
 }
 
-SignatureDetails.propTypes = {
+DSRequestDetails.propTypes = {
 	url: PropTypes.string.isRequired,
 };

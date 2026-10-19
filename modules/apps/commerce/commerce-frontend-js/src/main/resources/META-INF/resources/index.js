@@ -9,9 +9,11 @@ import * as commerceEvents from './utilities/eventsDefinitions';
 export {default as CommerceServiceProvider} from './ServiceProvider/index';
 
 export * as MiniCartUtils from './components/mini_cart/util';
+export {default as DSRequestStatusDataRenderer} from './components/data_renderers/DSRequestStatusDataRenderer';
 export {default as PriceRenderer} from './components/data_renderers/PriceRenderer';
 export {default as ProductOptionsDataRenderer} from './components/data_renderers/ProductOptionsDataRenderer';
-export {default as SignatureStatusDataRenderer} from './components/data_renderers/SignatureStatusDataRenderer';
+export {default as openDSRequestDetailsModal} from './components/ds_request_details/openDSRequestDetailsModal';
+export {default as removeDSRequestStatusColumn} from './components/ds_request_details/removeDSRequestStatusColumn';
 export {
 	AccountCreationModal,
 	accountSelector,
@@ -52,8 +54,6 @@ export {
 	TierPrice,
 	UnitOfMeasureSelector,
 } from './components/index';
-export {default as MiniCompare} from './components/mini_compare/entry';
-export {default as PriceComponent} from './components/price/Price';
 
 // This is to provide a layer indirection for internal modules so that we are
 // not directly relying on a global value and can import `CommerceContext`
@@ -63,8 +63,8 @@ export const CommerceContext = Liferay.CommerceContext;
 
 export {commerceEvents, commerceTypes};
 
-export {default as openSignatureDetailsModal} from './components/signature_details/openSignatureDetailsModal';
-export {default as removeSignatureStatusColumn} from './components/signature_details/removeSignatureStatusColumn';
+export {default as MiniCompare} from './components/mini_compare/entry';
+export {default as PriceComponent} from './components/price/Price';
 export {default as createCommerceCart} from './utilities/createCommerceCart';
 export {default as FormUtils} from './utilities/forms/index';
 export {

@@ -4,18 +4,18 @@
  */
 
 import {
-	SignatureStatusDataRenderer,
+	DSRequestStatusDataRenderer,
 	formatActionUrl,
-	openSignatureDetailsModal,
-	removeSignatureStatusColumn,
+	openDSRequestDetailsModal,
+	removeDSRequestStatusColumn,
 } from 'commerce-frontend-js';
 import {openModal, openToast} from 'frontend-js-components-web';
 import {escapeHTML, sub} from 'frontend-js-web';
 import React from 'react';
 
+import AddDSRequestModal from './AddDSRequestModal';
 import CommerceOrderAttachmentRestrictedDataRenderer from './CommerceOrderAttachmentRestrictedDataRenderer';
 import CommerceOrderAttachmentTitleDataRenderer from './CommerceOrderAttachmentTitleDataRenderer';
-import RequestSignatureModal from './RequestSignatureModal';
 
 const openDeleteConfirmationModal = ({itemName, loadData, url}) => {
 	openModal({
@@ -93,18 +93,18 @@ const openErrorToast = (error) => {
 	});
 };
 
-const openRequestSignatureModal = ({
+const openAddDSRequestModal = ({
+	addDSRequestModalProps,
 	addDSRequestURL,
 	attachment,
-	requestSignatureModalProps,
 }) => {
 	openModal({
 		contentComponent: ({closeModal}) =>
-			React.createElement(RequestSignatureModal, {
+			React.createElement(AddDSRequestModal, {
+				addDSRequestModalProps,
 				addDSRequestURL,
 				attachment,
 				closeModal,
-				requestSignatureModalProps,
 			}),
 		size: 'lg',
 	});
@@ -126,7 +126,7 @@ const openVoidConfirmationModal = ({url}) => {
 				displayType: 'danger',
 				label: Liferay.Language.get('void'),
 				onClick: ({processClose}) => {
-					postSignatureRequestAction(url)
+					postDSRequestAction(url)
 						.then(() => {
 							processClose();
 
@@ -141,7 +141,7 @@ const openVoidConfirmationModal = ({url}) => {
 	});
 };
 
-const postSignatureRequestAction = (url) =>
+const postDSRequestAction = (url) =>
 	Liferay.Util.fetch(url, {method: 'POST'})
 		.then((response) => {
 			if (!response.ok) {
@@ -164,18 +164,18 @@ const postSignatureRequestAction = (url) =>
 		});
 
 const AttachmentsFDSPropsTransformer = (props) => {
-	const requestSignatureModalProps =
-		props.additionalProps?.requestSignatureModalProps;
-	const signatureStatuses = props.additionalProps?.signatureStatuses ?? {};
+	const addDSRequestModalProps =
+		props.additionalProps?.addDSRequestModalProps;
+	const dsRequestStatuses = props.additionalProps?.dsRequestStatuses ?? {};
 
 	const isRequestable = (item) =>
-		!!requestSignatureModalProps &&
-		requestSignatureModalProps.allowedFileExtensions.includes(
+		!!addDSRequestModalProps &&
+		addDSRequestModalProps.allowedFileExtensions.includes(
 			item?.extension
 		) &&
-		(!signatureStatuses[item?.id] ||
-			requestSignatureModalProps.requestableSignatureStatuses.includes(
-				signatureStatuses[item?.id]
+		(!dsRequestStatuses[item?.id] ||
+			addDSRequestModalProps.requestableDSRequestStatuses.includes(
+				dsRequestStatuses[item?.id]
 			));
 
 	return {
@@ -185,10 +185,10 @@ const AttachmentsFDSPropsTransformer = (props) => {
 				CommerceOrderAttachmentRestrictedDataRenderer,
 			commerceOrderAttachmentTitleDataRenderer:
 				CommerceOrderAttachmentTitleDataRenderer,
-			signatureStatusDataRenderer: (rendererProps) =>
-				React.createElement(SignatureStatusDataRenderer, {
+			dsRequestStatusDataRenderer: (rendererProps) =>
+				React.createElement(DSRequestStatusDataRenderer, {
 					...rendererProps,
-					signatureStatuses,
+					dsRequestStatuses,
 				}),
 		},
 		itemsActions: props.itemsActions?.map((action) => {
@@ -201,7 +201,7 @@ const AttachmentsFDSPropsTransformer = (props) => {
 				};
 			}
 
-			if (actionId === 'request-signature') {
+			if (actionId === 'add-ds-request') {
 				return {
 					...action,
 					isVisible: isRequestable,
@@ -209,19 +209,19 @@ const AttachmentsFDSPropsTransformer = (props) => {
 			}
 
 			if (
-				actionId === 'resend-signature-request' ||
-				actionId === 'void-signature-request'
+				actionId === 'resend-ds-request' ||
+				actionId === 'void-ds-request'
 			) {
 				return {
 					...action,
-					isVisible: (item) => signatureStatuses[item?.id] === 'sent',
+					isVisible: (item) => dsRequestStatuses[item?.id] === 'sent',
 				};
 			}
 
-			if (actionId === 'view-signature-details') {
+			if (actionId === 'view-ds-request-details') {
 				return {
 					...action,
-					isVisible: (item) => !!signatureStatuses[item?.id],
+					isVisible: (item) => !!dsRequestStatuses[item?.id],
 				};
 			}
 
@@ -250,36 +250,36 @@ const AttachmentsFDSPropsTransformer = (props) => {
 
 				window.location.href = fileURL;
 			}
-			else if (actionId === 'request-signature') {
+			else if (actionId === 'add-ds-request') {
 				event?.preventDefault();
 
-				openRequestSignatureModal({
+				openAddDSRequestModal({
+					addDSRequestModalProps,
 					addDSRequestURL: formatActionUrl(
 						action.data.addDSRequestURL,
 						itemData
 					),
 					attachment: itemData,
-					requestSignatureModalProps,
 				});
 			}
-			else if (actionId === 'resend-signature-request') {
+			else if (actionId === 'resend-ds-request') {
 				event?.preventDefault();
 
-				postSignatureRequestAction(
+				postDSRequestAction(
 					formatActionUrl(action.data.resendDSRequestURL, itemData)
 				).catch(openErrorToast);
 			}
-			else if (actionId === 'view-signature-details') {
+			else if (actionId === 'view-ds-request-details') {
 				event?.preventDefault();
 
-				openSignatureDetailsModal({
+				openDSRequestDetailsModal({
 					url: formatActionUrl(
-						action.data.signatureDetailsURL,
+						action.data.dsRequestDetailsURL,
 						itemData
 					),
 				});
 			}
-			else if (actionId === 'void-signature-request') {
+			else if (actionId === 'void-ds-request') {
 				event?.preventDefault();
 
 				openVoidConfirmationModal({
@@ -290,9 +290,9 @@ const AttachmentsFDSPropsTransformer = (props) => {
 				});
 			}
 		},
-		views: Object.keys(signatureStatuses).length
+		views: Object.keys(dsRequestStatuses).length
 			? props.views
-			: removeSignatureStatusColumn(props.views),
+			: removeDSRequestStatusColumn(props.views),
 	};
 };
 
