@@ -34,13 +34,22 @@ export default function mountSigning({
 				url: signingURL,
 			});
 
-			signing.on('sessionEnd', () => {
+			signing.on('sessionEnd', (event) => {
 				window.removeEventListener('pagehide', onPageHide);
 				Liferay.detach('beforeNavigate', onBeforeNavigate);
 
+				const completed = ['decline', 'signing_complete'].includes(
+					event?.sessionEndType
+				);
 				const opener = getOpener();
 
 				if (opener && opener !== window) {
+					if (!completed) {
+						opener.Liferay.fire('closeModal', {redirect: backURL});
+
+						return;
+					}
+
 					fetch(completeURL, {method: 'POST'}).then(() => {
 						opener.Liferay.fire('closeModal', {redirect: backURL});
 					});
@@ -48,7 +57,7 @@ export default function mountSigning({
 					return;
 				}
 
-				window.location.href = completeURL;
+				window.location.href = completed ? completeURL : backURL;
 			});
 
 			signing.mount(`#${containerId}`);

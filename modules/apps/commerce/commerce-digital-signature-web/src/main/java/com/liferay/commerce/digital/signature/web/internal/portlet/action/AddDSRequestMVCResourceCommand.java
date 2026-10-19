@@ -158,6 +158,14 @@ public class AddDSRequestMVCResourceCommand
 				commerceOrder.getCompanyId(),
 				commerceOrderAttachment.getFileEntryId());
 
+			if ((dsRequest != null) && !dsRequest.isTerminal()) {
+				_dsRequestManager.updateDSRequest(dsRequest.getDSRequestId());
+
+				dsRequest = _dsRequestManager.fetchFileEntryDSRequest(
+					commerceOrder.getCompanyId(),
+					commerceOrderAttachment.getFileEntryId());
+			}
+
 			if ((dsRequest != null) && !dsRequest.isRequestable()) {
 				throw new PortalException(
 					_language.get(
