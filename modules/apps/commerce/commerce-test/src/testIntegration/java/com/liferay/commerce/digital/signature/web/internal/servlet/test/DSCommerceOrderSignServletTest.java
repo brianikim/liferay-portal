@@ -175,23 +175,14 @@ public class DSCommerceOrderSignServletTest {
 			_getRedirectedURL(
 				backURL, commerceOrderAttachmentId, UserTestUtil.addUser()));
 
-		String portletNamespace = _portal.getPortletNamespace(
-			DigitalSignaturePortletKeys.SIGN_DIGITAL_SIGNATURE);
-
 		Assert.assertEquals(
-			HttpComponentsUtil.addParameter(
-				HttpComponentsUtil.addParameter(
-					_dsRequestURLProvider.getURL(
-						_group.getCompanyId(), dsRequest.getSiteGroupId(),
-						dsRequest.getDSRequestId()),
-					"p_p_state", LiferayWindowState.POP_UP.toString()),
-				portletNamespace + "backURL", backURL),
+			_getModalURL(backURL, dsRequest),
 			_getRedirectedURL(backURL, commerceOrderAttachmentId, user));
 
-		_addDSRequest(DSRequestConstants.STATUS_COMPLETED, user);
+		dsRequest = _addDSRequest(DSRequestConstants.STATUS_COMPLETED, user);
 
 		Assert.assertEquals(
-			backURL,
+			_getModalURL(backURL, dsRequest),
 			_getRedirectedURL(backURL, commerceOrderAttachmentId, user));
 
 		User recipientUser = UserTestUtil.addUser();
@@ -230,6 +221,21 @@ public class DSCommerceOrderSignServletTest {
 			},
 			_group.getCompanyId(), _group.getGroupId(), user.getUserId(),
 			dsEnvelope, new long[] {_commerceOrderAttachment.getFileEntryId()});
+	}
+
+	private String _getModalURL(String backURL, DSRequest dsRequest)
+		throws Exception {
+
+		String portletNamespace = _portal.getPortletNamespace(
+			DigitalSignaturePortletKeys.SIGN_DIGITAL_SIGNATURE);
+
+		return HttpComponentsUtil.addParameter(
+			HttpComponentsUtil.addParameter(
+				_dsRequestURLProvider.getURL(
+					_group.getCompanyId(), dsRequest.getSiteGroupId(),
+					dsRequest.getDSRequestId()),
+				"p_p_state", LiferayWindowState.POP_UP.toString()),
+			portletNamespace + "backURL", backURL);
 	}
 
 	private String _getRedirectedURL(

@@ -117,14 +117,7 @@ public class VoidDSRequestMVCResourceCommandTest {
 			TestPropsValues.getUserId(), commerceChannel.getGroupId(),
 			accountEntry.getAccountEntryId(), commerceCurrency.getCode(), 0);
 
-		_commerceOrderAttachment =
-			_commerceOrderAttachmentLocalService.addCommerceOrderAttachment(
-				RandomTestUtil.randomString(), TestPropsValues.getUserId(),
-				_commerceOrder.getCommerceOrderId(),
-				RandomTestUtil.nextDouble(), false,
-				RandomTestUtil.randomString(), "invoice",
-				RandomTestUtil.randomString() + ".pdf",
-				new ByteArrayInputStream(RandomTestUtil.randomBytes()));
+		_commerceOrderAttachment = _addCommerceOrderAttachment();
 	}
 
 	@After
@@ -165,14 +158,7 @@ public class VoidDSRequestMVCResourceCommandTest {
 
 		_testServeResource("This signature request is no longer active.");
 
-		_commerceOrderAttachment =
-			_commerceOrderAttachmentLocalService.addCommerceOrderAttachment(
-				RandomTestUtil.randomString(), TestPropsValues.getUserId(),
-				_commerceOrder.getCommerceOrderId(),
-				RandomTestUtil.nextDouble(), false,
-				RandomTestUtil.randomString(), "invoice",
-				RandomTestUtil.randomString() + ".pdf",
-				new ByteArrayInputStream(RandomTestUtil.randomBytes()));
+		_commerceOrderAttachment = _addCommerceOrderAttachment();
 
 		DSEnvelope dsEnvelope = _addDSRequest(
 			DSRequestConstants.STATUS_SENT, UserTestUtil.addUser());
@@ -186,6 +172,10 @@ public class VoidDSRequestMVCResourceCommandTest {
 					DSEnvelopeManager.class.getClassLoader(),
 					new Class<?>[] {DSEnvelopeManager.class},
 					(proxy, method, arguments) -> {
+						if (Objects.equals(method.getName(), "getDSEnvelope")) {
+							return dsEnvelope;
+						}
+
 						throw new PortalException(message);
 					}));
 
@@ -230,13 +220,79 @@ public class VoidDSRequestMVCResourceCommandTest {
 
 			Assert.assertEquals("{}", jsonObject.toString());
 
-			Object[] arguments = argumentsAtomicReference.get();
+			Object[] voidDSEnvelopeArguments = argumentsAtomicReference.get();
 
-			Assert.assertEquals(dsEnvelope.getDSEnvelopeId(), arguments[2]);
 			Assert.assertEquals(
-				"The sender voided the signature request.", arguments[3]);
+				dsEnvelope.getDSEnvelopeId(), voidDSEnvelopeArguments[2]);
+			Assert.assertEquals(
+				"The sender voided the signature request.",
+				voidDSEnvelopeArguments[3]);
 
 			DSRequest dsRequest = _dsRequestManager.fetchFileEntryDSRequest(
+				_group.getCompanyId(),
+				_commerceOrderAttachment.getFileEntryId());
+
+			Assert.assertEquals(
+				DSRequestConstants.STATUS_VOIDED, dsRequest.getStatus());
+
+			_commerceOrderAttachment = _addCommerceOrderAttachment();
+
+			DSEnvelope declinedDSEnvelope = _addDSRequest(
+				DSRequestConstants.STATUS_SENT, UserTestUtil.addUser());
+
+			ReflectionTestUtil.setFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager",
+				ProxyUtil.newProxyInstance(
+					DSEnvelopeManager.class.getClassLoader(),
+					new Class<?>[] {DSEnvelopeManager.class},
+					(proxy, method, arguments) -> {
+						if (Objects.equals(method.getName(), "getDSEnvelope")) {
+							declinedDSEnvelope.setStatus(
+								DSRequestConstants.STATUS_DECLINED);
+
+							return declinedDSEnvelope;
+						}
+
+						throw new PortalException(message);
+					}));
+
+			_testServeResource("This signature request is no longer active.");
+
+			dsRequest = _dsRequestManager.fetchFileEntryDSRequest(
+				_group.getCompanyId(),
+				_commerceOrderAttachment.getFileEntryId());
+
+			Assert.assertEquals(
+				DSRequestConstants.STATUS_DECLINED, dsRequest.getStatus());
+
+			_commerceOrderAttachment = _addCommerceOrderAttachment();
+
+			DSEnvelope voidedDSEnvelope = _addDSRequest(
+				DSRequestConstants.STATUS_SENT, UserTestUtil.addUser());
+
+			ReflectionTestUtil.setFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager",
+				ProxyUtil.newProxyInstance(
+					DSEnvelopeManager.class.getClassLoader(),
+					new Class<?>[] {DSEnvelopeManager.class},
+					(proxy, method, arguments) -> {
+						if (Objects.equals(method.getName(), "getDSEnvelope")) {
+							voidedDSEnvelope.setStatus(
+								DSRequestConstants.STATUS_VOIDED);
+
+							return voidedDSEnvelope;
+						}
+
+						throw new PortalException(message);
+					}));
+
+			jsonObject = _serveResource(
+				_commerceOrderAttachment.getCommerceOrderAttachmentId(),
+				TestPropsValues.getUser());
+
+			Assert.assertEquals("{}", jsonObject.toString());
+
+			dsRequest = _dsRequestManager.fetchFileEntryDSRequest(
 				_group.getCompanyId(),
 				_commerceOrderAttachment.getFileEntryId());
 
@@ -247,6 +303,17 @@ public class VoidDSRequestMVCResourceCommandTest {
 			ReflectionTestUtil.setFieldValue(
 				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager);
 		}
+	}
+
+	private CommerceOrderAttachment _addCommerceOrderAttachment()
+		throws Exception {
+
+		return _commerceOrderAttachmentLocalService.addCommerceOrderAttachment(
+			RandomTestUtil.randomString(), TestPropsValues.getUserId(),
+			_commerceOrder.getCommerceOrderId(), RandomTestUtil.nextDouble(),
+			false, RandomTestUtil.randomString(), "invoice",
+			RandomTestUtil.randomString() + ".pdf",
+			new ByteArrayInputStream(RandomTestUtil.randomBytes()));
 	}
 
 	private DSEnvelope _addDSRequest(String status, User user)
