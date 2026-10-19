@@ -74,9 +74,12 @@ import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
+import com.liferay.portal.vulcan.pagination.Page;
+import com.liferay.portal.vulcan.pagination.Pagination;
 
 import java.io.Serializable;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
@@ -551,6 +554,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			Map<Long, DSRequest> dsRequests = _getDSRequests(
 				companyId, dsRequestIds);
 
+			Map<Long, List<DSRequest>> groupDSRequests = new HashMap<>();
+
 			for (DSRequest dsRequest : dsRequests.values()) {
 				if (dsRequest.isTerminal() ||
 					!_isEnabled(companyId, dsRequest.getSiteGroupId())) {
@@ -558,21 +563,43 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					continue;
 				}
 
-				_updateDSRequest(
-					_getDSRequestObjectEntry(dsRequest.getDSRequestId()));
+				List<DSRequest> siteDSRequests =
+					groupDSRequests.computeIfAbsent(
+						dsRequest.getSiteGroupId(), key -> new ArrayList<>());
 
-				DSRequest updatedDSRequest = fetchDSRequest(
-					companyId, dsRequest.getDSRequestId());
+				siteDSRequests.add(dsRequest);
+			}
 
-				if ((updatedDSRequest == null) ||
-					updatedDSRequest.isTerminal()) {
+			for (Map.Entry<Long, List<DSRequest>> entry :
+					groupDSRequests.entrySet()) {
 
-					continue;
+				Map<String, DSEnvelope> dsEnvelopes = _getDSEnvelopes(
+					companyId, entry.getValue(), entry.getKey());
+
+				for (DSRequest dsRequest : entry.getValue()) {
+					DSEnvelope dsEnvelope = dsEnvelopes.get(
+						dsRequest.getExternalReferenceCode());
+
+					if (dsEnvelope != null) {
+						_updateDSRequest(
+							dsEnvelope,
+							_getDSRequestObjectEntry(
+								dsRequest.getDSRequestId()));
+					}
+
+					DSRequest updatedDSRequest = fetchDSRequest(
+						companyId, dsRequest.getDSRequestId());
+
+					if ((updatedDSRequest == null) ||
+						updatedDSRequest.isTerminal()) {
+
+						continue;
+					}
+
+					_sendDSRequestNotifications(
+						updatedDSRequest,
+						updatedDSRequest.getDSRequestRecipients());
 				}
-
-				_sendDSRequestNotifications(
-					updatedDSRequest,
-					updatedDSRequest.getDSRequestRecipients());
 			}
 		}
 		catch (Exception exception) {
@@ -786,6 +813,56 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 		return new DSRequestRecipient(
 			dsRequestRecipientObjectEntry.getValues());
+	}
+
+	private Map<String, DSEnvelope> _getDSEnvelopes(
+		long companyId, List<DSRequest> dsRequests, long groupId) {
+
+		Set<String> dsEnvelopeIds = new HashSet<>(
+			TransformUtil.transform(
+				dsRequests, DSRequest::getExternalReferenceCode));
+
+		Date fromDate = Collections.min(
+			TransformUtil.transform(dsRequests, DSRequest::getCreateDate));
+
+		LocalDate fromLocalDate = LocalDate.ofInstant(
+			fromDate.toInstant(), ZoneOffset.UTC);
+
+		String fromDateString = String.valueOf(fromLocalDate.minusDays(1));
+
+		Map<String, DSEnvelope> dsEnvelopes = new HashMap<>();
+		int page = 1;
+
+		try {
+			while (true) {
+				Page<DSEnvelope> dsEnvelopesPage =
+					_dsEnvelopeManager.getDSEnvelopesPage(
+						companyId, groupId, fromDateString, false, null, null,
+						Pagination.of(page, 100), null);
+
+				for (DSEnvelope dsEnvelope : dsEnvelopesPage.getItems()) {
+					if (!dsEnvelopeIds.contains(dsEnvelope.getDSEnvelopeId())) {
+						continue;
+					}
+
+					dsEnvelopes.put(dsEnvelope.getDSEnvelopeId(), dsEnvelope);
+				}
+
+				if (!dsEnvelopesPage.hasNext()) {
+					return dsEnvelopes;
+				}
+
+				page++;
+			}
+		}
+		catch (Exception exception) {
+			_log.error(
+				"Unable to list digital signature envelopes for group " +
+					groupId,
+				exception);
+
+			return dsEnvelopes;
+		}
 	}
 
 	private Map<Long, Long> _getDSRequestIds(
@@ -1355,13 +1432,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		return Date.from(localDateTime.toInstant(ZoneOffset.UTC));
 	}
 
-	private List<DSRequestRecipient> _updateDSRequest(ObjectEntry objectEntry) {
-		if (ArrayUtil.contains(
-				DSRequestConstants.STATUSES_REQUEST_TERMINAL,
-				MapUtil.getString(objectEntry.getValues(), "requestStatus"))) {
-
-			return new ArrayList<>();
-		}
+	private List<DSRequestRecipient> _updateDSRequest(
+		DSEnvelope dsEnvelope, ObjectEntry objectEntry) {
 
 		long companyId = objectEntry.getCompanyId();
 		long groupId = MapUtil.getLong(objectEntry.getValues(), "siteGroupId");
@@ -1369,9 +1441,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		long dsRequestId = objectEntry.getObjectEntryId();
 
 		try {
-			DSEnvelope dsEnvelope = _dsEnvelopeManager.getDSEnvelope(
-				companyId, groupId, objectEntry.getExternalReferenceCode());
-
 			String requestStatus = _getDSRequestStatus(dsEnvelope);
 
 			if (Objects.equals(
@@ -1410,6 +1479,33 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		catch (Exception exception) {
 			_log.error(
 				"Unable to update digital signature request " + dsRequestId,
+				exception);
+
+			return new ArrayList<>();
+		}
+	}
+
+	private List<DSRequestRecipient> _updateDSRequest(ObjectEntry objectEntry) {
+		if (ArrayUtil.contains(
+				DSRequestConstants.STATUSES_REQUEST_TERMINAL,
+				MapUtil.getString(objectEntry.getValues(), "requestStatus"))) {
+
+			return new ArrayList<>();
+		}
+
+		long companyId = objectEntry.getCompanyId();
+		long groupId = MapUtil.getLong(objectEntry.getValues(), "siteGroupId");
+
+		try {
+			return _updateDSRequest(
+				_dsEnvelopeManager.getDSEnvelope(
+					companyId, groupId, objectEntry.getExternalReferenceCode()),
+				objectEntry);
+		}
+		catch (Exception exception) {
+			_log.error(
+				"Unable to update digital signature request " +
+					objectEntry.getObjectEntryId(),
 				exception);
 
 			return new ArrayList<>();
@@ -1523,7 +1619,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		for (long fileEntryId : fileEntryIds) {
 			FileEntry fileEntry = _dlAppLocalService.getFileEntry(fileEntryId);
 
-			FileVersion latestFileVersion = fileEntry.getLatestFileVersion(true);
+			FileVersion latestFileVersion = fileEntry.getLatestFileVersion(
+				true);
 
 			if (Objects.equals(latestFileVersion.getChangeLog(), changeLog)) {
 				continue;
