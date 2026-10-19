@@ -624,8 +624,25 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			return;
 		}
 
-		_dsEnvelopeManager.voidDSEnvelope(
-			companyId, groupId, objectEntry.getExternalReferenceCode(), reason);
+		try {
+			_dsEnvelopeManager.voidDSEnvelope(
+				companyId, groupId, objectEntry.getExternalReferenceCode(),
+				reason);
+		}
+		catch (PortalException portalException) {
+			_updateDSRequest(objectEntry);
+
+			objectEntry = _objectEntryLocalService.getObjectEntry(dsRequestId);
+
+			if (Objects.equals(
+					MapUtil.getString(objectEntry.getValues(), "requestStatus"),
+					DSRequestConstants.STATUS_VOIDED)) {
+
+				return;
+			}
+
+			throw portalException;
+		}
 
 		_updateDSRequest(objectEntry);
 	}

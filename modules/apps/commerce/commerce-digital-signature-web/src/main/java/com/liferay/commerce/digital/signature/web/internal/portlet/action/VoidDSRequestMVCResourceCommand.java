@@ -99,11 +99,27 @@ public class VoidDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
 						"this-signature-request-is-no-longer-active"));
 			}
 
-			_dsRequestManager.voidDSRequest(
-				dsRequest.getDSRequestId(),
-				_language.get(
-					themeDisplay.getLocale(),
-					"the-sender-voided-the-signature-request"));
+			try {
+				_dsRequestManager.voidDSRequest(
+					dsRequest.getDSRequestId(),
+					_language.get(
+						themeDisplay.getLocale(),
+						"the-sender-voided-the-signature-request"));
+			}
+			catch (PortalException portalException) {
+				dsRequest = _dsRequestManager.fetchDSRequest(
+					commerceOrder.getCompanyId(), dsRequest.getDSRequestId());
+
+				if ((dsRequest == null) || !dsRequest.isTerminal()) {
+					throw portalException;
+				}
+
+				throw new PortalException(
+					_language.get(
+						themeDisplay.getLocale(),
+						"this-signature-request-is-no-longer-active"),
+					portalException);
+			}
 
 			JSONPortletResponseUtil.writeJSON(
 				resourceRequest, resourceResponse,
