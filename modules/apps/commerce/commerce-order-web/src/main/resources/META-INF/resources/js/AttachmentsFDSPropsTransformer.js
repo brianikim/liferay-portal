@@ -170,9 +170,13 @@ const AttachmentsFDSPropsTransformer = (props) => {
 
 	const isRequestable = (item) =>
 		!!requestSignatureModalProps &&
-		requestSignatureModalProps.requestableCommerceOrderAttachmentIds.includes(
-			String(item?.id)
-		);
+		requestSignatureModalProps.allowedFileExtensions.includes(
+			item?.extension
+		) &&
+		(!signatureStatuses[item?.id] ||
+			requestSignatureModalProps.requestableSignatureStatuses.includes(
+				signatureStatuses[item?.id]
+			));
 
 	return {
 		...props,
