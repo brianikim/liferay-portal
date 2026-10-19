@@ -1320,11 +1320,12 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 		return new DSDocument() {
 			{
-				data = Base64.encode(
-					FileUtil.getBytes(fileEntry.getContentStream()));
-				dsDocumentId = String.valueOf(fileEntryId);
-				fileExtension = fileEntry.getExtension();
-				name = fileEntry.getFileName();
+				setData(
+					Base64.encode(
+						FileUtil.getBytes(fileEntry.getContentStream())));
+				setDSDocumentId(String.valueOf(fileEntryId));
+				setFileExtension(fileEntry.getExtension());
+				setName(fileEntry.getFileName());
 			}
 		};
 	}
