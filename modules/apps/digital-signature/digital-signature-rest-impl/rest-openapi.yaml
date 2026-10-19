@@ -221,6 +221,10 @@ components:
                     format: date-time
                     readOnly: true
                     type: string
+                tabs:
+                    description:
+                        DocuSign tabs that place this recipient's fields on the documents, such as signHereTabs with an anchor string. Supplied on creation; not returned on read.
+                    type: object
                 userId:
                     description:
                         Liferay user who must sign. Required when creating a signature request.
