@@ -30,7 +30,15 @@ export default function mountSigning({
 	script.onload = () => {
 		window.DocuSign.loadDocuSign(integrationKey).then((docuSign) => {
 			const signing = docuSign.signing({
-				displayFormat: 'default',
+				displayFormat: 'focused',
+				style: {
+					declineModal: {
+						show: true,
+					},
+					signingDeclineButton: {
+						show: true,
+					},
+				},
 				url: signingURL,
 			});
 
@@ -38,9 +46,11 @@ export default function mountSigning({
 				window.removeEventListener('pagehide', onPageHide);
 				Liferay.detach('beforeNavigate', onBeforeNavigate);
 
-				const completed = ['decline', 'signing_complete'].includes(
-					event?.sessionEndType
-				);
+				const completed = [
+					'decline',
+					'signing_complete',
+					'viewing_complete',
+				].includes(event?.sessionEndType);
 				const opener = getOpener();
 
 				if (opener && opener !== window) {

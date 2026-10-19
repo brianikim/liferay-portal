@@ -118,22 +118,6 @@ public class SignDSRequestMVCRenderCommand implements MVCRenderCommand {
 		}
 
 		try {
-			_dsRequestManager.updateDSRequest(dsRequest.getDSRequestId());
-		}
-		catch (PortalException portalException) {
-			throw new PortletException(portalException);
-		}
-
-		dsRequest = _dsRequestManager.fetchDSRequest(
-			themeDisplay.getCompanyId(), dsRequest.getDSRequestId());
-
-		if ((dsRequest == null) ||
-			!dsRequest.isSignatureRequired(user.getUserId())) {
-
-			return "/sign_digital_signature/view.jsp";
-		}
-
-		try {
 			renderRequest.setAttribute(
 				WebKeys.PORTLET_DISPLAY_CONTEXT,
 				new SignDSRequestDisplayContext(
