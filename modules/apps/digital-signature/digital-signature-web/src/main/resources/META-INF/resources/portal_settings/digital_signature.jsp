@@ -23,6 +23,12 @@ DigitalSignatureConfiguration digitalSignatureConfiguration = (DigitalSignatureC
 			<aui:input checked="<%= digitalSignatureConfiguration.embeddedViewEnabled() %>" inlineLabel="right" label='<%= LanguageUtil.get(resourceBundle, "enable-embedded-view") %>' labelCssClass="simple-toggle-switch" name="embeddedViewEnabled" type="toggle-switch" value="<%= digitalSignatureConfiguration.embeddedViewEnabled() %>" />
 		</div>
 	</div>
+
+	<div class="row">
+		<div class="col-md-12">
+			<aui:input checked="<%= digitalSignatureConfiguration.signatureReminderEnabled() %>" inlineLabel="right" label='<%= LanguageUtil.get(resourceBundle, "enable-signature-reminders") %>' labelCssClass="simple-toggle-switch" name="signatureReminderEnabled" type="toggle-switch" value="<%= digitalSignatureConfiguration.signatureReminderEnabled() %>" />
+		</div>
+	</div>
 </c:if>
 
 <div class="form-group row">

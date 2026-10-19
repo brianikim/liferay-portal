@@ -48,6 +48,9 @@ public interface DigitalSignatureConfiguration {
 	@Meta.AD(type = Meta.Type.Password)
 	public String rsaPrivateKey();
 
+	@Meta.AD(deflt = "false", required = false)
+	public boolean signatureReminderEnabled();
+
 	public String siteSettingsStrategy();
 
 }

@@ -456,20 +456,108 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			return;
 		}
 
-		for (DSRequestRecipient dsRequestRecipient :
-				dsRequest.getDSRequestRecipients()) {
+		_sendDSRequestNotifications(
+			dsRequest, dsRequest.getDSRequestRecipients());
+	}
 
-			if ((dsRequestRecipient.getUserId() <= 0) ||
-				!Objects.equals(
-					DSRequestConstants.STATUS_SENT,
-					dsRequestRecipient.getStatus()) ||
-				!Validator.isEmailAddress(
-					dsRequestRecipient.getEmailAddress())) {
+	@Override
+	public void sendDSRequestReminders(long companyId) {
+		if (!FeatureFlagManagerUtil.isEnabled(companyId, "LPD-69290")) {
+			return;
+		}
 
-				continue;
+		DigitalSignatureConfiguration digitalSignatureConfiguration =
+			DigitalSignatureConfigurationUtil.getDigitalSignatureConfiguration(
+				companyId, 0);
+
+		if (!digitalSignatureConfiguration.signatureReminderEnabled()) {
+			return;
+		}
+
+		ObjectDefinition objectDefinition =
+			_objectDefinitionLocalService.
+				fetchObjectDefinitionByExternalReferenceCode(
+					DSObjectDefinitionConstants.
+						EXTERNAL_REFERENCE_CODE_REQUEST_RECIPIENT,
+					companyId);
+
+		if (objectDefinition == null) {
+			return;
+		}
+
+		try {
+			Set<Long> dsRequestIds = new HashSet<>(
+				TransformUtil.transform(
+					_getValuesList(
+						companyId,
+						StringBundler.concat(
+							"(requestRecipientStatus eq '",
+							DSRequestConstants.STATUS_SENT, "')"),
+						objectDefinition, null),
+					values -> MapUtil.getLong(
+						values,
+						"r_dsRequestToDSRequestRecipients_l_dsRequestId")));
+
+			if (dsRequestIds.isEmpty()) {
+				return;
 			}
 
-			_sendDSRequestNotification(dsRequest, dsRequestRecipient);
+			Map<Long, List<DSRequest>> siteGroupDSRequestsMap = new HashMap<>();
+
+			Map<Long, DSRequest> dsRequests = _getDSRequests(
+				companyId, dsRequestIds);
+
+			for (DSRequest dsRequest : dsRequests.values()) {
+				if (!dsRequest.isSyncable() ||
+					!_isEnabled(companyId, dsRequest.getSiteGroupId())) {
+
+					continue;
+				}
+
+				List<DSRequest> siteGroupDSRequests =
+					siteGroupDSRequestsMap.computeIfAbsent(
+						dsRequest.getSiteGroupId(), key -> new ArrayList<>());
+
+				siteGroupDSRequests.add(dsRequest);
+			}
+
+			for (Map.Entry<Long, List<DSRequest>> entry :
+					siteGroupDSRequestsMap.entrySet()) {
+
+				Map<String, DSEnvelope> dsEnvelopes = _getDSEnvelopes(
+					companyId, entry.getValue(), entry.getKey());
+
+				for (DSRequest dsRequest : entry.getValue()) {
+					DSEnvelope dsEnvelope = dsEnvelopes.get(
+						dsRequest.getExternalReferenceCode());
+
+					if (dsEnvelope != null) {
+						_updateDSRequest(
+							dsEnvelope,
+							_getDSRequestObjectEntry(
+								dsRequest.getDSRequestId()));
+					}
+
+					DSRequest updatedDSRequest = fetchDSRequest(
+						companyId, dsRequest.getDSRequestId());
+
+					if ((updatedDSRequest == null) ||
+						updatedDSRequest.isTerminal()) {
+
+						continue;
+					}
+
+					_sendDSRequestNotifications(
+						updatedDSRequest,
+						updatedDSRequest.getDSRequestRecipients());
+				}
+			}
+		}
+		catch (Exception exception) {
+			_log.error(
+				"Unable to send digital signature request reminders for " +
+					"company " + companyId,
+				exception);
 		}
 	}
 
@@ -484,7 +572,21 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			return;
 		}
 
-		_updateDSRequest(objectEntry);
+		List<DSRequestRecipient> nextDSRequestRecipients = _updateDSRequest(
+			objectEntry);
+
+		if (nextDSRequestRecipients.isEmpty()) {
+			return;
+		}
+
+		DSRequest dsRequest = fetchDSRequest(
+			objectEntry.getCompanyId(), dsRequestId);
+
+		if ((dsRequest == null) || dsRequest.isTerminal()) {
+			return;
+		}
+
+		_sendDSRequestNotifications(dsRequest, nextDSRequestRecipients);
 	}
 
 	@Override
@@ -676,6 +778,41 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 		return new DSRequestRecipient(
 			dsRequestRecipientObjectEntry.getValues());
+	}
+
+	private Map<String, DSEnvelope> _getDSEnvelopes(
+		long companyId, List<DSRequest> dsRequests, long groupId) {
+
+		Map<String, DSEnvelope> dsEnvelopes = new HashMap<>();
+
+		try {
+			String[] dsEnvelopeIds = TransformUtil.transformToArray(
+				dsRequests, DSRequest::getExternalReferenceCode, String.class);
+
+			for (int i = 0; i < dsEnvelopeIds.length;
+				 i += _DS_ENVELOPE_IDS_MAX_SIZE) {
+
+				for (DSEnvelope dsEnvelope :
+						_dsEnvelopeManager.getDSEnvelopes(
+							companyId, groupId,
+							ArrayUtil.subset(
+								dsEnvelopeIds, i,
+								Math.min(
+									dsEnvelopeIds.length,
+									i + _DS_ENVELOPE_IDS_MAX_SIZE)))) {
+
+					dsEnvelopes.put(dsEnvelope.getDSEnvelopeId(), dsEnvelope);
+				}
+			}
+		}
+		catch (Exception exception) {
+			_log.error(
+				"Unable to list digital signature envelopes for site " +
+					groupId,
+				exception);
+		}
+
+		return dsEnvelopes;
 	}
 
 	private ObjectEntry _getDSRequestObjectEntry(long dsRequestId)
@@ -1203,6 +1340,24 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 	}
 
+	private void _sendDSRequestNotifications(
+		DSRequest dsRequest, List<DSRequestRecipient> dsRequestRecipients) {
+
+		for (DSRequestRecipient dsRequestRecipient : dsRequestRecipients) {
+			if ((dsRequestRecipient.getUserId() <= 0) ||
+				!Objects.equals(
+					dsRequestRecipient.getStatus(),
+					DSRequestConstants.STATUS_SENT) ||
+				!Validator.isEmailAddress(
+					dsRequestRecipient.getEmailAddress())) {
+
+				continue;
+			}
+
+			_sendDSRequestNotification(dsRequest, dsRequestRecipient);
+		}
+	}
+
 	private DSDocument _toDSDocument(long fileEntryId) throws Exception {
 		FileEntry fileEntry = _dlAppLocalService.getFileEntry(fileEntryId);
 
@@ -1226,22 +1381,14 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		return Date.from(localDateTime.toInstant(ZoneOffset.UTC));
 	}
 
-	private void _updateDSRequest(ObjectEntry objectEntry) {
-		if (ArrayUtil.contains(
-				DSRequestConstants.STATUSES_REQUEST_TERMINAL,
-				MapUtil.getString(objectEntry.getValues(), "requestStatus"))) {
-
-			return;
-		}
+	private List<DSRequestRecipient> _updateDSRequest(
+		DSEnvelope dsEnvelope, ObjectEntry objectEntry) {
 
 		long companyId = objectEntry.getCompanyId();
 		long dsRequestId = objectEntry.getObjectEntryId();
 		long groupId = MapUtil.getLong(objectEntry.getValues(), "siteGroupId");
 
 		try {
-			DSEnvelope dsEnvelope = _dsEnvelopeManager.getDSEnvelope(
-				companyId, groupId, objectEntry.getExternalReferenceCode());
-
 			String dsRequestStatus = _getDSRequestStatus(dsEnvelope);
 
 			if (Objects.equals(
@@ -1255,8 +1402,10 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					objectEntry.getUserId());
 			}
 
-			_updateDSRequestRecipientStatuses(
-				companyId, dsEnvelope, dsRequestId, dsRequestStatus, groupId);
+			List<DSRequestRecipient> nextDSRequestRecipients =
+				_updateDSRequestRecipientStatuses(
+					companyId, dsEnvelope, dsRequestId, dsRequestStatus,
+					groupId);
 
 			_objectEntryLocalService.partialUpdateObjectEntry(
 				objectEntry.getUserId(), dsRequestId,
@@ -1273,18 +1422,50 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				).build(),
 				_getServiceContext(
 					companyId, groupId, objectEntry.getUserId()));
+
+			return nextDSRequestRecipients;
 		}
 		catch (Exception exception) {
 			_log.error(
 				"Unable to update digital signature request " + dsRequestId,
 				exception);
+
+			return new ArrayList<>();
 		}
 	}
 
-	private void _updateDSRequestRecipientStatuses(
+	private List<DSRequestRecipient> _updateDSRequest(ObjectEntry objectEntry) {
+		if (ArrayUtil.contains(
+				DSRequestConstants.STATUSES_REQUEST_TERMINAL,
+				MapUtil.getString(objectEntry.getValues(), "requestStatus"))) {
+
+			return new ArrayList<>();
+		}
+
+		try {
+			return _updateDSRequest(
+				_dsEnvelopeManager.getDSEnvelope(
+					objectEntry.getCompanyId(),
+					MapUtil.getLong(objectEntry.getValues(), "siteGroupId"),
+					objectEntry.getExternalReferenceCode()),
+				objectEntry);
+		}
+		catch (Exception exception) {
+			_log.error(
+				"Unable to update digital signature request " +
+					objectEntry.getObjectEntryId(),
+				exception);
+
+			return new ArrayList<>();
+		}
+	}
+
+	private List<DSRequestRecipient> _updateDSRequestRecipientStatuses(
 			long companyId, DSEnvelope dsEnvelope, long dsRequestId,
 			String dsRequestStatus, long groupId)
 		throws Exception {
+
+		List<DSRequestRecipient> nextDSRequestRecipients = new ArrayList<>();
 
 		Map<String, DSRecipient> dsRecipients = new HashMap<>();
 
@@ -1325,14 +1506,15 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				continue;
 			}
 
-			_objectEntryLocalService.partialUpdateObjectEntry(
+			String dsRequestRecipientStatus = _getDSRequestRecipientStatus(
+				dsRecipient, dsRequestStatus);
+
+			objectEntry = _objectEntryLocalService.partialUpdateObjectEntry(
 				objectEntry.getUserId(), dsRequestRecipientId,
 				ObjectEntryFolderConstants.
 					PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
 				HashMapBuilder.<String, Serializable>put(
-					"requestRecipientStatus",
-					() -> _getDSRequestRecipientStatus(
-						dsRecipient, dsRequestStatus)
+					"requestRecipientStatus", () -> dsRequestRecipientStatus
 				).put(
 					"requestRecipientStatusDate",
 					() -> _toDate(dsRecipient.getStatusLocalDateTime())
@@ -1342,7 +1524,21 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				).build(),
 				_getServiceContext(
 					companyId, groupId, objectEntry.getUserId()));
+
+			if (!Objects.equals(
+					MapUtil.getString(values, "requestRecipientStatus"),
+					DSRequestConstants.STATUS_CREATED) ||
+				!Objects.equals(
+					dsRequestRecipientStatus, DSRequestConstants.STATUS_SENT)) {
+
+				continue;
+			}
+
+			nextDSRequestRecipients.add(
+				new DSRequestRecipient(objectEntry.getValues()));
 		}
+
+		return nextDSRequestRecipients;
 	}
 
 	private void _updateFileEntries(
@@ -1432,6 +1628,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			}
 		}
 	}
+
+	private static final int _DS_ENVELOPE_IDS_MAX_SIZE = 50;
 
 	private static final int _IN_FILTER_MAX_SIZE = 1000;
 
