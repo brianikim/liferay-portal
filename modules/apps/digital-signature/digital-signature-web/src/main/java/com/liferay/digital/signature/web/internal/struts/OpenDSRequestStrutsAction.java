@@ -25,6 +25,7 @@ import com.liferay.portal.kernel.service.permission.LayoutPermissionUtil;
 import com.liferay.portal.kernel.struts.StrutsAction;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HttpComponentsUtil;
+import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.Validator;
@@ -71,9 +72,11 @@ public class OpenDSRequestStrutsAction implements StrutsAction {
 			ParamUtil.getLong(httpServletRequest, "dsRequestId"));
 
 		if ((dsRequest == null) ||
-			!_dsRequestManager.hasPermission(
-				themeDisplay.getPermissionChecker(), dsRequest,
-				ActionKeys.VIEW)) {
+			!ListUtil.exists(
+				dsRequest.getDSRequestRecipients(),
+				dsRequestRecipient ->
+					dsRequestRecipient.getUserId() ==
+						themeDisplay.getUserId())) {
 
 			_portal.sendError(
 				HttpServletResponse.SC_NOT_FOUND, new NoSuchModelException(),
