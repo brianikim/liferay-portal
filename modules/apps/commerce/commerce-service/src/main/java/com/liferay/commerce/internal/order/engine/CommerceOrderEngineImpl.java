@@ -585,15 +585,10 @@ public class CommerceOrderEngineImpl implements CommerceOrderEngine {
 
 					message.put("companyId", commerceOrder.getCompanyId());
 
-					if (Validator.isNull(PrincipalThreadLocal.getName())) {
-						long principalUserId = userId;
+					if ((userId != 0) &&
+						Validator.isNull(PrincipalThreadLocal.getName())) {
 
-						if (principalUserId == 0) {
-							principalUserId = commerceOrder.getUserId();
-						}
-
-						message.put(
-							"principalName", String.valueOf(principalUserId));
+						message.put("principalName", String.valueOf(userId));
 					}
 				}
 
