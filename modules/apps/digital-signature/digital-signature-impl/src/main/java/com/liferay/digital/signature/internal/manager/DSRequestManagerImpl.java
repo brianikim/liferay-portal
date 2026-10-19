@@ -1506,7 +1506,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		for (long fileEntryId : fileEntryIds) {
 			FileEntry fileEntry = _dlAppLocalService.getFileEntry(fileEntryId);
 
-			FileVersion latestFileVersion = fileEntry.getLatestFileVersion();
+			FileVersion latestFileVersion = fileEntry.getLatestFileVersion(true);
 
 			if (Objects.equals(latestFileVersion.getChangeLog(), changeLog)) {
 				continue;
@@ -1544,7 +1544,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				fileEntry.getDisplayDate(), fileEntry.getExpirationDate(),
 				fileEntry.getReviewDate(), serviceContext);
 
-			FileVersion fileVersion = fileEntry.getLatestFileVersion();
+			FileVersion fileVersion = fileEntry.getLatestFileVersion(true);
 
 			if (fileVersion.getStatus() == WorkflowConstants.STATUS_APPROVED) {
 				continue;
