@@ -65,7 +65,7 @@ describe('mountSigning', () => {
 
 		window.DocuSign = {
 			loadDocuSign: jest.fn(() =>
-				Promise.resolve({signing: () => signing})
+				Promise.resolve({signing: jest.fn(() => signing)})
 			),
 		};
 		window.opener = {Liferay: {fire: jest.fn()}};
@@ -115,6 +115,54 @@ describe('mountSigning', () => {
 			beforeNavigateListener
 		);
 		expect(fetch.mock.calls[0][0]).toBe(COMPLETE_URL);
+
+		window.dispatchEvent(new Event('pagehide'));
+
+		expect(navigator.sendBeacon).not.toHaveBeenCalled();
+	});
+
+	it('completes the recipient view when the recipient finishes viewing a finished envelope', async () => {
+		fetch.mockResponseOnce('');
+
+		await mount();
+
+		sessionEndListener({sessionEndType: 'viewing_complete'});
+
+		await waitFor(() =>
+			expect(window.opener.Liferay.fire).toHaveBeenCalledWith(
+				'closeModal',
+				{redirect: 'http://localhost/web/guest/home'}
+			)
+		);
+
+		expect(fetch.mock.calls[0][0]).toBe(COMPLETE_URL);
+	});
+
+	it('mounts the focused view with the decline button', async () => {
+		await mount();
+
+		const docuSign =
+			await window.DocuSign.loadDocuSign.mock.results[0].value;
+
+		expect(docuSign.signing).toHaveBeenCalledWith({
+			displayFormat: 'focused',
+			style: {
+				declineModal: {show: true},
+				signingDeclineButton: {show: true},
+			},
+			url: 'http://localhost/signing',
+		});
+	});
+
+	it('closes without completing the recipient view when the session ends without an outcome', async () => {
+		await mount();
+
+		sessionEndListener({sessionEndType: 'cancel'});
+
+		expect(window.opener.Liferay.fire).toHaveBeenCalledWith('closeModal', {
+			redirect: 'http://localhost/web/guest/home',
+		});
+		expect(fetch).not.toHaveBeenCalled();
 
 		window.dispatchEvent(new Event('pagehide'));
 
