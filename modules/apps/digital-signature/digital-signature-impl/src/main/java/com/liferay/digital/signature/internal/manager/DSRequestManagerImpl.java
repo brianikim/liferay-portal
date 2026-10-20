@@ -135,7 +135,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			companyId, fileEntryIds);
 
 		for (DSRequest dsRequest : dsRequests.values()) {
-			if (!dsRequest.isRequestable()) {
+			if (dsRequest.isTerminal()) {
 				continue;
 			}
 
@@ -1320,11 +1320,12 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 		return new DSDocument() {
 			{
-				data = Base64.encode(
-					FileUtil.getBytes(fileEntry.getContentStream()));
-				dsDocumentId = String.valueOf(fileEntryId);
-				fileExtension = fileEntry.getExtension();
-				name = fileEntry.getFileName();
+				setData(
+					Base64.encode(
+						FileUtil.getBytes(fileEntry.getContentStream())));
+				setDSDocumentId(String.valueOf(fileEntryId));
+				setFileExtension(fileEntry.getExtension());
+				setName(fileEntry.getFileName());
 			}
 		};
 	}
@@ -1338,6 +1339,13 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	}
 
 	private List<DSRequestRecipient> _updateDSRequest(ObjectEntry objectEntry) {
+		if (ArrayUtil.contains(
+				DSRequestConstants.STATUSES_REQUEST_TERMINAL,
+				MapUtil.getString(objectEntry.getValues(), "requestStatus"))) {
+
+			return new ArrayList<>();
+		}
+
 		long companyId = objectEntry.getCompanyId();
 		long groupId = MapUtil.getLong(objectEntry.getValues(), "siteGroupId");
 
@@ -1492,7 +1500,18 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				objectDefinition, null),
 			values -> MapUtil.getLong(values, "fileEntryId"));
 
+		String changeLog =
+			"Digital signature envelope " + dsEnvelope.getDSEnvelopeId();
+
 		for (long fileEntryId : fileEntryIds) {
+			FileEntry fileEntry = _dlAppLocalService.getFileEntry(fileEntryId);
+
+			FileVersion latestFileVersion = fileEntry.getLatestFileVersion(true);
+
+			if (Objects.equals(latestFileVersion.getChangeLog(), changeLog)) {
+				continue;
+			}
+
 			byte[] bytes = _dsEnvelopeManager.getDSDocumentAsBytes(
 				companyId, groupId, String.valueOf(fileEntryId),
 				dsEnvelope.getDSEnvelopeId());
@@ -1507,8 +1526,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 						dsEnvelope.getDSEnvelopeId()));
 			}
 
-			FileEntry fileEntry = _dlAppLocalService.getFileEntry(fileEntryId);
-
 			String signedFileName = _getSignedFileName(fileEntry);
 			String title = fileEntry.getTitle();
 
@@ -1522,12 +1539,12 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			fileEntry = _dlAppLocalService.updateFileEntry(
 				userId, fileEntryId, signedFileName,
 				ContentTypes.APPLICATION_PDF, title, null,
-				fileEntry.getDescription(), null, DLVersionNumberIncrease.MAJOR,
-				bytes, fileEntry.getDisplayDate(),
-				fileEntry.getExpirationDate(), fileEntry.getReviewDate(),
-				serviceContext);
+				fileEntry.getDescription(), changeLog,
+				DLVersionNumberIncrease.MAJOR, bytes,
+				fileEntry.getDisplayDate(), fileEntry.getExpirationDate(),
+				fileEntry.getReviewDate(), serviceContext);
 
-			FileVersion fileVersion = fileEntry.getLatestFileVersion();
+			FileVersion fileVersion = fileEntry.getLatestFileVersion(true);
 
 			if (fileVersion.getStatus() == WorkflowConstants.STATUS_APPROVED) {
 				continue;

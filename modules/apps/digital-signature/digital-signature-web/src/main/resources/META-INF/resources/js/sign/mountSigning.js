@@ -30,17 +30,36 @@ export default function mountSigning({
 	script.onload = () => {
 		window.DocuSign.loadDocuSign(integrationKey).then((docuSign) => {
 			const signing = docuSign.signing({
-				displayFormat: 'default',
+				displayFormat: 'focused',
+				style: {
+					declineModal: {
+						show: true,
+					},
+					signingDeclineButton: {
+						show: true,
+					},
+				},
 				url: signingURL,
 			});
 
-			signing.on('sessionEnd', () => {
+			signing.on('sessionEnd', (event) => {
 				window.removeEventListener('pagehide', onPageHide);
 				Liferay.detach('beforeNavigate', onBeforeNavigate);
 
+				const hasOutcome = [
+					'decline',
+					'signing_complete',
+					'viewing_complete',
+				].includes(event?.sessionEndType);
 				const opener = getOpener();
 
 				if (opener && opener !== window) {
+					if (!hasOutcome) {
+						opener.Liferay.fire('closeModal', {redirect: backURL});
+
+						return;
+					}
+
 					fetch(completeURL, {method: 'POST'}).then(() => {
 						opener.Liferay.fire('closeModal', {redirect: backURL});
 					});
@@ -48,7 +67,7 @@ export default function mountSigning({
 					return;
 				}
 
-				window.location.href = completeURL;
+				window.location.href = hasOutcome ? completeURL : backURL;
 			});
 
 			signing.mount(`#${containerId}`);
