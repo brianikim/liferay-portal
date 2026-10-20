@@ -58,7 +58,9 @@ import jakarta.portlet.ResourceResponse;
 import java.io.ByteArrayOutputStream;
 
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.Objects;
+import java.util.Queue;
 
 import org.junit.Assert;
 import org.junit.ClassRule;
@@ -113,7 +115,9 @@ public class AddDSEnvelopeMVCResourceCommandTest {
 							"embeddedViewEnabled", true
 						).build())) {
 
+			Queue<Object[]> argumentsList = new LinkedList<>();
 			String dsEnvelopeId = RandomTestUtil.randomString();
+			long dsRequestId = RandomTestUtil.randomLong();
 
 			DSRequestManager dsRequestManager =
 				(DSRequestManager)ReflectionTestUtil.getAndSetFieldValue(
@@ -122,6 +126,15 @@ public class AddDSEnvelopeMVCResourceCommandTest {
 						DSRequestManager.class.getClassLoader(),
 						new Class<?>[] {DSRequestManager.class},
 						(proxy, method, arguments) -> {
+							if (Objects.equals(
+									method.getName(),
+									"sendDSRequestNotifications")) {
+
+								argumentsList.add(arguments);
+
+								return null;
+							}
+
 							if (!Objects.equals(
 									method.getName(), "addDSRequest")) {
 
@@ -136,9 +149,9 @@ public class AddDSEnvelopeMVCResourceCommandTest {
 								days - 1, dsEnvelope.getExpireWarn());
 
 							return new DSRequest(
-								TestPropsValues.getCompanyId(), null, 0,
-								Collections.emptyList(), dsEnvelopeId,
-								Collections.emptyList(), 0, null,
+								TestPropsValues.getCompanyId(), null,
+								dsRequestId, Collections.emptyList(),
+								dsEnvelopeId, Collections.emptyList(), 0, null,
 								Collections.emptyMap());
 						}));
 
@@ -167,6 +180,13 @@ public class AddDSEnvelopeMVCResourceCommandTest {
 
 			Assert.assertEquals(
 				dsEnvelopeId, jsonObject.getString("dsEnvelopeId"));
+
+			Assert.assertEquals(
+				argumentsList.toString(), 1, argumentsList.size());
+
+			Object[] arguments = argumentsList.poll();
+
+			Assert.assertEquals(dsRequestId, arguments[0]);
 		}
 
 		_testDoTransactionalCommandWithoutFileEntryPermission();
