@@ -249,7 +249,6 @@ public class AddDSEnvelopeMVCResourceCommandTest {
 		throws Exception {
 
 		_group = GroupTestUtil.addGroup();
-
 		_user = UserTestUtil.addUser();
 
 		MockLiferayResourceRequest mockLiferayResourceRequest =
@@ -284,6 +283,26 @@ public class AddDSEnvelopeMVCResourceCommandTest {
 			"fileEntryIds", String.valueOf(fileEntry.getFileEntryId()));
 
 		mockLiferayResourceRequest.setParameter("recipients", "[]");
+
+		try (CompanyConfigurationTemporarySwapper
+				companyConfigurationTemporarySwapper =
+					new CompanyConfigurationTemporarySwapper(
+						TestPropsValues.getCompanyId(),
+						DigitalSignatureConfiguration.class.getName(),
+						HashMapDictionaryBuilder.<String, Object>put(
+							"embeddedViewEnabled", false
+						).build())) {
+
+			Assert.assertThrows(
+				PrincipalException.MustHavePermission.class,
+				() -> ReflectionTestUtil.invoke(
+					_mvcResourceCommand, "doTransactionalCommand",
+					new Class<?>[] {
+						ResourceRequest.class, ResourceResponse.class
+					},
+					mockLiferayResourceRequest,
+					new MockLiferayResourceResponse()));
+		}
 
 		try (CompanyConfigurationTemporarySwapper
 				companyConfigurationTemporarySwapper =
