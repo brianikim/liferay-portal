@@ -9,7 +9,6 @@ import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration
 import com.liferay.digital.signature.configuration.DigitalSignatureConfigurationUtil;
 import com.liferay.digital.signature.internal.http.DSHttp;
 import com.liferay.digital.signature.model.DSRecipientViewDefinition;
-import com.liferay.digital.signature.util.DigitalSignatureSystemConfigurationUtil;
 import com.liferay.portal.json.JSONFactoryImpl;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
@@ -47,7 +46,6 @@ public class DSRecipientViewDefinitionManagerImplTest {
 	@AfterClass
 	public static void tearDownClass() {
 		_digitalSignatureConfigurationUtilMockedStatic.close();
-		_digitalSignatureSystemConfigurationUtilMockedStatic.close();
 	}
 
 	@Before
@@ -121,13 +119,6 @@ public class DSRecipientViewDefinitionManagerImplTest {
 					getDigitalSignatureConfiguration(1, 2)
 		).thenReturn(
 			digitalSignatureConfiguration
-		);
-
-		_digitalSignatureSystemConfigurationUtilMockedStatic.when(
-			() -> DigitalSignatureSystemConfigurationUtil.getAppOriginURL(
-				"production")
-		).thenReturn(
-			"https://apps.docusign.com"
 		);
 
 		User user = Mockito.mock(User.class);
@@ -226,9 +217,6 @@ public class DSRecipientViewDefinitionManagerImplTest {
 	private static final MockedStatic<DigitalSignatureConfigurationUtil>
 		_digitalSignatureConfigurationUtilMockedStatic = Mockito.mockStatic(
 			DigitalSignatureConfigurationUtil.class);
-	private static final MockedStatic<DigitalSignatureSystemConfigurationUtil>
-		_digitalSignatureSystemConfigurationUtilMockedStatic =
-			Mockito.mockStatic(DigitalSignatureSystemConfigurationUtil.class);
 
 	private final DSRecipientViewDefinitionManagerImpl
 		_dsRecipientViewDefinitionManagerImpl =

@@ -7,8 +7,8 @@ package com.liferay.digital.signature.internal.http;
 
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfigurationUtil;
+import com.liferay.digital.signature.constants.DigitalSignatureConstants;
 import com.liferay.digital.signature.internal.web.cache.DSAccessTokenWebCacheItem;
-import com.liferay.digital.signature.util.DigitalSignatureSystemConfigurationUtil;
 import com.liferay.petra.function.RetryableUnsafeSupplier;
 import com.liferay.petra.reflect.ReflectionUtil;
 import com.liferay.petra.string.StringBundler;
@@ -85,7 +85,7 @@ public class DSHttp {
 		throws Exception {
 
 		JSONObject jsonObject = DSAccessTokenWebCacheItem.get(
-			DigitalSignatureSystemConfigurationUtil.getAccountURL(
+			DigitalSignatureConstants.getAccountURL(
 				digitalSignatureConfiguration.environment()),
 			digitalSignatureConfiguration.apiUsername(), companyId,
 			digitalSignatureConfiguration.environment(),

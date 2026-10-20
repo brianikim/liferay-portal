@@ -6,8 +6,8 @@
 package com.liferay.digital.signature.web.internal.display.context;
 
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
+import com.liferay.digital.signature.constants.DigitalSignatureConstants;
 import com.liferay.digital.signature.model.DSRequest;
-import com.liferay.digital.signature.util.DigitalSignatureSystemConfigurationUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.portlet.url.builder.PortletURLBuilder;
 import com.liferay.portal.kernel.service.GroupLocalService;
@@ -107,7 +107,7 @@ public class SignDSRequestDisplayContext {
 				_digitalSignatureConfiguration.integrationKey())
 		).put(
 			"jsURL",
-			DigitalSignatureSystemConfigurationUtil.getJSURL(
+			DigitalSignatureConstants.getJSURL(
 				_digitalSignatureConfiguration.environment())
 		).put(
 			"signingURL", _signingURL
