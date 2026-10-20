@@ -158,6 +158,14 @@ public class AddDSRequestMVCResourceCommand
 				commerceOrder.getCompanyId(),
 				commerceOrderAttachment.getFileEntryId());
 
+			if ((dsRequest != null) && !dsRequest.isTerminal()) {
+				_dsRequestManager.updateDSRequest(dsRequest.getDSRequestId());
+
+				dsRequest = _dsRequestManager.fetchFileEntryDSRequest(
+					commerceOrder.getCompanyId(),
+					commerceOrderAttachment.getFileEntryId());
+			}
+
 			if ((dsRequest != null) && !dsRequest.isRequestable()) {
 				throw new PortalException(
 					_language.get(
@@ -172,16 +180,19 @@ public class AddDSRequestMVCResourceCommand
 				themeDisplay.getUserId(),
 				new DSEnvelope() {
 					{
-						dsRecipients = _getDSRecipients(
-							commerceOrder, themeDisplay.getLocale(),
-							resourceRequest);
-						emailBlurb = ParamUtil.getString(
-							resourceRequest, "emailMessage");
-						emailSubject = ParamUtil.getString(
-							resourceRequest, "emailSubject");
-						expireAfter = expireAfterDays;
-						expireWarn = expireWarnDays;
-						name = commerceOrderAttachment.getTitle();
+						setDSRecipients(
+							_getDSRecipients(
+								commerceOrder, themeDisplay.getLocale(),
+								resourceRequest));
+						setEmailBlurb(
+							ParamUtil.getString(
+								resourceRequest, "emailMessage"));
+						setEmailSubject(
+							ParamUtil.getString(
+								resourceRequest, "emailSubject"));
+						setExpireAfter(expireAfterDays);
+						setExpireWarn(expireWarnDays);
+						setName(commerceOrderAttachment.getTitle());
 					}
 				},
 				new long[] {commerceOrderAttachment.getFileEntryId()});
