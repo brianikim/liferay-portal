@@ -6,6 +6,7 @@
 package com.liferay.digital.signature.rest.internal.resource.v1_0;
 
 import com.liferay.digital.signature.constants.DSObjectDefinitionConstants;
+import com.liferay.digital.signature.exception.DSRequestException;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
@@ -20,7 +21,6 @@ import com.liferay.object.definition.security.permission.resource.ObjectDefiniti
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.service.ObjectDefinitionLocalService;
 import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.repository.model.FileEntry;
@@ -179,15 +179,9 @@ public class SignatureRequestResourceImpl
 				_toDSEnvelope(signatureRequest),
 				ArrayUtil.toArray(fileEntryIds));
 		}
-		catch (PortalException portalException) {
-			if ((portalException.getClass() != PortalException.class) ||
-				(portalException.getCause() != null)) {
-
-				throw portalException;
-			}
-
+		catch (DSRequestException dsRequestException) {
 			throw new BadRequestException(
-				portalException.getMessage(), portalException);
+				dsRequestException.getMessage(), dsRequestException);
 		}
 
 		if (GetterUtil.getBoolean(

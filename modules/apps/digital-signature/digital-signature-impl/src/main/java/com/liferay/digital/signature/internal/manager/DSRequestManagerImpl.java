@@ -9,6 +9,7 @@ import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration
 import com.liferay.digital.signature.configuration.DigitalSignatureConfigurationUtil;
 import com.liferay.digital.signature.constants.DSObjectDefinitionConstants;
 import com.liferay.digital.signature.constants.DSRequestConstants;
+import com.liferay.digital.signature.exception.DSRequestException;
 import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSDocument;
@@ -112,27 +113,22 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		throws PortalException {
 
 		if (!_isEnabled(companyId, groupId)) {
-			throw new PortalException(
-				"Digital signature is not enabled for site " + groupId);
+			throw new DSRequestException.NotEnabled(groupId);
 		}
 
 		if (ArrayUtil.isEmpty(fileEntryIds)) {
-			throw new PortalException(
-				"A digital signature request must have at least one file " +
-					"entry");
+			throw new DSRequestException.MustHaveFileEntry();
 		}
 
 		int expireAfter = dsEnvelope.getExpireAfter();
 		int expireWarn = dsEnvelope.getExpireWarn();
 
 		if ((expireAfter < 0) || (expireWarn < 0)) {
-			throw new PortalException(
-				"Expire after and expire warn must not be negative");
+			throw new DSRequestException.NegativeExpiration();
 		}
 
 		if ((expireAfter > 0) && (expireWarn >= expireAfter)) {
-			throw new PortalException(
-				"Expire warn must be less than expire after");
+			throw new DSRequestException.ExpireWarnNotLessThanExpireAfter();
 		}
 
 		Map<Long, DSRequest> dsRequests = _getFileEntryDSRequests(
@@ -159,32 +155,32 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			}
 
 			if (!dsRequest.isReplaceable()) {
-				throw new PortalException(
-					StringBundler.concat(
-						"File entry ", entry.getKey(),
-						" already has a digital signature request with status ",
-						"\"", dsRequest.getStatus(), "\""));
+				throw new DSRequestException.FileEntryHasDSRequest(
+					entry.getKey(), dsRequest.getStatus());
 			}
 		}
 
 		Set<Long> recipientUserIds = new HashSet<>();
 
 		for (DSRecipient dsRecipient : dsEnvelope.getDSRecipients()) {
-			User recipientUser = _userLocalService.getUserByEmailAddress(
+			User recipientUser = _userLocalService.fetchUserByEmailAddress(
 				companyId, dsRecipient.getEmailAddress());
+
+			if (recipientUser == null) {
+				throw new DSRequestException.UnknownRecipient(
+					dsRecipient.getEmailAddress());
+			}
 
 			if ((recipientUser.getType() != UserConstants.TYPE_REGULAR) ||
 				!recipientUser.isActive()) {
 
-				throw new PortalException(
-					"User " + recipientUser.getUserId() +
-						" cannot be a digital signature request recipient");
+				throw new DSRequestException.InvalidRecipient(
+					recipientUser.getUserId());
 			}
 
 			if (!recipientUserIds.add(recipientUser.getUserId())) {
-				throw new PortalException(
-					"User " + recipientUser.getUserId() +
-						" is already a digital signature request recipient");
+				throw new DSRequestException.DuplicateRecipient(
+					recipientUser.getUserId());
 			}
 
 			dsRecipient.setDSClientUserId(
