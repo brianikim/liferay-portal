@@ -11,6 +11,7 @@ import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.model.CommerceOrderAttachment;
 import com.liferay.commerce.service.CommerceOrderAttachmentLocalService;
 import com.liferay.commerce.service.CommerceOrderLocalService;
+import com.liferay.digital.signature.exception.DSRequestException;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.portal.kernel.exception.NoSuchModelException;
@@ -106,19 +107,12 @@ public class VoidDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
 						themeDisplay.getLocale(),
 						"the-sender-voided-the-signature-request"));
 			}
-			catch (PortalException portalException) {
-				dsRequest = _dsRequestManager.fetchDSRequest(
-					commerceOrder.getCompanyId(), dsRequest.getDSRequestId());
-
-				if ((dsRequest == null) || !dsRequest.isTerminal()) {
-					throw portalException;
-				}
-
+			catch (DSRequestException.NotActive dsRequestException) {
 				throw new PortalException(
 					_language.get(
 						themeDisplay.getLocale(),
 						"this-signature-request-is-no-longer-active"),
-					portalException);
+					dsRequestException);
 			}
 
 			JSONPortletResponseUtil.writeJSON(

@@ -11,6 +11,7 @@ import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.model.CommerceOrderAttachment;
 import com.liferay.commerce.service.CommerceOrderAttachmentLocalService;
 import com.liferay.commerce.service.CommerceOrderLocalService;
+import com.liferay.digital.signature.exception.DSRequestException;
 import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
@@ -88,10 +89,23 @@ public class AddDSRequestMVCResourceCommand
 				_log.debug(throwable);
 			}
 
+			String errorMessage = throwable.getMessage();
+
+			if (throwable instanceof DSRequestException.FileEntryHasDSRequest) {
+				ThemeDisplay themeDisplay =
+					(ThemeDisplay)resourceRequest.getAttribute(
+						WebKeys.THEME_DISPLAY);
+
+				errorMessage = _language.get(
+					themeDisplay.getLocale(),
+					"this-document-already-has-an-active-or-completed-" +
+						"signature-request");
+			}
+
 			try {
 				JSONPortletResponseUtil.writeJSON(
 					resourceRequest, resourceResponse,
-					JSONUtil.put("errorMessage", throwable.getMessage()));
+					JSONUtil.put("errorMessage", errorMessage));
 			}
 			catch (IOException ioException) {
 				throw new PortletException(ioException);
@@ -132,6 +146,15 @@ public class AddDSRequestMVCResourceCommand
 						"digital-signature-is-not-enabled-for-this-order"));
 			}
 
+			if (!DSCommerceOrderAttachmentUtil.hasAllowedFileExtension(
+					commerceOrderAttachment)) {
+
+				throw new PortalException(
+					_language.get(
+						themeDisplay.getLocale(),
+						"this-file-extension-is-not-supported-by-docusign"));
+			}
+
 			int expireAfterDays = ParamUtil.getInteger(
 				resourceRequest, "expireAfter");
 			int expireWarnDays = ParamUtil.getInteger(
@@ -145,36 +168,7 @@ public class AddDSRequestMVCResourceCommand
 							"until-expiration"));
 			}
 
-			if (!DSCommerceOrderAttachmentUtil.hasAllowedFileExtension(
-					commerceOrderAttachment)) {
-
-				throw new PortalException(
-					_language.get(
-						themeDisplay.getLocale(),
-						"this-file-extension-is-not-supported-by-docusign"));
-			}
-
-			DSRequest dsRequest = _dsRequestManager.fetchFileEntryDSRequest(
-				commerceOrder.getCompanyId(),
-				commerceOrderAttachment.getFileEntryId());
-
-			if ((dsRequest != null) && !dsRequest.isTerminal()) {
-				_dsRequestManager.updateDSRequest(dsRequest.getDSRequestId());
-
-				dsRequest = _dsRequestManager.fetchFileEntryDSRequest(
-					commerceOrder.getCompanyId(),
-					commerceOrderAttachment.getFileEntryId());
-			}
-
-			if ((dsRequest != null) && !dsRequest.isRequestable()) {
-				throw new PortalException(
-					_language.get(
-						themeDisplay.getLocale(),
-						"this-document-already-has-an-active-or-completed-" +
-							"signature-request"));
-			}
-
-			dsRequest = _dsRequestManager.addDSRequest(
+			DSRequest dsRequest = _dsRequestManager.addDSRequest(
 				commerceOrder.getCompanyId(),
 				DSCommerceOrderAttachmentUtil.getSiteGroupId(commerceOrder),
 				themeDisplay.getUserId(),

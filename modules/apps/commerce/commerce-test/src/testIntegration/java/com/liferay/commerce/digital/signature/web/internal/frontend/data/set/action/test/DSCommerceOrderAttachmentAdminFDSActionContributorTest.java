@@ -173,7 +173,7 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 				DSRequestConstants.STATUS_VOIDED
 			},
 			(String[])addDSRequestModalProps.get(
-				"requestableDSRequestStatuses"));
+				"replaceableDSRequestStatuses"));
 
 		_addDSRequest(_commerceOrderAttachment, user);
 
@@ -260,11 +260,12 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 		ReflectionTestUtil.invoke(
 			_dsRequestManager, "_addDSRequest",
 			new Class<?>[] {
-				long.class, long.class, long.class, DSEnvelope.class,
-				long[].class
+				long.class, DSEnvelope.class, long[].class, long.class,
+				long.class
 			},
-			_group.getCompanyId(), _group.getGroupId(), user.getUserId(),
-			dsEnvelope, new long[] {commerceOrderAttachment.getFileEntryId()});
+			_group.getCompanyId(), dsEnvelope,
+			new long[] {commerceOrderAttachment.getFileEntryId()},
+			_group.getGroupId(), user.getUserId());
 	}
 
 	private Map<String, Object> _getAdditionalProps(User user)

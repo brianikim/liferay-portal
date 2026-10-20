@@ -85,8 +85,9 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributor
 						User user = _userLocalService.fetchUser(
 							commerceOrder.getUserId());
 
-						if ((user == null) || !user.isActive() ||
-							(user.getType() != UserConstants.TYPE_REGULAR)) {
+						if ((user == null) ||
+							(user.getType() != UserConstants.TYPE_REGULAR) ||
+							!user.isActive()) {
 
 							return null;
 						}
@@ -111,7 +112,7 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributor
 					_portal.getPortletNamespace(
 						CommercePortletKeys.COMMERCE_ORDER)
 				).put(
-					"requestableDSRequestStatuses",
+					"replaceableDSRequestStatuses",
 					ArrayUtil.remove(
 						DSRequestConstants.STATUSES_REQUEST_TERMINAL,
 						DSRequestConstants.STATUS_COMPLETED)
