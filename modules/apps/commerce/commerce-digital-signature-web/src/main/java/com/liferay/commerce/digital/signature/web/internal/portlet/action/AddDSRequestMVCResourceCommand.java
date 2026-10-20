@@ -166,7 +166,7 @@ public class AddDSRequestMVCResourceCommand
 					commerceOrderAttachment.getFileEntryId());
 			}
 
-			if ((dsRequest != null) && !dsRequest.isRequestable()) {
+			if ((dsRequest != null) && !dsRequest.isReplaceable()) {
 				throw new PortalException(
 					_language.get(
 						themeDisplay.getLocale(),

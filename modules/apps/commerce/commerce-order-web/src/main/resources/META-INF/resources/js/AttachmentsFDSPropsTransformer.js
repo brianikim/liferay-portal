@@ -174,7 +174,7 @@ const AttachmentsFDSPropsTransformer = (props) => {
 			item?.extension
 		) &&
 		(!dsRequestStatuses[item?.id] ||
-			addDSRequestModalProps.requestableDSRequestStatuses.includes(
+			addDSRequestModalProps.replaceableDSRequestStatuses.includes(
 				dsRequestStatuses[item?.id]
 			));
 

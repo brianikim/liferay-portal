@@ -15,7 +15,6 @@ import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
-import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.model.Group;
@@ -32,7 +31,6 @@ import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
 import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
-import com.liferay.portal.kernel.test.AssertUtils;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.constants.TestDataConstants;
 import com.liferay.portal.kernel.test.portlet.MockLiferayResourceRequest;
@@ -102,7 +100,7 @@ public class AddDSEnvelopeMVCResourceCommandTest {
 		mockLiferayResourceRequest.setParameter(
 			"expireAfter", String.valueOf(days));
 		mockLiferayResourceRequest.setParameter(
-			"expireWarn", String.valueOf(days));
+			"expireWarn", String.valueOf(days - 1));
 
 		mockLiferayResourceRequest.setParameter("recipients", "[]");
 
@@ -114,20 +112,6 @@ public class AddDSEnvelopeMVCResourceCommandTest {
 						HashMapDictionaryBuilder.<String, Object>put(
 							"embeddedViewEnabled", true
 						).build())) {
-
-			AssertUtils.assertFailure(
-				PortalException.class,
-				"Expire warn must be less than expire after",
-				() -> ReflectionTestUtil.invoke(
-					_mvcResourceCommand, "doTransactionalCommand",
-					new Class<?>[] {
-						ResourceRequest.class, ResourceResponse.class
-					},
-					mockLiferayResourceRequest,
-					new MockLiferayResourceResponse()));
-
-			mockLiferayResourceRequest.setParameter(
-				"expireWarn", String.valueOf(days - 1));
 
 			String dsEnvelopeId = RandomTestUtil.randomString();
 
@@ -154,7 +138,7 @@ public class AddDSEnvelopeMVCResourceCommandTest {
 							return new DSRequest(
 								TestPropsValues.getCompanyId(), null, 0,
 								Collections.emptyList(), dsEnvelopeId,
-								Collections.emptyList(), null, 0, null,
+								Collections.emptyList(), 0, null,
 								Collections.emptyMap());
 						}));
 
@@ -369,7 +353,7 @@ public class AddDSEnvelopeMVCResourceCommandTest {
 							return new DSRequest(
 								TestPropsValues.getCompanyId(), null, 0,
 								Collections.emptyList(), dsEnvelopeId,
-								Collections.emptyList(), null, 0, null,
+								Collections.emptyList(), 0, null,
 								Collections.emptyMap());
 						}));
 

@@ -123,13 +123,14 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 
 		int expireAfter = dsEnvelope.getExpireAfter();
+		int expireWarn = dsEnvelope.getExpireWarn();
 
-		if ((expireAfter < 0) || (dsEnvelope.getExpireWarn() < 0)) {
+		if ((expireAfter < 0) || (expireWarn < 0)) {
 			throw new PortalException(
 				"Expire after and expire warn must not be negative");
 		}
 
-		if ((expireAfter > 0) && (dsEnvelope.getExpireWarn() >= expireAfter)) {
+		if ((expireAfter > 0) && (expireWarn >= expireAfter)) {
 			throw new PortalException(
 				"Expire warn must be less than expire after");
 		}
@@ -137,30 +138,27 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		Map<Long, DSRequest> dsRequests = _getFileEntryDSRequests(
 			companyId, fileEntryIds);
 
-		for (DSRequest dsRequest : dsRequests.values()) {
-			if (dsRequest.isTerminal()) {
-				continue;
-			}
-
-			try {
-				updateDSRequest(dsRequest.getDSRequestId());
-			}
-			catch (PortalException portalException) {
-				if (_log.isWarnEnabled()) {
-					_log.warn(
-						"Unable to update digital signature request " +
-							dsRequest.getDSRequestId(),
-						portalException);
-				}
-			}
-		}
-
-		dsRequests = _getFileEntryDSRequests(companyId, fileEntryIds);
-
 		for (Map.Entry<Long, DSRequest> entry : dsRequests.entrySet()) {
 			DSRequest dsRequest = entry.getValue();
 
-			if (!dsRequest.isRequestable()) {
+			if (!dsRequest.isTerminal()) {
+				try {
+					updateDSRequest(dsRequest.getDSRequestId());
+				}
+				catch (PortalException portalException) {
+					if (_log.isWarnEnabled()) {
+						_log.warn(
+							"Unable to update digital signature request " +
+								dsRequest.getDSRequestId(),
+							portalException);
+					}
+				}
+
+				dsRequest = fetchDSRequest(
+					companyId, dsRequest.getDSRequestId());
+			}
+
+			if (!dsRequest.isReplaceable()) {
 				throw new PortalException(
 					StringBundler.concat(
 						"File entry ", entry.getKey(),
@@ -207,14 +205,24 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 		try {
 			return _addDSRequest(
-				companyId, groupId, userId, sentDSEnvelope, fileEntryIds);
+				companyId, sentDSEnvelope, fileEntryIds, groupId, userId);
 		}
-		catch (Exception exception) {
-			_dsEnvelopeManager.voidDSEnvelope(
-				companyId, groupId, sentDSEnvelope.getDSEnvelopeId(),
-				"Unable to record the digital signature request");
+		catch (Exception exception1) {
+			try {
+				_dsEnvelopeManager.voidDSEnvelope(
+					companyId, groupId, sentDSEnvelope.getDSEnvelopeId(),
+					"Unable to record the digital signature request");
+			}
+			catch (Exception exception2) {
+				_log.error(
+					"Unable to void digital signature envelope " +
+						sentDSEnvelope.getDSEnvelopeId(),
+					exception2);
 
-			throw exception;
+				exception1.addSuppressed(exception2);
+			}
+
+			throw exception1;
 		}
 	}
 
@@ -675,8 +683,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	}
 
 	private DSRequest _addDSRequest(
-			long companyId, long groupId, long userId, DSEnvelope dsEnvelope,
-			long[] fileEntryIds)
+			long companyId, DSEnvelope dsEnvelope, long[] fileEntryIds,
+			long groupId, long userId)
 		throws PortalException {
 
 		if (Validator.isNull(dsEnvelope.getDSEnvelopeId())) {
@@ -764,9 +772,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			dsRequestObjectEntry.getCreateDate(),
 			dsRequestObjectEntry.getObjectEntryId(), dsRequestRecipients,
 			dsRequestObjectEntry.getExternalReferenceCode(),
-			ListUtil.fromArray(fileEntryIds),
-			_getUserEmailAddress(dsRequestObjectEntry),
-			dsRequestObjectEntry.getUserId(),
+			ListUtil.fromArray(fileEntryIds), dsRequestObjectEntry.getUserId(),
 			dsRequestObjectEntry.getUserName(),
 			dsRequestObjectEntry.getValues());
 	}
@@ -1057,8 +1063,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					objectEntry.getExternalReferenceCode(),
 					fileEntryIdsMap.getOrDefault(
 						dsRequestId, Collections.emptyList()),
-					_getUserEmailAddress(objectEntry), objectEntry.getUserId(),
-					objectEntry.getUserName(), objectEntry.getValues()));
+					objectEntry.getUserId(), objectEntry.getUserName(),
+					objectEntry.getValues()));
 		}
 
 		return dsRequests;
@@ -1203,16 +1209,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 
 		return groupId;
-	}
-
-	private String _getUserEmailAddress(ObjectEntry objectEntry) {
-		User user = _userLocalService.fetchUser(objectEntry.getUserId());
-
-		if (user == null) {
-			return null;
-		}
-
-		return user.getEmailAddress();
 	}
 
 	private long _getUserId(long companyId, String emailAddress) {

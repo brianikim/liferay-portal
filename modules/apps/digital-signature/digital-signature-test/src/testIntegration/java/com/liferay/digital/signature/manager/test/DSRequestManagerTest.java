@@ -101,6 +101,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -373,6 +374,7 @@ public class DSRequestManagerTest {
 				_dsRequestRecipientObjectDefinition));
 
 		_testAddDSRequestWhenDSEnvelopeIdIsNull();
+		_testAddDSRequestWhenDSEnvelopeVoidFails();
 		_testAddDSRequestWhenDSRecipientIsInvalid();
 		_testAddDSRequestWhenDSRequestRecipientUserIsDeleted();
 		_testAddDSRequestWhenEmbeddedViewIsDisabled();
@@ -825,11 +827,11 @@ public class DSRequestManagerTest {
 		return ReflectionTestUtil.invoke(
 			_dsRequestManager, "_addDSRequest",
 			new Class<?>[] {
-				long.class, long.class, long.class, DSEnvelope.class,
-				long[].class
+				long.class, DSEnvelope.class, long[].class, long.class,
+				long.class
 			},
-			TestPropsValues.getCompanyId(), TestPropsValues.getGroupId(),
-			TestPropsValues.getUserId(), dsEnvelope, fileEntryIds);
+			TestPropsValues.getCompanyId(), dsEnvelope, fileEntryIds,
+			TestPropsValues.getGroupId(), TestPropsValues.getUserId());
 	}
 
 	private DSRequest _addDSRequest(String emailAddress, String status)
@@ -1028,6 +1030,64 @@ public class DSRequestManagerTest {
 			_getValuesList(
 				"(emailAddress eq '" + dsRecipient.getEmailAddress() + "')",
 				_dsRequestRecipientObjectDefinition));
+	}
+
+	private void _testAddDSRequestWhenDSEnvelopeVoidFails() throws Exception {
+		DSEnvelope dsEnvelope = _createDSEnvelope(
+			_createDSRecipient(UserTestUtil.addUser()));
+		FileEntry fileEntry = _addFileEntry();
+
+		DSEnvelopeManager dsEnvelopeManager =
+			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager",
+				ProxyUtil.newProxyInstance(
+					DSEnvelopeManager.class.getClassLoader(),
+					new Class<?>[] {DSEnvelopeManager.class},
+					(proxy, method, arguments) -> {
+						if (Objects.equals(
+								method.getName(), "voidDSEnvelope")) {
+
+							throw new PortalException();
+						}
+
+						DSEnvelope addedDSEnvelope = (DSEnvelope)arguments[2];
+
+						addedDSEnvelope.setDSEnvelopeId(null);
+
+						return addedDSEnvelope;
+					}));
+
+		try (LogCapture logCapture = LoggerTestUtil.configureLog4JLogger(
+				"com.liferay.digital.signature.internal.manager." +
+					"DSRequestManagerImpl",
+				LoggerTestUtil.ERROR)) {
+
+			PortalException portalException = Assert.assertThrows(
+				PortalException.class,
+				() -> _dsRequestManager.addDSRequest(
+					TestPropsValues.getCompanyId(),
+					TestPropsValues.getGroupId(), TestPropsValues.getUserId(),
+					dsEnvelope, new long[] {fileEntry.getFileEntryId()}));
+
+			Assert.assertEquals(
+				"A digital signature request requires a digital signature " +
+					"envelope ID",
+				portalException.getMessage());
+
+			Throwable[] suppressedThrowables = portalException.getSuppressed();
+
+			Assert.assertEquals(
+				Arrays.toString(suppressedThrowables), 1,
+				suppressedThrowables.length);
+
+			List<LogEntry> logEntries = logCapture.getLogEntries();
+
+			Assert.assertEquals(logEntries.toString(), 1, logEntries.size());
+		}
+		finally {
+			ReflectionTestUtil.setFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager);
+		}
 	}
 
 	private void _testAddDSRequestWhenDSRecipientIsInvalid() throws Exception {
@@ -1310,7 +1370,7 @@ public class DSRequestManagerTest {
 		dsRequest = _dsRequestManager.fetchDSRequest(
 			TestPropsValues.getCompanyId(), dsRequest.getDSRequestId());
 
-		Assert.assertTrue(dsRequest.isRequestable());
+		Assert.assertTrue(dsRequest.isReplaceable());
 		Assert.assertTrue(dsRequest.isTerminal());
 		Assert.assertEquals(
 			DSRequestConstants.STATUS_EXPIRED, dsRequest.getStatus());

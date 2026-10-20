@@ -190,11 +190,12 @@ public class DSCommerceOrderAttachmentFDSActionContributorTest {
 		ReflectionTestUtil.invoke(
 			_dsRequestManager, "_addDSRequest",
 			new Class<?>[] {
-				long.class, long.class, long.class, DSEnvelope.class,
-				long[].class
+				long.class, DSEnvelope.class, long[].class, long.class,
+				long.class
 			},
-			_group.getCompanyId(), _group.getGroupId(), user.getUserId(),
-			dsEnvelope, new long[] {commerceOrderAttachment.getFileEntryId()});
+			_group.getCompanyId(), dsEnvelope,
+			new long[] {commerceOrderAttachment.getFileEntryId()},
+			_group.getGroupId(), user.getUserId());
 	}
 
 	private User _addUser() throws Exception {
