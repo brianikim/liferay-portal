@@ -72,7 +72,6 @@ import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.MapUtil;
-import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
@@ -1205,7 +1204,6 @@ public class CommerceOrderEngineTest {
 			ProcessingCommerceOrderStatusImpl.KEY);
 	}
 
-	@FeatureFlag("LPD-69290")
 	@Test
 	public void testTransitionCommerceOrderMessage() throws Exception {
 		_commerceOrder = _commerceOrderEngine.checkoutCommerceOrder(
@@ -1238,27 +1236,6 @@ public class CommerceOrderEngineTest {
 		Assert.assertEquals(
 			String.valueOf(TestPropsValues.getUserId()),
 			message.getString("principalName"));
-	}
-
-	@FeatureFlag(enable = false, value = "LPD-69290")
-	@Test
-	public void testTransitionCommerceOrderMessageWhenFeatureFlagIsDisabled()
-		throws Exception {
-
-		_commerceOrder = _commerceOrderEngine.checkoutCommerceOrder(
-			_commerceOrder, _user.getUserId());
-
-		List<Message> messages = _registerMessageListener();
-
-		PrincipalThreadLocal.setName(null);
-
-		_commerceOrder = _commerceOrderEngine.transitionCommerceOrder(
-			_commerceOrder, CommerceOrderConstants.ORDER_STATUS_ON_HOLD,
-			_user.getUserId(), true);
-
-		Message message = messages.get(messages.size() - 1);
-
-		Assert.assertNull(message.get("principalName"));
 	}
 
 	@Test

@@ -54,7 +54,6 @@ import com.liferay.commerce.service.CommerceShippingMethodLocalService;
 import com.liferay.commerce.subscription.CommerceSubscriptionEntryHelperUtil;
 import com.liferay.portal.configuration.module.configuration.ConfigurationProvider;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
@@ -580,21 +579,12 @@ public class CommerceOrderEngineImpl implements CommerceOrderEngine {
 
 				Message message = new Message();
 
-				if (FeatureFlagManagerUtil.isEnabled(
-						commerceOrder.getCompanyId(), "LPD-69290")) {
+				message.put("companyId", commerceOrder.getCompanyId());
 
-					message.put("companyId", commerceOrder.getCompanyId());
+				if ((userId != 0) &&
+					Validator.isNull(PrincipalThreadLocal.getName())) {
 
-					if (Validator.isNull(PrincipalThreadLocal.getName())) {
-						long principalUserId = userId;
-
-						if (principalUserId == 0) {
-							principalUserId = commerceOrder.getUserId();
-						}
-
-						message.put(
-							"principalName", String.valueOf(principalUserId));
-					}
+					message.put("principalName", String.valueOf(userId));
 				}
 
 				DTOConverter<?, ?> commerceOrderDTOConverter =
