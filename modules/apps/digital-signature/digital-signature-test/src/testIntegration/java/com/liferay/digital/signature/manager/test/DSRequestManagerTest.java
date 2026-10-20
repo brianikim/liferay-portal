@@ -39,7 +39,6 @@ import com.liferay.object.rest.filter.factory.FilterFactory;
 import com.liferay.object.service.ObjectDefinitionLocalService;
 import com.liferay.object.service.ObjectEntryLocalService;
 import com.liferay.petra.function.transform.TransformUtil;
-import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.petra.sql.dsl.expression.Predicate;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
@@ -73,7 +72,6 @@ import com.liferay.portal.kernel.test.context.ContextUserReplace;
 import com.liferay.portal.kernel.test.portlet.MockLiferayResourceRequest;
 import com.liferay.portal.kernel.test.portlet.MockLiferayResourceResponse;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
-import com.liferay.portal.kernel.test.util.FeatureFlagTestUtil;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
@@ -97,7 +95,6 @@ import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.test.log.LogCapture;
 import com.liferay.portal.test.log.LogEntry;
 import com.liferay.portal.test.log.LoggerTestUtil;
-import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
@@ -132,7 +129,6 @@ import org.junit.runner.RunWith;
 /**
  * @author Brian I. Kim
  */
-@FeatureFlag("LPD-69290")
 @RunWith(Arquillian.class)
 public class DSRequestManagerTest {
 
@@ -445,7 +441,6 @@ public class DSRequestManagerTest {
 		_testAddDSRequestWhenEmbeddedViewIsDisabled();
 		_testAddDSRequestWhenExpirationIsInvalid();
 		_testAddDSRequestWhenExpiredDSEnvelopeIsCompleted();
-		_testAddDSRequestWhenFeatureFlagIsDisabled();
 		_testAddDSRequestWhenFileEntryIsInvalid();
 		_testAddDSRequestWhenGroupIsStagingGroup();
 	}
@@ -1538,31 +1533,6 @@ public class DSRequestManagerTest {
 
 		Assert.assertEquals(
 			DSRequestConstants.STATUS_COMPLETED, dsRequest.getStatus());
-	}
-
-	private void _testAddDSRequestWhenFeatureFlagIsDisabled() throws Exception {
-		DSEnvelope dsEnvelope = _createDSEnvelope(TestPropsValues.getUser());
-
-		try (SafeCloseable safeCloseable =
-				FeatureFlagTestUtil.setFeatureFlagsWithSafeCloseable(
-					false, "LPD-69290")) {
-
-			AssertUtils.assertFailure(
-				DSRequestException.NotEnabled.class,
-				"Digital signature is not enabled for site " +
-					TestPropsValues.getGroupId(),
-				() -> _dsRequestManager.addDSRequest(
-					TestPropsValues.getCompanyId(),
-					TestPropsValues.getGroupId(), TestPropsValues.getUserId(),
-					dsEnvelope, new long[0]));
-		}
-
-		FileEntry fileEntry = _addFileEntry();
-
-		DSRequest dsRequest = _addDSRequest(dsEnvelope, fileEntry);
-
-		Assert.assertEquals(
-			dsEnvelope.getDSEnvelopeId(), dsRequest.getExternalReferenceCode());
 	}
 
 	private void _testAddDSRequestWhenFileEntryIsInvalid() throws Exception {

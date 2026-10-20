@@ -29,7 +29,6 @@ import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.layout.test.util.LayoutTestUtil;
 import com.liferay.petra.function.transform.TransformUtil;
-import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.model.Group;
@@ -46,7 +45,6 @@ import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
-import com.liferay.portal.kernel.test.util.FeatureFlagTestUtil;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
@@ -58,7 +56,6 @@ import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.WebKeys;
-import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
@@ -82,7 +79,6 @@ import org.springframework.mock.web.MockHttpServletRequest;
 /**
  * @author Brian I. Kim
  */
-@FeatureFlag("LPD-69290")
 @RunWith(Arquillian.class)
 public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 
@@ -244,14 +240,6 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 				"request-signature", "view-signature-details", "resend",
 				"void"),
 			_getFDSActionDropdownItemIds(user));
-
-		try (SafeCloseable safeCloseable =
-				FeatureFlagTestUtil.setFeatureFlagsWithSafeCloseable(
-					false, "LPD-69290")) {
-
-			Assert.assertEquals(
-				Collections.emptyList(), _getFDSActionDropdownItemIds(user));
-		}
 
 		_saveDigitalSignatureConfiguration(false);
 

@@ -9,7 +9,6 @@ import com.liferay.commerce.constants.CommerceCheckoutWebKeys;
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.util.CommerceCheckoutStep;
 import com.liferay.petra.string.StringPool;
-import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.portlet.LiferayPortletURL;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
@@ -31,7 +30,6 @@ import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 /**
@@ -73,45 +71,24 @@ public class PaymentProcessCheckoutStepDisplayContextTest {
 
 	@Test
 	public void testGetCallbackURL() {
-		try (MockedStatic<FeatureFlagManagerUtil> mockedStatic =
-				Mockito.mockStatic(FeatureFlagManagerUtil.class)) {
+		Assert.assertEquals(StringPool.BLANK, _getCallbackURL(false, null));
+		Assert.assertEquals(
+			StringPool.BLANK, _getCallbackURL(false, "shipping"));
+		Assert.assertEquals(
+			URLCodec.encodeURL("http://localhost/checkout"),
+			_getCallbackURL(true, "shipping"));
 
-			mockedStatic.when(
-				() -> FeatureFlagManagerUtil.isEnabled(
-					Mockito.anyLong(), Mockito.eq("LPD-69290"))
-			).thenReturn(
-				false
-			);
+		Mockito.verify(
+			_liferayPortletURL
+		).setParameter(
+			"checkoutStepName", "shipping"
+		);
 
-			Assert.assertEquals(
-				StringPool.BLANK, _getCallbackURL(true, "shipping"));
-
-			mockedStatic.when(
-				() -> FeatureFlagManagerUtil.isEnabled(
-					Mockito.anyLong(), Mockito.eq("LPD-69290"))
-			).thenReturn(
-				true
-			);
-
-			Assert.assertEquals(StringPool.BLANK, _getCallbackURL(false, null));
-			Assert.assertEquals(
-				StringPool.BLANK, _getCallbackURL(false, "shipping"));
-			Assert.assertEquals(
-				URLCodec.encodeURL("http://localhost/checkout"),
-				_getCallbackURL(true, "shipping"));
-
-			Mockito.verify(
-				_liferayPortletURL
-			).setParameter(
-				"checkoutStepName", "shipping"
-			);
-
-			Mockito.verify(
-				_liferayPortletURL
-			).setParameter(
-				"commerceOrderUuid", "commerceOrderUuid"
-			);
-		}
+		Mockito.verify(
+			_liferayPortletURL
+		).setParameter(
+			"commerceOrderUuid", "commerceOrderUuid"
+		);
 	}
 
 	private String _getCallbackURL(

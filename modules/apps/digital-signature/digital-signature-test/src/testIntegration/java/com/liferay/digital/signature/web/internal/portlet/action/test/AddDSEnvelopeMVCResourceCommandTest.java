@@ -48,7 +48,6 @@ import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.WebKeys;
-import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
@@ -72,7 +71,6 @@ import org.junit.runner.RunWith;
 /**
  * @author Brian I. Kim
  */
-@FeatureFlag("LPD-69290")
 @RunWith(Arquillian.class)
 public class AddDSEnvelopeMVCResourceCommandTest {
 
@@ -190,12 +188,11 @@ public class AddDSEnvelopeMVCResourceCommandTest {
 			Assert.assertEquals(dsRequestId, arguments[0]);
 		}
 
+		_testDoTransactionalCommandWhenEmbeddedViewIsDisabled();
 		_testDoTransactionalCommandWithoutFileEntryPermission();
 	}
 
-	@FeatureFlag(enable = false, value = "LPD-69290")
-	@Test
-	public void testDoTransactionalCommandWhenFeatureFlagIsDisabled()
+	private void _testDoTransactionalCommandWhenEmbeddedViewIsDisabled()
 		throws Exception {
 
 		MockLiferayResourceRequest mockLiferayResourceRequest =
@@ -211,8 +208,10 @@ public class AddDSEnvelopeMVCResourceCommandTest {
 		mockLiferayResourceRequest.setAttribute(
 			WebKeys.THEME_DISPLAY, themeDisplay);
 
-		mockLiferayResourceRequest.setParameter("expireAfter", "5");
-		mockLiferayResourceRequest.setParameter("expireWarn", "5");
+		mockLiferayResourceRequest.setParameter(
+			"expireAfter", String.valueOf(RandomTestUtil.randomInt()));
+		mockLiferayResourceRequest.setParameter(
+			"expireWarn", String.valueOf(RandomTestUtil.randomInt()));
 		mockLiferayResourceRequest.setParameter("recipients", "[]");
 
 		String dsEnvelopeId = RandomTestUtil.randomString();
@@ -243,7 +242,7 @@ public class AddDSEnvelopeMVCResourceCommandTest {
 						TestPropsValues.getCompanyId(),
 						DigitalSignatureConfiguration.class.getName(),
 						HashMapDictionaryBuilder.<String, Object>put(
-							"embeddedViewEnabled", true
+							"embeddedViewEnabled", false
 						).build())) {
 
 			ReflectionTestUtil.invoke(

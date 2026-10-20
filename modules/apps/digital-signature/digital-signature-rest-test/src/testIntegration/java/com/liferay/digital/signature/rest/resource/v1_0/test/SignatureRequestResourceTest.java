@@ -72,7 +72,6 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.test.log.LogCapture;
 import com.liferay.portal.test.log.LoggerTestUtil;
-import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
 
 import java.io.Serializable;
@@ -96,7 +95,6 @@ import org.junit.runner.RunWith;
 /**
  * @author Danny Situ
  */
-@FeatureFlag("LPD-69290")
 @RunWith(Arquillian.class)
 public class SignatureRequestResourceTest
 	extends BaseSignatureRequestResourceTestCase {

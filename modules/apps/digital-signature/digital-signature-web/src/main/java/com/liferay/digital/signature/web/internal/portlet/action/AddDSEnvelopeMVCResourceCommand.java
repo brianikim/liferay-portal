@@ -17,7 +17,6 @@ import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.petra.function.transform.TransformUtil;
-import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.User;
@@ -70,14 +69,8 @@ public class AddDSEnvelopeMVCResourceCommand
 			DigitalSignatureConfigurationUtil.getDigitalSignatureConfiguration(
 				themeDisplay.getCompanyId(), themeDisplay.getSiteGroupId());
 
-		boolean embeddedViewEnabled = false;
-
-		if (digitalSignatureConfiguration.embeddedViewEnabled() &&
-			FeatureFlagManagerUtil.isEnabled(
-				themeDisplay.getCompanyId(), "LPD-69290")) {
-
-			embeddedViewEnabled = true;
-		}
+		boolean embeddedViewEnabled =
+			digitalSignatureConfiguration.embeddedViewEnabled();
 
 		DSEnvelope dsEnvelope = new DSEnvelope() {
 			{

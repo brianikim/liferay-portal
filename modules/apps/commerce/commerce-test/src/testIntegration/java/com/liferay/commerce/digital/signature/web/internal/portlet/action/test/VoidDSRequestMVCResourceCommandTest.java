@@ -51,7 +51,6 @@ import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.WebKeys;
-import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
@@ -78,7 +77,6 @@ import org.junit.runner.RunWith;
 /**
  * @author Brian I. Kim
  */
-@FeatureFlag("LPD-69290")
 @RunWith(Arquillian.class)
 public class VoidDSRequestMVCResourceCommandTest {
 

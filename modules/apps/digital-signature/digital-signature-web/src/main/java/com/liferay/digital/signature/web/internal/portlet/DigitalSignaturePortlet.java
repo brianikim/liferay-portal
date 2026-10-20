@@ -9,7 +9,6 @@ import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration
 import com.liferay.digital.signature.configuration.DigitalSignatureConfigurationUtil;
 import com.liferay.digital.signature.constants.DigitalSignaturePortletKeys;
 import com.liferay.digital.signature.web.internal.constants.DigitalSignatureWebKeys;
-import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.WebKeys;
@@ -63,8 +62,6 @@ public class DigitalSignaturePortlet extends MVCPortlet {
 
 		renderRequest.setAttribute(
 			DigitalSignatureWebKeys.DIGITAL_SIGNATURE_EMBEDDED_VIEW_ENABLED,
-			FeatureFlagManagerUtil.isEnabled(
-				themeDisplay.getCompanyId(), "LPD-69290") &&
 			digitalSignatureConfiguration.embeddedViewEnabled());
 
 		super.render(renderRequest, renderResponse);

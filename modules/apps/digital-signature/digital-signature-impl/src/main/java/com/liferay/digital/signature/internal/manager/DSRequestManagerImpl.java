@@ -43,7 +43,6 @@ import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.log.Log;
@@ -300,10 +299,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 		List<DSRequest> dsRequests = new ArrayList<>();
 
-		if (!FeatureFlagManagerUtil.isEnabled(companyId, "LPD-69290")) {
-			return dsRequests;
-		}
-
 		ObjectDefinition objectDefinition =
 			_objectDefinitionLocalService.
 				fetchObjectDefinitionByExternalReferenceCode(
@@ -537,10 +532,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 	@Override
 	public void sendDSRequestReminders(long companyId) {
-		if (!FeatureFlagManagerUtil.isEnabled(companyId, "LPD-69290")) {
-			return;
-		}
-
 		DigitalSignatureConfiguration digitalSignatureConfiguration =
 			DigitalSignatureConfigurationUtil.getDigitalSignatureConfiguration(
 				companyId, 0);
@@ -1130,9 +1121,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 		Map<Long, DSRequest> dsRequests = new HashMap<>();
 
-		if (ArrayUtil.isEmpty(fileEntryIds) ||
-			!FeatureFlagManagerUtil.isEnabled(companyId, "LPD-69290")) {
-
+		if (ArrayUtil.isEmpty(fileEntryIds)) {
 			return dsRequests;
 		}
 
@@ -1296,10 +1285,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	}
 
 	private boolean _isEnabled(long companyId, long groupId) {
-		if (!FeatureFlagManagerUtil.isEnabled(companyId, "LPD-69290")) {
-			return false;
-		}
-
 		DigitalSignatureConfiguration digitalSignatureConfiguration =
 			DigitalSignatureConfigurationUtil.getDigitalSignatureConfiguration(
 				companyId, groupId);

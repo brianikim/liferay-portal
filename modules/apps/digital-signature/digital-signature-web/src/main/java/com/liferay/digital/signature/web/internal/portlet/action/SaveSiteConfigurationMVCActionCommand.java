@@ -8,7 +8,6 @@ package com.liferay.digital.signature.web.internal.portlet.action;
 import com.liferay.configuration.admin.constants.ConfigurationAdminPortletKeys;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.portal.configuration.module.configuration.ConfigurationProvider;
-import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
@@ -58,21 +57,6 @@ public class SaveSiteConfigurationMVCActionCommand
 			return;
 		}
 
-		boolean embeddedViewEnabled = ParamUtil.getBoolean(
-			actionRequest, "embeddedViewEnabled");
-
-		if (!FeatureFlagManagerUtil.isEnabled(
-				themeDisplay.getCompanyId(), "LPD-69290")) {
-
-			DigitalSignatureConfiguration digitalSignatureConfiguration =
-				_configurationProvider.getGroupConfiguration(
-					DigitalSignatureConfiguration.class,
-					themeDisplay.getSiteGroupId());
-
-			embeddedViewEnabled =
-				digitalSignatureConfiguration.embeddedViewEnabled();
-		}
-
 		_configurationProvider.saveGroupConfiguration(
 			DigitalSignatureConfiguration.class, themeDisplay.getCompanyId(),
 			themeDisplay.getSiteGroupId(),
@@ -85,7 +69,8 @@ public class SaveSiteConfigurationMVCActionCommand
 			).put(
 				"apiUsername", ParamUtil.getString(actionRequest, "apiUsername")
 			).put(
-				"embeddedViewEnabled", embeddedViewEnabled
+				"embeddedViewEnabled",
+				ParamUtil.getBoolean(actionRequest, "embeddedViewEnabled")
 			).put(
 				"enabled", ParamUtil.getBoolean(actionRequest, "enabled")
 			).put(
