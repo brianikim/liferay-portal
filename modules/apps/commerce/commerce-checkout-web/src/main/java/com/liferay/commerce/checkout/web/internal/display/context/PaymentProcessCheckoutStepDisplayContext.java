@@ -55,9 +55,9 @@ public class PaymentProcessCheckoutStepDisplayContext {
 	}
 
 	private String _getCallbackURL() {
-		if ((_nextCommerceCheckoutStep == null) ||
-			!FeatureFlagManagerUtil.isEnabled(
+		if (!FeatureFlagManagerUtil.isEnabled(
 				_commerceOrder.getCompanyId(), "LPD-69290") ||
+			(_nextCommerceCheckoutStep == null) ||
 			!_nextCommerceCheckoutStep.isContinueAfterPayment()) {
 
 			return StringPool.BLANK;

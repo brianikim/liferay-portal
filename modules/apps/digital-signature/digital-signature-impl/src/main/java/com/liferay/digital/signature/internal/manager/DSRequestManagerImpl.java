@@ -967,8 +967,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		String status = StringUtil.toLowerCase(dsEnvelope.getStatus());
 		LocalDateTime statusLocalDateTime = dsEnvelope.getStatusLocalDateTime();
 
-		if (Objects.equals(status, DSRequestConstants.STATUS_VOIDED) &&
-			(expirationLocalDateTime != null) &&
+		if ((expirationLocalDateTime != null) &&
+			Objects.equals(status, DSRequestConstants.STATUS_VOIDED) &&
 			(statusLocalDateTime != null) &&
 			!statusLocalDateTime.isBefore(expirationLocalDateTime)) {
 
@@ -1387,10 +1387,10 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		DSRequest dsRequest, List<DSRequestRecipient> dsRequestRecipients) {
 
 		for (DSRequestRecipient dsRequestRecipient : dsRequestRecipients) {
-			if (!Objects.equals(
+			if ((dsRequestRecipient.getUserId() <= 0) ||
+				!Objects.equals(
 					DSRequestConstants.STATUS_SENT,
 					dsRequestRecipient.getStatus()) ||
-				(dsRequestRecipient.getUserId() <= 0) ||
 				!Validator.isEmailAddress(
 					dsRequestRecipient.getEmailAddress())) {
 
@@ -1435,11 +1435,11 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		try {
 			String requestStatus = _getDSRequestStatus(dsEnvelope);
 
-			if (Objects.equals(
-					requestStatus, DSRequestConstants.STATUS_COMPLETED) &&
-				!Objects.equals(
+			if (!Objects.equals(
 					MapUtil.getString(objectEntry.getValues(), "requestStatus"),
-					DSRequestConstants.STATUS_COMPLETED)) {
+					DSRequestConstants.STATUS_COMPLETED) &&
+				Objects.equals(
+					requestStatus, DSRequestConstants.STATUS_COMPLETED)) {
 
 				_updateFileEntries(
 					companyId, dsEnvelope, dsRequestId, groupId,

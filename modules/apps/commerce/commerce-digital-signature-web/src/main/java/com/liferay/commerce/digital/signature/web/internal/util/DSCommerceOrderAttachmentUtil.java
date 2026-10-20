@@ -60,8 +60,9 @@ public class DSCommerceOrderAttachmentUtil {
 				User user = UserLocalServiceUtil.fetchUser(
 					accountEntryUserRel.getAccountUserId());
 
-				if ((user == null) || !user.isActive() ||
-					(user.getType() != UserConstants.TYPE_REGULAR)) {
+				if ((user == null) ||
+					(user.getType() != UserConstants.TYPE_REGULAR) ||
+					!user.isActive()) {
 
 					return null;
 				}
