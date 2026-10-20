@@ -8,6 +8,7 @@ package com.liferay.digital.signature.model;
 import com.liferay.digital.signature.constants.DSRequestConstants;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
+import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
 
 import java.io.Serializable;
@@ -31,24 +32,74 @@ public class DSRequestTest {
 		LiferayUnitTestRule.INSTANCE;
 
 	@Test
+	public void testGetStatus() {
+		Date pastDate = new Date(System.currentTimeMillis() - Time.DAY);
+
+		DSRequest dsRequest = _createDSRequest(
+			pastDate, DSRequestConstants.STATUS_SENT,
+			DSRequestConstants.STATUS_SENT, RandomTestUtil.randomLong());
+
+		Assert.assertEquals(
+			DSRequestConstants.STATUS_EXPIRED, dsRequest.getStatus());
+
+		dsRequest = _createDSRequest(
+			pastDate, DSRequestConstants.STATUS_SENT,
+			DSRequestConstants.STATUS_VOIDED, RandomTestUtil.randomLong());
+
+		Assert.assertEquals(
+			DSRequestConstants.STATUS_VOIDED, dsRequest.getStatus());
+
+		dsRequest = _createDSRequest(
+			new Date(System.currentTimeMillis() + Time.DAY),
+			DSRequestConstants.STATUS_SENT, DSRequestConstants.STATUS_SENT,
+			RandomTestUtil.randomLong());
+
+		Assert.assertEquals(
+			DSRequestConstants.STATUS_SENT, dsRequest.getStatus());
+	}
+
+	@Test
+	public void testIsReplaceable() {
+		Assert.assertFalse(_isReplaceable(DSRequestConstants.STATUS_COMPLETED));
+		Assert.assertFalse(_isReplaceable(DSRequestConstants.STATUS_CREATED));
+		Assert.assertTrue(_isReplaceable(DSRequestConstants.STATUS_DECLINED));
+		Assert.assertTrue(_isReplaceable(DSRequestConstants.STATUS_EXPIRED));
+		Assert.assertFalse(_isReplaceable(DSRequestConstants.STATUS_SENT));
+		Assert.assertTrue(_isReplaceable(DSRequestConstants.STATUS_VOIDED));
+	}
+
+	@Test
 	public void testIsSignatureRequired() {
 		long userId = RandomTestUtil.randomLong();
 
 		DSRequest dsRequest = _createDSRequest(
-			DSRequestConstants.STATUS_COMPLETED,
+			null, DSRequestConstants.STATUS_SENT,
 			DSRequestConstants.STATUS_COMPLETED, userId);
 
 		Assert.assertFalse(dsRequest.isSignatureRequired(userId));
 
 		dsRequest = _createDSRequest(
-			DSRequestConstants.STATUS_CREATED, DSRequestConstants.STATUS_SENT,
+			null, DSRequestConstants.STATUS_CREATED,
+			DSRequestConstants.STATUS_SENT, userId);
+
+		Assert.assertFalse(dsRequest.isSignatureRequired(userId));
+
+		dsRequest = _createDSRequest(
+			new Date(System.currentTimeMillis() - Time.DAY),
+			DSRequestConstants.STATUS_SENT, DSRequestConstants.STATUS_SENT,
 			userId);
 
 		Assert.assertFalse(dsRequest.isSignatureRequired(userId));
 
 		dsRequest = _createDSRequest(
-			DSRequestConstants.STATUS_SENT, DSRequestConstants.STATUS_SENT,
-			userId);
+			null, DSRequestConstants.STATUS_SENT,
+			DSRequestConstants.STATUS_SENT, 0);
+
+		Assert.assertFalse(dsRequest.isSignatureRequired(0));
+
+		dsRequest = _createDSRequest(
+			null, DSRequestConstants.STATUS_SENT,
+			DSRequestConstants.STATUS_SENT, userId);
 
 		Assert.assertTrue(dsRequest.isSignatureRequired(userId));
 		Assert.assertFalse(
@@ -56,7 +107,8 @@ public class DSRequestTest {
 	}
 
 	private DSRequest _createDSRequest(
-		String requestRecipientStatus, String requestStatus, long userId) {
+		Date expirationDate, String requestRecipientStatus,
+		String requestStatus, long userId) {
 
 		return new DSRequest(
 			RandomTestUtil.randomLong(), new Date(),
@@ -69,11 +121,20 @@ public class DSRequestTest {
 						"requestRecipientStatus", requestRecipientStatus
 					).build())),
 			RandomTestUtil.randomString(), Collections.emptyList(),
-			RandomTestUtil.randomString(), RandomTestUtil.randomLong(),
-			RandomTestUtil.randomString(),
+			RandomTestUtil.randomLong(), RandomTestUtil.randomString(),
 			HashMapBuilder.<String, Serializable>put(
+				"requestExpirationDate", expirationDate
+			).put(
 				"requestStatus", requestStatus
 			).build());
+	}
+
+	private boolean _isReplaceable(String requestStatus) {
+		DSRequest dsRequest = _createDSRequest(
+			null, DSRequestConstants.STATUS_SENT, requestStatus,
+			RandomTestUtil.randomLong());
+
+		return dsRequest.isReplaceable();
 	}
 
 }

@@ -26,9 +26,8 @@ public class DSRequest {
 	public DSRequest(
 		long companyId, Date createDate, long dsRequestId,
 		List<DSRequestRecipient> dsRequestRecipients,
-		String externalReferenceCode, List<Long> fileEntryIds,
-		String userEmailAddress, long userId, String userName,
-		Map<String, Serializable> values) {
+		String externalReferenceCode, List<Long> fileEntryIds, long userId,
+		String userName, Map<String, Serializable> values) {
 
 		_companyId = companyId;
 		_createDate = createDate;
@@ -36,7 +35,6 @@ public class DSRequest {
 		_dsRequestRecipients = dsRequestRecipients;
 		_externalReferenceCode = externalReferenceCode;
 		_fileEntryIds = fileEntryIds;
-		_userEmailAddress = userEmailAddress;
 		_userId = userId;
 		_userName = userName;
 
@@ -105,9 +103,9 @@ public class DSRequest {
 	}
 
 	public String getStatus() {
-		if ((_expirationDate != null) && _expirationDate.before(new Date()) &&
-			!ArrayUtil.contains(
-				DSRequestConstants.STATUSES_REQUEST_TERMINAL, _status)) {
+		if (!ArrayUtil.contains(
+				DSRequestConstants.STATUSES_REQUEST_TERMINAL, _status) &&
+			(_expirationDate != null) && _expirationDate.before(new Date())) {
 
 			return DSRequestConstants.STATUS_EXPIRED;
 		}
@@ -123,10 +121,6 @@ public class DSRequest {
 		return new Date(_statusDate.getTime());
 	}
 
-	public String getUserEmailAddress() {
-		return _userEmailAddress;
-	}
-
 	public long getUserId() {
 		return _userId;
 	}
@@ -135,12 +129,12 @@ public class DSRequest {
 		return _userName;
 	}
 
-	public boolean isRequestable() {
+	public boolean isReplaceable() {
 		String status = getStatus();
 
-		if (!Objects.equals(status, DSRequestConstants.STATUS_COMPLETED) &&
-			ArrayUtil.contains(
-				DSRequestConstants.STATUSES_REQUEST_TERMINAL, status)) {
+		if (ArrayUtil.contains(
+				DSRequestConstants.STATUSES_REQUEST_TERMINAL, status) &&
+			!Objects.equals(status, DSRequestConstants.STATUS_COMPLETED)) {
 
 			return true;
 		}
@@ -149,7 +143,7 @@ public class DSRequest {
 	}
 
 	public boolean isSignatureRequired(long userId) {
-		if ((userId <= 0) || isTerminal()) {
+		if (isTerminal() || (userId <= 0)) {
 			return false;
 		}
 
@@ -191,7 +185,6 @@ public class DSRequest {
 	private final long _siteGroupId;
 	private final String _status;
 	private final Date _statusDate;
-	private final String _userEmailAddress;
 	private final long _userId;
 	private final String _userName;
 

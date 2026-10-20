@@ -17,7 +17,6 @@ import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.petra.function.transform.TransformUtil;
-import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONUtil;
@@ -71,9 +70,9 @@ public class AddDSEnvelopeMVCResourceCommand
 
 		boolean embeddedViewEnabled = false;
 
-		if (FeatureFlagManagerUtil.isEnabled(
-				themeDisplay.getCompanyId(), "LPD-69290") &&
-			digitalSignatureConfiguration.embeddedViewEnabled()) {
+		if (digitalSignatureConfiguration.embeddedViewEnabled() &&
+			FeatureFlagManagerUtil.isEnabled(
+				themeDisplay.getCompanyId(), "LPD-69290")) {
 
 			embeddedViewEnabled = true;
 		}
@@ -94,13 +93,6 @@ public class AddDSEnvelopeMVCResourceCommand
 				ParamUtil.getInteger(resourceRequest, "expireAfter"));
 			dsEnvelope.setExpireWarn(
 				ParamUtil.getInteger(resourceRequest, "expireWarn"));
-		}
-
-		if ((dsEnvelope.getExpireAfter() > 0) &&
-			(dsEnvelope.getExpireWarn() >= dsEnvelope.getExpireAfter())) {
-
-			throw new PortalException(
-				"Expire warn must be less than expire after");
 		}
 
 		long[] fileEntryIds = ParamUtil.getLongValues(
