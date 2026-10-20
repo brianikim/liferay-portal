@@ -83,9 +83,7 @@ public class DSCommerceOrderSignServlet extends HttpServlet {
 			DSRequest dsRequest = _dsRequestManager.fetchFileEntryDSRequest(
 				user.getCompanyId(), commerceOrderAttachment.getFileEntryId());
 
-			if ((dsRequest == null) ||
-				!dsRequest.isSignatureRequired(user.getUserId())) {
-
+			if (dsRequest == null) {
 				httpServletResponse.sendRedirect(backURL);
 
 				return;
