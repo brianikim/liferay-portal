@@ -57,7 +57,7 @@ public class DSCommerceOrderAttachmentFDSActionContributor
 			"dsRequestStatuses",
 			DSCommerceOrderAttachmentUtil.getDSRequestStatuses(dsRequests)
 		).put(
-			"signableCommerceOrderAttachmentIds",
+			"signatureRequiredCommerceOrderAttachmentIds",
 			TransformUtil.transform(
 				dsRequests.entrySet(),
 				entry -> {
@@ -131,7 +131,7 @@ public class DSCommerceOrderAttachmentFDSActionContributor
 			).setLabel(
 				_language.get(httpServletRequest, "view-signature-details")
 			).build(
-				"view-ds-request-details"
+				"view-signature-details"
 			));
 
 		return fdsActionDropdownItems;

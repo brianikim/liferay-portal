@@ -80,9 +80,12 @@ const openDeleteConfirmationModal = ({itemName, loadData, url}) => {
 };
 
 const OrderAttachmentsFDSPropsTransformer = (props) => {
-	const signableCommerceOrderAttachmentIds =
-		props.additionalProps?.signableCommerceOrderAttachmentIds ?? [];
 	const dsRequestStatuses = props.additionalProps?.dsRequestStatuses ?? {};
+	const signatureRequiredCommerceOrderAttachmentIds =
+		props.additionalProps?.signatureRequiredCommerceOrderAttachmentIds ??
+		[];
+
+	const getDSRequestStatus = (item) => dsRequestStatuses[item.id];
 
 	return {
 		...props,
@@ -90,7 +93,7 @@ const OrderAttachmentsFDSPropsTransformer = (props) => {
 			dsRequestStatusDataRenderer: (rendererProps) =>
 				React.createElement(DSRequestStatusDataRenderer, {
 					...rendererProps,
-					dsRequestStatuses,
+					value: getDSRequestStatus(rendererProps.itemData),
 				}),
 		},
 		itemsActions: props.itemsActions?.map((action) => {
@@ -107,16 +110,16 @@ const OrderAttachmentsFDSPropsTransformer = (props) => {
 				return {
 					...action,
 					isVisible: (item) =>
-						signableCommerceOrderAttachmentIds.includes(
-							String(item?.id)
+						signatureRequiredCommerceOrderAttachmentIds.includes(
+							String(item.id)
 						),
 				};
 			}
 
-			if (actionId === 'view-ds-request-details') {
+			if (actionId === 'view-signature-details') {
 				return {
 					...action,
-					isVisible: (item) => !!dsRequestStatuses[item?.id],
+					isVisible: (item) => !!getDSRequestStatus(item),
 				};
 			}
 
@@ -157,7 +160,7 @@ const OrderAttachmentsFDSPropsTransformer = (props) => {
 					url: formatActionUrl(action.data.signURL, itemData),
 				});
 			}
-			else if (actionId === 'view-ds-request-details') {
+			else if (actionId === 'view-signature-details') {
 				event?.preventDefault();
 
 				openDSRequestDetailsModal({

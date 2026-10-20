@@ -150,11 +150,11 @@ public class DSCommerceOrderAttachmentFDSActionContributorTest {
 		_addDSRequest(_commerceOrderAttachment, user);
 
 		Assert.assertEquals(
-			List.of("sign", "view-ds-request-details"),
+			List.of("sign", "view-signature-details"),
 			_getFDSActionDropdownItemIds(user));
 
 		Assert.assertEquals(
-			List.of("view-ds-request-details"),
+			List.of("view-signature-details"),
 			_getFDSActionDropdownItemIds(_addUser()));
 		Assert.assertEquals(
 			Collections.emptyList(),
@@ -318,7 +318,7 @@ public class DSCommerceOrderAttachmentFDSActionContributorTest {
 
 		Assert.assertEquals(
 			List.of(commerceOrderAttachmentId),
-			additionalProps.get("signableCommerceOrderAttachmentIds"));
+			additionalProps.get("signatureRequiredCommerceOrderAttachmentIds"));
 		Assert.assertEquals(
 			HashMapBuilder.put(
 				commerceOrderAttachmentId, DSRequestConstants.STATUS_SENT
@@ -329,7 +329,7 @@ public class DSCommerceOrderAttachmentFDSActionContributorTest {
 
 		Assert.assertEquals(
 			Collections.emptyList(),
-			additionalProps.get("signableCommerceOrderAttachmentIds"));
+			additionalProps.get("signatureRequiredCommerceOrderAttachmentIds"));
 
 		Assert.assertEquals(
 			Collections.emptyMap(),
