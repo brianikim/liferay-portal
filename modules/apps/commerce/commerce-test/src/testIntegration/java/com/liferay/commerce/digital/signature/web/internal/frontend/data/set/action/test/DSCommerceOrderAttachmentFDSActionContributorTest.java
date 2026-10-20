@@ -150,11 +150,11 @@ public class DSCommerceOrderAttachmentFDSActionContributorTest {
 		_addDSRequest(_commerceOrderAttachment, user);
 
 		Assert.assertEquals(
-			List.of("sign", "view-signature-details"),
+			List.of("sign", "view-ds-request-details"),
 			_getFDSActionDropdownItemIds(user));
 
 		Assert.assertEquals(
-			List.of("view-signature-details"),
+			List.of("view-ds-request-details"),
 			_getFDSActionDropdownItemIds(_addUser()));
 		Assert.assertEquals(
 			Collections.emptyList(),
@@ -323,7 +323,7 @@ public class DSCommerceOrderAttachmentFDSActionContributorTest {
 			HashMapBuilder.put(
 				commerceOrderAttachmentId, DSRequestConstants.STATUS_SENT
 			).build(),
-			additionalProps.get("signatureStatuses"));
+			additionalProps.get("dsRequestStatuses"));
 
 		additionalProps = _getAdditionalProps(_addUser());
 
@@ -360,7 +360,7 @@ public class DSCommerceOrderAttachmentFDSActionContributorTest {
 					_commerceOrderAttachment.getCommerceOrderAttachmentId()),
 				DSRequestConstants.STATUS_SENT
 			).build(),
-			additionalProps.get("signatureStatuses"));
+			additionalProps.get("dsRequestStatuses"));
 
 		additionalProps = _getAdditionalProps(TestPropsValues.getUser());
 
@@ -374,7 +374,7 @@ public class DSCommerceOrderAttachmentFDSActionContributorTest {
 					commerceOrderAttachment.getCommerceOrderAttachmentId()),
 				DSRequestConstants.STATUS_SENT
 			).build(),
-			additionalProps.get("signatureStatuses"));
+			additionalProps.get("dsRequestStatuses"));
 	}
 
 	private void _testGetAdditionalPropsWhenDisabled() throws Exception {

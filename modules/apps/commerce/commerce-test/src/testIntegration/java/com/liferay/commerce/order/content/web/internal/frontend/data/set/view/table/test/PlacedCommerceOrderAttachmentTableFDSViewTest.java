@@ -59,8 +59,8 @@ public class PlacedCommerceOrderAttachmentTableFDSViewTest {
 			"dateTime", "modified-date", "dateModified", true);
 		_testGetFDSTableSchemaField(null, "priority", "priority", true);
 		_testGetFDSTableSchemaField(
-			"signatureStatusDataRenderer", "signature-status",
-			"signatureStatus", false);
+			"dsRequestStatusDataRenderer", "signature-status",
+			"dsRequestStatus", false);
 		_testGetFDSTableSchemaField(null, "title", "title", true);
 	}
 

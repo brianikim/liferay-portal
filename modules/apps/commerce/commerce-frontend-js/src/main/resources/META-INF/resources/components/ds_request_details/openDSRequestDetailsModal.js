@@ -6,11 +6,11 @@
 import {openModal} from 'frontend-js-components-web';
 import React from 'react';
 
-import SignatureDetails from './SignatureDetails';
+import DSRequestDetails from './DSRequestDetails';
 
-export default function openSignatureDetailsModal({url}) {
+export default function openDSRequestDetailsModal({url}) {
 	openModal({
-		bodyComponent: () => React.createElement(SignatureDetails, {url}),
+		bodyComponent: () => React.createElement(DSRequestDetails, {url}),
 		size: 'lg',
 		title: Liferay.Language.get('signature-details'),
 	});
