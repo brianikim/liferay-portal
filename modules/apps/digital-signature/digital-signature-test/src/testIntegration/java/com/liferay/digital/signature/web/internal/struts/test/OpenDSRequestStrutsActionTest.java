@@ -137,7 +137,7 @@ public class OpenDSRequestStrutsActionTest {
 		_testExecuteWithHiddenLayout();
 		_testExecuteWithParameters();
 		_testExecuteWithoutDSRequest();
-		_testExecuteWithoutDSRequestViewPermission();
+		_testExecuteWithoutDSRequestRecipient();
 		_testExecuteWithoutLayoutViewPermission();
 		_testExecuteWithoutSite();
 	}
@@ -350,11 +350,18 @@ public class OpenDSRequestStrutsActionTest {
 			mockHttpServletResponse.getStatus());
 	}
 
-	private void _testExecuteWithoutDSRequestViewPermission() throws Exception {
+	private void _testExecuteWithoutDSRequestRecipient() throws Exception {
 		long dsRequestId = _addDSRequest(_group.getGroupId());
 
 		MockHttpServletResponse mockHttpServletResponse = _execute(
 			dsRequestId, Collections.emptyMap(), UserTestUtil.addUser());
+
+		Assert.assertEquals(
+			HttpServletResponse.SC_NOT_FOUND,
+			mockHttpServletResponse.getStatus());
+
+		mockHttpServletResponse = _execute(
+			dsRequestId, Collections.emptyMap(), TestPropsValues.getUser());
 
 		Assert.assertEquals(
 			HttpServletResponse.SC_NOT_FOUND,

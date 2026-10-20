@@ -26,6 +26,7 @@ import com.liferay.notification.service.NotificationQueueEntryLocalService;
 import com.liferay.notification.service.NotificationTemplateLocalService;
 import com.liferay.notification.util.NotificationRecipientSettingUtil;
 import com.liferay.object.constants.ObjectDefinitionConstants;
+import com.liferay.object.constants.ObjectEntryFolderConstants;
 import com.liferay.object.exception.NoSuchObjectEntryException;
 import com.liferay.object.exception.ObjectEntryValuesException;
 import com.liferay.object.model.ObjectDefinition;
@@ -81,6 +82,7 @@ import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.WebKeys;
+import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.test.log.LogCapture;
 import com.liferay.portal.test.log.LogEntry;
@@ -97,6 +99,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -1159,8 +1162,7 @@ public class DSRequestManagerTest {
 		DSEnvelope dsEnvelope1 = _createDSEnvelope();
 		FileEntry fileEntry = _addFileEntry();
 
-		DSRequest dsRequest1 = _addDSRequest(
-			dsEnvelope1, fileEntry.getFileEntryId());
+		_addDSRequest(dsEnvelope1, fileEntry.getFileEntryId());
 
 		DSEnvelope dsEnvelope2 = _createDSEnvelope(TestPropsValues.getUser());
 
@@ -1189,16 +1191,14 @@ public class DSRequestManagerTest {
 					}));
 
 		try {
-			_dsRequestManager.updateDSRequest(dsRequest1.getDSRequestId());
-
-			DSRequest dsRequest2 = _dsRequestManager.addDSRequest(
+			DSRequest dsRequest = _dsRequestManager.addDSRequest(
 				TestPropsValues.getCompanyId(), TestPropsValues.getGroupId(),
 				TestPropsValues.getUserId(), dsEnvelope2,
 				new long[] {fileEntry.getFileEntryId()});
 
 			Assert.assertEquals(
 				dsEnvelope2.getDSEnvelopeId(),
-				dsRequest2.getExternalReferenceCode());
+				dsRequest.getExternalReferenceCode());
 		}
 		finally {
 			ReflectionTestUtil.setFieldValue(
@@ -1406,6 +1406,8 @@ public class DSRequestManagerTest {
 
 		DSEnvelope dsEnvelope = _createDSEnvelope();
 
+		dsEnvelope.setDSEnvelopeId(PortalUUIDUtil.generate());
+
 		DSRequest dsRequest = _addDSRequest(
 			dsEnvelope, fileEntry.getFileEntryId());
 
@@ -1413,6 +1415,7 @@ public class DSRequestManagerTest {
 
 		byte[] bytes = ArrayUtil.append(
 			"%PDF-".getBytes(), RandomTestUtil.randomBytes());
+		List<String> methodNames = new ArrayList<>();
 
 		DSEnvelopeManager dsEnvelopeManager =
 			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
@@ -1421,6 +1424,8 @@ public class DSRequestManagerTest {
 					DSEnvelopeManager.class.getClassLoader(),
 					new Class<?>[] {DSEnvelopeManager.class},
 					(proxy, method, arguments) -> {
+						methodNames.add(method.getName());
+
 						if (Objects.equals(
 								method.getName(), "getDSDocumentAsBytes")) {
 
@@ -1430,10 +1435,37 @@ public class DSRequestManagerTest {
 						return dsEnvelope;
 					}));
 
+		PermissionChecker permissionChecker =
+			PermissionThreadLocal.getPermissionChecker();
+
+		PermissionThreadLocal.setPermissionChecker(
+			PermissionCheckerFactoryUtil.create(UserTestUtil.addUser()));
+
 		try {
 			_dsRequestManager.updateDSRequest(dsRequest.getDSRequestId());
+
+			PermissionThreadLocal.setPermissionChecker(permissionChecker);
+
+			_objectEntryLocalService.partialUpdateObjectEntry(
+				TestPropsValues.getUserId(), dsRequest.getDSRequestId(),
+				ObjectEntryFolderConstants.
+					PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
+				HashMapBuilder.<String, Serializable>put(
+					"requestStatus", DSRequestConstants.STATUS_SENT
+				).build(),
+				ServiceContextTestUtil.getServiceContext());
+
+			_dsRequestManager.updateDSRequest(dsRequest.getDSRequestId());
+
+			methodNames.clear();
+
+			_dsRequestManager.updateDSRequest(dsRequest.getDSRequestId());
+
+			Assert.assertTrue(methodNames.toString(), methodNames.isEmpty());
 		}
 		finally {
+			PermissionThreadLocal.setPermissionChecker(permissionChecker);
+
 			ReflectionTestUtil.setFieldValue(
 				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager);
 		}
