@@ -6,7 +6,6 @@
 package com.liferay.commerce.checkout.web.internal.display.context;
 
 import com.liferay.commerce.checkout.web.internal.display.context.helper.CommerceCheckoutRequestHelper;
-import com.liferay.commerce.checkout.web.internal.util.OrderConfirmationCommerceCheckoutStep;
 import com.liferay.commerce.constants.CommerceCheckoutWebKeys;
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.util.CommerceCheckoutStep;
@@ -17,8 +16,6 @@ import com.liferay.portal.kernel.portlet.url.builder.PortletURLBuilder;
 import com.liferay.portal.kernel.util.URLCodec;
 
 import jakarta.servlet.http.HttpServletRequest;
-
-import java.util.Objects;
 
 /**
  * @author Luca Pellizzon
@@ -58,12 +55,10 @@ public class PaymentProcessCheckoutStepDisplayContext {
 	}
 
 	private String _getCallbackURL() {
-		if ((_nextCommerceCheckoutStep == null) ||
-			!FeatureFlagManagerUtil.isEnabled(
+		if (!FeatureFlagManagerUtil.isEnabled(
 				_commerceOrder.getCompanyId(), "LPD-69290") ||
-			Objects.equals(
-				_nextCommerceCheckoutStep.getName(),
-				OrderConfirmationCommerceCheckoutStep.NAME)) {
+			(_nextCommerceCheckoutStep == null) ||
+			!_nextCommerceCheckoutStep.isContinueAfterPayment()) {
 
 			return StringPool.BLANK;
 		}
