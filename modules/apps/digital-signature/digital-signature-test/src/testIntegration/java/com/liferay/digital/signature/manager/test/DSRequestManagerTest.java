@@ -80,6 +80,7 @@ import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.MapUtil;
+import com.liferay.portal.kernel.util.MimeTypesUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
@@ -891,10 +892,14 @@ public class DSRequestManagerTest {
 	}
 
 	private FileEntry _addFileEntry() throws Exception {
+		return _addFileEntry(RandomTestUtil.randomString() + ".txt");
+	}
+
+	private FileEntry _addFileEntry(String fileName) throws Exception {
 		return _dlAppLocalService.addFileEntry(
 			null, TestPropsValues.getUserId(), TestPropsValues.getGroupId(),
-			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
-			RandomTestUtil.randomString() + ".txt", ContentTypes.TEXT_PLAIN,
+			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID, fileName,
+			MimeTypesUtil.getContentType(fileName),
 			TestDataConstants.TEST_BYTE_ARRAY, null, null, null,
 			ServiceContextTestUtil.getServiceContext(
 				TestPropsValues.getGroupId()));
@@ -1675,6 +1680,7 @@ public class DSRequestManagerTest {
 			bytes, FileUtil.getBytes(fileEntry.getContentStream()));
 		Assert.assertEquals(description, fileEntry.getDescription());
 		Assert.assertEquals("contract (signed).pdf", fileEntry.getFileName());
+		Assert.assertEquals("contract (signed).pdf", fileEntry.getTitle());
 		Assert.assertEquals("2.0", fileEntry.getVersion());
 
 		FileVersion fileVersion = fileEntry.getLatestFileVersion();
@@ -1849,23 +1855,22 @@ public class DSRequestManagerTest {
 			_createDSRecipient(UserTestUtil.addUser()),
 			_createDSRecipient(UserTestUtil.addUser()));
 
-		FileEntry fileEntry = _dlAppLocalService.addFileEntry(
-			null, TestPropsValues.getUserId(), TestPropsValues.getGroupId(),
-			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
-			RandomTestUtil.randomString() + ".pdf",
-			ContentTypes.APPLICATION_PDF, TestDataConstants.TEST_BYTE_ARRAY,
-			null, null, null,
-			ServiceContextTestUtil.getServiceContext(
-				TestPropsValues.getGroupId()));
+		FileEntry fileEntry1 = _addFileEntry(
+			RandomTestUtil.randomString() + ".pdf");
+		FileEntry fileEntry2 = _addFileEntry(
+			RandomTestUtil.randomString() + ".pdf");
 
 		DSRequest dsRequest = _addDSRequest(
-			dsEnvelope, fileEntry.getFileEntryId());
+			dsEnvelope, fileEntry1.getFileEntryId(),
+			fileEntry2.getFileEntryId());
 
 		for (DSRecipient dsRecipient : dsEnvelope.getDSRecipients()) {
 			dsRecipient.setStatus(DSRequestConstants.STATUS_COMPLETED);
 		}
 
 		dsEnvelope.setStatus(DSRequestConstants.STATUS_COMPLETED);
+
+		String dsDocumentId = String.valueOf(fileEntry2.getFileEntryId());
 
 		DSEnvelopeManager dsEnvelopeManager =
 			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
@@ -1874,13 +1879,18 @@ public class DSRequestManagerTest {
 					DSEnvelopeManager.class.getClassLoader(),
 					new Class<?>[] {DSEnvelopeManager.class},
 					(proxy, method, arguments) -> {
-						if (Objects.equals(
+						if (!Objects.equals(
 								method.getName(), "getDSDocumentAsBytes")) {
 
-							return "{\"errorCode\":\"NOT_FOUND\"}".getBytes();
+							return dsEnvelope;
 						}
 
-						return dsEnvelope;
+						if (Objects.equals(dsDocumentId, arguments[2])) {
+							return "{\"errorCode\": \"NOT_FOUND\"}".getBytes();
+						}
+
+						return ArrayUtil.append(
+							"%PDF-".getBytes(), RandomTestUtil.randomBytes());
 					}));
 
 		try (LogCapture logCapture = LoggerTestUtil.configureLog4JLogger(
@@ -1889,10 +1899,23 @@ public class DSRequestManagerTest {
 				LoggerTestUtil.ERROR)) {
 
 			_dsRequestManager.updateDSRequest(dsRequest.getDSRequestId());
+			_dsRequestManager.updateDSRequest(dsRequest.getDSRequestId());
 
 			List<LogEntry> logEntries = logCapture.getLogEntries();
 
-			Assert.assertEquals(logEntries.toString(), 1, logEntries.size());
+			Assert.assertEquals(logEntries.toString(), 2, logEntries.size());
+
+			for (LogEntry logEntry : logEntries) {
+				Throwable throwable = logEntry.getThrowable();
+
+				Assert.assertEquals(
+					StringBundler.concat(
+						"DocuSign did not return a signed PDF for file entry ",
+						fileEntry2.getFileEntryId(),
+						" of digital signature envelope ",
+						dsEnvelope.getDSEnvelopeId()),
+					throwable.getMessage());
+			}
 		}
 		finally {
 			ReflectionTestUtil.setFieldValue(
@@ -1912,9 +1935,15 @@ public class DSRequestManagerTest {
 				DSRequestConstants.STATUS_SENT, dsRequestRecipient.getStatus());
 		}
 
-		fileEntry = _dlAppLocalService.getFileEntry(fileEntry.getFileEntryId());
+		fileEntry1 = _dlAppLocalService.getFileEntry(
+			fileEntry1.getFileEntryId());
 
-		Assert.assertEquals("1.0", fileEntry.getVersion());
+		Assert.assertEquals("2.0", fileEntry1.getVersion());
+
+		fileEntry2 = _dlAppLocalService.getFileEntry(
+			fileEntry2.getFileEntryId());
+
+		Assert.assertEquals("1.0", fileEntry2.getVersion());
 
 		ReflectionTestUtil.setFieldValue(
 			_dsRequestManager, "_dsEnvelopeManager",
@@ -1954,9 +1983,21 @@ public class DSRequestManagerTest {
 				dsRequestRecipient.getStatus());
 		}
 
-		fileEntry = _dlAppLocalService.getFileEntry(fileEntry.getFileEntryId());
+		String fileName = fileEntry1.getFileName();
 
-		Assert.assertEquals("2.0", fileEntry.getVersion());
+		fileEntry1 = _dlAppLocalService.getFileEntry(
+			fileEntry1.getFileEntryId());
+
+		Assert.assertEquals(fileName, fileEntry1.getFileName());
+		Assert.assertEquals("2.0", fileEntry1.getVersion());
+
+		fileName = fileEntry2.getFileName();
+
+		fileEntry2 = _dlAppLocalService.getFileEntry(
+			fileEntry2.getFileEntryId());
+
+		Assert.assertEquals(fileName, fileEntry2.getFileName());
+		Assert.assertEquals("2.0", fileEntry2.getVersion());
 	}
 
 	private CompanyConfigurationTemporarySwapper
