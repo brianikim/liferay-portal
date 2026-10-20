@@ -256,12 +256,12 @@ public class DSCommerceOrderSignatureDetailsServletTest {
 		return ReflectionTestUtil.invoke(
 			_dsRequestManager, "_addDSRequest",
 			new Class<?>[] {
-				long.class, long.class, long.class, DSEnvelope.class,
-				long[].class
+				long.class, DSEnvelope.class, long[].class, long.class,
+				long.class
 			},
-			_group.getCompanyId(), _group.getGroupId(),
-			TestPropsValues.getUserId(), dsEnvelope,
-			new long[] {_commerceOrderAttachment.getFileEntryId()});
+			_group.getCompanyId(), dsEnvelope,
+			new long[] {_commerceOrderAttachment.getFileEntryId()},
+			_group.getGroupId(), TestPropsValues.getUserId());
 	}
 
 	private DSRecipient _createDSRecipient(String status, User user) {
