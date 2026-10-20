@@ -169,11 +169,12 @@ public class ResendDSRequestMVCResourceCommandTest {
 
 		_saveDigitalSignatureConfiguration(false);
 
-		_testServeResource("Digital signature is not enabled for this order.");
+		_assertErrorMessage("Digital signature is not enabled for this order.");
 
 		_saveDigitalSignatureConfiguration(true);
 
-		_testServeResource("No signature request was found for this document.");
+		_assertErrorMessage(
+			"No signature request was found for this document.");
 
 		portletException = Assert.assertThrows(
 			PortletException.class,
@@ -186,7 +187,7 @@ public class ResendDSRequestMVCResourceCommandTest {
 		_addDSRequest(
 			DSRequestConstants.STATUS_COMPLETED, UserTestUtil.addUser());
 
-		_testServeResource("This signature request is no longer active.");
+		_assertErrorMessage("This signature request is no longer active.");
 
 		_commerceOrderAttachment =
 			_commerceOrderAttachmentLocalService.addCommerceOrderAttachment(
@@ -260,6 +261,15 @@ public class ResendDSRequestMVCResourceCommandTest {
 			_group.getCompanyId(), dsEnvelope,
 			new long[] {_commerceOrderAttachment.getFileEntryId()},
 			_group.getGroupId(), user.getUserId());
+	}
+
+	private void _assertErrorMessage(String expectedMessage) throws Exception {
+		JSONObject jsonObject = _serveResource(
+			_commerceOrderAttachment.getCommerceOrderAttachmentId(),
+			TestPropsValues.getUser());
+
+		Assert.assertEquals(
+			expectedMessage, jsonObject.getString("errorMessage"));
 	}
 
 	private List<NotificationQueueEntry> _getNotificationQueueEntries(
@@ -341,15 +351,6 @@ public class ResendDSRequestMVCResourceCommandTest {
 				mockLiferayResourceResponse.getPortletOutputStream();
 
 		return _jsonFactory.createJSONObject(byteArrayOutputStream.toString());
-	}
-
-	private void _testServeResource(String expectedMessage) throws Exception {
-		JSONObject jsonObject = _serveResource(
-			_commerceOrderAttachment.getCommerceOrderAttachmentId(),
-			TestPropsValues.getUser());
-
-		Assert.assertEquals(
-			expectedMessage, jsonObject.getString("errorMessage"));
 	}
 
 	private CommerceOrder _commerceOrder;

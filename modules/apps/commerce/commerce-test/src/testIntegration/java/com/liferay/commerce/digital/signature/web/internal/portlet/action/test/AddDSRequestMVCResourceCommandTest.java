@@ -149,7 +149,7 @@ public class AddDSRequestMVCResourceCommandTest {
 
 		_saveDigitalSignatureConfiguration(false);
 
-		_testServeResource(
+		_assertErrorMessage(
 			"Digital signature is not enabled for this order.", 0, 0);
 
 		_saveDigitalSignatureConfiguration(true);
@@ -163,7 +163,7 @@ public class AddDSRequestMVCResourceCommandTest {
 		Assert.assertTrue(
 			portletException.getCause() instanceof PrincipalException);
 
-		_testServeResource(
+		_assertErrorMessage(
 			"Days to warn recipients must be fewer than days until expiration.",
 			1, 1);
 
@@ -173,18 +173,18 @@ public class AddDSRequestMVCResourceCommandTest {
 			user1.getUserId(), WorkflowConstants.STATUS_INACTIVE,
 			ServiceContextTestUtil.getServiceContext());
 
-		_testServeResource(
+		_assertErrorMessage(
 			"One or more recipients cannot sign this order.", 0, 0,
 			user1.getUserId());
 
 		User user2 = UserTestUtil.addUser();
 		User user3 = UserTestUtil.addUser();
 
-		_testServeResource(
+		_assertErrorMessage(
 			"Only one internal countersigner is allowed.", 0, 0,
 			user2.getUserId(), user3.getUserId());
 
-		_testServeResource("At least one recipient is required.", 0, 0);
+		_assertErrorMessage("At least one recipient is required.", 0, 0);
 
 		_testServeResourceWhenResponseWriteFails();
 
@@ -289,7 +289,7 @@ public class AddDSRequestMVCResourceCommandTest {
 					}));
 
 		try {
-			_testServeResource(
+			_assertErrorMessage(
 				"This document already has an active or completed signature " +
 					"request.",
 				0, 0, TestPropsValues.getUserId());
@@ -322,9 +322,23 @@ public class AddDSRequestMVCResourceCommandTest {
 				RandomTestUtil.randomString() + ".zip",
 				new ByteArrayInputStream(RandomTestUtil.randomBytes()));
 
-		_testServeResource(
+		_assertErrorMessage(
 			"This file extension is not supported by DocuSign.", 0, 0,
 			TestPropsValues.getUserId());
+	}
+
+	private void _assertErrorMessage(
+			String expectedMessage, int expireAfter, int expireWarn,
+			long... recipientUserIds)
+		throws Exception {
+
+		JSONObject jsonObject = _serveResource(
+			_commerceOrderAttachment.getCommerceOrderAttachmentId(),
+			expireAfter, expireWarn, TestPropsValues.getUser(),
+			recipientUserIds);
+
+		Assert.assertEquals(
+			expectedMessage, jsonObject.getString("errorMessage"));
 	}
 
 	private MockLiferayResourceRequest _getMockLiferayResourceRequest(
@@ -414,20 +428,6 @@ public class AddDSRequestMVCResourceCommandTest {
 				mockLiferayResourceResponse.getPortletOutputStream();
 
 		return _jsonFactory.createJSONObject(byteArrayOutputStream.toString());
-	}
-
-	private void _testServeResource(
-			String expectedMessage, int expireAfter, int expireWarn,
-			long... recipientUserIds)
-		throws Exception {
-
-		JSONObject jsonObject = _serveResource(
-			_commerceOrderAttachment.getCommerceOrderAttachmentId(),
-			expireAfter, expireWarn, TestPropsValues.getUser(),
-			recipientUserIds);
-
-		Assert.assertEquals(
-			expectedMessage, jsonObject.getString("errorMessage"));
 	}
 
 	private void _testServeResourceWhenResponseWriteFails() throws Exception {
