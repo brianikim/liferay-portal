@@ -5,7 +5,6 @@
 
 package com.liferay.commerce.checkout.web.internal.display.context;
 
-import com.liferay.commerce.checkout.web.internal.util.OrderConfirmationCommerceCheckoutStep;
 import com.liferay.commerce.constants.CommerceCheckoutWebKeys;
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.util.CommerceCheckoutStep;
@@ -84,7 +83,8 @@ public class PaymentProcessCheckoutStepDisplayContextTest {
 				false
 			);
 
-			Assert.assertEquals(StringPool.BLANK, _getCallbackURL("shipping"));
+			Assert.assertEquals(
+				StringPool.BLANK, _getCallbackURL(true, "shipping"));
 
 			mockedStatic.when(
 				() -> FeatureFlagManagerUtil.isEnabled(
@@ -93,13 +93,12 @@ public class PaymentProcessCheckoutStepDisplayContextTest {
 				true
 			);
 
-			Assert.assertEquals(StringPool.BLANK, _getCallbackURL(null));
+			Assert.assertEquals(StringPool.BLANK, _getCallbackURL(false, null));
 			Assert.assertEquals(
-				StringPool.BLANK,
-				_getCallbackURL(OrderConfirmationCommerceCheckoutStep.NAME));
+				StringPool.BLANK, _getCallbackURL(false, "shipping"));
 			Assert.assertEquals(
 				URLCodec.encodeURL("http://localhost/checkout"),
-				_getCallbackURL("shipping"));
+				_getCallbackURL(true, "shipping"));
 
 			Mockito.verify(
 				_liferayPortletURL
@@ -115,7 +114,9 @@ public class PaymentProcessCheckoutStepDisplayContextTest {
 		}
 	}
 
-	private String _getCallbackURL(String nextCommerceCheckoutStepName) {
+	private String _getCallbackURL(
+		boolean continueAfterPayment, String nextCommerceCheckoutStepName) {
+
 		CommerceOrder commerceOrder = Mockito.mock(CommerceOrder.class);
 
 		Mockito.when(
@@ -156,6 +157,12 @@ public class PaymentProcessCheckoutStepDisplayContextTest {
 				nextCommerceCheckoutStep.getName()
 			).thenReturn(
 				nextCommerceCheckoutStepName
+			);
+
+			Mockito.when(
+				nextCommerceCheckoutStep.isContinueAfterPayment()
+			).thenReturn(
+				continueAfterPayment
 			);
 		}
 
