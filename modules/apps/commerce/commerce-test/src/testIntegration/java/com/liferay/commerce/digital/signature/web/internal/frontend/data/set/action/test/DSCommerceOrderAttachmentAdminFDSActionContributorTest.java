@@ -166,16 +166,12 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 		Assert.assertArrayEquals(
 			DigitalSignatureConstants.ALLOWED_FILE_EXTENSIONS,
 			(String[])addDSRequestModalProps.get("allowedFileExtensions"));
-		Assert.assertArrayEquals(
-			new String[] {
-				DSRequestConstants.STATUS_DECLINED,
-				DSRequestConstants.STATUS_EXPIRED,
-				DSRequestConstants.STATUS_VOIDED
-			},
-			(String[])addDSRequestModalProps.get(
-				"replaceableDSRequestStatuses"));
+		Assert.assertEquals(
+			Collections.emptyList(),
+			additionalProps.get("replaceableCommerceOrderAttachmentIds"));
 
-		_addDSRequest(_commerceOrderAttachment, user);
+		_addDSRequest(
+			_commerceOrderAttachment, DSRequestConstants.STATUS_SENT, user);
 
 		additionalProps = _getAdditionalProps(user);
 
@@ -187,6 +183,33 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 				commerceOrderAttachmentId, DSRequestConstants.STATUS_SENT
 			).build(),
 			additionalProps.get("dsRequestStatuses"));
+
+		Assert.assertEquals(
+			Collections.emptyList(),
+			additionalProps.get("replaceableCommerceOrderAttachmentIds"));
+
+		CommerceOrderAttachment commerceOrderAttachment =
+			_commerceOrderAttachmentLocalService.addCommerceOrderAttachment(
+				RandomTestUtil.randomString(), TestPropsValues.getUserId(),
+				_commerceOrder.getCommerceOrderId(),
+				RandomTestUtil.nextDouble(), false,
+				RandomTestUtil.randomString(), "invoice",
+				RandomTestUtil.randomString() + ".pdf",
+				new ByteArrayInputStream(RandomTestUtil.randomBytes()));
+
+		_addDSRequest(
+			commerceOrderAttachment, DSRequestConstants.STATUS_VOIDED, user);
+
+		additionalProps = _getAdditionalProps(user);
+
+		Assert.assertEquals(
+			List.of(
+				String.valueOf(
+					commerceOrderAttachment.getCommerceOrderAttachmentId())),
+			additionalProps.get("replaceableCommerceOrderAttachmentIds"));
+
+		_commerceOrderAttachmentLocalService.deleteCommerceOrderAttachment(
+			commerceOrderAttachment);
 
 		_commerceOrder.setUserId(
 			_userLocalService.getGuestUserId(_group.getCompanyId()));
@@ -218,8 +241,8 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 
 		Assert.assertEquals(
 			List.of(
-				"add-ds-request", "view-ds-request-details",
-				"resend-ds-request", "void-ds-request"),
+				"request-signature", "view-signature-details", "resend",
+				"void"),
 			_getFDSActionDropdownItemIds(user));
 
 		try (SafeCloseable safeCloseable =
@@ -237,7 +260,8 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 	}
 
 	private void _addDSRequest(
-			CommerceOrderAttachment commerceOrderAttachment, User user)
+			CommerceOrderAttachment commerceOrderAttachment, String status,
+			User user)
 		throws Exception {
 
 		DSEnvelope dsEnvelope = new DSEnvelope();
@@ -250,12 +274,12 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 		dsRecipient.setEmailAddress(user.getEmailAddress());
 		dsRecipient.setName(user.getFullName());
 		dsRecipient.setRoutingOrder(1);
-		dsRecipient.setStatus(DSRequestConstants.STATUS_SENT);
+		dsRecipient.setStatus(status);
 
 		dsEnvelope.setDSRecipients(ListUtil.fromArray(dsRecipient));
 
 		dsEnvelope.setEmailSubject(RandomTestUtil.randomString());
-		dsEnvelope.setStatus(DSRequestConstants.STATUS_SENT);
+		dsEnvelope.setStatus(status);
 
 		ReflectionTestUtil.invoke(
 			_dsRequestManager, "_addDSRequest",
@@ -389,7 +413,9 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 
 		_roleLocalService.addUserRole(user.getUserId(), role);
 
-		_addDSRequest(commerceOrderAttachment, TestPropsValues.getUser());
+		_addDSRequest(
+			commerceOrderAttachment, DSRequestConstants.STATUS_SENT,
+			TestPropsValues.getUser());
 
 		Map<String, Object> additionalProps = _getAdditionalProps(user);
 

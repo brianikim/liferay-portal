@@ -9,14 +9,18 @@ import com.liferay.commerce.constants.CommercePortletKeys;
 import com.liferay.commerce.digital.signature.web.internal.util.DSCommerceOrderAttachmentUtil;
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.order.CommerceOrderAttachmentAdminFDSActionContributor;
-import com.liferay.digital.signature.constants.DSRequestConstants;
 import com.liferay.digital.signature.constants.DigitalSignatureConstants;
+import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.frontend.data.set.model.FDSActionDropdownItem;
 import com.liferay.frontend.data.set.model.FDSActionDropdownItemBuilder;
 import com.liferay.frontend.data.set.model.FDSActionDropdownItemList;
+import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.language.Language;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.UserConstants;
 import com.liferay.portal.kernel.portlet.PortletURLFactory;
@@ -25,7 +29,6 @@ import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
-import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.WebKeys;
@@ -55,6 +58,9 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributor
 		if (!DSCommerceOrderAttachmentUtil.isEnabled(commerceOrder)) {
 			return Collections.emptyMap();
 		}
+
+		Map<Long, DSRequest> dsRequests = _getDSRequests(
+			commerceOrder, httpServletRequest);
 
 		return HashMapBuilder.<String, Object>put(
 			"addDSRequestModalProps",
@@ -111,18 +117,24 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributor
 					"portletNamespace",
 					_portal.getPortletNamespace(
 						CommercePortletKeys.COMMERCE_ORDER)
-				).put(
-					"replaceableDSRequestStatuses",
-					ArrayUtil.remove(
-						DSRequestConstants.STATUSES_REQUEST_TERMINAL,
-						DSRequestConstants.STATUS_COMPLETED)
 				).build();
 			}
 		).put(
 			"dsRequestStatuses",
-			() -> DSCommerceOrderAttachmentUtil.getDSRequestStatuses(
-				DSCommerceOrderAttachmentUtil.getDSRequests(
-					commerceOrder, httpServletRequest))
+			DSCommerceOrderAttachmentUtil.getDSRequestStatuses(dsRequests)
+		).put(
+			"replaceableCommerceOrderAttachmentIds",
+			TransformUtil.transform(
+				dsRequests.entrySet(),
+				entry -> {
+					DSRequest dsRequest = entry.getValue();
+
+					if (!dsRequest.isReplaceable()) {
+						return null;
+					}
+
+					return String.valueOf(entry.getKey());
+				})
 		).build();
 	}
 
@@ -152,7 +164,7 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributor
 			).setPermissionKey(
 				"update"
 			).build(
-				"add-ds-request"
+				"request-signature"
 			),
 			FDSActionDropdownItemBuilder.putData(
 				"dsRequestDetailsURL",
@@ -166,7 +178,7 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributor
 			).setLabel(
 				_language.get(httpServletRequest, "view-signature-details")
 			).build(
-				"view-ds-request-details"
+				"view-signature-details"
 			),
 			FDSActionDropdownItemBuilder.putData(
 				"resendDSRequestURL",
@@ -181,7 +193,7 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributor
 			).setPermissionKey(
 				"update"
 			).build(
-				"resend-ds-request"
+				"resend"
 			),
 			FDSActionDropdownItemBuilder.putData(
 				"voidDSRequestURL",
@@ -196,8 +208,22 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributor
 			).setPermissionKey(
 				"update"
 			).build(
-				"void-ds-request"
+				"void"
 			));
+	}
+
+	private Map<Long, DSRequest> _getDSRequests(
+		CommerceOrder commerceOrder, HttpServletRequest httpServletRequest) {
+
+		try {
+			return DSCommerceOrderAttachmentUtil.getDSRequests(
+				commerceOrder, httpServletRequest);
+		}
+		catch (PortalException portalException) {
+			_log.error(portalException);
+
+			return Collections.emptyMap();
+		}
 	}
 
 	private String _getResourceURL(
@@ -213,6 +239,9 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributor
 			resourceID
 		).buildString();
 	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		DSCommerceOrderAttachmentAdminFDSActionContributor.class);
 
 	@Reference(
 		target = "(model.class.name=com.liferay.commerce.model.CommerceOrder)"

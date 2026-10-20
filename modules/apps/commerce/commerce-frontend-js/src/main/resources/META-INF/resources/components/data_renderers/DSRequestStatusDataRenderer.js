@@ -8,14 +8,10 @@ import React from 'react';
 
 import DSRequestStatusLabel from '../ds_request_details/DSRequestStatusLabel';
 
-export default function DSRequestStatusDataRenderer({
-	dsRequestStatuses,
-	itemData,
-}) {
-	return <DSRequestStatusLabel status={dsRequestStatuses?.[itemData?.id]} />;
+export default function DSRequestStatusDataRenderer({value}) {
+	return <DSRequestStatusLabel status={value} />;
 }
 
 DSRequestStatusDataRenderer.propTypes = {
-	dsRequestStatuses: PropTypes.object,
-	itemData: PropTypes.object,
+	value: PropTypes.string,
 };

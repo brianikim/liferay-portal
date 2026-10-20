@@ -167,16 +167,16 @@ const AttachmentsFDSPropsTransformer = (props) => {
 	const addDSRequestModalProps =
 		props.additionalProps?.addDSRequestModalProps;
 	const dsRequestStatuses = props.additionalProps?.dsRequestStatuses ?? {};
+	const replaceableCommerceOrderAttachmentIds =
+		props.additionalProps?.replaceableCommerceOrderAttachmentIds ?? [];
+
+	const getDSRequestStatus = (item) => dsRequestStatuses[item.id];
 
 	const isRequestable = (item) =>
 		!!addDSRequestModalProps &&
-		addDSRequestModalProps.allowedFileExtensions.includes(
-			item?.extension
-		) &&
-		(!dsRequestStatuses[item?.id] ||
-			addDSRequestModalProps.replaceableDSRequestStatuses.includes(
-				dsRequestStatuses[item?.id]
-			));
+		addDSRequestModalProps.allowedFileExtensions.includes(item.extension) &&
+		(!getDSRequestStatus(item) ||
+			replaceableCommerceOrderAttachmentIds.includes(String(item.id)));
 
 	return {
 		...props,
@@ -188,7 +188,7 @@ const AttachmentsFDSPropsTransformer = (props) => {
 			dsRequestStatusDataRenderer: (rendererProps) =>
 				React.createElement(DSRequestStatusDataRenderer, {
 					...rendererProps,
-					dsRequestStatuses,
+					value: getDSRequestStatus(rendererProps.itemData),
 				}),
 		},
 		itemsActions: props.itemsActions?.map((action) => {
@@ -201,27 +201,24 @@ const AttachmentsFDSPropsTransformer = (props) => {
 				};
 			}
 
-			if (actionId === 'add-ds-request') {
+			if (actionId === 'request-signature') {
 				return {
 					...action,
 					isVisible: isRequestable,
 				};
 			}
 
-			if (
-				actionId === 'resend-ds-request' ||
-				actionId === 'void-ds-request'
-			) {
+			if (actionId === 'resend' || actionId === 'void') {
 				return {
 					...action,
-					isVisible: (item) => dsRequestStatuses[item?.id] === 'sent',
+					isVisible: (item) => getDSRequestStatus(item) === 'sent',
 				};
 			}
 
-			if (actionId === 'view-ds-request-details') {
+			if (actionId === 'view-signature-details') {
 				return {
 					...action,
-					isVisible: (item) => !!dsRequestStatuses[item?.id],
+					isVisible: (item) => !!getDSRequestStatus(item),
 				};
 			}
 
@@ -250,7 +247,7 @@ const AttachmentsFDSPropsTransformer = (props) => {
 
 				window.location.href = fileURL;
 			}
-			else if (actionId === 'add-ds-request') {
+			else if (actionId === 'request-signature') {
 				event?.preventDefault();
 
 				openAddDSRequestModal({
@@ -262,14 +259,14 @@ const AttachmentsFDSPropsTransformer = (props) => {
 					attachment: itemData,
 				});
 			}
-			else if (actionId === 'resend-ds-request') {
+			else if (actionId === 'resend') {
 				event?.preventDefault();
 
 				postDSRequestAction(
 					formatActionUrl(action.data.resendDSRequestURL, itemData)
 				).catch(openErrorToast);
 			}
-			else if (actionId === 'view-ds-request-details') {
+			else if (actionId === 'view-signature-details') {
 				event?.preventDefault();
 
 				openDSRequestDetailsModal({
@@ -279,7 +276,7 @@ const AttachmentsFDSPropsTransformer = (props) => {
 					),
 				});
 			}
-			else if (actionId === 'void-ds-request') {
+			else if (actionId === 'void') {
 				event?.preventDefault();
 
 				openVoidConfirmationModal({

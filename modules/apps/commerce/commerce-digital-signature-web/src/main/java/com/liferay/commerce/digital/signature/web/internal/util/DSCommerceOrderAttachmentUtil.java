@@ -80,30 +80,6 @@ public class DSCommerceOrderAttachmentUtil {
 		return url + "&commerceOrderAttachmentId={id}";
 	}
 
-	public static List<CommerceOrderAttachment> getCommerceOrderAttachments(
-			CommerceOrder commerceOrder, PermissionChecker permissionChecker)
-		throws PortalException {
-
-		ModelResourcePermission<CommerceOrderAttachment>
-			commerceOrderAttachmentModelResourcePermission =
-				_commerceOrderAttachmentModelResourcePermissionSnapshot.get();
-
-		return TransformUtil.transform(
-			CommerceOrderAttachmentLocalServiceUtil.getCommerceOrderAttachments(
-				commerceOrder.getCommerceOrderId(), QueryUtil.ALL_POS,
-				QueryUtil.ALL_POS, null),
-			commerceOrderAttachment -> {
-				if (!commerceOrderAttachmentModelResourcePermission.contains(
-						permissionChecker, commerceOrderAttachment,
-						ActionKeys.VIEW)) {
-
-					return null;
-				}
-
-				return commerceOrderAttachment;
-			});
-	}
-
 	public static Map<String, String> getDSRequestStatuses(
 		Map<Long, DSRequest> dsRequests) {
 
@@ -145,7 +121,7 @@ public class DSCommerceOrderAttachmentUtil {
 		Map<Long, Long> fileEntryIds = new LinkedHashMap<>();
 
 		for (CommerceOrderAttachment commerceOrderAttachment :
-				getCommerceOrderAttachments(
+				_getCommerceOrderAttachments(
 					commerceOrder, themeDisplay.getPermissionChecker())) {
 
 			fileEntryIds.put(
@@ -233,6 +209,30 @@ public class DSCommerceOrderAttachmentUtil {
 		}
 
 		return false;
+	}
+
+	private static List<CommerceOrderAttachment> _getCommerceOrderAttachments(
+			CommerceOrder commerceOrder, PermissionChecker permissionChecker)
+		throws PortalException {
+
+		ModelResourcePermission<CommerceOrderAttachment>
+			commerceOrderAttachmentModelResourcePermission =
+				_commerceOrderAttachmentModelResourcePermissionSnapshot.get();
+
+		return TransformUtil.transform(
+			CommerceOrderAttachmentLocalServiceUtil.getCommerceOrderAttachments(
+				commerceOrder.getCommerceOrderId(), QueryUtil.ALL_POS,
+				QueryUtil.ALL_POS, null),
+			commerceOrderAttachment -> {
+				if (!commerceOrderAttachmentModelResourcePermission.contains(
+						permissionChecker, commerceOrderAttachment,
+						ActionKeys.VIEW)) {
+
+					return null;
+				}
+
+				return commerceOrderAttachment;
+			});
 	}
 
 	private static final Snapshot
