@@ -27,26 +27,26 @@ const STATUS_LABELS = {
 	voided: Liferay.Language.get('voided'),
 };
 
-export function getSignatureStatusDisplayType(status) {
+export function getDSRequestStatusDisplayType(status) {
 	return DISPLAY_TYPES[status] || 'secondary';
 }
 
-export function getSignatureStatusLabel(status) {
+export function getDSRequestStatusLabel(status) {
 	return STATUS_LABELS[status] || status;
 }
 
-export default function SignatureStatusLabel({status}) {
+export default function DSRequestStatusLabel({status}) {
 	if (!status) {
 		return null;
 	}
 
 	return (
-		<ClayLabel displayType={getSignatureStatusDisplayType(status)}>
-			{getSignatureStatusLabel(status)}
+		<ClayLabel displayType={getDSRequestStatusDisplayType(status)}>
+			{getDSRequestStatusLabel(status)}
 		</ClayLabel>
 	);
 }
 
-SignatureStatusLabel.propTypes = {
+DSRequestStatusLabel.propTypes = {
 	status: PropTypes.string,
 };

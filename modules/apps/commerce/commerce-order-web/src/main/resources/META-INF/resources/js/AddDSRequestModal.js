@@ -218,11 +218,11 @@ function validate({emailSubject, expireAfter, expireWarn, recipients}) {
 	return errors;
 }
 
-export default function RequestSignatureModal({
+export default function AddDSRequestModal({
+	addDSRequestModalProps,
 	addDSRequestURL,
 	attachment,
 	closeModal,
-	requestSignatureModalProps,
 }) {
 	const {
 		accountUsers,
@@ -230,7 +230,7 @@ export default function RequestSignatureModal({
 		commerceOrderId,
 		getDSRequestRecipientUsersURL,
 		portletNamespace,
-	} = requestSignatureModalProps;
+	} = addDSRequestModalProps;
 
 	const [emailMessage, setEmailMessage] = useState('');
 	const [emailSubject, setEmailSubject] = useState('');
@@ -645,14 +645,8 @@ export default function RequestSignatureModal({
 	);
 }
 
-RequestSignatureModal.propTypes = {
-	addDSRequestURL: PropTypes.string.isRequired,
-	attachment: PropTypes.shape({
-		id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-		title: PropTypes.string,
-	}).isRequired,
-	closeModal: PropTypes.func.isRequired,
-	requestSignatureModalProps: PropTypes.shape({
+AddDSRequestModal.propTypes = {
+	addDSRequestModalProps: PropTypes.shape({
 		accountUsers: PropTypes.arrayOf(
 			PropTypes.shape({
 				emailAddress: PropTypes.string,
@@ -669,4 +663,10 @@ RequestSignatureModal.propTypes = {
 		getDSRequestRecipientUsersURL: PropTypes.string,
 		portletNamespace: PropTypes.string,
 	}).isRequired,
+	addDSRequestURL: PropTypes.string.isRequired,
+	attachment: PropTypes.shape({
+		id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+		title: PropTypes.string,
+	}).isRequired,
+	closeModal: PropTypes.func.isRequired,
 };

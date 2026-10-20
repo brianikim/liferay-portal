@@ -148,11 +148,10 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 
 		Map<String, Object> additionalProps = _getAdditionalProps(user);
 
-		Map<String, Object> requestSignatureModalProps =
-			(Map<String, Object>)additionalProps.get(
-				"requestSignatureModalProps");
+		Map<String, Object> addDSRequestModalProps =
+			(Map<String, Object>)additionalProps.get("addDSRequestModalProps");
 
-		JSONObject buyerJSONObject = (JSONObject)requestSignatureModalProps.get(
+		JSONObject buyerJSONObject = (JSONObject)addDSRequestModalProps.get(
 			"buyer");
 
 		Assert.assertEquals(
@@ -160,21 +159,21 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 
 		Assert.assertEquals(
 			_commerceOrder.getCommerceOrderId(),
-			requestSignatureModalProps.get("commerceOrderId"));
+			addDSRequestModalProps.get("commerceOrderId"));
 		Assert.assertEquals(
-			Collections.emptyMap(), additionalProps.get("signatureStatuses"));
+			Collections.emptyMap(), additionalProps.get("dsRequestStatuses"));
 
 		Assert.assertArrayEquals(
 			DigitalSignatureConstants.ALLOWED_FILE_EXTENSIONS,
-			(String[])requestSignatureModalProps.get("allowedFileExtensions"));
+			(String[])addDSRequestModalProps.get("allowedFileExtensions"));
 		Assert.assertArrayEquals(
 			new String[] {
 				DSRequestConstants.STATUS_DECLINED,
 				DSRequestConstants.STATUS_EXPIRED,
 				DSRequestConstants.STATUS_VOIDED
 			},
-			(String[])requestSignatureModalProps.get(
-				"requestableSignatureStatuses"));
+			(String[])addDSRequestModalProps.get(
+				"requestableDSRequestStatuses"));
 
 		_addDSRequest(_commerceOrderAttachment, user);
 
@@ -187,7 +186,7 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 			HashMapBuilder.put(
 				commerceOrderAttachmentId, DSRequestConstants.STATUS_SENT
 			).build(),
-			additionalProps.get("signatureStatuses"));
+			additionalProps.get("dsRequestStatuses"));
 
 		_commerceOrder.setUserId(
 			_userLocalService.getGuestUserId(_group.getCompanyId()));
@@ -197,16 +196,16 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 
 		additionalProps = _getAdditionalProps(user);
 
-		requestSignatureModalProps = (Map<String, Object>)additionalProps.get(
-			"requestSignatureModalProps");
+		addDSRequestModalProps = (Map<String, Object>)additionalProps.get(
+			"addDSRequestModalProps");
 
-		Assert.assertNull(requestSignatureModalProps.get("buyer"));
+		Assert.assertNull(addDSRequestModalProps.get("buyer"));
 
 		_testGetAdditionalPropsWhenCommerceOrderAttachmentIsRestricted();
 
 		additionalProps = _getAdditionalProps(UserTestUtil.addUser());
 
-		Assert.assertNull(additionalProps.get("requestSignatureModalProps"));
+		Assert.assertNull(additionalProps.get("addDSRequestModalProps"));
 
 		_saveDigitalSignatureConfiguration(false);
 
@@ -219,8 +218,8 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 
 		Assert.assertEquals(
 			List.of(
-				"request-signature", "view-signature-details",
-				"resend-signature-request", "void-signature-request"),
+				"add-ds-request", "view-ds-request-details",
+				"resend-ds-request", "void-ds-request"),
 			_getFDSActionDropdownItemIds(user));
 
 		try (SafeCloseable safeCloseable =
@@ -400,7 +399,7 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 			HashMapBuilder.put(
 				commerceOrderAttachmentId, DSRequestConstants.STATUS_SENT
 			).build(),
-			additionalProps.get("signatureStatuses"));
+			additionalProps.get("dsRequestStatuses"));
 
 		_resourcePermissionLocalService.setResourcePermissions(
 			_group.getCompanyId(), CommerceOrderConstants.RESOURCE_NAME,
@@ -423,7 +422,7 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 					commerceOrderAttachment.getCommerceOrderAttachmentId()),
 				DSRequestConstants.STATUS_SENT
 			).build(),
-			additionalProps.get("signatureStatuses"));
+			additionalProps.get("dsRequestStatuses"));
 	}
 
 	private CommerceOrder _commerceOrder;
