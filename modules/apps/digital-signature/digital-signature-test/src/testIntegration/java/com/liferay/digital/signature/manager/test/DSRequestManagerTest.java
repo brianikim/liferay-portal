@@ -101,6 +101,7 @@ import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
+import com.liferay.portal.vulcan.pagination.Page;
 
 import jakarta.portlet.PortletException;
 
@@ -688,13 +689,41 @@ public class DSRequestManagerTest {
 		dsEnvelope.setDSRecipients(
 			ListUtil.fromArray(dsRecipient1, dsRecipient2));
 
+		List<String> dsEnvelopeIds = new ArrayList<>();
+		List<String> methodNames = new ArrayList<>();
+
 		DSEnvelopeManager dsEnvelopeManager =
 			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
 				_dsRequestManager, "_dsEnvelopeManager",
 				ProxyUtil.newProxyInstance(
 					DSEnvelopeManager.class.getClassLoader(),
 					new Class<?>[] {DSEnvelopeManager.class},
-					(proxy, method, arguments) -> dsEnvelope));
+					(proxy, method, arguments) -> {
+						methodNames.add(method.getName());
+
+						if (!Objects.equals(
+								method.getName(), "getDSEnvelopesPage")) {
+
+							return dsEnvelope;
+						}
+
+						return Page.of(
+							TransformUtil.transform(
+								dsEnvelopeIds,
+								dsEnvelopeId -> {
+									DSEnvelope listedDSEnvelope =
+										new DSEnvelope();
+
+									listedDSEnvelope.setDSEnvelopeId(
+										dsEnvelopeId);
+									listedDSEnvelope.setDSRecipients(
+										dsEnvelope.getDSRecipients());
+									listedDSEnvelope.setStatus(
+										dsEnvelope.getStatus());
+
+									return listedDSEnvelope;
+								}));
+					}));
 
 		try {
 			DSRequest dsRequest1 = _addDSRequestObjectEntries(
@@ -704,11 +733,22 @@ public class DSRequestManagerTest {
 			DSRequest dsRequest3 = _addDSRequest(
 				dsEnvelope, RandomTestUtil.randomInt());
 
+			dsEnvelopeIds.add(dsRequest1.getExternalReferenceCode());
+			dsEnvelopeIds.add(dsRequest3.getExternalReferenceCode());
+
 			dsRecipient1.setStatus(DSRequestConstants.STATUS_COMPLETED);
 			dsRecipient2.setStatus(DSRequestConstants.STATUS_SENT);
 
+			methodNames.clear();
+
 			_dsRequestManager.sendDSRequestReminders(
 				TestPropsValues.getCompanyId());
+
+			Assert.assertEquals(
+				methodNames.toString(), 1,
+				Collections.frequency(methodNames, "getDSEnvelopesPage"));
+			Assert.assertFalse(
+				methodNames.toString(), methodNames.contains("getDSEnvelope"));
 
 			List<NotificationQueueEntry> notificationQueueEntries =
 				_getNotificationQueueEntries(dsRequest1);
@@ -764,6 +804,38 @@ public class DSRequestManagerTest {
 				TestPropsValues.getCompanyId());
 
 			notificationQueueEntries = _getNotificationQueueEntries(dsRequest1);
+
+			Assert.assertEquals(
+				notificationQueueEntries.toString(), 1,
+				notificationQueueEntries.size());
+
+			DSRequest dsRequest4 = _addDSRequestObjectEntries(
+				DSRequestConstants.STATUS_SENT);
+
+			ReflectionTestUtil.setFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager",
+				ProxyUtil.newProxyInstance(
+					DSEnvelopeManager.class.getClassLoader(),
+					new Class<?>[] {DSEnvelopeManager.class},
+					(proxy, method, arguments) -> {
+						throw new RuntimeException();
+					}));
+
+			try (LogCapture logCapture = LoggerTestUtil.configureLog4JLogger(
+					"com.liferay.digital.signature.internal.manager." +
+						"DSRequestManagerImpl",
+					LoggerTestUtil.ERROR)) {
+
+				_dsRequestManager.sendDSRequestReminders(
+					TestPropsValues.getCompanyId());
+
+				List<LogEntry> logEntries = logCapture.getLogEntries();
+
+				Assert.assertEquals(
+					logEntries.toString(), 1, logEntries.size());
+			}
+
+			notificationQueueEntries = _getNotificationQueueEntries(dsRequest4);
 
 			Assert.assertEquals(
 				notificationQueueEntries.toString(), 1,
