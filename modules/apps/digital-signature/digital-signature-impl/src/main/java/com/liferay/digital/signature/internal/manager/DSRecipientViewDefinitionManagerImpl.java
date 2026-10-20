@@ -7,10 +7,11 @@ package com.liferay.digital.signature.internal.manager;
 
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfigurationUtil;
+import com.liferay.digital.signature.constants.DigitalSignatureConstants;
 import com.liferay.digital.signature.internal.http.DSHttp;
 import com.liferay.digital.signature.manager.DSRecipientViewDefinitionManager;
 import com.liferay.digital.signature.model.DSRecipientViewDefinition;
-import com.liferay.digital.signature.util.DigitalSignatureSystemConfigurationUtil;
+import com.liferay.digital.signature.model.DSRequestRecipient;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONObject;
@@ -81,9 +82,8 @@ public class DSRecipientViewDefinitionManagerImpl
 			DigitalSignatureConfigurationUtil.getDigitalSignatureConfiguration(
 				companyId, groupId);
 
-		String appOriginURL =
-			DigitalSignatureSystemConfigurationUtil.getAppOriginURL(
-				digitalSignatureConfiguration.environment());
+		String appOriginURL = DigitalSignatureConstants.getAppOriginURL(
+			digitalSignatureConfiguration.environment());
 
 		dsRecipientViewDefinition.setFrameAncestors(
 			new String[] {portalURL, appOriginURL});

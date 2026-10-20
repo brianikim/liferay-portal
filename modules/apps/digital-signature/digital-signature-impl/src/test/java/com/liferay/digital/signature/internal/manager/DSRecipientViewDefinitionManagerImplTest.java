@@ -9,7 +9,8 @@ import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration
 import com.liferay.digital.signature.configuration.DigitalSignatureConfigurationUtil;
 import com.liferay.digital.signature.internal.http.DSHttp;
 import com.liferay.digital.signature.model.DSRecipientViewDefinition;
-import com.liferay.digital.signature.util.DigitalSignatureSystemConfigurationUtil;
+import com.liferay.digital.signature.model.DSRequestRecipient;
+import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.json.JSONFactoryImpl;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
@@ -51,7 +52,6 @@ public class DSRecipientViewDefinitionManagerImplTest {
 	@AfterClass
 	public static void tearDownClass() {
 		_digitalSignatureConfigurationUtilMockedStatic.close();
-		_digitalSignatureSystemConfigurationUtilMockedStatic.close();
 	}
 
 	@Before
@@ -133,39 +133,7 @@ public class DSRecipientViewDefinitionManagerImplTest {
 			digitalSignatureConfiguration
 		);
 
-		_digitalSignatureSystemConfigurationUtilMockedStatic.when(
-			() -> DigitalSignatureSystemConfigurationUtil.getAppOriginURL(
-				"production")
-		).thenReturn(
-			"https://apps.docusign.com"
-		);
-
-		User user = Mockito.mock(User.class);
-
-		Mockito.when(
-			user.getEmailAddress()
-		).thenReturn(
-			"test@liferay.com"
-		);
-
-		Mockito.when(
-			user.getFullName()
-		).thenReturn(
-			"Test Test"
-		);
-
-		UserLocalService userLocalService = Mockito.mock(
-			UserLocalService.class);
-
-		Mockito.when(
-			userLocalService.getUser(3)
-		).thenReturn(
-			user
-		);
-
-		ReflectionTestUtil.setFieldValue(
-			_dsRecipientViewDefinitionManagerImpl, "_userLocalService",
-			userLocalService);
+		long userId = RandomTestUtil.randomLong();
 
 		PermissionChecker permissionChecker = Mockito.mock(
 			PermissionChecker.class);
@@ -294,9 +262,6 @@ public class DSRecipientViewDefinitionManagerImplTest {
 	private static final MockedStatic<DigitalSignatureConfigurationUtil>
 		_digitalSignatureConfigurationUtilMockedStatic = Mockito.mockStatic(
 			DigitalSignatureConfigurationUtil.class);
-	private static final MockedStatic<DigitalSignatureSystemConfigurationUtil>
-		_digitalSignatureSystemConfigurationUtilMockedStatic =
-			Mockito.mockStatic(DigitalSignatureSystemConfigurationUtil.class);
 
 	private final DSRecipientViewDefinitionManagerImpl
 		_dsRecipientViewDefinitionManagerImpl =
