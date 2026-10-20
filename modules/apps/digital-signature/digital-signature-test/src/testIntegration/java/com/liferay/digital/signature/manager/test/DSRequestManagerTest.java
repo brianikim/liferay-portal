@@ -55,6 +55,7 @@ import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.service.CompanyLocalService;
+import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.test.AssertUtils;
@@ -380,6 +381,7 @@ public class DSRequestManagerTest {
 		_testAddDSRequestWhenExpireWarnIsInvalid();
 		_testAddDSRequestWhenFeatureFlagIsDisabled();
 		_testAddDSRequestWhenFileEntryIsInvalid();
+		_testAddDSRequestWhenGroupIsStagingGroup();
 	}
 
 	@Test
@@ -1336,6 +1338,24 @@ public class DSRequestManagerTest {
 		}
 	}
 
+	private void _testAddDSRequestWhenGroupIsStagingGroup() throws Exception {
+		Group group = GroupTestUtil.addGroup();
+
+		group.setLiveGroupId(TestPropsValues.getGroupId());
+
+		Group stagingGroup = _groupLocalService.updateGroup(group);
+
+		AssertUtils.assertFailure(
+			DSRequestException.StagingNotSupported.class,
+			"Digital signature requests are not supported in staging group " +
+				stagingGroup.getGroupId(),
+			() -> _dsRequestManager.addDSRequest(
+				TestPropsValues.getCompanyId(), stagingGroup.getGroupId(),
+				TestPropsValues.getUserId(),
+				_createDSEnvelope(_createDSRecipient(UserTestUtil.addUser())),
+				new long[] {RandomTestUtil.randomLong()}));
+	}
+
 	private void _testFetchDSRequest() throws Exception {
 		DSRequest dsRequest1 = _addDSRequest(
 			_createDSEnvelope(), RandomTestUtil.randomInt());
@@ -1927,6 +1947,9 @@ public class DSRequestManagerTest {
 		filter = "filter.factory.key=" + ObjectDefinitionConstants.STORAGE_TYPE_DEFAULT
 	)
 	private FilterFactory<Predicate> _filterFactory;
+
+	@Inject
+	private GroupLocalService _groupLocalService;
 
 	@Inject(filter = "mvc.command.name=/digital_signature/add_ds_envelope")
 	private MVCResourceCommand _mvcResourceCommand;

@@ -80,6 +80,16 @@ public class DSRequestException extends PortalException {
 
 	}
 
+	public static class StagingNotSupported extends DSRequestException {
+
+		public StagingNotSupported(long groupId) {
+			super(
+				"Digital signature requests are not supported in staging " +
+					"group " + groupId);
+		}
+
+	}
+
 	public static class UnknownRecipient extends DSRequestException {
 
 		public UnknownRecipient(String emailAddress) {

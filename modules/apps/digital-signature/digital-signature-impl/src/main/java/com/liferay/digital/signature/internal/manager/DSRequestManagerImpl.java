@@ -112,6 +112,12 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			long[] fileEntryIds)
 		throws PortalException {
 
+		Group group = _groupLocalService.fetchGroup(groupId);
+
+		if ((group != null) && group.isStagingGroup()) {
+			throw new DSRequestException.StagingNotSupported(groupId);
+		}
+
 		if (!_isEnabled(companyId, groupId)) {
 			throw new DSRequestException.NotEnabled(groupId);
 		}
