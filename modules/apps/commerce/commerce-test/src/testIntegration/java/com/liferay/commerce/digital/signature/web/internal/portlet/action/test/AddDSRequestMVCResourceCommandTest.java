@@ -258,10 +258,60 @@ public class AddDSRequestMVCResourceCommandTest {
 		Assert.assertEquals(
 			DSRequestConstants.STATUS_SENT, dsRequest.getStatus());
 
-		_testServeResource(
-			"This document already has an active or completed signature " +
-				"request.",
-			0, 0, TestPropsValues.getUserId());
+		dsEnvelope.setStatus(DSRequestConstants.STATUS_SENT);
+
+		dsEnvelopeManager =
+			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager",
+				ProxyUtil.newProxyInstance(
+					DSEnvelopeManager.class.getClassLoader(),
+					new Class<?>[] {DSEnvelopeManager.class},
+					(proxy, method, arguments) -> {
+						if (!Objects.equals(
+								method.getName(), "addDSEnvelope")) {
+
+							return dsEnvelope;
+						}
+
+						DSEnvelope addedDSEnvelope = (DSEnvelope)arguments[2];
+
+						addedDSEnvelope.setDSEnvelopeId(
+							RandomTestUtil.randomString());
+
+						for (DSRecipient addedDSRecipient :
+								addedDSEnvelope.getDSRecipients()) {
+
+							addedDSRecipient.setStatus(
+								DSRequestConstants.STATUS_SENT);
+						}
+
+						return addedDSEnvelope;
+					}));
+
+		try {
+			_testServeResource(
+				"This document already has an active or completed signature " +
+					"request.",
+				0, 0, TestPropsValues.getUserId());
+
+			dsEnvelope.setStatus(DSRequestConstants.STATUS_VOIDED);
+
+			JSONObject jsonObject = _serveResource(
+				_commerceOrderAttachment.getCommerceOrderAttachmentId(), 0, 0,
+				TestPropsValues.getUser(), TestPropsValues.getUserId());
+
+			Assert.assertEquals("{}", jsonObject.toString());
+		}
+		finally {
+			ReflectionTestUtil.setFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager);
+		}
+
+		dsRequest = _dsRequestManager.fetchFileEntryDSRequest(
+			_group.getCompanyId(), _commerceOrderAttachment.getFileEntryId());
+
+		Assert.assertNotEquals(
+			dsEnvelope.getDSEnvelopeId(), dsRequest.getExternalReferenceCode());
 
 		_commerceOrderAttachment =
 			_commerceOrderAttachmentLocalService.addCommerceOrderAttachment(

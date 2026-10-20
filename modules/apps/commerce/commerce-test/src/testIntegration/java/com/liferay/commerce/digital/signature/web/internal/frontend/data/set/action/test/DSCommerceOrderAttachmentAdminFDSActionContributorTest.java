@@ -23,6 +23,7 @@ import com.liferay.commerce.test.util.CommerceOrderAttachmentTestUtil;
 import com.liferay.commerce.test.util.CommerceTestUtil;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.digital.signature.constants.DSRequestConstants;
+import com.liferay.digital.signature.constants.DigitalSignatureConstants;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
@@ -163,55 +164,30 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 		Assert.assertEquals(
 			Collections.emptyMap(), additionalProps.get("signatureStatuses"));
 
-		String commerceOrderAttachmentId = String.valueOf(
-			_commerceOrderAttachment.getCommerceOrderAttachmentId());
-
-		Assert.assertEquals(
-			List.of(commerceOrderAttachmentId),
-			requestSignatureModalProps.get(
-				"requestableCommerceOrderAttachmentIds"));
+		Assert.assertArrayEquals(
+			DigitalSignatureConstants.ALLOWED_FILE_EXTENSIONS,
+			(String[])requestSignatureModalProps.get("allowedFileExtensions"));
+		Assert.assertArrayEquals(
+			new String[] {
+				DSRequestConstants.STATUS_DECLINED,
+				DSRequestConstants.STATUS_EXPIRED,
+				DSRequestConstants.STATUS_VOIDED
+			},
+			(String[])requestSignatureModalProps.get(
+				"requestableSignatureStatuses"));
 
 		_addDSRequest(_commerceOrderAttachment, user);
 
 		additionalProps = _getAdditionalProps(user);
 
-		requestSignatureModalProps = (Map<String, Object>)additionalProps.get(
-			"requestSignatureModalProps");
-
-		Assert.assertEquals(
-			Collections.emptyList(),
-			requestSignatureModalProps.get(
-				"requestableCommerceOrderAttachmentIds"));
+		String commerceOrderAttachmentId = String.valueOf(
+			_commerceOrderAttachment.getCommerceOrderAttachmentId());
 
 		Assert.assertEquals(
 			HashMapBuilder.put(
 				commerceOrderAttachmentId, DSRequestConstants.STATUS_SENT
 			).build(),
 			additionalProps.get("signatureStatuses"));
-
-		CommerceOrderAttachment commerceOrderAttachment =
-			_commerceOrderAttachmentLocalService.addCommerceOrderAttachment(
-				RandomTestUtil.randomString(), TestPropsValues.getUserId(),
-				_commerceOrder.getCommerceOrderId(),
-				RandomTestUtil.nextDouble(), false,
-				RandomTestUtil.randomString(), "invoice",
-				RandomTestUtil.randomString() + ".zip",
-				new ByteArrayInputStream(RandomTestUtil.randomBytes()));
-
-		additionalProps = _getAdditionalProps(user);
-
-		requestSignatureModalProps = (Map<String, Object>)additionalProps.get(
-			"requestSignatureModalProps");
-
-		Assert.assertEquals(
-			Collections.emptyList(),
-			requestSignatureModalProps.get(
-				"requestableCommerceOrderAttachmentIds"));
-
-		commerceOrderAttachment.setFileEntryId(RandomTestUtil.nextLong());
-
-		_commerceOrderAttachmentLocalService.updateCommerceOrderAttachment(
-			commerceOrderAttachment);
 
 		_commerceOrder.setUserId(
 			_userLocalService.getGuestUserId(_group.getCompanyId()));
@@ -225,10 +201,6 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 			"requestSignatureModalProps");
 
 		Assert.assertNull(requestSignatureModalProps.get("buyer"));
-		Assert.assertEquals(
-			Collections.emptyList(),
-			requestSignatureModalProps.get(
-				"requestableCommerceOrderAttachmentIds"));
 
 		_testGetAdditionalPropsWhenCommerceOrderAttachmentIsRestricted();
 
@@ -417,20 +389,9 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 
 		_roleLocalService.addUserRole(user.getUserId(), role);
 
-		Map<String, Object> additionalProps = _getAdditionalProps(user);
-
-		Map<String, Object> requestSignatureModalProps =
-			(Map<String, Object>)additionalProps.get(
-				"requestSignatureModalProps");
-
-		Assert.assertEquals(
-			Collections.emptyList(),
-			requestSignatureModalProps.get(
-				"requestableCommerceOrderAttachmentIds"));
-
 		_addDSRequest(commerceOrderAttachment, TestPropsValues.getUser());
 
-		additionalProps = _getAdditionalProps(user);
+		Map<String, Object> additionalProps = _getAdditionalProps(user);
 
 		String commerceOrderAttachmentId = String.valueOf(
 			_commerceOrderAttachment.getCommerceOrderAttachmentId());
