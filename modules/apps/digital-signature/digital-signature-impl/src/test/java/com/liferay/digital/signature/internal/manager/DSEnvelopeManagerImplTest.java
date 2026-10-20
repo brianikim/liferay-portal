@@ -6,13 +6,18 @@
 package com.liferay.digital.signature.internal.manager;
 
 import com.liferay.digital.signature.internal.http.DSHttp;
+import com.liferay.digital.signature.manager.DSCustomFieldManager;
+import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.portal.json.JSONFactoryImpl;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
+
+import java.util.Arrays;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -37,6 +42,71 @@ public class DSEnvelopeManagerImplTest {
 		JSONFactoryUtil jsonFactoryUtil = new JSONFactoryUtil();
 
 		jsonFactoryUtil.setJSONFactory(new JSONFactoryImpl());
+	}
+
+	@Test
+	public void testAddDSEnvelope() throws Exception {
+		DSHttp dsHttp = _mockDSHttp(JSONUtil.put("envelopeId", "envelopeId"));
+
+		ReflectionTestUtil.setFieldValue(
+			_dsEnvelopeManagerImpl, "_dsCustomFieldManager",
+			Mockito.mock(DSCustomFieldManager.class));
+
+		Mockito.when(
+			dsHttp.get(
+				Mockito.anyLong(), Mockito.anyLong(), Mockito.anyString())
+		).thenReturn(
+			JSONUtil.put(
+				"errorCode", "ENVELOPE_DOES_NOT_EXIST"
+			).put(
+				"message", "The envelope could not be read."
+			)
+		);
+
+		Mockito.when(
+			dsHttp.post(
+				Mockito.anyLong(), Mockito.anyLong(), Mockito.eq("envelopes"),
+				Mockito.any(JSONObject.class))
+		).thenReturn(
+			JSONUtil.put("envelopeId", "envelopeId")
+		);
+
+		SystemException systemException = Assert.assertThrows(
+			SystemException.class,
+			() -> _dsEnvelopeManagerImpl.addDSEnvelope(1, 2, new DSEnvelope()));
+
+		Assert.assertEquals(
+			"Unable to read digital signature envelope envelopeId",
+			systemException.getMessage());
+
+		Mockito.verify(
+			dsHttp
+		).put(
+			Mockito.eq(1L), Mockito.eq(2L), Mockito.eq("envelopes/envelopeId"),
+			Mockito.any(JSONObject.class)
+		);
+
+		Mockito.when(
+			dsHttp.put(
+				Mockito.anyLong(), Mockito.anyLong(), Mockito.anyString(),
+				Mockito.any(JSONObject.class))
+		).thenReturn(
+			JSONUtil.put(
+				"errorCode", "ENVELOPE_CANNOT_VOID_INVALID_STATE"
+			).put(
+				"message", "Only envelopes in the sent state may be voided."
+			)
+		);
+
+		systemException = Assert.assertThrows(
+			SystemException.class,
+			() -> _dsEnvelopeManagerImpl.addDSEnvelope(1, 2, new DSEnvelope()));
+
+		Throwable[] suppressedThrowables = systemException.getSuppressed();
+
+		Assert.assertEquals(
+			Arrays.toString(suppressedThrowables), 1,
+			suppressedThrowables.length);
 	}
 
 	@Test
@@ -65,7 +135,7 @@ public class DSEnvelopeManagerImplTest {
 		}
 	}
 
-	private void _mockDSHttp(JSONObject jsonObject) {
+	private DSHttp _mockDSHttp(JSONObject jsonObject) {
 		DSHttp dsHttp = Mockito.mock(DSHttp.class);
 
 		Mockito.when(
@@ -78,6 +148,8 @@ public class DSEnvelopeManagerImplTest {
 
 		ReflectionTestUtil.setFieldValue(
 			_dsEnvelopeManagerImpl, "_dsHttp", dsHttp);
+
+		return dsHttp;
 	}
 
 	private final DSEnvelopeManagerImpl _dsEnvelopeManagerImpl =
