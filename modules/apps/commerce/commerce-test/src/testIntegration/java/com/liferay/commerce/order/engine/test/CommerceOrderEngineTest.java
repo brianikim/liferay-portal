@@ -1225,6 +1225,14 @@ public class CommerceOrderEngineTest {
 			String.valueOf(_user.getUserId()),
 			message.getString("principalName"));
 
+		_commerceOrder = _commerceOrderEngine.transitionCommerceOrder(
+			_commerceOrder, CommerceOrderConstants.ORDER_STATUS_ON_HOLD, 0,
+			true);
+
+		message = messages.get(messages.size() - 1);
+
+		Assert.assertNull(message.get("principalName"));
+
 		PrincipalThreadLocal.setName(TestPropsValues.getUserId());
 
 		_commerceOrder = _commerceOrderEngine.transitionCommerceOrder(

@@ -13,6 +13,7 @@ import com.liferay.digital.signature.constants.DSRequestConstants;
 import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
+import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.digital.signature.rest.client.dto.v1_0.Creator;
 import com.liferay.digital.signature.rest.client.dto.v1_0.FileEntryBrief;
@@ -36,6 +37,7 @@ import com.liferay.petra.function.UnsafeRunnable;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.User;
@@ -73,6 +75,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -302,6 +305,7 @@ public class SignatureRequestResourceTest
 		_testPostSiteSignatureRequestWhenExpireWarnIsNotLessThanExpireAfter();
 		_testPostSiteSignatureRequestWhenFileEntryIdsIsEmpty();
 		_testPostSiteSignatureRequestWhenRecipientIsDuplicated();
+		_testPostSiteSignatureRequestWhenRecipientTabsIsNotObject();
 		_testPostSiteSignatureRequestWhenRecipientUserIdIsNull();
 		_testPostSiteSignatureRequestWhenRecipientsIsEmpty();
 		_testPostSiteSignatureRequestWithoutAddPermission();
@@ -647,6 +651,9 @@ public class SignatureRequestResourceTest
 	}
 
 	private void _testPostSiteSignatureRequest() throws Exception {
+		AtomicReference<DSEnvelope> dsEnvelopeAtomicReference =
+			new AtomicReference<>();
+
 		DSEnvelopeManager dsEnvelopeManager =
 			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
 				_dsRequestManager, "_dsEnvelopeManager",
@@ -654,6 +661,10 @@ public class SignatureRequestResourceTest
 					DSEnvelopeManager.class.getClassLoader(),
 					new Class<?>[] {DSEnvelopeManager.class},
 					(proxy, method, arguments) -> {
+						if (Objects.equals(method.getName(), "getDSEnvelope")) {
+							return dsEnvelopeAtomicReference.get();
+						}
+
 						if (!Objects.equals(
 								method.getName(), "addDSEnvelope")) {
 
@@ -665,11 +676,32 @@ public class SignatureRequestResourceTest
 						dsEnvelope.setDSEnvelopeId(
 							RandomTestUtil.randomString());
 
+						for (DSRecipient dsRecipient :
+								dsEnvelope.getDSRecipients()) {
+
+							dsRecipient.setStatus(
+								DSRequestConstants.STATUS_SENT);
+						}
+
+						dsEnvelopeAtomicReference.set(dsEnvelope);
+
 						return dsEnvelope;
 					}));
 
 		try {
 			SignatureRequest signatureRequest = _createSignatureRequest();
+
+			SignatureRequestRecipient[] signatureRequestRecipients =
+				signatureRequest.getSignatureRequestRecipients();
+
+			signatureRequestRecipients[0].setTabs(
+				HashMapBuilder.put(
+					"signHereTabs",
+					List.of(
+						HashMapBuilder.put(
+							"anchorString", "/sig1/"
+						).build())
+				).build());
 
 			SignatureRequest postSignatureRequest =
 				signatureRequestResource.postSiteSignatureRequest(
@@ -707,7 +739,20 @@ public class SignatureRequestResourceTest
 			Assert.assertEquals(
 				fileEntry.getTitle(), fileEntryBrief.getFileEntryTitle());
 
-			SignatureRequestRecipient[] signatureRequestRecipients =
+			DSEnvelope dsEnvelope = dsEnvelopeAtomicReference.get();
+
+			List<DSRecipient> dsRecipients = dsEnvelope.getDSRecipients();
+
+			DSRecipient dsRecipient = dsRecipients.get(0);
+
+			Assert.assertEquals(
+				JSONUtil.put(
+					"signHereTabs",
+					JSONUtil.put(JSONUtil.put("anchorString", "/sig1/"))
+				).toString(),
+				String.valueOf(dsRecipient.getTabsJSONObject()));
+
+			signatureRequestRecipients =
 				postSignatureRequest.getSignatureRequestRecipients();
 
 			Assert.assertEquals(
@@ -777,6 +822,22 @@ public class SignatureRequestResourceTest
 			new SignatureRequestRecipient[] {
 				signatureRequestRecipients[0], signatureRequestRecipients[0]
 			});
+
+		_assertProblemStatus(
+			"BAD_REQUEST",
+			() -> signatureRequestResource.postSiteSignatureRequest(
+				testGroup.getGroupId(), signatureRequest));
+	}
+
+	private void _testPostSiteSignatureRequestWhenRecipientTabsIsNotObject()
+		throws Exception {
+
+		SignatureRequest signatureRequest = _createSignatureRequest();
+
+		SignatureRequestRecipient[] signatureRequestRecipients =
+			signatureRequest.getSignatureRequestRecipients();
+
+		signatureRequestRecipients[0].setTabs(RandomTestUtil.randomString());
 
 		_assertProblemStatus(
 			"BAD_REQUEST",
