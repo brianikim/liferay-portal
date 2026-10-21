@@ -85,7 +85,7 @@ public class DSRequestException extends PortalException {
 	public static class NotEnabled extends DSRequestException {
 
 		public NotEnabled(long groupId) {
-			super("Digital signature is not enabled for group " + groupId);
+			super("Digital signature is not enabled for site " + groupId);
 		}
 
 	}

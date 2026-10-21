@@ -768,7 +768,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				dsRecipient -> _addDSRequestRecipient(
 					dsRecipient, dsRequestObjectEntry,
 					dsRequestRecipientObjectDefinition, requestStatus,
-					serviceContext, userId));
+					serviceContext));
 
 		return new DSRequest(
 			dsRequestObjectEntry.getCompanyId(),
@@ -783,12 +783,12 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	private DSRequestRecipient _addDSRequestRecipient(
 			DSRecipient dsRecipient, ObjectEntry dsRequestObjectEntry,
 			ObjectDefinition dsRequestRecipientObjectDefinition,
-			String requestStatus, ServiceContext serviceContext, long userId)
+			String requestStatus, ServiceContext serviceContext)
 		throws PortalException {
 
 		ObjectEntry dsRequestRecipientObjectEntry =
 			_objectEntryLocalService.addObjectEntry(
-				0, userId,
+				0, dsRequestObjectEntry.getUserId(),
 				dsRequestRecipientObjectDefinition.getObjectDefinitionId(),
 				ObjectEntryFolderConstants.
 					PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
@@ -822,41 +822,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 		return new DSRequestRecipient(
 			dsRequestRecipientObjectEntry.getValues());
-	}
-
-	private Map<Long, Long> _getDSRequestIds(
-			long companyId, long[] fileEntryIds)
-		throws Exception {
-
-		Map<Long, Long> dsRequestIds = new HashMap<>();
-
-		ObjectDefinition objectDefinition =
-			_objectDefinitionLocalService.
-				fetchObjectDefinitionByExternalReferenceCode(
-					DSObjectDefinitionConstants.
-						EXTERNAL_REFERENCE_CODE_REQUEST_DOCUMENT,
-					companyId);
-
-		if (objectDefinition == null) {
-			return dsRequestIds;
-		}
-
-		for (Map<String, Serializable> values :
-				_getValuesList(
-					companyId, "fileEntryId", fileEntryIds, objectDefinition,
-					false,
-					new Sort[] {
-						new Sort(Field.CREATE_DATE, Sort.LONG_TYPE, true),
-						new Sort("id", Sort.LONG_TYPE, true)
-					})) {
-
-			dsRequestIds.putIfAbsent(
-				MapUtil.getLong(values, "fileEntryId"),
-				MapUtil.getLong(
-					values, "r_dsRequestToDSRequestDocuments_l_dsRequestId"));
-		}
-
-		return dsRequestIds;
 	}
 
 	private ObjectEntry _getDSRequestObjectEntry(long dsRequestId)
@@ -1065,6 +1030,41 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		return fileEntryIdsMap;
 	}
 
+	private Map<Long, Long> _getLatestFileEntryDSRequestIds(
+			long companyId, long[] fileEntryIds)
+		throws Exception {
+
+		Map<Long, Long> dsRequestIds = new HashMap<>();
+
+		ObjectDefinition objectDefinition =
+			_objectDefinitionLocalService.
+				fetchObjectDefinitionByExternalReferenceCode(
+					DSObjectDefinitionConstants.
+						EXTERNAL_REFERENCE_CODE_REQUEST_DOCUMENT,
+					companyId);
+
+		if (objectDefinition == null) {
+			return dsRequestIds;
+		}
+
+		for (Map<String, Serializable> values :
+				_getValuesList(
+					companyId, "fileEntryId", fileEntryIds, objectDefinition,
+					false,
+					new Sort[] {
+						new Sort(Field.CREATE_DATE, Sort.LONG_TYPE, true),
+						new Sort("id", Sort.LONG_TYPE, true)
+					})) {
+
+			dsRequestIds.putIfAbsent(
+				MapUtil.getLong(values, "fileEntryId"),
+				MapUtil.getLong(
+					values, "r_dsRequestToDSRequestDocuments_l_dsRequestId"));
+		}
+
+		return dsRequestIds;
+	}
+
 	private Map<Long, DSRequest> _getLatestFileEntryDSRequests(
 			long companyId, long[] fileEntryIds)
 		throws PortalException {
@@ -1078,17 +1078,19 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 
 		try {
-			Map<Long, Long> dsRequestIds = _getDSRequestIds(
-				companyId, fileEntryIds);
+			Map<Long, Long> latestFileEntryDSRequestIds =
+				_getLatestFileEntryDSRequestIds(companyId, fileEntryIds);
 
-			if (dsRequestIds.isEmpty()) {
+			if (latestFileEntryDSRequestIds.isEmpty()) {
 				return dsRequests;
 			}
 
 			Map<Long, DSRequest> dsRequestsMap = _getDSRequests(
-				companyId, new HashSet<>(dsRequestIds.values()));
+				companyId, new HashSet<>(latestFileEntryDSRequestIds.values()));
 
-			for (Map.Entry<Long, Long> entry : dsRequestIds.entrySet()) {
+			for (Map.Entry<Long, Long> entry :
+					latestFileEntryDSRequestIds.entrySet()) {
+
 				DSRequest dsRequest = dsRequestsMap.get(entry.getValue());
 
 				if ((dsRequest == null) ||
