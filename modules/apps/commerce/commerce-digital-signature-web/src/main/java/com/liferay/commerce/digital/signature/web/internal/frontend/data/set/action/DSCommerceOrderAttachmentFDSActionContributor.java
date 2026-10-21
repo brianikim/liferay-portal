@@ -104,7 +104,7 @@ public class DSCommerceOrderAttachmentFDSActionContributor
 		if (signatureRequired) {
 			fdsActionDropdownItems.add(
 				FDSActionDropdownItemBuilder.putData(
-					"signURL",
+					"signDSRequestURL",
 					DSCommerceOrderAttachmentUtil.getActionURL(
 						"/commerce-digital-signature/sign", themeDisplay)
 				).setHref(

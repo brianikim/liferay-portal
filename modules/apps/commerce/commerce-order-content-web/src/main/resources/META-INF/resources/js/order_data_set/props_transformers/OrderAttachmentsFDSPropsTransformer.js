@@ -157,7 +157,10 @@ const OrderAttachmentsFDSPropsTransformer = (props) => {
 					onClose: () => window.location.reload(),
 					size: 'full-screen',
 					title: itemData?.title,
-					url: formatActionUrl(action.data.signURL, itemData),
+					url: formatActionUrl(
+						action.data.signDSRequestURL,
+						itemData
+					),
 				});
 			}
 			else if (actionId === 'view-signature-details') {
