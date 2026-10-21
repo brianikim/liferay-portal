@@ -443,6 +443,7 @@ public class DSRequestManagerTest {
 		_testAddDSRequestWhenDigitalSignatureIsDisabled();
 		_testAddDSRequestWhenEmbeddedViewIsDisabled();
 		_testAddDSRequestWhenExpirationIsInvalid();
+		_testAddDSRequestWhenExpiredDSEnvelopeIsCompleted();
 		_testAddDSRequestWhenFeatureFlagIsDisabled();
 		_testAddDSRequestWhenFileEntryIsInvalid();
 		_testAddDSRequestWhenGroupIsStagingGroup();
@@ -841,7 +842,7 @@ public class DSRequestManagerTest {
 
 			AssertUtils.assertFailure(
 				DSRequestException.NotEnabled.class,
-				"Digital signature is not enabled for group " +
+				"Digital signature is not enabled for site " +
 					TestPropsValues.getGroupId(),
 				() -> _dsRequestManager.voidDSRequest(
 					dsRequest.getDSRequestId(), RandomTestUtil.randomString()));
@@ -1285,7 +1286,7 @@ public class DSRequestManagerTest {
 
 			AssertUtils.assertFailure(
 				DSRequestException.NotEnabled.class,
-				"Digital signature is not enabled for group " +
+				"Digital signature is not enabled for site " +
 					TestPropsValues.getGroupId(),
 				() -> _addDSRequest(dsEnvelope, fileEntry));
 		}
@@ -1317,7 +1318,7 @@ public class DSRequestManagerTest {
 
 			AssertUtils.assertFailure(
 				DSRequestException.NotEnabled.class,
-				"Digital signature is not enabled for group " +
+				"Digital signature is not enabled for site " +
 					TestPropsValues.getGroupId(),
 				() -> _addDSRequest(dsEnvelope, fileEntry));
 		}
@@ -1364,6 +1365,71 @@ public class DSRequestManagerTest {
 			dsEnvelope.getDSEnvelopeId(), dsRequest.getExternalReferenceCode());
 	}
 
+	private void _testAddDSRequestWhenExpiredDSEnvelopeIsCompleted()
+		throws Exception {
+
+		DSEnvelope dsEnvelope1 = _createDSEnvelope();
+
+		LocalDateTime localDateTime = LocalDateTime.now();
+
+		dsEnvelope1.setExpirationLocalDateTime(localDateTime.minusDays(1));
+
+		FileEntry fileEntry = _addFileEntry(
+			RandomTestUtil.randomString() + ".pdf");
+
+		DSRequest dsRequest = _addDSRequest(
+			dsEnvelope1, fileEntry.getFileEntryId());
+
+		Assert.assertTrue(dsRequest.isReplaceable());
+
+		dsEnvelope1.setStatus(DSRequestConstants.STATUS_COMPLETED);
+
+		byte[] bytes = ArrayUtil.append(
+			"%PDF-".getBytes(), RandomTestUtil.randomBytes());
+
+		DSEnvelopeManager dsEnvelopeManager =
+			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager",
+				ProxyUtil.newProxyInstance(
+					DSEnvelopeManager.class.getClassLoader(),
+					new Class<?>[] {DSEnvelopeManager.class},
+					(proxy, method, arguments) -> {
+						if (Objects.equals(
+								method.getName(), "getDSDocumentAsBytes")) {
+
+							return bytes;
+						}
+
+						return dsEnvelope1;
+					}));
+
+		try {
+			DSEnvelope dsEnvelope2 = _createDSEnvelope(
+				TestPropsValues.getUser());
+
+			AssertUtils.assertFailure(
+				DSRequestException.FileEntryHasDSRequest.class,
+				StringBundler.concat(
+					"File entry ", fileEntry.getFileEntryId(),
+					" already has a digital signature request with status \"",
+					DSRequestConstants.STATUS_COMPLETED, "\""),
+				() -> _dsRequestManager.addDSRequest(
+					TestPropsValues.getCompanyId(),
+					TestPropsValues.getGroupId(), TestPropsValues.getUserId(),
+					dsEnvelope2, new long[] {fileEntry.getFileEntryId()}));
+		}
+		finally {
+			ReflectionTestUtil.setFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager);
+		}
+
+		dsRequest = _dsRequestManager.fetchDSRequest(
+			TestPropsValues.getCompanyId(), dsRequest.getDSRequestId());
+
+		Assert.assertEquals(
+			DSRequestConstants.STATUS_COMPLETED, dsRequest.getStatus());
+	}
+
 	private void _testAddDSRequestWhenFeatureFlagIsDisabled() throws Exception {
 		DSEnvelope dsEnvelope = _createDSEnvelope(TestPropsValues.getUser());
 
@@ -1373,7 +1439,7 @@ public class DSRequestManagerTest {
 
 			AssertUtils.assertFailure(
 				DSRequestException.NotEnabled.class,
-				"Digital signature is not enabled for group " +
+				"Digital signature is not enabled for site " +
 					TestPropsValues.getGroupId(),
 				() -> _dsRequestManager.addDSRequest(
 					TestPropsValues.getCompanyId(),
