@@ -6,6 +6,7 @@
 package com.liferay.digital.signature.manager;
 
 import com.liferay.digital.signature.model.DSRecipientViewDefinition;
+import com.liferay.digital.signature.model.DSRequestRecipient;
 
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -16,13 +17,13 @@ import org.osgi.annotation.versioning.ProviderType;
 public interface DSRecipientViewDefinitionManager {
 
 	public String addDSRecipientViewDefinition(
-			long companyId, long groupId, long userId, String dsEnvelopeId,
-			String portalURL)
+			long companyId, long groupId, String dsEnvelopeId,
+			DSRecipientViewDefinition dsRecipientViewDefinition)
 		throws Exception;
 
 	public String addDSRecipientViewDefinition(
 			long companyId, long groupId, String dsEnvelopeId,
-			DSRecipientViewDefinition dsRecipientViewDefinition)
+			DSRequestRecipient dsRequestRecipient, String portalURL)
 		throws Exception;
 
 }

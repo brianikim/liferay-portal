@@ -11,15 +11,14 @@ import com.liferay.digital.signature.constants.DigitalSignatureConstants;
 import com.liferay.digital.signature.internal.http.DSHttp;
 import com.liferay.digital.signature.manager.DSRecipientViewDefinitionManager;
 import com.liferay.digital.signature.model.DSRecipientViewDefinition;
+import com.liferay.digital.signature.model.DSRequestRecipient;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONObject;
-import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
-import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.Validator;
 
 import org.osgi.service.component.annotations.Component;
@@ -34,9 +33,30 @@ public class DSRecipientViewDefinitionManagerImpl
 
 	@Override
 	public String addDSRecipientViewDefinition(
-			long companyId, long groupId, long userId, String dsEnvelopeId,
-			String portalURL)
+			long companyId, long groupId, String dsEnvelopeId,
+			DSRecipientViewDefinition dsRecipientViewDefinition)
 		throws Exception {
+
+		PermissionChecker permissionChecker =
+			PermissionThreadLocal.getPermissionChecker();
+
+		if ((permissionChecker == null) ||
+			!permissionChecker.isCompanyAdmin(companyId)) {
+
+			throw new PrincipalException.MustBeCompanyAdmin(permissionChecker);
+		}
+
+		return _addDSRecipientViewDefinition(
+			companyId, groupId, dsEnvelopeId, dsRecipientViewDefinition);
+	}
+
+	@Override
+	public String addDSRecipientViewDefinition(
+			long companyId, long groupId, String dsEnvelopeId,
+			DSRequestRecipient dsRequestRecipient, String portalURL)
+		throws Exception {
+
+		long userId = dsRequestRecipient.getUserId();
 
 		PermissionChecker permissionChecker =
 			PermissionThreadLocal.getPermissionChecker();
@@ -55,10 +75,8 @@ public class DSRecipientViewDefinitionManagerImpl
 
 		dsRecipientViewDefinition.setAuthenticationMethod("none");
 		dsRecipientViewDefinition.setDSClientUserId(String.valueOf(userId));
-
-		User user = _userLocalService.getUser(userId);
-
-		dsRecipientViewDefinition.setEmailAddress(user.getEmailAddress());
+		dsRecipientViewDefinition.setEmailAddress(
+			dsRequestRecipient.getEmailAddress());
 
 		DigitalSignatureConfiguration digitalSignatureConfiguration =
 			DigitalSignatureConfigurationUtil.getDigitalSignatureConfiguration(
@@ -73,26 +91,7 @@ public class DSRecipientViewDefinitionManagerImpl
 			new String[] {appOriginURL});
 		dsRecipientViewDefinition.setReturnURL(appOriginURL);
 
-		dsRecipientViewDefinition.setUserName(user.getFullName());
-
-		return _addDSRecipientViewDefinition(
-			companyId, groupId, dsEnvelopeId, dsRecipientViewDefinition);
-	}
-
-	@Override
-	public String addDSRecipientViewDefinition(
-			long companyId, long groupId, String dsEnvelopeId,
-			DSRecipientViewDefinition dsRecipientViewDefinition)
-		throws Exception {
-
-		PermissionChecker permissionChecker =
-			PermissionThreadLocal.getPermissionChecker();
-
-		if ((permissionChecker == null) ||
-			!permissionChecker.isCompanyAdmin(companyId)) {
-
-			throw new PrincipalException.MustBeCompanyAdmin(permissionChecker);
-		}
+		dsRecipientViewDefinition.setUserName(dsRequestRecipient.getName());
 
 		return _addDSRecipientViewDefinition(
 			companyId, groupId, dsEnvelopeId, dsRecipientViewDefinition);
@@ -122,8 +121,5 @@ public class DSRecipientViewDefinitionManagerImpl
 
 	@Reference
 	private DSHttp _dsHttp;
-
-	@Reference
-	private UserLocalService _userLocalService;
 
 }

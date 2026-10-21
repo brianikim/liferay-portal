@@ -131,8 +131,9 @@ public class SignDSRequestMVCRenderCommand implements MVCRenderCommand {
 						addDSRecipientViewDefinition(
 							themeDisplay.getCompanyId(),
 							dsRequest.getSiteGroupId(),
-							themeDisplay.getUserId(),
 							dsRequest.getExternalReferenceCode(),
+							dsRequest.fetchSentDSRequestRecipient(
+								user.getUserId()),
 							_portal.getPortalURL(
 								_portal.getHttpServletRequest(
 									renderRequest)))));
