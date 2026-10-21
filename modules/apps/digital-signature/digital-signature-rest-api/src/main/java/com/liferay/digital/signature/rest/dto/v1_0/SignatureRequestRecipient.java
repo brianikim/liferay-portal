@@ -19,8 +19,6 @@ import com.liferay.portal.vulcan.util.ObjectMapperUtil;
 
 import jakarta.annotation.Generated;
 
-import jakarta.validation.Valid;
-
 import jakarta.xml.bind.annotation.XmlRootElement;
 
 import java.io.Serializable;
@@ -283,50 +281,6 @@ public class SignatureRequestRecipient implements Serializable {
 	private Supplier<Date> _statusDateSupplier;
 
 	@io.swagger.v3.oas.annotations.media.Schema(
-		description = "DocuSign tabs that place this recipient's fields on the documents, such as signHereTabs with an anchor string. Supplied on creation; not returned on read."
-	)
-	@Valid
-	public Object getTabs() {
-		if (_tabsSupplier != null) {
-			tabs = _tabsSupplier.get();
-
-			_tabsSupplier = null;
-		}
-
-		return tabs;
-	}
-
-	public void setTabs(Object tabs) {
-		this.tabs = tabs;
-
-		_tabsSupplier = null;
-	}
-
-	@JsonIgnore
-	public void setTabs(UnsafeSupplier<Object, Exception> tabsUnsafeSupplier) {
-		_tabsSupplier = () -> {
-			try {
-				return tabsUnsafeSupplier.get();
-			}
-			catch (RuntimeException runtimeException) {
-				throw runtimeException;
-			}
-			catch (Exception exception) {
-				throw new RuntimeException(exception);
-			}
-		};
-	}
-
-	@GraphQLField(
-		description = "DocuSign tabs that place this recipient's fields on the documents, such as signHereTabs with an anchor string. Supplied on creation; not returned on read."
-	)
-	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
-	protected Object tabs;
-
-	@JsonIgnore
-	private Supplier<Object> _tabsSupplier;
-
-	@io.swagger.v3.oas.annotations.media.Schema(
 		description = "Liferay user who must sign. Required when creating a signature request."
 	)
 	public Long getUserId() {
@@ -482,18 +436,6 @@ public class SignatureRequestRecipient implements Serializable {
 			sb.append("\"");
 		}
 
-		Object tabs = getTabs();
-
-		if (tabs != null) {
-			if (sb.length() > 1) {
-				sb.append(", ");
-			}
-
-			sb.append("\"tabs\": ");
-
-			sb.append(_toJSON(tabs));
-		}
-
 		Long userId = getUserId();
 
 		if (userId != null) {
@@ -628,4 +570,4 @@ public class SignatureRequestRecipient implements Serializable {
 	private Map<String, Serializable> _extendedProperties;
 
 }
-// LIFERAY-REST-BUILDER-HASH:-1129002070
+// LIFERAY-REST-BUILDER-HASH:429761350
