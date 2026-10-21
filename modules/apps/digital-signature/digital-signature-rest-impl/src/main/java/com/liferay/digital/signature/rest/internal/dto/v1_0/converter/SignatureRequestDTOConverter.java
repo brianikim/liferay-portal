@@ -56,11 +56,7 @@ public class SignatureRequestDTOConverter
 				setFileEntryBriefs(() -> _getFileEntryBriefs(dsRequest));
 				setId(dsRequest::getDSRequestId);
 				setSignatureRequestRecipients(
-					() -> TransformUtil.transformToArray(
-						dsRequest.getDSRequestRecipients(),
-						dsRequestRecipient -> _toSignatureRequestRecipient(
-							dsRequestRecipient),
-						SignatureRequestRecipient.class));
+					() -> _getSignatureRequestRecipients(dsRequest));
 				setStatus(dsRequest::getStatus);
 				setStatusDate(dsRequest::getStatusDate);
 			}
@@ -86,6 +82,15 @@ public class SignatureRequestDTOConverter
 				};
 			},
 			FileEntryBrief.class);
+	}
+
+	private SignatureRequestRecipient[] _getSignatureRequestRecipients(
+		DSRequest dsRequest) {
+
+		return TransformUtil.transformToArray(
+			dsRequest.getDSRequestRecipients(),
+			this::_toSignatureRequestRecipient,
+			SignatureRequestRecipient.class);
 	}
 
 	private SignatureRequestRecipient _toSignatureRequestRecipient(
