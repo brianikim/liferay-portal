@@ -33,8 +33,10 @@ import com.liferay.portal.kernel.portlet.bridges.mvc.BaseTransactionalMVCResourc
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.service.permission.UserPermissionUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.WebKeys;
@@ -142,8 +144,9 @@ public class AddDSRequestMVCResourceCommand
 			if (!DSCommerceOrderAttachmentUtil.hasAllowedFileExtension(
 					commerceOrderAttachment)) {
 
-				throw new DSCommerceOrderAttachmentException.UnsupportedFileExtension(
-					commerceOrderAttachment.getCommerceOrderAttachmentId());
+				throw new DSCommerceOrderAttachmentException.
+					UnsupportedFileExtension(
+						commerceOrderAttachment.getCommerceOrderAttachmentId());
 			}
 
 			int expireAfterDays = ParamUtil.getInteger(
@@ -152,7 +155,8 @@ public class AddDSRequestMVCResourceCommand
 				resourceRequest, "expireWarn");
 
 			if ((expireAfterDays > 0) && (expireWarnDays >= expireAfterDays)) {
-				throw new DSRequestException.ExpireWarnMustBeLessThanExpireAfter();
+				throw new DSRequestException.
+					ExpireWarnMustBeLessThanExpireAfter();
 			}
 
 			DSRequest dsRequest = _dsRequestManager.addDSRequest(
@@ -162,7 +166,10 @@ public class AddDSRequestMVCResourceCommand
 				new DSEnvelope() {
 					{
 						setDSRecipients(
-							_getDSRecipients(commerceOrder, resourceRequest));
+							_getDSRecipients(
+								commerceOrder,
+								themeDisplay.getPermissionChecker(),
+								resourceRequest));
 						setEmailBlurb(
 							ParamUtil.getString(
 								resourceRequest, "emailMessage"));
@@ -191,7 +198,8 @@ public class AddDSRequestMVCResourceCommand
 	}
 
 	private List<DSRecipient> _getDSRecipients(
-			CommerceOrder commerceOrder, ResourceRequest resourceRequest)
+			CommerceOrder commerceOrder, PermissionChecker permissionChecker,
+			ResourceRequest resourceRequest)
 		throws PortalException {
 
 		List<DSRecipient> dsRecipients = new ArrayList<>();
@@ -226,11 +234,15 @@ public class AddDSRequestMVCResourceCommand
 			if (!accountUserIds.contains(recipientUserId) &&
 				(recipientUserId != commerceOrder.getUserId())) {
 
+				UserPermissionUtil.check(
+					permissionChecker, recipientUserId, ActionKeys.VIEW);
+
 				count++;
 			}
 
 			if (count > 1) {
-				throw new DSCommerceOrderAttachmentException.TooManyCountersigners();
+				throw new DSCommerceOrderAttachmentException.
+					TooManyCountersigners();
 			}
 
 			DSRecipient dsRecipient = new DSRecipient();
