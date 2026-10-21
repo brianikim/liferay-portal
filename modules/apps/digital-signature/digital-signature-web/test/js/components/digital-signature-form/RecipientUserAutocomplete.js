@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import {render, screen} from '@testing-library/react';
+import {render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
@@ -153,6 +153,28 @@ describe('RecipientUserAutocomplete', () => {
 		expect(screen.getByLabelText('recipient-email')).toHaveValue(
 			'test1@liferay.com'
 		);
+	});
+
+	it('searches the user accounts by the typed text', async () => {
+		render(
+			<RecipientUserAutocomplete
+				id="recipients[0].email"
+				label="recipient-email"
+				onSelectUser={jest.fn()}
+			/>
+		);
+
+		await userEvent.type(
+			screen.getByLabelText('recipient-email'),
+			'test user'
+		);
+
+		await waitFor(() => expect(fetch).toHaveBeenCalled());
+
+		const url = new URL(fetch.mock.calls[0][0], 'http://localhost');
+
+		expect(url.pathname).toBe('/o/headless-admin-user/v1.0/user-accounts');
+		expect(url.searchParams.get('search')).toBe('test user');
 	});
 
 	it('shows the email of the recipient in its row', () => {
