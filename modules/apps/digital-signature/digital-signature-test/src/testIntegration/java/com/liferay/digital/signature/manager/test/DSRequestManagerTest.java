@@ -432,7 +432,7 @@ public class DSRequestManagerTest {
 	}
 
 	@Test
-	public void testGetDSRequests() throws Exception {
+	public void testGetLatestFileEntryDSRequests() throws Exception {
 		long fileEntryId1 = RandomTestUtil.randomInt();
 		long fileEntryId2 = RandomTestUtil.randomInt();
 
@@ -440,7 +440,7 @@ public class DSRequestManagerTest {
 			_createDSEnvelope(), fileEntryId1, fileEntryId2);
 		DSRequest dsRequest2 = _addDSRequest(_createDSEnvelope(), fileEntryId2);
 
-		Map<Long, DSRequest> dsRequests = _dsRequestManager.getDSRequests(
+		Map<Long, DSRequest> dsRequests = _dsRequestManager.getLatestFileEntryDSRequests(
 			TestPropsValues.getCompanyId(),
 			new long[] {fileEntryId1, fileEntryId2});
 
@@ -456,7 +456,7 @@ public class DSRequestManagerTest {
 		Assert.assertEquals(
 			dsRequest2.getDSRequestId(), dsRequest4.getDSRequestId());
 
-		dsRequests = _dsRequestManager.getDSRequests(
+		dsRequests = _dsRequestManager.getLatestFileEntryDSRequests(
 			TestPropsValues.getCompanyId(),
 			new long[] {RandomTestUtil.randomLong()});
 
