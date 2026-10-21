@@ -605,10 +605,10 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			return;
 		}
 
-		List<DSRequestRecipient> dsRequestRecipients = _updateDSRequest(
+		List<DSRequestRecipient> nextDSRequestRecipients = _updateDSRequest(
 			objectEntry);
 
-		if (dsRequestRecipients.isEmpty()) {
+		if (nextDSRequestRecipients.isEmpty()) {
 			return;
 		}
 
@@ -619,7 +619,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			return;
 		}
 
-		_sendDSRequestNotifications(dsRequest, dsRequestRecipients);
+		_sendDSRequestNotifications(dsRequest, nextDSRequestRecipients);
 	}
 
 	@Override
@@ -1393,7 +1393,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					objectEntry.getUserId());
 			}
 
-			List<DSRequestRecipient> dsRequestRecipients =
+			List<DSRequestRecipient> nextDSRequestRecipients =
 				_updateDSRequestRecipientStatuses(
 					companyId, dsEnvelope, dsRequestId, groupId, requestStatus);
 
@@ -1413,7 +1413,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				_getServiceContext(
 					companyId, groupId, objectEntry.getUserId()));
 
-			return dsRequestRecipients;
+			return nextDSRequestRecipients;
 		}
 		catch (Exception exception) {
 			_log.error(
@@ -1429,7 +1429,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			long groupId, String requestStatus)
 		throws Exception {
 
-		List<DSRequestRecipient> dsRequestRecipients = new ArrayList<>();
+		List<DSRequestRecipient> nextDSRequestRecipients = new ArrayList<>();
 
 		Map<String, DSRecipient> dsRecipients = new HashMap<>();
 
@@ -1498,11 +1498,11 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				continue;
 			}
 
-			dsRequestRecipients.add(
+			nextDSRequestRecipients.add(
 				new DSRequestRecipient(objectEntry.getValues()));
 		}
 
-		return dsRequestRecipients;
+		return nextDSRequestRecipients;
 	}
 
 	private void _updateFileEntries(
