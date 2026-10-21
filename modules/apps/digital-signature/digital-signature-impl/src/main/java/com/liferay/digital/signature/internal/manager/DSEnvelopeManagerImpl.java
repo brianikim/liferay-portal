@@ -5,6 +5,7 @@
 
 package com.liferay.digital.signature.internal.manager;
 
+import com.liferay.digital.signature.exception.DSEnvelopeException;
 import com.liferay.digital.signature.internal.http.DSHttp;
 import com.liferay.digital.signature.manager.DSCustomFieldManager;
 import com.liferay.digital.signature.manager.DSEnvelopeManager;
@@ -224,12 +225,21 @@ public class DSEnvelopeManagerImpl implements DSEnvelopeManager {
 				"voidedReason", reason
 			));
 
-		if (Validator.isNotNull(jsonObject.getString("errorCode"))) {
-			throw new PortalException(
-				StringBundler.concat(
-					"Unable to void digital signature envelope ", dsEnvelopeId,
-					": ", jsonObject.getString("message")));
+		String errorCode = jsonObject.getString("errorCode");
+
+		if (Validator.isNull(errorCode)) {
+			return;
 		}
+
+		String message = StringBundler.concat(
+			"Unable to void digital signature envelope ", dsEnvelopeId, ": ",
+			jsonObject.getString("message"));
+
+		if (Objects.equals(errorCode, "ENVELOPE_CANNOT_VOID_INVALID_STATE")) {
+			throw new DSEnvelopeException.NotVoidable(message);
+		}
+
+		throw new PortalException(message);
 	}
 
 	private List<DSDocument> _getDSDocuments(JSONArray jsonArray) {

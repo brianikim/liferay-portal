@@ -9,6 +9,7 @@ import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration
 import com.liferay.digital.signature.configuration.DigitalSignatureConfigurationUtil;
 import com.liferay.digital.signature.constants.DSObjectDefinitionConstants;
 import com.liferay.digital.signature.constants.DSRequestConstants;
+import com.liferay.digital.signature.exception.DSEnvelopeException;
 import com.liferay.digital.signature.exception.DSRequestException;
 import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.manager.DSRequestManager;
@@ -639,7 +640,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				companyId, groupId, objectEntry.getExternalReferenceCode(),
 				reason);
 		}
-		catch (PortalException portalException) {
+		catch (DSEnvelopeException.NotVoidable dsEnvelopeException) {
 			_updateDSRequest(objectEntry);
 
 			objectEntry = _objectEntryLocalService.getObjectEntry(dsRequestId);
@@ -660,7 +661,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				throw new DSRequestException.NotActive(dsRequestId);
 			}
 
-			throw portalException;
+			throw dsEnvelopeException;
 		}
 
 		_updateDSRequest(objectEntry);
