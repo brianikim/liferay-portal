@@ -774,6 +774,34 @@ public class DSRequestManagerTest {
 		_testUpdateDSRequestWhenSignedDocumentIsNotPDF();
 	}
 
+	@Test
+	public void testVoidDSRequest() throws Exception {
+		DSRequest dsRequest = _addDSRequest(
+			_createDSEnvelope(), RandomTestUtil.randomInt());
+
+		try (CompanyConfigurationTemporarySwapper
+				companyConfigurationTemporarySwapper =
+					new CompanyConfigurationTemporarySwapper(
+						TestPropsValues.getCompanyId(),
+						DigitalSignatureConfiguration.class.getName(),
+						HashMapDictionaryBuilder.<String, Object>put(
+							"embeddedViewEnabled", false
+						).put(
+							"enabled", true
+						).put(
+							"siteSettingsStrategy", "always-inherit"
+						).build())) {
+
+			AssertUtils.assertFailure(
+				DSRequestException.NotEnabled.class,
+				"Digital signature is not enabled for group " +
+					TestPropsValues.getGroupId(),
+				() -> _dsRequestManager.voidDSRequest(
+					dsRequest.getDSRequestId(),
+					RandomTestUtil.randomString()));
+		}
+	}
+
 	private DSRequest _addDSRequest(DSEnvelope dsEnvelope, FileEntry fileEntry)
 		throws Exception {
 
