@@ -20,6 +20,7 @@ import com.liferay.commerce.test.util.CommerceOrderAttachmentTestUtil;
 import com.liferay.commerce.test.util.CommerceTestUtil;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.digital.signature.constants.DSRequestConstants;
+import com.liferay.digital.signature.exception.DSEnvelopeException;
 import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
@@ -60,6 +61,9 @@ import jakarta.portlet.PortletException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -165,6 +169,7 @@ public class VoidDSRequestMVCResourceCommandTest {
 			DSRequestConstants.STATUS_SENT, UserTestUtil.addUser());
 
 		String message = RandomTestUtil.randomString();
+		List<String> methodNames = new ArrayList<>();
 
 		DSEnvelopeManager dsEnvelopeManager =
 			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
@@ -173,6 +178,8 @@ public class VoidDSRequestMVCResourceCommandTest {
 					DSEnvelopeManager.class.getClassLoader(),
 					new Class<?>[] {DSEnvelopeManager.class},
 					(proxy, method, arguments) -> {
+						methodNames.add(method.getName());
+
 						if (Objects.equals(method.getName(), "getDSEnvelope")) {
 							return dsEnvelope;
 						}
@@ -182,6 +189,9 @@ public class VoidDSRequestMVCResourceCommandTest {
 
 		try {
 			_assertErrorMessage(message);
+
+			Assert.assertEquals(
+				Collections.singletonList("voidDSEnvelope"), methodNames);
 
 			AtomicReference<Object[]> argumentsAtomicReference =
 				new AtomicReference<>();
@@ -254,7 +264,7 @@ public class VoidDSRequestMVCResourceCommandTest {
 							return declinedDSEnvelope;
 						}
 
-						throw new PortalException(message);
+						throw new DSEnvelopeException.NotVoidable(message);
 					}));
 
 			_assertErrorMessage("This signature request is no longer active.");
@@ -284,7 +294,7 @@ public class VoidDSRequestMVCResourceCommandTest {
 							return voidedDSEnvelope;
 						}
 
-						throw new PortalException(message);
+						throw new DSEnvelopeException.NotVoidable(message);
 					}));
 
 			jsonObject = _serveResource(
