@@ -101,7 +101,6 @@ import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
-import com.liferay.portal.vulcan.pagination.Page;
 
 import jakarta.portlet.PortletException;
 
@@ -691,6 +690,7 @@ public class DSRequestManagerTest {
 
 		List<String> dsEnvelopeIds = new ArrayList<>();
 		List<String> methodNames = new ArrayList<>();
+		List<String> requestedDSEnvelopeIds = new ArrayList<>();
 
 		DSEnvelopeManager dsEnvelopeManager =
 			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
@@ -702,27 +702,27 @@ public class DSRequestManagerTest {
 						methodNames.add(method.getName());
 
 						if (!Objects.equals(
-								method.getName(), "getDSEnvelopesPage")) {
+								method.getName(), "getDSEnvelopes")) {
 
 							return dsEnvelope;
 						}
 
-						return Page.of(
-							TransformUtil.transform(
-								dsEnvelopeIds,
-								dsEnvelopeId -> {
-									DSEnvelope listedDSEnvelope =
-										new DSEnvelope();
+						Collections.addAll(
+							requestedDSEnvelopeIds, (String[])arguments[2]);
 
-									listedDSEnvelope.setDSEnvelopeId(
-										dsEnvelopeId);
-									listedDSEnvelope.setDSRecipients(
-										dsEnvelope.getDSRecipients());
-									listedDSEnvelope.setStatus(
-										dsEnvelope.getStatus());
+						return TransformUtil.transform(
+							dsEnvelopeIds,
+							dsEnvelopeId -> {
+								DSEnvelope listedDSEnvelope = new DSEnvelope();
 
-									return listedDSEnvelope;
-								}));
+								listedDSEnvelope.setDSEnvelopeId(dsEnvelopeId);
+								listedDSEnvelope.setDSRecipients(
+									dsEnvelope.getDSRecipients());
+								listedDSEnvelope.setStatus(
+									dsEnvelope.getStatus());
+
+								return listedDSEnvelope;
+							});
 					}));
 
 		try {
@@ -746,7 +746,14 @@ public class DSRequestManagerTest {
 
 			Assert.assertEquals(
 				methodNames.toString(), 1,
-				Collections.frequency(methodNames, "getDSEnvelopesPage"));
+				Collections.frequency(methodNames, "getDSEnvelopes"));
+			Assert.assertTrue(
+				requestedDSEnvelopeIds.toString(),
+				requestedDSEnvelopeIds.containsAll(dsEnvelopeIds));
+			Assert.assertFalse(
+				requestedDSEnvelopeIds.toString(),
+				requestedDSEnvelopeIds.contains(
+					dsRequest2.getExternalReferenceCode()));
 			Assert.assertFalse(
 				methodNames.toString(), methodNames.contains("getDSEnvelope"));
 
