@@ -121,6 +121,55 @@ describe('mountSigning', () => {
 		expect(navigator.sendBeacon).not.toHaveBeenCalled();
 	});
 
+	it('completes the recipient view when the recipient declines', async () => {
+		fetch.mockResponseOnce('');
+
+		await mount();
+
+		sessionEndListener({sessionEndType: 'decline'});
+
+		await waitFor(() =>
+			expect(window.opener.Liferay.fire).toHaveBeenCalledWith(
+				'closeModal',
+				{redirect: 'http://localhost/web/guest/home'}
+			)
+		);
+
+		expect(fetch.mock.calls[0][0]).toBe(COMPLETE_URL);
+	});
+
+	it('goes to the complete URL or the back URL when there is no opener', async () => {
+		const location = window.location;
+
+		Object.defineProperty(window, 'location', {
+			configurable: true,
+			value: {href: ''},
+		});
+
+		delete window.opener;
+
+		try {
+			await mount();
+
+			sessionEndListener({sessionEndType: 'signing_complete'});
+
+			expect(window.location.href).toBe(COMPLETE_URL);
+
+			sessionEndListener({sessionEndType: 'cancel'});
+
+			expect(window.location.href).toBe(
+				'http://localhost/web/guest/home'
+			);
+			expect(fetch).not.toHaveBeenCalled();
+		}
+		finally {
+			Object.defineProperty(window, 'location', {
+				configurable: true,
+				value: location,
+			});
+		}
+	});
+
 	it('completes the recipient view when the recipient finishes viewing a finished envelope', async () => {
 		fetch.mockResponseOnce('');
 

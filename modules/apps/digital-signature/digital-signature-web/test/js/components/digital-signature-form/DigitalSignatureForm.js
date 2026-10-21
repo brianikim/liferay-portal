@@ -86,28 +86,7 @@ describe('DigitalSignatureForm', () => {
 		expect(asFragment()).toMatchSnapshot();
 	});
 
-	it('Validates the days to warn recipients when embedded signing is enabled', async () => {
-		const {getByLabelText, getByText} = render(
-			<AppContext.Provider value={{embeddedViewEnabled: true}}>
-				<DigitalSignatureForm />
-			</AppContext.Provider>
-		);
-
-		const inputExpireWarn = getByLabelText(
-			'days-to-warn-recipients-before-expiration'
-		);
-
-		await userEvent.clear(inputExpireWarn);
-		await userEvent.type(inputExpireWarn, '120');
-
-		expect(
-			getByText(
-				'days-to-warn-recipients-must-be-fewer-than-days-until-expiration'
-			)
-		).toBeInTheDocument();
-	});
-
-	it('Does not validate the days to warn recipients when the envelope does not expire', async () => {
+	it('Validates the days to warn recipients only when the envelope expires', async () => {
 		const {getByLabelText, getByText, queryByText} = render(
 			<AppContext.Provider value={{embeddedViewEnabled: true}}>
 				<DigitalSignatureForm />
@@ -218,7 +197,7 @@ describe('DigitalSignatureForm', () => {
 		expect(body.get('_namespace_expireWarn')).toBe('5');
 	});
 
-	it('Restricts recipients to existing users when embedded signing is enabled', () => {
+	it('Restricts recipients to existing users when the embedded view is enabled', () => {
 		const {getByPlaceholderText, queryByPlaceholderText} = render(
 			<AppContext.Provider value={{embeddedViewEnabled: true}}>
 				<DigitalSignatureForm />
