@@ -117,9 +117,8 @@ public class DSRequest {
 	}
 
 	public String getStatus() {
-		if (!ArrayUtil.contains(
-				DSRequestConstants.STATUSES_REQUEST_TERMINAL, _status) &&
-			(_expirationDate != null) && _expirationDate.before(new Date())) {
+		if ((_expirationDate != null) && _expirationDate.before(new Date()) &&
+			isSyncable()) {
 
 			return DSRequestConstants.STATUS_EXPIRED;
 		}
@@ -128,11 +127,17 @@ public class DSRequest {
 	}
 
 	public Date getStatusDate() {
-		if (_statusDate == null) {
+		Date statusDate = _statusDate;
+
+		if (!Objects.equals(_status, getStatus())) {
+			statusDate = _expirationDate;
+		}
+
+		if (statusDate == null) {
 			return null;
 		}
 
-		return new Date(_statusDate.getTime());
+		return new Date(statusDate.getTime());
 	}
 
 	public long getUserId() {
@@ -164,6 +169,11 @@ public class DSRequest {
 		}
 
 		return true;
+	}
+
+	public boolean isSyncable() {
+		return !ArrayUtil.contains(
+			DSRequestConstants.STATUSES_REQUEST_TERMINAL, _status);
 	}
 
 	public boolean isTerminal() {

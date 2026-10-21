@@ -143,7 +143,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		for (Map.Entry<Long, DSRequest> entry : dsRequests.entrySet()) {
 			DSRequest dsRequest = entry.getValue();
 
-			if (!dsRequest.isTerminal()) {
+			if (dsRequest.isSyncable()) {
 				try {
 					updateDSRequest(dsRequest.getDSRequestId());
 				}
