@@ -138,8 +138,15 @@ describe('mountSigning', () => {
 		expect(fetch.mock.calls[0][0]).toBe(COMPLETE_URL);
 	});
 
-	it('mounts the default view', async () => {
+	it('loads the bundle and mounts the default view in the container', async () => {
 		await mount();
+
+		expect(document.head.querySelector('script').src).toBe(
+			'http://localhost/bundle.js'
+		);
+		expect(window.DocuSign.loadDocuSign).toHaveBeenCalledWith(
+			'integrationKey'
+		);
 
 		const docuSign =
 			await window.DocuSign.loadDocuSign.mock.results[0].value;
@@ -148,6 +155,7 @@ describe('mountSigning', () => {
 			displayFormat: 'default',
 			url: 'http://localhost/signing',
 		});
+		expect(signing.mount).toHaveBeenCalledWith('#signingContainer');
 	});
 
 	it('closes without completing the recipient view when the session ends without an outcome', async () => {

@@ -9,17 +9,22 @@ import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration
 import com.liferay.digital.signature.configuration.DigitalSignatureConfigurationUtil;
 import com.liferay.digital.signature.internal.http.DSHttp;
 import com.liferay.digital.signature.model.DSRecipientViewDefinition;
+import com.liferay.digital.signature.model.DSRequestRecipient;
+import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.json.JSONFactoryImpl;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
-import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
-import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.test.AssertUtils;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
+import com.liferay.portal.kernel.test.util.RandomTestUtil;
+import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
+
+import java.io.Serializable;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -76,12 +81,19 @@ public class DSRecipientViewDefinitionManagerImplTest {
 
 	@Test
 	public void testAddDSRecipientViewDefinition() throws Exception {
-		_mockDSHttp(JSONUtil.put("url", "https://docusign.net"));
+		long companyId = RandomTestUtil.randomLong();
+		String dsEnvelopeId = RandomTestUtil.randomString();
+		long groupId = RandomTestUtil.randomLong();
+
+		String url = "https://" + RandomTestUtil.randomString();
+
+		_mockDSHttp(JSONUtil.put("url", url));
 
 		Assert.assertEquals(
-			"https://docusign.net",
+			url,
 			_dsRecipientViewDefinitionManagerImpl.addDSRecipientViewDefinition(
-				1, 2, "envelopeId", new DSRecipientViewDefinition()));
+				companyId, groupId, dsEnvelopeId,
+				new DSRecipientViewDefinition()));
 
 		_mockDSHttp(
 			JSONUtil.put(
@@ -90,19 +102,17 @@ public class DSRecipientViewDefinitionManagerImplTest {
 				"message", "The recipient you have identified is not valid."
 			));
 
-		try {
-			_dsRecipientViewDefinitionManagerImpl.addDSRecipientViewDefinition(
-				1, 2, "envelopeId", new DSRecipientViewDefinition());
-
-			Assert.fail();
-		}
-		catch (PortalException portalException) {
-			Assert.assertEquals(
-				"Unable to create a recipient view for digital signature " +
-					"envelope envelopeId: The recipient you have identified " +
-						"is not valid.",
-				portalException.getMessage());
-		}
+		AssertUtils.assertFailure(
+			PortalException.class,
+			StringBundler.concat(
+				"Unable to create a recipient view for digital signature ",
+				"envelope ", dsEnvelopeId,
+				": The recipient you have identified is not valid."),
+			() ->
+				_dsRecipientViewDefinitionManagerImpl.
+					addDSRecipientViewDefinition(
+						companyId, groupId, dsEnvelopeId,
+						new DSRecipientViewDefinition()));
 
 		DigitalSignatureConfiguration digitalSignatureConfiguration =
 			Mockito.mock(DigitalSignatureConfiguration.class);
@@ -116,37 +126,12 @@ public class DSRecipientViewDefinitionManagerImplTest {
 		_digitalSignatureConfigurationUtilMockedStatic.when(
 			() ->
 				DigitalSignatureConfigurationUtil.
-					getDigitalSignatureConfiguration(1, 2)
+					getDigitalSignatureConfiguration(companyId, groupId)
 		).thenReturn(
 			digitalSignatureConfiguration
 		);
 
-		User user = Mockito.mock(User.class);
-
-		Mockito.when(
-			user.getEmailAddress()
-		).thenReturn(
-			"test@liferay.com"
-		);
-
-		Mockito.when(
-			user.getFullName()
-		).thenReturn(
-			"Test Test"
-		);
-
-		UserLocalService userLocalService = Mockito.mock(
-			UserLocalService.class);
-
-		Mockito.when(
-			userLocalService.getUser(3)
-		).thenReturn(
-			user
-		);
-
-		ReflectionTestUtil.setFieldValue(
-			_dsRecipientViewDefinitionManagerImpl, "_userLocalService",
-			userLocalService);
+		long userId = RandomTestUtil.randomLong();
 
 		PermissionChecker permissionChecker = Mockito.mock(
 			PermissionChecker.class);
@@ -154,18 +139,30 @@ public class DSRecipientViewDefinitionManagerImplTest {
 		Mockito.when(
 			permissionChecker.getUserId()
 		).thenReturn(
-			3L
+			userId
 		);
 
 		PermissionThreadLocal.setPermissionChecker(permissionChecker);
 
-		DSHttp dsHttp = _mockDSHttp(
-			JSONUtil.put("url", "https://docusign.net"));
+		DSHttp dsHttp = _mockDSHttp(JSONUtil.put("url", url));
+
+		String emailAddress = RandomTestUtil.randomString();
+		String name = RandomTestUtil.randomString();
+		String portalURL = "https://" + RandomTestUtil.randomString();
 
 		Assert.assertEquals(
-			"https://docusign.net",
+			url,
 			_dsRecipientViewDefinitionManagerImpl.addDSRecipientViewDefinition(
-				1, 2, 3, "envelopeId", "https://liferay.com"));
+				companyId, groupId, dsEnvelopeId,
+				new DSRequestRecipient(
+					HashMapBuilder.<String, Serializable>put(
+						"emailAddress", emailAddress
+					).put(
+						"name", name
+					).put(
+						"r_userToDSRequestRecipients_userId", userId
+					).build()),
+				portalURL));
 
 		ArgumentCaptor<JSONObject> argumentCaptor = ArgumentCaptor.forClass(
 			JSONObject.class);
@@ -173,18 +170,21 @@ public class DSRecipientViewDefinitionManagerImplTest {
 		Mockito.verify(
 			dsHttp
 		).post(
-			Mockito.eq(1L), Mockito.eq(2L),
-			Mockito.eq("envelopes/envelopeId/views/recipient"),
+			Mockito.eq(companyId), Mockito.eq(groupId),
+			Mockito.eq("envelopes/" + dsEnvelopeId + "/views/recipient"),
 			argumentCaptor.capture()
 		);
 
 		JSONObject jsonObject = argumentCaptor.getValue();
 
-		Assert.assertEquals("3", jsonObject.getString("clientUserId"));
-		Assert.assertEquals("test@liferay.com", jsonObject.getString("email"));
+		Assert.assertEquals(
+			"none", jsonObject.getString("authenticationMethod"));
+		Assert.assertEquals(
+			String.valueOf(userId), jsonObject.getString("clientUserId"));
+		Assert.assertEquals(emailAddress, jsonObject.getString("email"));
 		Assert.assertEquals(
 			JSONUtil.putAll(
-				"https://liferay.com", "https://apps.docusign.com"
+				portalURL, "https://apps.docusign.com"
 			).toString(),
 			String.valueOf(jsonObject.getJSONArray("frameAncestors")));
 		Assert.assertEquals(
@@ -194,7 +194,7 @@ public class DSRecipientViewDefinitionManagerImplTest {
 			String.valueOf(jsonObject.getJSONArray("messageOrigins")));
 		Assert.assertEquals(
 			"https://apps.docusign.com", jsonObject.getString("returnUrl"));
-		Assert.assertEquals("Test Test", jsonObject.getString("userName"));
+		Assert.assertEquals(name, jsonObject.getString("userName"));
 	}
 
 	private DSHttp _mockDSHttp(JSONObject jsonObject) {

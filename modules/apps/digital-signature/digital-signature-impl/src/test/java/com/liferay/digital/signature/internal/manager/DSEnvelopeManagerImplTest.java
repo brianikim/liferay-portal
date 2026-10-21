@@ -9,6 +9,7 @@ import com.liferay.digital.signature.exception.DSEnvelopeException;
 import com.liferay.digital.signature.internal.http.DSHttp;
 import com.liferay.digital.signature.manager.DSCustomFieldManager;
 import com.liferay.digital.signature.model.DSEnvelope;
+import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.json.JSONFactoryImpl;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -16,6 +17,7 @@ import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
+import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
 
 import java.util.Arrays;
@@ -26,6 +28,7 @@ import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 /**
@@ -112,9 +115,30 @@ public class DSEnvelopeManagerImplTest {
 
 	@Test
 	public void testVoidDSEnvelope() throws Exception {
-		_mockDSHttp(JSONUtil.put("envelopeId", "envelopeId"));
+		long companyId = RandomTestUtil.randomLong();
+		String dsEnvelopeId = RandomTestUtil.randomString();
+		long groupId = RandomTestUtil.randomLong();
+		String reason = RandomTestUtil.randomString();
 
-		_dsEnvelopeManagerImpl.voidDSEnvelope(1, 2, "envelopeId", "reason");
+		DSHttp dsHttp = _mockDSHttp(JSONUtil.put("envelopeId", dsEnvelopeId));
+
+		_dsEnvelopeManagerImpl.voidDSEnvelope(
+			companyId, groupId, dsEnvelopeId, reason);
+
+		ArgumentCaptor<JSONObject> argumentCaptor = ArgumentCaptor.forClass(
+			JSONObject.class);
+
+		Mockito.verify(
+			dsHttp
+		).put(
+			Mockito.eq(companyId), Mockito.eq(groupId),
+			Mockito.eq("envelopes/" + dsEnvelopeId), argumentCaptor.capture()
+		);
+
+		JSONObject jsonObject = argumentCaptor.getValue();
+
+		Assert.assertEquals("voided", jsonObject.getString("status"));
+		Assert.assertEquals(reason, jsonObject.getString("voidedReason"));
 
 		_mockDSHttp(
 			JSONUtil.put(
@@ -126,11 +150,12 @@ public class DSEnvelopeManagerImplTest {
 		DSEnvelopeException.NotVoidable notVoidable = Assert.assertThrows(
 			DSEnvelopeException.NotVoidable.class,
 			() -> _dsEnvelopeManagerImpl.voidDSEnvelope(
-				1, 2, "envelopeId", "reason"));
+				companyId, groupId, dsEnvelopeId, reason));
 
 		Assert.assertEquals(
-			"Unable to void digital signature envelope envelopeId: Only " +
-				"envelopes in the sent state may be voided.",
+			StringBundler.concat(
+				"Unable to void digital signature envelope ", dsEnvelopeId,
+				": Only envelopes in the sent state may be voided."),
 			notVoidable.getMessage());
 
 		_mockDSHttp(
@@ -143,13 +168,14 @@ public class DSEnvelopeManagerImplTest {
 		PortalException portalException = Assert.assertThrows(
 			PortalException.class,
 			() -> _dsEnvelopeManagerImpl.voidDSEnvelope(
-				1, 2, "envelopeId", "reason"));
+				companyId, groupId, dsEnvelopeId, reason));
 
 		Assert.assertFalse(
 			portalException instanceof DSEnvelopeException.NotVoidable);
 		Assert.assertEquals(
-			"Unable to void digital signature envelope envelopeId: One or " +
-				"both of Username and Password are invalid.",
+			StringBundler.concat(
+				"Unable to void digital signature envelope ", dsEnvelopeId,
+				": One or both of Username and Password are invalid."),
 			portalException.getMessage());
 	}
 
