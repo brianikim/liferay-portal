@@ -132,7 +132,7 @@ public class DSCommerceOrderAttachmentUtil {
 		DSRequestManager dsRequestManager = _dsRequestManagerSnapshot.get();
 
 		Map<Long, DSRequest> fileEntryDSRequests =
-			dsRequestManager.getDSRequests(
+			dsRequestManager.getLatestFileEntryDSRequests(
 				commerceOrder.getCompanyId(),
 				ArrayUtil.toLongArray(fileEntryIds.values()));
 
