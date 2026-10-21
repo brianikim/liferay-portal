@@ -709,7 +709,7 @@ public class SignatureRequestResourceTest
 
 			Long[] fileEntryIds = signatureRequest.getFileEntryIds();
 
-			Map<Long, DSRequest> dsRequests = _dsRequestManager.getDSRequests(
+			Map<Long, DSRequest> dsRequests = _dsRequestManager.getLatestFileEntryDSRequests(
 				testCompany.getCompanyId(), new long[] {fileEntryIds[0]});
 
 			DSRequest dsRequest = dsRequests.get(fileEntryIds[0]);
