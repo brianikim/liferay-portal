@@ -21,7 +21,6 @@ import com.liferay.object.definition.security.permission.resource.ObjectDefiniti
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.service.ObjectDefinitionLocalService;
 import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
@@ -290,13 +289,6 @@ public class SignatureRequestResourceImpl
 						"A recipient must have a user ID");
 				}
 
-				Object tabs = signatureRequestRecipient.getTabs();
-
-				if ((tabs != null) && !(tabs instanceof Map)) {
-					throw new BadRequestException(
-						"A recipient's tabs must be a JSON object");
-				}
-
 				User user = _userService.getUserById(userId);
 
 				return new DSRecipient() {
@@ -305,11 +297,6 @@ public class SignatureRequestResourceImpl
 							String.valueOf(integerWrapper.increment()));
 						setEmailAddress(user.getEmailAddress());
 						setName(user.getFullName());
-
-						if (tabs != null) {
-							setTabsJSONObject(
-								_jsonFactory.createJSONObject((Map<?, ?>)tabs));
-						}
 					}
 				};
 			});
@@ -352,9 +339,6 @@ public class SignatureRequestResourceImpl
 
 	@Reference
 	private GroupService _groupService;
-
-	@Reference
-	private JSONFactory _jsonFactory;
 
 	@Reference
 	private ObjectDefinitionLocalService _objectDefinitionLocalService;
