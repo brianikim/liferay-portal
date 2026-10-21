@@ -30,15 +30,7 @@ export default function mountSigning({
 	script.onload = () => {
 		window.DocuSign.loadDocuSign(integrationKey).then((docuSign) => {
 			const signing = docuSign.signing({
-				displayFormat: 'focused',
-				style: {
-					declineModal: {
-						show: true,
-					},
-					signingDeclineButton: {
-						show: true,
-					},
-				},
+				displayFormat: 'default',
 				url: signingURL,
 			});
 
