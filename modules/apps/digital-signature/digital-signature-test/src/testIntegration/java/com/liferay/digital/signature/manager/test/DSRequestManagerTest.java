@@ -90,6 +90,7 @@ import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.MimeTypesUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
+import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
@@ -1729,10 +1730,17 @@ public class DSRequestManagerTest {
 
 		String description = RandomTestUtil.randomString();
 
+		long time = System.currentTimeMillis() / Time.SECOND * Time.SECOND;
+
+		Date displayDate = new Date(time - Time.DAY);
+		Date expirationDate = new Date(time + Time.DAY);
+		Date reviewDate = new Date(time + Time.HOUR);
+
 		fileEntry = _dlAppLocalService.updateFileEntry(
 			TestPropsValues.getUserId(), fileEntry.getFileEntryId(), null, null,
 			fileEntry.getTitle(), null, description, null,
-			DLVersionNumberIncrease.NONE, (byte[])null, null, null, null,
+			DLVersionNumberIncrease.NONE, (byte[])null, displayDate,
+			expirationDate, reviewDate,
 			ServiceContextTestUtil.getServiceContext(group.getGroupId()));
 
 		_portletFileRepository.addPortletFileEntry(
@@ -1819,7 +1827,10 @@ public class DSRequestManagerTest {
 		Assert.assertArrayEquals(
 			bytes, FileUtil.getBytes(fileEntry.getContentStream()));
 		Assert.assertEquals(description, fileEntry.getDescription());
+		Assert.assertEquals(displayDate, fileEntry.getDisplayDate());
+		Assert.assertEquals(expirationDate, fileEntry.getExpirationDate());
 		Assert.assertEquals("contract (signed).pdf", fileEntry.getFileName());
+		Assert.assertEquals(reviewDate, fileEntry.getReviewDate());
 		Assert.assertEquals("contract (signed).pdf", fileEntry.getTitle());
 		Assert.assertEquals("2.0", fileEntry.getVersion());
 
