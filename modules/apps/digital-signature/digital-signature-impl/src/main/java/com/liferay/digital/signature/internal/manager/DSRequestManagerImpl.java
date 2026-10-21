@@ -583,7 +583,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			Map<Long, List<DSRequest>> groupDSRequests = new HashMap<>();
 
 			for (DSRequest dsRequest : dsRequests.values()) {
-				if (dsRequest.isTerminal() ||
+				if (!dsRequest.isSyncable() ||
 					!_isEnabled(companyId, dsRequest.getSiteGroupId())) {
 
 					continue;
