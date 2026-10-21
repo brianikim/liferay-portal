@@ -6,9 +6,12 @@
 package com.liferay.commerce.digital.signature.web.internal.portlet.action.test;
 
 import com.liferay.account.model.AccountEntry;
+import com.liferay.account.service.AccountEntryUserRelLocalService;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.batch.engine.test.util.BatchEngineTestUtil;
 import com.liferay.commerce.account.test.util.CommerceAccountTestUtil;
+import com.liferay.commerce.constants.CommerceOrderActionKeys;
+import com.liferay.commerce.constants.CommerceOrderConstants;
 import com.liferay.commerce.currency.model.CommerceCurrency;
 import com.liferay.commerce.currency.test.util.CommerceCurrencyTestUtil;
 import com.liferay.commerce.model.CommerceOrder;
@@ -21,11 +24,16 @@ import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.ResourceConstants;
+import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.model.role.RoleConstants;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
 import com.liferay.portal.kernel.service.CompanyLocalService;
+import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
+import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.test.portlet.MockLiferayResourceRequest;
 import com.liferay.portal.kernel.test.portlet.MockLiferayResourceResponse;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
@@ -154,6 +162,8 @@ public class GetDSRequestRecipientUsersMVCResourceCommandTest {
 			user.getEmailAddress(), jsonObject.getString("emailAddress"));
 		Assert.assertEquals(user.getFullName(), jsonObject.getString("name"));
 		Assert.assertEquals(user.getUserId(), jsonObject.getLong("userId"));
+
+		_testServeResourceWhenUserHasNoUserViewPermission();
 	}
 
 	private void _saveDigitalSignatureConfiguration(boolean enabled)
@@ -224,6 +234,62 @@ public class GetDSRequestRecipientUsersMVCResourceCommandTest {
 		return byteArrayOutputStream.toString();
 	}
 
+	private void _testServeResourceWhenUserHasNoUserViewPermission()
+		throws Exception {
+
+		Role role = _roleLocalService.addRole(
+			RandomTestUtil.randomString(), TestPropsValues.getUserId(), null, 0,
+			RandomTestUtil.randomString(), null, null,
+			RoleConstants.TYPE_REGULAR, null,
+			ServiceContextTestUtil.getServiceContext(
+				_group.getGroupId(), TestPropsValues.getUserId()));
+
+		AccountEntry accountEntry = _commerceOrder.getAccountEntry();
+
+		_resourcePermissionLocalService.setResourcePermissions(
+			_group.getCompanyId(), CommerceOrderConstants.RESOURCE_NAME,
+			ResourceConstants.SCOPE_GROUP,
+			String.valueOf(accountEntry.getAccountEntryGroupId()),
+			role.getRoleId(),
+			new String[] {CommerceOrderActionKeys.MANAGE_COMMERCE_ORDERS});
+
+		User user1 = UserTestUtil.addUser();
+
+		_roleLocalService.addUserRole(user1.getUserId(), role);
+
+		User user2 = UserTestUtil.addUser();
+
+		_accountEntryUserRelLocalService.
+			deleteAccountEntryUserRelsByAccountEntryId(
+				accountEntry.getAccountEntryId());
+
+		_accountEntryUserRelLocalService.addAccountEntryUserRel(
+			accountEntry.getAccountEntryId(), user2.getUserId());
+
+		JSONArray jsonArray = _jsonFactory.createJSONArray(
+			_serveResource(
+				_commerceOrder.getCommerceOrderId(), user2.getScreenName(),
+				user1));
+
+		Assert.assertEquals(jsonArray.toString(), 1, jsonArray.length());
+
+		JSONObject jsonObject = jsonArray.getJSONObject(0);
+
+		Assert.assertEquals(user2.getUserId(), jsonObject.getLong("userId"));
+
+		User user3 = UserTestUtil.addUser();
+
+		jsonArray = _jsonFactory.createJSONArray(
+			_serveResource(
+				_commerceOrder.getCommerceOrderId(), user3.getScreenName(),
+				user1));
+
+		Assert.assertEquals(jsonArray.toString(), 0, jsonArray.length());
+	}
+
+	@Inject
+	private AccountEntryUserRelLocalService _accountEntryUserRelLocalService;
+
 	private CommerceOrder _commerceOrder;
 
 	@Inject
@@ -244,5 +310,11 @@ public class GetDSRequestRecipientUsersMVCResourceCommandTest {
 		filter = "mvc.command.name=/commerce_order/get_ds_request_recipient_users"
 	)
 	private MVCResourceCommand _mvcResourceCommand;
+
+	@Inject
+	private ResourcePermissionLocalService _resourcePermissionLocalService;
+
+	@Inject
+	private RoleLocalService _roleLocalService;
 
 }

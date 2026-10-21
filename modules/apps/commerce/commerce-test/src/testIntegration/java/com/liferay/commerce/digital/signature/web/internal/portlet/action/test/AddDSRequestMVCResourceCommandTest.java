@@ -6,6 +6,7 @@
 package com.liferay.commerce.digital.signature.web.internal.portlet.action.test;
 
 import com.liferay.account.model.AccountEntry;
+import com.liferay.account.service.AccountEntryUserRelLocalService;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.batch.engine.test.util.BatchEngineTestUtil;
 import com.liferay.commerce.account.test.util.CommerceAccountTestUtil;
@@ -27,7 +28,10 @@ import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.digital.signature.model.DSRequest;
+import com.liferay.notification.model.NotificationQueueEntry;
+import com.liferay.notification.service.NotificationQueueEntryLocalService;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.model.Group;
@@ -54,6 +58,7 @@ import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
+import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.WebKeys;
@@ -103,7 +108,11 @@ public class AddDSRequestMVCResourceCommandTest {
 			AddDSRequestMVCResourceCommandTest.class,
 			new String[] {
 				".com.liferay.digital.signature.internal.batch.01.object." +
-					"definition"
+					"definition",
+				".com.liferay.digital.signature.internal.batch.02.object." +
+					"relationship",
+				".com.liferay.digital.signature.internal.batch.03." +
+					"notification.template"
 			});
 
 		CommerceOrderAttachmentTestUtil.initialize(getClass());
@@ -236,69 +245,51 @@ public class AddDSRequestMVCResourceCommandTest {
 		Assert.assertEquals(
 			countersignerUser.getUserId(), mustHavePermission.resourceId);
 
+		_testServeResourceWhenNotSequential();
 		_testServeResourceWhenResponseWriteFails();
 
-		AtomicReference<DSEnvelope> dsEnvelopeAtomicReference =
-			new AtomicReference<>();
+		User accountUser = UserTestUtil.addUser();
 
-		DSEnvelopeManager dsEnvelopeManager =
-			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
-				_dsRequestManager, "_dsEnvelopeManager",
-				ProxyUtil.newProxyInstance(
-					DSEnvelopeManager.class.getClassLoader(),
-					new Class<?>[] {DSEnvelopeManager.class},
-					(proxy, method, arguments) -> {
-						if (!Objects.equals(
-								method.getName(), "addDSEnvelope")) {
+		_accountEntryUserRelLocalService.
+			deleteAccountEntryUserRelsByAccountEntryId(
+				accountEntry.getAccountEntryId());
 
-							return null;
-						}
+		_accountEntryUserRelLocalService.addAccountEntryUserRel(
+			accountEntry.getAccountEntryId(), accountUser.getUserId());
 
-						DSEnvelope dsEnvelope = (DSEnvelope)arguments[2];
+		int expireAfter = RandomTestUtil.randomInt(2, 120);
 
-						dsEnvelope.setDSEnvelopeId(
-							RandomTestUtil.randomString());
+		int expireWarn = RandomTestUtil.randomInt(1, expireAfter - 1);
 
-						for (DSRecipient dsRecipient :
-								dsEnvelope.getDSRecipients()) {
+		MockLiferayResourceRequest mockLiferayResourceRequest =
+			_getMockLiferayResourceRequest(
+				_commerceOrderAttachment.getCommerceOrderAttachmentId(),
+				expireAfter, expireWarn, orderManagerUser,
+				accountUser.getUserId(), TestPropsValues.getUserId());
 
-							dsRecipient.setStatus(
-								DSRequestConstants.STATUS_SENT);
-						}
+		String emailMessage = RandomTestUtil.randomString();
 
-						dsEnvelopeAtomicReference.set(dsEnvelope);
+		mockLiferayResourceRequest.addParameter("emailMessage", emailMessage);
 
-						return dsEnvelope;
-					}));
+		String emailSubject = RandomTestUtil.randomString();
 
-		try {
-			JSONObject jsonObject = _serveResource(
-				_commerceOrderAttachment.getCommerceOrderAttachmentId(), 0, 0,
-				TestPropsValues.getUser(), TestPropsValues.getUserId(),
-				TestPropsValues.getUserId());
+		mockLiferayResourceRequest.addParameter("emailSubject", emailSubject);
 
-			Assert.assertEquals("{}", jsonObject.toString());
-		}
-		finally {
-			ReflectionTestUtil.setFieldValue(
-				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager);
-		}
+		DSEnvelope dsEnvelope = _getDSEnvelope(mockLiferayResourceRequest);
 
-		DSEnvelope dsEnvelope = dsEnvelopeAtomicReference.get();
-
+		Assert.assertEquals(emailMessage, dsEnvelope.getEmailBlurb());
+		Assert.assertEquals(emailSubject, dsEnvelope.getEmailSubject());
+		Assert.assertEquals(expireAfter, dsEnvelope.getExpireAfter());
+		Assert.assertEquals(expireWarn, dsEnvelope.getExpireWarn());
 		Assert.assertEquals(
 			_commerceOrderAttachment.getTitle(), dsEnvelope.getName());
 
 		List<DSRecipient> dsRecipients = dsEnvelope.getDSRecipients();
 
-		Assert.assertEquals(dsRecipients.toString(), 1, dsRecipients.size());
+		Assert.assertEquals(dsRecipients.toString(), 2, dsRecipients.size());
 
-		DSRecipient dsRecipient = dsRecipients.get(0);
-
-		User user4 = TestPropsValues.getUser();
-
-		Assert.assertEquals(
-			user4.getEmailAddress(), dsRecipient.getEmailAddress());
+		_assertDSRecipient(dsRecipients.get(0), 1, accountUser);
+		_assertDSRecipient(dsRecipients.get(1), 2, TestPropsValues.getUser());
 
 		DSRequest dsRequest = _dsRequestManager.fetchFileEntryDSRequest(
 			_group.getCompanyId(), _commerceOrderAttachment.getFileEntryId());
@@ -308,9 +299,16 @@ public class AddDSRequestMVCResourceCommandTest {
 		Assert.assertEquals(
 			DSRequestConstants.STATUS_SENT, dsRequest.getStatus());
 
+		List<NotificationQueueEntry> notificationQueueEntries =
+			_getNotificationQueueEntries(dsRequest);
+
+		Assert.assertEquals(
+			notificationQueueEntries.toString(), 2,
+			notificationQueueEntries.size());
+
 		dsEnvelope.setStatus(DSRequestConstants.STATUS_SENT);
 
-		dsEnvelopeManager =
+		DSEnvelopeManager dsEnvelopeManager =
 			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
 				_dsRequestManager, "_dsEnvelopeManager",
 				ProxyUtil.newProxyInstance(
@@ -377,6 +375,15 @@ public class AddDSRequestMVCResourceCommandTest {
 			TestPropsValues.getUserId());
 	}
 
+	private void _assertDSRecipient(
+		DSRecipient dsRecipient, int routingOrder, User user) {
+
+		Assert.assertEquals(
+			user.getEmailAddress(), dsRecipient.getEmailAddress());
+		Assert.assertEquals(user.getFullName(), dsRecipient.getName());
+		Assert.assertEquals(routingOrder, dsRecipient.getRoutingOrder());
+	}
+
 	private void _assertErrorMessage(
 			String expectedMessage, int expireAfter, int expireWarn,
 			long... recipientUserIds)
@@ -389,6 +396,56 @@ public class AddDSRequestMVCResourceCommandTest {
 
 		Assert.assertEquals(
 			expectedMessage, jsonObject.getString("errorMessage"));
+	}
+
+	private DSEnvelope _getDSEnvelope(
+			MockLiferayResourceRequest mockLiferayResourceRequest)
+		throws Exception {
+
+		AtomicReference<DSEnvelope> dsEnvelopeAtomicReference =
+			new AtomicReference<>();
+
+		DSEnvelopeManager dsEnvelopeManager =
+			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager",
+				ProxyUtil.newProxyInstance(
+					DSEnvelopeManager.class.getClassLoader(),
+					new Class<?>[] {DSEnvelopeManager.class},
+					(proxy, method, arguments) -> {
+						if (!Objects.equals(
+								method.getName(), "addDSEnvelope")) {
+
+							return null;
+						}
+
+						DSEnvelope dsEnvelope = (DSEnvelope)arguments[2];
+
+						dsEnvelope.setDSEnvelopeId(
+							RandomTestUtil.randomString());
+
+						for (DSRecipient dsRecipient :
+								dsEnvelope.getDSRecipients()) {
+
+							dsRecipient.setStatus(
+								DSRequestConstants.STATUS_SENT);
+						}
+
+						dsEnvelopeAtomicReference.set(dsEnvelope);
+
+						return dsEnvelope;
+					}));
+
+		try {
+			JSONObject jsonObject = _serveResource(mockLiferayResourceRequest);
+
+			Assert.assertEquals("{}", jsonObject.toString());
+		}
+		finally {
+			ReflectionTestUtil.setFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager);
+		}
+
+		return dsEnvelopeAtomicReference.get();
 	}
 
 	private MockLiferayResourceRequest _getMockLiferayResourceRequest(
@@ -425,6 +482,20 @@ public class AddDSRequestMVCResourceCommandTest {
 		}
 
 		return mockLiferayResourceRequest;
+	}
+
+	private List<NotificationQueueEntry> _getNotificationQueueEntries(
+		DSRequest dsRequest) {
+
+		return ListUtil.filter(
+			_notificationQueueEntryLocalService.getNotificationQueueEntries(
+				QueryUtil.ALL_POS, QueryUtil.ALL_POS),
+			notificationQueueEntry ->
+				Objects.equals(
+					notificationQueueEntry.getClassName(),
+					DSRequest.class.getName()) &&
+				(notificationQueueEntry.getClassPK() ==
+					dsRequest.getDSRequestId()));
 	}
 
 	private void _saveDigitalSignatureConfiguration(boolean enabled)
@@ -464,20 +535,57 @@ public class AddDSRequestMVCResourceCommandTest {
 			User user, long... recipientUserIds)
 		throws Exception {
 
+		return _serveResource(
+			_getMockLiferayResourceRequest(
+				commerceOrderAttachmentId, expireAfter, expireWarn, user,
+				recipientUserIds));
+	}
+
+	private JSONObject _serveResource(
+			MockLiferayResourceRequest mockLiferayResourceRequest)
+		throws Exception {
+
 		MockLiferayResourceResponse mockLiferayResourceResponse =
 			new MockLiferayResourceResponse();
 
 		_mvcResourceCommand.serveResource(
-			_getMockLiferayResourceRequest(
-				commerceOrderAttachmentId, expireAfter, expireWarn, user,
-				recipientUserIds),
-			mockLiferayResourceResponse);
+			mockLiferayResourceRequest, mockLiferayResourceResponse);
 
 		ByteArrayOutputStream byteArrayOutputStream =
 			(ByteArrayOutputStream)
 				mockLiferayResourceResponse.getPortletOutputStream();
 
 		return _jsonFactory.createJSONObject(byteArrayOutputStream.toString());
+	}
+
+	private void _testServeResourceWhenNotSequential() throws Exception {
+		CommerceOrderAttachment commerceOrderAttachment =
+			_commerceOrderAttachmentLocalService.addCommerceOrderAttachment(
+				RandomTestUtil.randomString(), TestPropsValues.getUserId(),
+				_commerceOrder.getCommerceOrderId(),
+				RandomTestUtil.nextDouble(), false,
+				RandomTestUtil.randomString(), "invoice",
+				RandomTestUtil.randomString() + ".pdf",
+				new ByteArrayInputStream(RandomTestUtil.randomBytes()));
+
+		User user = UserTestUtil.addUser();
+
+		MockLiferayResourceRequest mockLiferayResourceRequest =
+			_getMockLiferayResourceRequest(
+				commerceOrderAttachment.getCommerceOrderAttachmentId(), 0, 0,
+				TestPropsValues.getUser(), TestPropsValues.getUserId(),
+				user.getUserId());
+
+		mockLiferayResourceRequest.addParameter("sequential", "false");
+
+		DSEnvelope dsEnvelope = _getDSEnvelope(mockLiferayResourceRequest);
+
+		List<DSRecipient> dsRecipients = dsEnvelope.getDSRecipients();
+
+		Assert.assertEquals(dsRecipients.toString(), 2, dsRecipients.size());
+
+		_assertDSRecipient(dsRecipients.get(0), 1, TestPropsValues.getUser());
+		_assertDSRecipient(dsRecipients.get(1), 1, user);
 	}
 
 	private void _testServeResourceWhenResponseWriteFails() throws Exception {
@@ -563,6 +671,9 @@ public class AddDSRequestMVCResourceCommandTest {
 			voidedDSEnvelopeIdAtomicReference.get());
 	}
 
+	@Inject
+	private AccountEntryUserRelLocalService _accountEntryUserRelLocalService;
+
 	private CommerceOrder _commerceOrder;
 	private CommerceOrderAttachment _commerceOrderAttachment;
 
@@ -589,6 +700,10 @@ public class AddDSRequestMVCResourceCommandTest {
 
 	@Inject(filter = "mvc.command.name=/commerce_order/add_ds_request")
 	private MVCResourceCommand _mvcResourceCommand;
+
+	@Inject
+	private NotificationQueueEntryLocalService
+		_notificationQueueEntryLocalService;
 
 	@Inject
 	private ResourcePermissionLocalService _resourcePermissionLocalService;
