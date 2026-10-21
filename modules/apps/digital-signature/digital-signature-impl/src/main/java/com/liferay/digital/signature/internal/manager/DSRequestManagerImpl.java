@@ -136,7 +136,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			throw new DSRequestException.ExpireWarnMustBeLessThanExpireAfter();
 		}
 
-		Map<Long, DSRequest> dsRequests = _getFileEntryDSRequests(
+		Map<Long, DSRequest> dsRequests = _getLatestFileEntryDSRequests(
 			companyId, fileEntryIds);
 
 		for (Map.Entry<Long, DSRequest> entry : dsRequests.entrySet()) {
@@ -271,18 +271,18 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 	@Override
 	public DSRequest fetchFileEntryDSRequest(long companyId, long fileEntryId) {
-		Map<Long, DSRequest> dsRequests = getDSRequests(
+		Map<Long, DSRequest> dsRequests = getLatestFileEntryDSRequests(
 			companyId, new long[] {fileEntryId});
 
 		return dsRequests.get(fileEntryId);
 	}
 
 	@Override
-	public Map<Long, DSRequest> getDSRequests(
+	public Map<Long, DSRequest> getLatestFileEntryDSRequests(
 		long companyId, long[] fileEntryIds) {
 
 		try {
-			return _getFileEntryDSRequests(companyId, fileEntryIds);
+			return _getLatestFileEntryDSRequests(companyId, fileEntryIds);
 		}
 		catch (PortalException portalException) {
 			_log.error(portalException);
@@ -1014,7 +1014,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		return HtmlUtil.escape(emailMessage);
 	}
 
-	private Map<Long, DSRequest> _getFileEntryDSRequests(
+	private Map<Long, DSRequest> _getLatestFileEntryDSRequests(
 			long companyId, long[] fileEntryIds)
 		throws PortalException {
 

@@ -30,9 +30,6 @@ public interface DSRequestManager {
 
 	public DSRequest fetchFileEntryDSRequest(long companyId, long fileEntryId);
 
-	public Map<Long, DSRequest> getDSRequests(
-		long companyId, long[] fileEntryIds);
-
 	public List<DSRequest> getFileEntryDSRequests(
 		long companyId, long fileEntryId);
 
@@ -41,6 +38,9 @@ public interface DSRequestManager {
 
 	public int getGroupDSRequestsCount(
 		long companyId, long groupId, String search);
+
+	public Map<Long, DSRequest> getLatestFileEntryDSRequests(
+		long companyId, long[] fileEntryIds);
 
 	public boolean hasPermission(
 			PermissionChecker permissionChecker, DSRequest dsRequest,
