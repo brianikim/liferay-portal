@@ -632,7 +632,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		long groupId = MapUtil.getLong(objectEntry.getValues(), "siteGroupId");
 
 		if (!_isEnabled(companyId, groupId)) {
-			return;
+			throw new DSRequestException.NotEnabled(groupId);
 		}
 
 		try {
