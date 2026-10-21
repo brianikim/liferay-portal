@@ -14,11 +14,9 @@ import com.liferay.commerce.product.service.CommerceChannelLocalServiceUtil;
 import com.liferay.commerce.service.CommerceOrderAttachmentLocalServiceUtil;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfigurationUtil;
-import com.liferay.digital.signature.constants.DigitalSignatureConstants;
 import com.liferay.digital.signature.exception.DSRequestException;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSRequest;
-import com.liferay.document.library.kernel.service.DLAppLocalServiceUtil;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
@@ -30,7 +28,6 @@ import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.UserConstants;
 import com.liferay.portal.kernel.module.service.Snapshot;
-import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
@@ -40,6 +37,7 @@ import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.HttpComponentsUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -163,7 +161,7 @@ public class DSCommerceOrderAttachmentUtil {
 
 		String key = _errorMessageKeys.get(portalException.getClass());
 
-		if (key == null) {
+		if (Validator.isNull(key)) {
 			return portalException.getMessage();
 		}
 
@@ -190,22 +188,6 @@ public class DSCommerceOrderAttachmentUtil {
 		).put(
 			"userId", user.getUserId()
 		);
-	}
-
-	public static boolean hasAllowedFileExtension(
-			CommerceOrderAttachment commerceOrderAttachment)
-		throws PortalException {
-
-		FileEntry fileEntry = DLAppLocalServiceUtil.fetchFileEntry(
-			commerceOrderAttachment.getFileEntryId());
-
-		if (fileEntry == null) {
-			return false;
-		}
-
-		return ArrayUtil.contains(
-			DigitalSignatureConstants.ALLOWED_FILE_EXTENSIONS,
-			fileEntry.getExtension());
 	}
 
 	public static boolean isEnabled(CommerceOrder commerceOrder) {

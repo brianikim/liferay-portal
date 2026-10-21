@@ -12,12 +12,14 @@ import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.model.CommerceOrderAttachment;
 import com.liferay.commerce.service.CommerceOrderAttachmentLocalService;
 import com.liferay.commerce.service.CommerceOrderLocalService;
+import com.liferay.digital.signature.constants.DigitalSignatureConstants;
 import com.liferay.digital.signature.exception.DSRequestException;
 import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.digital.signature.model.DSRequest;
+import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.portal.kernel.exception.NoSuchModelException;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -31,6 +33,7 @@ import com.liferay.portal.kernel.model.UserConstants;
 import com.liferay.portal.kernel.portlet.JSONPortletResponseUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseTransactionalMVCResourceCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
+import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
@@ -38,6 +41,7 @@ import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermi
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.service.permission.UserPermissionUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 
@@ -141,9 +145,7 @@ public class AddDSRequestMVCResourceCommand
 					commerceOrder.getCommerceOrderId());
 			}
 
-			if (!DSCommerceOrderAttachmentUtil.hasAllowedFileExtension(
-					commerceOrderAttachment)) {
-
+			if (!_hasAllowedFileExtension(commerceOrderAttachment)) {
 				throw new DSCommerceOrderAttachmentException.
 					UnsupportedFileExtension(
 						commerceOrderAttachment.getCommerceOrderAttachmentId());
@@ -270,6 +272,22 @@ public class AddDSRequestMVCResourceCommand
 		return dsRecipients;
 	}
 
+	private boolean _hasAllowedFileExtension(
+			CommerceOrderAttachment commerceOrderAttachment)
+		throws PortalException {
+
+		FileEntry fileEntry = _dlAppLocalService.fetchFileEntry(
+			commerceOrderAttachment.getFileEntryId());
+
+		if (fileEntry == null) {
+			return false;
+		}
+
+		return ArrayUtil.contains(
+			DigitalSignatureConstants.ALLOWED_FILE_EXTENSIONS,
+			fileEntry.getExtension());
+	}
+
 	private void _voidDSEnvelope(ResourceRequest resourceRequest) {
 		DSRequest dsRequest = (DSRequest)resourceRequest.getAttribute(
 			DSRequest.class.getName());
@@ -313,6 +331,9 @@ public class AddDSRequestMVCResourceCommand
 	)
 	private ModelResourcePermission<CommerceOrder>
 		_commerceOrderModelResourcePermission;
+
+	@Reference
+	private DLAppLocalService _dlAppLocalService;
 
 	@Reference
 	private DSEnvelopeManager _dsEnvelopeManager;
