@@ -9,6 +9,7 @@ import com.liferay.digital.signature.exception.DSEnvelopeException;
 import com.liferay.digital.signature.internal.http.DSHttp;
 import com.liferay.digital.signature.manager.DSCustomFieldManager;
 import com.liferay.digital.signature.model.DSEnvelope;
+import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.json.JSONFactoryImpl;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -21,6 +22,7 @@ import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -56,6 +58,45 @@ public class DSEnvelopeManagerImplTest {
 
 		DSHttp dsHttp = _mockDSHttp(JSONFactoryUtil.createJSONObject());
 
+		long companyId = RandomTestUtil.randomLong();
+		String dsEnvelopeId = RandomTestUtil.randomString();
+		long groupId = RandomTestUtil.randomLong();
+		String status = RandomTestUtil.randomString();
+
+		Mockito.when(
+			dsHttp.get(
+				companyId, groupId,
+				"envelopes/" + dsEnvelopeId +
+					"?include=custom_fields,recipients")
+		).thenReturn(
+			JSONUtil.put(
+				"envelopeId", dsEnvelopeId
+			).put(
+				"status", status
+			)
+		);
+
+		Mockito.when(
+			dsHttp.post(
+				Mockito.eq(companyId), Mockito.eq(groupId),
+				Mockito.eq("envelopes"), Mockito.any(JSONObject.class))
+		).thenReturn(
+			JSONUtil.put("envelopeId", dsEnvelopeId)
+		);
+
+		DSEnvelope dsEnvelope = _dsEnvelopeManagerImpl.addDSEnvelope(
+			companyId, groupId, new DSEnvelope());
+
+		Assert.assertEquals(dsEnvelopeId, dsEnvelope.getDSEnvelopeId());
+		Assert.assertEquals(status, dsEnvelope.getStatus());
+
+		Mockito.verify(
+			dsHttp, Mockito.never()
+		).put(
+			Mockito.anyLong(), Mockito.anyLong(), Mockito.anyString(),
+			Mockito.any(JSONObject.class)
+		);
+
 		Mockito.when(
 			dsHttp.get(
 				Mockito.anyLong(), Mockito.anyLong(), Mockito.anyString())
@@ -66,19 +107,6 @@ public class DSEnvelopeManagerImplTest {
 				"message", "The envelope could not be read."
 			)
 		);
-
-		String dsEnvelopeId = RandomTestUtil.randomString();
-
-		Mockito.when(
-			dsHttp.post(
-				Mockito.anyLong(), Mockito.anyLong(), Mockito.eq("envelopes"),
-				Mockito.any(JSONObject.class))
-		).thenReturn(
-			JSONUtil.put("envelopeId", dsEnvelopeId)
-		);
-
-		long companyId = RandomTestUtil.randomLong();
-		long groupId = RandomTestUtil.randomLong();
 
 		SystemException systemException = Assert.assertThrows(
 			SystemException.class,
@@ -122,6 +150,94 @@ public class DSEnvelopeManagerImplTest {
 		Assert.assertEquals(
 			Arrays.toString(suppressedThrowables), 1,
 			suppressedThrowables.length);
+	}
+
+	@Test
+	public void testGetDSEnvelopes() throws Exception {
+		long companyId = RandomTestUtil.randomLong();
+		String dsClientUserId = RandomTestUtil.randomString();
+		String dsEnvelopeId1 = RandomTestUtil.randomString();
+		String dsEnvelopeId2 = RandomTestUtil.randomString();
+		DSHttp dsHttp = Mockito.mock(DSHttp.class);
+		String dsRecipientId = RandomTestUtil.randomString();
+		long groupId = RandomTestUtil.randomLong();
+		int routingOrder = RandomTestUtil.randomInt();
+
+		Mockito.when(
+			dsHttp.get(
+				companyId, groupId,
+				StringBundler.concat(
+					"envelopes?envelope_ids=", dsEnvelopeId1, ",",
+					dsEnvelopeId2, "&include=custom_fields,recipients"))
+		).thenReturn(
+			JSONUtil.put(
+				"envelopes",
+				JSONUtil.putAll(
+					JSONUtil.put(
+						"envelopeId", dsEnvelopeId1
+					).put(
+						"recipients",
+						JSONUtil.put(
+							"signers",
+							JSONUtil.putAll(
+								JSONUtil.put(
+									"clientUserId", dsClientUserId
+								).put(
+									"recipientId", dsRecipientId
+								).put(
+									"routingOrder", String.valueOf(routingOrder)
+								)))
+					),
+					JSONUtil.put("envelopeId", dsEnvelopeId2)))
+		);
+
+		ReflectionTestUtil.setFieldValue(
+			_dsEnvelopeManagerImpl, "_dsHttp", dsHttp);
+
+		List<DSEnvelope> dsEnvelopes = _dsEnvelopeManagerImpl.getDSEnvelopes(
+			companyId, groupId, dsEnvelopeId1, dsEnvelopeId2);
+
+		Assert.assertEquals(dsEnvelopes.toString(), 2, dsEnvelopes.size());
+
+		DSEnvelope dsEnvelope1 = dsEnvelopes.get(0);
+
+		Assert.assertEquals(dsEnvelopeId1, dsEnvelope1.getDSEnvelopeId());
+
+		List<DSRecipient> dsRecipients = dsEnvelope1.getDSRecipients();
+
+		Assert.assertEquals(dsRecipients.toString(), 1, dsRecipients.size());
+
+		DSRecipient dsRecipient = dsRecipients.get(0);
+
+		Assert.assertEquals(dsClientUserId, dsRecipient.getDSClientUserId());
+		Assert.assertEquals(dsRecipientId, dsRecipient.getDSRecipientId());
+		Assert.assertEquals(routingOrder, dsRecipient.getRoutingOrder());
+
+		DSEnvelope dsEnvelope2 = dsEnvelopes.get(1);
+
+		Assert.assertEquals(dsEnvelopeId2, dsEnvelope2.getDSEnvelopeId());
+
+		String message = RandomTestUtil.randomString();
+
+		Mockito.when(
+			dsHttp.get(
+				Mockito.anyLong(), Mockito.anyLong(), Mockito.anyString())
+		).thenReturn(
+			JSONUtil.put(
+				"errorCode", RandomTestUtil.randomString()
+			).put(
+				"message", message
+			)
+		);
+
+		PortalException portalException = Assert.assertThrows(
+			PortalException.class,
+			() -> _dsEnvelopeManagerImpl.getDSEnvelopes(
+				companyId, groupId, dsEnvelopeId1));
+
+		Assert.assertEquals(
+			"Unable to list digital signature envelopes: " + message,
+			portalException.getMessage());
 	}
 
 	@Test
