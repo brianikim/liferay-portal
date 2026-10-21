@@ -76,6 +76,7 @@ import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
+import com.liferay.portal.kernel.workflow.WorkflowThreadLocal;
 
 import java.io.Serializable;
 
@@ -1560,25 +1561,33 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 			ServiceContext serviceContext = _getServiceContext(
 				companyId, fileEntry.getGroupId(), userId);
+			boolean workflowEnabled = WorkflowThreadLocal.isEnabled();
 
-			fileEntry = _dlAppLocalService.updateFileEntry(
-				userId, fileEntryId, signedFileName,
-				ContentTypes.APPLICATION_PDF, title, null,
-				fileEntry.getDescription(), changeLog,
-				DLVersionNumberIncrease.MAJOR, bytes,
-				fileEntry.getDisplayDate(), fileEntry.getExpirationDate(),
-				fileEntry.getReviewDate(), serviceContext);
+			try {
+				WorkflowThreadLocal.setEnabled(false);
 
-			FileVersion fileVersion = fileEntry.getLatestFileVersion(true);
+				fileEntry = _dlAppLocalService.updateFileEntry(
+					userId, fileEntryId, signedFileName,
+					ContentTypes.APPLICATION_PDF, title, null,
+					fileEntry.getDescription(), changeLog,
+					DLVersionNumberIncrease.MAJOR, bytes,
+					fileEntry.getDisplayDate(), fileEntry.getExpirationDate(),
+					fileEntry.getReviewDate(), serviceContext);
 
-			if (fileVersion.getStatus() == WorkflowConstants.STATUS_APPROVED) {
-				continue;
+				FileVersion fileVersion = fileEntry.getLatestFileVersion(true);
+
+				if (fileVersion.getStatus() !=
+						WorkflowConstants.STATUS_APPROVED) {
+
+					_dlFileEntryLocalService.updateStatus(
+						userId, fileVersion.getFileVersionId(),
+						WorkflowConstants.STATUS_APPROVED, serviceContext,
+						new HashMap<>());
+				}
 			}
-
-			_dlFileEntryLocalService.updateStatus(
-				userId, fileVersion.getFileVersionId(),
-				WorkflowConstants.STATUS_APPROVED, serviceContext,
-				new HashMap<>());
+			finally {
+				WorkflowThreadLocal.setEnabled(workflowEnabled);
+			}
 		}
 	}
 
