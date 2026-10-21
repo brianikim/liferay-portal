@@ -6,6 +6,7 @@
 package com.liferay.commerce.digital.signature.web.internal.util;
 
 import com.liferay.account.service.AccountEntryUserRelLocalServiceUtil;
+import com.liferay.commerce.digital.signature.web.internal.exception.DSCommerceOrderAttachmentException;
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.model.CommerceOrderAttachment;
 import com.liferay.commerce.product.model.CommerceChannel;
@@ -14,6 +15,7 @@ import com.liferay.commerce.service.CommerceOrderAttachmentLocalServiceUtil;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfigurationUtil;
 import com.liferay.digital.signature.constants.DigitalSignatureConstants;
+import com.liferay.digital.signature.exception.DSRequestException;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.document.library.kernel.service.DLAppLocalServiceUtil;
@@ -24,6 +26,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
+import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.UserConstants;
 import com.liferay.portal.kernel.module.service.Snapshot;
@@ -34,6 +37,7 @@ import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermi
 import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
+import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.HttpComponentsUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.WebKeys;
@@ -44,6 +48,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -153,6 +158,18 @@ public class DSCommerceOrderAttachmentUtil {
 		return dsRequests;
 	}
 
+	public static String getErrorMessage(
+		Language language, Locale locale, PortalException portalException) {
+
+		String key = _errorMessageKeys.get(portalException.getClass());
+
+		if (key == null) {
+			return portalException.getMessage();
+		}
+
+		return language.get(locale, key);
+	}
+
 	public static long getSiteGroupId(CommerceOrder commerceOrder) {
 		CommerceChannel commerceChannel =
 			CommerceChannelLocalServiceUtil.fetchCommerceChannelByGroupClassPK(
@@ -246,5 +263,37 @@ public class DSCommerceOrderAttachmentUtil {
 	private static final Snapshot<DSRequestManager> _dsRequestManagerSnapshot =
 		new Snapshot<>(
 			DSCommerceOrderAttachmentUtil.class, DSRequestManager.class);
+	private static final Map<Class<?>, String> _errorMessageKeys =
+		HashMapBuilder.<Class<?>, String>put(
+			DSCommerceOrderAttachmentException.InvalidRecipient.class,
+			"one-or-more-recipients-cannot-sign-this-order"
+		).put(
+			DSCommerceOrderAttachmentException.MustHaveRecipient.class,
+			"at-least-one-recipient-is-required"
+		).put(
+			DSCommerceOrderAttachmentException.NoDSRequest.class,
+			"no-signature-request-was-found-for-this-document"
+		).put(
+			DSCommerceOrderAttachmentException.NotEnabled.class,
+			"digital-signature-is-not-enabled-for-this-order"
+		).put(
+			DSCommerceOrderAttachmentException.TooManyCountersigners.class,
+			"only-one-internal-countersigner-is-allowed"
+		).put(
+			DSCommerceOrderAttachmentException.UnsupportedFileExtension.class,
+			"this-file-extension-is-not-supported-by-docusign"
+		).put(
+			DSRequestException.ExpireWarnMustBeLessThanExpireAfter.class,
+			"days-to-warn-recipients-must-be-fewer-than-days-until-expiration"
+		).put(
+			DSRequestException.FileEntryHasDSRequest.class,
+			"this-document-already-has-an-active-or-completed-signature-request"
+		).put(
+			DSRequestException.NotActive.class,
+			"this-signature-request-is-no-longer-active"
+		).put(
+			DSRequestException.NotEnabled.class,
+			"digital-signature-is-not-enabled-for-this-order"
+		).build();
 
 }

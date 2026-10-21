@@ -6,11 +6,13 @@
 package com.liferay.commerce.digital.signature.web.internal.portlet.action;
 
 import com.liferay.commerce.constants.CommercePortletKeys;
+import com.liferay.commerce.digital.signature.web.internal.exception.DSCommerceOrderAttachmentException;
 import com.liferay.commerce.digital.signature.web.internal.util.DSCommerceOrderAttachmentUtil;
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.model.CommerceOrderAttachment;
 import com.liferay.commerce.service.CommerceOrderAttachmentLocalService;
 import com.liferay.commerce.service.CommerceOrderLocalService;
+import com.liferay.digital.signature.exception.DSRequestException;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.portal.kernel.exception.NoSuchModelException;
@@ -75,10 +77,8 @@ public class ResendDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
 				ActionKeys.UPDATE);
 
 			if (!DSCommerceOrderAttachmentUtil.isEnabled(commerceOrder)) {
-				throw new PortalException(
-					_language.get(
-						themeDisplay.getLocale(),
-						"digital-signature-is-not-enabled-for-this-order"));
+				throw new DSCommerceOrderAttachmentException.NotEnabled(
+					commerceOrder.getCommerceOrderId());
 			}
 
 			DSRequest dsRequest = _dsRequestManager.fetchFileEntryDSRequest(
@@ -86,10 +86,8 @@ public class ResendDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
 				commerceOrderAttachment.getFileEntryId());
 
 			if (dsRequest == null) {
-				throw new PortalException(
-					_language.get(
-						themeDisplay.getLocale(),
-						"no-signature-request-was-found-for-this-document"));
+				throw new DSCommerceOrderAttachmentException.NoDSRequest(
+					commerceOrderAttachment.getCommerceOrderAttachmentId());
 			}
 
 			_dsRequestManager.updateDSRequest(dsRequest.getDSRequestId());
@@ -98,10 +96,8 @@ public class ResendDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
 				commerceOrder.getCompanyId(), dsRequest.getDSRequestId());
 
 			if (dsRequest.isTerminal()) {
-				throw new PortalException(
-					_language.get(
-						themeDisplay.getLocale(),
-						"this-signature-request-is-no-longer-active"));
+				throw new DSRequestException.NotActive(
+					dsRequest.getDSRequestId());
 			}
 
 			_dsRequestManager.sendDSRequestNotifications(
@@ -124,7 +120,10 @@ public class ResendDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
 
 			JSONPortletResponseUtil.writeJSON(
 				resourceRequest, resourceResponse,
-				JSONUtil.put("errorMessage", portalException.getMessage()));
+				JSONUtil.put(
+					"errorMessage",
+					DSCommerceOrderAttachmentUtil.getErrorMessage(
+						_language, themeDisplay.getLocale(), portalException)));
 		}
 	}
 

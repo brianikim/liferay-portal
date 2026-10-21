@@ -6,6 +6,7 @@
 package com.liferay.commerce.digital.signature.web.internal.portlet.action;
 
 import com.liferay.commerce.constants.CommercePortletKeys;
+import com.liferay.commerce.digital.signature.web.internal.exception.DSCommerceOrderAttachmentException;
 import com.liferay.commerce.digital.signature.web.internal.util.DSCommerceOrderAttachmentUtil;
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.model.CommerceOrderAttachment;
@@ -47,7 +48,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 import org.osgi.service.component.annotations.Component;
@@ -89,23 +89,18 @@ public class AddDSRequestMVCResourceCommand
 				_log.debug(throwable);
 			}
 
-			String errorMessage = throwable.getMessage();
-
-			if (throwable instanceof DSRequestException.FileEntryHasDSRequest) {
-				ThemeDisplay themeDisplay =
-					(ThemeDisplay)resourceRequest.getAttribute(
-						WebKeys.THEME_DISPLAY);
-
-				errorMessage = _language.get(
-					themeDisplay.getLocale(),
-					"this-document-already-has-an-active-or-completed-" +
-						"signature-request");
-			}
+			ThemeDisplay themeDisplay =
+				(ThemeDisplay)resourceRequest.getAttribute(
+					WebKeys.THEME_DISPLAY);
 
 			try {
 				JSONPortletResponseUtil.writeJSON(
 					resourceRequest, resourceResponse,
-					JSONUtil.put("errorMessage", errorMessage));
+					JSONUtil.put(
+						"errorMessage",
+						DSCommerceOrderAttachmentUtil.getErrorMessage(
+							_language, themeDisplay.getLocale(),
+							(PortalException)throwable)));
 			}
 			catch (IOException ioException) {
 				throw new PortletException(ioException);
@@ -140,19 +135,15 @@ public class AddDSRequestMVCResourceCommand
 				ActionKeys.UPDATE);
 
 			if (!DSCommerceOrderAttachmentUtil.isEnabled(commerceOrder)) {
-				throw new PortalException(
-					_language.get(
-						themeDisplay.getLocale(),
-						"digital-signature-is-not-enabled-for-this-order"));
+				throw new DSCommerceOrderAttachmentException.NotEnabled(
+					commerceOrder.getCommerceOrderId());
 			}
 
 			if (!DSCommerceOrderAttachmentUtil.hasAllowedFileExtension(
 					commerceOrderAttachment)) {
 
-				throw new PortalException(
-					_language.get(
-						themeDisplay.getLocale(),
-						"this-file-extension-is-not-supported-by-docusign"));
+				throw new DSCommerceOrderAttachmentException.UnsupportedFileExtension(
+					commerceOrderAttachment.getCommerceOrderAttachmentId());
 			}
 
 			int expireAfterDays = ParamUtil.getInteger(
@@ -161,11 +152,7 @@ public class AddDSRequestMVCResourceCommand
 				resourceRequest, "expireWarn");
 
 			if ((expireAfterDays > 0) && (expireWarnDays >= expireAfterDays)) {
-				throw new PortalException(
-					_language.get(
-						themeDisplay.getLocale(),
-						"days-to-warn-recipients-must-be-fewer-than-days-" +
-							"until-expiration"));
+				throw new DSRequestException.ExpireWarnMustBeLessThanExpireAfter();
 			}
 
 			DSRequest dsRequest = _dsRequestManager.addDSRequest(
@@ -175,9 +162,7 @@ public class AddDSRequestMVCResourceCommand
 				new DSEnvelope() {
 					{
 						setDSRecipients(
-							_getDSRecipients(
-								commerceOrder, themeDisplay.getLocale(),
-								resourceRequest));
+							_getDSRecipients(commerceOrder, resourceRequest));
 						setEmailBlurb(
 							ParamUtil.getString(
 								resourceRequest, "emailMessage"));
@@ -206,8 +191,7 @@ public class AddDSRequestMVCResourceCommand
 	}
 
 	private List<DSRecipient> _getDSRecipients(
-			CommerceOrder commerceOrder, Locale locale,
-			ResourceRequest resourceRequest)
+			CommerceOrder commerceOrder, ResourceRequest resourceRequest)
 		throws PortalException {
 
 		List<DSRecipient> dsRecipients = new ArrayList<>();
@@ -235,10 +219,8 @@ public class AddDSRequestMVCResourceCommand
 				(user.getType() != UserConstants.TYPE_REGULAR) ||
 				!user.isActive()) {
 
-				throw new PortalException(
-					_language.get(
-						locale,
-						"one-or-more-recipients-cannot-sign-this-order"));
+				throw new DSCommerceOrderAttachmentException.InvalidRecipient(
+					recipientUserId);
 			}
 
 			if (!accountUserIds.contains(recipientUserId) &&
@@ -248,9 +230,7 @@ public class AddDSRequestMVCResourceCommand
 			}
 
 			if (count > 1) {
-				throw new PortalException(
-					_language.get(
-						locale, "only-one-internal-countersigner-is-allowed"));
+				throw new DSCommerceOrderAttachmentException.TooManyCountersigners();
 			}
 
 			DSRecipient dsRecipient = new DSRecipient();
@@ -272,8 +252,7 @@ public class AddDSRequestMVCResourceCommand
 		}
 
 		if (dsRecipients.isEmpty()) {
-			throw new PortalException(
-				_language.get(locale, "at-least-one-recipient-is-required"));
+			throw new DSCommerceOrderAttachmentException.MustHaveRecipient();
 		}
 
 		return dsRecipients;

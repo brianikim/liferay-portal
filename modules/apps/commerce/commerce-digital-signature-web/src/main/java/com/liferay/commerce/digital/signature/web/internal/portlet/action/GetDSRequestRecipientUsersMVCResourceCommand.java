@@ -6,6 +6,7 @@
 package com.liferay.commerce.digital.signature.web.internal.portlet.action;
 
 import com.liferay.commerce.constants.CommercePortletKeys;
+import com.liferay.commerce.digital.signature.web.internal.exception.DSCommerceOrderAttachmentException;
 import com.liferay.commerce.digital.signature.web.internal.util.DSCommerceOrderAttachmentUtil;
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.service.CommerceOrderLocalService;
@@ -68,10 +69,8 @@ public class GetDSRequestRecipientUsersMVCResourceCommand
 				ActionKeys.UPDATE);
 
 			if (!DSCommerceOrderAttachmentUtil.isEnabled(commerceOrder)) {
-				throw new PortalException(
-					_language.get(
-						themeDisplay.getLocale(),
-						"digital-signature-is-not-enabled-for-this-order"));
+				throw new DSCommerceOrderAttachmentException.NotEnabled(
+					commerceOrder.getCommerceOrderId());
 			}
 
 			JSONPortletResponseUtil.writeJSON(
@@ -99,7 +98,10 @@ public class GetDSRequestRecipientUsersMVCResourceCommand
 
 			JSONPortletResponseUtil.writeJSON(
 				resourceRequest, resourceResponse,
-				JSONUtil.put("errorMessage", portalException.getMessage()));
+				JSONUtil.put(
+					"errorMessage",
+					DSCommerceOrderAttachmentUtil.getErrorMessage(
+						_language, themeDisplay.getLocale(), portalException)));
 		}
 	}
 

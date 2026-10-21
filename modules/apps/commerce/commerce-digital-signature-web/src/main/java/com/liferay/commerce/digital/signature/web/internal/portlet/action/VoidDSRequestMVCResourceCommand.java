@@ -6,6 +6,7 @@
 package com.liferay.commerce.digital.signature.web.internal.portlet.action;
 
 import com.liferay.commerce.constants.CommercePortletKeys;
+import com.liferay.commerce.digital.signature.web.internal.exception.DSCommerceOrderAttachmentException;
 import com.liferay.commerce.digital.signature.web.internal.util.DSCommerceOrderAttachmentUtil;
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.model.CommerceOrderAttachment;
@@ -76,10 +77,8 @@ public class VoidDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
 				ActionKeys.UPDATE);
 
 			if (!DSCommerceOrderAttachmentUtil.isEnabled(commerceOrder)) {
-				throw new PortalException(
-					_language.get(
-						themeDisplay.getLocale(),
-						"digital-signature-is-not-enabled-for-this-order"));
+				throw new DSCommerceOrderAttachmentException.NotEnabled(
+					commerceOrder.getCommerceOrderId());
 			}
 
 			DSRequest dsRequest = _dsRequestManager.fetchFileEntryDSRequest(
@@ -87,33 +86,20 @@ public class VoidDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
 				commerceOrderAttachment.getFileEntryId());
 
 			if (dsRequest == null) {
-				throw new PortalException(
-					_language.get(
-						themeDisplay.getLocale(),
-						"no-signature-request-was-found-for-this-document"));
+				throw new DSCommerceOrderAttachmentException.NoDSRequest(
+					commerceOrderAttachment.getCommerceOrderAttachmentId());
 			}
 
 			if (dsRequest.isTerminal()) {
-				throw new PortalException(
-					_language.get(
-						themeDisplay.getLocale(),
-						"this-signature-request-is-no-longer-active"));
+				throw new DSRequestException.NotActive(
+					dsRequest.getDSRequestId());
 			}
 
-			try {
-				_dsRequestManager.voidDSRequest(
-					dsRequest.getDSRequestId(),
-					_language.get(
-						themeDisplay.getLocale(),
-						"the-sender-voided-the-signature-request"));
-			}
-			catch (DSRequestException.NotActive dsRequestException) {
-				throw new PortalException(
-					_language.get(
-						themeDisplay.getLocale(),
-						"this-signature-request-is-no-longer-active"),
-					dsRequestException);
-			}
+			_dsRequestManager.voidDSRequest(
+				dsRequest.getDSRequestId(),
+				_language.get(
+					themeDisplay.getLocale(),
+					"the-sender-voided-the-signature-request"));
 
 			JSONPortletResponseUtil.writeJSON(
 				resourceRequest, resourceResponse,
@@ -132,7 +118,10 @@ public class VoidDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
 
 			JSONPortletResponseUtil.writeJSON(
 				resourceRequest, resourceResponse,
-				JSONUtil.put("errorMessage", portalException.getMessage()));
+				JSONUtil.put(
+					"errorMessage",
+					DSCommerceOrderAttachmentUtil.getErrorMessage(
+						_language, themeDisplay.getLocale(), portalException)));
 		}
 	}
 
