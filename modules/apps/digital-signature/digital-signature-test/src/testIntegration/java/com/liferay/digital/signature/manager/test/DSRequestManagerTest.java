@@ -816,6 +816,36 @@ public class DSRequestManagerTest {
 				notificationQueueEntries.toString(), 1,
 				notificationQueueEntries.size());
 
+			DSEnvelope expiredDSEnvelope = _createDSEnvelope();
+
+			LocalDateTime localDateTime = LocalDateTime.now();
+
+			expiredDSEnvelope.setExpirationLocalDateTime(
+				localDateTime.minusDays(1));
+
+			List<DSRecipient> expiredDSRecipients =
+				expiredDSEnvelope.getDSRecipients();
+
+			DSRecipient expiredDSRecipient = expiredDSRecipients.get(0);
+
+			expiredDSRecipient.setStatus(DSRequestConstants.STATUS_SENT);
+
+			DSRequest expiredDSRequest = _addDSRequest(
+				expiredDSEnvelope, RandomTestUtil.randomInt());
+
+			Assert.assertTrue(expiredDSRequest.isSyncable());
+
+			dsEnvelopeIds.add(expiredDSRequest.getExternalReferenceCode());
+
+			_dsRequestManager.sendDSRequestReminders(
+				TestPropsValues.getCompanyId());
+
+			expiredDSRequest = _dsRequestManager.fetchDSRequest(
+				TestPropsValues.getCompanyId(),
+				expiredDSRequest.getDSRequestId());
+
+			Assert.assertFalse(expiredDSRequest.isSyncable());
+
 			DSRequest dsRequest4 = _addDSRequestObjectEntries(
 				DSRequestConstants.STATUS_SENT);
 
