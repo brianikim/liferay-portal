@@ -17,6 +17,7 @@ import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.Role;
@@ -373,6 +374,30 @@ public class AddDSEnvelopeMVCResourceCommandTest {
 
 			themeDisplay.setPermissionChecker(
 				PermissionCheckerFactoryUtil.create(_user));
+
+			User recipientUser = UserTestUtil.addUser();
+
+			mockLiferayResourceRequest.setParameter(
+				"recipients",
+				JSONUtil.putAll(
+					JSONUtil.put(
+						"email", recipientUser.getEmailAddress()
+					).put(
+						"fullName", recipientUser.getFullName()
+					)
+				).toString());
+
+			Assert.assertThrows(
+				PrincipalException.MustHavePermission.class,
+				() -> ReflectionTestUtil.invoke(
+					_mvcResourceCommand, "doTransactionalCommand",
+					new Class<?>[] {
+						ResourceRequest.class, ResourceResponse.class
+					},
+					mockLiferayResourceRequest,
+					new MockLiferayResourceResponse()));
+
+			mockLiferayResourceRequest.setParameter("recipients", "[]");
 
 			String dsEnvelopeId = RandomTestUtil.randomString();
 
