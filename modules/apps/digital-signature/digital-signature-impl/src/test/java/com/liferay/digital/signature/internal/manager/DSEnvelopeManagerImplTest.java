@@ -21,6 +21,7 @@ import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -111,6 +112,69 @@ public class DSEnvelopeManagerImplTest {
 		Assert.assertEquals(
 			Arrays.toString(suppressedThrowables), 1,
 			suppressedThrowables.length);
+	}
+
+	@Test
+	public void testGetDSEnvelopes() throws Exception {
+		DSHttp dsHttp = Mockito.mock(DSHttp.class);
+
+		Mockito.when(
+			dsHttp.get(
+				1, 2,
+				"envelopes?envelope_ids=envelopeId1,envelopeId2&include=" +
+					"custom_fields,recipients")
+		).thenReturn(
+			JSONUtil.put(
+				"envelopes",
+				JSONUtil.putAll(
+					JSONUtil.put(
+						"envelopeId", "envelopeId1"
+					).put(
+						"status", "sent"
+					),
+					JSONUtil.put(
+						"envelopeId", "envelopeId2"
+					).put(
+						"status", "completed"
+					)))
+		);
+
+		ReflectionTestUtil.setFieldValue(
+			_dsEnvelopeManagerImpl, "_dsHttp", dsHttp);
+
+		List<DSEnvelope> dsEnvelopes = _dsEnvelopeManagerImpl.getDSEnvelopes(
+			1, 2, "envelopeId1", "envelopeId2");
+
+		Assert.assertEquals(dsEnvelopes.toString(), 2, dsEnvelopes.size());
+
+		DSEnvelope dsEnvelope1 = dsEnvelopes.get(0);
+
+		Assert.assertEquals("envelopeId1", dsEnvelope1.getDSEnvelopeId());
+
+		DSEnvelope dsEnvelope2 = dsEnvelopes.get(1);
+
+		Assert.assertEquals("envelopeId2", dsEnvelope2.getDSEnvelopeId());
+
+		Mockito.when(
+			dsHttp.get(
+				Mockito.anyLong(), Mockito.anyLong(), Mockito.anyString())
+		).thenReturn(
+			JSONUtil.put(
+				"errorCode", "INVALID_REQUEST_PARAMETER"
+			).put(
+				"message",
+				"The request contained at least one invalid parameter."
+			)
+		);
+
+		PortalException portalException = Assert.assertThrows(
+			PortalException.class,
+			() -> _dsEnvelopeManagerImpl.getDSEnvelopes(1, 2, "envelopeId1"));
+
+		Assert.assertEquals(
+			"Unable to list digital signature envelopes: The request " +
+				"contained at least one invalid parameter.",
+			portalException.getMessage());
 	}
 
 	@Test
