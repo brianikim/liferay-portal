@@ -68,7 +68,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
  */
 @FeatureFlag("LPD-69290")
 @RunWith(Arquillian.class)
-public class CommerceOrderDSRequestSignServletTest {
+public class DSCommerceOrderAttachmentSignServletTest {
 
 	@ClassRule
 	@Rule
@@ -81,7 +81,7 @@ public class CommerceOrderDSRequestSignServletTest {
 	public void setUp() throws Exception {
 		BatchEngineTestUtil.processBatchEngineUnits(
 			"com.liferay.digital.signature.impl",
-			CommerceOrderDSRequestSignServletTest.class,
+			DSCommerceOrderAttachmentSignServletTest.class,
 			new String[] {
 				".com.liferay.digital.signature.internal.batch.01.object." +
 					"definition"
@@ -290,7 +290,7 @@ public class CommerceOrderDSRequestSignServletTest {
 	private Portal _portal;
 
 	@Inject(
-		filter = "osgi.http.whiteboard.servlet.name=com.liferay.commerce.digital.signature.web.internal.servlet.CommerceOrderDSRequestSignServlet"
+		filter = "osgi.http.whiteboard.servlet.name=com.liferay.commerce.digital.signature.web.internal.servlet.DSCommerceOrderAttachmentSignServlet"
 	)
 	private Servlet _servlet;
 

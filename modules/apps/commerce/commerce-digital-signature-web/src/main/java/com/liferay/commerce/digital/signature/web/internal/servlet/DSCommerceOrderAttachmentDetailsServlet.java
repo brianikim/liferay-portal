@@ -47,12 +47,12 @@ import org.osgi.service.component.annotations.Reference;
 @Component(
 	property = {
 		"osgi.http.whiteboard.context.path=/commerce-digital-signature",
-		"osgi.http.whiteboard.servlet.name=com.liferay.commerce.digital.signature.web.internal.servlet.CommerceOrderDSRequestDetailsServlet",
+		"osgi.http.whiteboard.servlet.name=com.liferay.commerce.digital.signature.web.internal.servlet.DSCommerceOrderAttachmentDetailsServlet",
 		"osgi.http.whiteboard.servlet.pattern=/commerce-digital-signature/signature-details/*"
 	},
 	service = Servlet.class
 )
-public class CommerceOrderDSRequestDetailsServlet extends HttpServlet {
+public class DSCommerceOrderAttachmentDetailsServlet extends HttpServlet {
 
 	@Override
 	protected void doGet(
@@ -206,7 +206,7 @@ public class CommerceOrderDSRequestDetailsServlet extends HttpServlet {
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		CommerceOrderDSRequestDetailsServlet.class);
+		DSCommerceOrderAttachmentDetailsServlet.class);
 
 	@Reference
 	private CommerceOrderAttachmentService _commerceOrderAttachmentService;
