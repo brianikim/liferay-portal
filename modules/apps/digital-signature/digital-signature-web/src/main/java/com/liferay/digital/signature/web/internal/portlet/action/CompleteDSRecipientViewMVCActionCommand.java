@@ -21,7 +21,6 @@ import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 
@@ -29,6 +28,8 @@ import jakarta.portlet.ActionRequest;
 import jakarta.portlet.ActionResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.util.Objects;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -89,7 +90,7 @@ public class CompleteDSRecipientViewMVCActionCommand
 				dsRequest.getDSRequestRecipients()) {
 
 			if ((dsRequestRecipient.getUserId() == user.getUserId()) &&
-				StringUtil.equalsIgnoreCase(
+				Objects.equals(
 					DSRequestConstants.STATUS_COMPLETED,
 					dsRequestRecipient.getStatus())) {
 
