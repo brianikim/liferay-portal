@@ -138,18 +138,14 @@ describe('mountSigning', () => {
 		expect(fetch.mock.calls[0][0]).toBe(COMPLETE_URL);
 	});
 
-	it('mounts the focused view with the decline button', async () => {
+	it('mounts the default view', async () => {
 		await mount();
 
 		const docuSign =
 			await window.DocuSign.loadDocuSign.mock.results[0].value;
 
 		expect(docuSign.signing).toHaveBeenCalledWith({
-			displayFormat: 'focused',
-			style: {
-				declineModal: {show: true},
-				signingDeclineButton: {show: true},
-			},
+			displayFormat: 'default',
 			url: 'http://localhost/signing',
 		});
 	});
