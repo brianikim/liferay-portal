@@ -6,6 +6,12 @@
 package com.liferay.digital.signature.manager.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.portal.kernel.service.WorkflowInstanceLinkLocalService;
+import com.liferay.portal.kernel.service.WorkflowDefinitionLinkLocalService;
+import com.liferay.portal.kernel.repository.model.Folder;
+import com.liferay.document.library.kernel.service.DLFolderLocalService;
+import com.liferay.document.library.kernel.model.DLFolder;
+import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.batch.engine.test.util.BatchEngineTestUtil;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.digital.signature.constants.DSObjectDefinitionConstants;
@@ -769,6 +775,7 @@ public class DSRequestManagerTest {
 
 		_testUpdateDSRequestWhenDSEnvelopeIsCompleted();
 		_testUpdateDSRequestWhenDSRecipientStatusesDiffer();
+		_testUpdateDSRequestWhenFolderHasWorkflow();
 		_testUpdateDSRequestWhenNextDSRecipientIsSent();
 		_testUpdateDSRequestWhenObjectEntryIsNotDSRequest();
 		_testUpdateDSRequestWhenSignedDocumentIsNotPDF();
@@ -1799,6 +1806,87 @@ public class DSRequestManagerTest {
 			dsRequestRecipientValues.get("requestRecipientStatusDate"));
 	}
 
+	private void _testUpdateDSRequestWhenFolderHasWorkflow() throws Exception {
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(
+				TestPropsValues.getGroupId());
+
+		Folder folder = _dlAppLocalService.addFolder(
+			null, TestPropsValues.getUserId(), TestPropsValues.getGroupId(),
+			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
+			RandomTestUtil.randomString(), RandomTestUtil.randomString(),
+			serviceContext);
+
+		FileEntry fileEntry = _dlAppLocalService.addFileEntry(
+			null, TestPropsValues.getUserId(), TestPropsValues.getGroupId(),
+			folder.getFolderId(), RandomTestUtil.randomString() + ".pdf",
+			ContentTypes.APPLICATION_PDF, TestDataConstants.TEST_BYTE_ARRAY,
+			null, null, null, serviceContext);
+
+		_dlFolderLocalService.updateFolder(
+			folder.getFolderId(), folder.getName(), folder.getDescription(), 0,
+			ListUtil.fromArray(0L), DLFolderConstants.RESTRICTION_TYPE_WORKFLOW,
+			serviceContext);
+
+		_workflowDefinitionLinkLocalService.addWorkflowDefinitionLink(
+			null, TestPropsValues.getUserId(), TestPropsValues.getCompanyId(),
+			TestPropsValues.getGroupId(), DLFolder.class.getName(),
+			folder.getFolderId(), -1, "Single Approver", 1);
+
+		DSEnvelope dsEnvelope = _createDSEnvelope(
+			_createDSRecipient(UserTestUtil.addUser()));
+
+		dsEnvelope.setDSEnvelopeId(PortalUUIDUtil.generate());
+
+		DSRequest dsRequest = _addDSRequest(
+			dsEnvelope, fileEntry.getFileEntryId());
+
+		for (DSRecipient dsRecipient : dsEnvelope.getDSRecipients()) {
+			dsRecipient.setStatus(DSRequestConstants.STATUS_COMPLETED);
+		}
+
+		dsEnvelope.setStatus(DSRequestConstants.STATUS_COMPLETED);
+
+		DSEnvelopeManager dsEnvelopeManager =
+			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager",
+				ProxyUtil.newProxyInstance(
+					DSEnvelopeManager.class.getClassLoader(),
+					new Class<?>[] {DSEnvelopeManager.class},
+					(proxy, method, arguments) -> {
+						if (Objects.equals(
+								method.getName(), "getDSDocumentAsBytes")) {
+
+							return ArrayUtil.append(
+								"%PDF-".getBytes(),
+								RandomTestUtil.randomBytes());
+						}
+
+						return dsEnvelope;
+					}));
+
+		try {
+			_dsRequestManager.updateDSRequest(dsRequest.getDSRequestId());
+		}
+		finally {
+			ReflectionTestUtil.setFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager);
+		}
+
+		fileEntry = _dlAppLocalService.getFileEntry(fileEntry.getFileEntryId());
+
+		Assert.assertEquals("2.0", fileEntry.getVersion());
+
+		FileVersion fileVersion = fileEntry.getLatestFileVersion(true);
+
+		Assert.assertEquals(
+			WorkflowConstants.STATUS_APPROVED, fileVersion.getStatus());
+		Assert.assertNull(
+			_workflowInstanceLinkLocalService.fetchWorkflowInstanceLink(
+				TestPropsValues.getCompanyId(), TestPropsValues.getGroupId(),
+				DLFileEntry.class.getName(), fileVersion.getFileVersionId()));
+	}
+
 	private void _testUpdateDSRequestWhenNextDSRecipientIsSent()
 		throws Exception {
 
@@ -2037,6 +2125,9 @@ public class DSRequestManagerTest {
 	@Inject
 	private DLAppLocalService _dlAppLocalService;
 
+	@Inject
+	private DLFolderLocalService _dlFolderLocalService;
+
 	private ObjectDefinition _dsRequestDocumentObjectDefinition;
 
 	@Inject
@@ -2074,5 +2165,13 @@ public class DSRequestManagerTest {
 
 	@Inject
 	private UserLocalService _userLocalService;
+
+
+	@Inject
+	private WorkflowDefinitionLinkLocalService
+		_workflowDefinitionLinkLocalService;
+
+	@Inject
+	private WorkflowInstanceLinkLocalService _workflowInstanceLinkLocalService;
 
 }
