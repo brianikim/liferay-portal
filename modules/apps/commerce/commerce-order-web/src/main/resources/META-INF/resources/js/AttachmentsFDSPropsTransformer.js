@@ -17,6 +17,23 @@ import AddDSRequestModal from './AddDSRequestModal';
 import CommerceOrderAttachmentRestrictedDataRenderer from './CommerceOrderAttachmentRestrictedDataRenderer';
 import CommerceOrderAttachmentTitleDataRenderer from './CommerceOrderAttachmentTitleDataRenderer';
 
+const openAddDSRequestModal = ({
+	addDSRequestModalProps,
+	addDSRequestURL,
+	attachment,
+}) => {
+	openModal({
+		contentComponent: ({closeModal}) =>
+			React.createElement(AddDSRequestModal, {
+				addDSRequestModalProps,
+				addDSRequestURL,
+				attachment,
+				closeModal,
+			}),
+		size: 'lg',
+	});
+};
+
 const openDeleteConfirmationModal = ({itemName, loadData, url}) => {
 	openModal({
 		bodyHTML: Liferay.Language.get(
@@ -90,23 +107,6 @@ const openErrorToast = (error) => {
 				Liferay.Language.get('an-unexpected-error-occurred')
 		),
 		type: 'danger',
-	});
-};
-
-const openAddDSRequestModal = ({
-	addDSRequestModalProps,
-	addDSRequestURL,
-	attachment,
-}) => {
-	openModal({
-		contentComponent: ({closeModal}) =>
-			React.createElement(AddDSRequestModal, {
-				addDSRequestModalProps,
-				addDSRequestURL,
-				attachment,
-				closeModal,
-			}),
-		size: 'lg',
 	});
 };
 
