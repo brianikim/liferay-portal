@@ -10,6 +10,7 @@ import com.liferay.batch.engine.test.util.BatchEngineTestUtil;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.digital.signature.constants.DSObjectDefinitionConstants;
 import com.liferay.digital.signature.constants.DSRequestConstants;
+import com.liferay.digital.signature.exception.DSEnvelopeException;
 import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
@@ -40,6 +41,8 @@ import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporaryS
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.GroupConstants;
 import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.User;
@@ -50,6 +53,7 @@ import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.constants.TestDataConstants;
+import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.RoleTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
@@ -65,6 +69,7 @@ import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.test.log.LogCapture;
 import com.liferay.portal.test.log.LoggerTestUtil;
 import com.liferay.portal.test.rule.FeatureFlag;
@@ -75,6 +80,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -219,6 +225,10 @@ public class SignatureRequestResourceTest
 		Assert.assertEquals(
 			Long.valueOf(TestPropsValues.getUserId()), creator.getId());
 
+		DSRequest dsRequest = _dsRequestManager.fetchDSRequest(
+			testCompany.getCompanyId(),
+			dsRequestObjectEntry.getObjectEntryId());
+
 		Assert.assertEquals(
 			MapUtil.getString(dsRequestObjectEntry.getValues(), "emailMessage"),
 			signatureRequest.getEmailMessage());
@@ -226,10 +236,15 @@ public class SignatureRequestResourceTest
 			MapUtil.getString(dsRequestObjectEntry.getValues(), "emailSubject"),
 			signatureRequest.getEmailSubject());
 		Assert.assertEquals(
+			dsRequest.getExpirationDate(),
+			signatureRequest.getExpirationDate());
+		Assert.assertEquals(
 			Long.valueOf(dsRequestObjectEntry.getObjectEntryId()),
 			signatureRequest.getId());
 		Assert.assertEquals(
 			DSRequestConstants.STATUS_SENT, signatureRequest.getStatus());
+		Assert.assertEquals(
+			dsRequest.getStatusDate(), signatureRequest.getStatusDate());
 
 		Map<String, Map<String, String>> actions =
 			signatureRequest.getActions();
@@ -254,10 +269,6 @@ public class SignatureRequestResourceTest
 			Arrays.toString(signatureRequestRecipients), 1,
 			signatureRequestRecipients.length);
 
-		DSRequest dsRequest = _dsRequestManager.fetchDSRequest(
-			testCompany.getCompanyId(),
-			dsRequestObjectEntry.getObjectEntryId());
-
 		List<DSRequestRecipient> dsRequestRecipients =
 			dsRequest.getDSRequestRecipients();
 
@@ -272,11 +283,22 @@ public class SignatureRequestResourceTest
 		Assert.assertEquals(
 			dsRequestRecipient.getName(), signatureRequestRecipient.getName());
 		Assert.assertEquals(
+			dsRequestRecipient.getSentDate(),
+			signatureRequestRecipient.getSentDate());
+		Assert.assertEquals(
 			DSRequestConstants.STATUS_SENT,
 			signatureRequestRecipient.getStatus());
 		Assert.assertEquals(
+			dsRequestRecipient.getStatusDate(),
+			signatureRequestRecipient.getStatusDate());
+		Assert.assertEquals(
 			Long.valueOf(user1.getUserId()),
 			signatureRequestRecipient.getUserId());
+
+		signatureRequest = signatureRequestResource.getSignatureRequest(
+			dsRequestObjectEntry.getObjectEntryId());
+
+		Assert.assertTrue(MapUtil.isEmpty(signatureRequest.getActions()));
 
 		User user2 = UserTestUtil.addUser();
 
@@ -352,6 +374,7 @@ public class SignatureRequestResourceTest
 		super.testPostSignatureRequestVoid();
 
 		_testPostSignatureRequestVoid();
+		_testPostSignatureRequestVoidWhenDSEnvelopeIsNotVoidable();
 		_testPostSignatureRequestVoidWhenSignatureRequestIsTerminal();
 		_testPostSignatureRequestVoidWhenVoidReasonIsBlank();
 		_testPostSignatureRequestVoidWithoutUpdatePermission();
@@ -367,7 +390,7 @@ public class SignatureRequestResourceTest
 		_testPostSiteSignatureRequestWhenExpireAfterIsNegative();
 		_testPostSiteSignatureRequestWhenExpireWarnIsNotLessThanExpireAfter();
 		_testPostSiteSignatureRequestWhenFileEntryHasDSRequest();
-		_testPostSiteSignatureRequestWhenFileEntryIdsIsEmpty();
+		_testPostSiteSignatureRequestWhenFileEntryIdsIsNull();
 		_testPostSiteSignatureRequestWhenRecipientIsDuplicated();
 		_testPostSiteSignatureRequestWhenRecipientUserIdIsNull();
 		_testPostSiteSignatureRequestWhenRecipientsIsEmpty();
@@ -376,6 +399,7 @@ public class SignatureRequestResourceTest
 		_testPostSiteSignatureRequestWithoutAddPermission();
 		_testPostSiteSignatureRequestWithoutFileEntryUpdatePermission();
 		_testPostSiteSignatureRequestWithoutRecipientUserViewPermission();
+		_testPostSiteSignatureRequestWithoutSiteViewPermission();
 	}
 
 	@Ignore
@@ -453,6 +477,8 @@ public class SignatureRequestResourceTest
 			ServiceContextTestUtil.getServiceContext(
 				testGroup.getGroupId(), TestPropsValues.getUserId());
 
+		long time = System.currentTimeMillis() / Time.SECOND * Time.SECOND;
+
 		ObjectEntry dsRequestObjectEntry =
 			_objectEntryLocalService.addObjectEntry(
 				0, TestPropsValues.getUserId(),
@@ -465,7 +491,11 @@ public class SignatureRequestResourceTest
 				).put(
 					"externalReferenceCode", RandomTestUtil.randomString()
 				).put(
+					"requestExpirationDate", new Date(time + Time.DAY)
+				).put(
 					"requestStatus", requestStatus
+				).put(
+					"requestStatusDate", new Date(time - Time.HOUR)
 				).put(
 					"siteGroupId", testGroup.getGroupId()
 				).build(),
@@ -508,6 +538,10 @@ public class SignatureRequestResourceTest
 				}
 			).put(
 				"requestRecipientStatus", DSRequestConstants.STATUS_SENT
+			).put(
+				"requestRecipientStatusDate", new Date(time - Time.MINUTE)
+			).put(
+				"sentDate", new Date(time - Time.HOUR)
 			).put(
 				"signingOrder", 1
 			).build(),
@@ -768,6 +802,48 @@ public class SignatureRequestResourceTest
 		}
 	}
 
+	private void _testPostSignatureRequestVoidWhenDSEnvelopeIsNotVoidable()
+		throws Exception {
+
+		DSEnvelope dsEnvelope = new DSEnvelope();
+
+		dsEnvelope.setDSRecipients(new ArrayList<>());
+		dsEnvelope.setStatus(DSRequestConstants.STATUS_SENT);
+
+		DSEnvelopeManager dsEnvelopeManager =
+			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager",
+				ProxyUtil.newProxyInstance(
+					DSEnvelopeManager.class.getClassLoader(),
+					new Class<?>[] {DSEnvelopeManager.class},
+					(proxy, method, arguments) -> {
+						if (Objects.equals(
+								method.getName(), "voidDSEnvelope")) {
+
+							throw new DSEnvelopeException.NotVoidable(
+								RandomTestUtil.randomString());
+						}
+
+						return dsEnvelope;
+					}));
+
+		try {
+			ObjectEntry dsRequestObjectEntry = _addDSRequestObjectEntry(
+				RandomTestUtil.randomString() + "@liferay.com",
+				DSRequestConstants.STATUS_SENT);
+
+			_assertProblemStatus(
+				"BAD_REQUEST",
+				() -> signatureRequestResource.postSignatureRequestVoid(
+					dsRequestObjectEntry.getObjectEntryId(),
+					RandomTestUtil.randomString()));
+		}
+		finally {
+			ReflectionTestUtil.setFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager);
+		}
+	}
+
 	private void _testPostSignatureRequestVoidWhenSignatureRequestIsTerminal()
 		throws Exception {
 
@@ -851,6 +927,12 @@ public class SignatureRequestResourceTest
 			postSignatureRequest.getId());
 
 		Assert.assertEquals(
+			signatureRequest.getEmailMessage(),
+			postSignatureRequest.getEmailMessage());
+		Assert.assertEquals(
+			signatureRequest.getEmailSubject(),
+			postSignatureRequest.getEmailSubject());
+		Assert.assertEquals(
 			DSRequestConstants.STATUS_SENT, postSignatureRequest.getStatus());
 
 		FileEntryBrief[] fileEntryBriefs =
@@ -870,6 +952,12 @@ public class SignatureRequestResourceTest
 
 		DSEnvelope dsEnvelope = _dsEnvelopeAtomicReference.get();
 
+		Assert.assertEquals(
+			signatureRequest.getEmailMessage(), dsEnvelope.getEmailBlurb());
+		Assert.assertEquals(
+			signatureRequest.getEmailSubject(), dsEnvelope.getEmailSubject());
+		Assert.assertEquals(signatureRequest.getName(), dsEnvelope.getName());
+
 		List<DSRecipient> dsRecipients = dsEnvelope.getDSRecipients();
 
 		DSRecipient dsRecipient = dsRecipients.get(0);
@@ -885,6 +973,13 @@ public class SignatureRequestResourceTest
 		Assert.assertEquals(
 			"/sig1/", signHereTabJSONObject.getString("anchorString"));
 
+		SignatureRequestRecipient[] postSignatureRequestRecipients =
+			postSignatureRequest.getSignatureRequestRecipients();
+
+		Assert.assertEquals(
+			Arrays.toString(postSignatureRequestRecipients), 1,
+			postSignatureRequestRecipients.length);
+
 		SignatureRequestRecipient[] signatureRequestRecipients =
 			signatureRequest.getSignatureRequestRecipients();
 
@@ -893,13 +988,6 @@ public class SignatureRequestResourceTest
 
 		User user = _userLocalService.getUser(
 			signatureRequestRecipient.getUserId());
-
-		SignatureRequestRecipient[] postSignatureRequestRecipients =
-			postSignatureRequest.getSignatureRequestRecipients();
-
-		Assert.assertEquals(
-			Arrays.toString(postSignatureRequestRecipients), 1,
-			postSignatureRequestRecipients.length);
 
 		SignatureRequestRecipient postSignatureRequestRecipient =
 			postSignatureRequestRecipients[0];
@@ -952,12 +1040,12 @@ public class SignatureRequestResourceTest
 				testGroup.getGroupId(), signatureRequest));
 	}
 
-	private void _testPostSiteSignatureRequestWhenFileEntryIdsIsEmpty()
+	private void _testPostSiteSignatureRequestWhenFileEntryIdsIsNull()
 		throws Exception {
 
 		SignatureRequest signatureRequest = _createSignatureRequest();
 
-		signatureRequest.setFileEntryIds(new Long[0]);
+		signatureRequest.setFileEntryIds((Long[])null);
 
 		_assertProblemStatus(
 			"BAD_REQUEST",
@@ -1128,6 +1216,39 @@ public class SignatureRequestResourceTest
 			"FORBIDDEN",
 			() -> userSignatureRequestResource.postSiteSignatureRequest(
 				testGroup.getGroupId(), signatureRequest));
+	}
+
+	private void _testPostSiteSignatureRequestWithoutSiteViewPermission()
+		throws Exception {
+
+		Role role = RoleTestUtil.addRole(RoleConstants.TYPE_REGULAR);
+
+		RoleTestUtil.addResourcePermission(
+			role, _dsRequestObjectDefinition.getResourceName(),
+			ResourceConstants.SCOPE_COMPANY,
+			String.valueOf(testCompany.getCompanyId()),
+			ObjectActionKeys.ADD_OBJECT_ENTRY);
+		RoleTestUtil.addResourcePermission(
+			role, DLFileEntry.class.getName(), ResourceConstants.SCOPE_GROUP,
+			String.valueOf(testGroup.getGroupId()), ActionKeys.UPDATE);
+		RoleTestUtil.addResourcePermission(
+			role, User.class.getName(), ResourceConstants.SCOPE_COMPANY,
+			String.valueOf(testCompany.getCompanyId()), ActionKeys.VIEW);
+
+		User user = UserTestUtil.addUser(testGroup.getGroupId());
+
+		_userLocalService.addRoleUser(role.getRoleId(), user);
+
+		Group group = GroupTestUtil.addGroupWithType(
+			GroupConstants.TYPE_SITE_PRIVATE);
+		SignatureRequest signatureRequest = _createSignatureRequest();
+		SignatureRequestResource userSignatureRequestResource =
+			_getSignatureRequestResource(user);
+
+		_assertProblemStatus(
+			"FORBIDDEN",
+			() -> userSignatureRequestResource.postSiteSignatureRequest(
+				group.getGroupId(), signatureRequest));
 	}
 
 	private CompanyConfigurationTemporarySwapper
