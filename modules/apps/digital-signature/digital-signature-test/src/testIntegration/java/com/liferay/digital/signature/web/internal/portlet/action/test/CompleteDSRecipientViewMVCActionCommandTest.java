@@ -14,10 +14,13 @@ import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
+import com.liferay.digital.signature.model.DSRequest;
+import com.liferay.digital.signature.model.DSRequestRecipient;
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.model.ObjectEntry;
 import com.liferay.object.service.ObjectDefinitionLocalService;
 import com.liferay.object.service.ObjectEntryLocalService;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
@@ -121,9 +124,68 @@ public class CompleteDSRecipientViewMVCActionCommandTest {
 
 	@Test
 	public void testProcessAction() throws Exception {
-		String dsEnvelopeId = RandomTestUtil.randomString();
+		_testProcessAction();
+		_testProcessActionWhenDSRecipientIsDeclined();
+		_testProcessActionWithBackURL();
+		_testProcessActionWithoutBackURL();
+	}
 
-		long dsRequestId = _addDSRequest(dsEnvelopeId);
+	private long _addDSRequest(String dsEnvelopeId) throws Exception {
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(
+				_group.getGroupId(), TestPropsValues.getUserId());
+
+		ObjectEntry dsRequestObjectEntry = _addObjectEntry(
+			_dsRequestObjectDefinition, serviceContext,
+			HashMapBuilder.<String, Serializable>put(
+				"emailSubject", RandomTestUtil.randomString()
+			).put(
+				"externalReferenceCode", dsEnvelopeId
+			).put(
+				"requestStatus", DSRequestConstants.STATUS_SENT
+			).put(
+				"siteGroupId", _group.getGroupId()
+			).build());
+
+		_addObjectEntry(
+			_dsRequestRecipientObjectDefinition, serviceContext,
+			HashMapBuilder.<String, Serializable>put(
+				"emailAddress",
+				() -> {
+					User user = TestPropsValues.getUser();
+
+					return user.getEmailAddress();
+				}
+			).put(
+				"name", RandomTestUtil.randomString()
+			).put(
+				"r_dsRequestToDSRequestRecipients_l_dsRequestId",
+				dsRequestObjectEntry.getObjectEntryId()
+			).put(
+				"r_userToDSRequestRecipients_userId",
+				TestPropsValues.getUserId()
+			).put(
+				"requestRecipientStatus", DSRequestConstants.STATUS_SENT
+			).build());
+
+		return dsRequestObjectEntry.getObjectEntryId();
+	}
+
+	private ObjectEntry _addObjectEntry(
+			ObjectDefinition objectDefinition, ServiceContext serviceContext,
+			Map<String, Serializable> values)
+		throws Exception {
+
+		return _objectEntryLocalService.addObjectEntry(
+			0, TestPropsValues.getUserId(),
+			objectDefinition.getObjectDefinitionId(), 0,
+			LocaleUtil.toLanguageId(LocaleUtil.getSiteDefault()), values,
+			serviceContext);
+	}
+
+	private DSEnvelope _createDSEnvelope(
+			String dsEnvelopeId, String dsRecipientStatus)
+		throws Exception {
 
 		DSEnvelope dsEnvelope = new DSEnvelope();
 
@@ -134,11 +196,75 @@ public class CompleteDSRecipientViewMVCActionCommandTest {
 		dsRecipient.setDSClientUserId(String.valueOf(user.getUserId()));
 		dsRecipient.setEmailAddress(user.getEmailAddress());
 
-		dsRecipient.setStatus(DSRequestConstants.STATUS_COMPLETED);
+		dsRecipient.setStatus(dsRecipientStatus);
 
 		dsEnvelope.setDSEnvelopeId(dsEnvelopeId);
 		dsEnvelope.setDSRecipients(ListUtil.fromArray(dsRecipient));
 		dsEnvelope.setStatus(DSRequestConstants.STATUS_SENT);
+
+		return dsEnvelope;
+	}
+
+	private MockLiferayPortletActionRequest _getMockLiferayPortletActionRequest(
+			String backURL, long dsRequestId, User user)
+		throws Exception {
+
+		MockLiferayPortletActionRequest mockLiferayPortletActionRequest =
+			new MockLiferayPortletActionRequest();
+
+		ThemeDisplay themeDisplay = new ThemeDisplay();
+
+		themeDisplay.setCompany(
+			_companyLocalService.getCompany(TestPropsValues.getCompanyId()));
+		themeDisplay.setPermissionChecker(
+			PermissionCheckerFactoryUtil.create(user));
+		themeDisplay.setURLHome("/" + RandomTestUtil.randomString());
+		themeDisplay.setUser(user);
+
+		mockLiferayPortletActionRequest.setAttribute(
+			WebKeys.THEME_DISPLAY, themeDisplay);
+
+		mockLiferayPortletActionRequest.addParameter("backURL", backURL);
+		mockLiferayPortletActionRequest.addParameter(
+			"dsRequestId", String.valueOf(dsRequestId));
+
+		return mockLiferayPortletActionRequest;
+	}
+
+	private HttpServletRequest _processAction(long dsRequestId, User user)
+		throws Exception {
+
+		MockLiferayPortletActionRequest mockLiferayPortletActionRequest =
+			_getMockLiferayPortletActionRequest(
+				"/" + RandomTestUtil.randomString(), dsRequestId, user);
+
+		_processAction(mockLiferayPortletActionRequest);
+
+		return mockLiferayPortletActionRequest.getHttpServletRequest();
+	}
+
+	private CustomMockLiferayPortletActionResponse _processAction(
+			MockLiferayPortletActionRequest mockLiferayPortletActionRequest)
+		throws Exception {
+
+		CustomMockLiferayPortletActionResponse
+			customMockLiferayPortletActionResponse =
+				new CustomMockLiferayPortletActionResponse();
+
+		_mvcActionCommand.processAction(
+			mockLiferayPortletActionRequest,
+			customMockLiferayPortletActionResponse);
+
+		return customMockLiferayPortletActionResponse;
+	}
+
+	private void _testProcessAction() throws Exception {
+		String dsEnvelopeId = RandomTestUtil.randomString();
+
+		long dsRequestId = _addDSRequest(dsEnvelopeId);
+
+		DSEnvelope dsEnvelope = _createDSEnvelope(
+			dsEnvelopeId, DSRequestConstants.STATUS_COMPLETED);
 
 		List<String> methodNames = new ArrayList<>();
 
@@ -155,6 +281,8 @@ public class CompleteDSRecipientViewMVCActionCommandTest {
 					}));
 
 		try {
+			User user = TestPropsValues.getUser();
+
 			HttpServletRequest httpServletRequest = _processAction(
 				RandomTestUtil.randomLong(), user);
 
@@ -184,86 +312,87 @@ public class CompleteDSRecipientViewMVCActionCommandTest {
 		}
 	}
 
-	private long _addDSRequest(String dsEnvelopeId) throws Exception {
-		ServiceContext serviceContext =
-			ServiceContextTestUtil.getServiceContext(
-				_group.getGroupId(), TestPropsValues.getUserId());
-
-		ObjectEntry objectEntry = _addObjectEntry(
-			_dsRequestObjectDefinition, serviceContext,
-			HashMapBuilder.<String, Serializable>put(
-				"emailSubject", RandomTestUtil.randomString()
-			).put(
-				"externalReferenceCode", dsEnvelopeId
-			).put(
-				"requestStatus", DSRequestConstants.STATUS_SENT
-			).put(
-				"siteGroupId", _group.getGroupId()
-			).build());
-
-		_addObjectEntry(
-			_dsRequestRecipientObjectDefinition, serviceContext,
-			HashMapBuilder.<String, Serializable>put(
-				"emailAddress",
-				() -> {
-					User user = TestPropsValues.getUser();
-
-					return user.getEmailAddress();
-				}
-			).put(
-				"name", RandomTestUtil.randomString()
-			).put(
-				"r_dsRequestToDSRequestRecipients_l_dsRequestId",
-				objectEntry.getObjectEntryId()
-			).put(
-				"r_userToDSRequestRecipients_userId",
-				TestPropsValues.getUserId()
-			).put(
-				"requestRecipientStatus", DSRequestConstants.STATUS_SENT
-			).build());
-
-		return objectEntry.getObjectEntryId();
-	}
-
-	private ObjectEntry _addObjectEntry(
-			ObjectDefinition objectDefinition, ServiceContext serviceContext,
-			Map<String, Serializable> values)
+	private void _testProcessActionWhenDSRecipientIsDeclined()
 		throws Exception {
 
-		return _objectEntryLocalService.addObjectEntry(
-			0, TestPropsValues.getUserId(),
-			objectDefinition.getObjectDefinitionId(), 0,
-			LocaleUtil.toLanguageId(LocaleUtil.getSiteDefault()), values,
-			serviceContext);
+		String dsEnvelopeId = RandomTestUtil.randomString();
+
+		long dsRequestId = _addDSRequest(dsEnvelopeId);
+
+		DSEnvelope dsEnvelope = _createDSEnvelope(
+			dsEnvelopeId, DSRequestConstants.STATUS_DECLINED);
+
+		List<String> methodNames = new ArrayList<>();
+
+		DSEnvelopeManager dsEnvelopeManager =
+			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager",
+				ProxyUtil.newProxyInstance(
+					DSEnvelopeManager.class.getClassLoader(),
+					new Class<?>[] {DSEnvelopeManager.class},
+					(proxy, method, arguments) -> {
+						methodNames.add(method.getName());
+
+						return dsEnvelope;
+					}));
+
+		try {
+			HttpServletRequest httpServletRequest = _processAction(
+				dsRequestId, TestPropsValues.getUser());
+
+			Assert.assertEquals(List.of("getDSEnvelope"), methodNames);
+			Assert.assertFalse(
+				SessionMessages.contains(
+					httpServletRequest, "requestProcessed"));
+		}
+		finally {
+			ReflectionTestUtil.setFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager);
+		}
+
+		DSRequest dsRequest = _dsRequestManager.fetchDSRequest(
+			TestPropsValues.getCompanyId(), dsRequestId);
+
+		List<DSRequestRecipient> dsRequestRecipients =
+			dsRequest.getDSRequestRecipients();
+
+		DSRequestRecipient dsRequestRecipient = dsRequestRecipients.get(0);
+
+		Assert.assertEquals(
+			DSRequestConstants.STATUS_DECLINED, dsRequestRecipient.getStatus());
 	}
 
-	private HttpServletRequest _processAction(long dsRequestId, User user)
-		throws Exception {
+	private void _testProcessActionWithBackURL() throws Exception {
+		String backURL = "/" + RandomTestUtil.randomString();
 
+		CustomMockLiferayPortletActionResponse
+			customMockLiferayPortletActionResponse = _processAction(
+				_getMockLiferayPortletActionRequest(
+					backURL, RandomTestUtil.randomLong(),
+					TestPropsValues.getUser()));
+
+		Assert.assertEquals(
+			backURL,
+			customMockLiferayPortletActionResponse.getRedirectLocation());
+	}
+
+	private void _testProcessActionWithoutBackURL() throws Exception {
 		MockLiferayPortletActionRequest mockLiferayPortletActionRequest =
-			new MockLiferayPortletActionRequest();
+			_getMockLiferayPortletActionRequest(
+				StringPool.BLANK, RandomTestUtil.randomLong(),
+				TestPropsValues.getUser());
 
-		ThemeDisplay themeDisplay = new ThemeDisplay();
+		CustomMockLiferayPortletActionResponse
+			customMockLiferayPortletActionResponse = _processAction(
+				mockLiferayPortletActionRequest);
 
-		themeDisplay.setCompany(
-			_companyLocalService.getCompany(TestPropsValues.getCompanyId()));
-		themeDisplay.setPermissionChecker(
-			PermissionCheckerFactoryUtil.create(user));
-		themeDisplay.setUser(user);
+		ThemeDisplay themeDisplay =
+			(ThemeDisplay)mockLiferayPortletActionRequest.getAttribute(
+				WebKeys.THEME_DISPLAY);
 
-		mockLiferayPortletActionRequest.setAttribute(
-			WebKeys.THEME_DISPLAY, themeDisplay);
-
-		mockLiferayPortletActionRequest.addParameter(
-			"backURL", "/" + RandomTestUtil.randomString());
-		mockLiferayPortletActionRequest.addParameter(
-			"dsRequestId", String.valueOf(dsRequestId));
-
-		_mvcActionCommand.processAction(
-			mockLiferayPortletActionRequest,
-			new MockLiferayPortletActionResponse());
-
-		return mockLiferayPortletActionRequest.getHttpServletRequest();
+		Assert.assertEquals(
+			themeDisplay.getURLHome(),
+			customMockLiferayPortletActionResponse.getRedirectLocation());
 	}
 
 	private CompanyConfigurationTemporarySwapper
@@ -291,5 +420,21 @@ public class CompleteDSRecipientViewMVCActionCommandTest {
 
 	@Inject
 	private ObjectEntryLocalService _objectEntryLocalService;
+
+	private class CustomMockLiferayPortletActionResponse
+		extends MockLiferayPortletActionResponse {
+
+		public String getRedirectLocation() {
+			return _redirectLocation;
+		}
+
+		@Override
+		public void sendRedirect(String location) {
+			_redirectLocation = location;
+		}
+
+		private String _redirectLocation;
+
+	}
 
 }

@@ -36,6 +36,7 @@ import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
 import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.struts.StrutsAction;
 import com.liferay.portal.kernel.test.context.ContextUserReplace;
@@ -133,9 +134,11 @@ public class OpenDSRequestStrutsActionTest {
 
 	@Test
 	public void testExecute() throws Exception {
+		_testExecuteWithExternalBackURL();
 		_testExecuteWithGuestUser();
 		_testExecuteWithHiddenLayout();
 		_testExecuteWithParameters();
+		_testExecuteWithSignDigitalSignaturePortletLayout();
 		_testExecuteWithoutDSRequest();
 		_testExecuteWithoutDSRequestRecipient();
 		_testExecuteWithoutLayoutViewPermission();
@@ -147,7 +150,7 @@ public class OpenDSRequestStrutsActionTest {
 			ServiceContextTestUtil.getServiceContext(
 				_group.getGroupId(), TestPropsValues.getUserId());
 
-		ObjectEntry objectEntry = _addObjectEntry(
+		ObjectEntry dsRequestObjectEntry = _addObjectEntry(
 			_dsRequestObjectDefinition, serviceContext,
 			HashMapBuilder.<String, Serializable>put(
 				"emailSubject", RandomTestUtil.randomString()
@@ -167,14 +170,14 @@ public class OpenDSRequestStrutsActionTest {
 				"name", _user.getFullName()
 			).put(
 				"r_dsRequestToDSRequestRecipients_l_dsRequestId",
-				objectEntry.getObjectEntryId()
+				dsRequestObjectEntry.getObjectEntryId()
 			).put(
 				"r_userToDSRequestRecipients_userId", _user.getUserId()
 			).put(
 				"requestRecipientStatus", DSRequestConstants.STATUS_SENT
 			).build());
 
-		return objectEntry.getObjectEntryId();
+		return dsRequestObjectEntry.getObjectEntryId();
 	}
 
 	private ObjectEntry _addObjectEntry(
@@ -236,7 +239,7 @@ public class OpenDSRequestStrutsActionTest {
 			Company company = _companyLocalService.getCompany(
 				TestPropsValues.getCompanyId());
 
-			Group group = _groupLocalService.getGroup(
+			Group guestGroup = _groupLocalService.getGroup(
 				company.getCompanyId(), GroupConstants.GUEST);
 
 			ThemeDisplay themeDisplay = new ThemeDisplay();
@@ -246,7 +249,7 @@ public class OpenDSRequestStrutsActionTest {
 			themeDisplay.setPermissionChecker(permissionChecker);
 			themeDisplay.setPortalURL(company.getPortalURL(0));
 			themeDisplay.setSignedIn(!user.isGuestUser());
-			themeDisplay.setSiteGroupId(group.getGroupId());
+			themeDisplay.setSiteGroupId(guestGroup.getGroupId());
 			themeDisplay.setUser(user);
 
 			mockHttpServletRequest.setAttribute(
@@ -255,11 +258,47 @@ public class OpenDSRequestStrutsActionTest {
 			MockHttpServletResponse mockHttpServletResponse =
 				new MockHttpServletResponse();
 
-			_openDSRequestStrutsAction.execute(
-				mockHttpServletRequest, mockHttpServletResponse);
+			ServiceContext serviceContext = new ServiceContext();
+
+			serviceContext.setPortalURL(themeDisplay.getPortalURL());
+
+			ServiceContextThreadLocal.pushServiceContext(serviceContext);
+
+			try {
+				_openDSRequestStrutsAction.execute(
+					mockHttpServletRequest, mockHttpServletResponse);
+			}
+			finally {
+				ServiceContextThreadLocal.popServiceContext();
+			}
 
 			return mockHttpServletResponse;
 		}
+	}
+
+	private void _testExecuteWithExternalBackURL() throws Exception {
+		Group group = GroupTestUtil.addGroup();
+
+		LayoutTestUtil.addTypePortletLayout(group);
+
+		long dsRequestId = _addDSRequest(group.getGroupId());
+
+		String portletNamespace = _portal.getPortletNamespace(
+			DigitalSignaturePortletKeys.SIGN_DIGITAL_SIGNATURE);
+
+		MockHttpServletResponse mockHttpServletResponse = _execute(
+			dsRequestId,
+			HashMapBuilder.put(
+				portletNamespace + "backURL", "https://example.com"
+			).put(
+				"p_p_state", LiferayWindowState.POP_UP.toString()
+			).build(),
+			_user);
+
+		String redirectedURL = mockHttpServletResponse.getRedirectedUrl();
+
+		Assert.assertFalse(
+			redirectedURL, redirectedURL.contains("example.com"));
 	}
 
 	private void _testExecuteWithGuestUser() throws Exception {
@@ -303,9 +342,9 @@ public class OpenDSRequestStrutsActionTest {
 	private void _testExecuteWithParameters() throws Exception {
 		Group group = GroupTestUtil.addGroup();
 
-		long dsRequestId = _addDSRequest(group.getGroupId());
-
 		Layout layout = LayoutTestUtil.addTypePortletLayout(group);
+
+		long dsRequestId = _addDSRequest(group.getGroupId());
 
 		String backURL = "/" + RandomTestUtil.randomString();
 		String portletNamespace = _portal.getPortletNamespace(
@@ -339,6 +378,25 @@ public class OpenDSRequestStrutsActionTest {
 			URLCodec.decodeURL(
 				HttpComponentsUtil.getParameter(
 					redirectedURL, portletNamespace + "backURL", false)));
+	}
+
+	private void _testExecuteWithSignDigitalSignaturePortletLayout()
+		throws Exception {
+
+		Group group = GroupTestUtil.addGroup();
+
+		LayoutTestUtil.addTypePortletLayout(group);
+
+		Layout portletLayout = LayoutTestUtil.addTypePortletLayout(group);
+
+		LayoutTestUtil.addPortletToLayout(
+			portletLayout, DigitalSignaturePortletKeys.SIGN_DIGITAL_SIGNATURE);
+
+		long dsRequestId = _addDSRequest(group.getGroupId());
+
+		_assertRedirectedToLayout(
+			dsRequestId, portletLayout,
+			_execute(dsRequestId, Collections.emptyMap(), _user));
 	}
 
 	private void _testExecuteWithoutDSRequest() throws Exception {
@@ -380,9 +438,9 @@ public class OpenDSRequestStrutsActionTest {
 			String.valueOf(layout1.getPlid()), role.getRoleId(),
 			ActionKeys.VIEW);
 
-		long dsRequestId = _addDSRequest(_group.getGroupId());
-
 		Layout layout2 = LayoutTestUtil.addTypePortletLayout(_group);
+
+		long dsRequestId = _addDSRequest(_group.getGroupId());
 
 		_assertRedirectedToLayout(
 			dsRequestId, layout2,
@@ -391,13 +449,13 @@ public class OpenDSRequestStrutsActionTest {
 
 	private void _testExecuteWithoutSite() throws Exception {
 		long dsRequestId = _addDSRequest(RandomTestUtil.randomInt());
-		Group group = _groupLocalService.getGroup(
+		Group guestGroup = _groupLocalService.getGroup(
 			TestPropsValues.getCompanyId(), GroupConstants.GUEST);
 
 		_assertRedirectedToLayout(
 			dsRequestId,
 			_layoutLocalService.fetchFirstLayout(
-				group.getGroupId(), false,
+				guestGroup.getGroupId(), false,
 				LayoutConstants.DEFAULT_PARENT_LAYOUT_ID, false),
 			_execute(dsRequestId, Collections.emptyMap(), _user));
 	}

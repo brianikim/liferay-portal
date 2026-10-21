@@ -8,6 +8,7 @@ package com.liferay.digital.signature.manager.test;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.digital.signature.manager.DSRecipientViewDefinitionManager;
 import com.liferay.digital.signature.model.DSRecipientViewDefinition;
+import com.liferay.digital.signature.model.DSRequestRecipient;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
@@ -16,9 +17,12 @@ import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
+import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
+
+import java.io.Serializable;
 
 import org.junit.Assert;
 import org.junit.ClassRule;
@@ -46,26 +50,26 @@ public class DSRecipientViewDefinitionManagerTest {
 		PermissionThreadLocal.setPermissionChecker(
 			PermissionCheckerFactoryUtil.create(user));
 
-		DSRecipientViewDefinition dsRecipientViewDefinition =
-			new DSRecipientViewDefinition();
-
-		dsRecipientViewDefinition.setEmailAddress(user.getEmailAddress());
-
 		Assert.assertThrows(
 			PrincipalException.MustBeCompanyAdmin.class,
 			() ->
 				_dsRecipientViewDefinitionManager.addDSRecipientViewDefinition(
 					TestPropsValues.getCompanyId(),
 					TestPropsValues.getGroupId(), RandomTestUtil.randomString(),
-					dsRecipientViewDefinition));
+					new DSRecipientViewDefinition()));
 
 		Assert.assertThrows(
 			PrincipalException.MustHavePermission.class,
 			() ->
 				_dsRecipientViewDefinitionManager.addDSRecipientViewDefinition(
 					TestPropsValues.getCompanyId(),
-					TestPropsValues.getGroupId(), TestPropsValues.getUserId(),
-					RandomTestUtil.randomString(), "http://localhost"));
+					TestPropsValues.getGroupId(), RandomTestUtil.randomString(),
+					new DSRequestRecipient(
+						HashMapBuilder.<String, Serializable>put(
+							"r_userToDSRequestRecipients_userId",
+							TestPropsValues.getUserId()
+						).build()),
+					"http://" + RandomTestUtil.randomString()));
 	}
 
 	@Inject
