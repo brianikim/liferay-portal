@@ -44,6 +44,7 @@ import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -191,6 +192,22 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			dsRecipient.setDSClientUserId(
 				String.valueOf(recipientUser.getUserId()));
 			dsRecipient.setName(recipientUser.getFullName());
+			dsRecipient.setTabsJSONObject(
+				JSONUtil.put(
+					"signHereTabs",
+					JSONUtil.putAll(
+						JSONUtil.put(
+							"anchorIgnoreIfNotPresent", "true"
+						).put(
+							"anchorString",
+							"/sig" + recipientUserIds.size() + "/"
+						).put(
+							"anchorUnits", "pixels"
+						).put(
+							"anchorXOffset", "0"
+						).put(
+							"anchorYOffset", "0"
+						))));
 		}
 
 		User user = _userLocalService.getUser(userId);
@@ -275,20 +292,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			companyId, new long[] {fileEntryId});
 
 		return dsRequests.get(fileEntryId);
-	}
-
-	@Override
-	public Map<Long, DSRequest> getLatestFileEntryDSRequests(
-		long companyId, long[] fileEntryIds) {
-
-		try {
-			return _getLatestFileEntryDSRequests(companyId, fileEntryIds);
-		}
-		catch (PortalException portalException) {
-			_log.error(portalException);
-
-			return new HashMap<>();
-		}
 	}
 
 	@Override
@@ -436,6 +439,20 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				exception);
 
 			return 0;
+		}
+	}
+
+	@Override
+	public Map<Long, DSRequest> getLatestFileEntryDSRequests(
+		long companyId, long[] fileEntryIds) {
+
+		try {
+			return _getLatestFileEntryDSRequests(companyId, fileEntryIds);
+		}
+		catch (PortalException portalException) {
+			_log.error(portalException);
+
+			return new HashMap<>();
 		}
 	}
 
@@ -1014,6 +1031,40 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		return HtmlUtil.escape(emailMessage);
 	}
 
+	private Map<Long, List<Long>> _getFileEntryIdsMap(
+			long companyId, Set<Long> dsRequestIds)
+		throws Exception {
+
+		Map<Long, List<Long>> fileEntryIdsMap = new HashMap<>();
+
+		ObjectDefinition objectDefinition =
+			_objectDefinitionLocalService.
+				fetchObjectDefinitionByExternalReferenceCode(
+					DSObjectDefinitionConstants.
+						EXTERNAL_REFERENCE_CODE_REQUEST_DOCUMENT,
+					companyId);
+
+		if (objectDefinition == null) {
+			return fileEntryIdsMap;
+		}
+
+		for (Map<String, Serializable> values :
+				_getValuesList(
+					companyId, "r_dsRequestToDSRequestDocuments_l_dsRequestId",
+					ArrayUtil.toLongArray(dsRequestIds), objectDefinition, true,
+					null)) {
+
+			List<Long> fileEntryIds = fileEntryIdsMap.computeIfAbsent(
+				MapUtil.getLong(
+					values, "r_dsRequestToDSRequestDocuments_l_dsRequestId"),
+				dsRequestId -> new ArrayList<>());
+
+			fileEntryIds.add(MapUtil.getLong(values, "fileEntryId"));
+		}
+
+		return fileEntryIdsMap;
+	}
+
 	private Map<Long, DSRequest> _getLatestFileEntryDSRequests(
 			long companyId, long[] fileEntryIds)
 		throws PortalException {
@@ -1057,40 +1108,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		}
 
 		return dsRequests;
-	}
-
-	private Map<Long, List<Long>> _getFileEntryIdsMap(
-			long companyId, Set<Long> dsRequestIds)
-		throws Exception {
-
-		Map<Long, List<Long>> fileEntryIdsMap = new HashMap<>();
-
-		ObjectDefinition objectDefinition =
-			_objectDefinitionLocalService.
-				fetchObjectDefinitionByExternalReferenceCode(
-					DSObjectDefinitionConstants.
-						EXTERNAL_REFERENCE_CODE_REQUEST_DOCUMENT,
-					companyId);
-
-		if (objectDefinition == null) {
-			return fileEntryIdsMap;
-		}
-
-		for (Map<String, Serializable> values :
-				_getValuesList(
-					companyId, "r_dsRequestToDSRequestDocuments_l_dsRequestId",
-					ArrayUtil.toLongArray(dsRequestIds), objectDefinition, true,
-					null)) {
-
-			List<Long> fileEntryIds = fileEntryIdsMap.computeIfAbsent(
-				MapUtil.getLong(
-					values, "r_dsRequestToDSRequestDocuments_l_dsRequestId"),
-				dsRequestId -> new ArrayList<>());
-
-			fileEntryIds.add(MapUtil.getLong(values, "fileEntryId"));
-		}
-
-		return fileEntryIdsMap;
 	}
 
 	private Locale _getLocale(long siteGroupId, long userId) throws Exception {
