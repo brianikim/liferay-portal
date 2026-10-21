@@ -15,6 +15,7 @@ import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.digital.signature.model.DSRequest;
+import com.liferay.digital.signature.model.DSRequestRecipient;
 import com.liferay.digital.signature.rest.client.dto.v1_0.Creator;
 import com.liferay.digital.signature.rest.client.dto.v1_0.FileEntryBrief;
 import com.liferay.digital.signature.rest.client.dto.v1_0.SignatureRequest;
@@ -73,6 +74,7 @@ import java.io.Serializable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -150,11 +152,47 @@ public class SignatureRequestResourceTest
 					DSObjectDefinitionConstants.
 						EXTERNAL_REFERENCE_CODE_REQUEST_RECIPIENT,
 					testCompany.getCompanyId());
+		_dsEnvelopeManager =
+			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager",
+				ProxyUtil.newProxyInstance(
+					DSEnvelopeManager.class.getClassLoader(),
+					new Class<?>[] {DSEnvelopeManager.class},
+					(proxy, method, arguments) -> {
+						if (Objects.equals(method.getName(), "getDSEnvelope")) {
+							return _dsEnvelopeAtomicReference.get();
+						}
+
+						if (!Objects.equals(
+								method.getName(), "addDSEnvelope")) {
+
+							return null;
+						}
+
+						DSEnvelope dsEnvelope = (DSEnvelope)arguments[2];
+
+						dsEnvelope.setDSEnvelopeId(
+							RandomTestUtil.randomString());
+
+						for (DSRecipient dsRecipient :
+								dsEnvelope.getDSRecipients()) {
+
+							dsRecipient.setStatus(
+								DSRequestConstants.STATUS_SENT);
+						}
+
+						_dsEnvelopeAtomicReference.set(dsEnvelope);
+
+						return dsEnvelope;
+					}));
 	}
 
 	@After
 	@Override
 	public void tearDown() throws Exception {
+		ReflectionTestUtil.setFieldValue(
+			_dsRequestManager, "_dsEnvelopeManager", _dsEnvelopeManager);
+
 		_companyConfigurationTemporarySwapper.close();
 
 		super.tearDown();
@@ -163,6 +201,8 @@ public class SignatureRequestResourceTest
 	@Override
 	@Test
 	public void testGetSignatureRequest() throws Exception {
+		super.testGetSignatureRequest();
+
 		User user1 = UserTestUtil.addUser();
 
 		ObjectEntry dsRequestObjectEntry = _addDSRequestObjectEntry(
@@ -183,8 +223,13 @@ public class SignatureRequestResourceTest
 			MapUtil.getString(dsRequestObjectEntry.getValues(), "emailMessage"),
 			signatureRequest.getEmailMessage());
 		Assert.assertEquals(
+			MapUtil.getString(dsRequestObjectEntry.getValues(), "emailSubject"),
+			signatureRequest.getEmailSubject());
+		Assert.assertEquals(
 			Long.valueOf(dsRequestObjectEntry.getObjectEntryId()),
 			signatureRequest.getId());
+		Assert.assertEquals(
+			DSRequestConstants.STATUS_SENT, signatureRequest.getStatus());
 
 		Map<String, Map<String, String>> actions =
 			signatureRequest.getActions();
@@ -202,6 +247,37 @@ public class SignatureRequestResourceTest
 				"/digital_signature/open_ds_request"));
 		Assert.assertEquals("GET", signAction.get("method"));
 
+		SignatureRequestRecipient[] signatureRequestRecipients =
+			signatureRequest.getSignatureRequestRecipients();
+
+		Assert.assertEquals(
+			Arrays.toString(signatureRequestRecipients), 1,
+			signatureRequestRecipients.length);
+
+		DSRequest dsRequest = _dsRequestManager.fetchDSRequest(
+			testCompany.getCompanyId(),
+			dsRequestObjectEntry.getObjectEntryId());
+
+		List<DSRequestRecipient> dsRequestRecipients =
+			dsRequest.getDSRequestRecipients();
+
+		DSRequestRecipient dsRequestRecipient = dsRequestRecipients.get(0);
+
+		SignatureRequestRecipient signatureRequestRecipient =
+			signatureRequestRecipients[0];
+
+		Assert.assertEquals(
+			user1.getEmailAddress(),
+			signatureRequestRecipient.getEmailAddress());
+		Assert.assertEquals(
+			dsRequestRecipient.getName(), signatureRequestRecipient.getName());
+		Assert.assertEquals(
+			DSRequestConstants.STATUS_SENT,
+			signatureRequestRecipient.getStatus());
+		Assert.assertEquals(
+			Long.valueOf(user1.getUserId()),
+			signatureRequestRecipient.getUserId());
+
 		User user2 = UserTestUtil.addUser();
 
 		SignatureRequestResource user2SignatureRequestResource =
@@ -216,30 +292,10 @@ public class SignatureRequestResourceTest
 	@Override
 	@Test
 	public void testGetSiteSignatureRequestsPage() throws Exception {
-		_addDSRequestObjectEntry(
-			RandomTestUtil.randomString() + "@liferay.com",
-			DSRequestConstants.STATUS_SENT);
+		super.testGetSiteSignatureRequestsPage();
 
-		Page<SignatureRequest> page =
-			signatureRequestResource.getSiteSignatureRequestsPage(
-				testGroup.getGroupId(), null, Pagination.of(1, 10));
-
-		Assert.assertEquals(1, page.getTotalCount());
-
-		page = signatureRequestResource.getSiteSignatureRequestsPage(
-			irrelevantGroup.getGroupId(), null, Pagination.of(1, 10));
-
-		Assert.assertEquals(0, page.getTotalCount());
-
-		User user = UserTestUtil.addUser();
-
-		SignatureRequestResource userSignatureRequestResource =
-			_getSignatureRequestResource(user);
-
-		page = userSignatureRequestResource.getSiteSignatureRequestsPage(
-			testGroup.getGroupId(), null, Pagination.of(1, 10));
-
-		Assert.assertEquals(0, page.getTotalCount());
+		_testGetSiteSignatureRequestsPageWithSearch();
+		_testGetSiteSignatureRequestsPageWithoutViewPermission();
 	}
 
 	@Ignore
@@ -282,6 +338,8 @@ public class SignatureRequestResourceTest
 	@Override
 	@Test
 	public void testPostSignatureRequestNotification() throws Exception {
+		super.testPostSignatureRequestNotification();
+
 		_testPostSignatureRequestNotification();
 		_testPostSignatureRequestNotificationWhenSignatureRequestIsTerminal();
 		_testPostSignatureRequestNotificationWithoutUpdatePermission();
@@ -291,9 +349,11 @@ public class SignatureRequestResourceTest
 	@Override
 	@Test
 	public void testPostSignatureRequestVoid() throws Exception {
+		super.testPostSignatureRequestVoid();
+
 		_testPostSignatureRequestVoid();
 		_testPostSignatureRequestVoidWhenSignatureRequestIsTerminal();
-		_testPostSignatureRequestVoidWhenVoidReasonIsNull();
+		_testPostSignatureRequestVoidWhenVoidReasonIsBlank();
 		_testPostSignatureRequestVoidWithoutUpdatePermission();
 		_testPostSignatureRequestVoidWithoutViewPermission();
 	}
@@ -301,13 +361,18 @@ public class SignatureRequestResourceTest
 	@Override
 	@Test
 	public void testPostSiteSignatureRequest() throws Exception {
+		super.testPostSiteSignatureRequest();
+
 		_testPostSiteSignatureRequest();
 		_testPostSiteSignatureRequestWhenExpireAfterIsNegative();
 		_testPostSiteSignatureRequestWhenExpireWarnIsNotLessThanExpireAfter();
+		_testPostSiteSignatureRequestWhenFileEntryHasDSRequest();
 		_testPostSiteSignatureRequestWhenFileEntryIdsIsEmpty();
 		_testPostSiteSignatureRequestWhenRecipientIsDuplicated();
 		_testPostSiteSignatureRequestWhenRecipientUserIdIsNull();
 		_testPostSiteSignatureRequestWhenRecipientsIsEmpty();
+		_testPostSiteSignatureRequestWhenSendNotificationsIsFalse();
+		_testPostSiteSignatureRequestWhenSendNotificationsIsNull();
 		_testPostSiteSignatureRequestWithoutAddPermission();
 		_testPostSiteSignatureRequestWithoutFileEntryUpdatePermission();
 		_testPostSiteSignatureRequestWithoutRecipientUserViewPermission();
@@ -317,6 +382,65 @@ public class SignatureRequestResourceTest
 	@Override
 	@Test
 	public void testVulcanCRUDItemDelegateGetItem() throws Exception {
+	}
+
+	@Override
+	protected SignatureRequest testGetSignatureRequest_addSignatureRequest()
+		throws Exception {
+
+		return signatureRequestResource.postSiteSignatureRequest(
+			testGroup.getGroupId(), _createSignatureRequest());
+	}
+
+	@Override
+	protected SignatureRequest
+			testGetSiteSignatureRequestsPage_addSignatureRequest(
+				Long siteId, SignatureRequest signatureRequest)
+		throws Exception {
+
+		return signatureRequestResource.postSiteSignatureRequest(
+			siteId, _createSignatureRequest());
+	}
+
+	@Override
+	protected Map<String, Map<String, String>>
+			testGetSiteSignatureRequestsPage_getExpectedActions(Long siteId)
+		throws Exception {
+
+		return Collections.emptyMap();
+	}
+
+	@Override
+	protected SignatureRequest
+			testPostSignatureRequestNotification_addSignatureRequest(
+				SignatureRequest signatureRequest)
+		throws Exception {
+
+		SignatureRequest postSignatureRequest =
+			testGetSignatureRequest_addSignatureRequest();
+
+		return signatureRequestResource.postSignatureRequestNotification(
+			postSignatureRequest.getId());
+	}
+
+	@Override
+	protected SignatureRequest testPostSignatureRequestVoid_addSignatureRequest(
+			SignatureRequest signatureRequest)
+		throws Exception {
+
+		SignatureRequest postSignatureRequest =
+			testGetSignatureRequest_addSignatureRequest();
+
+		return signatureRequestResource.postSignatureRequestVoid(
+			postSignatureRequest.getId(), RandomTestUtil.randomString());
+	}
+
+	@Override
+	protected SignatureRequest testPostSiteSignatureRequest_addSignatureRequest(
+			SignatureRequest signatureRequest)
+		throws Exception {
+
+		return testGetSignatureRequest_addSignatureRequest();
 	}
 
 	private ObjectEntry _addDSRequestObjectEntry(
@@ -401,11 +525,9 @@ public class SignatureRequestResourceTest
 					"WebApplicationExceptionMapper",
 				LoggerTestUtil.WARN)) {
 
-			unsafeRunnable.run();
+			Problem.ProblemException problemException = Assert.assertThrows(
+				Problem.ProblemException.class, unsafeRunnable::run);
 
-			Assert.fail();
-		}
-		catch (Problem.ProblemException problemException) {
 			Problem problem = problemException.getProblem();
 
 			Assert.assertEquals(expectedStatus, problem.getStatus());
@@ -445,6 +567,19 @@ public class SignatureRequestResourceTest
 		return signatureRequest;
 	}
 
+	private List<NotificationQueueEntry> _getNotificationQueueEntries(
+		long dsRequestId) {
+
+		return ListUtil.filter(
+			_notificationQueueEntryLocalService.getNotificationQueueEntries(
+				QueryUtil.ALL_POS, QueryUtil.ALL_POS),
+			notificationQueueEntry ->
+				Objects.equals(
+					notificationQueueEntry.getClassName(),
+					DSRequest.class.getName()) &&
+				(notificationQueueEntry.getClassPK() == dsRequestId));
+	}
+
 	private SignatureRequestResource _getSignatureRequestResource(User user)
 		throws Exception {
 
@@ -464,6 +599,58 @@ public class SignatureRequestResourceTest
 		).build();
 	}
 
+	private void _testGetSiteSignatureRequestsPageWithSearch()
+		throws Exception {
+
+		String search = RandomTestUtil.randomString();
+
+		SignatureRequest signatureRequest = _createSignatureRequest();
+
+		signatureRequest.setEmailSubject(
+			search + " " + RandomTestUtil.randomString());
+
+		SignatureRequest postSignatureRequest =
+			signatureRequestResource.postSiteSignatureRequest(
+				testGroup.getGroupId(), signatureRequest);
+
+		signatureRequestResource.postSiteSignatureRequest(
+			testGroup.getGroupId(), _createSignatureRequest());
+
+		Page<SignatureRequest> page =
+			signatureRequestResource.getSiteSignatureRequestsPage(
+				testGroup.getGroupId(), search, Pagination.of(1, 10));
+
+		Assert.assertEquals(1, page.getTotalCount());
+
+		List<SignatureRequest> signatureRequests =
+			(List<SignatureRequest>)page.getItems();
+
+		SignatureRequest pageSignatureRequest = signatureRequests.get(0);
+
+		Assert.assertEquals(
+			postSignatureRequest.getId(), pageSignatureRequest.getId());
+
+		page = signatureRequestResource.getSiteSignatureRequestsPage(
+			irrelevantGroup.getGroupId(), search, Pagination.of(1, 10));
+
+		Assert.assertEquals(0, page.getTotalCount());
+	}
+
+	private void _testGetSiteSignatureRequestsPageWithoutViewPermission()
+		throws Exception {
+
+		User user = UserTestUtil.addUser();
+
+		SignatureRequestResource userSignatureRequestResource =
+			_getSignatureRequestResource(user);
+
+		Page<SignatureRequest> page =
+			userSignatureRequestResource.getSiteSignatureRequestsPage(
+				testGroup.getGroupId(), null, Pagination.of(1, 10));
+
+		Assert.assertEquals(0, page.getTotalCount());
+	}
+
 	private void _testPostSignatureRequestNotification() throws Exception {
 		User user = UserTestUtil.addUser();
 
@@ -473,15 +660,9 @@ public class SignatureRequestResourceTest
 		signatureRequestResource.postSignatureRequestNotification(
 			dsRequestObjectEntry.getObjectEntryId());
 
-		List<NotificationQueueEntry> notificationQueueEntries = ListUtil.filter(
-			_notificationQueueEntryLocalService.getNotificationQueueEntries(
-				QueryUtil.ALL_POS, QueryUtil.ALL_POS),
-			notificationQueueEntry ->
-				Objects.equals(
-					notificationQueueEntry.getClassName(),
-					DSRequest.class.getName()) &&
-				(notificationQueueEntry.getClassPK() ==
-					dsRequestObjectEntry.getObjectEntryId()));
+		List<NotificationQueueEntry> notificationQueueEntries =
+			_getNotificationQueueEntries(
+				dsRequestObjectEntry.getObjectEntryId());
 
 		Assert.assertEquals(
 			notificationQueueEntries.toString(), 1,
@@ -601,7 +782,7 @@ public class SignatureRequestResourceTest
 				RandomTestUtil.randomString()));
 	}
 
-	private void _testPostSignatureRequestVoidWhenVoidReasonIsNull()
+	private void _testPostSignatureRequestVoidWhenVoidReasonIsBlank()
 		throws Exception {
 
 		ObjectEntry dsRequestObjectEntry = _addDSRequestObjectEntry(
@@ -651,116 +832,83 @@ public class SignatureRequestResourceTest
 	}
 
 	private void _testPostSiteSignatureRequest() throws Exception {
-		AtomicReference<DSEnvelope> dsEnvelopeAtomicReference =
-			new AtomicReference<>();
+		SignatureRequest signatureRequest = _createSignatureRequest();
 
-		DSEnvelopeManager dsEnvelopeManager =
-			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
-				_dsRequestManager, "_dsEnvelopeManager",
-				ProxyUtil.newProxyInstance(
-					DSEnvelopeManager.class.getClassLoader(),
-					new Class<?>[] {DSEnvelopeManager.class},
-					(proxy, method, arguments) -> {
-						if (Objects.equals(method.getName(), "getDSEnvelope")) {
-							return dsEnvelopeAtomicReference.get();
-						}
+		SignatureRequest postSignatureRequest =
+			signatureRequestResource.postSiteSignatureRequest(
+				testGroup.getGroupId(), signatureRequest);
 
-						if (!Objects.equals(
-								method.getName(), "addDSEnvelope")) {
+		Long[] fileEntryIds = signatureRequest.getFileEntryIds();
 
-							return null;
-						}
+		Map<Long, DSRequest> dsRequests =
+			_dsRequestManager.getLatestFileEntryDSRequests(
+				testCompany.getCompanyId(), new long[] {fileEntryIds[0]});
 
-						DSEnvelope dsEnvelope = (DSEnvelope)arguments[2];
+		DSRequest dsRequest = dsRequests.get(fileEntryIds[0]);
 
-						dsEnvelope.setDSEnvelopeId(
-							RandomTestUtil.randomString());
+		Assert.assertEquals(
+			Long.valueOf(dsRequest.getDSRequestId()),
+			postSignatureRequest.getId());
 
-						for (DSRecipient dsRecipient :
-								dsEnvelope.getDSRecipients()) {
+		Assert.assertEquals(
+			DSRequestConstants.STATUS_SENT, postSignatureRequest.getStatus());
 
-							dsRecipient.setStatus(
-								DSRequestConstants.STATUS_SENT);
-						}
+		FileEntryBrief[] fileEntryBriefs =
+			postSignatureRequest.getFileEntryBriefs();
 
-						dsEnvelopeAtomicReference.set(dsEnvelope);
+		Assert.assertEquals(
+			Arrays.toString(fileEntryBriefs), 1, fileEntryBriefs.length);
 
-						return dsEnvelope;
-					}));
+		FileEntryBrief fileEntryBrief = fileEntryBriefs[0];
 
-		try {
-			SignatureRequest signatureRequest = _createSignatureRequest();
+		Assert.assertEquals(fileEntryIds[0], fileEntryBrief.getFileEntryId());
 
-			SignatureRequest postSignatureRequest =
-				signatureRequestResource.postSiteSignatureRequest(
-					testGroup.getGroupId(), signatureRequest);
+		FileEntry fileEntry = _dlAppLocalService.getFileEntry(fileEntryIds[0]);
 
-			Long[] fileEntryIds = signatureRequest.getFileEntryIds();
+		Assert.assertEquals(
+			fileEntry.getTitle(), fileEntryBrief.getFileEntryTitle());
 
-			Map<Long, DSRequest> dsRequests =
-				_dsRequestManager.getLatestFileEntryDSRequests(
-					testCompany.getCompanyId(), new long[] {fileEntryIds[0]});
+		DSEnvelope dsEnvelope = _dsEnvelopeAtomicReference.get();
 
-			DSRequest dsRequest = dsRequests.get(fileEntryIds[0]);
+		List<DSRecipient> dsRecipients = dsEnvelope.getDSRecipients();
 
-			Assert.assertEquals(
-				Long.valueOf(dsRequest.getDSRequestId()),
-				postSignatureRequest.getId());
+		DSRecipient dsRecipient = dsRecipients.get(0);
 
-			Assert.assertEquals(
-				DSRequestConstants.STATUS_SENT,
-				postSignatureRequest.getStatus());
+		JSONObject tabsJSONObject = dsRecipient.getTabsJSONObject();
 
-			FileEntryBrief[] fileEntryBriefs =
-				postSignatureRequest.getFileEntryBriefs();
+		JSONArray signHereTabsJSONArray = tabsJSONObject.getJSONArray(
+			"signHereTabs");
 
-			Assert.assertEquals(
-				Arrays.toString(fileEntryBriefs), 1, fileEntryBriefs.length);
+		JSONObject signHereTabJSONObject = signHereTabsJSONArray.getJSONObject(
+			0);
 
-			FileEntryBrief fileEntryBrief = fileEntryBriefs[0];
+		Assert.assertEquals(
+			"/sig1/", signHereTabJSONObject.getString("anchorString"));
 
-			Assert.assertEquals(
-				fileEntryIds[0], fileEntryBrief.getFileEntryId());
+		SignatureRequestRecipient[] signatureRequestRecipients =
+			signatureRequest.getSignatureRequestRecipients();
 
-			FileEntry fileEntry = _dlAppLocalService.getFileEntry(
-				fileEntryIds[0]);
+		SignatureRequestRecipient signatureRequestRecipient =
+			signatureRequestRecipients[0];
 
-			Assert.assertEquals(
-				fileEntry.getTitle(), fileEntryBrief.getFileEntryTitle());
+		User user = _userLocalService.getUser(
+			signatureRequestRecipient.getUserId());
 
-			DSEnvelope dsEnvelope = dsEnvelopeAtomicReference.get();
+		SignatureRequestRecipient[] postSignatureRequestRecipients =
+			postSignatureRequest.getSignatureRequestRecipients();
 
-			List<DSRecipient> dsRecipients = dsEnvelope.getDSRecipients();
+		Assert.assertEquals(
+			Arrays.toString(postSignatureRequestRecipients), 1,
+			postSignatureRequestRecipients.length);
 
-			DSRecipient dsRecipient = dsRecipients.get(0);
+		SignatureRequestRecipient postSignatureRequestRecipient =
+			postSignatureRequestRecipients[0];
 
-			JSONObject tabsJSONObject = dsRecipient.getTabsJSONObject();
-
-			JSONArray signHereTabsJSONArray = tabsJSONObject.getJSONArray(
-				"signHereTabs");
-
-			JSONObject signHereTabJSONObject =
-				signHereTabsJSONArray.getJSONObject(0);
-
-			Assert.assertEquals(
-				"/sig1/", signHereTabJSONObject.getString("anchorString"));
-
-			SignatureRequestRecipient[] signatureRequestRecipients =
-				postSignatureRequest.getSignatureRequestRecipients();
-
-			Assert.assertEquals(
-				Arrays.toString(signatureRequestRecipients), 1,
-				signatureRequestRecipients.length);
-
-			_assertProblemStatus(
-				"BAD_REQUEST",
-				() -> signatureRequestResource.postSiteSignatureRequest(
-					testGroup.getGroupId(), signatureRequest));
-		}
-		finally {
-			ReflectionTestUtil.setFieldValue(
-				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager);
-		}
+		Assert.assertEquals(
+			user.getEmailAddress(),
+			postSignatureRequestRecipient.getEmailAddress());
+		Assert.assertEquals(
+			user.getFullName(), postSignatureRequestRecipient.getName());
 	}
 
 	private void _testPostSiteSignatureRequestWhenExpireAfterIsNegative()
@@ -783,6 +931,20 @@ public class SignatureRequestResourceTest
 
 		signatureRequest.setExpireAfter(5);
 		signatureRequest.setExpireWarn(5);
+
+		_assertProblemStatus(
+			"BAD_REQUEST",
+			() -> signatureRequestResource.postSiteSignatureRequest(
+				testGroup.getGroupId(), signatureRequest));
+	}
+
+	private void _testPostSiteSignatureRequestWhenFileEntryHasDSRequest()
+		throws Exception {
+
+		SignatureRequest signatureRequest = _createSignatureRequest();
+
+		signatureRequestResource.postSiteSignatureRequest(
+			testGroup.getGroupId(), signatureRequest);
 
 		_assertProblemStatus(
 			"BAD_REQUEST",
@@ -848,6 +1010,44 @@ public class SignatureRequestResourceTest
 			"BAD_REQUEST",
 			() -> signatureRequestResource.postSiteSignatureRequest(
 				testGroup.getGroupId(), signatureRequest));
+	}
+
+	private void _testPostSiteSignatureRequestWhenSendNotificationsIsFalse()
+		throws Exception {
+
+		SignatureRequest signatureRequest = _createSignatureRequest();
+
+		signatureRequest.setSendNotifications(false);
+
+		SignatureRequest postSignatureRequest =
+			signatureRequestResource.postSiteSignatureRequest(
+				testGroup.getGroupId(), signatureRequest);
+
+		List<NotificationQueueEntry> notificationQueueEntries =
+			_getNotificationQueueEntries(postSignatureRequest.getId());
+
+		Assert.assertEquals(
+			notificationQueueEntries.toString(), 0,
+			notificationQueueEntries.size());
+	}
+
+	private void _testPostSiteSignatureRequestWhenSendNotificationsIsNull()
+		throws Exception {
+
+		SignatureRequest signatureRequest = _createSignatureRequest();
+
+		signatureRequest.setSendNotifications((Boolean)null);
+
+		SignatureRequest postSignatureRequest =
+			signatureRequestResource.postSiteSignatureRequest(
+				testGroup.getGroupId(), signatureRequest);
+
+		List<NotificationQueueEntry> notificationQueueEntries =
+			_getNotificationQueueEntries(postSignatureRequest.getId());
+
+		Assert.assertEquals(
+			notificationQueueEntries.toString(), 1,
+			notificationQueueEntries.size());
 	}
 
 	private void _testPostSiteSignatureRequestWithoutAddPermission()
@@ -919,29 +1119,7 @@ public class SignatureRequestResourceTest
 
 		_userLocalService.addRoleUser(role.getRoleId(), user);
 
-		SignatureRequest signatureRequest = randomSignatureRequest();
-
-		FileEntry fileEntry = _dlAppLocalService.addFileEntry(
-			null, TestPropsValues.getUserId(), testGroup.getGroupId(),
-			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
-			RandomTestUtil.randomString() + ".pdf",
-			ContentTypes.APPLICATION_PDF, TestDataConstants.TEST_BYTE_ARRAY,
-			null, null, null,
-			ServiceContextTestUtil.getServiceContext(testGroup.getGroupId()));
-
-		signatureRequest.setFileEntryIds(
-			new Long[] {fileEntry.getFileEntryId()});
-
-		User recipientUser = UserTestUtil.addUser();
-
-		signatureRequest.setSignatureRequestRecipients(
-			new SignatureRequestRecipient[] {
-				new SignatureRequestRecipient() {
-					{
-						setUserId(recipientUser.getUserId());
-					}
-				}
-			});
+		SignatureRequest signatureRequest = _createSignatureRequest();
 
 		SignatureRequestResource userSignatureRequestResource =
 			_getSignatureRequestResource(user);
@@ -958,6 +1136,9 @@ public class SignatureRequestResourceTest
 	@Inject
 	private DLAppLocalService _dlAppLocalService;
 
+	private final AtomicReference<DSEnvelope> _dsEnvelopeAtomicReference =
+		new AtomicReference<>();
+	private DSEnvelopeManager _dsEnvelopeManager;
 	private ObjectDefinition _dsRequestDocumentObjectDefinition;
 
 	@Inject
