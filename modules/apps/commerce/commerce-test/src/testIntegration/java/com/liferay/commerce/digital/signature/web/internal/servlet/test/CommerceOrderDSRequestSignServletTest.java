@@ -174,7 +174,6 @@ public class CommerceOrderDSRequestSignServletTest {
 			backURL,
 			_getRedirectedURL(
 				backURL, commerceOrderAttachmentId, UserTestUtil.addUser()));
-
 		Assert.assertEquals(
 			_getModalURL(backURL, dsRequest),
 			_getRedirectedURL(backURL, commerceOrderAttachmentId, user));
