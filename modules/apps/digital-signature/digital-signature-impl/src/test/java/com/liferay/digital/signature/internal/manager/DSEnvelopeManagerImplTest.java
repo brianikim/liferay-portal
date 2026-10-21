@@ -5,6 +5,7 @@
 
 package com.liferay.digital.signature.internal.manager;
 
+import com.liferay.digital.signature.exception.DSEnvelopeException;
 import com.liferay.digital.signature.internal.http.DSHttp;
 import com.liferay.digital.signature.manager.DSCustomFieldManager;
 import com.liferay.digital.signature.model.DSEnvelope;
@@ -122,17 +123,34 @@ public class DSEnvelopeManagerImplTest {
 				"message", "Only envelopes in the sent state may be voided."
 			));
 
-		try {
-			_dsEnvelopeManagerImpl.voidDSEnvelope(1, 2, "envelopeId", "reason");
+		DSEnvelopeException.NotVoidable notVoidable = Assert.assertThrows(
+			DSEnvelopeException.NotVoidable.class,
+			() -> _dsEnvelopeManagerImpl.voidDSEnvelope(
+				1, 2, "envelopeId", "reason"));
 
-			Assert.fail();
-		}
-		catch (PortalException portalException) {
-			Assert.assertEquals(
-				"Unable to void digital signature envelope envelopeId: Only " +
-					"envelopes in the sent state may be voided.",
-				portalException.getMessage());
-		}
+		Assert.assertEquals(
+			"Unable to void digital signature envelope envelopeId: Only " +
+				"envelopes in the sent state may be voided.",
+			notVoidable.getMessage());
+
+		_mockDSHttp(
+			JSONUtil.put(
+				"errorCode", "USER_AUTHENTICATION_FAILED"
+			).put(
+				"message", "One or both of Username and Password are invalid."
+			));
+
+		PortalException portalException = Assert.assertThrows(
+			PortalException.class,
+			() -> _dsEnvelopeManagerImpl.voidDSEnvelope(
+				1, 2, "envelopeId", "reason"));
+
+		Assert.assertFalse(
+			portalException instanceof DSEnvelopeException.NotVoidable);
+		Assert.assertEquals(
+			"Unable to void digital signature envelope envelopeId: One or " +
+				"both of Username and Password are invalid.",
+			portalException.getMessage());
 	}
 
 	private DSHttp _mockDSHttp(JSONObject jsonObject) {
