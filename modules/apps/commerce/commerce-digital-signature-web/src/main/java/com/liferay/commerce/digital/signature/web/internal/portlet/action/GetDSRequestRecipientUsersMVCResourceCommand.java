@@ -10,6 +10,7 @@ import com.liferay.commerce.digital.signature.web.internal.exception.DSCommerceO
 import com.liferay.commerce.digital.signature.web.internal.util.DSCommerceOrderAttachmentUtil;
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.service.CommerceOrderLocalService;
+import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.portal.kernel.exception.NoSuchModelException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONUtil;
@@ -23,8 +24,10 @@ import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCResourceCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.service.permission.UserPermissionUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
@@ -34,6 +37,9 @@ import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
 import jakarta.portlet.ResourceRequest;
 import jakarta.portlet.ResourceResponse;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -73,6 +79,12 @@ public class GetDSRequestRecipientUsersMVCResourceCommand
 					commerceOrder.getCommerceOrderId());
 			}
 
+			Set<Long> accountUserIds = new HashSet<>(
+				TransformUtil.transform(
+					DSCommerceOrderAttachmentUtil.getAccountUsers(
+						commerceOrder),
+					User::getUserId));
+
 			JSONPortletResponseUtil.writeJSON(
 				resourceRequest, resourceResponse,
 				JSONUtil.toJSONArray(
@@ -82,7 +94,9 @@ public class GetDSRequestRecipientUsersMVCResourceCommand
 							ParamUtil.getString(resourceRequest, "keywords"),
 							WorkflowConstants.STATUS_APPROVED, null, 0, 10,
 							(OrderByComparator<User>)null),
-						user -> user.getType() == UserConstants.TYPE_REGULAR),
+						user -> _isDSRecipient(
+							accountUserIds, commerceOrder,
+							themeDisplay.getPermissionChecker(), user)),
 					DSCommerceOrderAttachmentUtil::getUserJSONObject));
 		}
 		catch (NoSuchModelException noSuchModelException) {
@@ -103,6 +117,24 @@ public class GetDSRequestRecipientUsersMVCResourceCommand
 					DSCommerceOrderAttachmentUtil.getErrorMessage(
 						_language, themeDisplay.getLocale(), portalException)));
 		}
+	}
+
+	private boolean _isDSRecipient(
+		Set<Long> accountUserIds, CommerceOrder commerceOrder,
+		PermissionChecker permissionChecker, User user) {
+
+		if (user.getType() != UserConstants.TYPE_REGULAR) {
+			return false;
+		}
+
+		if (accountUserIds.contains(user.getUserId()) ||
+			(user.getUserId() == commerceOrder.getUserId())) {
+
+			return true;
+		}
+
+		return UserPermissionUtil.contains(
+			permissionChecker, user.getUserId(), ActionKeys.VIEW);
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
