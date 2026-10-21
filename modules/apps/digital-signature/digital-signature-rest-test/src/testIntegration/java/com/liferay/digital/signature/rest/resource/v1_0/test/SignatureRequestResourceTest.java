@@ -37,7 +37,8 @@ import com.liferay.petra.function.UnsafeRunnable;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
-import com.liferay.portal.kernel.json.JSONUtil;
+import com.liferay.portal.kernel.json.JSONArray;
+import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.User;
@@ -305,7 +306,6 @@ public class SignatureRequestResourceTest
 		_testPostSiteSignatureRequestWhenExpireWarnIsNotLessThanExpireAfter();
 		_testPostSiteSignatureRequestWhenFileEntryIdsIsEmpty();
 		_testPostSiteSignatureRequestWhenRecipientIsDuplicated();
-		_testPostSiteSignatureRequestWhenRecipientTabsIsNotObject();
 		_testPostSiteSignatureRequestWhenRecipientUserIdIsNull();
 		_testPostSiteSignatureRequestWhenRecipientsIsEmpty();
 		_testPostSiteSignatureRequestWithoutAddPermission();
@@ -691,26 +691,15 @@ public class SignatureRequestResourceTest
 		try {
 			SignatureRequest signatureRequest = _createSignatureRequest();
 
-			SignatureRequestRecipient[] signatureRequestRecipients =
-				signatureRequest.getSignatureRequestRecipients();
-
-			signatureRequestRecipients[0].setTabs(
-				HashMapBuilder.put(
-					"signHereTabs",
-					List.of(
-						HashMapBuilder.put(
-							"anchorString", "/sig1/"
-						).build())
-				).build());
-
 			SignatureRequest postSignatureRequest =
 				signatureRequestResource.postSiteSignatureRequest(
 					testGroup.getGroupId(), signatureRequest);
 
 			Long[] fileEntryIds = signatureRequest.getFileEntryIds();
 
-			Map<Long, DSRequest> dsRequests = _dsRequestManager.getLatestFileEntryDSRequests(
-				testCompany.getCompanyId(), new long[] {fileEntryIds[0]});
+			Map<Long, DSRequest> dsRequests =
+				_dsRequestManager.getLatestFileEntryDSRequests(
+					testCompany.getCompanyId(), new long[] {fileEntryIds[0]});
 
 			DSRequest dsRequest = dsRequests.get(fileEntryIds[0]);
 
@@ -745,14 +734,18 @@ public class SignatureRequestResourceTest
 
 			DSRecipient dsRecipient = dsRecipients.get(0);
 
-			Assert.assertEquals(
-				JSONUtil.put(
-					"signHereTabs",
-					JSONUtil.put(JSONUtil.put("anchorString", "/sig1/"))
-				).toString(),
-				String.valueOf(dsRecipient.getTabsJSONObject()));
+			JSONObject tabsJSONObject = dsRecipient.getTabsJSONObject();
 
-			signatureRequestRecipients =
+			JSONArray signHereTabsJSONArray = tabsJSONObject.getJSONArray(
+				"signHereTabs");
+
+			JSONObject signHereTabJSONObject =
+				signHereTabsJSONArray.getJSONObject(0);
+
+			Assert.assertEquals(
+				"/sig1/", signHereTabJSONObject.getString("anchorString"));
+
+			SignatureRequestRecipient[] signatureRequestRecipients =
 				postSignatureRequest.getSignatureRequestRecipients();
 
 			Assert.assertEquals(
@@ -822,22 +815,6 @@ public class SignatureRequestResourceTest
 			new SignatureRequestRecipient[] {
 				signatureRequestRecipients[0], signatureRequestRecipients[0]
 			});
-
-		_assertProblemStatus(
-			"BAD_REQUEST",
-			() -> signatureRequestResource.postSiteSignatureRequest(
-				testGroup.getGroupId(), signatureRequest));
-	}
-
-	private void _testPostSiteSignatureRequestWhenRecipientTabsIsNotObject()
-		throws Exception {
-
-		SignatureRequest signatureRequest = _createSignatureRequest();
-
-		SignatureRequestRecipient[] signatureRequestRecipients =
-			signatureRequest.getSignatureRequestRecipients();
-
-		signatureRequestRecipients[0].setTabs(RandomTestUtil.randomString());
 
 		_assertProblemStatus(
 			"BAD_REQUEST",
