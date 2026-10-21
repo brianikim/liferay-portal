@@ -6,12 +6,6 @@
 package com.liferay.digital.signature.manager.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
-import com.liferay.portal.kernel.service.WorkflowInstanceLinkLocalService;
-import com.liferay.portal.kernel.service.WorkflowDefinitionLinkLocalService;
-import com.liferay.portal.kernel.repository.model.Folder;
-import com.liferay.document.library.kernel.service.DLFolderLocalService;
-import com.liferay.document.library.kernel.model.DLFolder;
-import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.batch.engine.test.util.BatchEngineTestUtil;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.digital.signature.constants.DSObjectDefinitionConstants;
@@ -24,9 +18,12 @@ import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.digital.signature.model.DSRequestRecipient;
 import com.liferay.digital.signature.url.DSRequestURLProvider;
+import com.liferay.document.library.kernel.model.DLFileEntry;
+import com.liferay.document.library.kernel.model.DLFolder;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.document.library.kernel.model.DLVersionNumberIncrease;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
+import com.liferay.document.library.kernel.service.DLFolderLocalService;
 import com.liferay.notification.constants.NotificationRecipientSettingConstants;
 import com.liferay.notification.model.NotificationQueueEntry;
 import com.liferay.notification.service.NotificationQueueEntryLocalService;
@@ -49,6 +46,8 @@ import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporaryS
 import com.liferay.portal.configuration.test.util.GroupConfigurationTemporarySwapper;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.json.JSONArray;
+import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
@@ -56,6 +55,7 @@ import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
 import com.liferay.portal.kernel.portletfilerepository.PortletFileRepository;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.FileVersion;
+import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
@@ -64,6 +64,8 @@ import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.service.WorkflowDefinitionLinkLocalService;
+import com.liferay.portal.kernel.service.WorkflowInstanceLinkLocalService;
 import com.liferay.portal.kernel.test.AssertUtils;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.constants.TestDataConstants;
@@ -234,6 +236,28 @@ public class DSRequestManagerTest {
 			String.valueOf(user1.getUserId()),
 			dsRecipient1.getDSClientUserId());
 		Assert.assertEquals(user1.getFullName(), dsRecipient1.getName());
+
+		List<DSRecipient> dsRecipients = dsEnvelope1.getDSRecipients();
+
+		for (int i = 0; i < dsRecipients.size(); i++) {
+			DSRecipient dsRecipient = dsRecipients.get(i);
+
+			JSONObject tabsJSONObject = dsRecipient.getTabsJSONObject();
+
+			JSONArray signHereTabsJSONArray = tabsJSONObject.getJSONArray(
+				"signHereTabs");
+
+			JSONObject signHereTabJSONObject =
+				signHereTabsJSONArray.getJSONObject(0);
+
+			Assert.assertEquals(
+				"true",
+				signHereTabJSONObject.getString("anchorIgnoreIfNotPresent"));
+			Assert.assertEquals(
+				"/sig" + (i + 1) + "/",
+				signHereTabJSONObject.getString("anchorString"));
+		}
+
 		Assert.assertEquals(
 			dsEnvelope1.getDSEnvelopeId(),
 			dsRequest.getExternalReferenceCode());
@@ -432,38 +456,6 @@ public class DSRequestManagerTest {
 	}
 
 	@Test
-	public void testGetLatestFileEntryDSRequests() throws Exception {
-		long fileEntryId1 = RandomTestUtil.randomInt();
-		long fileEntryId2 = RandomTestUtil.randomInt();
-
-		DSRequest dsRequest1 = _addDSRequest(
-			_createDSEnvelope(), fileEntryId1, fileEntryId2);
-		DSRequest dsRequest2 = _addDSRequest(_createDSEnvelope(), fileEntryId2);
-
-		Map<Long, DSRequest> dsRequests = _dsRequestManager.getLatestFileEntryDSRequests(
-			TestPropsValues.getCompanyId(),
-			new long[] {fileEntryId1, fileEntryId2});
-
-		Assert.assertEquals(dsRequests.toString(), 2, dsRequests.size());
-
-		DSRequest dsRequest3 = dsRequests.get(fileEntryId1);
-
-		Assert.assertEquals(
-			dsRequest1.getDSRequestId(), dsRequest3.getDSRequestId());
-
-		DSRequest dsRequest4 = dsRequests.get(fileEntryId2);
-
-		Assert.assertEquals(
-			dsRequest2.getDSRequestId(), dsRequest4.getDSRequestId());
-
-		dsRequests = _dsRequestManager.getLatestFileEntryDSRequests(
-			TestPropsValues.getCompanyId(),
-			new long[] {RandomTestUtil.randomLong()});
-
-		Assert.assertTrue(dsRequests.isEmpty());
-	}
-
-	@Test
 	public void testGetFileEntryDSRequests() throws Exception {
 		DSEnvelope dsEnvelope = _createDSEnvelope();
 
@@ -489,6 +481,39 @@ public class DSRequestManagerTest {
 
 		Assert.assertEquals(
 			DSRequestConstants.STATUS_VOIDED, dsRequest2.getStatus());
+	}
+
+	@Test
+	public void testGetLatestFileEntryDSRequests() throws Exception {
+		long fileEntryId1 = RandomTestUtil.randomInt();
+		long fileEntryId2 = RandomTestUtil.randomInt();
+
+		DSRequest dsRequest1 = _addDSRequest(
+			_createDSEnvelope(), fileEntryId1, fileEntryId2);
+		DSRequest dsRequest2 = _addDSRequest(_createDSEnvelope(), fileEntryId2);
+
+		Map<Long, DSRequest> dsRequests =
+			_dsRequestManager.getLatestFileEntryDSRequests(
+				TestPropsValues.getCompanyId(),
+				new long[] {fileEntryId1, fileEntryId2});
+
+		Assert.assertEquals(dsRequests.toString(), 2, dsRequests.size());
+
+		DSRequest dsRequest3 = dsRequests.get(fileEntryId1);
+
+		Assert.assertEquals(
+			dsRequest1.getDSRequestId(), dsRequest3.getDSRequestId());
+
+		DSRequest dsRequest4 = dsRequests.get(fileEntryId2);
+
+		Assert.assertEquals(
+			dsRequest2.getDSRequestId(), dsRequest4.getDSRequestId());
+
+		dsRequests = _dsRequestManager.getLatestFileEntryDSRequests(
+			TestPropsValues.getCompanyId(),
+			new long[] {RandomTestUtil.randomLong()});
+
+		Assert.assertTrue(dsRequests.isEmpty());
 	}
 
 	@Test
@@ -804,8 +829,7 @@ public class DSRequestManagerTest {
 				"Digital signature is not enabled for group " +
 					TestPropsValues.getGroupId(),
 				() -> _dsRequestManager.voidDSRequest(
-					dsRequest.getDSRequestId(),
-					RandomTestUtil.randomString()));
+					dsRequest.getDSRequestId(), RandomTestUtil.randomString()));
 		}
 	}
 
@@ -2165,7 +2189,6 @@ public class DSRequestManagerTest {
 
 	@Inject
 	private UserLocalService _userLocalService;
-
 
 	@Inject
 	private WorkflowDefinitionLinkLocalService
