@@ -78,12 +78,9 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.workflow.WorkflowThreadLocal;
-import com.liferay.portal.vulcan.pagination.Page;
-import com.liferay.portal.vulcan.pagination.Pagination;
 
 import java.io.Serializable;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
@@ -856,41 +853,29 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 		Map<String, DSEnvelope> dsEnvelopes = new HashMap<>();
 
-		Set<String> dsEnvelopeIds = new HashSet<>(
-			TransformUtil.transform(
-				dsRequests, DSRequest::getExternalReferenceCode));
-
-		Date fromDate = Collections.min(
-			TransformUtil.transform(dsRequests, DSRequest::getCreateDate));
-
-		LocalDate fromLocalDate = LocalDate.ofInstant(
-			fromDate.toInstant(), ZoneOffset.UTC);
-
-		String fromDateString = String.valueOf(fromLocalDate.minusDays(1));
+		String[] dsEnvelopeIds = TransformUtil.transformToArray(
+			dsRequests, DSRequest::getExternalReferenceCode, String.class);
 
 		try {
-			Page<DSEnvelope> dsEnvelopesPage = null;
-			int page = 1;
+			for (int i = 0; i < dsEnvelopeIds.length;
+				 i += _DS_ENVELOPE_IDS_MAX_SIZE) {
 
-			do {
-				dsEnvelopesPage = _dsEnvelopeManager.getDSEnvelopesPage(
-					companyId, groupId, fromDateString, false, null, null,
-					Pagination.of(page, 100), null);
+				for (DSEnvelope dsEnvelope :
+						_dsEnvelopeManager.getDSEnvelopes(
+							companyId, groupId,
+							ArrayUtil.subset(
+								dsEnvelopeIds, i,
+								Math.min(
+									dsEnvelopeIds.length,
+									i + _DS_ENVELOPE_IDS_MAX_SIZE)))) {
 
-				for (DSEnvelope dsEnvelope : dsEnvelopesPage.getItems()) {
-					if (dsEnvelopeIds.contains(dsEnvelope.getDSEnvelopeId())) {
-						dsEnvelopes.put(
-							dsEnvelope.getDSEnvelopeId(), dsEnvelope);
-					}
+					dsEnvelopes.put(dsEnvelope.getDSEnvelopeId(), dsEnvelope);
 				}
-
-				page++;
 			}
-			while (dsEnvelopesPage.hasNext());
 		}
 		catch (Exception exception) {
 			_log.error(
-				"Unable to list digital signature envelopes for group " +
+				"Unable to list digital signature envelopes for site " +
 					groupId,
 				exception);
 		}
@@ -1703,6 +1688,8 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			}
 		}
 	}
+
+	private static final int _DS_ENVELOPE_IDS_MAX_SIZE = 50;
 
 	private static final int _IN_FILTER_MAX_SIZE = 1000;
 

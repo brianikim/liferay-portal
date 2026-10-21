@@ -25,6 +25,7 @@ import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.vulcan.pagination.Page;
 import com.liferay.portal.vulcan.pagination.Pagination;
@@ -165,6 +166,28 @@ public class DSEnvelopeManagerImpl implements DSEnvelopeManager {
 				"envelopes/", dsEnvelopeId, "?include=", include));
 
 		return _toDSEnvelope(jsonObject);
+	}
+
+	@Override
+	public List<DSEnvelope> getDSEnvelopes(
+			long companyId, long groupId, String... dsEnvelopeIds)
+		throws PortalException {
+
+		JSONObject jsonObject = _dsHttp.get(
+			companyId, groupId,
+			StringBundler.concat(
+				"envelopes?envelope_ids=", StringUtil.merge(dsEnvelopeIds),
+				"&include=custom_fields,recipients"));
+
+		if (Validator.isNotNull(jsonObject.getString("errorCode"))) {
+			throw new PortalException(
+				"Unable to list digital signature envelopes: " +
+					jsonObject.getString("message"));
+		}
+
+		return JSONUtil.toList(
+			jsonObject.getJSONArray("envelopes"),
+			envelopeJSONObject -> _toDSEnvelope(envelopeJSONObject), _log);
 	}
 
 	@Override

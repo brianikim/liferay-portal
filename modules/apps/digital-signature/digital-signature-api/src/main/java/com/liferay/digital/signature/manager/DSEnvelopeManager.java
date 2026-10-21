@@ -10,6 +10,8 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.vulcan.pagination.Page;
 import com.liferay.portal.vulcan.pagination.Pagination;
 
+import java.util.List;
+
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -33,6 +35,10 @@ public interface DSEnvelopeManager {
 
 	public DSEnvelope getDSEnvelope(
 		long companyId, long groupId, String dsEnvelopeId, String include);
+
+	public List<DSEnvelope> getDSEnvelopes(
+			long companyId, long groupId, String... dsEnvelopeIds)
+		throws PortalException;
 
 	public Page<DSEnvelope> getDSEnvelopesPage(
 		long companyId, long groupId, String fromDateString,
