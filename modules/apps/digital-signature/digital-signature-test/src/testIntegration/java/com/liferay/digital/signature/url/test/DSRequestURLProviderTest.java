@@ -80,20 +80,20 @@ public class DSRequestURLProviderTest {
 
 	@Test
 	public void testGetURL() throws Exception {
-		Company company = _companyLocalService.getCompany(
-			TestPropsValues.getCompanyId());
-		long dsRequestId = RandomTestUtil.randomLong();
+		LayoutTestUtil.addTypePortletLayout(_group);
 
 		String virtualHostname = StringUtil.toLowerCase(
 			RandomTestUtil.randomString() + ".com");
-
-		LayoutTestUtil.addTypePortletLayout(_group);
 
 		_layoutSetLocalService.updateVirtualHosts(
 			_group.getGroupId(), false,
 			TreeMapBuilder.put(
 				virtualHostname, StringPool.BLANK
 			).build());
+
+		Company company = _companyLocalService.getCompany(
+			TestPropsValues.getCompanyId());
+		long dsRequestId = RandomTestUtil.randomLong();
 
 		String url = _dsRequestURLProvider.getURL(
 			company.getCompanyId(), _group.getGroupId(), dsRequestId);
@@ -114,11 +114,11 @@ public class DSRequestURLProviderTest {
 
 		_groupLocalService.deleteGroup(group);
 
-		Group guestGroup = _groupLocalService.getGroup(
-			company.getCompanyId(), GroupConstants.GUEST);
-
 		url = _dsRequestURLProvider.getURL(
 			company.getCompanyId(), group.getGroupId(), dsRequestId);
+
+		Group guestGroup = _groupLocalService.getGroup(
+			company.getCompanyId(), GroupConstants.GUEST);
 
 		Assert.assertTrue(
 			url, url.startsWith(company.getPortalURL(guestGroup.getGroupId())));

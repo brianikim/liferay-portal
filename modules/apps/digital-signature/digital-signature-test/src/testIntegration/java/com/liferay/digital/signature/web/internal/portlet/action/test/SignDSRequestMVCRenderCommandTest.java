@@ -12,6 +12,9 @@ import com.liferay.digital.signature.constants.DSObjectDefinitionConstants;
 import com.liferay.digital.signature.constants.DSRequestConstants;
 import com.liferay.digital.signature.constants.DigitalSignaturePortletKeys;
 import com.liferay.digital.signature.manager.DSRecipientViewDefinitionManager;
+import com.liferay.digital.signature.manager.DSRequestManager;
+import com.liferay.digital.signature.model.DSRequest;
+import com.liferay.digital.signature.model.DSRequestRecipient;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.layout.test.util.ContentLayoutTestUtil;
 import com.liferay.layout.test.util.LayoutTestUtil;
@@ -277,10 +280,12 @@ public class SignDSRequestMVCRenderCommandTest {
 
 		themeDisplay.setStatePopUp(true);
 
-		MockLiferayPortletRenderRequest mockLiferayPortletRenderRequest =
-			_getMockLiferayPortletRenderRequest(
-				_addDSRequest(fileEntry.getFileEntryId()), themeDisplay);
+		long dsRequestId = _addDSRequest(fileEntry.getFileEntryId());
 
+		MockLiferayPortletRenderRequest mockLiferayPortletRenderRequest =
+			_getMockLiferayPortletRenderRequest(dsRequestId, themeDisplay);
+
+		List<Object[]> argumentsList = new ArrayList<>();
 		List<String> methodNames = new ArrayList<>();
 
 		DSRecipientViewDefinitionManager dsRecipientViewDefinitionManager =
@@ -291,6 +296,7 @@ public class SignDSRequestMVCRenderCommandTest {
 						DSRecipientViewDefinitionManager.class.getClassLoader(),
 						new Class<?>[] {DSRecipientViewDefinitionManager.class},
 						(proxy, method, arguments) -> {
+							argumentsList.add(arguments);
 							methodNames.add(method.getName());
 
 							return RandomTestUtil.randomString();
@@ -312,6 +318,27 @@ public class SignDSRequestMVCRenderCommandTest {
 		Assert.assertEquals(
 			Collections.singletonList("addDSRecipientViewDefinition"),
 			methodNames);
+
+		DSRequest dsRequest = _dsRequestManager.fetchDSRequest(
+			TestPropsValues.getCompanyId(), dsRequestId);
+
+		Object[] arguments = argumentsList.get(0);
+
+		DSRequestRecipient dsRequestRecipient =
+			(DSRequestRecipient)arguments[3];
+
+		List<DSRequestRecipient> dsRequestRecipients =
+			dsRequest.getDSRequestRecipients();
+
+		DSRequestRecipient expectedDSRequestRecipient = dsRequestRecipients.get(
+			0);
+
+		Assert.assertEquals(
+			expectedDSRequestRecipient.getEmailAddress(),
+			dsRequestRecipient.getEmailAddress());
+		Assert.assertEquals(
+			expectedDSRequestRecipient.getName(), dsRequestRecipient.getName());
+
 		Assert.assertNotNull(
 			mockLiferayPortletRenderRequest.getAttribute(
 				WebKeys.PORTLET_DISPLAY_CONTEXT));
@@ -339,6 +366,10 @@ public class SignDSRequestMVCRenderCommandTest {
 	private CompanyLocalService _companyLocalService;
 
 	private ObjectDefinition _dsRequestDocumentObjectDefinition;
+
+	@Inject
+	private DSRequestManager _dsRequestManager;
+
 	private ObjectDefinition _dsRequestObjectDefinition;
 	private ObjectDefinition _dsRequestRecipientObjectDefinition;
 
