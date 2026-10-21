@@ -9,6 +9,8 @@ import com.liferay.account.model.AccountEntry;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.batch.engine.test.util.BatchEngineTestUtil;
 import com.liferay.commerce.account.test.util.CommerceAccountTestUtil;
+import com.liferay.commerce.constants.CommerceOrderActionKeys;
+import com.liferay.commerce.constants.CommerceOrderConstants;
 import com.liferay.commerce.currency.model.CommerceCurrency;
 import com.liferay.commerce.currency.test.util.CommerceCurrencyTestUtil;
 import com.liferay.commerce.model.CommerceOrder;
@@ -29,11 +31,17 @@ import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporaryS
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.ResourceConstants;
+import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.model.role.RoleConstants;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
 import com.liferay.portal.kernel.service.CompanyLocalService;
+import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
+import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.portlet.MockLiferayResourceRequest;
@@ -185,6 +193,48 @@ public class AddDSRequestMVCResourceCommandTest {
 			user2.getUserId(), user3.getUserId());
 
 		_assertErrorMessage("At least one recipient is required.", 0, 0);
+
+		Role role = _roleLocalService.addRole(
+			RandomTestUtil.randomString(), TestPropsValues.getUserId(), null, 0,
+			RandomTestUtil.randomString(), null, null,
+			RoleConstants.TYPE_REGULAR, null,
+			ServiceContextTestUtil.getServiceContext(
+				_group.getGroupId(), TestPropsValues.getUserId()));
+
+		_resourcePermissionLocalService.setResourcePermissions(
+			_group.getCompanyId(), CommerceOrderAttachment.class.getName(),
+			ResourceConstants.SCOPE_GROUP,
+			String.valueOf(_commerceOrder.getGroupId()), role.getRoleId(),
+			new String[] {ActionKeys.UPDATE, ActionKeys.VIEW});
+
+		AccountEntry accountEntry = _commerceOrder.getAccountEntry();
+
+		_resourcePermissionLocalService.setResourcePermissions(
+			_group.getCompanyId(), CommerceOrderConstants.RESOURCE_NAME,
+			ResourceConstants.SCOPE_GROUP,
+			String.valueOf(accountEntry.getAccountEntryGroupId()),
+			role.getRoleId(),
+			new String[] {CommerceOrderActionKeys.MANAGE_COMMERCE_ORDERS});
+
+		User orderManagerUser = UserTestUtil.addUser();
+
+		_roleLocalService.addUserRole(orderManagerUser.getUserId(), role);
+
+		User countersignerUser = UserTestUtil.addUser();
+
+		portletException = Assert.assertThrows(
+			PortletException.class,
+			() -> _serveResource(
+				_commerceOrderAttachment.getCommerceOrderAttachmentId(), 0, 0,
+				orderManagerUser, countersignerUser.getUserId()));
+
+		PrincipalException.MustHavePermission mustHavePermission =
+			(PrincipalException.MustHavePermission)portletException.getCause();
+
+		Assert.assertEquals(
+			User.class.getName(), mustHavePermission.resourceName);
+		Assert.assertEquals(
+			countersignerUser.getUserId(), mustHavePermission.resourceId);
 
 		_testServeResourceWhenResponseWriteFails();
 
@@ -539,6 +589,12 @@ public class AddDSRequestMVCResourceCommandTest {
 
 	@Inject(filter = "mvc.command.name=/commerce_order/add_ds_request")
 	private MVCResourceCommand _mvcResourceCommand;
+
+	@Inject
+	private ResourcePermissionLocalService _resourcePermissionLocalService;
+
+	@Inject
+	private RoleLocalService _roleLocalService;
 
 	@Inject
 	private UserLocalService _userLocalService;
