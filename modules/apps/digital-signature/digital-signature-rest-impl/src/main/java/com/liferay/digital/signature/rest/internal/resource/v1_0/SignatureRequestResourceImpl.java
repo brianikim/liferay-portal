@@ -6,6 +6,7 @@
 package com.liferay.digital.signature.rest.internal.resource.v1_0;
 
 import com.liferay.digital.signature.constants.DSObjectDefinitionConstants;
+import com.liferay.digital.signature.exception.DSEnvelopeException;
 import com.liferay.digital.signature.exception.DSRequestException;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
@@ -28,8 +29,8 @@ import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermission;
-import com.liferay.portal.kernel.service.GroupService;
 import com.liferay.portal.kernel.service.UserService;
+import com.liferay.portal.kernel.service.permission.GroupPermissionUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
@@ -133,6 +134,10 @@ public class SignatureRequestResourceImpl
 			_dsRequestManager.voidDSRequest(
 				dsRequest.getDSRequestId(), voidReason);
 		}
+		catch (DSEnvelopeException.NotVoidable dsEnvelopeException) {
+			throw new BadRequestException(
+				dsEnvelopeException.getMessage(), dsEnvelopeException);
+		}
 		catch (DSRequestException dsRequestException) {
 			throw new BadRequestException(
 				dsRequestException.getMessage(), dsRequestException);
@@ -169,7 +174,9 @@ public class SignatureRequestResourceImpl
 				"A signature request must have at least one file entry");
 		}
 
-		_groupService.getGroup(siteId);
+		GroupPermissionUtil.check(
+			PermissionThreadLocal.getPermissionChecker(), siteId,
+			ActionKeys.VIEW);
 
 		for (Long fileEntryId : fileEntryIds) {
 			_fileEntryModelResourcePermission.check(
@@ -336,9 +343,6 @@ public class SignatureRequestResourceImpl
 	)
 	private ModelResourcePermission<FileEntry>
 		_fileEntryModelResourcePermission;
-
-	@Reference
-	private GroupService _groupService;
 
 	@Reference
 	private ObjectDefinitionLocalService _objectDefinitionLocalService;
