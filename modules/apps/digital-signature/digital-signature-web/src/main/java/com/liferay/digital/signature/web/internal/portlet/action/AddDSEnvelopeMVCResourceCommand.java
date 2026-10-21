@@ -27,6 +27,8 @@ import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
+import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.service.permission.UserPermissionUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Base64;
 import com.liferay.portal.kernel.util.FileUtil;
@@ -132,6 +134,17 @@ public class AddDSEnvelopeMVCResourceCommand
 			return;
 		}
 
+		for (DSRecipient dsRecipient : dsEnvelope.getDSRecipients()) {
+			User recipientUser = _userLocalService.fetchUserByEmailAddress(
+				themeDisplay.getCompanyId(), dsRecipient.getEmailAddress());
+
+			if (recipientUser != null) {
+				UserPermissionUtil.check(
+					themeDisplay.getPermissionChecker(),
+					recipientUser.getUserId(), ActionKeys.VIEW);
+			}
+		}
+
 		DSRequest dsRequest = _dsRequestManager.addDSRequest(
 			themeDisplay.getCompanyId(), themeDisplay.getSiteGroupId(),
 			user.getUserId(), dsEnvelope, fileEntryIds);
@@ -192,5 +205,8 @@ public class AddDSEnvelopeMVCResourceCommand
 
 	@Reference
 	private JSONFactory _jsonFactory;
+
+	@Reference
+	private UserLocalService _userLocalService;
 
 }
