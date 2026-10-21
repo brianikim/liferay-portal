@@ -581,8 +581,21 @@ public class DSRequestManagerTest {
 			notificationQueueEntries.toString(), 0,
 			notificationQueueEntries.size());
 
-		dsRequest = _addDSRequest(
-			user.getEmailAddress(), DSRequestConstants.STATUS_SENT);
+		DSRecipient dsRecipient1 = _createDSRecipient(user);
+
+		dsRecipient1.setStatus(DSRequestConstants.STATUS_SENT);
+
+		DSRecipient dsRecipient2 = _createDSRecipient(UserTestUtil.addUser());
+
+		dsRecipient2.setStatus(DSRequestConstants.STATUS_CREATED);
+
+		DSEnvelope dsEnvelope = _createDSEnvelope(dsRecipient1, dsRecipient2);
+
+		String emailMessage = RandomTestUtil.randomString();
+
+		dsEnvelope.setEmailBlurb("<b>" + emailMessage + "</b>");
+
+		dsRequest = _addDSRequest(dsEnvelope, RandomTestUtil.randomInt());
 
 		_dsRequestManager.sendDSRequestNotifications(
 			dsRequest.getDSRequestId());
@@ -601,6 +614,8 @@ public class DSRequestManagerTest {
 
 		String body = notificationQueueEntry.getBody();
 
+		Assert.assertTrue(
+			body, body.contains("&lt;b&gt;" + emailMessage + "&lt;/b&gt;"));
 		Assert.assertTrue(
 			body,
 			body.contains(

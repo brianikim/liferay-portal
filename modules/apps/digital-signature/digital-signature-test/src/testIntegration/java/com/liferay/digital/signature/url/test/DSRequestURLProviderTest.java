@@ -8,8 +8,15 @@ package com.liferay.digital.signature.url.test;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.digital.signature.constants.DigitalSignaturePortletKeys;
 import com.liferay.digital.signature.url.DSRequestURLProvider;
+import com.liferay.layout.test.util.LayoutTestUtil;
+import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.GroupConstants;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
+import com.liferay.portal.kernel.service.CompanyLocalService;
+import com.liferay.portal.kernel.service.GroupLocalService;
+import com.liferay.portal.kernel.service.LayoutSetLocalService;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
@@ -17,6 +24,8 @@ import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.HttpComponentsUtil;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.TreeMapBuilder;
 import com.liferay.portal.kernel.util.URLCodec;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
@@ -71,23 +80,64 @@ public class DSRequestURLProviderTest {
 
 	@Test
 	public void testGetURL() throws Exception {
+		Company company = _companyLocalService.getCompany(
+			TestPropsValues.getCompanyId());
 		long dsRequestId = RandomTestUtil.randomLong();
 
+		String virtualHostname = StringUtil.toLowerCase(
+			RandomTestUtil.randomString() + ".com");
+
+		LayoutTestUtil.addTypePortletLayout(_group);
+
+		_layoutSetLocalService.updateVirtualHosts(
+			_group.getGroupId(), false,
+			TreeMapBuilder.put(
+				virtualHostname, StringPool.BLANK
+			).build());
+
 		String url = _dsRequestURLProvider.getURL(
-			TestPropsValues.getCompanyId(), _group.getGroupId(), dsRequestId);
+			company.getCompanyId(), _group.getGroupId(), dsRequestId);
 
 		Assert.assertTrue(
 			url,
 			url.endsWith(
 				"/c/digital_signature/open_ds_request?dsRequestId=" +
 					dsRequestId));
+		Assert.assertTrue(
+			url,
+			url.startsWith(
+				_portal.getPortalURL(
+					virtualHostname, _portal.getPortalServerPort(false),
+					false)));
+
+		Group group = GroupTestUtil.addGroup();
+
+		_groupLocalService.deleteGroup(group);
+
+		Group guestGroup = _groupLocalService.getGroup(
+			company.getCompanyId(), GroupConstants.GUEST);
+
+		url = _dsRequestURLProvider.getURL(
+			company.getCompanyId(), group.getGroupId(), dsRequestId);
+
+		Assert.assertTrue(
+			url, url.startsWith(company.getPortalURL(guestGroup.getGroupId())));
 	}
+
+	@Inject
+	private CompanyLocalService _companyLocalService;
 
 	@Inject
 	private DSRequestURLProvider _dsRequestURLProvider;
 
 	@DeleteAfterTestRun
 	private Group _group;
+
+	@Inject
+	private GroupLocalService _groupLocalService;
+
+	@Inject
+	private LayoutSetLocalService _layoutSetLocalService;
 
 	@Inject
 	private Portal _portal;

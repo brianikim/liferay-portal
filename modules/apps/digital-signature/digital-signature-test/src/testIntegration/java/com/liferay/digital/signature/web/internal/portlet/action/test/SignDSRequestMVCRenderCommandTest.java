@@ -11,6 +11,7 @@ import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration
 import com.liferay.digital.signature.constants.DSObjectDefinitionConstants;
 import com.liferay.digital.signature.constants.DSRequestConstants;
 import com.liferay.digital.signature.constants.DigitalSignaturePortletKeys;
+import com.liferay.digital.signature.manager.DSRecipientViewDefinitionManager;
 import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.layout.test.util.ContentLayoutTestUtil;
 import com.liferay.layout.test.util.LayoutTestUtil;
@@ -28,6 +29,7 @@ import com.liferay.portal.kernel.portletfilerepository.PortletFileRepository;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.constants.TestDataConstants;
 import com.liferay.portal.kernel.test.portlet.MockLiferayPortletRenderRequest;
 import com.liferay.portal.kernel.test.portlet.MockLiferayPortletRenderResponse;
@@ -37,11 +39,14 @@ import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
+import com.liferay.portal.kernel.test.util.UserTestUtil;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.HttpComponentsUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
@@ -50,6 +55,9 @@ import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
 
 import java.io.Serializable;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.After;
@@ -117,7 +125,7 @@ public class SignDSRequestMVCRenderCommandTest {
 
 		_group = GroupTestUtil.addGroup();
 
-		_layout = LayoutTestUtil.addTypePortletLayout(_group);
+		_portletLayout = LayoutTestUtil.addTypePortletLayout(_group);
 	}
 
 	@After
@@ -127,15 +135,18 @@ public class SignDSRequestMVCRenderCommandTest {
 
 	@Test
 	public void testRender() throws Exception {
-		Layout layout = LayoutTestUtil.addTypePortletLayout(_group);
+		Layout fileEntryLayout = LayoutTestUtil.addTypePortletLayout(_group);
 
-		FileEntry fileEntry = _addFileEntry(layout.getPlid());
+		FileEntry fileEntry = _addFileEntry(fileEntryLayout.getPlid());
 
-		_testRender(_addDSRequest(fileEntry.getFileEntryId()), layout);
+		_testRender(_addDSRequest(fileEntry.getFileEntryId()), fileEntryLayout);
 
 		fileEntry = _addFileEntry(RandomTestUtil.randomLong());
 
-		_testRender(_addDSRequest(fileEntry.getFileEntryId()), _layout);
+		_testRender(_addDSRequest(fileEntry.getFileEntryId()), _portletLayout);
+
+		_testRenderWhenStateIsPopUp();
+		_testRenderWhenUserIsNotDSRequestRecipient();
 	}
 
 	private long _addDSRequest(long fileEntryId) throws Exception {
@@ -143,7 +154,7 @@ public class SignDSRequestMVCRenderCommandTest {
 			ServiceContextTestUtil.getServiceContext(
 				_group.getGroupId(), TestPropsValues.getUserId());
 
-		ObjectEntry objectEntry = _addObjectEntry(
+		ObjectEntry dsRequestObjectEntry = _addObjectEntry(
 			_dsRequestObjectDefinition, serviceContext,
 			HashMapBuilder.<String, Serializable>put(
 				"emailSubject", RandomTestUtil.randomString()
@@ -161,7 +172,7 @@ public class SignDSRequestMVCRenderCommandTest {
 				"fileEntryId", fileEntryId
 			).put(
 				"r_dsRequestToDSRequestDocuments_l_dsRequestId",
-				objectEntry.getObjectEntryId()
+				dsRequestObjectEntry.getObjectEntryId()
 			).build());
 
 		_addObjectEntry(
@@ -177,7 +188,7 @@ public class SignDSRequestMVCRenderCommandTest {
 				"name", RandomTestUtil.randomString()
 			).put(
 				"r_dsRequestToDSRequestRecipients_l_dsRequestId",
-				objectEntry.getObjectEntryId()
+				dsRequestObjectEntry.getObjectEntryId()
 			).put(
 				"r_userToDSRequestRecipients_userId",
 				TestPropsValues.getUserId()
@@ -185,7 +196,7 @@ public class SignDSRequestMVCRenderCommandTest {
 				"requestRecipientStatus", DSRequestConstants.STATUS_SENT
 			).build());
 
-		return objectEntry.getObjectEntryId();
+		return dsRequestObjectEntry.getObjectEntryId();
 	}
 
 	private FileEntry _addFileEntry(long plid) throws Exception {
@@ -211,25 +222,35 @@ public class SignDSRequestMVCRenderCommandTest {
 			serviceContext);
 	}
 
-	private void _testRender(long dsRequestId, Layout layout) throws Exception {
+	private MockLiferayPortletRenderRequest _getMockLiferayPortletRenderRequest(
+		long dsRequestId, ThemeDisplay themeDisplay) {
+
 		MockLiferayPortletRenderRequest mockLiferayPortletRenderRequest =
 			new MockLiferayPortletRenderRequest();
 
 		mockLiferayPortletRenderRequest.setAttribute(
-			WebKeys.THEME_DISPLAY,
-			ContentLayoutTestUtil.getThemeDisplay(
-				_companyLocalService.getCompany(_group.getCompanyId()), _group,
-				_layout));
+			WebKeys.THEME_DISPLAY, themeDisplay);
 		mockLiferayPortletRenderRequest.setParameter(
 			"dsRequestId", String.valueOf(dsRequestId));
 
+		return mockLiferayPortletRenderRequest;
+	}
+
+	private ThemeDisplay _getThemeDisplay() throws Exception {
+		return ContentLayoutTestUtil.getThemeDisplay(
+			_companyLocalService.getCompany(_group.getCompanyId()), _group,
+			_portletLayout);
+	}
+
+	private void _testRender(long dsRequestId, Layout layout) throws Exception {
 		MockLiferayPortletRenderResponse mockLiferayPortletRenderResponse =
 			new MockLiferayPortletRenderResponse();
 
 		Assert.assertEquals(
 			MVCRenderConstants.MVC_PATH_VALUE_SKIP_DISPATCH,
 			_mvcRenderCommand.render(
-				mockLiferayPortletRenderRequest,
+				_getMockLiferayPortletRenderRequest(
+					dsRequestId, _getThemeDisplay()),
 				mockLiferayPortletRenderResponse));
 
 		MockHttpServletResponse mockHttpServletResponse =
@@ -249,6 +270,68 @@ public class SignDSRequestMVCRenderCommandTest {
 				redirectedURL, "dsRequestId", false));
 	}
 
+	private void _testRenderWhenStateIsPopUp() throws Exception {
+		FileEntry fileEntry = _addFileEntry(_portletLayout.getPlid());
+
+		ThemeDisplay themeDisplay = _getThemeDisplay();
+
+		themeDisplay.setStatePopUp(true);
+
+		MockLiferayPortletRenderRequest mockLiferayPortletRenderRequest =
+			_getMockLiferayPortletRenderRequest(
+				_addDSRequest(fileEntry.getFileEntryId()), themeDisplay);
+
+		List<String> methodNames = new ArrayList<>();
+
+		DSRecipientViewDefinitionManager dsRecipientViewDefinitionManager =
+			(DSRecipientViewDefinitionManager)
+				ReflectionTestUtil.getAndSetFieldValue(
+					_mvcRenderCommand, "_dsRecipientViewDefinitionManager",
+					ProxyUtil.newProxyInstance(
+						DSRecipientViewDefinitionManager.class.getClassLoader(),
+						new Class<?>[] {DSRecipientViewDefinitionManager.class},
+						(proxy, method, arguments) -> {
+							methodNames.add(method.getName());
+
+							return RandomTestUtil.randomString();
+						}));
+
+		try {
+			Assert.assertEquals(
+				"/sign_digital_signature/sign_ds_request.jsp",
+				_mvcRenderCommand.render(
+					mockLiferayPortletRenderRequest,
+					new MockLiferayPortletRenderResponse()));
+		}
+		finally {
+			ReflectionTestUtil.setFieldValue(
+				_mvcRenderCommand, "_dsRecipientViewDefinitionManager",
+				dsRecipientViewDefinitionManager);
+		}
+
+		Assert.assertEquals(
+			Collections.singletonList("addDSRecipientViewDefinition"),
+			methodNames);
+		Assert.assertNotNull(
+			mockLiferayPortletRenderRequest.getAttribute(
+				WebKeys.PORTLET_DISPLAY_CONTEXT));
+	}
+
+	private void _testRenderWhenUserIsNotDSRequestRecipient() throws Exception {
+		FileEntry fileEntry = _addFileEntry(_portletLayout.getPlid());
+
+		ThemeDisplay themeDisplay = _getThemeDisplay();
+
+		themeDisplay.setUser(UserTestUtil.addUser());
+
+		Assert.assertEquals(
+			"/sign_digital_signature/view.jsp",
+			_mvcRenderCommand.render(
+				_getMockLiferayPortletRenderRequest(
+					_addDSRequest(fileEntry.getFileEntryId()), themeDisplay),
+				new MockLiferayPortletRenderResponse()));
+	}
+
 	private CompanyConfigurationTemporarySwapper
 		_companyConfigurationTemporarySwapper;
 
@@ -262,8 +345,6 @@ public class SignDSRequestMVCRenderCommandTest {
 	@DeleteAfterTestRun
 	private Group _group;
 
-	private Layout _layout;
-
 	@Inject(filter = "mvc.command.name=/digital_signature/sign_ds_request")
 	private MVCRenderCommand _mvcRenderCommand;
 
@@ -275,5 +356,7 @@ public class SignDSRequestMVCRenderCommandTest {
 
 	@Inject
 	private PortletFileRepository _portletFileRepository;
+
+	private Layout _portletLayout;
 
 }
