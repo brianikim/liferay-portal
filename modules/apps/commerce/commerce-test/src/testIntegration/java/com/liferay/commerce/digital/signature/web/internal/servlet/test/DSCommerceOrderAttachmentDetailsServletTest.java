@@ -307,9 +307,6 @@ public class DSCommerceOrderAttachmentDetailsServletTest {
 			long commerceOrderAttachmentId, User user)
 		throws Exception {
 
-		MockHttpServletResponse mockHttpServletResponse =
-			new MockHttpServletResponse();
-
 		MockHttpServletRequest mockHttpServletRequest =
 			new MockHttpServletRequest();
 
@@ -324,6 +321,9 @@ public class DSCommerceOrderAttachmentDetailsServletTest {
 		mockHttpServletRequest.setParameter(
 			"commerceOrderAttachmentId",
 			String.valueOf(commerceOrderAttachmentId));
+
+		MockHttpServletResponse mockHttpServletResponse =
+			new MockHttpServletResponse();
 
 		_servlet.service(mockHttpServletRequest, mockHttpServletResponse);
 
