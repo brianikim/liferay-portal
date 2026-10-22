@@ -153,18 +153,18 @@ public class DSCommerceOrderAttachmentSignServletTest {
 			backURL,
 			_getRedirectedURL(backURL, commerceOrderAttachmentId, null));
 
-		User user = TestPropsValues.getUser();
+		User user1 = TestPropsValues.getUser();
 
 		Assert.assertEquals(
 			backURL,
-			_getRedirectedURL(backURL, commerceOrderAttachmentId, user));
+			_getRedirectedURL(backURL, commerceOrderAttachmentId, user1));
 
 		DSRequest dsRequest = _addDSRequest(
-			DSRequestConstants.STATUS_SENT, user);
+			DSRequestConstants.STATUS_SENT, user1);
 
 		Assert.assertEquals(
 			backURL,
-			_getRedirectedURL(backURL, RandomTestUtil.randomLong(), user));
+			_getRedirectedURL(backURL, RandomTestUtil.randomLong(), user1));
 
 		Assert.assertEquals(
 			backURL,
@@ -174,24 +174,23 @@ public class DSCommerceOrderAttachmentSignServletTest {
 			_dsRequestURLProvider.getSignModalURL(
 				backURL, _group.getCompanyId(), dsRequest.getDSRequestId(),
 				dsRequest.getSiteGroupId()),
-			_getRedirectedURL(backURL, commerceOrderAttachmentId, user));
+			_getRedirectedURL(backURL, commerceOrderAttachmentId, user1));
 
-		dsRequest = _addDSRequest(DSRequestConstants.STATUS_COMPLETED, user);
+		dsRequest = _addDSRequest(DSRequestConstants.STATUS_COMPLETED, user1);
 
 		Assert.assertEquals(
 			_dsRequestURLProvider.getSignModalURL(
 				backURL, _group.getCompanyId(), dsRequest.getDSRequestId(),
 				dsRequest.getSiteGroupId()),
-			_getRedirectedURL(backURL, commerceOrderAttachmentId, user));
+			_getRedirectedURL(backURL, commerceOrderAttachmentId, user1));
 
-		User recipientUser = UserTestUtil.addUser();
+		User user2 = UserTestUtil.addUser();
 
-		_addDSRequest(DSRequestConstants.STATUS_SENT, recipientUser);
+		_addDSRequest(DSRequestConstants.STATUS_SENT, user2);
 
 		Assert.assertEquals(
 			backURL,
-			_getRedirectedURL(
-				backURL, commerceOrderAttachmentId, recipientUser));
+			_getRedirectedURL(backURL, commerceOrderAttachmentId, user2));
 	}
 
 	private DSRequest _addDSRequest(String status, User user) throws Exception {

@@ -136,8 +136,8 @@ public class DSCommerceOrderAttachmentFDSActionContributorTest {
 	@Test
 	public void testGetAdditionalProps() throws Exception {
 		_testGetAdditionalProps();
-		_testGetAdditionalPropsWhenCommerceOrderAttachmentIsRestricted();
-		_testGetAdditionalPropsWhenDisabled();
+		_testGetAdditionalPropsWithDigitalSignatureDisabled();
+		_testGetAdditionalPropsWithRestrictedCommerceOrderAttachment();
 	}
 
 	@Test
@@ -311,10 +311,10 @@ public class DSCommerceOrderAttachmentFDSActionContributorTest {
 
 		_addDSRequest(_commerceOrderAttachment, user);
 
-		Map<String, Object> additionalProps = _getAdditionalProps(user);
-
 		String commerceOrderAttachmentId = String.valueOf(
 			_commerceOrderAttachment.getCommerceOrderAttachmentId());
+
+		Map<String, Object> additionalProps = _getAdditionalProps(user);
 
 		Assert.assertEquals(
 			HashMapBuilder.put(
@@ -336,7 +336,17 @@ public class DSCommerceOrderAttachmentFDSActionContributorTest {
 			_getAdditionalProps(UserTestUtil.addUser()));
 	}
 
-	private void _testGetAdditionalPropsWhenCommerceOrderAttachmentIsRestricted()
+	private void _testGetAdditionalPropsWithDigitalSignatureDisabled()
+		throws Exception {
+
+		_saveDigitalSignatureConfiguration(false);
+
+		Assert.assertEquals(
+			Collections.emptyMap(),
+			_getAdditionalProps(TestPropsValues.getUser()));
+	}
+
+	private void _testGetAdditionalPropsWithRestrictedCommerceOrderAttachment()
 		throws Exception {
 
 		CommerceOrderAttachment commerceOrderAttachment =
@@ -352,13 +362,14 @@ public class DSCommerceOrderAttachmentFDSActionContributorTest {
 
 		_addDSRequest(commerceOrderAttachment, user);
 
+		String commerceOrderAttachmentId = String.valueOf(
+			_commerceOrderAttachment.getCommerceOrderAttachmentId());
+
 		Map<String, Object> additionalProps = _getAdditionalProps(user);
 
 		Assert.assertEquals(
 			HashMapBuilder.put(
-				String.valueOf(
-					_commerceOrderAttachment.getCommerceOrderAttachmentId()),
-				DSRequestConstants.STATUS_SENT
+				commerceOrderAttachmentId, DSRequestConstants.STATUS_SENT
 			).build(),
 			additionalProps.get("dsRequestStatuses"));
 
@@ -366,23 +377,13 @@ public class DSCommerceOrderAttachmentFDSActionContributorTest {
 
 		Assert.assertEquals(
 			HashMapBuilder.put(
-				String.valueOf(
-					_commerceOrderAttachment.getCommerceOrderAttachmentId()),
-				DSRequestConstants.STATUS_SENT
+				commerceOrderAttachmentId, DSRequestConstants.STATUS_SENT
 			).put(
 				String.valueOf(
 					commerceOrderAttachment.getCommerceOrderAttachmentId()),
 				DSRequestConstants.STATUS_SENT
 			).build(),
 			additionalProps.get("dsRequestStatuses"));
-	}
-
-	private void _testGetAdditionalPropsWhenDisabled() throws Exception {
-		_saveDigitalSignatureConfiguration(false);
-
-		Assert.assertEquals(
-			Collections.emptyMap(),
-			_getAdditionalProps(TestPropsValues.getUser()));
 	}
 
 	private CommerceOrder _commerceOrder;

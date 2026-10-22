@@ -163,12 +163,12 @@ public class DSCommerceOrderAttachmentDetailsServletTest {
 
 	@Test
 	public void testDoGet() throws Exception {
-		_testDoGetWhenNotFound(
+		_assertNotFound(
 			_commerceOrderAttachment.getCommerceOrderAttachmentId(), null);
 
 		User user = TestPropsValues.getUser();
 
-		_testDoGetWhenNotFound(RandomTestUtil.randomLong(), user);
+		_assertNotFound(RandomTestUtil.randomLong(), user);
 
 		Assert.assertEquals(
 			"{}",
@@ -222,12 +222,12 @@ public class DSCommerceOrderAttachmentDetailsServletTest {
 			DSRequestConstants.STATUS_SENT,
 			recipientJSONObject.getString("status"));
 
-		_testDoGetWhenNotFound(
+		_assertNotFound(
 			_commerceOrderAttachment.getCommerceOrderAttachmentId(),
 			UserTestUtil.addUser());
 
-		_testDoGetWhenDSRequestIsExpired();
-		_testDoGetWhenUserHasOrderManagerRole();
+		_testDoGetWithExpiredDSRequest();
+		_testDoGetWithOrderManagerUser();
 	}
 
 	private CommerceOrderAttachment _addCommerceOrderAttachment(
@@ -262,6 +262,24 @@ public class DSCommerceOrderAttachmentDetailsServletTest {
 			_group.getCompanyId(), dsEnvelope,
 			new long[] {_commerceOrderAttachment.getFileEntryId()},
 			_group.getGroupId(), TestPropsValues.getUserId());
+	}
+
+	private void _assertNotFound(
+			long commerceOrderAttachmentId, User user)
+		throws Exception {
+
+		try (LogCapture logCapture = LoggerTestUtil.configureLog4JLogger(
+				"com.liferay.commerce.digital.signature.web.internal.servlet." +
+					"DSCommerceOrderAttachmentDetailsServlet",
+				LoggerTestUtil.OFF)) {
+
+			MockHttpServletResponse mockHttpServletResponse =
+				_getMockHttpServletResponse(commerceOrderAttachmentId, user);
+
+			Assert.assertEquals(
+				HttpServletResponse.SC_NOT_FOUND,
+				mockHttpServletResponse.getStatus());
+		}
 	}
 
 	private DSRecipient _createDSRecipient(String status, User user) {
@@ -323,7 +341,7 @@ public class DSCommerceOrderAttachmentDetailsServletTest {
 			role.getRoleId(), actionIds);
 	}
 
-	private void _testDoGetWhenDSRequestIsExpired() throws Exception {
+	private void _testDoGetWithExpiredDSRequest() throws Exception {
 		User user1 = TestPropsValues.getUser();
 		User user2 = UserTestUtil.addUser();
 
@@ -371,32 +389,15 @@ public class DSCommerceOrderAttachmentDetailsServletTest {
 			recipientStatuses);
 	}
 
-	private void _testDoGetWhenNotFound(
-			long commerceOrderAttachmentId, User user)
-		throws Exception {
+	private void _testDoGetWithOrderManagerUser() throws Exception {
+		User user = UserTestUtil.addUser();
 
-		try (LogCapture logCapture = LoggerTestUtil.configureLog4JLogger(
-				"com.liferay.commerce.digital.signature.web.internal.servlet." +
-					"DSCommerceOrderAttachmentDetailsServlet",
-				LoggerTestUtil.OFF)) {
-
-			MockHttpServletResponse mockHttpServletResponse =
-				_getMockHttpServletResponse(commerceOrderAttachmentId, user);
-
-			Assert.assertEquals(
-				HttpServletResponse.SC_NOT_FOUND,
-				mockHttpServletResponse.getStatus());
-		}
-	}
-
-	private void _testDoGetWhenUserHasOrderManagerRole() throws Exception {
 		Role role = _roleLocalService.addRole(
 			RandomTestUtil.randomString(), TestPropsValues.getUserId(), null, 0,
 			RandomTestUtil.randomString(), null, null,
 			RoleConstants.TYPE_REGULAR, null,
 			ServiceContextTestUtil.getServiceContext(
 				_group.getGroupId(), TestPropsValues.getUserId()));
-		User user = UserTestUtil.addUser();
 
 		_roleLocalService.addUserRole(user.getUserId(), role);
 
@@ -421,7 +422,7 @@ public class DSCommerceOrderAttachmentDetailsServletTest {
 		CommerceOrderAttachment restrictedCommerceOrderAttachment =
 			_addCommerceOrderAttachment(true);
 
-		_testDoGetWhenNotFound(
+		_assertNotFound(
 			restrictedCommerceOrderAttachment.getCommerceOrderAttachmentId(),
 			user);
 

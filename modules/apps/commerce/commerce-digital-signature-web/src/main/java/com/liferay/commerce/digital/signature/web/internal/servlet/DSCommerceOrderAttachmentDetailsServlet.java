@@ -136,9 +136,9 @@ public class DSCommerceOrderAttachmentDetailsServlet extends HttpServlet {
 		String status = dsRequestRecipient.getStatus();
 
 		if (Objects.equals(
-				dsRequest.getStatus(), DSRequestConstants.STATUS_EXPIRED) &&
-			(Objects.equals(status, DSRequestConstants.STATUS_CREATED) ||
-			 Objects.equals(status, DSRequestConstants.STATUS_SENT))) {
+				DSRequestConstants.STATUS_EXPIRED, dsRequest.getStatus()) &&
+			(Objects.equals(DSRequestConstants.STATUS_CREATED, status) ||
+			 Objects.equals(DSRequestConstants.STATUS_SENT, status))) {
 
 			return DSRequestConstants.STATUS_EXPIRED;
 		}

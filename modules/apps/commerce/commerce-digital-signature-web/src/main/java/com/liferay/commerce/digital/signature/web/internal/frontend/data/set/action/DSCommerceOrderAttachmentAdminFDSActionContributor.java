@@ -144,10 +144,6 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributor
 			return Collections.emptyList();
 		}
 
-		ThemeDisplay themeDisplay =
-			(ThemeDisplay)httpServletRequest.getAttribute(
-				WebKeys.THEME_DISPLAY);
-
 		return FDSActionDropdownItemList.of(
 			FDSActionDropdownItemBuilder.putData(
 				"addDSRequestURL",
@@ -183,7 +179,8 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributor
 				"dsRequestDetailsURL",
 				DSCommerceOrderAttachmentUtil.getServletURL(
 					"/commerce-digital-signature/signature-details",
-					themeDisplay)
+					(ThemeDisplay)httpServletRequest.getAttribute(
+						WebKeys.THEME_DISPLAY))
 			).setHref(
 				StringPool.POUND
 			).setIcon(
