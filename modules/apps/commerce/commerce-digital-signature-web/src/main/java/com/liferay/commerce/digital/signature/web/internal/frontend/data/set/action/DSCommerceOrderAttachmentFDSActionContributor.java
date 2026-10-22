@@ -6,8 +6,8 @@
 package com.liferay.commerce.digital.signature.web.internal.frontend.data.set.action;
 
 import com.liferay.commerce.digital.signature.web.internal.util.DSCommerceOrderAttachmentUtil;
+import com.liferay.commerce.frontend.data.set.action.CommerceOrderAttachmentFDSActionContributor;
 import com.liferay.commerce.model.CommerceOrder;
-import com.liferay.commerce.order.CommerceOrderAttachmentFDSActionContributor;
 import com.liferay.digital.signature.model.DSRequest;
 import com.liferay.frontend.data.set.model.FDSActionDropdownItem;
 import com.liferay.frontend.data.set.model.FDSActionDropdownItemBuilder;
