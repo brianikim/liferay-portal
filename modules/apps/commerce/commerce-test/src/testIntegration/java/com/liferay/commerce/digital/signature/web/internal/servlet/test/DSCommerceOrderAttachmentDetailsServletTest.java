@@ -264,8 +264,7 @@ public class DSCommerceOrderAttachmentDetailsServletTest {
 			_group.getGroupId(), TestPropsValues.getUserId());
 	}
 
-	private void _assertNotFound(
-			long commerceOrderAttachmentId, User user)
+	private void _assertNotFound(long commerceOrderAttachmentId, User user)
 		throws Exception {
 
 		try (LogCapture logCapture = LoggerTestUtil.configureLog4JLogger(
