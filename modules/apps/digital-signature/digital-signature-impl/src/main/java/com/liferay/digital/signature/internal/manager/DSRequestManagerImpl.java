@@ -334,17 +334,19 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			Map<Long, DSRequest> dsRequestsMap = _getDSRequests(
 				companyId, dsRequestIds);
 
-			for (long dsRequestId : dsRequestIds) {
-				DSRequest dsRequest = dsRequestsMap.get(dsRequestId);
+			return TransformUtil.transform(
+				dsRequestIds,
+				dsRequestId -> {
+					DSRequest dsRequest = dsRequestsMap.get(dsRequestId);
 
-				if ((dsRequest == null) ||
-					!_isEnabled(companyId, dsRequest.getSiteGroupId())) {
+					if ((dsRequest == null) ||
+						!_isEnabled(companyId, dsRequest.getSiteGroupId())) {
 
-					continue;
-				}
+						return null;
+					}
 
-				dsRequests.add(dsRequest);
-			}
+					return dsRequest;
+				});
 		}
 		catch (Exception exception) {
 			_log.error(
