@@ -136,6 +136,17 @@ public class DSEnvelopeManagerImpl implements DSEnvelopeManager {
 	}
 
 	@Override
+	public byte[] getDSDocumentAsBytes(
+		long companyId, String dsDocumentId, String dsEnvelopeId,
+		long groupId) {
+
+		return _dsHttp.getAsBytes(
+			companyId, groupId,
+			StringBundler.concat(
+				"envelopes/", dsEnvelopeId, "/documents/", dsDocumentId));
+	}
+
+	@Override
 	public DSEnvelope getDSEnvelope(
 		long companyId, long groupId, String dsEnvelopeId) {
 
