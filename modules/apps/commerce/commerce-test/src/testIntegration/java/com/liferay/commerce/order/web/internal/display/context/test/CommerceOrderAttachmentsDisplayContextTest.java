@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-package com.liferay.commerce.digital.signature.web.internal.frontend.data.set.action.test;
+package com.liferay.commerce.order.web.internal.frontend.data.set.action.test;
 
 import com.liferay.account.model.AccountEntry;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
@@ -13,7 +13,6 @@ import com.liferay.commerce.constants.CommerceOrderActionKeys;
 import com.liferay.commerce.constants.CommerceOrderConstants;
 import com.liferay.commerce.currency.model.CommerceCurrency;
 import com.liferay.commerce.currency.test.util.CommerceCurrencyTestUtil;
-import com.liferay.commerce.frontend.data.set.action.CommerceOrderAttachmentAdminFDSActionContributor;
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.model.CommerceOrderAttachment;
 import com.liferay.commerce.product.model.CommerceChannel;
@@ -27,17 +26,21 @@ import com.liferay.digital.signature.constants.DigitalSignatureConstants;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
+import com.liferay.frontend.data.set.model.FDSActionDropdownItem;
+import com.liferay.frontend.taglib.servlet.taglib.ScreenNavigationEntry;
 import com.liferay.layout.test.util.LayoutTestUtil;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.role.RoleConstants;
+import com.liferay.portal.kernel.portlet.PortletURLFactory;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
 import com.liferay.portal.kernel.service.CompanyLocalService;
@@ -57,6 +60,7 @@ import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.MapUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
@@ -64,6 +68,8 @@ import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
 
 import java.io.ByteArrayInputStream;
+
+import java.lang.reflect.Constructor;
 
 import java.util.Collections;
 import java.util.List;
@@ -84,7 +90,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
  */
 @FeatureFlag("LPD-69290")
 @RunWith(Arquillian.class)
-public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
+public class CommerceOrderAttachmentsDisplayContextTest {
 
 	@ClassRule
 	@Rule
@@ -97,7 +103,7 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 	public void setUp() throws Exception {
 		BatchEngineTestUtil.processBatchEngineUnits(
 			"com.liferay.digital.signature.impl",
-			DSCommerceOrderAttachmentAdminFDSActionContributorTest.class,
+			CommerceOrderAttachmentsDisplayContextTest.class,
 			new String[] {
 				".com.liferay.digital.signature.internal.batch.01.object." +
 					"definition"
@@ -292,18 +298,42 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 	private Map<String, Object> _getAdditionalProps(User user)
 		throws Exception {
 
-		return _commerceOrderAttachmentAdminFDSActionContributor.
-			getAdditionalProps(
-				_commerceOrder, _getMockHttpServletRequest(user));
+		return ReflectionTestUtil.invoke(
+			_getCommerceOrderAttachmentsDisplayContext(user),
+			"_getDSRequestAdditionalProps", new Class<?>[0]);
+	}
+
+	private Object _getCommerceOrderAttachmentsDisplayContext(User user)
+		throws Exception {
+
+		Class<?> screenNavigationEntryClass = _screenNavigationEntry.getClass();
+
+		ClassLoader classLoader = screenNavigationEntryClass.getClassLoader();
+
+		Class<?> clazz = classLoader.loadClass(
+			"com.liferay.commerce.order.web.internal.display.context." +
+				"CommerceOrderAttachmentsDisplayContext");
+
+		Constructor<?>[] constructors = clazz.getConstructors();
+
+		return constructors[0].newInstance(
+			_commerceOrder,
+			ReflectionTestUtil.getFieldValue(
+				_screenNavigationEntry, "_commerceOrderModelResourcePermission"),
+			_getMockHttpServletRequest(user), _language, _portal,
+			_portletURLFactory, _userLocalService);
 	}
 
 	private List<String> _getFDSActionDropdownItemIds(User user)
 		throws Exception {
 
+		List<FDSActionDropdownItem> fdsActionDropdownItems =
+			ReflectionTestUtil.invoke(
+				_getCommerceOrderAttachmentsDisplayContext(user),
+				"_getDSRequestFDSActionDropdownItems", new Class<?>[0]);
+
 		return TransformUtil.transform(
-			_commerceOrderAttachmentAdminFDSActionContributor.
-				getFDSActionDropdownItems(
-					_commerceOrder, _getMockHttpServletRequest(user)),
+			fdsActionDropdownItems,
 			fdsActionDropdownItem -> {
 				Map<String, Object> data =
 					(Map<String, Object>)fdsActionDropdownItem.get("data");
@@ -454,10 +484,6 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 	private CommerceOrderAttachment _commerceOrderAttachment;
 
 	@Inject
-	private CommerceOrderAttachmentAdminFDSActionContributor
-		_commerceOrderAttachmentAdminFDSActionContributor;
-
-	@Inject
 	private CommerceOrderAttachmentLocalService
 		_commerceOrderAttachmentLocalService;
 
@@ -474,13 +500,28 @@ public class DSCommerceOrderAttachmentAdminFDSActionContributorTest {
 	private DSRequestManager _dsRequestManager;
 
 	private Group _group;
+
+	@Inject
+	private Language _language;
+
 	private Layout _layout;
+
+	@Inject
+	private Portal _portal;
+
+	@Inject
+	private PortletURLFactory _portletURLFactory;
 
 	@Inject
 	private ResourcePermissionLocalService _resourcePermissionLocalService;
 
 	@Inject
 	private RoleLocalService _roleLocalService;
+
+	@Inject(
+		filter = "component.name=com.liferay.commerce.order.web.internal.frontend.taglib.servlet.taglib.CommerceOrderAttachmentsScreenNavigationEntry"
+	)
+	private ScreenNavigationEntry<?> _screenNavigationEntry;
 
 	@Inject
 	private UserLocalService _userLocalService;
