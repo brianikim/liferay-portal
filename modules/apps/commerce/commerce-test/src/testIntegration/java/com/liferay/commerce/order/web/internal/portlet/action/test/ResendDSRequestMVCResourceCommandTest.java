@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-package com.liferay.commerce.digital.signature.web.internal.portlet.action.test;
+package com.liferay.commerce.order.web.internal.portlet.action.test;
 
 import com.liferay.account.model.AccountEntry;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
@@ -20,14 +20,15 @@ import com.liferay.commerce.test.util.CommerceOrderAttachmentTestUtil;
 import com.liferay.commerce.test.util.CommerceTestUtil;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
 import com.liferay.digital.signature.constants.DSRequestConstants;
-import com.liferay.digital.signature.exception.DSEnvelopeException;
 import com.liferay.digital.signature.manager.DSEnvelopeManager;
 import com.liferay.digital.signature.manager.DSRequestManager;
 import com.liferay.digital.signature.model.DSEnvelope;
 import com.liferay.digital.signature.model.DSRecipient;
 import com.liferay.digital.signature.model.DSRequest;
+import com.liferay.notification.model.NotificationQueueEntry;
+import com.liferay.notification.service.NotificationQueueEntryLocalService;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
-import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.model.Group;
@@ -61,11 +62,8 @@ import jakarta.portlet.PortletException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -80,7 +78,7 @@ import org.junit.runner.RunWith;
  */
 @FeatureFlag("LPD-69290")
 @RunWith(Arquillian.class)
-public class VoidDSRequestMVCResourceCommandTest {
+public class ResendDSRequestMVCResourceCommandTest {
 
 	@ClassRule
 	@Rule
@@ -93,10 +91,14 @@ public class VoidDSRequestMVCResourceCommandTest {
 	public void setUp() throws Exception {
 		BatchEngineTestUtil.processBatchEngineUnits(
 			"com.liferay.digital.signature.impl",
-			VoidDSRequestMVCResourceCommandTest.class,
+			ResendDSRequestMVCResourceCommandTest.class,
 			new String[] {
 				".com.liferay.digital.signature.internal.batch.01.object." +
-					"definition"
+					"definition",
+				".com.liferay.digital.signature.internal.batch.02.object." +
+					"relationship",
+				".com.liferay.digital.signature.internal.batch.03." +
+					"notification.template"
 			});
 
 		CommerceOrderAttachmentTestUtil.initialize(getClass());
@@ -121,11 +123,35 @@ public class VoidDSRequestMVCResourceCommandTest {
 			TestPropsValues.getUserId(), commerceChannel.getGroupId(),
 			accountEntry.getAccountEntryId(), commerceCurrency.getCode(), 0);
 
-		_commerceOrderAttachment = _addCommerceOrderAttachment();
+		_commerceOrderAttachment =
+			_commerceOrderAttachmentLocalService.addCommerceOrderAttachment(
+				RandomTestUtil.randomString(), TestPropsValues.getUserId(),
+				_commerceOrder.getCommerceOrderId(),
+				RandomTestUtil.nextDouble(), false,
+				RandomTestUtil.randomString(), "invoice",
+				RandomTestUtil.randomString() + ".pdf",
+				new ByteArrayInputStream(RandomTestUtil.randomBytes()));
+
+		_dsEnvelopeManager =
+			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
+				_dsRequestManager, "_dsEnvelopeManager",
+				ProxyUtil.newProxyInstance(
+					DSEnvelopeManager.class.getClassLoader(),
+					new Class<?>[] {DSEnvelopeManager.class},
+					(proxy, method, arguments) -> {
+						if (Objects.equals(method.getName(), "getDSEnvelope")) {
+							return _dsEnvelope;
+						}
+
+						return null;
+					}));
 	}
 
 	@After
 	public void tearDown() throws Exception {
+		ReflectionTestUtil.setFieldValue(
+			_dsRequestManager, "_dsEnvelopeManager", _dsEnvelopeManager);
+
 		_companyConfigurationTemporarySwapper.close();
 	}
 
@@ -163,180 +189,56 @@ public class VoidDSRequestMVCResourceCommandTest {
 
 		_assertErrorMessage("This signature request is no longer active.");
 
-		_commerceOrderAttachment = _addCommerceOrderAttachment();
+		_commerceOrderAttachment =
+			_commerceOrderAttachmentLocalService.addCommerceOrderAttachment(
+				RandomTestUtil.randomString(), TestPropsValues.getUserId(),
+				_commerceOrder.getCommerceOrderId(),
+				RandomTestUtil.nextDouble(), false,
+				RandomTestUtil.randomString(), "invoice",
+				RandomTestUtil.randomString() + ".pdf",
+				new ByteArrayInputStream(RandomTestUtil.randomBytes()));
 
-		DSEnvelope dsEnvelope = _addDSRequest(
+		DSRequest dsRequest = _addDSRequest(
 			DSRequestConstants.STATUS_SENT, UserTestUtil.addUser());
 
-		String message = RandomTestUtil.randomString();
-		List<String> methodNames = new ArrayList<>();
+		_serveResource(
+			_commerceOrderAttachment.getCommerceOrderAttachmentId(),
+			TestPropsValues.getUser());
 
-		DSEnvelopeManager dsEnvelopeManager =
-			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
-				_dsRequestManager, "_dsEnvelopeManager",
-				ProxyUtil.newProxyInstance(
-					DSEnvelopeManager.class.getClassLoader(),
-					new Class<?>[] {DSEnvelopeManager.class},
-					(proxy, method, arguments) -> {
-						methodNames.add(method.getName());
+		List<NotificationQueueEntry> notificationQueueEntries =
+			_getNotificationQueueEntries(dsRequest);
 
-						if (Objects.equals(method.getName(), "getDSEnvelope")) {
-							return dsEnvelope;
-						}
+		Assert.assertEquals(
+			notificationQueueEntries.toString(), 1,
+			notificationQueueEntries.size());
 
-						throw new PortalException(message);
-					}));
+		List<DSRecipient> dsRecipients = _dsEnvelope.getDSRecipients();
 
-		try {
-			_assertErrorMessage(message);
+		DSRecipient dsRecipient = dsRecipients.get(0);
 
-			Assert.assertEquals(
-				Collections.singletonList("voidDSEnvelope"), methodNames);
+		dsRecipient.setStatus(DSRequestConstants.STATUS_COMPLETED);
 
-			AtomicReference<Object[]> argumentsAtomicReference =
-				new AtomicReference<>();
+		JSONObject jsonObject = _serveResource(
+			_commerceOrderAttachment.getCommerceOrderAttachmentId(),
+			TestPropsValues.getUser());
 
-			ReflectionTestUtil.setFieldValue(
-				_dsRequestManager, "_dsEnvelopeManager",
-				ProxyUtil.newProxyInstance(
-					DSEnvelopeManager.class.getClassLoader(),
-					new Class<?>[] {DSEnvelopeManager.class},
-					(proxy, method, arguments) -> {
-						if (Objects.equals(method.getName(), "getDSEnvelope")) {
-							for (DSRecipient dsRecipient :
-									dsEnvelope.getDSRecipients()) {
+		Assert.assertEquals("{}", jsonObject.toString());
 
-								dsRecipient.setStatus(
-									DSRequestConstants.STATUS_VOIDED);
-							}
+		notificationQueueEntries = _getNotificationQueueEntries(dsRequest);
 
-							dsEnvelope.setStatus(
-								DSRequestConstants.STATUS_VOIDED);
-
-							return dsEnvelope;
-						}
-
-						if (Objects.equals(
-								method.getName(), "voidDSEnvelope")) {
-
-							argumentsAtomicReference.set(arguments);
-						}
-
-						return null;
-					}));
-
-			JSONObject jsonObject = _serveResource(
-				_commerceOrderAttachment.getCommerceOrderAttachmentId(),
-				TestPropsValues.getUser());
-
-			Assert.assertEquals("{}", jsonObject.toString());
-
-			Object[] voidDSEnvelopeArguments = argumentsAtomicReference.get();
-
-			Assert.assertEquals(
-				dsEnvelope.getDSEnvelopeId(), voidDSEnvelopeArguments[1]);
-			Assert.assertEquals(
-				"The sender voided the signature request.",
-				voidDSEnvelopeArguments[3]);
-
-			DSRequest dsRequest =
-				_dsRequestManager.fetchLatestFileEntryDSRequest(
-					_group.getCompanyId(),
-					_commerceOrderAttachment.getFileEntryId());
-
-			Assert.assertEquals(
-				DSRequestConstants.STATUS_VOIDED, dsRequest.getStatus());
-
-			_commerceOrderAttachment = _addCommerceOrderAttachment();
-
-			DSEnvelope declinedDSEnvelope = _addDSRequest(
-				DSRequestConstants.STATUS_SENT, UserTestUtil.addUser());
-
-			ReflectionTestUtil.setFieldValue(
-				_dsRequestManager, "_dsEnvelopeManager",
-				ProxyUtil.newProxyInstance(
-					DSEnvelopeManager.class.getClassLoader(),
-					new Class<?>[] {DSEnvelopeManager.class},
-					(proxy, method, arguments) -> {
-						if (Objects.equals(method.getName(), "getDSEnvelope")) {
-							declinedDSEnvelope.setStatus(
-								DSRequestConstants.STATUS_DECLINED);
-
-							return declinedDSEnvelope;
-						}
-
-						throw new DSEnvelopeException.MustBeVoidable(message);
-					}));
-
-			_assertErrorMessage("This signature request is no longer active.");
-
-			dsRequest = _dsRequestManager.fetchLatestFileEntryDSRequest(
-				_group.getCompanyId(),
-				_commerceOrderAttachment.getFileEntryId());
-
-			Assert.assertEquals(
-				DSRequestConstants.STATUS_DECLINED, dsRequest.getStatus());
-
-			_commerceOrderAttachment = _addCommerceOrderAttachment();
-
-			DSEnvelope voidedDSEnvelope = _addDSRequest(
-				DSRequestConstants.STATUS_SENT, UserTestUtil.addUser());
-
-			ReflectionTestUtil.setFieldValue(
-				_dsRequestManager, "_dsEnvelopeManager",
-				ProxyUtil.newProxyInstance(
-					DSEnvelopeManager.class.getClassLoader(),
-					new Class<?>[] {DSEnvelopeManager.class},
-					(proxy, method, arguments) -> {
-						if (Objects.equals(method.getName(), "getDSEnvelope")) {
-							voidedDSEnvelope.setStatus(
-								DSRequestConstants.STATUS_VOIDED);
-
-							return voidedDSEnvelope;
-						}
-
-						throw new DSEnvelopeException.MustBeVoidable(message);
-					}));
-
-			jsonObject = _serveResource(
-				_commerceOrderAttachment.getCommerceOrderAttachmentId(),
-				TestPropsValues.getUser());
-
-			Assert.assertEquals("{}", jsonObject.toString());
-
-			dsRequest = _dsRequestManager.fetchLatestFileEntryDSRequest(
-				_group.getCompanyId(),
-				_commerceOrderAttachment.getFileEntryId());
-
-			Assert.assertEquals(
-				DSRequestConstants.STATUS_VOIDED, dsRequest.getStatus());
-		}
-		finally {
-			ReflectionTestUtil.setFieldValue(
-				_dsRequestManager, "_dsEnvelopeManager", dsEnvelopeManager);
-		}
+		Assert.assertEquals(
+			notificationQueueEntries.toString(), 1,
+			notificationQueueEntries.size());
 	}
 
-	private CommerceOrderAttachment _addCommerceOrderAttachment()
-		throws Exception {
-
-		return _commerceOrderAttachmentLocalService.addCommerceOrderAttachment(
-			RandomTestUtil.randomString(), TestPropsValues.getUserId(),
-			_commerceOrder.getCommerceOrderId(), RandomTestUtil.nextDouble(),
-			false, RandomTestUtil.randomString(), "invoice",
-			RandomTestUtil.randomString() + ".pdf",
-			new ByteArrayInputStream(RandomTestUtil.randomBytes()));
-	}
-
-	private DSEnvelope _addDSRequest(String status, User user)
-		throws Exception {
-
+	private DSRequest _addDSRequest(String status, User user) throws Exception {
 		DSEnvelope dsEnvelope = new DSEnvelope();
 
 		dsEnvelope.setDSEnvelopeId(RandomTestUtil.randomString());
 
 		DSRecipient dsRecipient = new DSRecipient();
 
+		dsRecipient.setDSClientUserId(String.valueOf(user.getUserId()));
 		dsRecipient.setDSRecipientId("1");
 		dsRecipient.setEmailAddress(user.getEmailAddress());
 		dsRecipient.setName(user.getFullName());
@@ -348,7 +250,9 @@ public class VoidDSRequestMVCResourceCommandTest {
 		dsEnvelope.setEmailSubject(RandomTestUtil.randomString());
 		dsEnvelope.setStatus(status);
 
-		ReflectionTestUtil.invoke(
+		_dsEnvelope = dsEnvelope;
+
+		return ReflectionTestUtil.invoke(
 			_dsRequestManager, "_addDSRequest",
 			new Class<?>[] {
 				long.class, DSEnvelope.class, long[].class, long.class,
@@ -357,8 +261,6 @@ public class VoidDSRequestMVCResourceCommandTest {
 			_group.getCompanyId(), dsEnvelope,
 			new long[] {_commerceOrderAttachment.getFileEntryId()},
 			_group.getGroupId(), user.getUserId());
-
-		return dsEnvelope;
 	}
 
 	private void _assertErrorMessage(String expectedMessage) throws Exception {
@@ -368,6 +270,20 @@ public class VoidDSRequestMVCResourceCommandTest {
 
 		Assert.assertEquals(
 			expectedMessage, jsonObject.getString("errorMessage"));
+	}
+
+	private List<NotificationQueueEntry> _getNotificationQueueEntries(
+		DSRequest dsRequest) {
+
+		return ListUtil.filter(
+			_notificationQueueEntryLocalService.getNotificationQueueEntries(
+				QueryUtil.ALL_POS, QueryUtil.ALL_POS),
+			notificationQueueEntry ->
+				Objects.equals(
+					notificationQueueEntry.getClassName(),
+					DSRequest.class.getName()) &&
+				(notificationQueueEntry.getClassPK() ==
+					dsRequest.getDSRequestId()));
 	}
 
 	private void _saveDigitalSignatureConfiguration(boolean enabled)
@@ -453,6 +369,9 @@ public class VoidDSRequestMVCResourceCommandTest {
 	@Inject
 	private CompanyLocalService _companyLocalService;
 
+	private DSEnvelope _dsEnvelope;
+	private DSEnvelopeManager _dsEnvelopeManager;
+
 	@Inject
 	private DSRequestManager _dsRequestManager;
 
@@ -461,7 +380,11 @@ public class VoidDSRequestMVCResourceCommandTest {
 	@Inject
 	private JSONFactory _jsonFactory;
 
-	@Inject(filter = "mvc.command.name=/commerce_order/void_ds_request")
+	@Inject(filter = "mvc.command.name=/commerce_order/resend_ds_request")
 	private MVCResourceCommand _mvcResourceCommand;
+
+	@Inject
+	private NotificationQueueEntryLocalService
+		_notificationQueueEntryLocalService;
 
 }

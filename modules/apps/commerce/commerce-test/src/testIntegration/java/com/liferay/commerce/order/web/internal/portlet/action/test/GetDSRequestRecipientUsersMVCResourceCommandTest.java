@@ -3,41 +3,37 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-package com.liferay.commerce.digital.signature.web.internal.portlet.action.test;
+package com.liferay.commerce.order.web.internal.portlet.action.test;
 
 import com.liferay.account.model.AccountEntry;
+import com.liferay.account.service.AccountEntryUserRelLocalService;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.batch.engine.test.util.BatchEngineTestUtil;
 import com.liferay.commerce.account.test.util.CommerceAccountTestUtil;
+import com.liferay.commerce.constants.CommerceOrderActionKeys;
+import com.liferay.commerce.constants.CommerceOrderConstants;
 import com.liferay.commerce.currency.model.CommerceCurrency;
 import com.liferay.commerce.currency.test.util.CommerceCurrencyTestUtil;
 import com.liferay.commerce.model.CommerceOrder;
-import com.liferay.commerce.model.CommerceOrderAttachment;
 import com.liferay.commerce.product.model.CommerceChannel;
-import com.liferay.commerce.service.CommerceOrderAttachmentLocalService;
 import com.liferay.commerce.service.CommerceOrderLocalService;
-import com.liferay.commerce.test.util.CommerceOrderAttachmentTestUtil;
 import com.liferay.commerce.test.util.CommerceTestUtil;
 import com.liferay.digital.signature.configuration.DigitalSignatureConfiguration;
-import com.liferay.digital.signature.constants.DSRequestConstants;
-import com.liferay.digital.signature.manager.DSEnvelopeManager;
-import com.liferay.digital.signature.manager.DSRequestManager;
-import com.liferay.digital.signature.model.DSEnvelope;
-import com.liferay.digital.signature.model.DSRecipient;
-import com.liferay.digital.signature.model.DSRequest;
-import com.liferay.notification.model.NotificationQueueEntry;
-import com.liferay.notification.service.NotificationQueueEntryLocalService;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
-import com.liferay.portal.kernel.dao.orm.QueryUtil;
+import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.ResourceConstants;
+import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.model.role.RoleConstants;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
 import com.liferay.portal.kernel.service.CompanyLocalService;
-import com.liferay.portal.kernel.test.ReflectionTestUtil;
+import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
+import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.test.portlet.MockLiferayResourceRequest;
 import com.liferay.portal.kernel.test.portlet.MockLiferayResourceResponse;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
@@ -48,9 +44,7 @@ import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
-import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
-import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
@@ -59,11 +53,7 @@ import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
 
 import jakarta.portlet.PortletException;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-
-import java.util.List;
-import java.util.Objects;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -78,7 +68,7 @@ import org.junit.runner.RunWith;
  */
 @FeatureFlag("LPD-69290")
 @RunWith(Arquillian.class)
-public class ResendDSRequestMVCResourceCommandTest {
+public class GetDSRequestRecipientUsersMVCResourceCommandTest {
 
 	@ClassRule
 	@Rule
@@ -91,17 +81,11 @@ public class ResendDSRequestMVCResourceCommandTest {
 	public void setUp() throws Exception {
 		BatchEngineTestUtil.processBatchEngineUnits(
 			"com.liferay.digital.signature.impl",
-			ResendDSRequestMVCResourceCommandTest.class,
+			GetDSRequestRecipientUsersMVCResourceCommandTest.class,
 			new String[] {
 				".com.liferay.digital.signature.internal.batch.01.object." +
-					"definition",
-				".com.liferay.digital.signature.internal.batch.02.object." +
-					"relationship",
-				".com.liferay.digital.signature.internal.batch.03." +
-					"notification.template"
+					"definition"
 			});
-
-		CommerceOrderAttachmentTestUtil.initialize(getClass());
 
 		_saveDigitalSignatureConfiguration(true);
 
@@ -122,46 +106,22 @@ public class ResendDSRequestMVCResourceCommandTest {
 		_commerceOrder = _commerceOrderLocalService.addCommerceOrder(
 			TestPropsValues.getUserId(), commerceChannel.getGroupId(),
 			accountEntry.getAccountEntryId(), commerceCurrency.getCode(), 0);
-
-		_commerceOrderAttachment =
-			_commerceOrderAttachmentLocalService.addCommerceOrderAttachment(
-				RandomTestUtil.randomString(), TestPropsValues.getUserId(),
-				_commerceOrder.getCommerceOrderId(),
-				RandomTestUtil.nextDouble(), false,
-				RandomTestUtil.randomString(), "invoice",
-				RandomTestUtil.randomString() + ".pdf",
-				new ByteArrayInputStream(RandomTestUtil.randomBytes()));
-
-		_dsEnvelopeManager =
-			(DSEnvelopeManager)ReflectionTestUtil.getAndSetFieldValue(
-				_dsRequestManager, "_dsEnvelopeManager",
-				ProxyUtil.newProxyInstance(
-					DSEnvelopeManager.class.getClassLoader(),
-					new Class<?>[] {DSEnvelopeManager.class},
-					(proxy, method, arguments) -> {
-						if (Objects.equals(method.getName(), "getDSEnvelope")) {
-							return _dsEnvelope;
-						}
-
-						return null;
-					}));
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		ReflectionTestUtil.setFieldValue(
-			_dsRequestManager, "_dsEnvelopeManager", _dsEnvelopeManager);
-
 		_companyConfigurationTemporarySwapper.close();
 	}
 
 	@Test
 	public void testServeResource() throws Exception {
+		User user = UserTestUtil.addUser();
+
 		PortletException portletException = Assert.assertThrows(
 			PortletException.class,
 			() -> _serveResource(
-				_commerceOrderAttachment.getCommerceOrderAttachmentId(),
-				UserTestUtil.addUser()));
+				_commerceOrder.getCommerceOrderId(), user.getScreenName(),
+				user));
 
 		Assert.assertTrue(
 			portletException.getCause() instanceof
@@ -169,121 +129,41 @@ public class ResendDSRequestMVCResourceCommandTest {
 
 		_saveDigitalSignatureConfiguration(false);
 
-		_assertErrorMessage("Digital signature is not enabled for this order.");
+		JSONObject jsonObject = _jsonFactory.createJSONObject(
+			_serveResource(
+				_commerceOrder.getCommerceOrderId(), user.getScreenName(),
+				TestPropsValues.getUser()));
+
+		Assert.assertEquals(
+			"Digital signature is not enabled for this order.",
+			jsonObject.getString("errorMessage"));
 
 		_saveDigitalSignatureConfiguration(true);
-
-		_assertErrorMessage(
-			"No signature request was found for this document.");
 
 		portletException = Assert.assertThrows(
 			PortletException.class,
 			() -> _serveResource(
-				RandomTestUtil.randomLong(), TestPropsValues.getUser()));
+				RandomTestUtil.randomLong(), user.getScreenName(),
+				TestPropsValues.getUser()));
 
 		Assert.assertTrue(
 			portletException.getCause() instanceof PrincipalException);
 
-		_addDSRequest(
-			DSRequestConstants.STATUS_COMPLETED, UserTestUtil.addUser());
+		JSONArray jsonArray = _jsonFactory.createJSONArray(
+			_serveResource(
+				_commerceOrder.getCommerceOrderId(), user.getScreenName(),
+				TestPropsValues.getUser()));
 
-		_assertErrorMessage("This signature request is no longer active.");
+		Assert.assertEquals(jsonArray.toString(), 1, jsonArray.length());
 
-		_commerceOrderAttachment =
-			_commerceOrderAttachmentLocalService.addCommerceOrderAttachment(
-				RandomTestUtil.randomString(), TestPropsValues.getUserId(),
-				_commerceOrder.getCommerceOrderId(),
-				RandomTestUtil.nextDouble(), false,
-				RandomTestUtil.randomString(), "invoice",
-				RandomTestUtil.randomString() + ".pdf",
-				new ByteArrayInputStream(RandomTestUtil.randomBytes()));
-
-		DSRequest dsRequest = _addDSRequest(
-			DSRequestConstants.STATUS_SENT, UserTestUtil.addUser());
-
-		_serveResource(
-			_commerceOrderAttachment.getCommerceOrderAttachmentId(),
-			TestPropsValues.getUser());
-
-		List<NotificationQueueEntry> notificationQueueEntries =
-			_getNotificationQueueEntries(dsRequest);
+		jsonObject = jsonArray.getJSONObject(0);
 
 		Assert.assertEquals(
-			notificationQueueEntries.toString(), 1,
-			notificationQueueEntries.size());
+			user.getEmailAddress(), jsonObject.getString("emailAddress"));
+		Assert.assertEquals(user.getFullName(), jsonObject.getString("name"));
+		Assert.assertEquals(user.getUserId(), jsonObject.getLong("userId"));
 
-		List<DSRecipient> dsRecipients = _dsEnvelope.getDSRecipients();
-
-		DSRecipient dsRecipient = dsRecipients.get(0);
-
-		dsRecipient.setStatus(DSRequestConstants.STATUS_COMPLETED);
-
-		JSONObject jsonObject = _serveResource(
-			_commerceOrderAttachment.getCommerceOrderAttachmentId(),
-			TestPropsValues.getUser());
-
-		Assert.assertEquals("{}", jsonObject.toString());
-
-		notificationQueueEntries = _getNotificationQueueEntries(dsRequest);
-
-		Assert.assertEquals(
-			notificationQueueEntries.toString(), 1,
-			notificationQueueEntries.size());
-	}
-
-	private DSRequest _addDSRequest(String status, User user) throws Exception {
-		DSEnvelope dsEnvelope = new DSEnvelope();
-
-		dsEnvelope.setDSEnvelopeId(RandomTestUtil.randomString());
-
-		DSRecipient dsRecipient = new DSRecipient();
-
-		dsRecipient.setDSClientUserId(String.valueOf(user.getUserId()));
-		dsRecipient.setDSRecipientId("1");
-		dsRecipient.setEmailAddress(user.getEmailAddress());
-		dsRecipient.setName(user.getFullName());
-		dsRecipient.setRoutingOrder(1);
-		dsRecipient.setStatus(status);
-
-		dsEnvelope.setDSRecipients(ListUtil.fromArray(dsRecipient));
-
-		dsEnvelope.setEmailSubject(RandomTestUtil.randomString());
-		dsEnvelope.setStatus(status);
-
-		_dsEnvelope = dsEnvelope;
-
-		return ReflectionTestUtil.invoke(
-			_dsRequestManager, "_addDSRequest",
-			new Class<?>[] {
-				long.class, DSEnvelope.class, long[].class, long.class,
-				long.class
-			},
-			_group.getCompanyId(), dsEnvelope,
-			new long[] {_commerceOrderAttachment.getFileEntryId()},
-			_group.getGroupId(), user.getUserId());
-	}
-
-	private void _assertErrorMessage(String expectedMessage) throws Exception {
-		JSONObject jsonObject = _serveResource(
-			_commerceOrderAttachment.getCommerceOrderAttachmentId(),
-			TestPropsValues.getUser());
-
-		Assert.assertEquals(
-			expectedMessage, jsonObject.getString("errorMessage"));
-	}
-
-	private List<NotificationQueueEntry> _getNotificationQueueEntries(
-		DSRequest dsRequest) {
-
-		return ListUtil.filter(
-			_notificationQueueEntryLocalService.getNotificationQueueEntries(
-				QueryUtil.ALL_POS, QueryUtil.ALL_POS),
-			notificationQueueEntry ->
-				Objects.equals(
-					notificationQueueEntry.getClassName(),
-					DSRequest.class.getName()) &&
-				(notificationQueueEntry.getClassPK() ==
-					dsRequest.getDSRequestId()));
+		_testServeResourceWithoutUserViewPermission();
 	}
 
 	private void _saveDigitalSignatureConfiguration(boolean enabled)
@@ -318,7 +198,8 @@ public class ResendDSRequestMVCResourceCommandTest {
 				).build());
 	}
 
-	private JSONObject _serveResource(long commerceOrderAttachmentId, User user)
+	private String _serveResource(
+			long commerceOrderId, String keywords, User user)
 		throws Exception {
 
 		MockLiferayResourceRequest mockLiferayResourceRequest =
@@ -337,8 +218,8 @@ public class ResendDSRequestMVCResourceCommandTest {
 			WebKeys.THEME_DISPLAY, themeDisplay);
 
 		mockLiferayResourceRequest.addParameter(
-			"commerceOrderAttachmentId",
-			String.valueOf(commerceOrderAttachmentId));
+			"commerceOrderId", String.valueOf(commerceOrderId));
+		mockLiferayResourceRequest.addParameter("keywords", keywords);
 
 		MockLiferayResourceResponse mockLiferayResourceResponse =
 			new MockLiferayResourceResponse();
@@ -350,15 +231,66 @@ public class ResendDSRequestMVCResourceCommandTest {
 			(ByteArrayOutputStream)
 				mockLiferayResourceResponse.getPortletOutputStream();
 
-		return _jsonFactory.createJSONObject(byteArrayOutputStream.toString());
+		return byteArrayOutputStream.toString();
 	}
 
-	private CommerceOrder _commerceOrder;
-	private CommerceOrderAttachment _commerceOrderAttachment;
+	private void _testServeResourceWithoutUserViewPermission()
+		throws Exception {
+
+		Role role = _roleLocalService.addRole(
+			RandomTestUtil.randomString(), TestPropsValues.getUserId(), null, 0,
+			RandomTestUtil.randomString(), null, null,
+			RoleConstants.TYPE_REGULAR, null,
+			ServiceContextTestUtil.getServiceContext(
+				_group.getGroupId(), TestPropsValues.getUserId()));
+
+		AccountEntry accountEntry = _commerceOrder.getAccountEntry();
+
+		_resourcePermissionLocalService.setResourcePermissions(
+			_group.getCompanyId(), CommerceOrderConstants.RESOURCE_NAME,
+			ResourceConstants.SCOPE_GROUP,
+			String.valueOf(accountEntry.getAccountEntryGroupId()),
+			role.getRoleId(),
+			new String[] {CommerceOrderActionKeys.MANAGE_COMMERCE_ORDERS});
+
+		User user1 = UserTestUtil.addUser();
+
+		_roleLocalService.addUserRole(user1.getUserId(), role);
+
+		_accountEntryUserRelLocalService.
+			deleteAccountEntryUserRelsByAccountEntryId(
+				accountEntry.getAccountEntryId());
+
+		User user2 = UserTestUtil.addUser();
+
+		_accountEntryUserRelLocalService.addAccountEntryUserRel(
+			accountEntry.getAccountEntryId(), user2.getUserId());
+
+		JSONArray jsonArray = _jsonFactory.createJSONArray(
+			_serveResource(
+				_commerceOrder.getCommerceOrderId(), user2.getScreenName(),
+				user1));
+
+		Assert.assertEquals(jsonArray.toString(), 1, jsonArray.length());
+
+		JSONObject jsonObject = jsonArray.getJSONObject(0);
+
+		Assert.assertEquals(user2.getUserId(), jsonObject.getLong("userId"));
+
+		User user3 = UserTestUtil.addUser();
+
+		jsonArray = _jsonFactory.createJSONArray(
+			_serveResource(
+				_commerceOrder.getCommerceOrderId(), user3.getScreenName(),
+				user1));
+
+		Assert.assertEquals(jsonArray.toString(), 0, jsonArray.length());
+	}
 
 	@Inject
-	private CommerceOrderAttachmentLocalService
-		_commerceOrderAttachmentLocalService;
+	private AccountEntryUserRelLocalService _accountEntryUserRelLocalService;
+
+	private CommerceOrder _commerceOrder;
 
 	@Inject
 	private CommerceOrderLocalService _commerceOrderLocalService;
@@ -369,22 +301,20 @@ public class ResendDSRequestMVCResourceCommandTest {
 	@Inject
 	private CompanyLocalService _companyLocalService;
 
-	private DSEnvelope _dsEnvelope;
-	private DSEnvelopeManager _dsEnvelopeManager;
-
-	@Inject
-	private DSRequestManager _dsRequestManager;
-
 	private Group _group;
 
 	@Inject
 	private JSONFactory _jsonFactory;
 
-	@Inject(filter = "mvc.command.name=/commerce_order/resend_ds_request")
+	@Inject(
+		filter = "mvc.command.name=/commerce_order/get_ds_request_recipient_users"
+	)
 	private MVCResourceCommand _mvcResourceCommand;
 
 	@Inject
-	private NotificationQueueEntryLocalService
-		_notificationQueueEntryLocalService;
+	private ResourcePermissionLocalService _resourcePermissionLocalService;
+
+	@Inject
+	private RoleLocalService _roleLocalService;
 
 }

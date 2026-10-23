@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-package com.liferay.commerce.digital.signature.web.internal.portlet.action;
+package com.liferay.commerce.order.web.internal.portlet.action;
 
 import com.liferay.commerce.constants.CommercePortletKeys;
-import com.liferay.commerce.digital.signature.web.internal.exception.DSCommerceOrderAttachmentException;
-import com.liferay.commerce.digital.signature.web.internal.util.DSCommerceOrderAttachmentUtil;
+import com.liferay.commerce.order.web.internal.exception.DSCommerceOrderAttachmentException;
+import com.liferay.commerce.order.web.internal.util.DSCommerceOrderAttachmentUtil;
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.model.CommerceOrderAttachment;
 import com.liferay.commerce.service.CommerceOrderAttachmentLocalService;
@@ -44,11 +44,11 @@ import org.osgi.service.component.annotations.Reference;
 @Component(
 	property = {
 		"jakarta.portlet.name=" + CommercePortletKeys.COMMERCE_ORDER,
-		"mvc.command.name=/commerce_order/void_ds_request"
+		"mvc.command.name=/commerce_order/resend_ds_request"
 	},
 	service = MVCResourceCommand.class
 )
-public class VoidDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
+public class ResendDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
 
 	@Override
 	protected void doServeResource(
@@ -92,16 +92,18 @@ public class VoidDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
 					commerceOrderAttachment.getCommerceOrderAttachmentId());
 			}
 
+			_dsRequestManager.updateDSRequest(dsRequest.getDSRequestId());
+
+			dsRequest = _dsRequestManager.fetchDSRequest(
+				commerceOrder.getCompanyId(), dsRequest.getDSRequestId());
+
 			if (dsRequest.isTerminal()) {
 				throw new DSRequestException.MustBeActive(
 					dsRequest.getDSRequestId());
 			}
 
-			_dsRequestManager.voidDSRequest(
-				dsRequest.getDSRequestId(),
-				_language.get(
-					themeDisplay.getLocale(),
-					"the-sender-voided-the-signature-request"));
+			_dsRequestManager.sendDSRequestNotifications(
+				dsRequest.getDSRequestId());
 
 			JSONPortletResponseUtil.writeJSON(
 				resourceRequest, resourceResponse,
@@ -128,7 +130,7 @@ public class VoidDSRequestMVCResourceCommand extends BaseMVCResourceCommand {
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		VoidDSRequestMVCResourceCommand.class);
+		ResendDSRequestMVCResourceCommand.class);
 
 	@Reference
 	private CommerceOrderAttachmentLocalService
