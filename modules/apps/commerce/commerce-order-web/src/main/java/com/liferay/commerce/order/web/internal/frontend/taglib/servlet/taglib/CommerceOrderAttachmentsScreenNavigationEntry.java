@@ -5,13 +5,16 @@
 
 package com.liferay.commerce.order.web.internal.frontend.taglib.servlet.taglib;
 
-import com.liferay.commerce.frontend.data.set.action.CommerceOrderAttachmentAdminFDSActionContributor;
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.order.web.internal.display.context.CommerceOrderAttachmentsDisplayContext;
 import com.liferay.commerce.order.web.internal.display.context.CommerceOrderEditDisplayContext;
 import com.liferay.frontend.taglib.servlet.taglib.ScreenNavigationEntry;
 import com.liferay.frontend.taglib.servlet.taglib.util.JSPRenderer;
 import com.liferay.portal.kernel.language.Language;
+import com.liferay.portal.kernel.portlet.PortletURLFactory;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
+import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.WebKeys;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,12 +22,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-import java.util.List;
-
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 /**
  * @author Tancredi Covioli
@@ -58,9 +57,9 @@ public class CommerceOrderAttachmentsScreenNavigationEntry
 		CommerceOrderAttachmentsDisplayContext
 			commerceOrderAttachmentsDisplayContext =
 				new CommerceOrderAttachmentsDisplayContext(
-					commerceOrder,
-					_commerceOrderAttachmentAdminFDSActionContributors,
-					httpServletRequest, _language);
+					commerceOrder, _commerceOrderModelResourcePermission,
+					httpServletRequest, _language, _portal, _portletURLFactory,
+					_userLocalService);
 
 		httpServletRequest.setAttribute(
 			CommerceOrderAttachmentsDisplayContext.class.getName(),
@@ -72,16 +71,24 @@ public class CommerceOrderAttachmentsScreenNavigationEntry
 	}
 
 	@Reference(
-		cardinality = ReferenceCardinality.MULTIPLE,
-		policyOption = ReferencePolicyOption.GREEDY
+		target = "(model.class.name=com.liferay.commerce.model.CommerceOrder)"
 	)
-	private List<CommerceOrderAttachmentAdminFDSActionContributor>
-		_commerceOrderAttachmentAdminFDSActionContributors;
+	private ModelResourcePermission<CommerceOrder>
+		_commerceOrderModelResourcePermission;
 
 	@Reference
 	private JSPRenderer _jspRenderer;
 
 	@Reference
 	private Language _language;
+
+	@Reference
+	private Portal _portal;
+
+	@Reference
+	private PortletURLFactory _portletURLFactory;
+
+	@Reference
+	private UserLocalService _userLocalService;
 
 }
