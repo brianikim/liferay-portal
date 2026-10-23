@@ -40,6 +40,7 @@ import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
+import com.liferay.portal.kernel.util.HttpComponentsUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.WebKeys;
 
@@ -249,6 +250,20 @@ public class CommerceOrderAttachmentsDisplayContext {
 		).build();
 	}
 
+	private String _getDSRequestDetailsURL() {
+		ThemeDisplay themeDisplay =
+			(ThemeDisplay)_httpServletRequest.getAttribute(
+				WebKeys.THEME_DISPLAY);
+
+		String dsRequestDetailsURL = HttpComponentsUtil.addParameter(
+			StringBundler.concat(
+				themeDisplay.getPortalURL(), _portal.getPathModule(),
+				"/commerce-order-attachment-signature/details"),
+			"backURL", themeDisplay.getURLCurrent());
+
+		return dsRequestDetailsURL + "&commerceOrderAttachmentId={id}";
+	}
+
 	private List<FDSActionDropdownItem> _getDSRequestFDSActionDropdownItems() {
 		if (!DSCommerceOrderAttachmentUtil.isEnabled(_commerceOrder)) {
 			return Collections.emptyList();
@@ -282,6 +297,17 @@ public class CommerceOrderAttachmentsDisplayContext {
 				"update"
 			).build(
 				"resend"
+			),
+			FDSActionDropdownItemBuilder.putData(
+				"dsRequestDetailsURL", _getDSRequestDetailsURL()
+			).setHref(
+				StringPool.POUND
+			).setIcon(
+				"list-ul"
+			).setLabel(
+				_language.get(_httpServletRequest, "view-signature-details")
+			).build(
+				"view-signature-details"
 			),
 			FDSActionDropdownItemBuilder.putData(
 				"voidDSRequestURL",
