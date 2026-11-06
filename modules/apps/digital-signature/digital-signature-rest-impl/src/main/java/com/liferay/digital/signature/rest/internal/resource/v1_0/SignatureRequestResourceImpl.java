@@ -131,8 +131,9 @@ public class SignatureRequestResourceImpl
 		}
 
 		try {
-			_dsRequestManager.voidDSRequest(
-				dsRequest.getDSRequestId(), voidedReason);
+			return _toSignatureRequest(
+				_dsRequestManager.voidDSRequest(
+					dsRequest.getDSRequestId(), voidedReason));
 		}
 		catch (DSEnvelopeException.MustBeVoidable dsEnvelopeException) {
 			throw new BadRequestException(
@@ -142,10 +143,6 @@ public class SignatureRequestResourceImpl
 			throw new BadRequestException(
 				dsRequestException.getMessage(), dsRequestException);
 		}
-
-		return _toSignatureRequest(
-			_dsRequestManager.fetchDSRequest(
-				contextCompany.getCompanyId(), dsRequest.getDSRequestId()));
 	}
 
 	@Override

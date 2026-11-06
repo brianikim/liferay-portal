@@ -68,6 +68,9 @@ import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.transaction.Propagation;
+import com.liferay.portal.kernel.transaction.TransactionConfig;
+import com.liferay.portal.kernel.transaction.TransactionInvokerUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.Base64;
 import com.liferay.portal.kernel.util.ContentTypes;
@@ -143,7 +146,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 			if (dsRequest.isSyncable()) {
 				try {
-					updateDSRequest(dsRequest.getDSRequestId());
+					dsRequest = updateDSRequest(dsRequest.getDSRequestId());
 				}
 				catch (PortalException portalException) {
 					if (_log.isWarnEnabled()) {
@@ -153,9 +156,6 @@ public class DSRequestManagerImpl implements DSRequestManager {
 							portalException);
 					}
 				}
-
-				dsRequest = fetchDSRequest(
-					companyId, dsRequest.getDSRequestId());
 			}
 
 			if (!dsRequest.isReplaceable()) {
@@ -541,21 +541,21 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	}
 
 	@Override
-	public void updateDSRequest(long dsRequestId) throws PortalException {
+	public DSRequest updateDSRequest(long dsRequestId) throws PortalException {
 		ObjectEntry objectEntry = _getDSRequestObjectEntry(dsRequestId);
 
 		if (!_isEnabled(
 				objectEntry.getCompanyId(),
 				MapUtil.getLong(objectEntry.getValues(), "siteGroupId"))) {
 
-			return;
+			return null;
 		}
 
 		DSRequest dsRequest = fetchDSRequest(
 			objectEntry.getCompanyId(), dsRequestId);
 
 		if (dsRequest == null) {
-			return;
+			return null;
 		}
 
 		Set<Long> userIds = new HashSet<>(
@@ -572,22 +572,28 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					return dsRequestRecipient.getUserId();
 				}));
 
-		dsRequest = _updateDSRequest(objectEntry);
+		DSRequest updatedDSRequest = _updateDSRequest(objectEntry);
 
-		if ((dsRequest == null) || dsRequest.isTerminal()) {
-			return;
+		if (updatedDSRequest == null) {
+			return dsRequest;
+		}
+
+		if (updatedDSRequest.isTerminal()) {
+			return updatedDSRequest;
 		}
 
 		_sendDSRequestNotifications(
-			dsRequest,
+			updatedDSRequest,
 			ListUtil.filter(
-				dsRequest.getDSRequestRecipients(),
+				updatedDSRequest.getDSRequestRecipients(),
 				dsRequestRecipient -> userIds.contains(
 					dsRequestRecipient.getUserId())));
+
+		return updatedDSRequest;
 	}
 
 	@Override
-	public void voidDSRequest(long dsRequestId, String voidedReason)
+	public DSRequest voidDSRequest(long dsRequestId, String voidedReason)
 		throws PortalException {
 
 		ObjectEntry objectEntry = _getDSRequestObjectEntry(dsRequestId);
@@ -603,7 +609,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				DSRequestConstants.STATUSES_REQUEST_TERMINAL,
 				MapUtil.getString(objectEntry.getValues(), "requestStatus"))) {
 
-			return;
+			return fetchDSRequest(companyId, dsRequestId);
 		}
 
 		try {
@@ -612,30 +618,28 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				voidedReason);
 		}
 		catch (DSEnvelopeException.MustBeVoidable dsEnvelopeException) {
-			_updateDSRequest(objectEntry);
+			DSRequest dsRequest = _updateDSRequest(objectEntry);
 
-			objectEntry = _objectEntryLocalService.getObjectEntry(dsRequestId);
-
-			String dsRequestStatus = MapUtil.getString(
-				objectEntry.getValues(), "requestStatus");
+			if ((dsRequest == null) || dsRequest.isSyncable()) {
+				throw dsEnvelopeException;
+			}
 
 			if (Objects.equals(
-					DSRequestConstants.STATUS_VOIDED, dsRequestStatus)) {
+					DSRequestConstants.STATUS_VOIDED, dsRequest.getStatus())) {
 
-				return;
+				return dsRequest;
 			}
 
-			if (ArrayUtil.contains(
-					DSRequestConstants.STATUSES_REQUEST_TERMINAL,
-					dsRequestStatus)) {
-
-				throw new DSRequestException.MustBeActive(dsRequestId);
-			}
-
-			throw dsEnvelopeException;
+			throw new DSRequestException.MustBeActive(dsRequestId);
 		}
 
-		_updateDSRequest(objectEntry);
+		DSRequest dsRequest = _updateDSRequest(objectEntry);
+
+		if (dsRequest != null) {
+			return dsRequest;
+		}
+
+		return fetchDSRequest(companyId, dsRequestId);
 	}
 
 	private DSRequest _addDSRequest(
@@ -1372,53 +1376,61 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		long groupId = MapUtil.getLong(objectEntry.getValues(), "siteGroupId");
 
 		try {
-			long userId = objectEntry.getUserId();
+			return TransactionInvokerUtil.invoke(
+				_transactionConfig,
+				() -> {
+					long userId = objectEntry.getUserId();
 
-			if (_userLocalService.fetchUser(userId) == null) {
-				userId = _getAdminUserId(companyId);
-			}
+					if (_userLocalService.fetchUser(userId) == null) {
+						userId = _getAdminUserId(companyId);
+					}
 
-			DSEnvelope dsEnvelope = _dsEnvelopeManager.getDSEnvelope(
-				companyId, groupId, objectEntry.getExternalReferenceCode());
+					DSEnvelope dsEnvelope = _dsEnvelopeManager.getDSEnvelope(
+						companyId, groupId,
+						objectEntry.getExternalReferenceCode());
 
-			String dsRequestStatus = _getDSRequestStatus(dsEnvelope);
+					String dsRequestStatus = _getDSRequestStatus(dsEnvelope);
 
-			if (Objects.equals(
-					DSRequestConstants.STATUS_COMPLETED, dsRequestStatus) &&
-				!Objects.equals(
-					DSRequestConstants.STATUS_COMPLETED,
-					MapUtil.getString(
-						objectEntry.getValues(), "requestStatus"))) {
+					if (Objects.equals(
+							DSRequestConstants.STATUS_COMPLETED,
+							dsRequestStatus) &&
+						!Objects.equals(
+							DSRequestConstants.STATUS_COMPLETED,
+							MapUtil.getString(
+								objectEntry.getValues(), "requestStatus"))) {
 
-				_updateFileEntries(
-					companyId, dsEnvelope, dsRequestId, groupId, userId);
-			}
+						_updateFileEntries(
+							companyId, dsEnvelope, dsRequestId, groupId,
+							userId);
+					}
 
-			_updateDSRequestRecipientStatuses(
-				companyId, dsEnvelope, dsRequestId, dsRequestStatus, groupId,
-				userId);
+					_updateDSRequestRecipientStatuses(
+						companyId, dsEnvelope, dsRequestId, dsRequestStatus,
+						groupId, userId);
 
-			_objectEntryLocalService.partialUpdateObjectEntry(
-				userId, dsRequestId,
-				ObjectEntryFolderConstants.
-					PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
-				HashMapBuilder.<String, Serializable>put(
-					"requestExpirationDate",
-					() -> _toDate(dsEnvelope.getExpirationLocalDateTime())
-				).put(
-					"requestStatus", () -> dsRequestStatus
-				).put(
-					"requestStatusDate",
-					() -> _toDate(dsEnvelope.getStatusLocalDateTime())
-				).build(),
-				_getServiceContext(companyId, groupId, userId));
+					_objectEntryLocalService.partialUpdateObjectEntry(
+						userId, dsRequestId,
+						ObjectEntryFolderConstants.
+							PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
+						HashMapBuilder.<String, Serializable>put(
+							"requestExpirationDate",
+							() -> _toDate(
+								dsEnvelope.getExpirationLocalDateTime())
+						).put(
+							"requestStatus", () -> dsRequestStatus
+						).put(
+							"requestStatusDate",
+							() -> _toDate(dsEnvelope.getStatusLocalDateTime())
+						).build(),
+						_getServiceContext(companyId, groupId, userId));
 
-			return fetchDSRequest(companyId, dsRequestId);
+					return fetchDSRequest(companyId, dsRequestId);
+				});
 		}
-		catch (Exception exception) {
+		catch (Throwable throwable) {
 			_log.error(
 				"Unable to update digital signature request " + dsRequestId,
-				exception);
+				throwable);
 
 			return null;
 		}
@@ -1610,6 +1622,10 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		DSRequestManagerImpl.class);
+
+	private static final TransactionConfig _transactionConfig =
+		TransactionConfig.Factory.create(
+			Propagation.REQUIRES_NEW, new Class<?>[] {Exception.class});
 
 	@Reference
 	private DLAppLocalService _dlAppLocalService;
