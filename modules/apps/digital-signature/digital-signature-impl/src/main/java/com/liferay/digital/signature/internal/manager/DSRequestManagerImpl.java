@@ -1503,6 +1503,19 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				continue;
 			}
 
+			if (fileEntry.isCheckedOut()) {
+				if (_log.isWarnEnabled()) {
+					_log.warn(
+						StringBundler.concat(
+							"Unable to save the signed copy of file entry ",
+							fileEntryId, " of digital signature envelope ",
+							dsEnvelope.getDSEnvelopeId(),
+							" because the file entry is checked out"));
+				}
+
+				continue;
+			}
+
 			FileVersion latestFileVersion = fileEntry.getLatestFileVersion(
 				true);
 
