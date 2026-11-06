@@ -48,6 +48,8 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.language.Language;
+import com.liferay.portal.kernel.lock.Lock;
+import com.liferay.portal.kernel.lock.LockManager;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
@@ -83,7 +85,9 @@ import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.PrefsPropsUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.workflow.WorkflowThreadLocal;
 
@@ -1375,11 +1379,38 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		long dsRequestId = objectEntry.getObjectEntryId();
 		long groupId = MapUtil.getLong(objectEntry.getValues(), "siteGroupId");
 
+		String key = String.valueOf(dsRequestId);
+		String owner = PortalUUIDUtil.generate();
+
 		try {
+			Lock lock = TransactionInvokerUtil.invoke(
+				_transactionConfig,
+				() -> _lockManager.lock(
+					_userLocalService.getGuestUserId(companyId),
+					DSRequestManagerImpl.class.getName(), key, owner, false,
+					Time.MINUTE * 10, false));
+
+			if (!lock.isNew()) {
+				return null;
+			}
+
 			return TransactionInvokerUtil.invoke(
 				_transactionConfig,
 				() -> {
-					long userId = objectEntry.getUserId();
+					ObjectEntry dsRequestObjectEntry =
+						_objectEntryLocalService.getObjectEntry(dsRequestId);
+
+					String storedDSRequestStatus = MapUtil.getString(
+						dsRequestObjectEntry.getValues(), "requestStatus");
+
+					if (ArrayUtil.contains(
+							DSRequestConstants.STATUSES_REQUEST_TERMINAL,
+							storedDSRequestStatus)) {
+
+						return null;
+					}
+
+					long userId = dsRequestObjectEntry.getUserId();
 
 					if (_userLocalService.fetchUser(userId) == null) {
 						userId = _getAdminUserId(companyId);
@@ -1387,7 +1418,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 					DSEnvelope dsEnvelope = _dsEnvelopeManager.getDSEnvelope(
 						companyId, groupId,
-						objectEntry.getExternalReferenceCode());
+						dsRequestObjectEntry.getExternalReferenceCode());
 
 					String dsRequestStatus = _getDSRequestStatus(dsEnvelope);
 
@@ -1396,8 +1427,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 							dsRequestStatus) &&
 						!Objects.equals(
 							DSRequestConstants.STATUS_COMPLETED,
-							MapUtil.getString(
-								objectEntry.getValues(), "requestStatus"))) {
+							storedDSRequestStatus)) {
 
 						_updateFileEntries(
 							companyId, dsEnvelope, dsRequestId, groupId,
@@ -1433,6 +1463,10 @@ public class DSRequestManagerImpl implements DSRequestManager {
 				throwable);
 
 			return null;
+		}
+		finally {
+			_lockManager.unlock(
+				DSRequestManagerImpl.class.getName(), key, owner);
 		}
 	}
 
@@ -1652,6 +1686,9 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 	@Reference
 	private Language _language;
+
+	@Reference
+	private LockManager _lockManager;
 
 	@Reference
 	private NotificationTemplateLocalService _notificationTemplateLocalService;
