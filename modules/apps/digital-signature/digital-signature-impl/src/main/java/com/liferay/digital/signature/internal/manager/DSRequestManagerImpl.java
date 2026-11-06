@@ -43,6 +43,7 @@ import com.liferay.petra.sql.dsl.expression.Predicate;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
+import com.liferay.portal.kernel.exception.NoSuchUserException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.json.JSONUtil;
@@ -50,8 +51,10 @@ import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.UserConstants;
+import com.liferay.portal.kernel.model.role.RoleConstants;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.FileVersion;
 import com.liferay.portal.kernel.search.Field;
@@ -62,6 +65,7 @@ import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermissionRegistryUtil;
 import com.liferay.portal.kernel.service.GroupLocalService;
+import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.ArrayUtil;
@@ -771,6 +775,26 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			dsRequestRecipientObjectEntry.getValues());
 	}
 
+	private long _getAdminUserId(long companyId) throws PortalException {
+		Role role = _roleLocalService.getRole(
+			companyId, RoleConstants.ADMINISTRATOR);
+
+		for (long roleUserId :
+				_userLocalService.getRoleUserIds(role.getRoleId())) {
+
+			User user = _userLocalService.fetchUser(roleUserId);
+
+			if ((user != null) && user.isActive()) {
+				return user.getUserId();
+			}
+		}
+
+		throw new NoSuchUserException(
+			StringBundler.concat(
+				"No active user exists in company ", companyId, " with role ",
+				role.getName()));
+	}
+
 	private ObjectEntry _getDSRequestObjectEntry(long dsRequestId)
 		throws PortalException {
 
@@ -1348,6 +1372,12 @@ public class DSRequestManagerImpl implements DSRequestManager {
 		long groupId = MapUtil.getLong(objectEntry.getValues(), "siteGroupId");
 
 		try {
+			long userId = objectEntry.getUserId();
+
+			if (_userLocalService.fetchUser(userId) == null) {
+				userId = _getAdminUserId(companyId);
+			}
+
 			DSEnvelope dsEnvelope = _dsEnvelopeManager.getDSEnvelope(
 				companyId, groupId, objectEntry.getExternalReferenceCode());
 
@@ -1361,15 +1391,15 @@ public class DSRequestManagerImpl implements DSRequestManager {
 						objectEntry.getValues(), "requestStatus"))) {
 
 				_updateFileEntries(
-					companyId, dsEnvelope, dsRequestId, groupId,
-					objectEntry.getUserId());
+					companyId, dsEnvelope, dsRequestId, groupId, userId);
 			}
 
 			_updateDSRequestRecipientStatuses(
-				companyId, dsEnvelope, dsRequestId, dsRequestStatus, groupId);
+				companyId, dsEnvelope, dsRequestId, dsRequestStatus, groupId,
+				userId);
 
 			_objectEntryLocalService.partialUpdateObjectEntry(
-				objectEntry.getUserId(), dsRequestId,
+				userId, dsRequestId,
 				ObjectEntryFolderConstants.
 					PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
 				HashMapBuilder.<String, Serializable>put(
@@ -1381,8 +1411,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					"requestStatusDate",
 					() -> _toDate(dsEnvelope.getStatusLocalDateTime())
 				).build(),
-				_getServiceContext(
-					companyId, groupId, objectEntry.getUserId()));
+				_getServiceContext(companyId, groupId, userId));
 
 			return fetchDSRequest(companyId, dsRequestId);
 		}
@@ -1397,7 +1426,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 	private void _updateDSRequestRecipientStatuses(
 			long companyId, DSEnvelope dsEnvelope, long dsRequestId,
-			String dsRequestStatus, long groupId)
+			String dsRequestStatus, long groupId, long userId)
 		throws Exception {
 
 		Map<String, DSRecipient> dsRecipients = new HashMap<>();
@@ -1444,7 +1473,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			}
 
 			_objectEntryLocalService.partialUpdateObjectEntry(
-				objectEntry.getUserId(), dsRequestRecipientId,
+				userId, dsRequestRecipientId,
 				ObjectEntryFolderConstants.
 					PARENT_OBJECT_ENTRY_FOLDER_ID_DEFAULT,
 				HashMapBuilder.<String, Serializable>put(
@@ -1458,8 +1487,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					"sentDate",
 					() -> _toDate(dsRecipient.getSentLocalDateTime())
 				).build(),
-				_getServiceContext(
-					companyId, groupId, objectEntry.getUserId()));
+				_getServiceContext(companyId, groupId, userId));
 		}
 	}
 
@@ -1623,6 +1651,9 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 	@Reference
 	private Portal _portal;
+
+	@Reference
+	private RoleLocalService _roleLocalService;
 
 	@Reference
 	private UserLocalService _userLocalService;
