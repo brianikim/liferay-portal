@@ -34,6 +34,7 @@ import {
 	configureBuyerUserForSite,
 	createAccountWithBuyerUser,
 	createChannelAccountManagerUser,
+	createProductWithOptions,
 	deployProductFragmentsOnDefaultDPT,
 	miniumSetUp,
 } from '../../utils/commerce';
@@ -2063,5 +2064,96 @@ test(
 				0
 			);
 		});
+	}
+);
+
+test(
+	'Buyer views the payment subscription of a product with multiple SKUs on its product details page',
+	{tag: ['@COMMERCE-9743', '@LPD-108799']},
+	async ({
+		apiHelpers,
+		commerceAdminProductPage,
+		page,
+		productDetailsPage,
+		site,
+	}) => {
+		await apiHelpers.headlessCommerceAdminChannel.postChannel({
+			siteGroupId: site.id,
+		});
+
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog({
+				name: getRandomString(),
+			});
+
+		await apiHelpers.headlessDelivery.createSitePage({
+			pageDefinition: getPageDefinition([
+				getWidgetDefinition({
+					id: getRandomString(),
+					widgetName:
+						'com_liferay_commerce_product_content_web_internal_portlet_CPContentPortlet',
+				}),
+			]),
+			siteId: site.id,
+			title: getRandomString(),
+		});
+
+		const {buyerUser} = await createAccountWithBuyerUser(
+			apiHelpers,
+			site.id
+		);
+
+		const optionName = getRandomString();
+
+		const {product} = await createProductWithOptions(
+			apiHelpers,
+			commerceAdminProductPage,
+			{
+				catalogId: catalog.id,
+				optionSpecs: [
+					{
+						fieldType: 'select',
+						name: optionName,
+						skuContributor: true,
+						values: [
+							{key: 'value-1', name: 'Value 1'},
+							{key: 'value-2', name: 'Value 2'},
+						],
+					},
+				],
+			}
+		);
+
+		await apiHelpers.headlessCommerceAdminCatalog.patchProductSubscriptionConfiguration(
+			product.productId,
+			{enable: true, length: 1, subscriptionType: 'daily'}
+		);
+
+		await performLogout(page);
+		await performLoginViaApi({page, screenName: buyerUser.alternateName});
+
+		await expect(async () => {
+			await page.goto(
+				`/web${site.friendlyUrlPath}/p/${product.urls['en_US']}`
+			);
+
+			await expect(
+				productDetailsPage.optionSelector(optionName)
+			).toBeVisible({timeout: 5000});
+		}).toPass({timeout: 60000});
+
+		await productDetailsPage
+			.optionSelector(optionName)
+			.selectOption({label: 'Value 1'});
+
+		await expect(productDetailsPage.subscriptionInfo).toContainText(
+			'Payment Subscription'
+		);
+		await expect(productDetailsPage.subscriptionInfo).toContainText(
+			'Every 1 Day'
+		);
+		await expect(productDetailsPage.subscriptionInfo).not.toContainText(
+			'Delivery Subscription'
+		);
 	}
 );
