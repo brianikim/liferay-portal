@@ -43,11 +43,6 @@ definition {
 	}
 
 	@summary = "Default summary"
-	macro desactiveValidation() {
-		Uncheck.uncheckToggleSwitch(locator1 = "ObjectCustomValidation#ACTIVE_VALIDATION_TOGGLE");
-	}
-
-	@summary = "Default summary"
 	macro editLabelOnCustomValidation(editValidationName = null) {
 		Type(
 			locator1 = "ObjectCustomValidation#LABEL_EDIT_VALIDATION",

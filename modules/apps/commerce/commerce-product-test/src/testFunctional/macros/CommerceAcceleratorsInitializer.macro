@@ -409,27 +409,6 @@ definition {
 	}
 
 	@summary = "Default summary"
-	macro viewDiscountedProductDetailsPage(discountPercentage = null, productDiscountedPrice = null, productPromoPrice = null, productListPrice = null) {
-		AssertTextEquals.assertPartialText(
-			locator1 = "CommerceAccelerators#PRODUCT_DETAILS_LIST_PRICE_INACTIVE",
-			value1 = ${productListPrice});
-
-		if (isSet(productPromoPrice)) {
-			AssertTextEquals.assertPartialText(
-				locator1 = "CommerceAccelerators#PRODUCT_DETAILS_PROMO_PRICE_INACTIVE",
-				value1 = ${productPromoPrice});
-		}
-
-		AssertTextEquals.assertPartialText(
-			locator1 = "CommerceAccelerators#PRODUCT_DETAILS_DISCOUNT",
-			value1 = ${discountPercentage});
-
-		AssertTextEquals.assertPartialText(
-			locator1 = "CommerceAccelerators#PRODUCT_DETAILS_NET_PRICE",
-			value1 = ${productDiscountedPrice});
-	}
-
-	@summary = "Default summary"
 	macro viewEnabledAddToCartButton(productName = null) {
 		AssertElementPresent(
 			key_productName = ${productName},
