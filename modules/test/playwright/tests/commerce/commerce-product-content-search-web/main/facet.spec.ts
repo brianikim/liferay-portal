@@ -830,6 +830,86 @@ for (const {
 }
 
 test(
+	'Specification Facet keeps working when searching products with many specifications',
+	{tag: ['@COMMERCE-12191', '@LPD-108835']},
+	async ({apiHelpers, page, site, specificationFacetsPage}) => {
+		const {catalogId, url} = await setUpFacetPage(
+			apiHelpers,
+			page,
+			specificationFacetsPage,
+			site
+		);
+
+		const specifications = [];
+
+		for (let index = 0; index < 21; index++) {
+			specifications.push(
+				await apiHelpers.headlessCommerceAdminCatalog.postSpecification(
+					true,
+					index,
+					'Spec' + getRandomString()
+				)
+			);
+		}
+
+		const productPlans = [
+			{
+				keyword: getRandomString().replace(/-/g, ''),
+				specifications: specifications.slice(0, 20),
+			},
+			{
+				keyword: getRandomString().replace(/-/g, ''),
+				specifications: [specifications[0], specifications[20]],
+			},
+		];
+
+		for (const productPlan of productPlans) {
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId,
+				name: {en_US: `${productPlan.keyword} Product`},
+				productSpecifications: productPlan.specifications.map(
+					(specification) => ({
+						specificationKey: specification.key,
+						value: {en_US: '0'},
+					})
+				),
+			});
+		}
+
+		await goToIndexedFacetPage(
+			page,
+			specificationFacetsPage,
+			url,
+			'Specification Facet',
+			specifications[0].title['en_US']
+		);
+
+		await specificationFacetsPage.updateFacetConfiguration(
+			'Specification Facet',
+			{maxTerms: 20}
+		);
+
+		await specificationFacetsPage.closeFacetConfiguration();
+
+		for (const {keyword} of productPlans) {
+			await page.goto(`${url}?q=${keyword}`);
+
+			await expect(
+				specificationFacetsPage.facetTerms(
+					'Specification Facet',
+					specifications[0].title['en_US']
+				)
+			).toHaveCount(1);
+			await expect(
+				specificationFacetsPage.unavailableErrorMessage(
+					'Specification Facet'
+				)
+			).toHaveCount(0);
+		}
+	}
+);
+
+test(
 	'Category Facet narrows the search results to the selected category',
 	{tag: ['@COMMERCE-6169', '@LPD-108835']},
 	async ({
