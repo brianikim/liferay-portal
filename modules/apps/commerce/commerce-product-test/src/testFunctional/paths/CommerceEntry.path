@@ -1319,11 +1319,6 @@
 	<td></td>
 </tr>
 <tr>
-	<td>DELIVERY_SUBSCRIPTION_TOGGLE</td>
-	<td>//div[contains(@class,'h4') and contains(text(), 'Delivery Subscription')]//following-sibling::span[contains(@class,'toggle-switch-handle')]</td>
-	<td></td>
-</tr>
-<tr>
 	<td>SUBSCRIPTION_TOGGLE</td>
 	<td>//div[contains(@class,'h4') and contains(text(), '${key_subscriptionName}')]//following-sibling::span[contains(@class,'toggle-switch-handle')]</td>
 	<td></td>
@@ -1336,11 +1331,6 @@
 <tr>
 	<td>SUBSCRIPTION_FIELD_LABEL_N</td>
 	<td>xpath=(//div[contains(@class,'h4') and contains(text(), '${key_subscriptionName}')]/..//label[contains(.,'${key_subscriptionFieldLabel}')]/..//select)[${key_indexNumber}]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>SUBSCRIPTION_TYPE_IN_LENGTH</td>
-	<td>//div[contains(@class,'h4') and contains(text(), '${key_subscriptionName}')]/..//label[contains(.,'${key_subscriptionFieldLabel}')]/..//span</td>
 	<td></td>
 </tr>
 <tr>
