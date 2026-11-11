@@ -22,6 +22,7 @@ export class CommerceSpecificationsPage {
 	readonly keyContent: Locator;
 	readonly page: Page;
 	readonly saveButton: Locator;
+	readonly searchInput: Locator;
 	readonly sidePanelSpecificationPicklistItemsFrame: FrameLocator;
 	readonly specificationLabel: Locator;
 	readonly specificationNameLink: (specificationName: string) => Locator;
@@ -75,6 +76,7 @@ export class CommerceSpecificationsPage {
 		this.groupTitle = page.getByLabel('Title Required');
 		this.keyContent = page.getByLabel('Key Required');
 		this.saveButton = page.getByRole('button', {name: 'Save'});
+		this.searchInput = page.getByPlaceholder('Search for');
 		this.sidePanelSpecificationPicklistItemsFrame =
 			page.frameLocator('iframe');
 		this.specificationLabel = page.getByLabel('Label Required');
@@ -103,6 +105,11 @@ export class CommerceSpecificationsPage {
 			'Success:Your request completed successfully.'
 		);
 		this.visibleToggle = page.getByLabel('Visible', {exact: true});
+	}
+
+	async search(keywords: string) {
+		await this.searchInput.fill(keywords);
+		await this.searchInput.press('Enter');
 	}
 
 	async waitForKey(specificationName) {
