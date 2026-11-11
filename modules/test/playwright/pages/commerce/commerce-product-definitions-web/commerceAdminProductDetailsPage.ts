@@ -58,6 +58,7 @@ export class CommerceAdminProductDetailsPage {
 	readonly productVisibilityLink: Locator;
 	readonly publishLink: Locator;
 	readonly saveAsDraftLink: Locator;
+	readonly shortDescriptionInput: Locator;
 	readonly textTableCell: (text: string) => Locator;
 	readonly visibleToggle: Locator;
 	readonly workflowStatusLabel: (status: string) => Locator;
@@ -203,6 +204,9 @@ export class CommerceAdminProductDetailsPage {
 			exact: true,
 			name: 'Save as Draft',
 		});
+		this.shortDescriptionInput = page.locator(
+			'textarea[id$="_shortDescriptionMapAsXML"]'
+		);
 		this.textTableCell = (text: string) =>
 			this.page.getByRole('cell', {
 				exact: true,
