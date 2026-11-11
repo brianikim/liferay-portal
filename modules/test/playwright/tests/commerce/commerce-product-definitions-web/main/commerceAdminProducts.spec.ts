@@ -8,6 +8,7 @@ import {expect, mergeTests} from '@playwright/test';
 import {apiHelpersTest} from '../../../../fixtures/apiHelpersTest';
 import {commercePagesTest} from '../../../../fixtures/commercePagesTest';
 import {dataApiHelpersTest} from '../../../../fixtures/dataApiHelpersTest';
+import {featureFlagsTest} from '../../../../fixtures/featureFlagsTest';
 import {isolatedSiteTest} from '../../../../fixtures/isolatedSiteTest';
 import {loginTest} from '../../../../fixtures/loginTest';
 import {serverAdministrationPageTest} from '../../../../fixtures/serverAdministrationPageTest';
@@ -17,11 +18,16 @@ import {getRandomInt} from '../../../../utils/getRandomInt';
 import getRandomString from '../../../../utils/getRandomString';
 import {userData} from '../../../../utils/performLogin';
 import {waitForAlert} from '../../../../utils/waitForAlert';
+import getPageDefinition from '../../../layout-content-page-editor-web/main/utils/getPageDefinition';
+import getWidgetDefinition from '../../../layout-content-page-editor-web/main/utils/getWidgetDefinition';
 
 export const test = mergeTests(
 	apiHelpersTest,
 	commercePagesTest,
 	dataApiHelpersTest,
+	featureFlagsTest({
+		'LPS-178052': {enabled: true},
+	}),
 	isolatedSiteTest,
 	loginTest(),
 	serverAdministrationPageTest,
@@ -820,6 +826,141 @@ test(
 					warehouse.name['en_US']
 				)
 			).toHaveValue('10.0000000');
+		});
+	}
+);
+
+test(
+	'A simple product created and priced in the admin is shown on the storefront and can be deleted',
+	{tag: '@LPD-108805'},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductDetailsSkusPage,
+		commerceAdminProductPage,
+		page,
+		productDetailsPage,
+		site,
+	}) => {
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		await apiHelpers.headlessCommerceAdminChannel.postChannel({
+			siteGroupId: site.id,
+		});
+
+		await apiHelpers.headlessDelivery.createSitePage({
+			pageDefinition: getPageDefinition([
+				getWidgetDefinition({
+					id: getRandomString(),
+					widgetName:
+						'com_liferay_commerce_product_content_web_internal_portlet_CPContentPortlet',
+				}),
+			]),
+			siteId: site.id,
+			title: getRandomString(),
+		});
+
+		const productName = getRandomString();
+		const shortDescription = getRandomString();
+		const sku = getRandomString();
+
+		await test.step('Create a simple product in a catalog', async () => {
+			await commerceAdminProductPage.goto();
+
+			await commerceAdminProductPage.addButton.click();
+			await commerceAdminProductPage
+				.menuItemProductType('Simple')
+				.click();
+			await commerceAdminProductPage.modalFieldName.fill(productName);
+			await commerceAdminProductPage.modalPlaceHolder.fill(catalog.name);
+			await commerceAdminProductPage.modalMenuItem(catalog.name).click();
+			await commerceAdminProductPage.modalSubmitButton.click();
+
+			await expect(
+				commerceAdminProductDetailsPage.productTitle(productName)
+			).toBeVisible();
+			await expect(
+				commerceAdminProductDetailsPage.workflowStatusLabel('Draft')
+			).toBeVisible();
+		});
+
+		await test.step('Set the short description and publish the product', async () => {
+			await commerceAdminProductDetailsPage.shortDescriptionInput.fill(
+				shortDescription
+			);
+
+			await commerceAdminProductDetailsPage.publish();
+
+			await expect(
+				commerceAdminProductDetailsPage.workflowStatusLabel('Approved')
+			).toBeVisible();
+		});
+
+		await test.step('Set the code and the base price of the default SKU', async () => {
+			await commerceAdminProductDetailsPage.goToProductSkus();
+
+			await commerceAdminProductDetailsSkusPage
+				.skusTableRowLink('default')
+				.click();
+			await commerceAdminProductDetailsSkusPage.sidePanelDetailsSkuFieldName.fill(
+				sku
+			);
+			await commerceAdminProductDetailsSkusPage.sidePanelDetailsSkuPublishButton.click();
+
+			await waitForAlert(
+				commerceAdminProductDetailsSkusPage.sidePanelFrame
+			);
+
+			await commerceAdminProductDetailsSkusPage.goToSkuTab('Price');
+			await commerceAdminProductDetailsSkusPage
+				.sidePanelSkuPriceTableRowLink(
+					`${catalog.name} Base Price List`
+				)
+				.click();
+			await commerceAdminProductDetailsSkusPage.sidePanelNestedPriceListPrice.fill(
+				'25'
+			);
+			await commerceAdminProductDetailsSkusPage.sidePanelNestedSaveButton.click();
+
+			await waitForAlert(
+				commerceAdminProductDetailsSkusPage.sidePanelNestedFrame
+			);
+		});
+
+		await test.step('The storefront shows the product with its short description, SKU and price', async () => {
+			const product = (
+				await apiHelpers.headlessCommerceAdminCatalog.getProducts(
+					new URLSearchParams({filter: `name eq '${productName}'`})
+				)
+			).items[0];
+
+			await page.goto(
+				`/web${site.friendlyUrlPath}/p/${product.urls['en_US']}`
+			);
+
+			await expect(
+				await productDetailsPage.productNameHeading(productName)
+			).toBeVisible();
+			await expect(
+				await productDetailsPage.shortDescriptionField(shortDescription)
+			).toBeVisible();
+			await expect(await productDetailsPage.skuField(sku)).toBeVisible();
+			await expect(
+				await productDetailsPage.priceField(
+					'$ 25.00',
+					productDetailsPage.priceContainer
+				)
+			).toBeVisible();
+		});
+
+		await test.step('Delete the product from the products list', async () => {
+			await commerceAdminProductPage.searchProduct(productName);
+
+			await commerceAdminProductPage.deleteProduct(
+				productName,
+				'Approved'
+			);
 		});
 	}
 );
