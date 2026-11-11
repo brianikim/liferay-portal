@@ -21,6 +21,7 @@ export class SearchResultsPage {
 	readonly page: Page;
 	readonly productListRendererButton: Locator;
 	readonly productListRendererSelectedOption: Locator;
+	readonly searchResultsPortlet: Locator;
 	readonly useApplicationDisplayTemplateRadio: Locator;
 
 	constructor(page: Page) {
@@ -68,6 +69,9 @@ export class SearchResultsPage {
 		this.productListRendererSelectedOption = this.configurationFrame
 			.getByRole('combobox', {exact: true, name: 'Product List Renderer'})
 			.getByRole('option', {selected: true});
+		this.searchResultsPortlet = page.locator(
+			'//section[contains(@id, "CPSearchResultsPortlet")]'
+		);
 		this.useApplicationDisplayTemplateRadio =
 			this.configurationFrame.getByRole('radio', {
 				exact: true,
@@ -81,6 +85,10 @@ export class SearchResultsPage {
 		await expandSection(this.productListRendererButton);
 	}
 
+	productsAvailableLabel(productCount: number) {
+		return this.page.getByText(`${productCount} Products Available`);
+	}
+
 	async saveConfiguration() {
 		await this.configurationSaveButton.click();
 
@@ -88,6 +96,10 @@ export class SearchResultsPage {
 			this.configurationFrame,
 			'Success:You have successfully updated the setup.'
 		);
+	}
+
+	searchResult(productName: string) {
+		return this.searchResultsPortlet.getByText(productName);
 	}
 
 	async selectDisplayTemplate(displayTemplateName: string) {
