@@ -916,3 +916,202 @@ for (const subscriptionName of [
 		}
 	);
 }
+
+test(
+	'Product and SKU subscription configurations are saved',
+	{
+		tag: [
+			'@COMMERCE-6085',
+			'@COMMERCE-9806',
+			'@COMMERCE-11150',
+			'@LPD-108844',
+		],
+	},
+	async ({
+		apiHelpers,
+		commerceAdminProductDetailsPage,
+		commerceAdminProductDetailsSkusPage,
+		commerceAdminProductPage,
+		page,
+	}) => {
+		const catalog =
+			await apiHelpers.headlessCommerceAdminCatalog.postCatalog();
+
+		const product =
+			await apiHelpers.headlessCommerceAdminCatalog.postProduct({
+				catalogId: catalog.id,
+			});
+
+		await commerceAdminProductPage.gotoProduct(product.name['en_US']);
+
+		await test.step('Configure the product delivery subscription', async () => {
+			await commerceAdminProductDetailsPage.productSubscriptionLink.click();
+
+			await commerceAdminProductDetailsPage
+				.subscriptionEnabledLabel('Delivery Subscription')
+				.click();
+			await commerceAdminProductDetailsPage
+				.subscriptionTypeSelect('Delivery Subscription')
+				.selectOption({label: 'Year'});
+			await commerceAdminProductDetailsPage
+				.subscriptionYearlyModeSelect('Delivery Subscription')
+				.selectOption({label: 'Exact Day of Year'});
+			await commerceAdminProductDetailsPage
+				.subscriptionYearlyMonthSelect('Delivery Subscription')
+				.selectOption({label: 'March'});
+			await commerceAdminProductDetailsPage
+				.subscriptionYearlyMonthDayInput('Delivery Subscription')
+				.fill('5');
+			await commerceAdminProductDetailsPage
+				.subscriptionLengthInput('Delivery Subscription')
+				.fill('5');
+			await commerceAdminProductDetailsPage.publishLink.click();
+
+			await waitForAlert(page);
+
+			await commerceAdminProductDetailsPage.productDetailsLink.click();
+			await commerceAdminProductDetailsPage.productSubscriptionLink.click();
+
+			await expect(
+				commerceAdminProductDetailsPage.subscriptionEnabledInput(
+					'Delivery Subscription'
+				)
+			).toBeChecked();
+			await expect(
+				commerceAdminProductDetailsPage
+					.subscriptionTypeSelect('Delivery Subscription')
+					.locator('option:checked')
+			).toHaveText('Year');
+			await expect(
+				commerceAdminProductDetailsPage
+					.subscriptionYearlyModeSelect('Delivery Subscription')
+					.locator('option:checked')
+			).toHaveText('Exact Day of Year');
+			await expect(
+				commerceAdminProductDetailsPage
+					.subscriptionYearlyMonthSelect('Delivery Subscription')
+					.locator('option:checked')
+			).toHaveText('March');
+			await expect(
+				commerceAdminProductDetailsPage.subscriptionYearlyMonthDayInput(
+					'Delivery Subscription'
+				)
+			).toHaveValue('5');
+			await expect(
+				commerceAdminProductDetailsPage.subscriptionLengthInput(
+					'Delivery Subscription'
+				)
+			).toHaveValue('5');
+		});
+
+		await test.step('Configure the product payment subscription', async () => {
+			await commerceAdminProductDetailsPage
+				.subscriptionEnabledLabel('Payment Subscription')
+				.click();
+			await commerceAdminProductDetailsPage.publishLink.click();
+
+			await waitForAlert(page);
+
+			await expect(
+				commerceAdminProductDetailsPage
+					.subscriptionTypeSelect('Payment Subscription')
+					.locator('option:checked')
+			).toHaveText('Day');
+
+			await commerceAdminProductDetailsPage
+				.subscriptionTypeSelect('Payment Subscription')
+				.selectOption({label: 'Year'});
+			await commerceAdminProductDetailsPage.publishLink.click();
+
+			await waitForAlert(page);
+
+			await commerceAdminProductDetailsPage.productDetailsLink.click();
+			await commerceAdminProductDetailsPage.productSubscriptionLink.click();
+
+			await expect(
+				commerceAdminProductDetailsPage.subscriptionEnabledInput(
+					'Delivery Subscription'
+				)
+			).toBeChecked();
+			await expect(
+				commerceAdminProductDetailsPage.subscriptionEnabledInput(
+					'Payment Subscription'
+				)
+			).toBeChecked();
+			await expect(
+				commerceAdminProductDetailsPage
+					.subscriptionTypeSelect('Payment Subscription')
+					.locator('option:checked')
+			).toHaveText('Year');
+			await expect(
+				commerceAdminProductDetailsPage
+					.subscriptionYearlyModeSelect('Payment Subscription')
+					.locator('option:checked')
+			).toHaveText('Order Date');
+		});
+
+		await test.step('Override the SKU delivery subscription', async () => {
+			await commerceAdminProductDetailsPage.goToProductSkus();
+
+			await commerceAdminProductDetailsSkusPage
+				.skusTableRowLink(product.skus[0].sku)
+				.click();
+
+			await commerceAdminProductDetailsSkusPage.goToSkuTab(
+				'Subscriptions'
+			);
+
+			await commerceAdminProductDetailsSkusPage.sidePanelSubscriptionOverrideToggle.check();
+			await commerceAdminProductDetailsSkusPage
+				.sidePanelSubscriptionEnabledLabel('Delivery Subscription')
+				.click();
+			await commerceAdminProductDetailsSkusPage.sidePanelSaveButton.click();
+
+			await waitForAlert(
+				commerceAdminProductDetailsSkusPage.sidePanelFrame
+			);
+
+			await expect(
+				commerceAdminProductDetailsSkusPage
+					.sidePanelSubscriptionTypeSelect('Delivery Subscription')
+					.locator('option:checked')
+			).toHaveText('Day');
+
+			await commerceAdminProductDetailsSkusPage
+				.sidePanelSubscriptionTypeSelect('Delivery Subscription')
+				.selectOption({label: 'Year'});
+
+			await expect(
+				commerceAdminProductDetailsSkusPage
+					.sidePanelSubscriptionYearlyModeSelect(
+						'Delivery Subscription'
+					)
+					.locator('option:checked')
+			).toHaveText('Order Date');
+
+			await commerceAdminProductDetailsSkusPage.sidePanelSaveButton.click();
+
+			await waitForAlert(
+				commerceAdminProductDetailsSkusPage.sidePanelFrame
+			);
+
+			await expect(
+				commerceAdminProductDetailsSkusPage
+					.sidePanelSubscriptionTypeSelect('Delivery Subscription')
+					.locator('option:checked')
+			).toHaveText('Year');
+			await expect(
+				commerceAdminProductDetailsSkusPage
+					.sidePanelSubscriptionYearlyModeSelect(
+						'Delivery Subscription'
+					)
+					.locator('option:checked')
+			).toHaveText('Order Date');
+			await expect(
+				commerceAdminProductDetailsSkusPage.sidePanelSubscriptionLengthInput(
+					'Delivery Subscription'
+				)
+			).toHaveValue('1');
+		});
+	}
+);
