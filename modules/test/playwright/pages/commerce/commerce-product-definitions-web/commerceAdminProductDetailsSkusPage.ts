@@ -9,6 +9,10 @@ import {
 	CommerceDNDTablePage,
 	searchTableRowByValue,
 } from '../commerceDNDTablePage';
+import {
+	ProductSubscriptionName,
+	SUBSCRIPTION_FIELD_IDS,
+} from './commerceAdminProductDetailsPage';
 
 export class CommerceAdminProductDetailsSkusPage extends CommerceDNDTablePage {
 	readonly addSkuUOMButton: Locator;
@@ -34,6 +38,19 @@ export class CommerceAdminProductDetailsSkusPage extends CommerceDNDTablePage {
 	readonly sidePanelSaveButton: Locator;
 	readonly sidePanelSkuInventoryQuantity: Locator;
 	readonly sidePanelSkuPriceTableRowLink: (priceListName: string) => Locator;
+	readonly sidePanelSubscriptionEnabledLabel: (
+		subscriptionName: ProductSubscriptionName
+	) => Locator;
+	readonly sidePanelSubscriptionLengthInput: (
+		subscriptionName: ProductSubscriptionName
+	) => Locator;
+	readonly sidePanelSubscriptionOverrideToggle: Locator;
+	readonly sidePanelSubscriptionTypeSelect: (
+		subscriptionName: ProductSubscriptionName
+	) => Locator;
+	readonly sidePanelSubscriptionYearlyModeSelect: (
+		subscriptionName: ProductSubscriptionName
+	) => Locator;
 	readonly skuAddButton: Locator;
 	readonly skuAddModal: FrameLocator;
 	readonly skuAddModalSkuInput: Locator;
@@ -166,6 +183,32 @@ export class CommerceAdminProductDetailsSkusPage extends CommerceDNDTablePage {
 				exact: true,
 				name: priceListName,
 			});
+		this.sidePanelSubscriptionEnabledLabel = (
+			subscriptionName: ProductSubscriptionName
+		) =>
+			this.sidePanelFrame.locator(
+				`label[for$="_${SUBSCRIPTION_FIELD_IDS[subscriptionName].enabled}"]`
+			);
+		this.sidePanelSubscriptionLengthInput = (
+			subscriptionName: ProductSubscriptionName
+		) =>
+			this.sidePanelFrame.locator(
+				`input[id$="_${SUBSCRIPTION_FIELD_IDS[subscriptionName].length}"]`
+			);
+		this.sidePanelSubscriptionOverrideToggle =
+			this.sidePanelFrame.getByLabel('Override Subscription Settings');
+		this.sidePanelSubscriptionTypeSelect = (
+			subscriptionName: ProductSubscriptionName
+		) =>
+			this.sidePanelFrame.locator(
+				`select[id$="_${SUBSCRIPTION_FIELD_IDS[subscriptionName].type}"]`
+			);
+		this.sidePanelSubscriptionYearlyModeSelect = (
+			subscriptionName: ProductSubscriptionName
+		) =>
+			this.sidePanelFrame.locator(
+				`select[name$="_${SUBSCRIPTION_FIELD_IDS[subscriptionName].yearlyMode}"]`
+			);
 		this.skusLink = page.getByRole('link', {
 			exact: true,
 			name: 'SKUs',
