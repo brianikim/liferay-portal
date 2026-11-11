@@ -525,79 +525,6 @@ definition {
 	}
 
 	@summary = "Default summary"
-	macro updateFacetConfiguration(displayTemplate = null, maxOptions = null, maxSpecifications = null, maxTerms = null, displayFrequencies = null, frequencyThreshold = null, parameterName = null, rangesArray = null, portletName = null) {
-		Portlet.gotoPortletOptions(
-			portletName = ${portletName},
-			portletOption = "Configuration");
-
-		WaitForLiferayEvent.initializeLiferayEventLog();
-
-		SelectFrameTop();
-
-		SelectFrame(locator1 = "IFrame#CONFIGURATION");
-
-		if (isSet(displayTemplate)) {
-			if (IsElementPresent(key_fieldLabel = "Display Template", locator1 = "Select#GENERIC_SELECT_FIELD")) {
-				Select(
-					key_fieldLabel = "Display Template",
-					locator1 = "Select#GENERIC_SELECT_FIELD",
-					value1 = ${displayTemplate});
-			}
-			else {
-				Click(
-					key_fieldLabel = "Display Template",
-					locator1 = "CommerceEntry#COMMERCE_FACET_BUTTON");
-
-				Click(
-					key_entry = ${displayTemplate},
-					locator1 = "CommerceEntry#COMMERCE_FACET_DROPDOWN");
-			}
-		}
-
-		if (isSet(parameterName)) {
-			FormFields.editText(
-				fieldName = "parameterName",
-				fieldValue = ${parameterName});
-		}
-
-		if (isSet(maxOptions)) {
-			FormFields.editText(
-				fieldName = "maxOptions",
-				fieldValue = ${maxOptions});
-		}
-
-		if (isSet(maxSpecifications)) {
-			FormFields.editText(
-				fieldName = "maxSpecifications",
-				fieldValue = ${maxSpecifications});
-		}
-
-		if (isSet(maxTerms)) {
-			FormFields.editText(
-				fieldName = "maxTerms",
-				fieldValue = ${maxTerms});
-		}
-
-		if (isSet(frequencyThreshold)) {
-			FormFields.editText(
-				fieldName = "frequencyThreshold",
-				fieldValue = ${frequencyThreshold});
-		}
-
-		if (isSet(rangesArray)) {
-			FormFields.editTextMultiline(
-				fieldName = "rangesJSONArray",
-				fieldValue = ${rangesArray});
-		}
-
-		if (${displayFrequencies} == "disable") {
-			FormFields.disableCheckbox(fieldName = "frequenciesVisible");
-		}
-
-		PortletEntry.save();
-	}
-
-	@summary = "Default summary"
 	macro updateProductPublisherConfiguration(renderSelection = null, itemsPerPage = null, filterEntries = null, filterType = null, portletName = null, productSelection = null) {
 		Portlet.gotoPortletOptions(
 			portletName = ${portletName},
@@ -796,14 +723,6 @@ definition {
 				key_fieldValue = ${accountDetails},
 				locator1 = "CommerceWidget#ASSERT_ACCOUNT_DETAILS_AT_SIDEBAR");
 		}
-	}
-
-	@summary = "Default summary"
-	macro viewCheckboxNotChecked(fieldName = null, fieldValue = null) {
-		AssertNotChecked.assertNotCheckedNotVisible(
-			key_fieldName = ${fieldName},
-			key_fieldValue = ${fieldValue},
-			locator1 = "FormViewBuilder#CHECKBOX_LABEL");
 	}
 
 	@summary = "This macro can be used for asserting user information from Organization Management Chart"

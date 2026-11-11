@@ -283,19 +283,6 @@ definition {
 	}
 
 	@summary = "Default summary"
-	macro removePortlet(portletName = null) {
-		var key_portletName = ${portletName};
-
-		MouseOver.waitForMenuToggleJSMouseOver(locator1 = "Portlet#SPECIFIC_PORTLET_SECTION");
-
-		Click(locator1 = "Portlet#SPECIFIC_ELLIPSIS_ICON");
-
-		MenuItem.clickNoError(menuItem = "Delete");
-
-		AssertConfirm(value1 = "Are you sure you want to remove this component?");
-	}
-
-	@summary = "Default summary"
 	macro reviewOrder(orderAuthor = null, productSku = null, productQuantity = null, deliveryTerm = null, productDiscount = null, productUnitPrice = null, uomKey = null, paymentTerm = null, productName = null, productPrice = null) {
 		if (IsElementPresent(key_orderAuthor = ${orderAuthor}, locator1 = "CommerceAccelerators#ORDERS_ENTRY_VIEW_BUTTON")) {
 			Click(

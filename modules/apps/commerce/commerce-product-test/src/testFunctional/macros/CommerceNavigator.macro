@@ -212,11 +212,6 @@ definition {
 	}
 
 	@summary = "Default summary"
-	macro goToSpecificationsAdmin() {
-		Navigator.openWithAppendToBaseURL(urlAppend = "group/guest/~/control_panel/manage?p_p_id=com_liferay_commerce_product_options_web_internal_portlet_CPSpecificationOptionsPortlet");
-	}
-
-	@summary = "Default summary"
 	macro gotoSpeedwellAccountDropdownItem(dropdownItem = null) {
 		Click(locator1 = "CommerceAccelerators#SPEEDWELL_ACCOUNT_DROPDOWN");
 

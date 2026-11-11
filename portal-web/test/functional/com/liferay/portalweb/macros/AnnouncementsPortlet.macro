@@ -17,11 +17,4 @@ definition {
 		SelectFrameTop();
 	}
 
-	@summary = "Default summary"
-	macro configurePaginationCP(itemsPerPage = null) {
-		Click(locator1 = "Dropdown#ENTRIES");
-
-		MenuItem.click(menuItem = ${itemsPerPage});
-	}
-
 }

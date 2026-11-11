@@ -66,11 +66,6 @@
 	<td></td>
 </tr>
 <tr>
-	<td>ENTRIES</td>
-	<td>//*[contains(@class,'dropdown') and contains(.,'Entries')]</td>
-	<td></td>
-</tr>
-<tr>
 	<td>ENTRIES_NUMBER</td>
 	<td>//div[@class='dropdown pagination-items-per-page']//button[contains(text(),'${key_numberEntries}')]</td>
 	<td></td>
