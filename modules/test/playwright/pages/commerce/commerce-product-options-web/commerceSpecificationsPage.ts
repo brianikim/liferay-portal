@@ -111,9 +111,4 @@ export class CommerceSpecificationsPage {
 		await this.searchInput.fill(keywords);
 		await this.searchInput.press('Enter');
 	}
-
-	async waitForKey(specificationName) {
-		await this.specificationLabel.fill(specificationName);
-		await this.specificationLabel.waitFor();
-	}
 }
