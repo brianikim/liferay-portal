@@ -537,6 +537,89 @@ public class DSRequestManagerImpl implements DSRequestManager {
 	}
 
 	@Override
+	public void sendDSRequestReminders(long companyId) {
+		if (!FeatureFlagManagerUtil.isEnabled(companyId, "LPD-69290")) {
+			return;
+		}
+
+		DigitalSignatureConfiguration digitalSignatureConfiguration =
+			DigitalSignatureConfigurationUtil.getDigitalSignatureConfiguration(
+				companyId, 0);
+
+		if (!digitalSignatureConfiguration.remindersEnabled()) {
+			return;
+		}
+
+		ObjectDefinition objectDefinition =
+			_objectDefinitionLocalService.
+				fetchObjectDefinitionByExternalReferenceCode(
+					DSObjectDefinitionConstants.
+						EXTERNAL_REFERENCE_CODE_REQUEST_RECIPIENT,
+					companyId);
+
+		if (objectDefinition == null) {
+			return;
+		}
+
+		try {
+			Set<Long> dsRequestIds = new HashSet<>(
+				TransformUtil.transform(
+					_getValuesList(
+						companyId,
+						StringBundler.concat(
+							"(requestRecipientStatus eq '",
+							DSRequestConstants.STATUS_SENT, "')"),
+						objectDefinition, null),
+					values -> MapUtil.getLong(
+						values,
+						"r_dsRequestToDSRequestRecipients_l_dsRequestId")));
+
+			if (dsRequestIds.isEmpty()) {
+				return;
+			}
+
+			Map<Long, DSRequest> dsRequests = _getDSRequests(
+				companyId, dsRequestIds);
+
+			for (DSRequest dsRequest : dsRequests.values()) {
+				if (!dsRequest.isSyncable() ||
+					!_isEnabled(companyId, dsRequest.getSiteGroupId())) {
+
+					continue;
+				}
+
+				ObjectEntry objectEntry =
+					_objectEntryLocalService.fetchObjectEntry(
+						dsRequest.getDSRequestId());
+
+				if (objectEntry == null) {
+					continue;
+				}
+
+				DSRequest updatedDSRequest = _updateDSRequest(objectEntry);
+
+				if (updatedDSRequest == null) {
+					updatedDSRequest = dsRequest;
+				}
+
+				if (updatedDSRequest.isTerminal()) {
+					continue;
+				}
+
+				_sendDSRequestNotifications(
+					updatedDSRequest,
+					updatedDSRequest.getDSRequestRecipients());
+			}
+		}
+		catch (Exception exception) {
+			_log.error(
+				"Unable to send digital signature request reminders for " +
+					"company " + companyId,
+				exception);
+		}
+	}
+
+	@Override
 	public void updateDSRequest(long dsRequestId) throws PortalException {
 		ObjectEntry objectEntry = _getDSRequestObjectEntry(dsRequestId);
 
