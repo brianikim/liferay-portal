@@ -937,7 +937,12 @@ public class DSRequestManagerTest {
 							}
 						}
 
-						return null;
+						DSEnvelope voidedDSEnvelope = _createDSEnvelope();
+
+						voidedDSEnvelope.setStatus(
+							DSRequestConstants.STATUS_VOIDED);
+
+						return voidedDSEnvelope;
 					}));
 
 		try {
