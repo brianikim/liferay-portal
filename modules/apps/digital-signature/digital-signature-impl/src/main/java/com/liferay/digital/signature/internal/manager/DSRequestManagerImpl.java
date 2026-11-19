@@ -607,19 +607,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 					continue;
 				}
 
-				Set<Long> userIds = new HashSet<>(
-					TransformUtil.transform(
-						dsRequest.getDSRequestRecipients(),
-						dsRequestRecipient -> {
-							if (!Objects.equals(
-									DSRequestConstants.STATUS_CREATED,
-									dsRequestRecipient.getStatus())) {
-
-								return null;
-							}
-
-							return dsRequestRecipient.getUserId();
-						}));
+				Set<Long> userIds = _getCreatedUserIds(dsRequest);
 
 				DSRequest updatedDSRequest = _updateDSRequest(objectEntry);
 
@@ -667,19 +655,7 @@ public class DSRequestManagerImpl implements DSRequestManager {
 			return;
 		}
 
-		Set<Long> userIds = new HashSet<>(
-			TransformUtil.transform(
-				dsRequest.getDSRequestRecipients(),
-				dsRequestRecipient -> {
-					if (!Objects.equals(
-							DSRequestConstants.STATUS_CREATED,
-							dsRequestRecipient.getStatus())) {
-
-						return null;
-					}
-
-					return dsRequestRecipient.getUserId();
-				}));
+		Set<Long> userIds = _getCreatedUserIds(dsRequest);
 
 		dsRequest = _updateDSRequest(objectEntry);
 
@@ -882,6 +858,22 @@ public class DSRequestManagerImpl implements DSRequestManager {
 
 		return new DSRequestRecipient(
 			dsRequestRecipientObjectEntry.getValues());
+	}
+
+	private Set<Long> _getCreatedUserIds(DSRequest dsRequest) {
+		return new HashSet<>(
+			TransformUtil.transform(
+				dsRequest.getDSRequestRecipients(),
+				dsRequestRecipient -> {
+					if (!Objects.equals(
+							DSRequestConstants.STATUS_CREATED,
+							dsRequestRecipient.getStatus())) {
+
+						return null;
+					}
+
+					return dsRequestRecipient.getUserId();
+				}));
 	}
 
 	private ObjectEntry _getDSRequestObjectEntry(long dsRequestId)
