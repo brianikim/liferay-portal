@@ -6,6 +6,7 @@
 import {fetch} from 'frontend-js-web';
 
 import {putAgentInstanceResume} from '../../../src/main/resources/META-INF/resources/js/TranslateContent/api';
+import {AccountDisabledError} from '../../../src/main/resources/META-INF/resources/js/utils/throwIfAccountDisabled';
 import {RequestTooLargeError} from '../../../src/main/resources/META-INF/resources/js/utils/throwIfRequestTooLarge';
 
 jest.mock('frontend-js-web', () => ({fetch: jest.fn()}));
@@ -36,6 +37,28 @@ function jsonResponse(body: unknown, ok = true, status = ok ? 200 : 500) {
 describe('putAgentInstanceResume', () => {
 	beforeEach(() => {
 		mockFetch.mockReset();
+	});
+
+	it('throws an account disabled error when the account is disabled', async () => {
+		mockFetch.mockResolvedValueOnce(
+			jsonResponse(authorizationToken) as never
+		);
+		mockFetch.mockResolvedValueOnce(
+			jsonResponse(
+				{type: 'AIHubAccountEntryDisabledException'},
+				false,
+				403
+			) as never
+		);
+
+		const error = await putAgentInstanceResume(resumeArguments).catch(
+			(caught) => caught
+		);
+
+		expect(error).toBeInstanceOf(AccountDisabledError);
+		expect(error.message).toBe(
+			'this-account-has-been-disabled.-contact-your-liferay-representative-to-enable-it'
+		);
 	});
 
 	it('throws a too-long error when the request is too large', async () => {

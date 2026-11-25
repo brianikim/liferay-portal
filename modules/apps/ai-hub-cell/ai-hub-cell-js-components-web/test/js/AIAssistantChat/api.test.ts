@@ -10,6 +10,7 @@ import {
 	createEventSource,
 	postChatByExternalReferenceCodeMessage,
 } from '../../../src/main/resources/META-INF/resources/js/AIAssistantChat/api';
+import {AccountDisabledError} from '../../../src/main/resources/META-INF/resources/js/utils/throwIfAccountDisabled';
 import {RequestTooLargeError} from '../../../src/main/resources/META-INF/resources/js/utils/throwIfRequestTooLarge';
 
 jest.mock('eventsource', () => ({EventSource: jest.fn()}));
@@ -70,6 +71,44 @@ describe('createEventSource', () => {
 describe('postChatByExternalReferenceCodeMessage', () => {
 	beforeEach(() => {
 		mockFetch.mockReset();
+	});
+
+	it('throws an account disabled error when the account is disabled', async () => {
+		mockFetch.mockResolvedValueOnce(
+			jsonResponse(authorizationToken) as never
+		);
+		mockFetch.mockResolvedValueOnce(
+			jsonResponse(
+				{type: 'AIHubAccountEntryDisabledException'},
+				false,
+				403
+			) as never
+		);
+
+		const error = await postChatByExternalReferenceCodeMessage(
+			messageArguments
+		).catch((caught) => caught);
+
+		expect(error).toBeInstanceOf(AccountDisabledError);
+		expect(error.message).toBe(
+			'this-account-has-been-disabled.-contact-your-liferay-representative-to-enable-it'
+		);
+	});
+
+	it('throws the generic error on any other 403 response', async () => {
+		mockFetch.mockResolvedValueOnce(
+			jsonResponse(authorizationToken) as never
+		);
+		mockFetch.mockResolvedValueOnce(
+			jsonResponse({type: 'PrincipalException'}, false, 403) as never
+		);
+
+		const error = await postChatByExternalReferenceCodeMessage(
+			messageArguments
+		).catch((caught) => caught);
+
+		expect(error).not.toBeInstanceOf(AccountDisabledError);
+		expect(error.message).toBe('Unable to send the chat message: 403');
 	});
 
 	it('throws a too-long error when the request is too large', async () => {

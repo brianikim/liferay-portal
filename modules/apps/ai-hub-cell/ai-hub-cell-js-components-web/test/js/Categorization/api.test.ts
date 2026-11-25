@@ -7,6 +7,7 @@ import {fetch} from 'frontend-js-web';
 
 import {postCategorizationAgentInstance} from '../../../src/main/resources/META-INF/resources/js/Categorization/api';
 import {ECategorizationAgent} from '../../../src/main/resources/META-INF/resources/js/Categorization/types';
+import {AccountDisabledError} from '../../../src/main/resources/META-INF/resources/js/utils/throwIfAccountDisabled';
 import {RequestTooLargeError} from '../../../src/main/resources/META-INF/resources/js/utils/throwIfRequestTooLarge';
 
 jest.mock('frontend-js-web', () => ({fetch: jest.fn()}));
@@ -38,6 +39,28 @@ function jsonResponse(body: unknown, ok = true, status = ok ? 200 : 500) {
 describe('postCategorizationAgentInstance', () => {
 	beforeEach(() => {
 		mockFetch.mockReset();
+	});
+
+	it('throws an account disabled error when the account is disabled', async () => {
+		mockFetch.mockResolvedValueOnce(
+			jsonResponse(authorizationToken) as never
+		);
+		mockFetch.mockResolvedValueOnce(
+			jsonResponse(
+				{type: 'AIHubAccountEntryDisabledException'},
+				false,
+				403
+			) as never
+		);
+
+		const error = await postCategorizationAgentInstance(
+			agentArguments
+		).catch((caught) => caught);
+
+		expect(error).toBeInstanceOf(AccountDisabledError);
+		expect(error.message).toBe(
+			'this-account-has-been-disabled.-contact-your-liferay-representative-to-enable-it'
+		);
 	});
 
 	it('throws a too-long error when the request is too large', async () => {
