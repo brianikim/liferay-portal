@@ -7,6 +7,7 @@ import {EventSource} from 'eventsource';
 import {fetch} from 'frontend-js-web';
 
 import postAuthorizationToken from '../utils/postAuthorizationToken';
+import throwIfAccountDisabled from '../utils/throwIfAccountDisabled';
 import throwIfRequestTooLarge from '../utils/throwIfRequestTooLarge';
 import {CATEGORIZATION_INTENT_AGENT, ECategorizationAgent} from './types';
 
@@ -76,6 +77,8 @@ export async function postCategorizationAgentInstance({
 	);
 
 	if (!response.ok) {
+		await throwIfAccountDisabled(response);
+
 		throwIfRequestTooLarge(
 			response,
 			Liferay.Language.get(

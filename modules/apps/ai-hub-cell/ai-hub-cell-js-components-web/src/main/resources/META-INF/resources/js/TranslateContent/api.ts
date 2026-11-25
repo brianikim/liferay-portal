@@ -6,6 +6,7 @@
 import {fetch} from 'frontend-js-web';
 
 import postAuthorizationToken from '../utils/postAuthorizationToken';
+import throwIfAccountDisabled from '../utils/throwIfAccountDisabled';
 import throwIfRequestTooLarge from '../utils/throwIfRequestTooLarge';
 
 const AI_HUB_ENDPOINT = '/o/ai-hub/v1.0';
@@ -37,6 +38,8 @@ export async function putAgentInstanceResume({
 			method: 'PUT',
 		}
 	);
+
+	await throwIfAccountDisabled(response);
 
 	throwIfRequestTooLarge(
 		response,

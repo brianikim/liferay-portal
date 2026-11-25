@@ -5,6 +5,7 @@
 
 import {Dispatch, SetStateAction, useEffect, useRef, useState} from 'react';
 
+import {AccountDisabledError} from '../utils/throwIfAccountDisabled';
 import {RequestTooLargeError} from '../utils/throwIfRequestTooLarge';
 import {putAgentInstanceResume} from './api';
 import {TranslateContentMessageBalloonProps} from './types';
@@ -59,6 +60,7 @@ export default function useTranslateContentAgent({
 
 			Liferay.Util.openToast({
 				message:
+					error instanceof AccountDisabledError ||
 					error instanceof RequestTooLargeError
 						? error.message
 						: Liferay.Language.get('an-unexpected-error-occurred'),

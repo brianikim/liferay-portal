@@ -7,6 +7,7 @@ import {EventSource} from 'eventsource';
 import {fetch} from 'frontend-js-web';
 
 import postAuthorizationToken from '../utils/postAuthorizationToken';
+import throwIfAccountDisabled from '../utils/throwIfAccountDisabled';
 import throwIfRequestTooLarge from '../utils/throwIfRequestTooLarge';
 import {EActionType} from './types';
 
@@ -72,6 +73,8 @@ export async function postAgentInstance(
 			method: 'POST',
 		}
 	);
+
+	await throwIfAccountDisabled(response);
 
 	throwIfRequestTooLarge(
 		response,

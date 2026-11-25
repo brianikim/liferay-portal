@@ -6,6 +6,7 @@
 import {EventSource} from 'eventsource';
 import {useCallback, useEffect, useRef, useState} from 'react';
 
+import {AccountDisabledError} from '../utils/throwIfAccountDisabled';
 import {RequestTooLargeError} from '../utils/throwIfRequestTooLarge';
 import {
 	createCategorizationEventSource,
@@ -174,6 +175,7 @@ export default function useCategorizationAgent(agent: ECategorizationAgent) {
 				}
 
 				setError(
+					error instanceof AccountDisabledError ||
 					error instanceof RequestTooLargeError
 						? error.message
 						: Liferay.Language.get('an-unexpected-error-occurred')

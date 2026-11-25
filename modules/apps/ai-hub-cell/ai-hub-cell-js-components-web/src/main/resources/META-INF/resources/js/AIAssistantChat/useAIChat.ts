@@ -14,6 +14,7 @@ import {
 import {classifyCategorizationIntent} from '../Categorization/services/classifyCategorizationIntent';
 import {ECategorizationAgent} from '../Categorization/types';
 import submitPositiveReportFeedback from '../ReportFeedback/submitPositiveReportFeedback';
+import {AccountDisabledError} from '../utils/throwIfAccountDisabled';
 import {RequestTooLargeError} from '../utils/throwIfRequestTooLarge';
 import {
 	AIAssistantActionOutcome,
@@ -334,7 +335,10 @@ export default function useAIChat({
 				})
 					.then(() => true)
 					.catch((error) => {
-						if (error instanceof RequestTooLargeError) {
+						if (
+							error instanceof AccountDisabledError ||
+							error instanceof RequestTooLargeError
+						) {
 							setMessage(text);
 
 							reportSendFailure(error.message);

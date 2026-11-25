@@ -13,6 +13,7 @@ import {Root, createRoot} from 'react-dom/client';
 
 import ReportFeedbackModal from '../ReportFeedback/ReportFeedbackModal';
 import submitPositiveReportFeedback from '../ReportFeedback/submitPositiveReportFeedback';
+import {AccountDisabledError} from '../utils/throwIfAccountDisabled';
 import {RequestTooLargeError} from '../utils/throwIfRequestTooLarge';
 import {createEventSource, postAgentInstance} from './api';
 import WritingAssistantActions from './components/WritingAssistantActions';
@@ -269,6 +270,7 @@ export default class WritingAssistant extends Plugin {
 						catch (error) {
 							Liferay.Util.openToast({
 								message:
+									error instanceof AccountDisabledError ||
 									error instanceof RequestTooLargeError
 										? error.message
 										: Liferay.Language.get(
